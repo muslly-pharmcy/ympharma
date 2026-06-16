@@ -8,7 +8,7 @@ import {
 
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { ProductCard } from "@/components/product-card";
-import { products } from "@/lib/products";
+import { useMergedProducts } from "@/lib/use-merged-products";
 import { waLink } from "@/lib/whatsapp";
 import storefrontAsset from "@/assets/pharmacy-storefront.png.asset.json";
 import robotAsset from "@/assets/pharmacy-robot.png.asset.json";
