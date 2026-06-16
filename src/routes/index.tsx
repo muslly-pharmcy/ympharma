@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import {
   Truck, FileText, Pill, Baby, Stethoscope, Sparkles, HeartPulse, Leaf, Bot,
   ChevronLeft, ShieldCheck, Clock3, BadgePercent, Beaker, MessageCircle,
+  MapPin, Phone, Navigation, Brain, ScanSearch, PillBottle,
 } from "lucide-react";
 
 
