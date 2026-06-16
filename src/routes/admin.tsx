@@ -10,7 +10,13 @@ import { toast } from "sonner";
 import { bootstrapOwner, getMyRole, inviteStaff, listStaff, removeStaff, updateStaffPermissions } from "@/lib/staff.functions";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "لوحة التحكم — صيدلية المصلي" }] }),
+  head: () => ({
+    meta: [
+      { title: "لوحة التحكم — صيدلية المصلي" },
+      { name: "description", content: "لوحة تحكم خاصة بفريق صيدلية المصلي لإدارة الطلبات والروشتات وصلاحيات الموظفين." },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
   component: AdminPage,
 });
 

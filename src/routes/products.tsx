@@ -15,6 +15,22 @@ export const Route = createFileRoute("/products")({
     meta: [
       { title: "كل المنتجات — صيدلية المصلي" },
       { name: "description", content: "تصفّح كل منتجات صيدلية المصلي: أدوية، فيتامينات NOW، أجهزة طبية، عناية، ومنتجات الأم والطفل." },
+      { property: "og:title", content: "كتالوج المنتجات — صيدلية المصلي" },
+      { property: "og:description", content: "أدوية أصلية، فيتامينات ومكملات NOW Foods، أجهزة طبية ومستلزمات العناية بأسعار منافسة." },
+      { property: "og:url", content: "https://ympharma.lovable.app/products" },
+    ],
+    links: [{ rel: "canonical", href: "https://ympharma.lovable.app/products" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "كل المنتجات — صيدلية المصلي",
+          url: "https://ympharma.lovable.app/products",
+          description: "كتالوج منتجات صيدلية المصلي: أدوية، فيتامينات، أجهزة طبية، ومنتجات العناية.",
+        }),
+      },
     ],
   }),
   component: ProductsPage,
