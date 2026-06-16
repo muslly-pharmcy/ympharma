@@ -239,6 +239,11 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
             <button onClick={load} disabled={busy} className="grid size-10 place-items-center rounded-xl bg-secondary hover:bg-accent" aria-label="تحديث">
               {busy ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
             </button>
+            {me?.isOwner && (
+              <a href="/admin-logs" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">
+                سجل النشاط
+              </a>
+            )}
             <button onClick={() => supabase.auth.signOut()} className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">
               <LogOut className="size-4" /> خروج
             </button>
