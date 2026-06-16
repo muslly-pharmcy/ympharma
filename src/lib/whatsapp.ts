@@ -82,3 +82,40 @@ export function buildPrescriptionMessage(r: RxMsgInput) {
   ];
   return lines.filter(Boolean).join("\n");
 }
+
+const TOPIC_LABEL: Record<string, string> = {
+  interactions: "استشارة تفاعل دوائي",
+  symptoms: "فحص أعراض أولي",
+  supplement: "توصية مكملات",
+  services: "استفسار عن الخدمات",
+};
+
+export type AiHandoffInput = {
+  topic: "interactions" | "symptoms" | "supplement" | "services";
+  messages: { role: "user" | "assistant"; content: string }[];
+  recommendedProducts?: { name: string; price?: number }[];
+};
+
+export function buildAiHandoffMessage(h: AiHandoffInput) {
+  const fmt = (n: number) => n.toLocaleString("ar-EG");
+  const recent = h.messages.slice(-6); // keep transcript short
+  const lines = [
+    "🏥 *صيدلية المصلي*",
+    "━━━━━━━━━━━━━━━",
+    `🤖 *${TOPIC_LABEL[h.topic] ?? "استشارة"}*`,
+    `📅 ${nowAr()}`,
+    "",
+    "💬 *ملخص المحادثة:*",
+    ...recent.map((m) => `${m.role === "user" ? "👤" : "💊"} ${m.content.replace(/\n/g, " ")}`),
+    "",
+  ];
+  if (h.recommendedProducts?.length) {
+    lines.push("🛒 *منتجات مقترحة:*");
+    h.recommendedProducts.forEach((p, i) => {
+      lines.push(`  ${i + 1}. ${p.name}${p.price ? ` — ${fmt(p.price)} ر.ي` : ""}`);
+    });
+    lines.push("");
+  }
+  lines.push("أرغب بمتابعة الاستشارة مع صيدلي مختص 🙏");
+  return lines.filter(Boolean).join("\n");
+}
