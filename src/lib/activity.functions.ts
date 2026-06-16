@@ -8,11 +8,14 @@ export const getActivityLogs = createServerFn({ method: "GET" })
     z.object({ limit: z.number().int().min(1).max(500).optional() }).optional().parse(d ?? {}),
   )
   .handler(async ({ data, context }) => {
-    const { data: isOwner } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "owner",
-    });
-    if (!isOwner) throw new Error("Forbidden: owner only");
+    const { data: ownerRole, error: ownerError } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .eq("role", "owner")
+      .maybeSingle();
+    if (ownerError) throw new Error(ownerError.message);
+    if (!ownerRole) throw new Error("Forbidden: owner only");
 
     const limit = data?.limit ?? 200;
     const { data: rows, error } = await context.supabase
