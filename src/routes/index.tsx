@@ -176,6 +176,7 @@ function Home() {
           ))}
         </section>
 
+        <NunDivider />
 
         <section>
           <SectionHeader title="من داخل صيدلية المصلي" subtitle="فرعنا في عدن — المنصورة" />
@@ -191,6 +192,8 @@ function Home() {
             ))}
           </div>
         </section>
+
+        <NunDivider />
 
         <section>
           <SectionHeader title="تسوّق حسب الفئة" subtitle="اختر القسم الذي يناسبك" />
