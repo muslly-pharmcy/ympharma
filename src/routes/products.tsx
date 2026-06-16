@@ -41,6 +41,7 @@ function ProductsPage() {
   const { cat, q } = Route.useSearch();
   const [query, setQuery] = useState(q ?? "");
   const activeCat = cat ?? "all";
+  const products = useMergedProducts();
 
   const visible = useMemo(
     () =>
@@ -49,7 +50,7 @@ function ProductsPage() {
           (activeCat === "all" || p.cat === activeCat) &&
           (query.trim() === "" || p.name.includes(query.trim()) || p.brand.toLowerCase().includes(query.trim().toLowerCase())),
       ),
-    [activeCat, query],
+    [activeCat, query, products],
   );
 
   const currentCatName = categories.find((c) => c.id === activeCat)?.name ?? "كل المنتجات";
