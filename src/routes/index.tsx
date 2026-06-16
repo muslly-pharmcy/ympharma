@@ -183,9 +183,9 @@ function Home() {
           <SectionHeader title="من داخل صيدلية المصلي" subtitle="فرعنا في عدن — المنصورة" />
           <div className="grid gap-3 sm:grid-cols-3">
             {[
-              { src: storefrontAsset.url, alt: "واجهة صيدلية المصلي في عدن — المنصورة" },
-              { src: robotAsset.url, alt: "أتمتة تجهيز الأدوية داخل صيدلية المصلي" },
-              { src: nightAsset.url, alt: "صيدلية المصلي ليلاً — خدمة 24 ساعة" },
+              { src: storefrontUrl, alt: "واجهة صيدلية المصلي في عدن — المنصورة" },
+              { src: robotUrl, alt: "أتمتة تجهيز الأدوية داخل صيدلية المصلي" },
+              { src: nightUrl, alt: "صيدلية المصلي ليلاً — خدمة 24 ساعة" },
             ].map((im) => (
               <div key={im.src} className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
                 <img src={im.src} alt={im.alt} loading="lazy" decoding="async" className="aspect-square w-full object-cover transition hover:scale-[1.03]" />
