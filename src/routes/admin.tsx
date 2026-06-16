@@ -75,13 +75,19 @@ function AdminPage() {
 
   useEffect(() => {
     if (!session) return;
-    Promise.all([
-      supabase.rpc("has_role", { _user_id: session.userId, _role: "admin" }),
-      supabase.rpc("has_role", { _user_id: session.userId, _role: "owner" }),
-    ]).then(([a, o]) => {
-      if (a.error && o.error) { console.error(a.error); setIsAdmin(false); return; }
-      setIsAdmin(Boolean(a.data) || Boolean(o.data));
-    });
+    supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", session.userId)
+      .in("role", ["admin", "owner"])
+      .then(({ data, error }) => {
+        if (error) {
+          console.error(error);
+          setIsAdmin(false);
+          return;
+        }
+        setIsAdmin((data ?? []).some((row) => row.role === "admin" || row.role === "owner"));
+      });
   }, [session]);
 
   if (loading) return <Center><Loader2 className="size-6 animate-spin text-primary" /></Center>;
