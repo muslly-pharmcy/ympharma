@@ -14,6 +14,8 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as PrescriptionRouteImport } from './routes/prescription'
 import { Route as CartRouteImport } from './routes/cart'
+import { Route as AiSymptomsRouteImport } from './routes/ai-symptoms'
+import { Route as AiSupplementRouteImport } from './routes/ai-supplement'
 import { Route as AiAssistantRouteImport } from './routes/ai-assistant'
 import { Route as AdminSettingsRouteImport } from './routes/admin-settings'
 import { Route as AdminProductsRouteImport } from './routes/admin-products'
@@ -45,6 +47,16 @@ const PrescriptionRoute = PrescriptionRouteImport.update({
 const CartRoute = CartRouteImport.update({
   id: '/cart',
   path: '/cart',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiSymptomsRoute = AiSymptomsRouteImport.update({
+  id: '/ai-symptoms',
+  path: '/ai-symptoms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiSupplementRoute = AiSupplementRouteImport.update({
+  id: '/ai-supplement',
+  path: '/ai-supplement',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AiAssistantRoute = AiAssistantRouteImport.update({
@@ -91,6 +103,8 @@ export interface FileRoutesByFullPath {
   '/admin-products': typeof AdminProductsRoute
   '/admin-settings': typeof AdminSettingsRoute
   '/ai-assistant': typeof AiAssistantRoute
+  '/ai-supplement': typeof AiSupplementRoute
+  '/ai-symptoms': typeof AiSymptomsRoute
   '/cart': typeof CartRoute
   '/prescription': typeof PrescriptionRoute
   '/products': typeof ProductsRoute
@@ -105,6 +119,8 @@ export interface FileRoutesByTo {
   '/admin-products': typeof AdminProductsRoute
   '/admin-settings': typeof AdminSettingsRoute
   '/ai-assistant': typeof AiAssistantRoute
+  '/ai-supplement': typeof AiSupplementRoute
+  '/ai-symptoms': typeof AiSymptomsRoute
   '/cart': typeof CartRoute
   '/prescription': typeof PrescriptionRoute
   '/products': typeof ProductsRoute
@@ -120,6 +136,8 @@ export interface FileRoutesById {
   '/admin-products': typeof AdminProductsRoute
   '/admin-settings': typeof AdminSettingsRoute
   '/ai-assistant': typeof AiAssistantRoute
+  '/ai-supplement': typeof AiSupplementRoute
+  '/ai-symptoms': typeof AiSymptomsRoute
   '/cart': typeof CartRoute
   '/prescription': typeof PrescriptionRoute
   '/products': typeof ProductsRoute
@@ -136,6 +154,8 @@ export interface FileRouteTypes {
     | '/admin-products'
     | '/admin-settings'
     | '/ai-assistant'
+    | '/ai-supplement'
+    | '/ai-symptoms'
     | '/cart'
     | '/prescription'
     | '/products'
@@ -150,6 +170,8 @@ export interface FileRouteTypes {
     | '/admin-products'
     | '/admin-settings'
     | '/ai-assistant'
+    | '/ai-supplement'
+    | '/ai-symptoms'
     | '/cart'
     | '/prescription'
     | '/products'
@@ -164,6 +186,8 @@ export interface FileRouteTypes {
     | '/admin-products'
     | '/admin-settings'
     | '/ai-assistant'
+    | '/ai-supplement'
+    | '/ai-symptoms'
     | '/cart'
     | '/prescription'
     | '/products'
@@ -179,6 +203,8 @@ export interface RootRouteChildren {
   AdminProductsRoute: typeof AdminProductsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AiAssistantRoute: typeof AiAssistantRoute
+  AiSupplementRoute: typeof AiSupplementRoute
+  AiSymptomsRoute: typeof AiSymptomsRoute
   CartRoute: typeof CartRoute
   PrescriptionRoute: typeof PrescriptionRoute
   ProductsRoute: typeof ProductsRoute
@@ -221,6 +247,20 @@ declare module '@tanstack/react-router' {
       path: '/cart'
       fullPath: '/cart'
       preLoaderRoute: typeof CartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-symptoms': {
+      id: '/ai-symptoms'
+      path: '/ai-symptoms'
+      fullPath: '/ai-symptoms'
+      preLoaderRoute: typeof AiSymptomsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-supplement': {
+      id: '/ai-supplement'
+      path: '/ai-supplement'
+      fullPath: '/ai-supplement'
+      preLoaderRoute: typeof AiSupplementRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ai-assistant': {
@@ -283,6 +323,8 @@ const rootRouteChildren: RootRouteChildren = {
   AdminProductsRoute: AdminProductsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AiAssistantRoute: AiAssistantRoute,
+  AiSupplementRoute: AiSupplementRoute,
+  AiSymptomsRoute: AiSymptomsRoute,
   CartRoute: CartRoute,
   PrescriptionRoute: PrescriptionRoute,
   ProductsRoute: ProductsRoute,
