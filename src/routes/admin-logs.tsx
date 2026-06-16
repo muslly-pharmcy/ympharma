@@ -1,7 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { getActivityLogs } from "@/lib/activity.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,10 +20,27 @@ export const Route = createFileRoute("/admin-logs")({
 });
 
 function AdminLogs() {
+  const navigate = useNavigate();
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (!mounted) return;
+      if (!data.session) {
+        navigate({ to: "/admin" });
+      } else {
+        setReady(true);
+      }
+    });
+    return () => { mounted = false; };
+  }, [navigate]);
+
   const fetchLogs = useServerFn(getActivityLogs);
   const { data, isLoading, refetch, isFetching, error } = useQuery({
     queryKey: ["activity-logs"],
     queryFn: () => fetchLogs({ data: { limit: 200 } }),
+    enabled: ready,
   });
 
   return (
