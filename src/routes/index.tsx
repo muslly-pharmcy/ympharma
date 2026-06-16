@@ -13,9 +13,9 @@ import { ProductCard } from "@/components/product-card";
 import { useI18n } from "@/lib/i18n";
 import { useMergedProducts } from "@/lib/use-merged-products";
 import { waLink } from "@/lib/whatsapp";
-import storefrontAsset from "@/assets/pharmacy-storefront.png.asset.json";
-import robotAsset from "@/assets/pharmacy-robot.png.asset.json";
-import nightAsset from "@/assets/pharmacy-night.png.asset.json";
+import storefrontUrl from "@/assets/pharmacy-storefront.jpg";
+import robotUrl from "@/assets/pharmacy-robot.jpg";
+import nightUrl from "@/assets/pharmacy-night.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
