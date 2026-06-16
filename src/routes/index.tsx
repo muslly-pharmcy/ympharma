@@ -89,11 +89,12 @@ function Home() {
   const [query, setQuery] = useState("");
   const [trackId, setTrackId] = useState("");
   const navigate = useNavigate();
+  const products = useMergedProducts();
   const featured = useMemo(
     () => products.filter((p) => query.trim() === "" || p.name.includes(query.trim())).slice(0, 8),
-    [query],
+    [query, products],
   );
-  const nowProducts = useMemo(() => products.filter((p) => p.cat === "now").slice(0, 4), []);
+  const nowProducts = useMemo(() => products.filter((p) => p.cat === "now").slice(0, 4), [products]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
