@@ -274,30 +274,37 @@ function Home() {
         {/* Advanced AI-Powered Services */}
         <section>
           <SectionHeader title="خدمات متقدمة بتقنية الذكاء" subtitle="رعاية ذكية أسرع وأدق — حصري على صيدلية المصلي" />
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Link to="/ai-assistant" className="group relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/10 via-card to-card p-5 shadow-card transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-elevated">
               <div className="absolute -end-6 -top-6 size-24 rounded-full bg-primary/10 blur-2xl transition group-hover:bg-primary/20" />
               <div className="relative">
                 <div className="grid size-12 place-items-center rounded-2xl brand-gradient text-primary-foreground"><Brain className="size-6" /></div>
-                <h3 className="mt-4 text-lg font-black">استشارة التفاعلات الدوائية</h3>
-                <p className="mt-1 text-sm text-muted-foreground">اسأل عن أي تفاعل بين دوائين، عشبة، أو طعام — وستحصل على إجابة فورية ومستوى الخطورة.</p>
+                <h3 className="mt-4 text-lg font-black">التفاعلات الدوائية</h3>
+                <p className="mt-1 text-sm text-muted-foreground">اسأل عن أي تفاعل بين دوائين أو عشبة أو طعام — إجابة فورية ومستوى الخطورة.</p>
                 <span className="mt-3 inline-flex items-center gap-1 text-sm font-black text-primary">جرّبها الآن <ChevronLeft className="size-4 rtl:rotate-0 ltr:rotate-180" /></span>
               </div>
+            </Link>
+
+            <Link to="/ai-symptoms" className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-card transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-elevated">
+              <div className="grid size-12 place-items-center rounded-2xl bg-sky-100 text-sky-700"><Stethoscope className="size-6" /></div>
+              <h3 className="mt-4 text-lg font-black">فحص الأعراض الأولي</h3>
+              <p className="mt-1 text-sm text-muted-foreground">صف أعراضك واحصل على تقييم أولي وتوصية بالمنتج المناسب من صيدليتنا.</p>
+              <span className="mt-3 inline-flex items-center gap-1 text-sm font-black text-primary">ابدأ التقييم <ChevronLeft className="size-4 rtl:rotate-0 ltr:rotate-180" /></span>
+            </Link>
+
+            <Link to="/ai-supplement" className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-card transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-elevated">
+              <div className="grid size-12 place-items-center rounded-2xl bg-amber-100 text-amber-700"><PillBottle className="size-6" /></div>
+              <h3 className="mt-4 text-lg font-black">توصية مكملات شخصية</h3>
+              <p className="mt-1 text-sm text-muted-foreground">أخبرنا عن هدفك الصحي ونرشّح لك المكمل الأنسب من NOW Foods.</p>
+              <span className="mt-3 inline-flex items-center gap-1 text-sm font-black text-primary">احصل على توصية <ChevronLeft className="size-4 rtl:rotate-0 ltr:rotate-180" /></span>
             </Link>
 
             <Link to="/prescription" className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-card transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-elevated">
               <div className="grid size-12 place-items-center rounded-2xl bg-emerald-100 text-emerald-700"><ScanSearch className="size-6" /></div>
               <h3 className="mt-4 text-lg font-black">قراءة الروشتة الذكية</h3>
-              <p className="mt-1 text-sm text-muted-foreground">صوّر روشتتك ونتولّى تجهيزها آليًا عبر فريق صيدلية المصلي خلال دقائق.</p>
+              <p className="mt-1 text-sm text-muted-foreground">صوّر روشتتك ونتولّى تجهيزها آليًا خلال دقائق.</p>
               <span className="mt-3 inline-flex items-center gap-1 text-sm font-black text-primary">ارفع روشتتك <ChevronLeft className="size-4 rtl:rotate-0 ltr:rotate-180" /></span>
             </Link>
-
-            <a href={waLink("أحتاج توصية بمكمل غذائي مناسب")} target="_blank" rel="noopener noreferrer" className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-card transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-elevated">
-              <div className="grid size-12 place-items-center rounded-2xl bg-amber-100 text-amber-700"><PillBottle className="size-6" /></div>
-              <h3 className="mt-4 text-lg font-black">توصية مكملات شخصية</h3>
-              <p className="mt-1 text-sm text-muted-foreground">أخبرنا عن هدفك الصحي ونرشّح لك المكمل الأنسب من NOW Foods والعلامات المعتمدة.</p>
-              <span className="mt-3 inline-flex items-center gap-1 text-sm font-black text-primary">احصل على توصية <ChevronLeft className="size-4 rtl:rotate-0 ltr:rotate-180" /></span>
-            </a>
           </div>
         </section>
 
