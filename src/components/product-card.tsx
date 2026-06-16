@@ -9,7 +9,7 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated">
       <Link to="/products" search={{ cat: product.cat }} className="relative aspect-square overflow-hidden bg-secondary/60 block">
-        <img src={product.img} alt={product.name} loading="lazy" className="size-full object-cover transition duration-500 group-hover:scale-110" />
+        <img src={product.img} alt={product.name} loading="lazy" decoding="async" className="size-full object-cover transition duration-500 group-hover:scale-110" />
         {product.badge && (
           <span className="absolute right-2 top-2 rounded-full bg-destructive px-2.5 py-1 text-[10px] font-black text-destructive-foreground shadow">{product.badge}</span>
         )}

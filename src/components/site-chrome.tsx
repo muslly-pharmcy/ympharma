@@ -24,7 +24,7 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
         <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3">
           <Link to="/" className="flex items-center gap-3 shrink-0">
             <div className="brand-gradient grid size-12 place-items-center rounded-2xl shadow-card overflow-hidden ring-1 ring-white/30">
-              <img src={logoAsset.url} alt="صيدلية المصلي" className="size-10 object-contain" />
+              <img src={logoAsset.url} alt="صيدلية المصلي" width="40" height="40" decoding="async" className="size-10 object-contain" />
             </div>
             <div className="hidden min-w-0 sm:block">
               <h1 className="truncate text-lg font-black leading-none text-primary-deep">صيدلية المصلي</h1>
@@ -84,7 +84,7 @@ export function SiteFooter() {
         <div>
           <div className="flex items-center gap-3">
             <div className="brand-gradient grid size-11 place-items-center rounded-2xl overflow-hidden">
-              <img src={logoAsset.url} alt="" className="size-9 object-contain" />
+              <img src={logoAsset.url} alt="" width="36" height="36" loading="lazy" decoding="async" className="size-9 object-contain" />
             </div>
             <div>
               <p className="font-black text-primary-deep">صيدلية المصلي</p>
@@ -113,7 +113,11 @@ export function SiteFooter() {
           <p className="font-black mb-3">تواصل معنا</p>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-2"><Phone className="size-4 text-primary" /> +967 782 878 280</li>
-            <li className="flex items-center gap-2"><MapPin className="size-4 text-primary" /> عدن — المنصورة، اليمن</li>
+            <li>
+              <a href="https://maps.app.goo.gl/ZK1a6kAGn1KdUgSF9" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-primary">
+                <MapPin className="size-4 text-primary" /> عدن — المنصورة، اليمن (الموقع على الخرائط)
+              </a>
+            </li>
             <li className="flex items-center gap-2"><Clock3 className="size-4 text-primary" /> يومياً 8 ص — 12 م</li>
           </ul>
         </div>
