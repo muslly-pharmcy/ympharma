@@ -79,7 +79,7 @@ function AdminPage() {
   if (!session) return <LoginCard />;
   if (isAdmin === null) return <Center><Loader2 className="size-6 animate-spin text-primary" /></Center>;
   if (!isAdmin) return <NotAdmin email={session.email} />;
-  return <Dashboard email={session.email} />;
+  return <Dashboard email={session.email} userId={session.userId} />;
 }
 
 function Center({ children }: { children: React.ReactNode }) {
