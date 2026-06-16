@@ -121,7 +121,7 @@ function PrescriptionPage() {
               <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {files.map((f, i) => (
                   <div key={i} className="group relative overflow-hidden rounded-xl border border-border animate-in zoom-in">
-                    <img src={f.url} alt="روشتة" className="aspect-square w-full object-cover" />
+                    <img src={f.url} alt="روشتة" loading="lazy" decoding="async" className="aspect-square w-full object-cover" />
                     <button type="button" onClick={() => removeFile(i)} className="absolute right-1 top-1 grid size-7 place-items-center rounded-full bg-black/60 text-white opacity-0 transition group-hover:opacity-100">
                       <X className="size-4" />
                     </button>

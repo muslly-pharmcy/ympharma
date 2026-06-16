@@ -24,7 +24,7 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
         <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3">
           <Link to="/" className="flex items-center gap-3 shrink-0">
             <div className="brand-gradient grid size-12 place-items-center rounded-2xl shadow-card overflow-hidden ring-1 ring-white/30">
-              <img src={logoAsset.url} alt="صيدلية المصلي" className="size-10 object-contain" />
+              <img src={logoAsset.url} alt="صيدلية المصلي" width="40" height="40" decoding="async" className="size-10 object-contain" />
             </div>
             <div className="hidden min-w-0 sm:block">
               <h1 className="truncate text-lg font-black leading-none text-primary-deep">صيدلية المصلي</h1>
@@ -84,7 +84,7 @@ export function SiteFooter() {
         <div>
           <div className="flex items-center gap-3">
             <div className="brand-gradient grid size-11 place-items-center rounded-2xl overflow-hidden">
-              <img src={logoAsset.url} alt="" className="size-9 object-contain" />
+              <img src={logoAsset.url} alt="" width="36" height="36" loading="lazy" decoding="async" className="size-9 object-contain" />
             </div>
             <div>
               <p className="font-black text-primary-deep">صيدلية المصلي</p>

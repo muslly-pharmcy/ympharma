@@ -345,7 +345,7 @@ function RxCard({ rx, onStatus }: { rx: Rx; onStatus: (id: string, s: string) =>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {rx.image_urls.map((u, i) => (
             <a key={i} href={u} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-lg border border-border">
-              <img src={u} alt={`روشتة ${i + 1}`} className="aspect-square w-full object-cover transition hover:scale-105" />
+              <img src={u} alt={`روشتة ${i + 1}`} loading="lazy" decoding="async" className="aspect-square w-full object-cover transition hover:scale-105" />
             </a>
           ))}
         </div>
