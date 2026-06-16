@@ -1,9 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import {
   Truck, FileText, Pill, Baby, Stethoscope, Sparkles, HeartPulse, Leaf, Bot,
-  ChevronLeft, ShieldCheck, Clock3, BadgePercent, Beaker,
+  ChevronLeft, ShieldCheck, Clock3, BadgePercent, Beaker, Search, MessageCircle,
 } from "lucide-react";
+
 
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { ProductCard } from "@/components/product-card";
@@ -32,6 +33,8 @@ const cats = [
 
 function Home() {
   const [query, setQuery] = useState("");
+  const [trackId, setTrackId] = useState("");
+  const navigate = useNavigate();
   const featured = useMemo(
     () => products.filter((p) => query.trim() === "" || p.name.includes(query.trim())).slice(0, 8),
     [query],
@@ -43,56 +46,69 @@ function Home() {
       <SiteHeader search={query} onSearch={setQuery} />
 
       <main className="mx-auto max-w-7xl px-4 py-6 space-y-10">
-        <section className="grid gap-4 lg:grid-cols-3">
-          <div className="relative overflow-hidden rounded-3xl brand-gradient p-8 text-primary-foreground shadow-elevated lg:col-span-2 lg:p-12">
-            <div className="absolute -left-16 -top-16 size-64 rounded-full bg-white/15 blur-3xl animate-pulse" />
-            <div className="absolute -right-10 bottom-0 size-48 rounded-full bg-white/10 blur-2xl" />
-            <div className="relative max-w-lg">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-[11px] font-bold backdrop-blur">
-                <Sparkles className="size-3.5" /> صحتك تهمّنا
-              </span>
-              <h2 className="mt-4 text-3xl font-black leading-tight sm:text-4xl lg:text-5xl">
-                كل احتياجاتك الطبية
-                <br />
-                <span className="text-white/90">بين يديك خلال ساعة</span>
-              </h2>
-              <p className="mt-3 text-sm text-white/85 sm:text-base">
-                أكثر من 5,000 منتج طبي وفيتامينات NOW الأصلية، مع طلب آلي عبر واتساب وتوصيل سريع.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link to="/products" className="inline-flex items-center gap-2 rounded-2xl bg-card px-5 py-3 text-sm font-bold text-primary-deep shadow-lg transition hover:scale-[1.02]">
-                  تسوّق الآن <ChevronLeft className="size-4" />
-                </Link>
-                <Link to="/prescription" className="inline-flex items-center gap-2 rounded-2xl bg-white/15 px-5 py-3 text-sm font-bold backdrop-blur transition hover:bg-white/25">
-                  <FileText className="size-4" /> ارفع الروشتة
-                </Link>
-              </div>
+        <section className="grid gap-6 lg:grid-cols-[1.05fr_.95fr] items-center overflow-hidden rounded-2xl brand-gradient p-6 text-primary-foreground shadow-elevated sm:p-10">
+          <div className="relative">
+            <span className="inline-flex items-center gap-1.5 rounded-md bg-white/15 px-3 py-1.5 text-[12px] font-bold ring-1 ring-white/25">
+              <Sparkles className="size-3.5" /> صحتك تهمنا، وطلبك يصل أسرع
+            </span>
+            <h2 className="mt-4 text-3xl font-black leading-[1.15] sm:text-4xl lg:text-5xl">
+              كل احتياجاتك الطبية
+              <br />
+              <span className="text-white/90">بين يديك خلال ساعة</span>
+            </h2>
+            <p className="mt-3 max-w-xl text-sm text-white/85 sm:text-base">
+              أكثر من 5,000 منتج طبي وفيتامينات أصلية، مع تجهيز آلي للطلب عبر واتساب وتوصيل موثوق داخل صنعاء ولجميع المحافظات.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link to="/products" className="inline-flex items-center gap-2 rounded-md bg-card px-5 py-3 text-sm font-black text-primary-deep shadow-lg transition hover:scale-[1.02]">
+                تسوّق الآن <ChevronLeft className="size-4" />
+              </Link>
+              <Link to="/prescription" className="inline-flex items-center gap-2 rounded-md bg-white/15 px-5 py-3 text-sm font-black ring-1 ring-white/30 backdrop-blur transition hover:bg-white/25">
+                <FileText className="size-4" /> ارفع الروشتة عبر واتساب
+              </Link>
             </div>
           </div>
 
-          <div className="grid gap-4">
-            <Link to="/track" className="rounded-3xl bg-card p-5 shadow-card ring-1 ring-border transition hover:-translate-y-1">
-              <div className="grid size-12 place-items-center rounded-2xl bg-emerald-50 text-emerald-600"><Truck className="size-6" /></div>
-              <h3 className="mt-3 font-black text-base">تتبع طلبك لحظة بلحظة</h3>
-              <p className="mt-1 text-xs text-muted-foreground">أدخل رقم الطلب وتابع حالته من التجهيز للتوصيل.</p>
-            </Link>
-            <div className="rounded-3xl brand-gradient-soft p-5 shadow-card ring-1 ring-border">
-              <div className="grid size-12 place-items-center rounded-2xl bg-card text-primary"><Bot className="size-6" /></div>
-              <h3 className="mt-3 font-black text-base">طلب آلي عبر واتساب</h3>
-              <p className="mt-1 text-xs text-muted-foreground">عند إتمام الطلب نرسله تلقائياً للصيدلية.</p>
+          <div className="rounded-xl bg-card p-5 text-foreground shadow-elevated ring-1 ring-white/40">
+            <h3 className="text-lg font-black">تتبع طلبك لحظة بلحظة</h3>
+            <p className="mt-1 text-xs text-muted-foreground">أدخل رقم الطلب وتابع حالته من التجهيز حتى وصول المندوب.</p>
+            <form
+              onSubmit={(e) => { e.preventDefault(); const id = trackId.trim(); if (id) navigate({ to: "/track", search: { id } }); }}
+              className="mt-3 grid grid-cols-[1fr_auto] gap-2"
+            >
+              <input
+                value={trackId}
+                onChange={(e) => setTrackId(e.target.value)}
+                placeholder="مثال: AM-XXXXXX"
+                className="min-h-11 rounded-md border border-border bg-secondary/40 px-3 text-sm outline-none focus:border-primary"
+              />
+              <button className="rounded-md bg-primary px-4 text-sm font-black text-primary-foreground transition hover:bg-primary-deep">تتبع</button>
+            </form>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              {[
+                { t: "24/7", s: "خدمة واستقبال طلبات" },
+                { t: "100%", s: "منتجات أصلية" },
+                { t: "+5,000", s: "منتج طبي متوفر" },
+                { t: "ساعة", s: "توصيل داخل صنعاء" },
+              ].map((s) => (
+                <div key={s.s} className="rounded-md border border-border bg-secondary/40 p-3">
+                  <strong className="block text-base text-primary-deep">{s.t}</strong>
+                  <span className="text-[11px] text-muted-foreground">{s.s}</span>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
-        <section className="grid gap-3 rounded-3xl border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="grid gap-3 rounded-2xl border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
             { icon: ShieldCheck, t: "منتجات أصلية 100%", s: "من موردين معتمدين" },
             { icon: Clock3, t: "خدمة 24/7", s: "اطلب في أي وقت" },
             { icon: BadgePercent, t: "أفضل الأسعار", s: "عروض يومية وحصرية" },
             { icon: Truck, t: "شحن لجميع المحافظات", s: "بالتعاون مع دهسم" },
           ].map((b) => (
-            <div key={b.t} className="flex items-center gap-3 rounded-2xl p-3 transition hover:bg-secondary/60">
-              <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><b.icon className="size-5" /></div>
+            <div key={b.t} className="flex items-center gap-3 rounded-md p-3 transition hover:bg-secondary/60">
+              <div className="grid size-11 shrink-0 place-items-center rounded-md bg-primary/10 text-primary"><b.icon className="size-5" /></div>
               <div className="min-w-0">
                 <p className="truncate font-black text-sm">{b.t}</p>
                 <p className="truncate text-xs text-muted-foreground">{b.s}</p>
@@ -100,6 +116,7 @@ function Home() {
             </div>
           ))}
         </section>
+
 
         <section>
           <SectionHeader title="تسوّق حسب الفئة" subtitle="اختر القسم الذي يناسبك" />
