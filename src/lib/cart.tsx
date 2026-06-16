@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { getProductById, type Product } from "./products";
+import { supabase } from "@/integrations/supabase/client";
 
 type CartItem = { id: number; qty: number };
 type StoredOrder = {
@@ -21,7 +22,7 @@ type CartCtx = {
   clear: () => void;
   detailed: { product: Product; qty: number }[];
   orders: StoredOrder[];
-  placeOrder: (customer: StoredOrder["customer"]) => StoredOrder;
+  placeOrder: (customer: StoredOrder["customer"]) => Promise<StoredOrder>;
   findOrder: (id: string) => StoredOrder | undefined;
 };
 
@@ -87,16 +88,35 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const count = useMemo(() => items.reduce((s, x) => s + x.qty, 0), [items]);
 
   const placeOrder = useCallback<CartCtx["placeOrder"]>(
-    (customer) => {
+    async (customer) => {
       const id = "AM-" + Date.now().toString(36).toUpperCase().slice(-6);
+      const orderItems = detailed.map((d) => ({ id: d.product.id, qty: d.qty, name: d.product.name, price: d.product.price }));
       const order: StoredOrder = {
         id,
         createdAt: Date.now(),
         status: "pending",
-        items: detailed.map((d) => ({ id: d.product.id, qty: d.qty, name: d.product.name, price: d.product.price })),
+        items: orderItems,
         total,
         customer,
       };
+
+      // Save to cloud (best-effort; UX continues even if it fails)
+      try {
+        const { error } = await supabase.from("orders").insert({
+          id,
+          customer_name: customer.name,
+          customer_phone: customer.phone,
+          customer_address: customer.address,
+          notes: customer.notes ?? null,
+          total,
+          status: "pending",
+          items: orderItems as never,
+        });
+        if (error) console.error("[orders.insert]", error);
+      } catch (e) {
+        console.error("[orders.insert] network", e);
+      }
+
       setOrders((prev) => [order, ...prev]);
       setItems([]);
       return order;

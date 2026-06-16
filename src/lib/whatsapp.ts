@@ -8,3 +8,77 @@ export function openWhatsApp(message: string) {
   if (typeof window === "undefined") return;
   window.open(waLink(message), "_blank", "noopener,noreferrer");
 }
+
+function nowAr() {
+  const d = new Date();
+  return d.toLocaleString("ar-EG", { dateStyle: "medium", timeStyle: "short" });
+}
+
+function trackUrl(orderId: string) {
+  if (typeof window === "undefined") return `/track?id=${orderId}`;
+  return `${window.location.origin}/track?id=${orderId}`;
+}
+
+export type OrderMsgInput = {
+  orderId: string;
+  items: { name: string; qty: number; price: number }[];
+  total: number;
+  customer: { name: string; phone: string; address: string; notes?: string };
+};
+
+export function buildOrderMessage(o: OrderMsgInput) {
+  const fmt = (n: number) => n.toLocaleString("ar-EG");
+  const lines = [
+    "🏥 *صيدلية المصلي*",
+    "━━━━━━━━━━━━━━━",
+    "🛒 *طلب جديد*",
+    `🆔 رقم الطلب: *${o.orderId}*`,
+    `📅 التاريخ: ${nowAr()}`,
+    "",
+    "📦 *المنتجات المطلوبة:*",
+    ...o.items.map((it, i) => `  ${i + 1}. ${it.name}\n      الكمية: ${it.qty} × ${fmt(it.price)} = *${fmt(it.price * it.qty)} ر.ي*`),
+    "",
+    "━━━━━━━━━━━━━━━",
+    `💰 *الإجمالي: ${fmt(o.total)} ر.ي*`,
+    "━━━━━━━━━━━━━━━",
+    "",
+    "👤 *بيانات العميل:*",
+    `   • الاسم: ${o.customer.name}`,
+    `   • الجوال: ${o.customer.phone}`,
+    `📍 العنوان: ${o.customer.address}`,
+    o.customer.notes ? `📝 ملاحظات: ${o.customer.notes}` : "",
+    "",
+    `🔎 تتبع الطلب: ${trackUrl(o.orderId)}`,
+    "",
+    "شكراً لثقتكم في *صيدلية المصلي* 🌿",
+  ];
+  return lines.filter(Boolean).join("\n");
+}
+
+export type RxMsgInput = {
+  refId: string;
+  imageUrls: string[];
+  customer: { name: string; phone: string; address: string; notes?: string };
+};
+
+export function buildPrescriptionMessage(r: RxMsgInput) {
+  const lines = [
+    "🏥 *صيدلية المصلي*",
+    "━━━━━━━━━━━━━━━",
+    "📄 *طلب روشتة جديد*",
+    `🆔 الرقم المرجعي: *${r.refId}*`,
+    `📅 ${nowAr()}`,
+    "",
+    "👤 *بيانات العميل:*",
+    `   • الاسم: ${r.customer.name}`,
+    `   • الجوال: ${r.customer.phone}`,
+    `📍 العنوان: ${r.customer.address}`,
+    r.customer.notes ? `📝 ملاحظات: ${r.customer.notes}` : "",
+    "",
+    `🖼️ *صور الروشتة (${r.imageUrls.length}):*`,
+    ...r.imageUrls.map((u, i) => `   ${i + 1}. ${u}`),
+    "",
+    "نرجو تجهيز الأدوية والتواصل لتأكيد الطلب 💊",
+  ];
+  return lines.filter(Boolean).join("\n");
+}

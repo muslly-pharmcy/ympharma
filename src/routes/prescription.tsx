@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
-import { FileText, Upload, X, MessageCircle, CheckCircle2, Camera } from "lucide-react";
+import { FileText, Upload, X, MessageCircle, CheckCircle2, Camera, Loader2 } from "lucide-react";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
-import { openWhatsApp, WHATSAPP_NUMBER } from "@/lib/whatsapp";
+import { openWhatsApp, WHATSAPP_NUMBER, buildPrescriptionMessage } from "@/lib/whatsapp";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/prescription")({
@@ -17,6 +18,7 @@ function PrescriptionPage() {
   const [address, setAddress] = useState("");
   const [notes, setNotes] = useState("");
   const [sent, setSent] = useState(false);
+  const [busy, setBusy] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   function handleFiles(list: FileList | null) {
@@ -32,28 +34,56 @@ function PrescriptionPage() {
     });
   }
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (files.length === 0) return toast.error("الرجاء إرفاق صورة الروشتة");
     if (!name.trim() || !phone.trim() || !address.trim()) return toast.error("الرجاء تعبئة بياناتك");
 
-    const ref = "RX-" + Date.now().toString(36).toUpperCase().slice(-6);
-    const msg = [
-      "📄 *طلب روشتة جديد*",
-      `الرقم المرجعي: ${ref}`,
-      "",
-      `الاسم: ${name}`,
-      `الجوال: ${phone}`,
-      `العنوان: ${address}`,
-      notes ? `ملاحظات: ${notes}` : "",
-      `عدد الصور المرفقة: ${files.length}`,
-      "",
-      "⚠️ من فضلك أرفق صور الروشتة هنا في واتساب لإكمال الطلب.",
-    ].filter(Boolean).join("\n");
+    setBusy(true);
+    try {
+      const refId = "RX-" + Date.now().toString(36).toUpperCase().slice(-6);
+      const folder = refId.toLowerCase();
+      const uploadedUrls: string[] = [];
 
-    openWhatsApp(msg);
-    setSent(true);
-    toast.success("تم تجهيز رسالة واتساب — أرفق الصور فيها ليصلنا طلبك");
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i].file;
+        const ext = (f.name.split(".").pop() || "jpg").toLowerCase();
+        const path = `${folder}/${i + 1}-${Date.now()}.${ext}`;
+        const { error } = await supabase.storage.from("prescriptions").upload(path, f, {
+          contentType: f.type || "image/jpeg",
+          upsert: false,
+        });
+        if (error) {
+          console.error("[storage.upload]", error);
+          toast.error("فشل رفع صورة الروشتة");
+          setBusy(false);
+          return;
+        }
+        // Signed URL valid 30 days so admin (or WhatsApp recipient) can open it.
+        const { data: signed } = await supabase.storage.from("prescriptions").createSignedUrl(path, 60 * 60 * 24 * 30);
+        if (signed?.signedUrl) uploadedUrls.push(signed.signedUrl);
+      }
+
+      const customer = { name: name.trim(), phone: phone.trim(), address: address.trim(), notes: notes.trim() || undefined };
+
+      const { error: insErr } = await supabase.from("prescriptions").insert({
+        id: refId,
+        customer_name: customer.name,
+        customer_phone: customer.phone,
+        customer_address: customer.address,
+        notes: customer.notes ?? null,
+        image_urls: uploadedUrls,
+        status: "pending",
+      });
+      if (insErr) console.error("[prescriptions.insert]", insErr);
+
+      const msg = buildPrescriptionMessage({ refId, imageUrls: uploadedUrls, customer });
+      openWhatsApp(msg);
+      setSent(true);
+      toast.success(`تم رفع الروشتة (${refId}) وفتح واتساب`);
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -65,7 +95,7 @@ function PrescriptionPage() {
             <div className="grid size-12 place-items-center rounded-2xl bg-white/20 backdrop-blur"><FileText className="size-6" /></div>
             <div>
               <h1 className="text-2xl font-black">ارفع روشتتك</h1>
-              <p className="text-sm text-white/85">صوّر الروشتة بوضوح — نجهّز أدويتك ونوصلها لك.</p>
+              <p className="text-sm text-white/85">ترفع صور الروشتة، تنحفظ بالسحابة، وتُرسل تلقائياً مع رسالة واتساب جاهزة.</p>
             </div>
           </div>
         </div>
@@ -108,14 +138,15 @@ function PrescriptionPage() {
           <input required value={address} onChange={(e) => setAddress(e.target.value)} placeholder="العنوان للتوصيل" className="w-full rounded-xl border border-border bg-secondary/40 px-3 py-2.5 text-sm outline-none focus:border-primary" />
           <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} placeholder="ملاحظات (مثلاً: حساسية، بدائل...) " className="w-full rounded-xl border border-border bg-secondary/40 px-3 py-2.5 text-sm outline-none focus:border-primary" />
 
-          <button type="submit" className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3.5 text-sm font-black text-white shadow-elevated transition hover:scale-[1.02]">
-            <MessageCircle className="size-5" /> إرسال الروشتة عبر واتساب
+          <button type="submit" disabled={busy} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3.5 text-sm font-black text-white shadow-elevated transition hover:scale-[1.02] disabled:opacity-60">
+            {busy ? <Loader2 className="size-5 animate-spin" /> : <MessageCircle className="size-5" />}
+            {busy ? "جارٍ رفع الصور..." : "إرسال الروشتة عبر واتساب"}
           </button>
 
           {sent && (
             <div className="flex items-start gap-2 rounded-2xl bg-emerald-50 p-3 text-xs text-emerald-700 animate-in fade-in">
               <CheckCircle2 className="size-4 shrink-0" />
-              <p>تم فتح واتساب — أرفق الصور في المحادثة ليصلنا طلبك على الرقم <strong dir="ltr">+{WHATSAPP_NUMBER}</strong>.</p>
+              <p>تم رفع الروشتة وإرسال الرسالة على الرقم <strong dir="ltr">+{WHATSAPP_NUMBER}</strong>. سيتواصل معك فريقنا قريباً.</p>
             </div>
           )}
 
