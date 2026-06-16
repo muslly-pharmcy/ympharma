@@ -13,9 +13,9 @@ export const Route = createFileRoute("/prescription")({
       { name: "description", content: "صوّر روشتتك الطبية وارفعها بسهولة، نجهّز أدويتك تلقائياً ونرسل تأكيد الطلب عبر واتساب." },
       { property: "og:title", content: "ارفع روشتتك واستلم أدويتك — صيدلية المصلي" },
       { property: "og:description", content: "خدمة رفع الروشتة الطبية عبر الموقع مع تجهيز سريع وتأكيد عبر واتساب." },
-      { property: "og:url", content: "https://ympharma.lovable.app/prescription" },
+      { property: "og:url", content: "https://muslly.com/prescription" },
     ],
-    links: [{ rel: "canonical", href: "https://ympharma.lovable.app/prescription" }],
+    links: [{ rel: "canonical", href: "https://muslly.com/prescription" }],
   }),
   component: PrescriptionPage,
 });

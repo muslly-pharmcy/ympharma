@@ -10,6 +10,9 @@ import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { ProductCard } from "@/components/product-card";
 import { products } from "@/lib/products";
 import { waLink } from "@/lib/whatsapp";
+import storefrontAsset from "@/assets/pharmacy-storefront.png.asset.json";
+import robotAsset from "@/assets/pharmacy-robot.png.asset.json";
+import nightAsset from "@/assets/pharmacy-night.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -18,9 +21,9 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "تسوّق الأدوية، فيتامينات NOW، الأجهزة الطبية ومنتجات العناية مع توصيل سريع وأتمتة الطلبات عبر واتساب." },
       { property: "og:title", content: "صيدلية المصلي — أدويتك ومنتجاتك الطبية في عدن" },
       { property: "og:description", content: "أكثر من 5,000 منتج طبي وفيتامينات أصلية مع تجهيز آلي للطلب وتوصيل موثوق داخل عدن وجميع المحافظات." },
-      { property: "og:url", content: "https://ympharma.lovable.app/" },
+      { property: "og:url", content: "https://muslly.com/" },
     ],
-    links: [{ rel: "canonical", href: "https://ympharma.lovable.app/" }],
+    links: [{ rel: "canonical", href: "https://muslly.com/" }],
     scripts: [
       {
         type: "application/ld+json",
@@ -28,7 +31,7 @@ export const Route = createFileRoute("/")({
           "@context": "https://schema.org",
           "@type": "Pharmacy",
           name: "صيدلية المصلي",
-          url: "https://ympharma.lovable.app/",
+          url: "https://muslly.com/",
           telephone: "+967782878280",
           address: {
             "@type": "PostalAddress",
@@ -45,10 +48,10 @@ export const Route = createFileRoute("/")({
           "@context": "https://schema.org",
           "@type": "WebSite",
           name: "صيدلية المصلي",
-          url: "https://ympharma.lovable.app/",
+          url: "https://muslly.com/",
           potentialAction: {
             "@type": "SearchAction",
-            target: "https://ympharma.lovable.app/products?q={search_term_string}",
+            target: "https://muslly.com/products?q={search_term_string}",
             "query-input": "required name=search_term_string",
           },
         }),
@@ -59,8 +62,8 @@ export const Route = createFileRoute("/")({
           "@context": "https://schema.org",
           "@type": "Organization",
           name: "صيدلية المصلي",
-          url: "https://ympharma.lovable.app/",
-          logo: "https://ympharma.lovable.app/icon-512.png",
+          url: "https://muslly.com/",
+          logo: "https://muslly.com/icon-512.png",
           telephone: "+967782878280",
         }),
       },
@@ -165,6 +168,21 @@ function Home() {
           ))}
         </section>
 
+
+        <section>
+          <SectionHeader title="من داخل صيدلية المصلي" subtitle="فرعنا في عدن — المنصورة" />
+          <div className="grid gap-3 sm:grid-cols-3">
+            {[
+              { src: storefrontAsset.url, alt: "واجهة صيدلية المصلي في عدن — المنصورة" },
+              { src: robotAsset.url, alt: "أتمتة تجهيز الأدوية داخل صيدلية المصلي" },
+              { src: nightAsset.url, alt: "صيدلية المصلي ليلاً — خدمة 24 ساعة" },
+            ].map((im) => (
+              <div key={im.src} className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
+                <img src={im.src} alt={im.alt} loading="lazy" decoding="async" className="aspect-square w-full object-cover transition hover:scale-[1.03]" />
+              </div>
+            ))}
+          </div>
+        </section>
 
         <section>
           <SectionHeader title="تسوّق حسب الفئة" subtitle="اختر القسم الذي يناسبك" />

@@ -17,9 +17,9 @@ export const Route = createFileRoute("/track")({
       { name: "description", content: "أدخل رقم طلبك لمتابعة حالته لحظة بلحظة من التجهيز والتأكيد حتى وصول المندوب إلى عنوانك." },
       { property: "og:title", content: "تتبع طلبك — صيدلية المصلي" },
       { property: "og:description", content: "متابعة حالة طلبك من التجهيز حتى التسليم مع تواصل مباشر عبر واتساب." },
-      { property: "og:url", content: "https://ympharma.lovable.app/track" },
+      { property: "og:url", content: "https://muslly.com/track" },
     ],
-    links: [{ rel: "canonical", href: "https://ympharma.lovable.app/track" }],
+    links: [{ rel: "canonical", href: "https://muslly.com/track" }],
   }),
   component: TrackPage,
 });

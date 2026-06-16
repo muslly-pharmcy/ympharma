@@ -17,9 +17,9 @@ export const Route = createFileRoute("/products")({
       { name: "description", content: "تصفّح كل منتجات صيدلية المصلي: أدوية، فيتامينات NOW، أجهزة طبية، عناية، ومنتجات الأم والطفل." },
       { property: "og:title", content: "كتالوج المنتجات — صيدلية المصلي" },
       { property: "og:description", content: "أدوية أصلية، فيتامينات ومكملات NOW Foods، أجهزة طبية ومستلزمات العناية بأسعار منافسة." },
-      { property: "og:url", content: "https://ympharma.lovable.app/products" },
+      { property: "og:url", content: "https://muslly.com/products" },
     ],
-    links: [{ rel: "canonical", href: "https://ympharma.lovable.app/products" }],
+    links: [{ rel: "canonical", href: "https://muslly.com/products" }],
     scripts: [
       {
         type: "application/ld+json",
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/products")({
           "@context": "https://schema.org",
           "@type": "CollectionPage",
           name: "كل المنتجات — صيدلية المصلي",
-          url: "https://ympharma.lovable.app/products",
+          url: "https://muslly.com/products",
           description: "كتالوج منتجات صيدلية المصلي: أدوية، فيتامينات، أجهزة طبية، ومنتجات العناية.",
         }),
       },
