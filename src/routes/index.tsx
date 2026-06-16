@@ -105,7 +105,7 @@ function Home() {
             { icon: ShieldCheck, t: "منتجات أصلية 100%", s: "من موردين معتمدين" },
             { icon: Clock3, t: "خدمة 24/7", s: "اطلب في أي وقت" },
             { icon: BadgePercent, t: "أفضل الأسعار", s: "عروض يومية وحصرية" },
-            { icon: Truck, t: "شحن لجميع المحافظات", s: "بالتعاون مع دهسم" },
+            { icon: Truck, t: "شحن لجميع المحافظات", s: "توصيل سريع وموثوق" },
           ].map((b) => (
             <div key={b.t} className="flex items-center gap-3 rounded-md p-3 transition hover:bg-secondary/60">
               <div className="grid size-11 shrink-0 place-items-center rounded-md bg-primary/10 text-primary"><b.icon className="size-5" /></div>

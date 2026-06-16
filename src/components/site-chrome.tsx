@@ -28,7 +28,7 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
             </div>
             <div className="hidden min-w-0 sm:block">
               <h1 className="truncate text-lg font-black leading-none text-primary-deep">صيدلية المصلي</h1>
-              <span className="text-[11px] font-bold text-muted-foreground">إحدى شركات دهسم</span>
+              <span className="text-[11px] font-bold text-muted-foreground">عدن — المنصورة</span>
             </div>
           </Link>
 
@@ -45,7 +45,7 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
           <div className="flex items-center gap-2 shrink-0">
             <button className="hidden md:flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2.5 text-xs font-bold text-secondary-foreground transition hover:bg-accent">
               <MapPin className="size-4 text-primary" />
-              <span className="hidden lg:inline">صنعاء</span>
+              <span className="hidden lg:inline">عدن — المنصورة</span>
             </button>
             <Link to="/cart" className="relative grid size-11 place-items-center rounded-2xl bg-secondary text-secondary-foreground transition hover:bg-accent" aria-label="السلة">
               <ShoppingBag className="size-5" />
@@ -88,7 +88,7 @@ export function SiteFooter() {
             </div>
             <div>
               <p className="font-black text-primary-deep">صيدلية المصلي</p>
-              <p className="text-[11px] text-muted-foreground">إحدى شركات دهسم</p>
+              <p className="text-[11px] text-muted-foreground">عدن — المنصورة</p>
             </div>
           </div>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">صحتك أمانة. نوفّر لك أفضل المنتجات الطبية بجودة مضمونة وأسعار منافسة.</p>
@@ -113,7 +113,7 @@ export function SiteFooter() {
           <p className="font-black mb-3">تواصل معنا</p>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-2"><Phone className="size-4 text-primary" /> +967 782 878 280</li>
-            <li className="flex items-center gap-2"><MapPin className="size-4 text-primary" /> صنعاء — اليمن</li>
+            <li className="flex items-center gap-2"><MapPin className="size-4 text-primary" /> عدن — المنصورة، اليمن</li>
             <li className="flex items-center gap-2"><Clock3 className="size-4 text-primary" /> يومياً 8 ص — 12 م</li>
           </ul>
         </div>
