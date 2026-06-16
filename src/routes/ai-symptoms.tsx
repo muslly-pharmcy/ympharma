@@ -32,7 +32,6 @@ export const Route = createFileRoute("/ai-symptoms")({
           mode="symptoms"
           greeting="أهلاً 👋 صف لي أعراضك بالتفصيل: ما تشعر به، منذ متى، وشدته، وسأقيّم لك الحالة وأرشّح المنتج المناسب من صيدلية المصلي."
           placeholder="مثال: صداع منذ يومين مع حرارة..."
-          waMessage="استفسار عن أعراض"
           suggestions={[
             "صداع وحمى منذ يومين",
             "ألم في الحلق وسعال",
