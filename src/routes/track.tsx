@@ -11,7 +11,16 @@ type SearchT = { id?: string };
 
 export const Route = createFileRoute("/track")({
   validateSearch: (s: Record<string, unknown>): SearchT => ({ id: typeof s.id === "string" ? s.id : undefined }),
-  head: () => ({ meta: [{ title: "تتبع الطلب — صيدلية المصلي" }] }),
+  head: () => ({
+    meta: [
+      { title: "تتبع الطلب — صيدلية المصلي" },
+      { name: "description", content: "أدخل رقم طلبك لمتابعة حالته لحظة بلحظة من التجهيز والتأكيد حتى وصول المندوب إلى عنوانك." },
+      { property: "og:title", content: "تتبع طلبك — صيدلية المصلي" },
+      { property: "og:description", content: "متابعة حالة طلبك من التجهيز حتى التسليم مع تواصل مباشر عبر واتساب." },
+      { property: "og:url", content: "https://ympharma.lovable.app/track" },
+    ],
+    links: [{ rel: "canonical", href: "https://ympharma.lovable.app/track" }],
+  }),
   component: TrackPage,
 });
 

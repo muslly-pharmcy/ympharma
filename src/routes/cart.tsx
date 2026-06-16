@@ -8,7 +8,16 @@ import { openWhatsApp, WHATSAPP_NUMBER, buildOrderMessage } from "@/lib/whatsapp
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/cart")({
-  head: () => ({ meta: [{ title: "سلة الطلب — صيدلية المصلي" }] }),
+  head: () => ({
+    meta: [
+      { title: "سلة الطلب — صيدلية المصلي" },
+      { name: "description", content: "راجع منتجات سلتك وأكمل الطلب بسهولة، يصلك تأكيد فوري عبر واتساب مع تتبع لحالة التوصيل." },
+      { property: "og:title", content: "سلة الطلب — صيدلية المصلي" },
+      { property: "og:description", content: "أكمل عملية الشراء وأرسل طلبك مباشرة عبر واتساب مع تتبع الحالة." },
+      { property: "og:url", content: "https://ympharma.lovable.app/cart" },
+    ],
+    links: [{ rel: "canonical", href: "https://ympharma.lovable.app/cart" }],
+  }),
   component: CartPage,
 });
 
@@ -60,9 +69,9 @@ function CartPage() {
                     <h3 className="text-sm font-bold leading-snug">{product.name}</h3>
                     <div className="mt-auto flex items-center justify-between gap-2 pt-2">
                       <div className="flex items-center gap-1 rounded-xl bg-secondary p-1">
-                        <button onClick={() => setQty(product.id, qty - 1)} className="grid size-7 place-items-center rounded-lg hover:bg-card"><Minus className="size-3.5" /></button>
+                        <button aria-label="تقليل الكمية" onClick={() => setQty(product.id, qty - 1)} className="grid size-7 place-items-center rounded-lg hover:bg-card"><Minus className="size-3.5" /></button>
                         <span className="w-7 text-center text-sm font-black">{qty}</span>
-                        <button onClick={() => setQty(product.id, qty + 1)} className="grid size-7 place-items-center rounded-lg hover:bg-card"><Plus className="size-3.5" /></button>
+                        <button aria-label="زيادة الكمية" onClick={() => setQty(product.id, qty + 1)} className="grid size-7 place-items-center rounded-lg hover:bg-card"><Plus className="size-3.5" /></button>
                       </div>
                       <p className="text-sm font-black text-primary-deep">{formatPrice(product.price * qty)} ر.ي</p>
                       <button onClick={() => remove(product.id)} className="grid size-9 place-items-center rounded-xl text-destructive hover:bg-destructive/10" aria-label="حذف"><Trash2 className="size-4" /></button>

@@ -27,7 +27,7 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
               <img src={logoAsset.url} alt="صيدلية المصلي" width="40" height="40" decoding="async" className="size-10 object-contain" />
             </div>
             <div className="hidden min-w-0 sm:block">
-              <h1 className="truncate text-lg font-black leading-none text-primary-deep">صيدلية المصلي</h1>
+              <span className="block truncate text-lg font-black leading-none text-primary-deep">صيدلية المصلي</span>
               <span className="text-[11px] font-bold text-muted-foreground">عدن — المنصورة</span>
             </div>
           </Link>

@@ -14,8 +14,56 @@ import { waLink } from "@/lib/whatsapp";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "صيدلية المصلي — صحتك تهمنا" },
+      { title: "صيدلية المصلي — أدويتك ومنتجاتك الطبية في عدن" },
       { name: "description", content: "تسوّق الأدوية، فيتامينات NOW، الأجهزة الطبية ومنتجات العناية مع توصيل سريع وأتمتة الطلبات عبر واتساب." },
+      { property: "og:title", content: "صيدلية المصلي — أدويتك ومنتجاتك الطبية في عدن" },
+      { property: "og:description", content: "أكثر من 5,000 منتج طبي وفيتامينات أصلية مع تجهيز آلي للطلب وتوصيل موثوق داخل عدن وجميع المحافظات." },
+      { property: "og:url", content: "https://ympharma.lovable.app/" },
+    ],
+    links: [{ rel: "canonical", href: "https://ympharma.lovable.app/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Pharmacy",
+          name: "صيدلية المصلي",
+          url: "https://ympharma.lovable.app/",
+          telephone: "+967782878280",
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: "المنصورة",
+            addressLocality: "عدن",
+            addressCountry: "YE",
+          },
+          openingHours: "Mo-Su 08:00-24:00",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "صيدلية المصلي",
+          url: "https://ympharma.lovable.app/",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: "https://ympharma.lovable.app/products?q={search_term_string}",
+            "query-input": "required name=search_term_string",
+          },
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "صيدلية المصلي",
+          url: "https://ympharma.lovable.app/",
+          logo: "https://ympharma.lovable.app/icon-512.png",
+          telephone: "+967782878280",
+        }),
+      },
     ],
   }),
   component: Home,
@@ -51,11 +99,11 @@ function Home() {
             <span className="inline-flex items-center gap-1.5 rounded-md bg-white/15 px-3 py-1.5 text-[12px] font-bold ring-1 ring-white/25">
               <Sparkles className="size-3.5" /> صحتك تهمنا، وطلبك يصل أسرع
             </span>
-            <h2 className="mt-4 text-3xl font-black leading-[1.15] sm:text-4xl lg:text-5xl">
+            <h1 className="mt-4 text-3xl font-black leading-[1.15] sm:text-4xl lg:text-5xl">
               كل احتياجاتك الطبية
               <br />
               <span className="text-white/90">بين يديك خلال ساعة</span>
-            </h2>
+            </h1>
             <p className="mt-3 max-w-xl text-sm text-white/85 sm:text-base">
               أكثر من 5,000 منتج طبي وفيتامينات أصلية، مع تجهيز آلي للطلب عبر واتساب وتوصيل موثوق داخل عدن ولجميع المحافظات.
             </p>
