@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrackRouteImport } from './routes/track'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as PrescriptionRouteImport } from './routes/prescription'
 import { Route as CartRouteImport } from './routes/cart'
@@ -32,6 +33,11 @@ const TrackRoute = TrackRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProductsRoute = ProductsRouteImport.update({
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/cart': typeof CartRoute
   '/prescription': typeof PrescriptionRoute
   '/products': typeof ProductsRoute
+  '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track': typeof TrackRoute
 }
@@ -124,6 +131,7 @@ export interface FileRoutesByTo {
   '/cart': typeof CartRoute
   '/prescription': typeof PrescriptionRoute
   '/products': typeof ProductsRoute
+  '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track': typeof TrackRoute
 }
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/cart': typeof CartRoute
   '/prescription': typeof PrescriptionRoute
   '/products': typeof ProductsRoute
+  '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track': typeof TrackRoute
 }
@@ -159,6 +168,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/prescription'
     | '/products'
+    | '/settings'
     | '/sitemap.xml'
     | '/track'
   fileRoutesByTo: FileRoutesByTo
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/prescription'
     | '/products'
+    | '/settings'
     | '/sitemap.xml'
     | '/track'
   id:
@@ -191,6 +202,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/prescription'
     | '/products'
+    | '/settings'
     | '/sitemap.xml'
     | '/track'
   fileRoutesById: FileRoutesById
@@ -208,6 +220,7 @@ export interface RootRouteChildren {
   CartRoute: typeof CartRoute
   PrescriptionRoute: typeof PrescriptionRoute
   ProductsRoute: typeof ProductsRoute
+  SettingsRoute: typeof SettingsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TrackRoute: typeof TrackRoute
 }
@@ -226,6 +239,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/products': {
@@ -328,6 +348,7 @@ const rootRouteChildren: RootRouteChildren = {
   CartRoute: CartRoute,
   PrescriptionRoute: PrescriptionRoute,
   ProductsRoute: ProductsRoute,
+  SettingsRoute: SettingsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TrackRoute: TrackRoute,
 }

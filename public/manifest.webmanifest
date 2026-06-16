@@ -1,18 +1,52 @@
 {
+  "id": "/?source=pwa",
   "name": "صيدلية المصلي",
   "short_name": "المصلي",
   "description": "صيدلية المصلي - منتجات طبية أصلية، طلب عبر واتساب، توصيل سريع لجميع المحافظات.",
   "lang": "ar",
   "dir": "rtl",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#0e8f7a",
+  "categories": ["health", "medical", "shopping", "lifestyle"],
+  "prefer_related_applications": false,
   "icons": [
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "المنتجات",
+      "short_name": "المنتجات",
+      "description": "تصفح كل المنتجات",
+      "url": "/products?source=pwa",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "رفع وصفة طبية",
+      "short_name": "وصفة",
+      "description": "رفع وصفة طبية للطلب",
+      "url": "/prescription?source=pwa",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "تتبع الطلب",
+      "short_name": "تتبع",
+      "description": "تتبع حالة طلبك",
+      "url": "/track?source=pwa",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "الإعدادات",
+      "short_name": "إعدادات",
+      "description": "إعدادات التطبيق",
+      "url": "/settings?source=pwa",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
   ]
 }
