@@ -153,6 +153,22 @@ function Home() {
           </div>
         </section>
 
+        <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-card">
+          <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+            <p className="text-sm font-bold text-emerald-900">
+              <Bot className="me-1 inline size-4 text-emerald-600" />
+              أتمتة الطلب مفعّلة: المنتجات، الروشتة، وتتبع الطلب تذهب إلى واتساب رقم اليمن
+              <span dir="ltr" className="mx-1 text-emerald-700">+967 782 878 280</span>
+            </p>
+            <a
+              href={waLink("مرحبًا، لدي استفسار من موقع صيدلية المصلي")}
+              target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-md bg-emerald-500 px-4 py-2 text-sm font-black text-white shadow-card transition hover:bg-emerald-600"
+            ><MessageCircle className="size-4" /> تواصل واتساب</a>
+          </div>
+        </section>
+
+
         <section>
           <SectionHeader
             title="منتجات NOW Foods الأصلية"
