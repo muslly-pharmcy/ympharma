@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteFooter } from "@/components/site-chrome";
-import { LayoutDashboard, LogOut, Package, FileText, MessageCircle, RefreshCw, Loader2, Lock, Filter } from "lucide-react";
+import { LayoutDashboard, LogOut, Package, FileText, MessageCircle, RefreshCw, Loader2, Lock, Filter, Users, Crown, Plus, Trash2, ShieldCheck } from "lucide-react";
 import { formatPrice } from "@/lib/products";
 import { openWhatsApp } from "@/lib/whatsapp";
 import { toast } from "sonner";
+import { bootstrapOwner, getMyRole, inviteStaff, listStaff, removeStaff, updateStaffPermissions } from "@/lib/staff.functions";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "لوحة التحكم — صيدلية المصلي" }] }),
