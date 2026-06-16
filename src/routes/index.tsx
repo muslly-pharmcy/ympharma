@@ -26,7 +26,10 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "أكثر من 5,000 منتج طبي وفيتامينات أصلية مع تجهيز آلي للطلب وتوصيل موثوق داخل عدن وجميع المحافظات." },
       { property: "og:url", content: "https://muslly.com/" },
     ],
-    links: [{ rel: "canonical", href: "https://muslly.com/" }],
+    links: [
+      { rel: "canonical", href: "https://muslly.com/" },
+      { rel: "preload", as: "image", href: storefrontUrl, fetchpriority: "high" },
+    ],
     scripts: [
       {
         type: "application/ld+json",
