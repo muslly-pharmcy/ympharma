@@ -4,7 +4,15 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Plus, Trash2, Upload, Save, ArrowRight, FileSpreadsheet, Link as LinkIcon } from "lucide-react";
-import { listAllProducts, upsertProduct, deleteProduct, bulkImportProducts, importFromGoogleSheet } from "@/lib/products-admin.functions";
+import { listAllProducts, upsertProduct, deleteProduct, bulkImportProducts, importFromGoogleSheet, importFromGoogleDrive } from "@/lib/products-admin.functions";
+
+const CSV_TEMPLATE = "name,brand,price,old_price,category,image_url,badge,description\nبانادول 500مج,GSK,1850,2100,medicine,https://example.com/img.jpg,خصم,شريط 24 قرص\nفيتامين سي 1000,NOW,7800,,vitamins,,جديد,60 قرص\n";
+function downloadTemplate(name: string, content: string, mime: string) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href = url; a.download = name; a.click();
+  URL.revokeObjectURL(url);
+}
 
 export const Route = createFileRoute("/admin-products")({
   head: () => ({ meta: [{ title: "إدارة الأصناف — صيدلية المصلي" }, { name: "robots", content: "noindex,nofollow" }] }),
