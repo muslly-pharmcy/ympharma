@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteFooter } from "@/components/site-chrome";
-import { LayoutDashboard, LogOut, Package, FileText, MessageCircle, RefreshCw, Loader2, Lock, Filter } from "lucide-react";
+import { LayoutDashboard, LogOut, Package, FileText, MessageCircle, RefreshCw, Loader2, Lock, Filter, Users, Crown, Plus, Trash2, ShieldCheck } from "lucide-react";
 import { formatPrice } from "@/lib/products";
 import { openWhatsApp } from "@/lib/whatsapp";
 import { toast } from "sonner";
+import { bootstrapOwner, getMyRole, inviteStaff, listStaff, removeStaff, updateStaffPermissions } from "@/lib/staff.functions";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "لوحة التحكم — صيدلية المصلي" }] }),
@@ -67,9 +69,12 @@ function AdminPage() {
 
   useEffect(() => {
     if (!session) return;
-    supabase.rpc("has_role", { _user_id: session.userId, _role: "admin" }).then(({ data, error }) => {
-      if (error) { console.error(error); setIsAdmin(false); return; }
-      setIsAdmin(Boolean(data));
+    Promise.all([
+      supabase.rpc("has_role", { _user_id: session.userId, _role: "admin" }),
+      supabase.rpc("has_role", { _user_id: session.userId, _role: "owner" }),
+    ]).then(([a, o]) => {
+      if (a.error && o.error) { console.error(a.error); setIsAdmin(false); return; }
+      setIsAdmin(Boolean(a.data) || Boolean(o.data));
     });
   }, [session]);
 
@@ -77,7 +82,7 @@ function AdminPage() {
   if (!session) return <LoginCard />;
   if (isAdmin === null) return <Center><Loader2 className="size-6 animate-spin text-primary" /></Center>;
   if (!isAdmin) return <NotAdmin email={session.email} />;
-  return <Dashboard email={session.email} />;
+  return <Dashboard email={session.email} userId={session.userId} />;
 }
 
 function Center({ children }: { children: React.ReactNode }) {
@@ -143,12 +148,20 @@ function NotAdmin({ email }: { email: string }) {
   );
 }
 
-function Dashboard({ email }: { email: string }) {
-  const [tab, setTab] = useState<"orders" | "rx">("orders");
+function Dashboard({ email, userId }: { email: string; userId: string }) {
+  const [tab, setTab] = useState<"orders" | "rx" | "team">("orders");
   const [orders, setOrders] = useState<Order[]>([]);
   const [rxs, setRxs] = useState<Rx[]>([]);
   const [filter, setFilter] = useState<string>("all");
   const [busy, setBusy] = useState(false);
+  const [me, setMe] = useState<{ isOwner: boolean; isAdmin: boolean; permissions: string[] } | null>(null);
+
+  const fetchMyRole = useServerFn(getMyRole);
+  const promote = useServerFn(bootstrapOwner);
+
+  useEffect(() => {
+    fetchMyRole({}).then(setMe).catch((e) => toast.error(String(e?.message ?? e)));
+  }, [fetchMyRole]);
 
   const load = useCallback(async () => {
     setBusy(true);
@@ -176,6 +189,24 @@ function Dashboard({ email }: { email: string }) {
     toast.success("تم تحديث الحالة");
   }
 
+  async function handlePromote() {
+    try {
+      const res = await promote({});
+      if (res.promoted) {
+        toast.success("تمت ترقيتك إلى مالك الموقع");
+        const r = await fetchMyRole({});
+        setMe(r);
+      } else {
+        toast.error("يوجد مالك بالفعل أو لست مسؤولاً");
+      }
+    } catch (e: any) {
+      toast.error(String(e?.message ?? e));
+    }
+  }
+
+  const canOrders = me?.isOwner || me?.isAdmin || me?.permissions.includes("orders");
+  const canRx = me?.isOwner || me?.isAdmin || me?.permissions.includes("prescriptions");
+
   const filteredOrders = filter === "all" ? orders : orders.filter((o) => o.status === filter);
   const filteredRxs = filter === "all" ? rxs : rxs.filter((o) => o.status === filter);
 
@@ -186,11 +217,19 @@ function Dashboard({ email }: { email: string }) {
           <div className="flex items-center gap-2">
             <div className="brand-gradient grid size-10 place-items-center rounded-xl text-primary-foreground"><LayoutDashboard className="size-5" /></div>
             <div>
-              <p className="text-sm font-black">لوحة تحكم صيدلية المصلي</p>
+              <p className="text-sm font-black flex items-center gap-1.5">
+                لوحة تحكم صيدلية المصلي
+                {me?.isOwner && <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700"><Crown className="size-3" /> مالك</span>}
+              </p>
               <p className="text-[11px] text-muted-foreground" dir="ltr">{email}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {me && !me.isOwner && me.isAdmin && (
+              <button onClick={handlePromote} className="flex items-center gap-1.5 rounded-xl bg-amber-500 px-3 py-2 text-xs font-black text-white hover:bg-amber-600" title="إذا لم يوجد مالك بعد، يمكنك ترقية نفسك">
+                <Crown className="size-4" /> كن المالك
+              </button>
+            )}
             <button onClick={load} disabled={busy} className="grid size-10 place-items-center rounded-xl bg-secondary hover:bg-accent" aria-label="تحديث">
               {busy ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
             </button>
@@ -200,28 +239,34 @@ function Dashboard({ email }: { email: string }) {
           </div>
         </div>
         <div className="mx-auto flex max-w-7xl items-center gap-2 overflow-x-auto px-4 pb-2">
-          <Tab active={tab === "orders"} onClick={() => setTab("orders")} icon={Package} label={`الطلبات (${orders.length})`} />
-          <Tab active={tab === "rx"} onClick={() => setTab("rx")} icon={FileText} label={`الروشتات (${rxs.length})`} />
-          <div className="mx-2 h-6 w-px bg-border" />
-          <Filter className="size-3.5 text-muted-foreground" />
-          <select value={filter} onChange={(e) => setFilter(e.target.value)} className="rounded-lg border border-border bg-card px-2 py-1.5 text-xs font-bold">
-            <option value="all">كل الحالات</option>
-            {STATUSES.map((s) => <option key={s.v} value={s.v}>{s.label}</option>)}
-          </select>
+          {canOrders && <Tab active={tab === "orders"} onClick={() => setTab("orders")} icon={Package} label={`الطلبات (${orders.length})`} />}
+          {canRx && <Tab active={tab === "rx"} onClick={() => setTab("rx")} icon={FileText} label={`الروشتات (${rxs.length})`} />}
+          {me?.isOwner && <Tab active={tab === "team"} onClick={() => setTab("team")} icon={Users} label="الفريق والصلاحيات" />}
+          {tab !== "team" && (
+            <>
+              <div className="mx-2 h-6 w-px bg-border" />
+              <Filter className="size-3.5 text-muted-foreground" />
+              <select value={filter} onChange={(e) => setFilter(e.target.value)} className="rounded-lg border border-border bg-card px-2 py-1.5 text-xs font-bold">
+                <option value="all">كل الحالات</option>
+                {STATUSES.map((s) => <option key={s.v} value={s.v}>{s.label}</option>)}
+              </select>
+            </>
+          )}
         </div>
       </header>
 
       <main className="mx-auto max-w-7xl space-y-3 px-4 py-6">
-        {tab === "orders" && (
+        {tab === "orders" && canOrders && (
           filteredOrders.length === 0
             ? <Empty text="لا توجد طلبات" />
             : filteredOrders.map((o) => <OrderCard key={o.id} order={o} onStatus={setOrderStatus} />)
         )}
-        {tab === "rx" && (
+        {tab === "rx" && canRx && (
           filteredRxs.length === 0
             ? <Empty text="لا توجد روشتات" />
             : filteredRxs.map((r) => <RxCard key={r.id} rx={r} onStatus={setRxStatus} />)
         )}
+        {tab === "team" && me?.isOwner && <TeamPanel currentUserId={userId} />}
       </main>
 
       <SiteFooter />
@@ -314,6 +359,146 @@ function RxCard({ rx, onStatus }: { rx: Rx; onStatus: (id: string, s: string) =>
           onClick={() => openWhatsApp(`مرحبًا ${rx.customer_name}، بخصوص روشتتك ${rx.id} من صيدلية المصلي:`)}
           className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-black text-white"
         ><MessageCircle className="size-3.5" /> واتساب العميل</button>
+      </div>
+    </div>
+  );
+}
+
+const ALL_PERMS: { v: "orders" | "prescriptions" | "users"; label: string; desc: string }[] = [
+  { v: "orders", label: "إدارة الطلبات", desc: "عرض الطلبات وتحديث حالتها" },
+  { v: "prescriptions", label: "إدارة الروشتات", desc: "عرض الروشتات وتحديث حالتها" },
+  { v: "users", label: "إدارة المستخدمين", desc: "صلاحية مساعدة (للمستقبل)" },
+];
+
+type StaffRow = { userId: string; email: string; isOwner: boolean; permissions: string[] };
+
+function TeamPanel({ currentUserId }: { currentUserId: string }) {
+  const [rows, setRows] = useState<StaffRow[] | null>(null);
+  const [email, setEmail] = useState("");
+  const [perms, setPerms] = useState<string[]>(["orders", "prescriptions"]);
+  const [busy, setBusy] = useState(false);
+
+  const fnList = useServerFn(listStaff);
+  const fnInvite = useServerFn(inviteStaff);
+  const fnUpdate = useServerFn(updateStaffPermissions);
+  const fnRemove = useServerFn(removeStaff);
+
+  const load = useCallback(async () => {
+    try { setRows(await fnList({})); }
+    catch (e: any) { toast.error(String(e?.message ?? e)); }
+  }, [fnList]);
+
+  useEffect(() => { load(); }, [load]);
+
+  async function add(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await fnInvite({ data: { email: email.trim(), permissions: perms as any } });
+      toast.success("تمت إضافة العضو ومنحه الصلاحيات");
+      setEmail("");
+      setPerms(["orders", "prescriptions"]);
+      await load();
+    } catch (e: any) { toast.error(String(e?.message ?? e)); }
+    finally { setBusy(false); }
+  }
+
+  async function togglePerm(userId: string, perm: string, has: boolean) {
+    const row = rows?.find((r) => r.userId === userId);
+    if (!row) return;
+    const next = has ? row.permissions.filter((p) => p !== perm) : [...row.permissions, perm];
+    try {
+      await fnUpdate({ data: { userId, permissions: next as any } });
+      setRows((r) => r?.map((x) => x.userId === userId ? { ...x, permissions: next } : x) ?? null);
+    } catch (e: any) { toast.error(String(e?.message ?? e)); }
+  }
+
+  async function remove(userId: string) {
+    if (!confirm("حذف هذا العضو من الفريق؟")) return;
+    try {
+      await fnRemove({ data: { userId } });
+      toast.success("تم حذف العضو");
+      await load();
+    } catch (e: any) { toast.error(String(e?.message ?? e)); }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900">
+        <div className="flex items-start gap-2">
+          <Crown className="mt-0.5 size-4 shrink-0" />
+          <p>أنت <strong>المدير العام</strong> للموقع. يمكنك إضافة أعضاء فريق وتحديد صلاحياتهم. يجب على العضو إنشاء حساب أولاً من صفحة لوحة التحكم ثم تضيفه هنا ببريده.</p>
+        </div>
+      </div>
+
+      <form onSubmit={add} className="rounded-2xl border border-border bg-card p-4 shadow-card">
+        <p className="mb-3 flex items-center gap-2 text-sm font-black"><Plus className="size-4 text-primary" /> إضافة عضو جديد</p>
+        <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+          <input
+            required type="email" dir="ltr" value={email} onChange={(e) => setEmail(e.target.value)}
+            placeholder="email@example.com"
+            className="rounded-xl border border-border bg-secondary/40 px-3 py-2.5 text-sm outline-none focus:border-primary"
+          />
+          <button disabled={busy} className="brand-gradient flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-black text-primary-foreground disabled:opacity-60">
+            {busy && <Loader2 className="size-4 animate-spin" />} إضافة
+          </button>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {ALL_PERMS.map((p) => {
+            const on = perms.includes(p.v);
+            return (
+              <button type="button" key={p.v}
+                onClick={() => setPerms((cur) => on ? cur.filter((x) => x !== p.v) : [...cur, p.v])}
+                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition ${on ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-primary"}`}>
+                <ShieldCheck className="size-3.5" /> {p.label}
+              </button>
+            );
+          })}
+        </div>
+      </form>
+
+      <div className="rounded-2xl border border-border bg-card shadow-card">
+        <div className="border-b border-border p-4 text-sm font-black flex items-center gap-2"><Users className="size-4 text-primary" /> أعضاء الفريق</div>
+        {rows === null ? (
+          <div className="grid place-items-center p-10"><Loader2 className="size-5 animate-spin text-primary" /></div>
+        ) : rows.length === 0 ? (
+          <Empty text="لا يوجد أعضاء بعد" />
+        ) : (
+          <ul className="divide-y divide-border">
+            {rows.map((r) => (
+              <li key={r.userId} className="p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-black flex items-center gap-2">
+                      <span dir="ltr">{r.email}</span>
+                      {r.isOwner && <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700"><Crown className="size-3" /> المالك</span>}
+                      {r.userId === currentUserId && <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-black text-primary">أنت</span>}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground" dir="ltr">{r.userId}</p>
+                  </div>
+                  {!r.isOwner && (
+                    <button onClick={() => remove(r.userId)} className="flex items-center gap-1.5 rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-black text-rose-700 hover:bg-rose-100">
+                      <Trash2 className="size-3.5" /> حذف
+                    </button>
+                  )}
+                </div>
+                {!r.isOwner && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {ALL_PERMS.map((p) => {
+                      const has = r.permissions.includes(p.v);
+                      return (
+                        <button key={p.v} onClick={() => togglePerm(r.userId, p.v, has)}
+                          className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition ${has ? "bg-emerald-500 text-white" : "bg-secondary text-muted-foreground hover:text-primary"}`}>
+                          <ShieldCheck className="size-3.5" /> {p.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

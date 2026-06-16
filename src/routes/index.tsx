@@ -57,7 +57,7 @@ function Home() {
               <span className="text-white/90">بين يديك خلال ساعة</span>
             </h2>
             <p className="mt-3 max-w-xl text-sm text-white/85 sm:text-base">
-              أكثر من 5,000 منتج طبي وفيتامينات أصلية، مع تجهيز آلي للطلب عبر واتساب وتوصيل موثوق داخل صنعاء ولجميع المحافظات.
+              أكثر من 5,000 منتج طبي وفيتامينات أصلية، مع تجهيز آلي للطلب عبر واتساب وتوصيل موثوق داخل عدن ولجميع المحافظات.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link to="/products" className="inline-flex items-center gap-2 rounded-md bg-card px-5 py-3 text-sm font-black text-primary-deep shadow-lg transition hover:scale-[1.02]">
@@ -89,7 +89,7 @@ function Home() {
                 { t: "24/7", s: "خدمة واستقبال طلبات" },
                 { t: "100%", s: "منتجات أصلية" },
                 { t: "+5,000", s: "منتج طبي متوفر" },
-                { t: "ساعة", s: "توصيل داخل صنعاء" },
+                { t: "ساعة", s: "توصيل داخل عدن" },
               ].map((s) => (
                 <div key={s.s} className="rounded-md border border-border bg-secondary/40 p-3">
                   <strong className="block text-base text-primary-deep">{s.t}</strong>
@@ -105,7 +105,7 @@ function Home() {
             { icon: ShieldCheck, t: "منتجات أصلية 100%", s: "من موردين معتمدين" },
             { icon: Clock3, t: "خدمة 24/7", s: "اطلب في أي وقت" },
             { icon: BadgePercent, t: "أفضل الأسعار", s: "عروض يومية وحصرية" },
-            { icon: Truck, t: "شحن لجميع المحافظات", s: "بالتعاون مع دهسم" },
+            { icon: Truck, t: "شحن لجميع المحافظات", s: "توصيل سريع وموثوق" },
           ].map((b) => (
             <div key={b.t} className="flex items-center gap-3 rounded-md p-3 transition hover:bg-secondary/60">
               <div className="grid size-11 shrink-0 place-items-center rounded-md bg-primary/10 text-primary"><b.icon className="size-5" /></div>

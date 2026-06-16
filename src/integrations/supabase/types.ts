@@ -83,6 +83,27 @@ export type Database = {
         }
         Relationships: []
       }
+      staff_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          permission: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          permission: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          permission?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -109,6 +130,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      bootstrap_owner: { Args: never; Returns: boolean }
       get_order_public: {
         Args: { _id: string }
         Returns: {
@@ -120,6 +142,10 @@ export type Database = {
           total: number
         }[]
       }
+      has_permission: {
+        Args: { _perm: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -129,7 +155,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "owner"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -257,7 +283,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "owner"],
     },
   },
 } as const
