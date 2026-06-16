@@ -69,9 +69,12 @@ function AdminPage() {
 
   useEffect(() => {
     if (!session) return;
-    supabase.rpc("has_role", { _user_id: session.userId, _role: "admin" }).then(({ data, error }) => {
-      if (error) { console.error(error); setIsAdmin(false); return; }
-      setIsAdmin(Boolean(data));
+    Promise.all([
+      supabase.rpc("has_role", { _user_id: session.userId, _role: "admin" }),
+      supabase.rpc("has_role", { _user_id: session.userId, _role: "owner" }),
+    ]).then(([a, o]) => {
+      if (a.error && o.error) { console.error(a.error); setIsAdmin(false); return; }
+      setIsAdmin(Boolean(a.data) || Boolean(o.data));
     });
   }, [session]);
 
