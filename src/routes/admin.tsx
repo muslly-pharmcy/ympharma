@@ -245,6 +245,9 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
             <button onClick={load} disabled={busy} className="grid size-10 place-items-center rounded-xl bg-secondary hover:bg-accent" aria-label="تحديث">
               {busy ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
             </button>
+            <a href="/admin-products" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">الأصناف</a>
+            <a href="/admin-offers" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">العروض</a>
+            <a href="/admin-settings" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">الإعدادات</a>
             {me?.isOwner && (
               <a href="/admin-logs" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">
                 سجل النشاط
