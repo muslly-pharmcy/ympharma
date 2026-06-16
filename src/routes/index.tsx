@@ -57,7 +57,7 @@ function Home() {
               <span className="text-white/90">بين يديك خلال ساعة</span>
             </h2>
             <p className="mt-3 max-w-xl text-sm text-white/85 sm:text-base">
-              أكثر من 5,000 منتج طبي وفيتامينات أصلية، مع تجهيز آلي للطلب عبر واتساب وتوصيل موثوق داخل صنعاء ولجميع المحافظات.
+              أكثر من 5,000 منتج طبي وفيتامينات أصلية، مع تجهيز آلي للطلب عبر واتساب وتوصيل موثوق داخل عدن ولجميع المحافظات.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link to="/products" className="inline-flex items-center gap-2 rounded-md bg-card px-5 py-3 text-sm font-black text-primary-deep shadow-lg transition hover:scale-[1.02]">
@@ -89,7 +89,7 @@ function Home() {
                 { t: "24/7", s: "خدمة واستقبال طلبات" },
                 { t: "100%", s: "منتجات أصلية" },
                 { t: "+5,000", s: "منتج طبي متوفر" },
-                { t: "ساعة", s: "توصيل داخل صنعاء" },
+                { t: "ساعة", s: "توصيل داخل عدن" },
               ].map((s) => (
                 <div key={s.s} className="rounded-md border border-border bg-secondary/40 p-3">
                   <strong className="block text-base text-primary-deep">{s.t}</strong>
