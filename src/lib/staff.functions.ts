@@ -6,7 +6,12 @@ const PERMS = ["orders", "prescriptions", "users"] as const;
 type Perm = (typeof PERMS)[number];
 
 async function assertOwner(supabase: any, userId: string) {
-  const { data, error } = await supabase.rpc("has_role", { _user_id: userId, _role: "owner" });
+  const { data, error } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "owner")
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("ليست لديك صلاحية المالك");
 }
@@ -15,14 +20,16 @@ export const getMyRole = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
-    const [{ data: isOwner }, { data: isAdmin }, { data: perms }] = await Promise.all([
-      supabase.rpc("has_role", { _user_id: userId, _role: "owner" }),
-      supabase.rpc("has_role", { _user_id: userId, _role: "admin" }),
+    const [{ data: roles, error: rolesError }, { data: perms, error: permsError }] = await Promise.all([
+      supabase.from("user_roles").select("role").eq("user_id", userId),
       supabase.from("staff_permissions").select("permission").eq("user_id", userId),
     ]);
+    if (rolesError) throw new Error(rolesError.message);
+    if (permsError) throw new Error(permsError.message);
+    const roleSet = new Set(((roles ?? []) as { role: string }[]).map((r) => r.role));
     return {
-      isOwner: Boolean(isOwner),
-      isAdmin: Boolean(isAdmin),
+      isOwner: roleSet.has("owner"),
+      isAdmin: roleSet.has("admin"),
       permissions: ((perms ?? []) as { permission: string }[]).map((p) => p.permission),
     };
   });

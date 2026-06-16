@@ -12,11 +12,14 @@ export const adminSetPassword = createServerFn({ method: "POST" })
     }).parse(d),
   )
   .handler(async ({ data, context }) => {
-    const { data: isOwner } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "owner",
-    });
-    if (!isOwner) throw new Error("Forbidden: owner only");
+    const { data: ownerRole, error: ownerError } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .eq("role", "owner")
+      .maybeSingle();
+    if (ownerError) throw new Error(ownerError.message);
+    if (!ownerRole) throw new Error("Forbidden: owner only");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
