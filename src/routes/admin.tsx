@@ -145,12 +145,20 @@ function NotAdmin({ email }: { email: string }) {
   );
 }
 
-function Dashboard({ email }: { email: string }) {
-  const [tab, setTab] = useState<"orders" | "rx">("orders");
+function Dashboard({ email, userId }: { email: string; userId: string }) {
+  const [tab, setTab] = useState<"orders" | "rx" | "team">("orders");
   const [orders, setOrders] = useState<Order[]>([]);
   const [rxs, setRxs] = useState<Rx[]>([]);
   const [filter, setFilter] = useState<string>("all");
   const [busy, setBusy] = useState(false);
+  const [me, setMe] = useState<{ isOwner: boolean; isAdmin: boolean; permissions: string[] } | null>(null);
+
+  const fetchMyRole = useServerFn(getMyRole);
+  const promote = useServerFn(bootstrapOwner);
+
+  useEffect(() => {
+    fetchMyRole({}).then(setMe).catch((e) => toast.error(String(e?.message ?? e)));
+  }, [fetchMyRole]);
 
   const load = useCallback(async () => {
     setBusy(true);
@@ -178,6 +186,24 @@ function Dashboard({ email }: { email: string }) {
     toast.success("تم تحديث الحالة");
   }
 
+  async function handlePromote() {
+    try {
+      const res = await promote({});
+      if (res.promoted) {
+        toast.success("تمت ترقيتك إلى مالك الموقع");
+        const r = await fetchMyRole({});
+        setMe(r);
+      } else {
+        toast.error("يوجد مالك بالفعل أو لست مسؤولاً");
+      }
+    } catch (e: any) {
+      toast.error(String(e?.message ?? e));
+    }
+  }
+
+  const canOrders = me?.isOwner || me?.isAdmin || me?.permissions.includes("orders");
+  const canRx = me?.isOwner || me?.isAdmin || me?.permissions.includes("prescriptions");
+
   const filteredOrders = filter === "all" ? orders : orders.filter((o) => o.status === filter);
   const filteredRxs = filter === "all" ? rxs : rxs.filter((o) => o.status === filter);
 
@@ -188,11 +214,19 @@ function Dashboard({ email }: { email: string }) {
           <div className="flex items-center gap-2">
             <div className="brand-gradient grid size-10 place-items-center rounded-xl text-primary-foreground"><LayoutDashboard className="size-5" /></div>
             <div>
-              <p className="text-sm font-black">لوحة تحكم صيدلية المصلي</p>
+              <p className="text-sm font-black flex items-center gap-1.5">
+                لوحة تحكم صيدلية المصلي
+                {me?.isOwner && <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700"><Crown className="size-3" /> مالك</span>}
+              </p>
               <p className="text-[11px] text-muted-foreground" dir="ltr">{email}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {me && !me.isOwner && me.isAdmin && (
+              <button onClick={handlePromote} className="flex items-center gap-1.5 rounded-xl bg-amber-500 px-3 py-2 text-xs font-black text-white hover:bg-amber-600" title="إذا لم يوجد مالك بعد، يمكنك ترقية نفسك">
+                <Crown className="size-4" /> كن المالك
+              </button>
+            )}
             <button onClick={load} disabled={busy} className="grid size-10 place-items-center rounded-xl bg-secondary hover:bg-accent" aria-label="تحديث">
               {busy ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
             </button>
@@ -202,28 +236,34 @@ function Dashboard({ email }: { email: string }) {
           </div>
         </div>
         <div className="mx-auto flex max-w-7xl items-center gap-2 overflow-x-auto px-4 pb-2">
-          <Tab active={tab === "orders"} onClick={() => setTab("orders")} icon={Package} label={`الطلبات (${orders.length})`} />
-          <Tab active={tab === "rx"} onClick={() => setTab("rx")} icon={FileText} label={`الروشتات (${rxs.length})`} />
-          <div className="mx-2 h-6 w-px bg-border" />
-          <Filter className="size-3.5 text-muted-foreground" />
-          <select value={filter} onChange={(e) => setFilter(e.target.value)} className="rounded-lg border border-border bg-card px-2 py-1.5 text-xs font-bold">
-            <option value="all">كل الحالات</option>
-            {STATUSES.map((s) => <option key={s.v} value={s.v}>{s.label}</option>)}
-          </select>
+          {canOrders && <Tab active={tab === "orders"} onClick={() => setTab("orders")} icon={Package} label={`الطلبات (${orders.length})`} />}
+          {canRx && <Tab active={tab === "rx"} onClick={() => setTab("rx")} icon={FileText} label={`الروشتات (${rxs.length})`} />}
+          {me?.isOwner && <Tab active={tab === "team"} onClick={() => setTab("team")} icon={Users} label="الفريق والصلاحيات" />}
+          {tab !== "team" && (
+            <>
+              <div className="mx-2 h-6 w-px bg-border" />
+              <Filter className="size-3.5 text-muted-foreground" />
+              <select value={filter} onChange={(e) => setFilter(e.target.value)} className="rounded-lg border border-border bg-card px-2 py-1.5 text-xs font-bold">
+                <option value="all">كل الحالات</option>
+                {STATUSES.map((s) => <option key={s.v} value={s.v}>{s.label}</option>)}
+              </select>
+            </>
+          )}
         </div>
       </header>
 
       <main className="mx-auto max-w-7xl space-y-3 px-4 py-6">
-        {tab === "orders" && (
+        {tab === "orders" && canOrders && (
           filteredOrders.length === 0
             ? <Empty text="لا توجد طلبات" />
             : filteredOrders.map((o) => <OrderCard key={o.id} order={o} onStatus={setOrderStatus} />)
         )}
-        {tab === "rx" && (
+        {tab === "rx" && canRx && (
           filteredRxs.length === 0
             ? <Empty text="لا توجد روشتات" />
             : filteredRxs.map((r) => <RxCard key={r.id} rx={r} onStatus={setRxStatus} />)
         )}
+        {tab === "team" && me?.isOwner && <TeamPanel currentUserId={userId} />}
       </main>
 
       <SiteFooter />
