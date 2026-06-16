@@ -58,7 +58,7 @@ export const askAssistant = createServerFn({ method: "POST" })
     try {
       const { text } = await generateText({
         model,
-        system: data.mode === "services" ? SYSTEM_SERVICES : SYSTEM_INTERACTIONS,
+        system: pickSystem(data.mode),
         messages: data.messages,
       });
       return { reply: text };
