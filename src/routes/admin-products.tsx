@@ -179,10 +179,12 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function ImportModal({ onClose, onDone }: { onClose: () => void; onDone: () => void }) {
   const [sheetUrl, setSheetUrl] = useState("");
+  const [driveUrl, setDriveUrl] = useState("");
   const [csvText, setCsvText] = useState("");
   const [replace, setReplace] = useState(false);
   const [busy, setBusy] = useState(false);
   const importSheet = useServerFn(importFromGoogleSheet);
+  const importDrive = useServerFn(importFromGoogleDrive);
   const bulkInsert = useServerFn(bulkImportProducts);
 
   async function runSheet() {
@@ -190,6 +192,16 @@ function ImportModal({ onClose, onDone }: { onClose: () => void; onDone: () => v
     setBusy(true);
     try {
       const r = await importSheet({ data: { sheetUrl, replace } });
+      toast.success(`تم استيراد ${r.inserted} صنف`);
+      onDone(); onClose();
+    } catch (e: any) { toast.error(String(e?.message ?? e)); }
+    finally { setBusy(false); }
+  }
+  async function runDrive() {
+    if (!driveUrl.trim()) return toast.error("ألصق رابط ملف Google Drive");
+    setBusy(true);
+    try {
+      const r = await importDrive({ data: { driveUrl, replace } });
       toast.success(`تم استيراد ${r.inserted} صنف`);
       onDone(); onClose();
     } catch (e: any) { toast.error(String(e?.message ?? e)); }
