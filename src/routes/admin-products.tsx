@@ -233,12 +233,34 @@ function ImportModal({ onClose, onDone }: { onClose: () => void; onDone: () => v
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={onClose}>
-      <div className="w-full max-w-2xl space-y-4 rounded-3xl bg-card p-6 shadow-elevated" onClick={(e) => e.stopPropagation()}>
-        <h2 className="text-base font-black">استيراد أصناف من Excel / Google Sheets</h2>
+      <div className="w-full max-w-2xl space-y-4 rounded-3xl bg-card p-6 shadow-elevated max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <h2 className="text-base font-black">استيراد أصناف من Excel / Google Sheets / Google Drive</h2>
         <p className="text-xs text-muted-foreground">الأعمدة المطلوبة: <code>name, price, category</code> — والاختيارية: <code>brand, old_price, image_url, badge, description</code></p>
 
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => downloadTemplate("products-template.csv", CSV_TEMPLATE, "text/csv;charset=utf-8")} className="rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">⬇ قالب CSV</button>
+          <a href={`data:text/csv;charset=utf-8,${encodeURIComponent(CSV_TEMPLATE)}`} download="products-template-excel.csv" className="rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">⬇ قالب Excel</a>
+          <a href="https://docs.google.com/spreadsheets/create" target="_blank" rel="noopener" className="rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">+ شيت جديد في Google</a>
+        </div>
+
         <div className="space-y-2 rounded-2xl border border-border bg-secondary/30 p-4">
-          <div className="flex items-center gap-2 text-sm font-black"><LinkIcon className="size-4" /> Google Sheets</div>
+          <div className="flex items-center gap-2 text-sm font-black"><LinkIcon className="size-4" /> Google Sheets (CSV عام)</div>
+          <p className="text-xs text-muted-foreground">شارك الشيت "أي شخص لديه الرابط" ثم ألصق الرابط:</p>
+          <input dir="ltr" value={sheetUrl} onChange={(e) => setSheetUrl(e.target.value)} placeholder="https://docs.google.com/spreadsheets/d/.../edit" className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs outline-none" />
+          <button onClick={runSheet} disabled={busy} className="brand-gradient inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-black text-primary-foreground disabled:opacity-50">
+            {busy ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />} استيراد من Google Sheets
+          </button>
+        </div>
+
+        <div className="space-y-2 rounded-2xl border border-border bg-secondary/30 p-4">
+          <div className="flex items-center gap-2 text-sm font-black"><LinkIcon className="size-4" /> Google Drive (ملف Excel/CSV)</div>
+          <p className="text-xs text-muted-foreground">ارفع ملف .xlsx أو .csv على Drive، شاركه "أي شخص لديه الرابط"، وألصق الرابط:</p>
+          <input dir="ltr" value={driveUrl} onChange={(e) => setDriveUrl(e.target.value)} placeholder="https://drive.google.com/file/d/.../view" className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs outline-none" />
+          <button onClick={runDrive} disabled={busy} className="brand-gradient inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-black text-primary-foreground disabled:opacity-50">
+            {busy ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />} استيراد من Google Drive
+          </button>
+        </div>
+
           <p className="text-xs text-muted-foreground">شارك الشيت "أي شخص لديه الرابط يمكنه الاطلاع" ثم ألصق الرابط:</p>
           <input dir="ltr" value={sheetUrl} onChange={(e) => setSheetUrl(e.target.value)} placeholder="https://docs.google.com/spreadsheets/d/.../edit" className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs outline-none" />
           <button onClick={runSheet} disabled={busy} className="brand-gradient inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-black text-primary-foreground disabled:opacity-50">
