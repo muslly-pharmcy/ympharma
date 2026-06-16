@@ -14,9 +14,9 @@ export const Route = createFileRoute("/cart")({
       { name: "description", content: "راجع منتجات سلتك وأكمل الطلب بسهولة، يصلك تأكيد فوري عبر واتساب مع تتبع لحالة التوصيل." },
       { property: "og:title", content: "سلة الطلب — صيدلية المصلي" },
       { property: "og:description", content: "أكمل عملية الشراء وأرسل طلبك مباشرة عبر واتساب مع تتبع الحالة." },
-      { property: "og:url", content: "https://ympharma.lovable.app/cart" },
+      { property: "og:url", content: "https://muslly.com/cart" },
     ],
-    links: [{ rel: "canonical", href: "https://ympharma.lovable.app/cart" }],
+    links: [{ rel: "canonical", href: "https://muslly.com/cart" }],
   }),
   component: CartPage,
 });
