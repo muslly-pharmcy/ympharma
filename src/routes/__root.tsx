@@ -96,6 +96,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-title", content: "صيدلية المصلي" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "format-detection", content: "telephone=no" },
+      { name: "google-site-verification", content: "FOLYVj61xFYD4O-suyS4rWYrd60Q8Q3kFNHBGxUiabg" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
