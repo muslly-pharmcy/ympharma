@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import {
   Truck, FileText, Pill, Baby, Stethoscope, Sparkles, HeartPulse, Leaf, Bot,
-  ChevronLeft, ShieldCheck, Clock3, BadgePercent, Beaker, Search, MessageCircle,
+  ChevronLeft, ShieldCheck, Clock3, BadgePercent, Beaker, MessageCircle,
 } from "lucide-react";
 
 
