@@ -10,6 +10,9 @@ import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { ProductCard } from "@/components/product-card";
 import { products } from "@/lib/products";
 import { waLink } from "@/lib/whatsapp";
+import storefrontAsset from "@/assets/pharmacy-storefront.png.asset.json";
+import robotAsset from "@/assets/pharmacy-robot.png.asset.json";
+import nightAsset from "@/assets/pharmacy-night.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -165,6 +168,21 @@ function Home() {
           ))}
         </section>
 
+
+        <section>
+          <SectionHeader title="من داخل صيدلية المصلي" subtitle="فرعنا في عدن — المنصورة" />
+          <div className="grid gap-3 sm:grid-cols-3">
+            {[
+              { src: storefrontAsset.url, alt: "واجهة صيدلية المصلي في عدن — المنصورة" },
+              { src: robotAsset.url, alt: "أتمتة تجهيز الأدوية داخل صيدلية المصلي" },
+              { src: nightAsset.url, alt: "صيدلية المصلي ليلاً — خدمة 24 ساعة" },
+            ].map((im) => (
+              <div key={im.src} className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
+                <img src={im.src} alt={im.alt} loading="lazy" decoding="async" className="aspect-square w-full object-cover transition hover:scale-[1.03]" />
+              </div>
+            ))}
+          </div>
+        </section>
 
         <section>
           <SectionHeader title="تسوّق حسب الفئة" subtitle="اختر القسم الذي يناسبك" />
