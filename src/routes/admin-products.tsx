@@ -261,12 +261,7 @@ function ImportModal({ onClose, onDone }: { onClose: () => void; onDone: () => v
           </button>
         </div>
 
-          <p className="text-xs text-muted-foreground">شارك الشيت "أي شخص لديه الرابط يمكنه الاطلاع" ثم ألصق الرابط:</p>
-          <input dir="ltr" value={sheetUrl} onChange={(e) => setSheetUrl(e.target.value)} placeholder="https://docs.google.com/spreadsheets/d/.../edit" className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs outline-none" />
-          <button onClick={runSheet} disabled={busy} className="brand-gradient inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-black text-primary-foreground disabled:opacity-50">
-            {busy ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />} استيراد من الشيت
-          </button>
-        </div>
+
 
         <div className="space-y-2 rounded-2xl border border-border bg-secondary/30 p-4">
           <div className="flex items-center gap-2 text-sm font-black"><FileSpreadsheet className="size-4" /> ألصق CSV من Excel</div>
