@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import * as XLSX from "xlsx";
 
 const productSchema = z.object({
   id: z.string().uuid().optional(),
@@ -147,6 +148,56 @@ export const importFromGoogleSheet = createServerFn({ method: "POST" })
       description: iDesc >= 0 ? (r[iDesc] || "").trim() : "",
       is_published: true,
     }));
+    if (data.replace) {
+      await context.supabase.from("products").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    }
+    const { error, count } = await context.supabase.from("products").insert(parsed, { count: "exact" });
+    if (error) throw new Error(error.message);
+    return { inserted: count ?? parsed.length };
+  });
+
+// Import from a publicly-shared Google Drive Excel/CSV file.
+// Accepts: https://drive.google.com/file/d/{id}/view  OR  https://drive.google.com/open?id={id}  OR raw id.
+export const importFromGoogleDrive = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({
+    driveUrl: z.string().min(8),
+    replace: z.boolean().optional(),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertPerm(context.supabase, context.userId, "products");
+    let id = data.driveUrl.trim();
+    const m1 = id.match(/\/d\/([a-zA-Z0-9-_]+)/);
+    const m2 = id.match(/[?&]id=([a-zA-Z0-9-_]+)/);
+    if (m1) id = m1[1]; else if (m2) id = m2[1];
+    const url = `https://drive.google.com/uc?export=download&id=${id}`;
+    const res = await fetch(url, { redirect: "follow" });
+    if (!res.ok) throw new Error(`تعذّر تنزيل الملف (${res.status}). تأكد أن المشاركة "أي شخص لديه الرابط".`);
+    const buf = new Uint8Array(await res.arrayBuffer());
+    const wb = XLSX.read(buf, { type: "array" });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const rowsObj = XLSX.utils.sheet_to_json<Record<string, any>>(sheet, { defval: "" });
+    if (rowsObj.length === 0) throw new Error("الملف فارغ");
+    const norm = (s: string) => s.trim().toLowerCase();
+    const parsed = rowsObj
+      .map((r) => {
+        const k: Record<string, any> = {};
+        for (const key of Object.keys(r)) k[norm(key)] = r[key];
+        return k;
+      })
+      .filter((r) => String(r.name ?? "").trim())
+      .map((r) => ({
+        name: String(r.name).trim(),
+        brand: String(r.brand ?? "").trim() || null,
+        price: Number(String(r.price ?? "0").replace(/[^\d.]/g, "")) || 0,
+        old_price: r.old_price ? Number(String(r.old_price).replace(/[^\d.]/g, "")) || null : null,
+        category: String(r.category ?? "medicine").trim(),
+        image_url: String(r.image_url ?? "").trim() || null,
+        badge: String(r.badge ?? "").trim() || null,
+        description: String(r.description ?? "").trim() || null,
+        is_published: true,
+      }));
+    if (!parsed.length) throw new Error("الأعمدة المطلوبة: name, price, category");
     if (data.replace) {
       await context.supabase.from("products").delete().neq("id", "00000000-0000-0000-0000-000000000000");
     }

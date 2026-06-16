@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { ProductCard } from "@/components/product-card";
-import { products, categories } from "@/lib/products";
+import { categories } from "@/lib/products";
+import { useMergedProducts } from "@/lib/use-merged-products";
 
 type Search = { cat?: string; q?: string };
 
@@ -40,6 +41,7 @@ function ProductsPage() {
   const { cat, q } = Route.useSearch();
   const [query, setQuery] = useState(q ?? "");
   const activeCat = cat ?? "all";
+  const products = useMergedProducts();
 
   const visible = useMemo(
     () =>
@@ -48,7 +50,7 @@ function ProductsPage() {
           (activeCat === "all" || p.cat === activeCat) &&
           (query.trim() === "" || p.name.includes(query.trim()) || p.brand.toLowerCase().includes(query.trim().toLowerCase())),
       ),
-    [activeCat, query],
+    [activeCat, query, products],
   );
 
   const currentCatName = categories.find((c) => c.id === activeCat)?.name ?? "كل المنتجات";

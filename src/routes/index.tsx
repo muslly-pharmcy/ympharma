@@ -8,7 +8,7 @@ import {
 
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { ProductCard } from "@/components/product-card";
-import { products } from "@/lib/products";
+import { useMergedProducts } from "@/lib/use-merged-products";
 import { waLink } from "@/lib/whatsapp";
 import storefrontAsset from "@/assets/pharmacy-storefront.png.asset.json";
 import robotAsset from "@/assets/pharmacy-robot.png.asset.json";
@@ -89,11 +89,12 @@ function Home() {
   const [query, setQuery] = useState("");
   const [trackId, setTrackId] = useState("");
   const navigate = useNavigate();
+  const products = useMergedProducts();
   const featured = useMemo(
     () => products.filter((p) => query.trim() === "" || p.name.includes(query.trim())).slice(0, 8),
-    [query],
+    [query, products],
   );
-  const nowProducts = useMemo(() => products.filter((p) => p.cat === "now").slice(0, 4), []);
+  const nowProducts = useMemo(() => products.filter((p) => p.cat === "now").slice(0, 4), [products]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
