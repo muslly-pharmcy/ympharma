@@ -186,12 +186,21 @@ function Home() {
           <SectionHeader title="من داخل صيدلية المصلي" subtitle="فرعنا في عدن — المنصورة" />
           <div className="grid gap-3 sm:grid-cols-3">
             {[
-              { src: storefrontUrl, alt: "واجهة صيدلية المصلي في عدن — المنصورة" },
-              { src: robotUrl, alt: "أتمتة تجهيز الأدوية داخل صيدلية المصلي" },
-              { src: nightUrl, alt: "صيدلية المصلي ليلاً — خدمة 24 ساعة" },
+              { src: storefrontUrl, alt: "واجهة صيدلية المصلي في عدن — المنصورة", eager: true },
+              { src: robotUrl, alt: "أتمتة تجهيز الأدوية داخل صيدلية المصلي", eager: false },
+              { src: nightUrl, alt: "صيدلية المصلي ليلاً — خدمة 24 ساعة", eager: false },
             ].map((im) => (
               <div key={im.src} className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
-                <img src={im.src} alt={im.alt} loading="lazy" decoding="async" className="aspect-square w-full object-cover transition hover:scale-[1.03]" />
+                <img
+                  src={im.src}
+                  alt={im.alt}
+                  loading={im.eager ? "eager" : "lazy"}
+                  fetchPriority={im.eager ? "high" : "auto"}
+                  decoding="async"
+                  width="800"
+                  height="800"
+                  className="aspect-square w-full object-cover transition hover:scale-[1.03]"
+                />
               </div>
             ))}
           </div>
