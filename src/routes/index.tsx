@@ -36,7 +36,7 @@ export const Route = createFileRoute("/")({
           name: "صيدلية المصلي",
           url: "https://muslly.com/",
           telephone: "+967782878280",
-          image: ["https://muslly.com/__l5e/assets-v1/9c1460dd-af0c-45ba-a815-04964361e9e2/pharmacy-storefront.png"],
+          image: ["https://muslly.com/__l5e/assets-v1/a8ea62c1-1cf3-4707-a017-db411980bb36/pharmacy-storefront.jpg"],
           address: {
             "@type": "PostalAddress",
             streetAddress: "المنصورة",
