@@ -384,10 +384,13 @@ function RxCard({ rx, onStatus }: { rx: Rx; onStatus: (id: string, s: string) =>
   );
 }
 
-const ALL_PERMS: { v: "orders" | "prescriptions" | "users"; label: string; desc: string }[] = [
+const ALL_PERMS: { v: "orders" | "prescriptions" | "users" | "products" | "pricing" | "integrations"; label: string; desc: string }[] = [
   { v: "orders", label: "إدارة الطلبات", desc: "عرض الطلبات وتحديث حالتها" },
   { v: "prescriptions", label: "إدارة الروشتات", desc: "عرض الروشتات وتحديث حالتها" },
-  { v: "users", label: "إدارة المستخدمين", desc: "صلاحية مساعدة (للمستقبل)" },
+  { v: "products", label: "إدارة الأصناف", desc: "إضافة وتعديل وحذف الأصناف واستيراد Excel/Sheets" },
+  { v: "pricing", label: "الأسعار والعروض", desc: "تغيير الأسعار وإضافة عروض ترويجية" },
+  { v: "integrations", label: "ربط الخدمات", desc: "ربط Google Workspace وأدوات خارجية" },
+  { v: "users", label: "إدارة المستخدمين", desc: "صلاحية مساعدة" },
 ];
 
 type StaffRow = { userId: string; email: string; isOwner: boolean; permissions: string[] };
