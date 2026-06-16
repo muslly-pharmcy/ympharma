@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import {
   Truck, FileText, Pill, Baby, Stethoscope, Sparkles, HeartPulse, Leaf, Bot,
   ChevronLeft, ShieldCheck, Clock3, BadgePercent, Beaker, MessageCircle,
+  MapPin, Phone, Navigation, Brain, ScanSearch, PillBottle,
 } from "lucide-react";
 
 
@@ -265,6 +266,94 @@ function Home() {
           />
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {featured.map((p) => <ProductCard key={p.id} product={p} />)}
+          </div>
+        </section>
+
+        <NunDivider />
+
+        {/* Advanced AI-Powered Services */}
+        <section>
+          <SectionHeader title="خدمات متقدمة بتقنية الذكاء" subtitle="رعاية ذكية أسرع وأدق — حصري على صيدلية المصلي" />
+          <div className="grid gap-4 md:grid-cols-3">
+            <Link to="/ai-assistant" className="group relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/10 via-card to-card p-5 shadow-card transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-elevated">
+              <div className="absolute -end-6 -top-6 size-24 rounded-full bg-primary/10 blur-2xl transition group-hover:bg-primary/20" />
+              <div className="relative">
+                <div className="grid size-12 place-items-center rounded-2xl brand-gradient text-primary-foreground"><Brain className="size-6" /></div>
+                <h3 className="mt-4 text-lg font-black">استشارة التفاعلات الدوائية</h3>
+                <p className="mt-1 text-sm text-muted-foreground">اسأل عن أي تفاعل بين دوائين، عشبة، أو طعام — وستحصل على إجابة فورية ومستوى الخطورة.</p>
+                <span className="mt-3 inline-flex items-center gap-1 text-sm font-black text-primary">جرّبها الآن <ChevronLeft className="size-4 rtl:rotate-0 ltr:rotate-180" /></span>
+              </div>
+            </Link>
+
+            <Link to="/prescription" className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-card transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-elevated">
+              <div className="grid size-12 place-items-center rounded-2xl bg-emerald-100 text-emerald-700"><ScanSearch className="size-6" /></div>
+              <h3 className="mt-4 text-lg font-black">قراءة الروشتة الذكية</h3>
+              <p className="mt-1 text-sm text-muted-foreground">صوّر روشتتك ونتولّى تجهيزها آليًا عبر فريق صيدلية المصلي خلال دقائق.</p>
+              <span className="mt-3 inline-flex items-center gap-1 text-sm font-black text-primary">ارفع روشتتك <ChevronLeft className="size-4 rtl:rotate-0 ltr:rotate-180" /></span>
+            </Link>
+
+            <a href={waLink("أحتاج توصية بمكمل غذائي مناسب")} target="_blank" rel="noopener noreferrer" className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-card transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-elevated">
+              <div className="grid size-12 place-items-center rounded-2xl bg-amber-100 text-amber-700"><PillBottle className="size-6" /></div>
+              <h3 className="mt-4 text-lg font-black">توصية مكملات شخصية</h3>
+              <p className="mt-1 text-sm text-muted-foreground">أخبرنا عن هدفك الصحي ونرشّح لك المكمل الأنسب من NOW Foods والعلامات المعتمدة.</p>
+              <span className="mt-3 inline-flex items-center gap-1 text-sm font-black text-primary">احصل على توصية <ChevronLeft className="size-4 rtl:rotate-0 ltr:rotate-180" /></span>
+            </a>
+          </div>
+        </section>
+
+        <NunDivider />
+
+        {/* Branch Locator / Contact */}
+        <section>
+          <SectionHeader title="فروعنا وكيفية الوصول" subtitle="نخدمك على مدار الساعة — اتصل أو زرنا" />
+          <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
+            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
+              <iframe
+                title="موقع صيدلية المصلي على الخريطة"
+                src="https://www.google.com/maps?q=12.8537392,44.9903458&hl=ar&z=16&output=embed"
+                className="h-72 w-full sm:h-96"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
+              <h3 className="text-lg font-black">الفرع الرئيسي — المنصورة</h3>
+              <p className="mt-1 text-sm text-muted-foreground">المنصورة، عدن، الجمهورية اليمنية</p>
+
+              <ul className="mt-4 space-y-3 text-sm">
+                <li className="flex items-center gap-3">
+                  <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><Clock3 className="size-5" /></span>
+                  <div>
+                    <p className="font-black">ساعات العمل</p>
+                    <p className="text-muted-foreground">يومياً 8 ص — 12 م · خدمة طلبات 24/7</p>
+                  </div>
+                </li>
+                <li className="flex items-center gap-3">
+                  <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><Phone className="size-5" /></span>
+                  <div>
+                    <p className="font-black">اتصال مباشر</p>
+                    <a href="tel:+967782878280" className="text-primary hover:underline" dir="ltr">+967 782 878 280</a>
+                  </div>
+                </li>
+                <li className="flex items-center gap-3">
+                  <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><MapPin className="size-5" /></span>
+                  <div>
+                    <p className="font-black">العنوان</p>
+                    <p className="text-muted-foreground">المنصورة — بالقرب من المعالم الرئيسية</p>
+                  </div>
+                </li>
+              </ul>
+
+              <div className="mt-5 grid grid-cols-2 gap-2">
+                <a href="https://maps.app.goo.gl/ZK1a6kAGn1KdUgSF9" target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-black text-primary-foreground hover:bg-primary-deep">
+                  <Navigation className="size-4" /> ابدأ التوجيه
+                </a>
+                <a href="tel:+967782878280" className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-secondary px-4 py-2.5 text-sm font-black hover:bg-accent">
+                  <Phone className="size-4" /> اتصل بنا
+                </a>
+              </div>
+            </div>
           </div>
         </section>
       </main>

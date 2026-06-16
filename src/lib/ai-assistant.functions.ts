@@ -1,0 +1,56 @@
+import { createServerFn } from "@tanstack/react-start";
+import { generateText } from "ai";
+import { z } from "zod";
+import { createLovableAiGatewayProvider } from "./ai-gateway.server";
+
+const MessageSchema = z.object({
+  role: z.enum(["user", "assistant"]),
+  content: z.string().min(1).max(4000),
+});
+
+const InputSchema = z.object({
+  messages: z.array(MessageSchema).min(1).max(20),
+  mode: z.enum(["interactions", "services"]).default("interactions"),
+});
+
+const SYSTEM_INTERACTIONS = `أنت "مساعد المصلي الصيدلي" — صيدلي مرجعي رقمي تابع لصيدلية المصلي في عدن.
+- أجب بالعربية الفصحى الواضحة (أو الإنجليزية إذا كتب المستخدم بالإنجليزية).
+- مهمتك: شرح التفاعلات الدوائية بين الأدوية والأعشاب والأطعمة، وتنبيه المستخدم لأي خطر.
+- اذكر مستوى الخطورة (خفيف/متوسط/شديد) ثم اشرح الآلية باختصار، ثم الإجراء الموصى به.
+- لا تذكر أبدًا اسم نموذج الذكاء الاصطناعي أو الشركة المطوّرة (مثل Gemini أو Google أو OpenAI).
+- إذا سُئلت "من أنت؟" قل: "أنا المساعد الصيدلي الرقمي لصيدلية المصلي".
+- في نهاية كل رد، أضف سطرًا: "⚠️ للاستشارة الدقيقة يرجى التواصل مع صيدلي المصلي على واتساب: +967 782 878 280".
+- لا تشخّص أمراضًا ولا تصف جرعات بديلة، فقط معلومات تفاعلات وتنبيهات.`;
+
+const SYSTEM_SERVICES = `أنت موظف خدمة عملاء صيدلية المصلي في عدن. أجب بإيجاز ودفء عن خدمات الصيدلية:
+التوصيل 24/7، رفع الروشتة، فروع المنصورة، المنتجات الأصلية، الفيتامينات والأجهزة الطبية.
+- لا تذكر اسم نموذج الذكاء الاصطناعي مطلقًا.
+- وجّه المستخدم للطلب عبر الموقع أو واتساب +967 782 878 280.`;
+
+export const askAssistant = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => InputSchema.parse(input))
+  .handler(async ({ data }) => {
+    const key = process.env.LOVABLE_API_KEY;
+    if (!key) throw new Error("AI service unavailable");
+
+    const gateway = createLovableAiGatewayProvider(key);
+    const model = gateway("google/gemini-3-flash-preview");
+
+    try {
+      const { text } = await generateText({
+        model,
+        system: data.mode === "services" ? SYSTEM_SERVICES : SYSTEM_INTERACTIONS,
+        messages: data.messages,
+      });
+      return { reply: text };
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes("429")) {
+        return { reply: "نعتذر، الخدمة مزدحمة حاليًا. حاول بعد قليل أو تواصل واتساب: +967 782 878 280" };
+      }
+      if (msg.includes("402")) {
+        return { reply: "الخدمة غير متاحة مؤقتًا. تواصل معنا واتساب: +967 782 878 280" };
+      }
+      throw new Error("تعذّر الاتصال بالمساعد، حاول لاحقًا.");
+    }
+  });
