@@ -245,6 +245,9 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
             <button onClick={load} disabled={busy} className="grid size-10 place-items-center rounded-xl bg-secondary hover:bg-accent" aria-label="تحديث">
               {busy ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
             </button>
+            <a href="/admin-products" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">الأصناف</a>
+            <a href="/admin-offers" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">العروض</a>
+            <a href="/admin-settings" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">الإعدادات</a>
             {me?.isOwner && (
               <a href="/admin-logs" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">
                 سجل النشاط
@@ -381,10 +384,13 @@ function RxCard({ rx, onStatus }: { rx: Rx; onStatus: (id: string, s: string) =>
   );
 }
 
-const ALL_PERMS: { v: "orders" | "prescriptions" | "users"; label: string; desc: string }[] = [
+const ALL_PERMS: { v: "orders" | "prescriptions" | "users" | "products" | "pricing" | "integrations"; label: string; desc: string }[] = [
   { v: "orders", label: "إدارة الطلبات", desc: "عرض الطلبات وتحديث حالتها" },
   { v: "prescriptions", label: "إدارة الروشتات", desc: "عرض الروشتات وتحديث حالتها" },
-  { v: "users", label: "إدارة المستخدمين", desc: "صلاحية مساعدة (للمستقبل)" },
+  { v: "products", label: "إدارة الأصناف", desc: "إضافة وتعديل وحذف الأصناف واستيراد Excel/Sheets" },
+  { v: "pricing", label: "الأسعار والعروض", desc: "تغيير الأسعار وإضافة عروض ترويجية" },
+  { v: "integrations", label: "ربط الخدمات", desc: "ربط Google Workspace وأدوات خارجية" },
+  { v: "users", label: "إدارة المستخدمين", desc: "صلاحية مساعدة" },
 ];
 
 type StaffRow = { userId: string; email: string; isOwner: boolean; permissions: string[] };

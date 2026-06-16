@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
-const PERMS = ["orders", "prescriptions", "users"] as const;
+const PERMS = ["orders", "prescriptions", "users", "products", "pricing", "integrations"] as const;
 type Perm = (typeof PERMS)[number];
 
 async function assertOwner(supabase: any, userId: string) {

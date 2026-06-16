@@ -53,6 +53,53 @@ export type Database = {
         }
         Relationships: []
       }
+      offers: {
+        Row: {
+          created_at: string
+          description: string | null
+          discount_percent: number | null
+          ends_at: string | null
+          id: string
+          is_active: boolean
+          product_id: string | null
+          starts_at: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          discount_percent?: number | null
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          product_id?: string | null
+          starts_at?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          discount_percent?: number | null
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          product_id?: string | null
+          starts_at?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offers_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           created_at: string
@@ -119,6 +166,57 @@ export type Database = {
           image_urls?: string[]
           notes?: string | null
           status?: string
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          badge: string | null
+          brand: string | null
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_published: boolean
+          legacy_id: number | null
+          name: string
+          old_price: number | null
+          price: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          badge?: string | null
+          brand?: string | null
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_published?: boolean
+          legacy_id?: number | null
+          name: string
+          old_price?: number | null
+          price?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          badge?: string | null
+          brand?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_published?: boolean
+          legacy_id?: number | null
+          name?: string
+          old_price?: number | null
+          price?: number
+          sort_order?: number
+          updated_at?: string
         }
         Relationships: []
       }
