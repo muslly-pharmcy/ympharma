@@ -3,7 +3,7 @@ import { Search, ShoppingBag, MapPin, Menu, Phone, Truck, Clock3, Globe } from "
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { useI18n } from "@/lib/i18n";
-import logoAsset from "@/assets/almusalli-logo.asset.json";
+import logoUrl from "@/assets/almusalli-logo.webp";
 import { categories } from "@/lib/products";
 
 export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (v: string) => void }) {
