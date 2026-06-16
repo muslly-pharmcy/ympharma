@@ -5,6 +5,7 @@ const BASE_URL = "https://muslly.com";
 
 interface SitemapEntry {
   path: string;
+  lastmod?: string;
   changefreq?: "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
   priority?: string;
 }
@@ -13,17 +14,19 @@ export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {
+        const today = new Date().toISOString().slice(0, 10);
         const entries: SitemapEntry[] = [
-          { path: "/", changefreq: "weekly", priority: "1.0" },
-          { path: "/products", changefreq: "weekly", priority: "0.9" },
-          { path: "/prescription", changefreq: "monthly", priority: "0.8" },
-          { path: "/track", changefreq: "monthly", priority: "0.5" },
+          { path: "/", changefreq: "weekly", priority: "1.0", lastmod: today },
+          { path: "/products", changefreq: "weekly", priority: "0.9", lastmod: today },
+          { path: "/prescription", changefreq: "monthly", priority: "0.8", lastmod: today },
+          { path: "/track", changefreq: "monthly", priority: "0.5", lastmod: today },
         ];
 
         const urls = entries.map((e) =>
           [
             `  <url>`,
             `    <loc>${BASE_URL}${e.path}</loc>`,
+            e.lastmod ? `    <lastmod>${e.lastmod}</lastmod>` : null,
             e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
             e.priority ? `    <priority>${e.priority}</priority>` : null,
             `  </url>`,
