@@ -37,8 +37,8 @@ export const logActivity = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.rpc("log_activity", {
       _action: data.action,
-      _entity_type: data.entityType ?? null,
-      _entity_id: data.entityId ?? null,
+      _entity_type: data.entityType,
+      _entity_id: data.entityId,
       _details: (data.details ?? {}) as any,
     });
     if (error) throw new Error(error.message);
