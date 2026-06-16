@@ -7,7 +7,9 @@ import {
 
 
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
+import { NunDivider } from "@/components/nun-divider";
 import { ProductCard } from "@/components/product-card";
+import { useI18n } from "@/lib/i18n";
 import { useMergedProducts } from "@/lib/use-merged-products";
 import { waLink } from "@/lib/whatsapp";
 import storefrontAsset from "@/assets/pharmacy-storefront.png.asset.json";
@@ -90,6 +92,7 @@ function Home() {
   const [trackId, setTrackId] = useState("");
   const navigate = useNavigate();
   const products = useMergedProducts();
+  const { t } = useI18n();
   const featured = useMemo(
     () => products.filter((p) => query.trim() === "" || p.name.includes(query.trim())).slice(0, 8),
     [query, products],
@@ -104,29 +107,30 @@ function Home() {
         <section className="grid gap-6 lg:grid-cols-[1.05fr_.95fr] items-center overflow-hidden rounded-2xl brand-gradient p-6 text-primary-foreground shadow-elevated sm:p-10">
           <div className="relative">
             <span className="inline-flex items-center gap-1.5 rounded-md bg-white/15 px-3 py-1.5 text-[12px] font-bold ring-1 ring-white/25">
-              <Sparkles className="size-3.5" /> صحتك تهمنا، وطلبك يصل أسرع
+              <Sparkles className="size-3.5" /> {t("hero.badge")}
             </span>
             <h1 className="mt-4 text-3xl font-black leading-[1.15] sm:text-4xl lg:text-5xl">
-              كل احتياجاتك الطبية
+              {t("hero.title1")}
               <br />
-              <span className="text-white/90">بين يديك خلال ساعة</span>
+              <span className="text-white/90">{t("hero.title2")}</span>
             </h1>
+            <p className="mt-2 text-sm font-bold text-white/80 italic">— {t("hero.tagline")}</p>
             <p className="mt-3 max-w-xl text-sm text-white/85 sm:text-base">
-              أكثر من 5,000 منتج طبي وفيتامينات أصلية، مع تجهيز آلي للطلب عبر واتساب وتوصيل موثوق داخل عدن ولجميع المحافظات.
+              {t("hero.subtitle")}
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link to="/products" className="inline-flex items-center gap-2 rounded-md bg-card px-5 py-3 text-sm font-black text-primary-deep shadow-lg transition hover:scale-[1.02]">
-                تسوّق الآن <ChevronLeft className="size-4" />
+                {t("hero.shop")} <ChevronLeft className="size-4 rtl:rotate-0 ltr:rotate-180" />
               </Link>
               <Link to="/prescription" className="inline-flex items-center gap-2 rounded-md bg-white/15 px-5 py-3 text-sm font-black ring-1 ring-white/30 backdrop-blur transition hover:bg-white/25">
-                <FileText className="size-4" /> ارفع الروشتة عبر واتساب
+                <FileText className="size-4" /> {t("hero.prescription")}
               </Link>
             </div>
           </div>
 
           <div className="rounded-xl bg-card p-5 text-foreground shadow-elevated ring-1 ring-white/40">
-            <h3 className="text-lg font-black">تتبع طلبك لحظة بلحظة</h3>
-            <p className="mt-1 text-xs text-muted-foreground">أدخل رقم الطلب وتابع حالته من التجهيز حتى وصول المندوب.</p>
+            <h3 className="text-lg font-black">{t("track.title")}</h3>
+            <p className="mt-1 text-xs text-muted-foreground">{t("track.subtitle")}</p>
             <form
               onSubmit={(e) => { e.preventDefault(); const id = trackId.trim(); if (id) navigate({ to: "/track", search: { id } }); }}
               className="mt-3 grid grid-cols-[1fr_auto] gap-2"
@@ -134,10 +138,10 @@ function Home() {
               <input
                 value={trackId}
                 onChange={(e) => setTrackId(e.target.value)}
-                placeholder="مثال: AM-XXXXXX"
+                placeholder={t("track.placeholder")}
                 className="min-h-11 rounded-md border border-border bg-secondary/40 px-3 text-sm outline-none focus:border-primary"
               />
-              <button className="rounded-md bg-primary px-4 text-sm font-black text-primary-foreground transition hover:bg-primary-deep">تتبع</button>
+              <button className="rounded-md bg-primary px-4 text-sm font-black text-primary-foreground transition hover:bg-primary-deep">{t("track.button")}</button>
             </form>
             <div className="mt-3 grid grid-cols-2 gap-2">
               {[
