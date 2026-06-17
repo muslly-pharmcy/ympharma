@@ -25,6 +25,13 @@ export const categories: Category[] = [
 // ---------- Image pools (Unsplash) ----------
 const IMG = {
   pill: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500",
+  pillStrip: "https://images.unsplash.com/photo-1550572017-edd951b55104?w=500",
+  pillsAmber: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=500",
+  syrup: "https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=500",
+  injection: "https://images.unsplash.com/photo-1583912267550-d44c9bdc4262?w=500",
+  inhaler: "https://images.unsplash.com/photo-1632571401005-458e9d244591?w=500",
+  ointment: "https://images.unsplash.com/photo-1631549919423-c7a4c4d3e87f?w=500",
+  drops: "https://images.unsplash.com/photo-1576602976047-174e57a47881?w=500",
   bottle: "https://images.unsplash.com/photo-1626716493137-b67fe9501e76?w=500",
   softgel: "https://images.unsplash.com/photo-1550572017-edd951b55104?w=500",
   fishoil: "https://images.unsplash.com/photo-1559757175-08f0cd8e07d4?w=500",
@@ -40,6 +47,9 @@ const IMG = {
   device: "https://images.unsplash.com/photo-1583947215259-38e31be8751f?w=500",
   thermo: "https://images.unsplash.com/photo-1585435557343-3b092031a831?w=500",
   herb: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=500",
+  dermaSerum: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=500",
+  dermaCream: "https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=500",
+  dermaTube: "https://images.unsplash.com/photo-1556228852-80b6e5eeff06?w=500",
 };
 
 // ---------- Core medicine + devices ----------
