@@ -350,6 +350,9 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
                 <Crown className="size-4" /> كن المالك
               </button>
             )}
+            <button onClick={() => setSoundOn((v) => !v)} className="grid size-10 place-items-center rounded-xl bg-secondary hover:bg-accent" aria-label="تنبيه صوتي" title={soundOn ? "تنبيه صوتي مفعّل" : "صامت"}>
+              {soundOn ? <Bell className="size-4 text-primary" /> : <BellOff className="size-4 text-muted-foreground" />}
+            </button>
             <button onClick={load} disabled={busy} className="grid size-10 place-items-center rounded-xl bg-secondary hover:bg-accent" aria-label="تحديث">
               {busy ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
             </button>
@@ -370,8 +373,18 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
           </div>
         </div>
         <div className="mx-auto flex max-w-7xl items-center gap-2 overflow-x-auto px-4 pb-2">
-          {canOrders && <Tab active={tab === "orders"} onClick={() => setTab("orders")} icon={Package} label={`الطلبات (${orders.length})`} />}
-          {canRx && <Tab active={tab === "rx"} onClick={() => setTab("rx")} icon={FileText} label={`الروشتات (${rxs.length})`} />}
+          {canOrders && (
+            <button onClick={() => { setTab("orders"); setNewOrders(0); }} className={`relative flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-1.5 text-xs font-black transition ${tab === "orders" ? "brand-gradient text-primary-foreground shadow-card" : "bg-secondary text-muted-foreground hover:text-primary"}`}>
+              <Package className="size-4" /> الطلبات ({orders.length})
+              {newOrders > 0 && tab !== "orders" && <span className="absolute -top-1 -left-1 grid min-w-5 h-5 place-items-center rounded-full bg-rose-500 px-1 text-[10px] font-black text-white animate-pulse">{newOrders}</span>}
+            </button>
+          )}
+          {canRx && (
+            <button onClick={() => { setTab("rx"); setNewRx(0); }} className={`relative flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-1.5 text-xs font-black transition ${tab === "rx" ? "brand-gradient text-primary-foreground shadow-card" : "bg-secondary text-muted-foreground hover:text-primary"}`}>
+              <FileText className="size-4" /> الروشتات ({rxs.length})
+              {newRx > 0 && tab !== "rx" && <span className="absolute -top-1 -left-1 grid min-w-5 h-5 place-items-center rounded-full bg-rose-500 px-1 text-[10px] font-black text-white animate-pulse">{newRx}</span>}
+            </button>
+          )}
           {me?.isOwner && <Tab active={tab === "team"} onClick={() => setTab("team")} icon={Users} label="الفريق والصلاحيات" />}
           {tab !== "team" && (
             <>
@@ -381,12 +394,16 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
                 <option value="all">كل الحالات</option>
                 {STATUSES.map((s) => <option key={s.v} value={s.v}>{s.label}</option>)}
               </select>
+              <button onClick={tab === "orders" ? exportOrdersCSV : exportRxCSV} className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-black text-white hover:bg-emerald-600" title="تصدير Excel/CSV">
+                <Download className="size-3.5" /> تصدير
+              </button>
             </>
           )}
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl space-y-3 px-4 py-6">
+      <main className="mx-auto max-w-7xl space-y-4 px-4 py-6">
+        {(canOrders || canRx) && tab !== "team" && <AdminStats refreshKey={statsKey} />}
         {tab === "orders" && canOrders && (
           filteredOrders.length === 0
             ? <Empty text="لا توجد طلبات" />
