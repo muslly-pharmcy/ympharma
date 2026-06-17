@@ -1,13 +1,46 @@
 export const WHATSAPP_NUMBER = "967782878280";
 
-export function waLink(message: string) {
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+/** Normalize a Yemeni phone to international form (no +). */
+export function normalizePhone(raw: string): string {
+  const digits = (raw || "").replace(/\D+/g, "");
+  if (!digits) return "";
+  if (digits.startsWith("00")) return digits.slice(2);
+  if (digits.startsWith("967")) return digits;
+  if (digits.startsWith("0")) return "967" + digits.slice(1);
+  if (digits.length === 9) return "967" + digits;
+  return digits;
 }
 
-export function openWhatsApp(message: string) {
-  if (typeof window === "undefined") return;
-  window.open(waLink(message), "_blank", "noopener,noreferrer");
+export function waLink(message: string, phone?: string) {
+  const num = phone ? normalizePhone(phone) : WHATSAPP_NUMBER;
+  return `https://wa.me/${num}?text=${encodeURIComponent(message)}`;
 }
+
+export function openWhatsApp(message: string, phone?: string) {
+  if (typeof window === "undefined") return;
+  window.open(waLink(message, phone), "_blank", "noopener,noreferrer");
+}
+
+/** Build a localized status-change message to send to the customer. */
+export function buildStatusMessage(opts: { name: string; orderId: string; status: string }): string {
+  const { name, orderId, status } = opts;
+  const trackUrl = typeof window !== "undefined" ? `${window.location.origin}/track?id=${orderId}` : `/track?id=${orderId}`;
+  const head = `🏥 *صيدلية المصلي*\n👋 مرحبًا ${name}،`;
+  const tail = `\n\n🔎 تتبع طلبك: ${trackUrl}\nشكراً لثقتكم 🌿`;
+  switch (status) {
+    case "confirmed":
+      return `${head}\n✅ تم *تأكيد* طلبك رقم *${orderId}* ونبدأ الآن في تجهيزه.${tail}`;
+    case "shipped":
+      return `${head}\n🚚 طلبك رقم *${orderId}* أصبح *في الطريق* إليك الآن.${tail}`;
+    case "delivered":
+      return `${head}\n📦 تم *تسليم* طلبك رقم *${orderId}* بنجاح. نتمنى لكم دوام الصحة والعافية.${tail}`;
+    case "cancelled":
+      return `${head}\n⚠️ نأسف لإبلاغك بأن طلبك رقم *${orderId}* قد *أُلغي*. للاستفسار يرجى التواصل معنا.${tail}`;
+    default:
+      return `${head}\nبخصوص طلبك رقم *${orderId}*.${tail}`;
+  }
+}
+
 
 function nowAr() {
   const d = new Date();
