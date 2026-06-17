@@ -417,10 +417,39 @@ function RxCard({ rx, onStatus }: { rx: Rx; onStatus: (id: string, s: string) =>
       {rx.image_urls.length > 0 && (
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {rx.image_urls.map((u, i) => (
-            <a key={i} href={u} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-lg border border-border">
+            <button key={i} type="button" onClick={() => setZoom(u)} className="block overflow-hidden rounded-lg border border-border">
               <img src={u} alt={`روشتة ${i + 1}`} loading="lazy" decoding="async" className="aspect-square w-full object-cover transition hover:scale-105" />
-            </a>
+            </button>
           ))}
+        </div>
+      )}
+
+      {zoom && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setZoom(null)}
+          className="fixed inset-0 z-50 grid place-items-center bg-black/85 p-4 animate-in fade-in"
+        >
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setZoom(null); }}
+            aria-label="إغلاق"
+            className="absolute right-4 top-4 grid size-10 place-items-center rounded-full bg-white/15 text-white hover:bg-white/25"
+          >✕</button>
+          <img
+            src={zoom}
+            alt="عرض الروشتة بالحجم الكامل"
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-[90vh] max-w-[95vw] rounded-xl object-contain shadow-elevated"
+          />
+          <a
+            href={zoom}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-white/90 px-4 py-2 text-xs font-black text-foreground hover:bg-white"
+          >فتح الصورة الأصلية</a>
         </div>
       )}
 
