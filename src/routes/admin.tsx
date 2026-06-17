@@ -193,6 +193,16 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "prescriptions" }, (p) => {
         setRxs((cur) => applyChange(cur, p) as Rx[]);
+        // Invalidate image cache when image_urls change on update/delete so
+        // stale signed URLs aren't reused after an Rx is edited.
+        if (p.eventType !== "INSERT") {
+          const row: any = p.new ?? p.old;
+          if (row?.id) {
+            void import("@/lib/image-cache").then(({ invalidateImagesMatching }) =>
+              invalidateImagesMatching(String(row.id).toLowerCase())
+            );
+          }
+        }
         if (p.eventType === "INSERT" && loadedRef.current) {
           setNewRx((n) => n + 1);
           setStatsKey((k) => k + 1);
