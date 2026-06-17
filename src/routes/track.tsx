@@ -124,6 +124,7 @@ function TrackPage() {
                 {steps.map((step, idx) => {
                   const done = idx <= statusIndex(order.status);
                   const active = idx === statusIndex(order.status);
+                  const hist = history.find((h) => h.status === step.key);
                   return (
                     <div key={step.key} className="flex items-start gap-4">
                       <div className={`relative grid size-10 shrink-0 place-items-center rounded-full transition ${done ? "brand-gradient text-primary-foreground" : "bg-secondary text-muted-foreground"} ${active ? "ring-4 ring-primary/20 animate-pulse" : ""}`}>
@@ -131,7 +132,8 @@ function TrackPage() {
                       </div>
                       <div className="pt-1.5">
                         <p className={`text-sm font-black ${done ? "text-foreground" : "text-muted-foreground"}`}>{step.label}</p>
-                        {active && <p className="text-xs text-muted-foreground">جارٍ تحديث الحالة...</p>}
+                        {hist && <p className="text-[11px] text-muted-foreground" dir="ltr">{new Date(hist.created_at).toLocaleString("ar-EG")}</p>}
+                        {active && !hist && <p className="text-xs text-muted-foreground">جارٍ تحديث الحالة...</p>}
                       </div>
                     </div>
                   );
