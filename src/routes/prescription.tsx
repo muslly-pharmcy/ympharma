@@ -67,30 +67,53 @@ function PrescriptionPage() {
       const folder = refId.toLowerCase();
       const uploadedUrls: string[] = [];
 
+      const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+      async function withRetry<T>(label: string, fn: () => Promise<T>, max = 3): Promise<T> {
+        let lastErr: unknown;
+        for (let attempt = 1; attempt <= max; attempt++) {
+          try { return await fn(); } catch (e) {
+            lastErr = e;
+            console.warn(`[${label}] attempt ${attempt} failed`, e);
+            if (attempt < max) await sleep(600 * attempt);
+          }
+        }
+        throw lastErr;
+      }
+
       for (let i = 0; i < files.length; i++) {
         const original = files[i].file;
         let f = original;
         try { f = await compressImage(original, { maxWidth: 1600, maxHeight: 1600, quality: 0.82 }); } catch { /* keep original */ }
         const ext = (f.name.split(".").pop() || "jpg").toLowerCase();
         const path = `${folder}/${i + 1}-${Date.now()}.${ext}`;
-        const { error } = await supabase.storage.from("prescriptions").upload(path, f, {
-          contentType: f.type || "image/jpeg",
-          upsert: false,
-        });
-        if (error) {
-          console.error("[storage.upload]", error);
-          toast.error("فشل رفع صورة الروشتة");
+        try {
+          await withRetry(`upload#${i + 1}`, async () => {
+            const { error } = await supabase.storage.from("prescriptions").upload(path, f, {
+              contentType: f.type || "image/jpeg",
+              upsert: false,
+            });
+            if (error) throw error;
+          });
+        } catch (e) {
+          console.error("[storage.upload]", e);
+          toast.error(`فشل رفع الصورة ${i + 1} بعد عدة محاولات`);
           setBusy(false);
           return;
         }
-        const { data: signed, error: sErr } = await supabase.storage.from("prescriptions").createSignedUrl(path, 60 * 60 * 24 * 30);
-        if (sErr || !signed?.signedUrl) {
-          console.error("[storage.signedUrl]", sErr);
+        let signedUrl = "";
+        try {
+          signedUrl = await withRetry(`sign#${i + 1}`, async () => {
+            const { data, error } = await supabase.storage.from("prescriptions").createSignedUrl(path, 60 * 60 * 24 * 30);
+            if (error || !data?.signedUrl) throw error || new Error("no signed url");
+            return data.signedUrl;
+          });
+        } catch (e) {
+          console.error("[storage.signedUrl]", e);
           toast.error("فشل إنشاء رابط الصورة");
           setBusy(false);
           return;
         }
-        uploadedUrls.push(signed.signedUrl);
+        uploadedUrls.push(signedUrl);
       }
 
       const customer = { name: name.trim(), phone: phone.trim(), address: address.trim(), notes: notes.trim() || undefined };
