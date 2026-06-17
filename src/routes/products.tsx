@@ -5,7 +5,7 @@ import { ProductCard } from "@/components/product-card";
 import { categories } from "@/lib/products";
 import { useMergedProducts } from "@/lib/use-merged-products";
 
-type Search = { cat?: string; q?: string; min?: number; max?: number; sort?: string };
+type Search = { cat?: string; q?: string; min?: number; max?: number; sort?: string; brands?: string };
 
 export const Route = createFileRoute("/products")({
   validateSearch: (s: Record<string, unknown>): Search => ({
@@ -14,11 +14,12 @@ export const Route = createFileRoute("/products")({
     min: typeof s.min === "number" ? s.min : undefined,
     max: typeof s.max === "number" ? s.max : undefined,
     sort: typeof s.sort === "string" ? s.sort : undefined,
+    brands: typeof s.brands === "string" ? s.brands : undefined,
   }),
   head: () => ({
     meta: [
       { title: "كل المنتجات — صيدلية المصلي" },
-      { name: "description", content: "تصفّح كل منتجات صيدلية المصلي مع بحث وتصفية حسب الفئة والسعر: أدوية الحكمة ونوفارتيس واليمنية المصرية، فيتامينات، أجهزة طبية وعناية." },
+      { name: "description", content: "تصفّح كل منتجات صيدلية المصلي مع بحث وتصفية حسب الفئة والماركة والسعر: أدوية الحكمة ونوفارتيس واليمنية المصرية وديرما للتجميل، فيتامينات، أجهزة طبية." },
       { property: "og:title", content: "كتالوج المنتجات — صيدلية المصلي" },
       { property: "og:description", content: "أدوية أصلية، فيتامينات ومكملات، أجهزة طبية ومستلزمات العناية بأسعار منافسة." },
       { property: "og:url", content: "https://muslly.com/products" },
@@ -28,30 +29,52 @@ export const Route = createFileRoute("/products")({
   component: ProductsPage,
 });
 
+// Featured brand chips (multi-select). All other brands still searchable via the search box.
+const BRAND_CHIPS: { id: string; label: string }[] = [
+  { id: "Hikma", label: "الحكمة" },
+  { id: "Novartis", label: "نوفارتيس" },
+  { id: "YEPCA", label: "اليمنية المصرية" },
+  { id: "Derma", label: "ديرما للتجميل" },
+  { id: "NOW Foods", label: "NOW Foods" },
+  { id: "Johnson's", label: "جونسون" },
+];
+
 function ProductsPage() {
-  const { cat, q, min, max, sort } = Route.useSearch();
+  const { cat, q, min, max, sort, brands } = Route.useSearch();
   const [query, setQuery] = useState(q ?? "");
   const [minP, setMinP] = useState<string>(min ? String(min) : "");
   const [maxP, setMaxP] = useState<string>(max ? String(max) : "");
   const [sortBy, setSortBy] = useState<string>(sort ?? "default");
+  const [selectedBrands, setSelectedBrands] = useState<string[]>(
+    brands ? brands.split(",").filter(Boolean) : [],
+  );
   const activeCat = cat ?? "all";
   const products = useMergedProducts();
+
+  function toggleBrand(b: string) {
+    setSelectedBrands((prev) => prev.includes(b) ? prev.filter((x) => x !== b) : [...prev, b]);
+  }
 
   const visible = useMemo(() => {
     const minN = Number(minP) || 0;
     const maxN = Number(maxP) || Infinity;
     const term = query.trim().toLowerCase();
-    let arr = products.filter(
-      (p) =>
-        (activeCat === "all" || p.cat === activeCat) &&
-        p.price >= minN && p.price <= maxN &&
-        (term === "" || p.name.toLowerCase().includes(term) || p.brand.toLowerCase().includes(term)),
-    );
+    let arr = products.filter((p) => {
+      if (activeCat !== "all" && p.cat !== activeCat) return false;
+      if (p.price < minN || p.price > maxN) return false;
+      if (selectedBrands.length && !selectedBrands.includes(p.brand)) return false;
+      if (term) {
+        // Partial match across name + brand (case-insensitive, accent-tolerant for Arabic)
+        const hay = (p.name + " " + p.brand).toLowerCase();
+        if (!hay.includes(term)) return false;
+      }
+      return true;
+    });
     if (sortBy === "price-asc") arr = [...arr].sort((a, b) => a.price - b.price);
     else if (sortBy === "price-desc") arr = [...arr].sort((a, b) => b.price - a.price);
     else if (sortBy === "name") arr = [...arr].sort((a, b) => a.name.localeCompare(b.name, "ar"));
     return arr;
-  }, [activeCat, query, products, minP, maxP, sortBy]);
+  }, [activeCat, query, products, minP, maxP, sortBy, selectedBrands]);
 
   const currentCatName = categories.find((c) => c.id === activeCat)?.name ?? "كل المنتجات";
 
@@ -74,6 +97,44 @@ function ProductsPage() {
           </div>
         </div>
 
+        {/* Search bar */}
+        <div className="rounded-2xl border border-border bg-card p-3">
+          <label className="text-[11px] font-bold text-muted-foreground">ابحث بالاسم أو الماركة (مطابقة جزئية)</label>
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="مثال: بانادول، فيتامين، ديرما، نوفارتيس…"
+            className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
+          />
+        </div>
+
+        {/* Brand multi-filter */}
+        <div className="rounded-2xl border border-border bg-card p-3">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-[11px] font-bold text-muted-foreground">الشركة المنتجة (اختر واحدة أو أكثر)</span>
+            {selectedBrands.length > 0 && (
+              <button onClick={() => setSelectedBrands([])} className="text-[11px] font-bold text-primary hover:underline">مسح</button>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {BRAND_CHIPS.map((b) => {
+              const active = selectedBrands.includes(b.id);
+              return (
+                <button
+                  key={b.id}
+                  onClick={() => toggleBrand(b.id)}
+                  className={`rounded-xl px-3 py-1.5 text-xs font-bold transition ${active ? "brand-gradient text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-accent"}`}
+                  aria-pressed={active}
+                >
+                  {active ? "✓ " : ""}{b.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Price + sort */}
         <div className="rounded-2xl border border-border bg-card p-3 grid gap-3 sm:grid-cols-4">
           <div>
             <label className="text-[11px] font-bold text-muted-foreground">السعر من (ر.ي)</label>
@@ -96,9 +157,9 @@ function ProductsPage() {
             </select>
           </div>
           <div className="flex items-end">
-            <button onClick={() => { setMinP(""); setMaxP(""); setSortBy("default"); setQuery(""); }}
+            <button onClick={() => { setMinP(""); setMaxP(""); setSortBy("default"); setQuery(""); setSelectedBrands([]); }}
               className="w-full rounded-xl bg-secondary px-3 py-2 text-sm font-bold text-secondary-foreground hover:bg-accent">
-              مسح الفلاتر
+              مسح جميع الفلاتر
             </button>
           </div>
         </div>
