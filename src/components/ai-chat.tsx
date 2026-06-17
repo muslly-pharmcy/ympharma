@@ -122,8 +122,12 @@ export function AiChat({
         </form>
       </div>
 
+      <p className="mt-3 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-900">
+        ⚠️ تنبيه طبي: هذه المعلومات إرشادية فقط ولا تغني عن استشارة الطبيب أو الصيدلي المختص. في حالات الطوارئ اتصل بالطوارئ فوراً.
+      </p>
+
       <a href={waHref} target="_blank" rel="noopener noreferrer"
-        className="mt-4 flex items-center justify-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-800 transition hover:bg-emerald-100">
+        className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-800 transition hover:bg-emerald-100">
         <MessageCircle className="size-5" />
         {hasConversation ? "أرسل ملخص المحادثة لصيدلي عبر واتساب" : "تحدّث مع صيدلي عبر واتساب"}
       </a>
