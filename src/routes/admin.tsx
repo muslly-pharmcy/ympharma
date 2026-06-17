@@ -193,6 +193,16 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "prescriptions" }, (p) => {
         setRxs((cur) => applyChange(cur, p) as Rx[]);
+        // Invalidate image cache when image_urls change on update/delete so
+        // stale signed URLs aren't reused after an Rx is edited.
+        if (p.eventType !== "INSERT") {
+          const row: any = p.new ?? p.old;
+          if (row?.id) {
+            void import("@/lib/image-cache").then(({ invalidateImagesMatching }) =>
+              invalidateImagesMatching(String(row.id).toLowerCase())
+            );
+          }
+        }
         if (p.eventType === "INSERT" && loadedRef.current) {
           setNewRx((n) => n + 1);
           setStatsKey((k) => k + 1);
@@ -238,15 +248,28 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
       void notifyCustomerCloud(prev, status);
     }
   }
-  async function setRxStatus(id: string, status: string) {
+  async function setRxStatus(id: string, status: string): Promise<void> {
     const prev = rxs.find((o) => o.id === id);
     const { error } = await supabase.from("prescriptions").update({ status }).eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) throw new Error(error.message);
     setRxs((p) => p.map((o) => (o.id === id ? { ...o, status } : o)));
     toast.success("تم تحديث الحالة");
     if (prev && prev.status !== status && ["confirmed", "shipped", "delivered", "cancelled"].includes(status)) {
       void notifyCustomerCloud(prev, status);
     }
+  }
+  async function archiveRx(id: string): Promise<void> {
+    const { error } = await supabase.from("prescriptions").update({ status: "archived" }).eq("id", id);
+    if (error) throw new Error(error.message);
+    setRxs((p) => p.map((o) => (o.id === id ? { ...o, status: "archived" } : o)));
+  }
+  async function deleteRx(id: string): Promise<void> {
+    const { error } = await supabase.from("prescriptions").delete().eq("id", id);
+    if (error) throw new Error(error.message);
+    setRxs((p) => p.filter((o) => o.id !== id));
+    // Drop any cached image URLs that belonged to this Rx.
+    const { invalidateImagesMatching } = await import("@/lib/image-cache");
+    invalidateImagesMatching(id.toLowerCase());
   }
 
   async function handlePromote() {
@@ -348,7 +371,7 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
       <main className="mx-auto max-w-7xl space-y-4 px-4 py-6">
         {(canOrders || canRx) && tab !== "team" && <AdminStats refreshKey={statsKey} />}
         {tab === "orders" && canOrders && <OrdersTab orders={filteredOrders} onStatus={setOrderStatus} loading={busy && orders.length === 0} error={loadError} onRetry={load} />}
-        {tab === "rx" && canRx && <PrescriptionsTab rxs={filteredRxs} onStatus={setRxStatus} loading={busy && rxs.length === 0} error={loadError} onRetry={load} />}
+        {tab === "rx" && canRx && <PrescriptionsTab rxs={filteredRxs} onStatus={setRxStatus} onDelete={deleteRx} onArchive={archiveRx} loading={busy && rxs.length === 0} error={loadError} onRetry={load} />}
         {tab === "team" && me?.isOwner && <StaffTab currentUserId={userId} />}
       </main>
 
