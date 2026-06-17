@@ -25,7 +25,7 @@ export const Route = createFileRoute("/ai-supplement")({
           </div>
           <p className="mt-3 flex items-start gap-2 rounded-xl bg-white/10 p-3 text-xs leading-relaxed ring-1 ring-white/20">
             <ShieldAlert className="mt-0.5 size-4 shrink-0" />
-            أخبرنا عن هدفك الصحي وحالتك العامة، ونرشّح لك المكمل الأنسب.
+            توصياتنا إرشادية ولا تغني عن استشارة الطبيب أو الصيدلي، خاصة للحوامل والمرضعات ومن يتناول أدوية مزمنة.
           </p>
         </header>
         <AiChat
