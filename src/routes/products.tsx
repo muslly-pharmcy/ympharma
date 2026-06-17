@@ -34,6 +34,7 @@ const BRAND_CHIPS: { id: string; label: string }[] = [
   { id: "Hikma", label: "الحكمة" },
   { id: "Novartis", label: "نوفارتيس" },
   { id: "YEPCA", label: "اليمنية المصرية" },
+  { id: "Derma Jordan", label: "ديرما الأردنية" },
   { id: "Derma", label: "ديرما للتجميل" },
   { id: "NOW Foods", label: "NOW Foods" },
   { id: "Johnson's", label: "جونسون" },
