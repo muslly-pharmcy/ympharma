@@ -21,8 +21,32 @@ export const Route = createFileRoute("/prescription")({
   component: PrescriptionPage,
 });
 
+type UploadStage = "idle" | "compressing" | "uploading" | "signing" | "done" | "error";
+type FileItem = { file: File; url: string; stage: UploadStage; error?: string };
+
+function stageLabel(s: UploadStage) {
+  switch (s) {
+    case "compressing": return "ضغط الصورة...";
+    case "uploading": return "رفع الصورة...";
+    case "signing": return "إنشاء الرابط...";
+    case "done": return "تم ✓";
+    case "error": return "فشل ✗";
+    default: return "بانتظار الرفع";
+  }
+}
+function stageProgress(s: UploadStage) {
+  switch (s) {
+    case "compressing": return 25;
+    case "uploading": return 60;
+    case "signing": return 85;
+    case "done": return 100;
+    case "error": return 100;
+    default: return 0;
+  }
+}
+
 function PrescriptionPage() {
-  const [files, setFiles] = useState<{ file: File; url: string }[]>([]);
+  const [files, setFiles] = useState<FileItem[]>([]);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
@@ -43,7 +67,7 @@ function PrescriptionPage() {
         const key = `${file.name}-${file.size}-${file.lastModified}`;
         if (seen.has(key)) continue;
         seen.add(key);
-        next.push({ file, url: URL.createObjectURL(file) });
+        next.push({ file, url: URL.createObjectURL(file), stage: "idle" });
       }
       return next;
     });
@@ -56,12 +80,17 @@ function PrescriptionPage() {
     });
   }
 
+  function updateStage(i: number, stage: UploadStage, error?: string) {
+    setFiles((prev) => prev.map((f, idx) => idx === i ? { ...f, stage, error } : f));
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (files.length === 0) return toast.error("الرجاء إرفاق صورة الروشتة");
     if (!name.trim() || !phone.trim() || !address.trim()) return toast.error("الرجاء تعبئة بياناتك");
 
     setBusy(true);
+    setFiles((prev) => prev.map((f) => ({ ...f, stage: "idle", error: undefined })));
     try {
       const refId = "RX-" + Date.now().toString(36).toUpperCase().slice(-6);
       const folder = refId.toLowerCase();
@@ -82,10 +111,12 @@ function PrescriptionPage() {
 
       for (let i = 0; i < files.length; i++) {
         const original = files[i].file;
+        updateStage(i, "compressing");
         let f = original;
         try { f = await compressImage(original, { maxWidth: 1600, maxHeight: 1600, quality: 0.82 }); } catch { /* keep original */ }
         const ext = (f.name.split(".").pop() || "jpg").toLowerCase();
         const path = `${folder}/${i + 1}-${Date.now()}.${ext}`;
+        updateStage(i, "uploading");
         try {
           await withRetry(`upload#${i + 1}`, async () => {
             const { error } = await supabase.storage.from("prescriptions").upload(path, f, {
@@ -94,12 +125,14 @@ function PrescriptionPage() {
             });
             if (error) throw error;
           });
-        } catch (e) {
+        } catch (e: any) {
           console.error("[storage.upload]", e);
+          updateStage(i, "error", e?.message || "فشل الرفع");
           toast.error(`فشل رفع الصورة ${i + 1} بعد عدة محاولات`);
           setBusy(false);
           return;
         }
+        updateStage(i, "signing");
         let signedUrl = "";
         try {
           signedUrl = await withRetry(`sign#${i + 1}`, async () => {
@@ -107,13 +140,15 @@ function PrescriptionPage() {
             if (error || !data?.signedUrl) throw error || new Error("no signed url");
             return data.signedUrl;
           });
-        } catch (e) {
+        } catch (e: any) {
           console.error("[storage.signedUrl]", e);
+          updateStage(i, "error", e?.message || "فشل التوقيع");
           toast.error("فشل إنشاء رابط الصورة");
           setBusy(false);
           return;
         }
         uploadedUrls.push(signedUrl);
+        updateStage(i, "done");
       }
 
       const customer = { name: name.trim(), phone: phone.trim(), address: address.trim(), notes: notes.trim() || undefined };
@@ -142,6 +177,10 @@ function PrescriptionPage() {
       setBusy(false);
     }
   }
+
+  const overallProgress = files.length === 0 ? 0
+    : Math.round(files.reduce((acc, f) => acc + stageProgress(f.stage), 0) / files.length);
+
 
   return (
     <div className="min-h-screen bg-background text-foreground">
