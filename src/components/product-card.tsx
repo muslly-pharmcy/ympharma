@@ -28,7 +28,7 @@ export function ProductCard({ product }: { product: Product }) {
   const [loaded, setLoaded] = useState(false);
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated">
-      <Link to="/products" search={{ cat: product.cat }} className="relative aspect-square overflow-hidden bg-secondary/60 block">
+      <Link to="/product/$id" params={{ id: String(product.id) }} className="relative aspect-square overflow-hidden bg-secondary/60 block">
         {!loaded && <Skeleton className="absolute inset-0 rounded-none" />}
         <img
           src={product.img}
