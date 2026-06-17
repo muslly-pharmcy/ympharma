@@ -86,6 +86,8 @@ function AdminSettings() {
         </section>
 
         <BackupSection />
+        <WhatsAppCloudSection />
+
       </main>
     </div>
   );
