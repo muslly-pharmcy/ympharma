@@ -53,6 +53,33 @@ export type Database = {
         }
         Relationships: []
       }
+      backups: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          orders_count: number
+          payload: Json
+          rx_count: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          orders_count?: number
+          payload: Json
+          rx_count?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          orders_count?: number
+          payload?: Json
+          rx_count?: number
+        }
+        Relationships: []
+      }
       offers: {
         Row: {
           created_at: string
@@ -304,6 +331,8 @@ export type Database = {
     Functions: {
       admin_stats: { Args: never; Returns: Json }
       bootstrap_owner: { Args: never; Returns: boolean }
+      create_backup: { Args: { _kind?: string }; Returns: string }
+      create_scheduled_backup: { Args: { _kind: string }; Returns: string }
       get_order_history_public: {
         Args: { _id: string }
         Returns: {
