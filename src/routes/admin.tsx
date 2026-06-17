@@ -361,6 +361,7 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
             <a href="/admin-settings" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">الإعدادات</a>
             {me?.isOwner && (
               <>
+                <a href="/admin-backups" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">النسخ الاحتياطية</a>
                 <a href="/admin-diagnostics" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">التشخيص</a>
                 <a href="/admin-logs" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">
                   سجل النشاط
