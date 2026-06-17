@@ -229,3 +229,58 @@ function parseCsv(text: string): string[][] {
   if (cur.length || row.length) { row.push(cur); rows.push(row); }
   return rows;
 }
+
+// Generate medicine catalog rows via Lovable AI (Gemini) for a given brand/company.
+export const importFromAI = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({
+    brand: z.string().trim().min(2).max(120),
+    category: z.string().trim().min(2).max(80).default("medicine"),
+    count: z.number().int().min(5).max(40).default(20),
+    replace: z.boolean().optional(),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertPerm(context.supabase, context.userId, "products");
+    const key = process.env.LOVABLE_API_KEY;
+    if (!key) throw new Error("LOVABLE_API_KEY غير مهيأ");
+    const gateway = createLovableAiGatewayProvider(key);
+    const prompt = `أنت مساعد صيدلية يمنية. أنشئ قائمة JSON صرفة (بدون أي شرح) تحتوي على ${data.count} منتجاً واقعياً تنتجه أو تسوّقه شركة "${data.brand}" ضمن فئة "${data.category}".
+الإخراج يجب أن يكون مصفوفة JSON فقط، كل عنصر بهذا الشكل بالضبط:
+{"name":"اسم المنتج بالعربية يتضمن التركيز والشكل الصيدلاني","price":السعر بالريال اليمني كرقم,"old_price":السعر القديم أو null,"description":"وصف مختصر بالعربية عن الاستخدام","badge":"وسم قصير أو null"}
+قواعد: الأسعار بالريال اليمني واقعية بين 200 و 50000. لا تكرر منتجات. لا تضف أي نص قبل أو بعد المصفوفة.`;
+
+    const { text } = await generateText({
+      model: gateway("google/gemini-2.5-flash"),
+      prompt,
+    });
+    // Extract JSON array
+    const m = text.match(/\[[\s\S]*\]/);
+    if (!m) throw new Error("لم يتم استلام JSON صالح من المساعد الذكي");
+    let arr: any[];
+    try { arr = JSON.parse(m[0]); } catch { throw new Error("تعذّر تحليل JSON من المساعد الذكي"); }
+    if (!Array.isArray(arr) || arr.length === 0) throw new Error("الرد فارغ");
+
+    const rows = arr
+      .filter((r) => r && typeof r.name === "string" && r.name.trim())
+      .slice(0, data.count)
+      .map((r) => ({
+        name: String(r.name).trim().slice(0, 300),
+        brand: data.brand,
+        price: Math.max(0, Number(r.price) || 0),
+        old_price: r.old_price ? Math.max(0, Number(r.old_price)) : null,
+        category: data.category,
+        image_url: null,
+        badge: r.badge ? String(r.badge).slice(0, 80) : null,
+        description: r.description ? String(r.description).slice(0, 2000) : null,
+        is_published: true,
+      }));
+    if (!rows.length) throw new Error("لم يُنتج المساعد أي عناصر صالحة");
+
+    if (data.replace) {
+      await context.supabase.from("products").delete().eq("brand", data.brand);
+    }
+    const { error, count } = await context.supabase
+      .from("products").insert(rows, { count: "exact" });
+    if (error) throw new Error(error.message);
+    return { inserted: count ?? rows.length, brand: data.brand };
+  });
