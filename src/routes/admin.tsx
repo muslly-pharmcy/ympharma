@@ -190,23 +190,10 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
 
   useEffect(() => { load(); }, [load]);
 
-  async function notifyCustomerCloud(o: { id: string; customer_name: string; customer_phone: string }, status: string) {
-    const t = toast.loading("جارٍ إرسال إشعار واتساب...");
-    try {
-      await sendWhatsAppOrderStatus({
-        data: {
-          orderId: o.id,
-          customerName: o.customer_name,
-          customerPhone: o.customer_phone,
-          status,
-        },
-      });
-      toast.success("تم إرسال إشعار واتساب للعميل", { id: t });
-    } catch (e: any) {
-      toast.error(`تعذّر الإرسال التلقائي: ${e?.message ?? e} — سنفتح واتساب يدوياً`, { id: t });
-      // Fallback to wa.me so the message still reaches the customer.
-      openWhatsApp(buildStatusMessage({ name: o.customer_name, orderId: o.id, status }), o.customer_phone);
-    }
+  function notifyCustomerCloud(o: { id: string; customer_name: string; customer_phone: string }, status: string) {
+    // إرسال مجاني عبر رابط wa.me — يفتح واتساب على رقم العميل برسالة جاهزة
+    openWhatsApp(buildStatusMessage({ name: o.customer_name, orderId: o.id, status }), o.customer_phone);
+    toast.success("تم فتح واتساب — اضغط إرسال لإكمال الإشعار");
   }
 
   async function setOrderStatus(id: string, status: string) {
