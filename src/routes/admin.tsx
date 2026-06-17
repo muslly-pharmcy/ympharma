@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SiteFooter } from "@/components/site-chrome";
 import { LayoutDashboard, LogOut, Package, FileText, MessageCircle, RefreshCw, Loader2, Lock, Filter, Users, Crown, Plus, Trash2, ShieldCheck } from "lucide-react";
 import { formatPrice } from "@/lib/products";
-import { openWhatsApp } from "@/lib/whatsapp";
+import { openWhatsApp, buildStatusMessage } from "@/lib/whatsapp";
 import { toast } from "sonner";
 import { bootstrapOwner, getMyRole, inviteStaff, listStaff, removeStaff, updateStaffPermissions } from "@/lib/staff.functions";
 
@@ -189,17 +189,29 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
   useEffect(() => { load(); }, [load]);
 
   async function setOrderStatus(id: string, status: string) {
+    const prev = orders.find((o) => o.id === id);
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
     if (error) return toast.error(error.message);
     setOrders((p) => p.map((o) => (o.id === id ? { ...o, status } : o)));
     toast.success("تم تحديث الحالة");
+    // Auto WhatsApp notification to the customer on meaningful transitions
+    if (prev && prev.status !== status && ["confirmed", "shipped", "delivered", "cancelled"].includes(status)) {
+      const msg = buildStatusMessage({ name: prev.customer_name, orderId: prev.id, status });
+      openWhatsApp(msg, prev.customer_phone);
+    }
   }
   async function setRxStatus(id: string, status: string) {
+    const prev = rxs.find((o) => o.id === id);
     const { error } = await supabase.from("prescriptions").update({ status }).eq("id", id);
     if (error) return toast.error(error.message);
     setRxs((p) => p.map((o) => (o.id === id ? { ...o, status } : o)));
     toast.success("تم تحديث الحالة");
+    if (prev && prev.status !== status && ["confirmed", "shipped", "delivered", "cancelled"].includes(status)) {
+      const msg = buildStatusMessage({ name: prev.customer_name, orderId: prev.id, status });
+      openWhatsApp(msg, prev.customer_phone);
+    }
   }
+
 
   async function handlePromote() {
     try {
@@ -338,10 +350,15 @@ function OrderCard({ order, onStatus }: { order: Order; onStatus: (id: string, s
           {STATUSES.map((s) => <option key={s.v} value={s.v}>{s.label}</option>)}
         </select>
         <button
-          onClick={() => openWhatsApp(`مرحبًا ${order.customer_name}، بخصوص طلبك ${order.id} من صيدلية المصلي:`)}
+          onClick={() => openWhatsApp(buildStatusMessage({ name: order.customer_name, orderId: order.id, status: "confirmed" }), order.customer_phone)}
+          className="flex items-center gap-1.5 rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-black text-white"
+        ><MessageCircle className="size-3.5" /> إشعار: جاهز/مؤكد</button>
+        <button
+          onClick={() => openWhatsApp(`مرحبًا ${order.customer_name}، بخصوص طلبك ${order.id} من صيدلية المصلي:`, order.customer_phone)}
           className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-black text-white"
         ><MessageCircle className="size-3.5" /> واتساب العميل</button>
       </div>
+
     </div>
   );
 }
@@ -376,9 +393,14 @@ function RxCard({ rx, onStatus }: { rx: Rx; onStatus: (id: string, s: string) =>
           {STATUSES.map((s) => <option key={s.v} value={s.v}>{s.label}</option>)}
         </select>
         <button
-          onClick={() => openWhatsApp(`مرحبًا ${rx.customer_name}، بخصوص روشتتك ${rx.id} من صيدلية المصلي:`)}
+          onClick={() => openWhatsApp(buildStatusMessage({ name: rx.customer_name, orderId: rx.id, status: "confirmed" }), rx.customer_phone)}
+          className="flex items-center gap-1.5 rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-black text-white"
+        ><MessageCircle className="size-3.5" /> إشعار: جاهز</button>
+        <button
+          onClick={() => openWhatsApp(`مرحبًا ${rx.customer_name}، بخصوص روشتتك ${rx.id} من صيدلية المصلي:`, rx.customer_phone)}
           className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-black text-white"
         ><MessageCircle className="size-3.5" /> واتساب العميل</button>
+
       </div>
     </div>
   );
