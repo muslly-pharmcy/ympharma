@@ -2,7 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, ArrowRight, KeyRound, Globe, Mail, FileSpreadsheet, HardDrive, CheckCircle2, DatabaseBackup, Download } from "lucide-react";
+import { Loader2, ArrowRight, KeyRound, Globe, Mail, FileSpreadsheet, HardDrive, CheckCircle2, DatabaseBackup, Download, MessageCircle, Send } from "lucide-react";
+import { testWhatsAppCloud } from "@/lib/whatsapp-test.functions";
+
 
 export const Route = createFileRoute("/admin-settings")({
   head: () => ({ meta: [{ title: "الإعدادات والتكاملات — صيدلية المصلي" }, { name: "robots", content: "noindex,nofollow" }] }),
