@@ -1,13 +1,14 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ChevronRight, Plus, Minus, ShoppingCart, Sparkles, Loader2, AlertTriangle, Pill, CheckCircle2 } from "lucide-react";
-import { useState } from "react";
+import { ChevronRight, Plus, Minus, ShoppingCart, Sparkles, Loader2, AlertTriangle, Pill, CheckCircle2, BookOpen, ChevronDown, RefreshCw, ShieldAlert } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { ProductCard } from "@/components/product-card";
 import { categories, formatPrice, getProductById, products } from "@/lib/products";
 import { useCart } from "@/lib/cart";
-import { getVitaminInfo } from "@/lib/vitamin-info.functions";
+import { getVitaminInfo, type VitaminInfo } from "@/lib/vitamin-info.functions";
+import { readCache, writeCache, cacheKey } from "@/lib/vitamin-cache";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/product/$id")({
@@ -105,7 +106,9 @@ function ProductDetail() {
           </div>
         </div>
 
-        {(p.cat === "vitamins" || p.cat === "now") && <VitaminAIInfo name={p.name} brand={p.brand} />}
+        {(p.cat === "vitamins" || p.cat === "now" || p.cat === "medicine" || p.cat === "herbal") && (
+          <VitaminAIInfo name={p.name} brand={p.brand} />
+        )}
 
         {related.length > 0 && (
           <section>
@@ -123,63 +126,150 @@ function ProductDetail() {
 
 function VitaminAIInfo({ name, brand }: { name: string; brand: string }) {
   const fetchInfo = useServerFn(getVitaminInfo);
-  const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ["vitamin-info", name, brand],
-    queryFn: () => fetchInfo({ data: { name, brand } }),
-    staleTime: 1000 * 60 * 60 * 24,
+  const key = cacheKey(name, brand);
+  const [open, setOpen] = useState(false);
+  const [initialData, setInitialData] = useState<VitaminInfo | null>(null);
+
+  // Hydrate from localStorage once per product key.
+  useEffect(() => {
+    setInitialData(readCache<VitaminInfo>(key));
+  }, [key]);
+
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
+    queryKey: ["vitamin-info", key],
+    queryFn: async () => {
+      const result = await fetchInfo({ data: { name, brand } });
+      writeCache(key, result);
+      return result;
+    },
+    enabled: open,
+    initialData: initialData ?? undefined,
+    staleTime: 1000 * 60 * 60 * 24 * 7, // 7 days
+    gcTime: 1000 * 60 * 60 * 24 * 7,
     retry: 1,
   });
 
+  // Log Gemini errors to console + toast so they surface in admin logs via
+  // the global window-error capture installed in main.tsx.
+  useEffect(() => {
+    if (isError) {
+      const msg = error instanceof Error ? error.message : "Gemini fetch failed";
+      console.error("[VitaminAIInfo]", { name, brand, msg });
+      toast.error("تعذّر جلب المعلومات الذكية", { description: msg });
+    }
+  }, [isError, error, name, brand]);
+
   return (
     <section className="rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/5 via-card to-card p-5 shadow-card">
-      <div className="mb-4 flex items-center gap-2">
-        <div className="brand-gradient grid size-9 place-items-center rounded-xl text-primary-foreground">
-          <Sparkles className="size-4" />
-        </div>
-        <div>
-          <h2 className="text-base font-black">معلومات تفصيلية بالذكاء الاصطناعي</h2>
-          <p className="text-[11px] text-muted-foreground">مولّدة بواسطة Gemini — استشر طبيبك دائماً</p>
-        </div>
-      </div>
-
-      {isLoading && (
-        <div className="flex items-center gap-2 py-6 text-sm text-muted-foreground">
-          <Loader2 className="size-4 animate-spin text-primary" />
-          جاري تجهيز المعلومات...
-        </div>
-      )}
-
-      {isError && (
-        <div className="flex items-center justify-between gap-3 rounded-xl bg-destructive/10 p-3 text-sm">
-          <span className="text-destructive">تعذّر جلب المعلومات</span>
-          <button onClick={() => refetch()} className="rounded-lg bg-destructive px-3 py-1.5 text-xs font-black text-destructive-foreground">إعادة المحاولة</button>
-        </div>
-      )}
-
-      {data && (
-        <div className="space-y-4">
-          <p className="rounded-xl bg-primary/10 p-3 text-sm font-bold leading-relaxed">{data.summary}</p>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <InfoBlock icon={<CheckCircle2 className="size-4 text-emerald-600" />} title="الفوائد" items={data.benefits} color="emerald" />
-            <InfoBlock icon={<Pill className="size-4 text-blue-600" />} title="الاستخدامات الأساسية" items={data.uses} color="blue" />
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between gap-3 text-right"
+        aria-expanded={open}
+      >
+        <div className="flex items-center gap-2">
+          <div className="brand-gradient grid size-9 place-items-center rounded-xl text-primary-foreground">
+            <Sparkles className="size-4" />
           </div>
-
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-            <h3 className="mb-1.5 flex items-center gap-1.5 text-sm font-black text-amber-800">
-              <Pill className="size-4" /> الجرعة العامة
-            </h3>
-            <p className="text-sm leading-relaxed text-amber-900">{data.dosage}</p>
+          <div>
+            <h2 className="text-base font-black">المهام الأساسية ومعلومات المنتج (AI)</h2>
+            <p className="text-[11px] text-muted-foreground">
+              {open ? "اضغط للإخفاء" : "اضغط لعرض الفوائد والاستخدامات والجرعة والتحذيرات"}
+            </p>
           </div>
+        </div>
+        <ChevronDown className={`size-5 text-muted-foreground transition ${open ? "rotate-180" : ""}`} />
+      </button>
 
-          <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
-            <h3 className="mb-2 flex items-center gap-1.5 text-sm font-black text-rose-800">
-              <AlertTriangle className="size-4" /> تحذيرات
-            </h3>
-            <ul className="space-y-1 text-sm text-rose-900">
-              {data.warnings.map((w, i) => <li key={i} className="flex gap-2"><span>•</span><span>{w}</span></li>)}
-            </ul>
-          </div>
+      {open && (
+        <div className="mt-4">
+          {(isLoading || (isFetching && !data)) && (
+            <div className="flex items-center gap-2 py-6 text-sm text-muted-foreground">
+              <Loader2 className="size-4 animate-spin text-primary" />
+              جاري تجهيز المعلومات من Gemini...
+            </div>
+          )}
+
+          {isError && !data && (
+            <div className="flex flex-col gap-2 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm">
+              <div className="flex items-center gap-2 font-bold text-destructive">
+                <AlertTriangle className="size-4" />
+                تعذّر جلب المعلومات الذكية
+              </div>
+              <p className="text-xs text-destructive/90">
+                {error instanceof Error ? error.message : "خطأ غير معروف"}
+              </p>
+              <button
+                onClick={() => refetch()}
+                className="mt-1 inline-flex items-center gap-1.5 self-start rounded-lg bg-destructive px-3 py-1.5 text-xs font-black text-destructive-foreground"
+              >
+                <RefreshCw className="size-3.5" /> إعادة المحاولة
+              </button>
+            </div>
+          )}
+
+          {data && (
+            <div className="space-y-4">
+              {/* Medical disclaimer banner */}
+              <div className="flex items-start gap-2 rounded-2xl border-2 border-amber-300 bg-amber-50 p-3">
+                <ShieldAlert className="mt-0.5 size-5 shrink-0 text-amber-700" />
+                <p className="text-[12px] font-bold leading-relaxed text-amber-900">
+                  {data.disclaimer || "هذه المعلومات مولّدة بالذكاء الاصطناعي للاسترشاد فقط، ولا تُغني عن استشارة الطبيب أو الصيدلي."}
+                </p>
+              </div>
+
+              <p className="rounded-xl bg-primary/10 p-3 text-sm font-bold leading-relaxed">{data.summary}</p>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <InfoBlock icon={<CheckCircle2 className="size-4 text-emerald-600" />} title="الفوائد" items={data.benefits} color="emerald" />
+                <InfoBlock icon={<Pill className="size-4 text-blue-600" />} title="الاستخدامات الأساسية" items={data.uses} color="blue" />
+              </div>
+
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                <h3 className="mb-1.5 flex items-center gap-1.5 text-sm font-black text-amber-800">
+                  <Pill className="size-4" /> الجرعة العامة (للبالغين)
+                </h3>
+                <p className="text-sm leading-relaxed text-amber-900">{data.dosage}</p>
+                <p className="mt-2 text-[11px] font-bold text-amber-700">
+                  ⚠️ الجرعة قد تختلف حسب الحالة والعمر — استشر الطبيب قبل الاستخدام.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
+                <h3 className="mb-2 flex items-center gap-1.5 text-sm font-black text-rose-800">
+                  <AlertTriangle className="size-4" /> تحذيرات وموانع الاستخدام
+                </h3>
+                <ul className="space-y-1 text-sm text-rose-900">
+                  {data.warnings.map((w, i) => <li key={i} className="flex gap-2"><span>•</span><span>{w}</span></li>)}
+                </ul>
+              </div>
+
+              {data.sources && data.sources.length > 0 && (
+                <div className="rounded-2xl border border-border bg-card p-3">
+                  <h3 className="mb-1.5 flex items-center gap-1.5 text-xs font-black text-muted-foreground">
+                    <BookOpen className="size-3.5" /> المصادر العلمية
+                  </h3>
+                  <ul className="flex flex-wrap gap-1.5">
+                    {data.sources.map((s, i) => (
+                      <li key={i} className="rounded-md bg-secondary px-2 py-0.5 text-[11px] font-bold text-secondary-foreground">
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between border-t border-border pt-2">
+                <p className="text-[10px] text-muted-foreground">مولّد بواسطة Gemini • محفوظ محلياً لمدة 7 أيام</p>
+                <button
+                  onClick={() => refetch()}
+                  disabled={isFetching}
+                  className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline disabled:opacity-50"
+                >
+                  <RefreshCw className={`size-3 ${isFetching ? "animate-spin" : ""}`} /> تحديث
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </section>
