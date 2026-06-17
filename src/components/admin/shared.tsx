@@ -27,6 +27,7 @@ export const STATUSES: { v: string; label: string; color: string }[] = [
   { v: "shipped", label: "في الطريق", color: "bg-purple-100 text-purple-700" },
   { v: "delivered", label: "تم التسليم", color: "bg-emerald-100 text-emerald-700" },
   { v: "cancelled", label: "ملغي", color: "bg-rose-100 text-rose-700" },
+  { v: "archived", label: "مؤرشف", color: "bg-slate-200 text-slate-700" },
 ];
 
 export function statusBadge(s: string) {
