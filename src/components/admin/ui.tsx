@@ -1,10 +1,37 @@
 import { Loader2, AlertCircle, RefreshCw, Search, ChevronRight, ChevronLeft } from "lucide-react";
 
-export function TabState({ loading, error, empty, onRetry, children }: {
+export function Skeleton({ className = "" }: { className?: string }) {
+  return <div className={`animate-pulse rounded-md bg-muted/60 ${className}`} />;
+}
+
+export function RxCardSkeleton() {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1 space-y-2">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-3 w-44" />
+          <Skeleton className="h-3 w-56" />
+        </div>
+        <Skeleton className="h-6 w-20 rounded-full" />
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="aspect-square w-full" />)}
+      </div>
+      <div className="mt-3 flex gap-2">
+        <Skeleton className="h-8 w-24" />
+        <Skeleton className="h-8 w-28" />
+      </div>
+    </div>
+  );
+}
+
+export function TabState({ loading, error, empty, onRetry, skeleton, children }: {
   loading?: boolean; error?: string | null; empty?: boolean;
-  onRetry?: () => void; children: React.ReactNode;
+  onRetry?: () => void; skeleton?: React.ReactNode; children: React.ReactNode;
 }) {
   if (loading) {
+    if (skeleton) return <>{skeleton}</>;
     return (
       <div className="grid place-items-center rounded-3xl border border-dashed border-border bg-card py-16">
         <Loader2 className="size-6 animate-spin text-primary" />

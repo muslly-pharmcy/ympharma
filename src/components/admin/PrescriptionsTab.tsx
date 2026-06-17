@@ -1,8 +1,15 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { MessageCircle } from "lucide-react";
 import { openWhatsApp, buildStatusMessage } from "@/lib/whatsapp";
 import { STATUSES, statusBadge, type Rx } from "./shared";
-import { TabState, SearchBar, Pagination, PAGE_SIZE } from "./ui";
+import { TabState, SearchBar, Pagination, PAGE_SIZE, RxCardSkeleton, Skeleton } from "./ui";
+
+function prefetchImage(url: string) {
+  if (typeof window === "undefined") return;
+  const img = new Image();
+  img.decoding = "async";
+  img.src = url;
+}
 
 export function PrescriptionsTab({ rxs, onStatus, loading, error, onRetry }: {
   rxs: Rx[]; onStatus: (id: string, s: string) => void;
@@ -25,10 +32,25 @@ export function PrescriptionsTab({ rxs, onStatus, loading, error, onRetry }: {
   const safePage = Math.min(page, pageCount);
   const slice = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
+  // Prefetch images of the NEXT page so navigation feels instant.
+  useEffect(() => {
+    if (safePage >= pageCount) return;
+    const next = filtered.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
+    const idle = (cb: () => void) =>
+      (window as any).requestIdleCallback ? (window as any).requestIdleCallback(cb) : setTimeout(cb, 200);
+    idle(() => next.forEach((r) => r.image_urls.forEach(prefetchImage)));
+  }, [filtered, safePage, pageCount]);
+
+  const skeleton = (
+    <div className="space-y-3">
+      {Array.from({ length: 4 }).map((_, i) => <RxCardSkeleton key={i} />)}
+    </div>
+  );
+
   return (
     <div className="space-y-3">
       <SearchBar value={q} onChange={(v) => { setQ(v); setPage(1); }} placeholder="ابحث برقم الروشتة، الاسم، أو الجوال..." />
-      <TabState loading={loading} error={error} empty={filtered.length === 0} onRetry={onRetry}>
+      <TabState loading={loading} error={error} empty={filtered.length === 0} onRetry={onRetry} skeleton={skeleton}>
         <div className="space-y-3">
           {slice.map((r) => <RxCard key={r.id} rx={r} onStatus={onStatus} />)}
         </div>
@@ -42,6 +64,8 @@ export function PrescriptionsTab({ rxs, onStatus, loading, error, onRetry }: {
 function RxCard({ rx, onStatus }: { rx: Rx; onStatus: (id: string, s: string) => void }) {
   const b = statusBadge(rx.status);
   const [zoom, setZoom] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState<Record<number, boolean>>({});
+
   return (
     <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -58,8 +82,23 @@ function RxCard({ rx, onStatus }: { rx: Rx; onStatus: (id: string, s: string) =>
       {rx.image_urls.length > 0 && (
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {rx.image_urls.map((u, i) => (
-            <button key={i} type="button" onClick={() => setZoom(u)} className="block overflow-hidden rounded-lg border border-border">
-              <img src={u} alt={`روشتة ${i + 1}`} loading="lazy" decoding="async" className="aspect-square w-full object-cover transition hover:scale-105" />
+            <button
+              key={i}
+              type="button"
+              onClick={() => setZoom(u)}
+              onMouseEnter={() => prefetchImage(u)}
+              onFocus={() => prefetchImage(u)}
+              className="relative block aspect-square overflow-hidden rounded-lg border border-border"
+            >
+              {!loaded[i] && <Skeleton className="absolute inset-0 rounded-none" />}
+              <img
+                src={u}
+                alt={`روشتة ${i + 1}`}
+                loading="lazy"
+                decoding="async"
+                onLoad={() => setLoaded((s) => ({ ...s, [i]: true }))}
+                className={`size-full object-cover transition hover:scale-105 ${loaded[i] ? "opacity-100" : "opacity-0"}`}
+              />
             </button>
           ))}
         </div>
