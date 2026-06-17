@@ -68,6 +68,8 @@ function applyChange<T extends { id: string }>(cur: T[], payload: { eventType: s
     return cur.filter((x) => x.id !== payload.old.id);
   }
   return cur;
+}
+
 
 function AdminPage() {
   const [session, setSession] = useState<{ userId: string; email: string } | null>(null);
