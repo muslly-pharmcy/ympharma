@@ -186,6 +186,21 @@ function ImportModal({ onClose, onDone }: { onClose: () => void; onDone: () => v
   const importSheet = useServerFn(importFromGoogleSheet);
   const importDrive = useServerFn(importFromGoogleDrive);
   const bulkInsert = useServerFn(bulkImportProducts);
+  const importAi = useServerFn(importFromAI);
+  const [aiBrand, setAiBrand] = useState("");
+  const [aiCategory, setAiCategory] = useState("medicine");
+  const [aiCount, setAiCount] = useState(20);
+
+  async function runAi() {
+    if (!aiBrand.trim()) return toast.error("اكتب اسم الشركة (مثل Hikma أو Derma)");
+    setBusy(true);
+    try {
+      const r = await importAi({ data: { brand: aiBrand.trim(), category: aiCategory, count: aiCount, replace } });
+      toast.success(`تم إنشاء واستيراد ${r.inserted} صنف للشركة ${r.brand}`);
+      onDone(); onClose();
+    } catch (e: any) { toast.error(String(e?.message ?? e)); }
+    finally { setBusy(false); }
+  }
 
   async function runSheet() {
     if (!sheetUrl.trim()) return toast.error("ألصق رابط Google Sheet");
