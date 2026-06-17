@@ -56,6 +56,21 @@ function statusBadge(s: string) {
   return STATUSES.find((x) => x.v === s) ?? { v: s, label: s, color: "bg-secondary text-foreground" };
 }
 
+function applyChange<T extends { id: string }>(cur: T[], payload: { eventType: string; new: any; old: any }): T[] {
+  if (payload.eventType === "INSERT") {
+    if (cur.some((x) => x.id === payload.new.id)) return cur;
+    return [payload.new as T, ...cur];
+  }
+  if (payload.eventType === "UPDATE") {
+    return cur.map((x) => (x.id === payload.new.id ? (payload.new as T) : x));
+  }
+  if (payload.eventType === "DELETE") {
+    return cur.filter((x) => x.id !== payload.old.id);
+  }
+  return cur;
+}
+
+
 function AdminPage() {
   const [session, setSession] = useState<{ userId: string; email: string } | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
@@ -190,6 +205,20 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
 
   useEffect(() => { load(); }, [load]);
 
+  // Realtime: live-update orders & prescriptions without manual refresh
+  useEffect(() => {
+    const channel = supabase
+      .channel("admin-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, (p) => {
+        setOrders((cur) => applyChange(cur, p) as Order[]);
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "prescriptions" }, (p) => {
+        setRxs((cur) => applyChange(cur, p) as Rx[]);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
   function notifyCustomerCloud(o: { id: string; customer_name: string; customer_phone: string }, status: string) {
     // إرسال مجاني عبر رابط wa.me — يفتح واتساب على رقم العميل برسالة جاهزة
     openWhatsApp(buildStatusMessage({ name: o.customer_name, orderId: o.id, status }), o.customer_phone);
@@ -267,9 +296,12 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
             <a href="/admin-offers" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">العروض</a>
             <a href="/admin-settings" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">الإعدادات</a>
             {me?.isOwner && (
-              <a href="/admin-logs" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">
-                سجل النشاط
-              </a>
+              <>
+                <a href="/admin-diagnostics" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">التشخيص</a>
+                <a href="/admin-logs" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">
+                  سجل النشاط
+                </a>
+              </>
             )}
             <button onClick={() => supabase.auth.signOut()} className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">
               <LogOut className="size-4" /> خروج
@@ -371,6 +403,7 @@ function OrderCard({ order, onStatus }: { order: Order; onStatus: (id: string, s
 
 function RxCard({ rx, onStatus }: { rx: Rx; onStatus: (id: string, s: string) => void }) {
   const b = statusBadge(rx.status);
+  const [zoom, setZoom] = useState<string | null>(null);
   return (
     <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -387,10 +420,39 @@ function RxCard({ rx, onStatus }: { rx: Rx; onStatus: (id: string, s: string) =>
       {rx.image_urls.length > 0 && (
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {rx.image_urls.map((u, i) => (
-            <a key={i} href={u} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-lg border border-border">
+            <button key={i} type="button" onClick={() => setZoom(u)} className="block overflow-hidden rounded-lg border border-border">
               <img src={u} alt={`روشتة ${i + 1}`} loading="lazy" decoding="async" className="aspect-square w-full object-cover transition hover:scale-105" />
-            </a>
+            </button>
           ))}
+        </div>
+      )}
+
+      {zoom && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setZoom(null)}
+          className="fixed inset-0 z-50 grid place-items-center bg-black/85 p-4 animate-in fade-in"
+        >
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setZoom(null); }}
+            aria-label="إغلاق"
+            className="absolute right-4 top-4 grid size-10 place-items-center rounded-full bg-white/15 text-white hover:bg-white/25"
+          >✕</button>
+          <img
+            src={zoom}
+            alt="عرض الروشتة بالحجم الكامل"
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-[90vh] max-w-[95vw] rounded-xl object-contain shadow-elevated"
+          />
+          <a
+            href={zoom}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-white/90 px-4 py-2 text-xs font-black text-foreground hover:bg-white"
+          >فتح الصورة الأصلية</a>
         </div>
       )}
 
