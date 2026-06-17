@@ -82,10 +82,65 @@ function AdminSettings() {
             💡 لاستيراد الأصناف من Google Sheet الآن، اذهب إلى <Link to="/admin-products" className="font-bold text-primary">إدارة الأصناف</Link> ← استيراد Excel/Sheets.
           </div>
         </section>
+
+        <BackupSection />
       </main>
     </div>
   );
 }
+
+function BackupSection() {
+  const [busy, setBusy] = useState(false);
+  async function downloadBackup() {
+    setBusy(true);
+    try {
+      const [orders, prescriptions, products, offers, activity_logs] = await Promise.all([
+        supabase.from("orders").select("*").order("created_at", { ascending: false }),
+        supabase.from("prescriptions").select("*").order("created_at", { ascending: false }),
+        supabase.from("products").select("*"),
+        supabase.from("offers").select("*"),
+        supabase.from("activity_logs").select("*").order("created_at", { ascending: false }).limit(1000),
+      ]);
+      const dump = {
+        meta: { app: "almusalli-pharmacy", exportedAt: new Date().toISOString(), version: 1 },
+        orders: orders.data ?? [],
+        prescriptions: prescriptions.data ?? [],
+        products: products.data ?? [],
+        offers: offers.data ?? [],
+        activity_logs: activity_logs.data ?? [],
+      };
+      const blob = new Blob([JSON.stringify(dump, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `almusalli-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("تم تنزيل النسخة الاحتياطية");
+    } catch (e: any) {
+      toast.error(String(e?.message ?? e));
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <section className="rounded-3xl border border-border bg-card p-6 shadow-card">
+      <div className="flex items-center gap-2">
+        <div className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><DatabaseBackup className="size-5" /></div>
+        <div>
+          <h2 className="text-base font-black">النسخة الاحتياطية</h2>
+          <p className="text-xs text-muted-foreground">تنزيل ملف JSON يحوي الطلبات والروشتات والأصناف والعروض وسجلات النشاط.</p>
+        </div>
+      </div>
+      <button onClick={downloadBackup} disabled={busy} className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-2.5 text-sm font-black text-white disabled:opacity-60">
+        {busy ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+        تنزيل نسخة احتياطية كاملة
+      </button>
+      <p className="mt-3 text-[11px] text-muted-foreground">احتفظ بالنسخ الاحتياطية في مكان آمن. يُنصح بالتنزيل أسبوعياً على الأقل.</p>
+    </section>
+  );
+}
+
 
 function IntegrationRow({ icon: Icon, title, desc, status }: { icon: any; title: string; desc: string; status: "connected" | "ready" | "optional" }) {
   const tone = status === "connected" ? "bg-emerald-100 text-emerald-700" : status === "ready" ? "bg-blue-100 text-blue-700" : "bg-secondary text-muted-foreground";
