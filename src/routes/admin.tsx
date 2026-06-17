@@ -8,6 +8,8 @@ import { formatPrice } from "@/lib/products";
 import { openWhatsApp, buildStatusMessage } from "@/lib/whatsapp";
 import { toast } from "sonner";
 import { bootstrapOwner, getMyRole, inviteStaff, listStaff, removeStaff, updateStaffPermissions } from "@/lib/staff.functions";
+import { sendWhatsAppOrderStatus } from "@/lib/whatsapp-cloud.functions";
+
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -188,16 +190,33 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
 
   useEffect(() => { load(); }, [load]);
 
+  async function notifyCustomerCloud(o: { id: string; customer_name: string; customer_phone: string }, status: string) {
+    const t = toast.loading("جارٍ إرسال إشعار واتساب...");
+    try {
+      await sendWhatsAppOrderStatus({
+        data: {
+          orderId: o.id,
+          customerName: o.customer_name,
+          customerPhone: o.customer_phone,
+          status,
+        },
+      });
+      toast.success("تم إرسال إشعار واتساب للعميل", { id: t });
+    } catch (e: any) {
+      toast.error(`تعذّر الإرسال التلقائي: ${e?.message ?? e} — سنفتح واتساب يدوياً`, { id: t });
+      // Fallback to wa.me so the message still reaches the customer.
+      openWhatsApp(buildStatusMessage({ name: o.customer_name, orderId: o.id, status }), o.customer_phone);
+    }
+  }
+
   async function setOrderStatus(id: string, status: string) {
     const prev = orders.find((o) => o.id === id);
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
     if (error) return toast.error(error.message);
     setOrders((p) => p.map((o) => (o.id === id ? { ...o, status } : o)));
     toast.success("تم تحديث الحالة");
-    // Auto WhatsApp notification to the customer on meaningful transitions
     if (prev && prev.status !== status && ["confirmed", "shipped", "delivered", "cancelled"].includes(status)) {
-      const msg = buildStatusMessage({ name: prev.customer_name, orderId: prev.id, status });
-      openWhatsApp(msg, prev.customer_phone);
+      void notifyCustomerCloud(prev, status);
     }
   }
   async function setRxStatus(id: string, status: string) {
@@ -207,10 +226,10 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
     setRxs((p) => p.map((o) => (o.id === id ? { ...o, status } : o)));
     toast.success("تم تحديث الحالة");
     if (prev && prev.status !== status && ["confirmed", "shipped", "delivered", "cancelled"].includes(status)) {
-      const msg = buildStatusMessage({ name: prev.customer_name, orderId: prev.id, status });
-      openWhatsApp(msg, prev.customer_phone);
+      void notifyCustomerCloud(prev, status);
     }
   }
+
 
 
   async function handlePromote() {
