@@ -1,13 +1,14 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ChevronRight, Plus, Minus, ShoppingCart, Sparkles, Loader2, AlertTriangle, Pill, CheckCircle2 } from "lucide-react";
-import { useState } from "react";
+import { ChevronRight, Plus, Minus, ShoppingCart, Sparkles, Loader2, AlertTriangle, Pill, CheckCircle2, BookOpen, ChevronDown, RefreshCw, ShieldAlert } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { ProductCard } from "@/components/product-card";
 import { categories, formatPrice, getProductById, products } from "@/lib/products";
 import { useCart } from "@/lib/cart";
-import { getVitaminInfo } from "@/lib/vitamin-info.functions";
+import { getVitaminInfo, type VitaminInfo } from "@/lib/vitamin-info.functions";
+import { readCache, writeCache, cacheKey } from "@/lib/vitamin-cache";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/product/$id")({
