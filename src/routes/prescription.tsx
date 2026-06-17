@@ -215,17 +215,52 @@ function PrescriptionPage() {
 
             {files.length > 0 && (
               <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                {files.map((f, i) => (
-                  <div key={i} className="group relative overflow-hidden rounded-xl border border-border animate-in zoom-in">
-                    <img src={f.url} alt={`صورة الروشتة الطبية المرفوعة ${i + 1}`} loading="lazy" decoding="async" className="aspect-square w-full object-cover" />
-                    <button type="button" aria-label={`حذف الصورة ${i + 1}`} onClick={() => removeFile(i)} className="absolute right-1 top-1 grid size-7 place-items-center rounded-full bg-black/60 text-white opacity-0 transition group-hover:opacity-100">
-                      <X className="size-4" />
-                    </button>
-                  </div>
-                ))}
+                {files.map((f, i) => {
+                  const pct = stageProgress(f.stage);
+                  const active = busy && f.stage !== "done" && f.stage !== "error";
+                  return (
+                    <div key={i} className="group relative overflow-hidden rounded-xl border border-border animate-in zoom-in">
+                      <img src={f.url} alt={`صورة الروشتة الطبية المرفوعة ${i + 1}`} loading="lazy" decoding="async"
+                        className={`aspect-square w-full object-cover transition ${active ? "opacity-60" : "opacity-100"}`} />
+                      {active && <div className="absolute inset-0 animate-pulse bg-black/10" />}
+                      {f.stage !== "idle" && (
+                        <div className="absolute inset-x-0 bottom-0 bg-black/60 px-2 py-1.5 text-[10px] font-black text-white">
+                          <div className="flex items-center justify-between">
+                            <span>{stageLabel(f.stage)}</span>
+                            <span>{pct}%</span>
+                          </div>
+                          <div className="mt-1 h-1 overflow-hidden rounded-full bg-white/25">
+                            <div
+                              className={`h-full transition-all ${f.stage === "error" ? "bg-rose-400" : f.stage === "done" ? "bg-emerald-400" : "bg-primary"}`}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                      {!busy && (
+                        <button type="button" aria-label={`حذف الصورة ${i + 1}`} onClick={() => removeFile(i)}
+                          className="absolute right-1 top-1 grid size-7 place-items-center rounded-full bg-black/60 text-white opacity-0 transition group-hover:opacity-100">
+                          <X className="size-4" />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
+
+          {busy && files.length > 0 && (
+            <div className="rounded-xl border border-primary/30 bg-primary/5 p-3">
+              <div className="flex items-center justify-between text-xs font-black text-primary-deep">
+                <span>جارٍ رفع {files.length} صورة...</span>
+                <span>{overallProgress}%</span>
+              </div>
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-primary/15">
+                <div className="h-full bg-primary transition-all" style={{ width: `${overallProgress}%` }} />
+              </div>
+            </div>
+          )}
 
           <div className="grid gap-2 sm:grid-cols-2">
             <input required value={name} onChange={(e) => setName(e.target.value)} placeholder="الاسم الكامل" className="rounded-xl border border-border bg-secondary/40 px-3 py-2.5 text-sm outline-none focus:border-primary" />
