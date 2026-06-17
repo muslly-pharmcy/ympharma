@@ -100,29 +100,34 @@ export function CartProvider({ children }: { children: ReactNode }) {
         customer,
       };
 
-      // Save to cloud (best-effort; UX continues even if it fails)
-      try {
-        const { error } = await supabase.from("orders").insert({
-          id,
-          customer_name: customer.name,
-          customer_phone: customer.phone,
-          customer_address: customer.address,
-          notes: customer.notes ?? null,
-          total,
-          status: "pending",
-          items: orderItems as never,
-        });
-        if (error) console.error("[orders.insert]", error);
-      } catch (e) {
-        console.error("[orders.insert] network", e);
-      }
-
       setOrders((prev) => [order, ...prev]);
       setItems([]);
+
+      // Save to cloud in background (fire-and-forget) so we don't break the
+      // user-gesture chain needed for window.open(whatsapp) on mobile browsers.
+      void (async () => {
+        try {
+          const { error } = await supabase.from("orders").insert({
+            id,
+            customer_name: customer.name,
+            customer_phone: customer.phone,
+            customer_address: customer.address,
+            notes: customer.notes ?? null,
+            total,
+            status: "pending",
+            items: orderItems as never,
+          });
+          if (error) console.error("[orders.insert]", error);
+        } catch (e) {
+          console.error("[orders.insert] network", e);
+        }
+      })();
+
       return order;
     },
     [detailed, total],
   );
+
 
   const findOrder = useCallback((id: string) => orders.find((o) => o.id.toLowerCase() === id.toLowerCase()), [orders]);
 
