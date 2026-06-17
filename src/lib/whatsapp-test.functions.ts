@@ -61,6 +61,7 @@ export const testWhatsAppCloud = createServerFn({ method: "POST" })
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
-    return { ok: res.ok, httpStatus: res.status, response: json, config };
+    const json = await res.json().catch(() => ({} as any));
+    return { ok: res.ok, httpStatus: res.status, response: JSON.stringify(json), config };
   });
+
