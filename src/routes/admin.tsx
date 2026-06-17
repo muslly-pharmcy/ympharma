@@ -190,6 +190,20 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
 
   useEffect(() => { load(); }, [load]);
 
+  // Realtime: live-update orders & prescriptions without manual refresh
+  useEffect(() => {
+    const channel = supabase
+      .channel("admin-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, (p) => {
+        setOrders((cur) => applyChange(cur, p) as Order[]);
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "prescriptions" }, (p) => {
+        setRxs((cur) => applyChange(cur, p) as Rx[]);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
   function notifyCustomerCloud(o: { id: string; customer_name: string; customer_phone: string }, status: string) {
     // إرسال مجاني عبر رابط wa.me — يفتح واتساب على رقم العميل برسالة جاهزة
     openWhatsApp(buildStatusMessage({ name: o.customer_name, orderId: o.id, status }), o.customer_phone);
