@@ -400,6 +400,7 @@ function OrderCard({ order, onStatus }: { order: Order; onStatus: (id: string, s
 
 function RxCard({ rx, onStatus }: { rx: Rx; onStatus: (id: string, s: string) => void }) {
   const b = statusBadge(rx.status);
+  const [zoom, setZoom] = useState<string | null>(null);
   return (
     <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
       <div className="flex flex-wrap items-start justify-between gap-3">
