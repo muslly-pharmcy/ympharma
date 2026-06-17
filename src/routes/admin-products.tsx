@@ -258,6 +258,22 @@ function ImportModal({ onClose, onDone }: { onClose: () => void; onDone: () => v
           <a href="https://docs.google.com/spreadsheets/create" target="_blank" rel="noopener" className="rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">+ شيت جديد في Google</a>
         </div>
 
+        <div className="space-y-2 rounded-2xl border-2 border-emerald-400/50 bg-gradient-to-br from-emerald-50 to-sky-50 p-4">
+          <div className="flex items-center gap-2 text-sm font-black text-emerald-700"><Sparkles className="size-4" /> توليد تلقائي بالذكاء الاصطناعي (Gemini)</div>
+          <p className="text-xs text-muted-foreground">اكتب اسم الشركة وعدد الأصناف، وسيقوم المساعد بإنشاء قائمة منتجات واقعية بالأسعار اليمنية وحفظها في قاعدة البيانات.</p>
+          <div className="grid gap-2 sm:grid-cols-3">
+            <input value={aiBrand} onChange={(e) => setAiBrand(e.target.value)} placeholder="اسم الشركة (مثل: Hikma)" className="rounded-xl border border-border bg-card px-3 py-2 text-xs outline-none" />
+            <select value={aiCategory} onChange={(e) => setAiCategory(e.target.value)} className="rounded-xl border border-border bg-card px-3 py-2 text-xs outline-none">
+              {["medicine","vitamins","cosmetics","kids","devices","herbal","now"].map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <input type="number" min={5} max={40} value={aiCount} onChange={(e) => setAiCount(Number(e.target.value) || 20)} placeholder="عدد المنتجات" className="rounded-xl border border-border bg-card px-3 py-2 text-xs outline-none" />
+          </div>
+          <button onClick={runAi} disabled={busy} className="brand-gradient inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-black text-primary-foreground disabled:opacity-50">
+            {busy ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />} توليد واستيراد
+          </button>
+        </div>
+
+
         <div className="space-y-2 rounded-2xl border border-border bg-secondary/30 p-4">
           <div className="flex items-center gap-2 text-sm font-black"><LinkIcon className="size-4" /> Google Sheets (CSV عام)</div>
           <p className="text-xs text-muted-foreground">شارك الشيت "أي شخص لديه الرابط" ثم ألصق الرابط:</p>
