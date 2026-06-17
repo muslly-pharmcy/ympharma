@@ -142,6 +142,11 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  useEffect(() => {
+    // Install the client-side error logger once on mount (browser only).
+    void import("../lib/client-error-logger").then((m) => m.installClientErrorLogger());
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
@@ -153,3 +158,4 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
+
