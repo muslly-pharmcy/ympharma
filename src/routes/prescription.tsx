@@ -32,8 +32,20 @@ function PrescriptionPage() {
 
   function handleFiles(list: FileList | null) {
     if (!list) return;
-    const arr = Array.from(list).slice(0, 5).map((file) => ({ file, url: URL.createObjectURL(file) }));
-    setFiles((prev) => [...prev, ...arr].slice(0, 5));
+    setFiles((prev) => {
+      const seen = new Set(prev.map((p) => `${p.file.name}-${p.file.size}-${p.file.lastModified}`));
+      const next = [...prev];
+      for (const file of Array.from(list)) {
+        if (next.length >= 5) break;
+        if (!file.type.startsWith("image/")) { toast.error("يسمح بالصور فقط"); continue; }
+        if (file.size > 10 * 1024 * 1024) { toast.error(`${file.name}: الحجم أكبر من 10MB`); continue; }
+        const key = `${file.name}-${file.size}-${file.lastModified}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        next.push({ file, url: URL.createObjectURL(file) });
+      }
+      return next;
+    });
   }
 
   function removeFile(i: number) {
@@ -68,9 +80,14 @@ function PrescriptionPage() {
           setBusy(false);
           return;
         }
-        // Signed URL valid 30 days so admin (or WhatsApp recipient) can open it.
-        const { data: signed } = await supabase.storage.from("prescriptions").createSignedUrl(path, 60 * 60 * 24 * 30);
-        if (signed?.signedUrl) uploadedUrls.push(signed.signedUrl);
+        const { data: signed, error: sErr } = await supabase.storage.from("prescriptions").createSignedUrl(path, 60 * 60 * 24 * 30);
+        if (sErr || !signed?.signedUrl) {
+          console.error("[storage.signedUrl]", sErr);
+          toast.error("فشل إنشاء رابط الصورة");
+          setBusy(false);
+          return;
+        }
+        uploadedUrls.push(signed.signedUrl);
       }
 
       const customer = { name: name.trim(), phone: phone.trim(), address: address.trim(), notes: notes.trim() || undefined };
@@ -84,7 +101,12 @@ function PrescriptionPage() {
         image_urls: uploadedUrls,
         status: "pending",
       });
-      if (insErr) console.error("[prescriptions.insert]", insErr);
+      if (insErr) {
+        console.error("[prescriptions.insert]", insErr);
+        toast.error("فشل حفظ الطلب، حاول مجدداً");
+        setBusy(false);
+        return;
+      }
 
       const msg = buildPrescriptionMessage({ refId, imageUrls: uploadedUrls, customer });
       openWhatsApp(msg);

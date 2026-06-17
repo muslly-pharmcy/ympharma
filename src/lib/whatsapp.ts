@@ -18,7 +18,9 @@ export function waLink(message: string, phone?: string) {
 
 export function openWhatsApp(message: string, phone?: string) {
   if (typeof window === "undefined") return;
-  window.open(waLink(message, phone), "_blank", "noopener,noreferrer");
+  const url = waLink(message, phone);
+  const popup = window.open(url, "_blank", "noopener,noreferrer");
+  if (!popup) window.location.href = url;
 }
 
 /** Build a localized status-change message to send to the customer. */
