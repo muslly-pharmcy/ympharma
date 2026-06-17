@@ -1,11 +1,42 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { MessageCircle } from "lucide-react";
 import { openWhatsApp, buildStatusMessage } from "@/lib/whatsapp";
-import { STATUSES, statusBadge, Empty, type Rx } from "./shared";
+import { STATUSES, statusBadge, type Rx } from "./shared";
+import { TabState, SearchBar, Pagination, PAGE_SIZE } from "./ui";
 
-export function PrescriptionsTab({ rxs, onStatus }: { rxs: Rx[]; onStatus: (id: string, s: string) => void }) {
-  if (rxs.length === 0) return <Empty text="لا توجد روشتات" />;
-  return <>{rxs.map((r) => <RxCard key={r.id} rx={r} onStatus={onStatus} />)}</>;
+export function PrescriptionsTab({ rxs, onStatus, loading, error, onRetry }: {
+  rxs: Rx[]; onStatus: (id: string, s: string) => void;
+  loading?: boolean; error?: string | null; onRetry?: () => void;
+}) {
+  const [q, setQ] = useState("");
+  const [page, setPage] = useState(1);
+
+  const filtered = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    if (!needle) return rxs;
+    return rxs.filter((r) =>
+      r.id.toLowerCase().includes(needle) ||
+      r.customer_name.toLowerCase().includes(needle) ||
+      r.customer_phone.includes(needle)
+    );
+  }, [rxs, q]);
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, pageCount);
+  const slice = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  return (
+    <div className="space-y-3">
+      <SearchBar value={q} onChange={(v) => { setQ(v); setPage(1); }} placeholder="ابحث برقم الروشتة، الاسم، أو الجوال..." />
+      <TabState loading={loading} error={error} empty={filtered.length === 0} onRetry={onRetry}>
+        <div className="space-y-3">
+          {slice.map((r) => <RxCard key={r.id} rx={r} onStatus={onStatus} />)}
+        </div>
+        <Pagination page={safePage} pageCount={pageCount} onChange={setPage} />
+        <p className="text-center text-[11px] text-muted-foreground">إجمالي {filtered.length} روشتة</p>
+      </TabState>
+    </div>
+  );
 }
 
 function RxCard({ rx, onStatus }: { rx: Rx; onStatus: (id: string, s: string) => void }) {

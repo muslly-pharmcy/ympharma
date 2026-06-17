@@ -1,11 +1,43 @@
+import { useState, useMemo } from "react";
 import { MessageCircle } from "lucide-react";
 import { formatPrice } from "@/lib/products";
 import { openWhatsApp, buildStatusMessage } from "@/lib/whatsapp";
-import { STATUSES, statusBadge, Empty, type Order } from "./shared";
+import { STATUSES, statusBadge, type Order } from "./shared";
+import { TabState, SearchBar, Pagination, PAGE_SIZE } from "./ui";
 
-export function OrdersTab({ orders, onStatus }: { orders: Order[]; onStatus: (id: string, s: string) => void }) {
-  if (orders.length === 0) return <Empty text="لا توجد طلبات" />;
-  return <>{orders.map((o) => <OrderCard key={o.id} order={o} onStatus={onStatus} />)}</>;
+export function OrdersTab({ orders, onStatus, loading, error, onRetry }: {
+  orders: Order[]; onStatus: (id: string, s: string) => void;
+  loading?: boolean; error?: string | null; onRetry?: () => void;
+}) {
+  const [q, setQ] = useState("");
+  const [page, setPage] = useState(1);
+
+  const filtered = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    if (!needle) return orders;
+    return orders.filter((o) =>
+      o.id.toLowerCase().includes(needle) ||
+      o.customer_name.toLowerCase().includes(needle) ||
+      o.customer_phone.includes(needle)
+    );
+  }, [orders, q]);
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, pageCount);
+  const slice = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  return (
+    <div className="space-y-3">
+      <SearchBar value={q} onChange={(v) => { setQ(v); setPage(1); }} placeholder="ابحث برقم الطلب، الاسم، أو الجوال..." />
+      <TabState loading={loading} error={error} empty={filtered.length === 0} onRetry={onRetry}>
+        <div className="space-y-3">
+          {slice.map((o) => <OrderCard key={o.id} order={o} onStatus={onStatus} />)}
+        </div>
+        <Pagination page={safePage} pageCount={pageCount} onChange={setPage} />
+        <p className="text-center text-[11px] text-muted-foreground">إجمالي {filtered.length} طلب</p>
+      </TabState>
+    </div>
+  );
 }
 
 function OrderCard({ order, onStatus }: { order: Order; onStatus: (id: string, s: string) => void }) {

@@ -132,6 +132,7 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
   const [rxs, setRxs] = useState<Rx[]>([]);
   const [filter, setFilter] = useState<string>("all");
   const [busy, setBusy] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [me, setMe] = useState<{ isOwner: boolean; isAdmin: boolean; permissions: string[] } | null>(null);
   const [newOrders, setNewOrders] = useState(0);
   const [newRx, setNewRx] = useState(0);
@@ -151,15 +152,25 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
 
   const load = useCallback(async () => {
     setBusy(true);
-    const [{ data: o }, { data: r }] = await Promise.all([
-      supabase.from("orders").select("*").order("created_at", { ascending: false }),
-      supabase.from("prescriptions").select("*").order("created_at", { ascending: false }),
-    ]);
-    setOrders((o as Order[]) ?? []);
-    setRxs((r as Rx[]) ?? []);
-    setBusy(false);
-    setStatsKey((k) => k + 1);
-    loadedRef.current = true;
+    setLoadError(null);
+    try {
+      const [{ data: o, error: oe }, { data: r, error: re }] = await Promise.all([
+        supabase.from("orders").select("*").order("created_at", { ascending: false }),
+        supabase.from("prescriptions").select("*").order("created_at", { ascending: false }),
+      ]);
+      if (oe) throw oe;
+      if (re) throw re;
+      setOrders((o as Order[]) ?? []);
+      setRxs((r as Rx[]) ?? []);
+      setStatsKey((k) => k + 1);
+      loadedRef.current = true;
+    } catch (e: any) {
+      const msg = String(e?.message ?? e);
+      setLoadError(msg);
+      toast.error(msg);
+    } finally {
+      setBusy(false);
+    }
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -336,8 +347,8 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
 
       <main className="mx-auto max-w-7xl space-y-4 px-4 py-6">
         {(canOrders || canRx) && tab !== "team" && <AdminStats refreshKey={statsKey} />}
-        {tab === "orders" && canOrders && <OrdersTab orders={filteredOrders} onStatus={setOrderStatus} />}
-        {tab === "rx" && canRx && <PrescriptionsTab rxs={filteredRxs} onStatus={setRxStatus} />}
+        {tab === "orders" && canOrders && <OrdersTab orders={filteredOrders} onStatus={setOrderStatus} loading={busy && orders.length === 0} error={loadError} onRetry={load} />}
+        {tab === "rx" && canRx && <PrescriptionsTab rxs={filteredRxs} onStatus={setRxStatus} loading={busy && rxs.length === 0} error={loadError} onRetry={load} />}
         {tab === "team" && me?.isOwner && <StaffTab currentUserId={userId} />}
       </main>
 
