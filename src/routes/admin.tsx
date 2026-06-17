@@ -187,6 +187,14 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
   const [filter, setFilter] = useState<string>("all");
   const [busy, setBusy] = useState(false);
   const [me, setMe] = useState<{ isOwner: boolean; isAdmin: boolean; permissions: string[] } | null>(null);
+  const [newOrders, setNewOrders] = useState(0);
+  const [newRx, setNewRx] = useState(0);
+  const [soundOn, setSoundOn] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    return localStorage.getItem("admin-sound") !== "off";
+  });
+  const [statsKey, setStatsKey] = useState(0);
+  const loadedRef = useRef(false);
 
   const fetchMyRole = useServerFn(getMyRole);
   const promote = useServerFn(bootstrapOwner);
@@ -204,23 +212,73 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
     setOrders((o as Order[]) ?? []);
     setRxs((r as Rx[]) ?? []);
     setBusy(false);
+    setStatsKey((k) => k + 1);
+    loadedRef.current = true;
   }, []);
 
   useEffect(() => { load(); }, [load]);
 
-  // Realtime: live-update orders & prescriptions without manual refresh
+  useEffect(() => {
+    localStorage.setItem("admin-sound", soundOn ? "on" : "off");
+  }, [soundOn]);
+
+  // Realtime: live-update + sound + badge for new inserts
   useEffect(() => {
     const channel = supabase
       .channel("admin-live")
       .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, (p) => {
         setOrders((cur) => applyChange(cur, p) as Order[]);
+        if (p.eventType === "INSERT" && loadedRef.current) {
+          setNewOrders((n) => n + 1);
+          setStatsKey((k) => k + 1);
+          if (soundOn) playNotificationBeep();
+          toast.success(`طلب جديد: ${(p.new as Order).customer_name}`);
+        }
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "prescriptions" }, (p) => {
         setRxs((cur) => applyChange(cur, p) as Rx[]);
+        if (p.eventType === "INSERT" && loadedRef.current) {
+          setNewRx((n) => n + 1);
+          setStatsKey((k) => k + 1);
+          if (soundOn) playNotificationBeep();
+          toast.success(`روشتة جديدة: ${(p.new as Rx).customer_name}`);
+        }
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, []);
+  }, [soundOn]);
+
+  function exportOrdersCSV() {
+    const rows = orders.map((o) => [
+      o.id,
+      new Date(o.created_at).toLocaleString("ar-EG"),
+      o.customer_name,
+      o.customer_phone,
+      o.customer_address,
+      o.status,
+      o.total,
+      (o.items ?? []).map((i) => `${i.name} ×${i.qty}`).join(" | "),
+      o.notes ?? "",
+    ]);
+    downloadCSV(`orders-${new Date().toISOString().slice(0,10)}.csv`,
+      ["رقم الطلب","التاريخ","الاسم","الجوال","العنوان","الحالة","الإجمالي","المنتجات","ملاحظات"], rows);
+    toast.success("تم تصدير الطلبات");
+  }
+  function exportRxCSV() {
+    const rows = rxs.map((r) => [
+      r.id,
+      new Date(r.created_at).toLocaleString("ar-EG"),
+      r.customer_name,
+      r.customer_phone,
+      r.customer_address,
+      r.status,
+      (r.image_urls ?? []).join(" | "),
+      r.notes ?? "",
+    ]);
+    downloadCSV(`prescriptions-${new Date().toISOString().slice(0,10)}.csv`,
+      ["رقم","التاريخ","الاسم","الجوال","العنوان","الحالة","الصور","ملاحظات"], rows);
+    toast.success("تم تصدير الروشتات");
+  }
 
   function notifyCustomerCloud(o: { id: string; customer_name: string; customer_phone: string }, status: string) {
     // إرسال مجاني عبر رابط wa.me — يفتح واتساب على رقم العميل برسالة جاهزة
