@@ -1,15 +1,10 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { MessageCircle } from "lucide-react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { openWhatsApp, buildStatusMessage } from "@/lib/whatsapp";
 import { STATUSES, statusBadge, type Rx } from "./shared";
 import { TabState, SearchBar, Pagination, PAGE_SIZE, RxCardSkeleton, Skeleton } from "./ui";
-
-function prefetchImage(url: string) {
-  if (typeof window === "undefined") return;
-  const img = new Image();
-  img.decoding = "async";
-  img.src = url;
-}
+import { fetchImageCached, getCachedImage, prefetchImageCached } from "@/lib/image-cache";
 
 export function PrescriptionsTab({ rxs, onStatus, loading, error, onRetry }: {
   rxs: Rx[]; onStatus: (id: string, s: string) => void;
@@ -38,8 +33,18 @@ export function PrescriptionsTab({ rxs, onStatus, loading, error, onRetry }: {
     const next = filtered.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
     const idle = (cb: () => void) =>
       (window as any).requestIdleCallback ? (window as any).requestIdleCallback(cb) : setTimeout(cb, 200);
-    idle(() => next.forEach((r) => r.image_urls.forEach(prefetchImage)));
+    idle(() => next.forEach((r) => r.image_urls.forEach(prefetchImageCached)));
   }, [filtered, safePage, pageCount]);
+
+  // --- Virtualization ---
+  const parentRef = useRef<HTMLDivElement>(null);
+  const virtualizer = useVirtualizer({
+    count: slice.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 280,
+    overscan: 4,
+    measureElement: (el) => el.getBoundingClientRect().height,
+  });
 
   const skeleton = (
     <div className="space-y-3">
@@ -47,13 +52,36 @@ export function PrescriptionsTab({ rxs, onStatus, loading, error, onRetry }: {
     </div>
   );
 
+  // Virtualize only when there are enough rows to matter.
+  const useVirtual = slice.length > 6;
+
   return (
     <div className="space-y-3">
       <SearchBar value={q} onChange={(v) => { setQ(v); setPage(1); }} placeholder="ابحث برقم الروشتة، الاسم، أو الجوال..." />
       <TabState loading={loading} error={error} empty={filtered.length === 0} onRetry={onRetry} skeleton={skeleton}>
-        <div className="space-y-3">
-          {slice.map((r) => <RxCard key={r.id} rx={r} onStatus={onStatus} />)}
-        </div>
+        {useVirtual ? (
+          <div ref={parentRef} className="max-h-[75vh] overflow-auto rounded-xl" style={{ contain: "strict" }}>
+            <div style={{ height: virtualizer.getTotalSize(), position: "relative", width: "100%" }}>
+              {virtualizer.getVirtualItems().map((vi) => {
+                const r = slice[vi.index];
+                return (
+                  <div
+                    key={r.id}
+                    data-index={vi.index}
+                    ref={virtualizer.measureElement}
+                    style={{ position: "absolute", top: 0, left: 0, width: "100%", transform: `translateY(${vi.start}px)`, paddingBottom: 12 }}
+                  >
+                    <RxCard rx={r} onStatus={onStatus} />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {slice.map((r) => <RxCard key={r.id} rx={r} onStatus={onStatus} />)}
+          </div>
+        )}
         <Pagination page={safePage} pageCount={pageCount} onChange={setPage} />
         <p className="text-center text-[11px] text-muted-foreground">إجمالي {filtered.length} روشتة</p>
       </TabState>
@@ -61,10 +89,45 @@ export function PrescriptionsTab({ rxs, onStatus, loading, error, onRetry }: {
   );
 }
 
+function CachedImage({ url, alt, onClick, onPrefetch }: {
+  url: string; alt: string; onClick?: () => void; onPrefetch?: () => void;
+}) {
+  const [src, setSrc] = useState<string | undefined>(() => getCachedImage(url));
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    const hit = getCachedImage(url);
+    if (hit) { setSrc(hit); setFailed(false); return; }
+    setSrc(undefined); setFailed(false);
+    fetchImageCached(url)
+      .then((u) => { if (alive) setSrc(u); })
+      .catch(() => { if (alive) setFailed(true); });
+    return () => { alive = false; };
+  }, [url]);
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      onMouseEnter={onPrefetch}
+      onFocus={onPrefetch}
+      className="relative block aspect-square overflow-hidden rounded-lg border border-border"
+    >
+      {!src && !failed && <Skeleton className="absolute inset-0 rounded-none" />}
+      {failed && <div className="absolute inset-0 grid place-items-center bg-rose-50 text-[10px] font-bold text-rose-600">تعذر التحميل</div>}
+      {src && (
+        <img src={src} alt={alt} loading="lazy" decoding="async"
+          className="size-full object-cover transition hover:scale-105" />
+      )}
+    </button>
+  );
+}
+
 function RxCard({ rx, onStatus }: { rx: Rx; onStatus: (id: string, s: string) => void }) {
   const b = statusBadge(rx.status);
   const [zoom, setZoom] = useState<string | null>(null);
-  const [loaded, setLoaded] = useState<Record<number, boolean>>({});
+  const prefetch = useCallback((u: string) => prefetchImageCached(u), []);
 
   return (
     <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
@@ -82,24 +145,13 @@ function RxCard({ rx, onStatus }: { rx: Rx; onStatus: (id: string, s: string) =>
       {rx.image_urls.length > 0 && (
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {rx.image_urls.map((u, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => setZoom(u)}
-              onMouseEnter={() => prefetchImage(u)}
-              onFocus={() => prefetchImage(u)}
-              className="relative block aspect-square overflow-hidden rounded-lg border border-border"
-            >
-              {!loaded[i] && <Skeleton className="absolute inset-0 rounded-none" />}
-              <img
-                src={u}
-                alt={`روشتة ${i + 1}`}
-                loading="lazy"
-                decoding="async"
-                onLoad={() => setLoaded((s) => ({ ...s, [i]: true }))}
-                className={`size-full object-cover transition hover:scale-105 ${loaded[i] ? "opacity-100" : "opacity-0"}`}
-              />
-            </button>
+            <CachedImage
+              key={u}
+              url={u}
+              alt={`روشتة ${i + 1}`}
+              onClick={() => { prefetch(u); setZoom(u); }}
+              onPrefetch={() => prefetch(u)}
+            />
           ))}
         </div>
       )}
@@ -108,7 +160,7 @@ function RxCard({ rx, onStatus }: { rx: Rx; onStatus: (id: string, s: string) =>
         <div role="dialog" aria-modal="true" onClick={() => setZoom(null)} className="fixed inset-0 z-50 grid place-items-center bg-black/85 p-4 animate-in fade-in">
           <button type="button" onClick={(e) => { e.stopPropagation(); setZoom(null); }} aria-label="إغلاق"
             className="absolute right-4 top-4 grid size-10 place-items-center rounded-full bg-white/15 text-white hover:bg-white/25">✕</button>
-          <img src={zoom} alt="عرض الروشتة بالحجم الكامل" onClick={(e) => e.stopPropagation()}
+          <img src={getCachedImage(zoom) ?? zoom} alt="عرض الروشتة بالحجم الكامل" onClick={(e) => e.stopPropagation()}
             className="max-h-[90vh] max-w-[95vw] rounded-xl object-contain shadow-elevated" />
           <a href={zoom} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
             className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-white/90 px-4 py-2 text-xs font-black text-foreground hover:bg-white">فتح الصورة الأصلية</a>
