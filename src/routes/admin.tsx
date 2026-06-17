@@ -350,10 +350,15 @@ function OrderCard({ order, onStatus }: { order: Order; onStatus: (id: string, s
           {STATUSES.map((s) => <option key={s.v} value={s.v}>{s.label}</option>)}
         </select>
         <button
-          onClick={() => openWhatsApp(`مرحبًا ${order.customer_name}، بخصوص طلبك ${order.id} من صيدلية المصلي:`)}
+          onClick={() => openWhatsApp(buildStatusMessage({ name: order.customer_name, orderId: order.id, status: "confirmed" }), order.customer_phone)}
+          className="flex items-center gap-1.5 rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-black text-white"
+        ><MessageCircle className="size-3.5" /> إشعار: جاهز/مؤكد</button>
+        <button
+          onClick={() => openWhatsApp(`مرحبًا ${order.customer_name}، بخصوص طلبك ${order.id} من صيدلية المصلي:`, order.customer_phone)}
           className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-black text-white"
         ><MessageCircle className="size-3.5" /> واتساب العميل</button>
       </div>
+
     </div>
   );
 }
