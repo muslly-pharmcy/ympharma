@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import * as XLSX from "xlsx";
+import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { generateText } from "ai";
 
 const productSchema = z.object({
   id: z.string().uuid().optional(),
