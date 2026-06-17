@@ -28,7 +28,7 @@ export function ProductCard({ product }: { product: Product }) {
   const [loaded, setLoaded] = useState(false);
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-1 hover:shadow-elevated">
-      <Link to="/products" search={{ cat: product.cat }} className="relative aspect-square overflow-hidden bg-secondary/60 block">
+      <Link to="/product/$id" params={{ id: String(product.id) }} className="relative aspect-square overflow-hidden bg-secondary/60 block">
         {!loaded && <Skeleton className="absolute inset-0 rounded-none" />}
         <img
           src={product.img}
@@ -45,7 +45,7 @@ export function ProductCard({ product }: { product: Product }) {
       </Link>
       <div className="flex flex-1 flex-col p-3">
         <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{product.brand}</p>
-        <h3 className="mt-1 line-clamp-2 text-sm font-bold leading-snug">{product.name}</h3>
+        <Link to="/product/$id" params={{ id: String(product.id) }} className="mt-1 line-clamp-2 text-sm font-bold leading-snug hover:text-primary"><h3>{product.name}</h3></Link>
         <div className="mt-3 flex items-end justify-between gap-2">
           <div className="min-w-0">
             <p className="text-base font-black text-primary-deep">{formatPrice(product.price)} <span className="text-xs font-bold">ر.ي</span></p>
