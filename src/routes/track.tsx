@@ -44,6 +44,8 @@ type CloudOrder = {
   items: { id: number; qty: number; name: string; price: number }[];
 };
 
+type HistoryRow = { status: StoredOrder["status"]; created_at: string; note: string | null };
+
 function TrackPage() {
   const { id: initialId } = Route.useSearch();
   const { orders } = useCart();
@@ -51,15 +53,20 @@ function TrackPage() {
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [order, setOrder] = useState<CloudOrder | null>(null);
+  const [history, setHistory] = useState<HistoryRow[]>([]);
 
   async function lookup(id: string) {
     setLoading(true);
     setSearched(true);
     try {
-      const { data, error } = await supabase.rpc("get_order_public", { _id: id.trim() });
-      if (error) { console.error(error); setOrder(null); return; }
+      const trimmed = id.trim();
+      const [{ data, error }, { data: hist }] = await Promise.all([
+        supabase.rpc("get_order_public", { _id: trimmed }),
+        supabase.rpc("get_order_history_public", { _id: trimmed }),
+      ]);
+      if (error) { console.error(error); setOrder(null); setHistory([]); return; }
       const row = Array.isArray(data) ? data[0] : data;
-      if (!row) { setOrder(null); return; }
+      if (!row) { setOrder(null); setHistory([]); return; }
       setOrder({
         id: row.id,
         status: (row.status as CloudOrder["status"]) ?? "pending",
@@ -68,6 +75,7 @@ function TrackPage() {
         customerName: row.customer_name,
         items: (row.items as CloudOrder["items"]) ?? [],
       });
+      setHistory((hist as HistoryRow[]) ?? []);
     } finally {
       setLoading(false);
     }
