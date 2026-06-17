@@ -56,6 +56,19 @@ function statusBadge(s: string) {
   return STATUSES.find((x) => x.v === s) ?? { v: s, label: s, color: "bg-secondary text-foreground" };
 }
 
+function applyChange<T extends { id: string }>(cur: T[], payload: { eventType: string; new: any; old: any }): T[] {
+  if (payload.eventType === "INSERT") {
+    if (cur.some((x) => x.id === payload.new.id)) return cur;
+    return [payload.new as T, ...cur];
+  }
+  if (payload.eventType === "UPDATE") {
+    return cur.map((x) => (x.id === payload.new.id ? (payload.new as T) : x));
+  }
+  if (payload.eventType === "DELETE") {
+    return cur.filter((x) => x.id !== payload.old.id);
+  }
+  return cur;
+
 function AdminPage() {
   const [session, setSession] = useState<{ userId: string; email: string } | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
