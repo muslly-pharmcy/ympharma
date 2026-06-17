@@ -1,13 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteFooter } from "@/components/site-chrome";
-import { LayoutDashboard, LogOut, Package, FileText, MessageCircle, RefreshCw, Loader2, Lock, Filter, Users, Crown, Plus, Trash2, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, LogOut, Package, FileText, MessageCircle, RefreshCw, Loader2, Lock, Filter, Users, Crown, Plus, Trash2, ShieldCheck, Download, Bell, BellOff } from "lucide-react";
 import { formatPrice } from "@/lib/products";
 import { openWhatsApp, buildStatusMessage } from "@/lib/whatsapp";
 import { toast } from "sonner";
 import { bootstrapOwner, getMyRole, inviteStaff, listStaff, removeStaff, updateStaffPermissions } from "@/lib/staff.functions";
+import { AdminStats } from "@/components/admin-stats";
+import { playNotificationBeep } from "@/lib/notify-sound";
+import { downloadCSV } from "@/lib/csv-export";
 
 
 
@@ -184,6 +187,14 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
   const [filter, setFilter] = useState<string>("all");
   const [busy, setBusy] = useState(false);
   const [me, setMe] = useState<{ isOwner: boolean; isAdmin: boolean; permissions: string[] } | null>(null);
+  const [newOrders, setNewOrders] = useState(0);
+  const [newRx, setNewRx] = useState(0);
+  const [soundOn, setSoundOn] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    return localStorage.getItem("admin-sound") !== "off";
+  });
+  const [statsKey, setStatsKey] = useState(0);
+  const loadedRef = useRef(false);
 
   const fetchMyRole = useServerFn(getMyRole);
   const promote = useServerFn(bootstrapOwner);
@@ -201,23 +212,73 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
     setOrders((o as Order[]) ?? []);
     setRxs((r as Rx[]) ?? []);
     setBusy(false);
+    setStatsKey((k) => k + 1);
+    loadedRef.current = true;
   }, []);
 
   useEffect(() => { load(); }, [load]);
 
-  // Realtime: live-update orders & prescriptions without manual refresh
+  useEffect(() => {
+    localStorage.setItem("admin-sound", soundOn ? "on" : "off");
+  }, [soundOn]);
+
+  // Realtime: live-update + sound + badge for new inserts
   useEffect(() => {
     const channel = supabase
       .channel("admin-live")
       .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, (p) => {
         setOrders((cur) => applyChange(cur, p) as Order[]);
+        if (p.eventType === "INSERT" && loadedRef.current) {
+          setNewOrders((n) => n + 1);
+          setStatsKey((k) => k + 1);
+          if (soundOn) playNotificationBeep();
+          toast.success(`طلب جديد: ${(p.new as Order).customer_name}`);
+        }
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "prescriptions" }, (p) => {
         setRxs((cur) => applyChange(cur, p) as Rx[]);
+        if (p.eventType === "INSERT" && loadedRef.current) {
+          setNewRx((n) => n + 1);
+          setStatsKey((k) => k + 1);
+          if (soundOn) playNotificationBeep();
+          toast.success(`روشتة جديدة: ${(p.new as Rx).customer_name}`);
+        }
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, []);
+  }, [soundOn]);
+
+  function exportOrdersCSV() {
+    const rows = orders.map((o) => [
+      o.id,
+      new Date(o.created_at).toLocaleString("ar-EG"),
+      o.customer_name,
+      o.customer_phone,
+      o.customer_address,
+      o.status,
+      o.total,
+      (o.items ?? []).map((i) => `${i.name} ×${i.qty}`).join(" | "),
+      o.notes ?? "",
+    ]);
+    downloadCSV(`orders-${new Date().toISOString().slice(0,10)}.csv`,
+      ["رقم الطلب","التاريخ","الاسم","الجوال","العنوان","الحالة","الإجمالي","المنتجات","ملاحظات"], rows);
+    toast.success("تم تصدير الطلبات");
+  }
+  function exportRxCSV() {
+    const rows = rxs.map((r) => [
+      r.id,
+      new Date(r.created_at).toLocaleString("ar-EG"),
+      r.customer_name,
+      r.customer_phone,
+      r.customer_address,
+      r.status,
+      (r.image_urls ?? []).join(" | "),
+      r.notes ?? "",
+    ]);
+    downloadCSV(`prescriptions-${new Date().toISOString().slice(0,10)}.csv`,
+      ["رقم","التاريخ","الاسم","الجوال","العنوان","الحالة","الصور","ملاحظات"], rows);
+    toast.success("تم تصدير الروشتات");
+  }
 
   function notifyCustomerCloud(o: { id: string; customer_name: string; customer_phone: string }, status: string) {
     // إرسال مجاني عبر رابط wa.me — يفتح واتساب على رقم العميل برسالة جاهزة
@@ -289,6 +350,9 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
                 <Crown className="size-4" /> كن المالك
               </button>
             )}
+            <button onClick={() => setSoundOn((v) => !v)} className="grid size-10 place-items-center rounded-xl bg-secondary hover:bg-accent" aria-label="تنبيه صوتي" title={soundOn ? "تنبيه صوتي مفعّل" : "صامت"}>
+              {soundOn ? <Bell className="size-4 text-primary" /> : <BellOff className="size-4 text-muted-foreground" />}
+            </button>
             <button onClick={load} disabled={busy} className="grid size-10 place-items-center rounded-xl bg-secondary hover:bg-accent" aria-label="تحديث">
               {busy ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
             </button>
@@ -309,8 +373,18 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
           </div>
         </div>
         <div className="mx-auto flex max-w-7xl items-center gap-2 overflow-x-auto px-4 pb-2">
-          {canOrders && <Tab active={tab === "orders"} onClick={() => setTab("orders")} icon={Package} label={`الطلبات (${orders.length})`} />}
-          {canRx && <Tab active={tab === "rx"} onClick={() => setTab("rx")} icon={FileText} label={`الروشتات (${rxs.length})`} />}
+          {canOrders && (
+            <button onClick={() => { setTab("orders"); setNewOrders(0); }} className={`relative flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-1.5 text-xs font-black transition ${tab === "orders" ? "brand-gradient text-primary-foreground shadow-card" : "bg-secondary text-muted-foreground hover:text-primary"}`}>
+              <Package className="size-4" /> الطلبات ({orders.length})
+              {newOrders > 0 && tab !== "orders" && <span className="absolute -top-1 -left-1 grid min-w-5 h-5 place-items-center rounded-full bg-rose-500 px-1 text-[10px] font-black text-white animate-pulse">{newOrders}</span>}
+            </button>
+          )}
+          {canRx && (
+            <button onClick={() => { setTab("rx"); setNewRx(0); }} className={`relative flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-1.5 text-xs font-black transition ${tab === "rx" ? "brand-gradient text-primary-foreground shadow-card" : "bg-secondary text-muted-foreground hover:text-primary"}`}>
+              <FileText className="size-4" /> الروشتات ({rxs.length})
+              {newRx > 0 && tab !== "rx" && <span className="absolute -top-1 -left-1 grid min-w-5 h-5 place-items-center rounded-full bg-rose-500 px-1 text-[10px] font-black text-white animate-pulse">{newRx}</span>}
+            </button>
+          )}
           {me?.isOwner && <Tab active={tab === "team"} onClick={() => setTab("team")} icon={Users} label="الفريق والصلاحيات" />}
           {tab !== "team" && (
             <>
@@ -320,12 +394,16 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
                 <option value="all">كل الحالات</option>
                 {STATUSES.map((s) => <option key={s.v} value={s.v}>{s.label}</option>)}
               </select>
+              <button onClick={tab === "orders" ? exportOrdersCSV : exportRxCSV} className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-black text-white hover:bg-emerald-600" title="تصدير Excel/CSV">
+                <Download className="size-3.5" /> تصدير
+              </button>
             </>
           )}
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl space-y-3 px-4 py-6">
+      <main className="mx-auto max-w-7xl space-y-4 px-4 py-6">
+        {(canOrders || canRx) && tab !== "team" && <AdminStats refreshKey={statsKey} />}
         {tab === "orders" && canOrders && (
           filteredOrders.length === 0
             ? <Empty text="لا توجد طلبات" />

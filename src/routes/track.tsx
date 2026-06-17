@@ -44,6 +44,8 @@ type CloudOrder = {
   items: { id: number; qty: number; name: string; price: number }[];
 };
 
+type HistoryRow = { status: StoredOrder["status"]; created_at: string; note: string | null };
+
 function TrackPage() {
   const { id: initialId } = Route.useSearch();
   const { orders } = useCart();
@@ -51,15 +53,20 @@ function TrackPage() {
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [order, setOrder] = useState<CloudOrder | null>(null);
+  const [history, setHistory] = useState<HistoryRow[]>([]);
 
   async function lookup(id: string) {
     setLoading(true);
     setSearched(true);
     try {
-      const { data, error } = await supabase.rpc("get_order_public", { _id: id.trim() });
-      if (error) { console.error(error); setOrder(null); return; }
+      const trimmed = id.trim();
+      const [{ data, error }, { data: hist }] = await Promise.all([
+        supabase.rpc("get_order_public", { _id: trimmed }),
+        supabase.rpc("get_order_history_public", { _id: trimmed }),
+      ]);
+      if (error) { console.error(error); setOrder(null); setHistory([]); return; }
       const row = Array.isArray(data) ? data[0] : data;
-      if (!row) { setOrder(null); return; }
+      if (!row) { setOrder(null); setHistory([]); return; }
       setOrder({
         id: row.id,
         status: (row.status as CloudOrder["status"]) ?? "pending",
@@ -68,6 +75,7 @@ function TrackPage() {
         customerName: row.customer_name,
         items: (row.items as CloudOrder["items"]) ?? [],
       });
+      setHistory((hist as HistoryRow[]) ?? []);
     } finally {
       setLoading(false);
     }
@@ -116,6 +124,7 @@ function TrackPage() {
                 {steps.map((step, idx) => {
                   const done = idx <= statusIndex(order.status);
                   const active = idx === statusIndex(order.status);
+                  const hist = history.find((h) => h.status === step.key);
                   return (
                     <div key={step.key} className="flex items-start gap-4">
                       <div className={`relative grid size-10 shrink-0 place-items-center rounded-full transition ${done ? "brand-gradient text-primary-foreground" : "bg-secondary text-muted-foreground"} ${active ? "ring-4 ring-primary/20 animate-pulse" : ""}`}>
@@ -123,7 +132,8 @@ function TrackPage() {
                       </div>
                       <div className="pt-1.5">
                         <p className={`text-sm font-black ${done ? "text-foreground" : "text-muted-foreground"}`}>{step.label}</p>
-                        {active && <p className="text-xs text-muted-foreground">جارٍ تحديث الحالة...</p>}
+                        {hist && <p className="text-[11px] text-muted-foreground" dir="ltr">{new Date(hist.created_at).toLocaleString("ar-EG")}</p>}
+                        {active && !hist && <p className="text-xs text-muted-foreground">جارٍ تحديث الحالة...</p>}
                       </div>
                     </div>
                   );

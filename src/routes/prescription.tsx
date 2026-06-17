@@ -5,6 +5,7 @@ import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { openWhatsApp, WHATSAPP_NUMBER, buildPrescriptionMessage } from "@/lib/whatsapp";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { compressImage } from "@/lib/image-compress";
 
 export const Route = createFileRoute("/prescription")({
   head: () => ({
@@ -67,7 +68,9 @@ function PrescriptionPage() {
       const uploadedUrls: string[] = [];
 
       for (let i = 0; i < files.length; i++) {
-        const f = files[i].file;
+        const original = files[i].file;
+        let f = original;
+        try { f = await compressImage(original, { maxWidth: 1600, maxHeight: 1600, quality: 0.82 }); } catch { /* keep original */ }
         const ext = (f.name.split(".").pop() || "jpg").toLowerCase();
         const path = `${folder}/${i + 1}-${Date.now()}.${ext}`;
         const { error } = await supabase.storage.from("prescriptions").upload(path, f, {
