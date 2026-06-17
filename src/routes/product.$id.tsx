@@ -106,7 +106,9 @@ function ProductDetail() {
           </div>
         </div>
 
-        {(p.cat === "vitamins" || p.cat === "now") && <VitaminAIInfo name={p.name} brand={p.brand} />}
+        {(p.cat === "vitamins" || p.cat === "now" || p.cat === "medicine" || p.cat === "herbal") && (
+          <VitaminAIInfo name={p.name} brand={p.brand} />
+        )}
 
         {related.length > 0 && (
           <section>
