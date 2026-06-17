@@ -189,17 +189,29 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
   useEffect(() => { load(); }, [load]);
 
   async function setOrderStatus(id: string, status: string) {
+    const prev = orders.find((o) => o.id === id);
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
     if (error) return toast.error(error.message);
     setOrders((p) => p.map((o) => (o.id === id ? { ...o, status } : o)));
     toast.success("تم تحديث الحالة");
+    // Auto WhatsApp notification to the customer on meaningful transitions
+    if (prev && prev.status !== status && ["confirmed", "shipped", "delivered", "cancelled"].includes(status)) {
+      const msg = buildStatusMessage({ name: prev.customer_name, orderId: prev.id, status });
+      openWhatsApp(msg, prev.customer_phone);
+    }
   }
   async function setRxStatus(id: string, status: string) {
+    const prev = rxs.find((o) => o.id === id);
     const { error } = await supabase.from("prescriptions").update({ status }).eq("id", id);
     if (error) return toast.error(error.message);
     setRxs((p) => p.map((o) => (o.id === id ? { ...o, status } : o)));
     toast.success("تم تحديث الحالة");
+    if (prev && prev.status !== status && ["confirmed", "shipped", "delivered", "cancelled"].includes(status)) {
+      const msg = buildStatusMessage({ name: prev.customer_name, orderId: prev.id, status });
+      openWhatsApp(msg, prev.customer_phone);
+    }
   }
+
 
   async function handlePromote() {
     try {
