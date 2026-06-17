@@ -11,13 +11,13 @@ export const testWhatsAppCloud = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     // owner/admin only
-    const { data: ownerRow } = await context.supabase
+    const { data: roleRows } = await context.supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", context.userId)
       .in("role", ["owner", "admin"])
-      .maybeSingle();
-    if (!ownerRow) throw new Error("Forbidden");
+      .limit(1);
+    if (!roleRows || roleRows.length === 0) throw new Error("Forbidden");
 
     const token = process.env.WHATSAPP_TOKEN;
     const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
