@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Shield, Lock, Database, Users, Cookie, FileText, Mail, Phone, AlertCircle, ArrowRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Shield, Lock, Database, Cookie, FileText, Mail, Phone, AlertCircle, ArrowRight, Users } from "lucide-react";
 
 export const Route = createFileRoute("/trust")({
   head: () => ({
@@ -8,7 +10,7 @@ export const Route = createFileRoute("/trust")({
       {
         name: "description",
         content:
-          "صفحة الأمان والخصوصية في صيدلية المصلي — توضح ممارسات حماية البيانات، ملفات الكوكيز، الاحتفاظ بالبيانات، وكيفية التواصل بشأن أي مخاوف.",
+          "صفحة الأمان والخصوصية في صيدلية المصلي — توضح ممارسات حماية البيانات، الكوكيز، الاحتفاظ بالبيانات، وكيفية الإبلاغ عن أي مشكلة.",
       },
       { property: "og:title", content: "الأمان والخصوصية — صيدلية المصلي" },
       {
@@ -21,14 +23,43 @@ export const Route = createFileRoute("/trust")({
   component: TrustPage,
 });
 
+type TrustData = {
+  title: string;
+  intro: string;
+  data_collection: string;
+  retention: string;
+  encryption: string;
+  cookies: string;
+  incident_reporting: string;
+  contact: string;
+};
+
+const FALLBACK: TrustData = {
+  title: "كيف نحمي بياناتك",
+  intro:
+    "هذه الصفحة يحررها فريق صيدلية المصلي للإجابة عن الأسئلة الشائعة حول الأمان والخصوصية. المعلومات هنا تصف ممارساتنا الحالية وليست شهادة اعتماد مستقلة.",
+  data_collection:
+    "نجمع فقط البيانات اللازمة لتنفيذ الطلب: الاسم، رقم الهاتف، العنوان، الأصناف المطلوبة، وصور الروشتات. لا نطلب بيانات حساسة إضافية ولا نبيع بياناتك لأي طرف ثالث.",
+  retention:
+    "نحتفظ ببيانات الطلبات والروشتات للفترة اللازمة لتنفيذ الخدمة وأغراض السجل الإداري. يمكنك طلب حذف بياناتك في أي وقت عبر التواصل معنا.",
+  encryption:
+    "كل الاتصالات بين المتصفح وخوادمنا مشفّرة عبر HTTPS. قاعدة البيانات محمية بسياسات صلاحيات صفية (Row Level Security)، وصور الروشتات تُخزّن في حاوية خاصة غير عامة.",
+  cookies:
+    "نستخدم تخزينًا محليًا في المتصفح (localStorage) لحفظ السلة وتفضيلات اللغة وجلسة الموظفين. لا نستخدم كوكيز إعلانية ولا نتتبّع المستخدمين عبر مواقع أخرى.",
+  incident_reporting:
+    "إذا اكتشفت ثغرة أمنية أو تسريبًا محتملًا، نرجو التواصل معنا مباشرة قبل أي إفصاح علني وسنرد بأسرع وقت ممكن.",
+  contact:
+    "واتساب: 774068936 — أرضي: 02358921 — العنوان: عدن — المنصورة — ريمي، أمام مشفى صابر.",
+};
+
 function Section({
   icon: Icon,
   title,
-  children,
+  body,
 }: {
   icon: typeof Shield;
   title: string;
-  children: React.ReactNode;
+  body: string;
 }) {
   return (
     <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
@@ -38,16 +69,43 @@ function Section({
         </div>
         <h2 className="text-lg font-bold text-foreground md:text-xl">{title}</h2>
       </div>
-      <div className="space-y-2 text-sm leading-relaxed text-muted-foreground md:text-base">
-        {children}
-      </div>
+      <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground md:text-base">
+        {body}
+      </p>
     </section>
   );
 }
 
 function TrustPage() {
+  const [data, setData] = useState<TrustData>(FALLBACK);
+
+  useEffect(() => {
+    let cancelled = false;
+    supabase
+      .from("trust_pages")
+      .select("*")
+      .eq("slug", "trust")
+      .maybeSingle()
+      .then(({ data: row }) => {
+        if (cancelled || !row) return;
+        setData({
+          title: row.title || FALLBACK.title,
+          intro: row.intro || FALLBACK.intro,
+          data_collection: row.data_collection || FALLBACK.data_collection,
+          retention: row.retention || FALLBACK.retention,
+          encryption: row.encryption || FALLBACK.encryption,
+          cookies: row.cookies || FALLBACK.cookies,
+          incident_reporting: row.incident_reporting || FALLBACK.incident_reporting,
+          contact: row.contact || FALLBACK.contact,
+        });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
+    <div className="min-h-screen bg-background" dir="rtl" data-testid="trust-page">
       <div className="mx-auto max-w-3xl px-4 py-8 md:py-12">
         <Link
           to="/"
@@ -62,96 +120,28 @@ function TrustPage() {
             <Shield className="h-3.5 w-3.5" />
             الأمان والخصوصية
           </div>
-          <h1 className="text-3xl font-extrabold text-foreground md:text-4xl">
-            كيف نحمي بياناتك
-          </h1>
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">
-            هذه الصفحة يحررها فريق صيدلية المصلي للإجابة عن الأسئلة الشائعة حول الأمان
-            والخصوصية. المعلومات هنا تصف ممارساتنا الحالية وليست شهادة اعتماد مستقلة.
+          <h1 className="text-3xl font-extrabold text-foreground md:text-4xl">{data.title}</h1>
+          <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground md:text-base">
+            {data.intro}
           </p>
         </header>
 
         <div className="space-y-4">
-          <Section icon={Lock} title="الدخول وحماية الحسابات">
-            <p>
-              تسجيل الدخول لإدارة المتجر يتم عبر بريد إلكتروني وكلمة سر أو حساب Google.
-              صلاحيات الموظفين موزعة على أدوار محددة (مالك، مدير، صلاحيات جزئية)، ولا يستطيع
-              أي موظف الوصول إلى بيانات خارج صلاحياته.
-            </p>
-            <p>
-              الزوار العاديون لا يحتاجون إلى تسجيل دخول لتصفح المنتجات أو إرسال طلب أو روشتة.
-            </p>
-          </Section>
-
-          <Section icon={Database} title="البيانات التي نجمعها">
-            <ul className="list-inside list-disc space-y-1">
-              <li>بيانات الطلب: الاسم، رقم الهاتف، العنوان، والأصناف المطلوبة.</li>
-              <li>صور الروشتات التي يرفعها المستخدم لمعالجتها وتجهيز الطلب.</li>
-              <li>بيانات تقنية أساسية (نوع الجهاز، نوع المتصفح) لتشغيل التطبيق وتحسينه.</li>
-            </ul>
-            <p>
-              لا نطلب أي بيانات حساسة إضافية، ولا نبيع بياناتك لأي طرف ثالث لأغراض تسويقية.
-            </p>
-          </Section>
-
-          <Section icon={Shield} title="حماية البيانات أثناء النقل والتخزين">
-            <p>
-              جميع الاتصالات بين المتصفح والخادم مشفّرة عبر HTTPS. بيانات الطلبات والروشتات
-              مخزّنة في قاعدة بيانات سحابية محمية بصلاحيات صفية (Row Level Security) بحيث لا
-              يمكن لأي مستخدم الوصول إلى بيانات مستخدم آخر.
-            </p>
-            <p>
-              صور الروشتات محفوظة في حاوية تخزين خاصة (غير عامة) ويتم الوصول إليها فقط من قِبَل
-              فريق الصيدلية المخوّل.
-            </p>
-          </Section>
-
-          <Section icon={Users} title="الأطراف الثالثة (Subprocessors)">
-            <p>نعتمد على مزوّدين موثوقين لتشغيل الخدمة:</p>
-            <ul className="list-inside list-disc space-y-1">
-              <li>Supabase / Lovable Cloud — استضافة قاعدة البيانات والتخزين والمصادقة.</li>
-              <li>WhatsApp Business API — لإرسال إشعارات الطلب للعميل وللصيدلية فقط.</li>
-              <li>Google — تسجيل الدخول الاختياري لفريق العمل.</li>
-            </ul>
-          </Section>
-
-          <Section icon={Cookie} title="الكوكيز والتخزين المحلي">
-            <p>
-              نستخدم تخزينًا محليًا في المتصفح (localStorage) لحفظ السلة، تفضيلات اللغة،
-              وجلسة تسجيل دخول الموظفين. لا نستخدم كوكيز إعلانية ولا نتتبع المستخدم عبر مواقع
-              أخرى.
-            </p>
-          </Section>
-
-          <Section icon={FileText} title="الاحتفاظ بالبيانات والحذف">
-            <p>
-              نحتفظ ببيانات الطلبات والروشتات للفترة اللازمة لإتمام الخدمة والاحتفاظ بسجل
-              العمليات الإدارية. يمكنك طلب حذف بياناتك في أي وقت بالتواصل معنا عبر الأرقام
-              أدناه.
-            </p>
-          </Section>
-
-          <Section icon={AlertCircle} title="الإبلاغ عن مشكلة أمنية">
-            <p>
-              إذا اكتشفت مشكلة أمنية أو تسريب محتمل، يُرجى التواصل معنا مباشرة قبل الإفصاح
-              العلني. سنرد عليك ونعمل على المعالجة في أقرب وقت ممكن.
-            </p>
-          </Section>
-
-          <Section icon={Mail} title="تواصل معنا">
-            <div className="space-y-1">
-              <p className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-primary" />
-                واتساب: 774068936 / 02358921 (أرضي)
-              </p>
-              <p>العنوان: عدن — المنصورة — ريمي — أمام مشفى صابر</p>
-            </div>
-          </Section>
+          <Section icon={Database} title="جمع البيانات" body={data.data_collection} />
+          <Section icon={FileText} title="الاحتفاظ بالبيانات والحذف" body={data.retention} />
+          <Section icon={Lock} title="التشفير وحماية البيانات" body={data.encryption} />
+          <Section icon={Cookie} title="الكوكيز والتخزين المحلي" body={data.cookies} />
+          <Section icon={Users} title="الأطراف الثالثة" body="Supabase / Lovable Cloud (قاعدة البيانات والتخزين)، WhatsApp Business API (إشعارات الطلب)، Google (تسجيل دخول الفريق)." />
+          <Section icon={AlertCircle} title="الإبلاغ عن مشكلة أمنية" body={data.incident_reporting} />
+          <Section icon={Mail} title="تواصل معنا" body={data.contact} />
         </div>
 
+        <p className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground" dir="ltr">
+          <Phone className="size-3.5 text-primary" /> +967 774 068 936 · +967 2 358921
+        </p>
+
         <footer className="mt-8 rounded-xl border border-dashed border-border bg-muted/40 p-4 text-xs leading-relaxed text-muted-foreground">
-          هذه الصفحة محتوى تحرّره صيدلية المصلي ويُحدَّث من حين لآخر. وهي ليست شهادة اعتماد
-          أو تدقيق مستقل، ولا تحلّ محل أي اتفاقية قانونية مع المستخدم.
+          هذه الصفحة محتوى تحرّره صيدلية المصلي ويُحدَّث من حين لآخر. وهي ليست شهادة اعتماد أو تدقيق مستقل، ولا تحلّ محل أي اتفاقية قانونية مع المستخدم.
         </footer>
       </div>
     </div>
