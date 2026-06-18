@@ -85,6 +85,7 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
         <nav className={`border-t border-border bg-card transition-all duration-300 ${scrolled ? "max-h-0 overflow-hidden border-t-0" : "max-h-20"}`}>
           <div className="mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-2 py-2 text-sm font-bold">
             <Link to="/" className="whitespace-nowrap rounded-xl px-4 py-2 text-muted-foreground transition hover:text-primary" activeProps={{ className: "brand-gradient text-primary-foreground shadow-card" }} activeOptions={{ exact: true }}>{t("nav.home")}</Link>
+            <Link to="/insurance" className="whitespace-nowrap rounded-xl px-4 py-2 font-black text-primary hover:underline">🩺 التأمين الطبي</Link>
             <Link to="/products" className="whitespace-nowrap rounded-xl px-4 py-2 text-muted-foreground transition hover:text-primary" activeProps={{ className: "brand-gradient text-primary-foreground shadow-card" }}>{t("nav.products")}</Link>
             {categories.map((c) => (
               <Link key={c.id} to="/products" search={{ cat: c.id }} className="whitespace-nowrap rounded-xl px-4 py-2 text-muted-foreground transition hover:text-primary">
