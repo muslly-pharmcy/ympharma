@@ -164,7 +164,7 @@ export const Route = createFileRoute("/api/public/img")({
               error: `upstream_${upstreamRes.status}`,
               duration_ms: Date.now() - started,
             });
-            return new Response("upstream error", { status: 502, headers: CORS });
+            return placeholderResponse({ "X-Img-Reason": `upstream_${upstreamRes.status}` });
           }
           const ct = upstreamRes.headers.get("content-type") ?? "image/jpeg";
           // fire-and-forget success log
