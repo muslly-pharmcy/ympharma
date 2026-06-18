@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { MessageCircle, Trash2, Archive, Download, Loader2, AlertTriangle, History, Settings2, CheckSquare, Square, X } from "lucide-react";
+import { MessageCircle, Trash2, Archive, Download, Loader2, AlertTriangle, History, Settings2, CheckSquare, Square, X, FileText, Filter } from "lucide-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { toast } from "sonner";
 import { openWhatsApp, buildStatusMessage } from "@/lib/whatsapp";
@@ -15,13 +15,14 @@ import {
 const EST_ROW_HEIGHT = 320;
 
 type Action = (id: string) => Promise<void> | void;
-type BulkAction = (ids: string[], onProgress?: (done: number, total: number, currentId: string) => void) => Promise<void> | void;
+type BulkAction = (ids: string[], onProgress?: (done: number, total: number, currentId: string, ok: boolean, error?: string) => void) => Promise<void> | void;
 
 // ---------- CSV columns ----------
 type CsvCol = { key: string; label: string; pick: (r: Rx) => unknown };
 const CSV_COLS: CsvCol[] = [
   { key: "id", label: "رقم", pick: (r) => r.id },
-  { key: "created_at", label: "التاريخ", pick: (r) => new Date(r.created_at).toLocaleString("ar-EG") },
+  { key: "created_at", label: "تاريخ الإنشاء", pick: (r) => new Date(r.created_at).toLocaleString("ar-EG") },
+  { key: "updated_at", label: "آخر تحديث", pick: (r) => new Date(r.updated_at ?? r.created_at).toLocaleString("ar-EG") },
   { key: "customer_name", label: "الاسم", pick: (r) => r.customer_name },
   { key: "customer_phone", label: "الجوال", pick: (r) => r.customer_phone },
   { key: "customer_address", label: "العنوان", pick: (r) => r.customer_address },
@@ -40,6 +41,22 @@ function loadCsvPrefs(): string[] {
     const valid = parsed.filter((k) => CSV_COLS.some((c) => c.key === k));
     return valid.length > 0 ? valid : CSV_COLS.map((c) => c.key);
   } catch { return CSV_COLS.map((c) => c.key); }
+}
+
+// ---------- Status filter ----------
+type StatusFilter = "all" | "active" | "archived" | "cancelled";
+const STATUS_FILTERS: { v: StatusFilter; label: string }[] = [
+  { v: "all", label: "الكل" },
+  { v: "active", label: "نشطة" },
+  { v: "archived", label: "مؤرشفة" },
+  { v: "cancelled", label: "ملغية" },
+];
+function matchesStatusFilter(r: Rx, f: StatusFilter): boolean {
+  if (f === "all") return true;
+  if (f === "archived") return r.status === "archived";
+  if (f === "cancelled") return r.status === "cancelled";
+  // active = anything that is not archived/cancelled
+  return r.status !== "archived" && r.status !== "cancelled";
 }
 
 export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDelete, onBulkArchive, loading, error, onRetry }: {
