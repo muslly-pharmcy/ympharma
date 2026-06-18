@@ -423,9 +423,25 @@ tr:nth-child(even) td { background:#f8fafc; }
           onClose={() => setShowCsvSettings(false)}
         />
       )}
+      {exportPreview && (
+        <ExportPreviewDialog
+          kind={exportPreview}
+          rows={filtered}
+          columns={csvCols.map((k) => CSV_COLS.find((c) => c.key === k)!).filter(Boolean)}
+          statusFilterLabel={STATUS_FILTERS.find((f) => f.v === statusFilter)?.label ?? "الكل"}
+          searchText={q}
+          onConfirm={() => {
+            const kind = exportPreview;
+            setExportPreview(null);
+            if (kind === "csv") exportCSV(); else exportPDF();
+          }}
+          onClose={() => setExportPreview(null)}
+        />
+      )}
     </div>
   );
 }
+
 
 // ---------- Confirm dialog ----------
 function ConfirmDialog({ kind, rxId, bulk, onConfirm, onCancel }: {
