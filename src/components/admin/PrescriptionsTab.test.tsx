@@ -180,3 +180,60 @@ describe("PrescriptionsTab — integration", () => {
     expect(screen.getByTestId("rx-flat-list")).toBeInTheDocument();
   });
 });
+
+describe("Imported products dedupe", () => {
+  it("dedupes by internal code when present", () => {
+    const a = { id: 1, name: "Cefix 500", brand: "x", price: 1, cat: "medicine", img: "", desc: "الكود: 0125618" } as any;
+    const b = { id: 2, name: "CEFIX  500MG", brand: "y", price: 9, cat: "medicine", img: "", desc: "الكود: 0125618 · باكت" } as any;
+    expect(productDedupeKey(a)).toBe(productDedupeKey(b));
+    const out = dedupeProducts([a], [b]);
+    expect(out).toHaveLength(1);
+    expect(out[0].id).toBe(1);
+  });
+
+  it("dedupes by normalized name when no code is present", () => {
+    const a = { id: 1, name: "Paracetamol 500", brand: "x", price: 1, cat: "medicine", img: "", desc: "" } as any;
+    const b = { id: 2, name: "paracetamol-500", brand: "y", price: 2, cat: "medicine", img: "", desc: "" } as any;
+    const c = { id: 3, name: "Ibuprofen 200", brand: "z", price: 3, cat: "medicine", img: "", desc: "" } as any;
+    const out = dedupeProducts([a], [b, c]);
+    expect(out.map((p) => p.id)).toEqual([1, 3]);
+  });
+});
+
+describe("Prescription submission (smoke, repeated)", () => {
+  it("uploads → signs → inserts → opens WhatsApp across 3 consecutive runs", async () => {
+    const supabaseMod = await import("@/integrations/supabase/client");
+    const whatsappMod = await import("@/lib/whatsapp");
+
+    const upload = vi.fn(async () => ({ data: { path: "p" }, error: null }));
+    const createSignedUrl = vi.fn(async () => ({ data: { signedUrl: "https://signed/url.jpg" }, error: null }));
+    const insert = vi.fn(async () => ({ error: null }));
+    vi.spyOn(supabaseMod.supabase.storage, "from").mockReturnValue({ upload, createSignedUrl } as any);
+    vi.spyOn(supabaseMod.supabase, "from").mockReturnValue({ insert } as any);
+    const openWa = vi.spyOn(whatsappMod, "openWhatsApp").mockImplementation(() => {});
+
+    const mod: any = await import("@/routes/prescription");
+    const PrescriptionPage = mod.Route.options.component;
+    const file = new File([new Uint8Array([1, 2, 3])], "rx.jpg", { type: "image/jpeg" });
+
+    for (let run = 1; run <= 3; run++) {
+      upload.mockClear(); createSignedUrl.mockClear(); insert.mockClear(); openWa.mockClear();
+      const { unmount } = render(<PrescriptionPage />);
+      const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+      await userEvent.upload(input, file);
+      await userEvent.type(screen.getByPlaceholderText(/الاسم الكامل/), `عميل ${run}`);
+      await userEvent.type(screen.getByPlaceholderText(/رقم الجوال/), "777000000");
+      await userEvent.type(screen.getByPlaceholderText(/العنوان للتوصيل/), "عدن — المنصورة");
+      await userEvent.click(screen.getByRole("button", { name: /إرسال الروشتة/ }));
+
+      await waitFor(() => expect(insert).toHaveBeenCalledTimes(1), { timeout: 8000 });
+      expect(upload).toHaveBeenCalledTimes(1);
+      expect(createSignedUrl).toHaveBeenCalledTimes(1);
+      expect(openWa).toHaveBeenCalledTimes(1);
+      const payload = (insert.mock.calls[0] as any[])[0];
+      expect(payload.image_urls).toEqual(["https://signed/url.jpg"]);
+      expect(payload.status).toBe("pending");
+      unmount();
+    }
+  }, 30000);
+});
