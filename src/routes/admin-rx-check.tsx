@@ -140,8 +140,19 @@ function RxCheckPage() {
             {running ? <Loader2 className="size-4 animate-spin" /> : <Play className="size-4" />}
             بدء الفحص ({rows.length})
           </button>
+          <button onClick={exportCSV} disabled={rows.length === 0}
+            data-testid="rxcheck-export-csv"
+            className="flex items-center gap-1.5 rounded-xl bg-emerald-500 px-3 py-2 text-xs font-black text-white disabled:opacity-50">
+            <Download className="size-4" /> CSV
+          </button>
+          <button onClick={exportPDF} disabled={rows.length === 0}
+            data-testid="rxcheck-export-pdf"
+            className="flex items-center gap-1.5 rounded-xl bg-rose-600 px-3 py-2 text-xs font-black text-white disabled:opacity-50">
+            <FileText className="size-4" /> PDF
+          </button>
           {running && <span className="text-xs text-muted-foreground">{done}/{total}</span>}
         </div>
+
 
         {total > 0 && (
           <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
