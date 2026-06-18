@@ -17,7 +17,8 @@ import {
 const EST_ROW_HEIGHT = 320;
 
 type Action = (id: string) => Promise<void> | void;
-type BulkAction = (ids: string[], onProgress?: (done: number, total: number, currentId: string) => void) => Promise<void> | void;
+export type BulkResult = { ok: number; fail: number; failures: { id: string; reason: string }[] };
+type BulkAction = (ids: string[], onProgress?: (done: number, total: number, currentId: string) => void) => Promise<void | BulkResult> | void;
 
 // ---------- CSV columns ----------
 type CsvCol = { key: string; label: string; pick: (r: Rx) => unknown };
@@ -100,7 +101,7 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDel
   const [showCsvSettings, setShowCsvSettings] = useState(false);
   const [csvCols, setCsvCols] = useState<string[]>(() => loadCsvPrefs());
   const [bulkProgress, setBulkProgress] = useState<null | { done: number; total: number; currentId: string; kind: "delete" | "archive" | "regenerate" }>(null);
-  const [bulkSummary, setBulkSummary] = useState<null | { ok: number; fail: number; total: number; kind: "delete" | "archive" | "regenerate"; error?: string }>(null);
+  const [bulkSummary, setBulkSummary] = useState<null | { ok: number; fail: number; total: number; kind: "delete" | "archive" | "regenerate"; error?: string; failures?: { id: string; reason: string }[] }>(null);
   const [exportPreview, setExportPreview] = useState<null | "csv" | "pdf">(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(() => {
     if (typeof localStorage === "undefined") return "active";
@@ -294,12 +295,19 @@ tr:nth-child(even) td { background:#f8fafc; }
     const actionName = kind === "delete" ? "الحذف الجماعي" : kind === "archive" ? "الأرشفة الجماعية" : "تجديد الروابط الجماعي";
     const logAction = kind === "delete" ? "bulk-delete" : kind === "archive" ? "bulk-archive" : "bulk-regenerate";
     try {
-      await handler(ids, (done, total, currentId) => {
+      const result = await handler(ids, (done, total, currentId) => {
         lastDone = done;
         setBulkProgress({ done, total, currentId, kind });
       });
-      logActivity({ rxId: `[${ids.length}]`, action: logAction as any, status: "success", details: ids.join(", ") });
-      setBulkSummary({ ok: ids.length, fail: 0, total: ids.length, kind });
+      if (result && typeof result === "object" && "failures" in result) {
+        const r = result as BulkResult;
+        const status = r.fail === 0 ? "success" : r.ok === 0 ? "error" : "success";
+        logActivity({ rxId: `[${ids.length}]`, action: logAction as any, status, details: ids.join(", "), error: r.failures.map((f) => `${f.id}: ${f.reason}`).join(" | ") || undefined });
+        setBulkSummary({ ok: r.ok, fail: r.fail, total: ids.length, kind, failures: r.failures });
+      } else {
+        logActivity({ rxId: `[${ids.length}]`, action: logAction as any, status: "success", details: ids.join(", ") });
+        setBulkSummary({ ok: ids.length, fail: 0, total: ids.length, kind });
+      }
       setSelected(new Set());
     } catch (e: any) {
       const msg = humanizeError(e, actionName);
@@ -374,7 +382,7 @@ tr:nth-child(even) td { background:#f8fafc; }
       </div>
 
       {riskStats.highRisk && (
-        <div role="alert" data-testid="rx-risk-banner" className="flex flex-wrap items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+        <div role="alert" data-testid="rx-risk-banner" data-pct={riskStats.pct} data-total={riskStats.total} data-at-risk={riskStats.atRisk} className="flex flex-wrap items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
           <AlertTriangle className="size-4 shrink-0 text-amber-600" />
           <span className="font-black">تنبيه:</span>
           <span>
@@ -666,30 +674,39 @@ function CsvSettingsDialog({ selected, onChange, onClose }: {
 
 // ---------- Bulk summary dialog ----------
 function BulkSummaryDialog({ s, onClose }: {
-  s: { ok: number; fail: number; total: number; kind: "delete" | "archive" | "regenerate"; error?: string };
+  s: { ok: number; fail: number; total: number; kind: "delete" | "archive" | "regenerate"; error?: string; failures?: { id: string; reason: string }[] };
   onClose: () => void;
 }) {
   const okPct = Math.round((s.ok / Math.max(1, s.total)) * 100);
   const allOk = s.fail === 0;
   const verb = s.kind === "delete" ? "الحذف" : s.kind === "archive" ? "الأرشفة" : "تجديد الروابط";
+  // group failures by reason for compact display
+  const grouped = (s.failures ?? []).reduce<Record<string, string[]>>((m, f) => {
+    (m[f.reason] ||= []).push(f.id);
+    return m;
+  }, {});
   return (
     <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4 animate-in fade-in" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} data-testid="bulk-summary" className="w-full max-w-md rounded-2xl bg-card p-5 shadow-elevated">
+      <div onClick={(e) => e.stopPropagation()} data-testid="bulk-summary" className="w-full max-w-lg rounded-2xl bg-card p-5 shadow-elevated max-h-[85vh] overflow-auto">
         <div className="flex items-start gap-3">
           <div className={`grid size-10 place-items-center rounded-xl ${allOk ? "bg-emerald-100 text-emerald-600" : "bg-amber-100 text-amber-700"}`}>
             {allOk ? <CheckSquare className="size-5" /> : <AlertTriangle className="size-5" />}
           </div>
           <div className="flex-1">
             <p className="text-base font-black">{allOk ? `اكتمل ${verb} بنجاح` : `اكتمل ${verb} مع وجود أخطاء`}</p>
-            <p className="mt-1 text-xs text-muted-foreground">إجمالي العمليات: {s.total}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {s.kind === "regenerate"
+                ? `تم تجديد روابط ${s.ok} روشتة بنجاح من أصل ${s.total}${s.fail ? ` · فشل ${s.fail}` : ""}`
+                : `إجمالي العمليات: ${s.total}`}
+            </p>
           </div>
         </div>
         <div className="mt-4 grid grid-cols-2 gap-2">
-          <div className="rounded-xl bg-emerald-50 p-3 text-center">
+          <div className="rounded-xl bg-emerald-50 p-3 text-center" data-testid="bulk-summary-ok">
             <p className="text-2xl font-black text-emerald-700">{s.ok}</p>
             <p className="text-[11px] font-bold text-emerald-700">نجاح</p>
           </div>
-          <div className="rounded-xl bg-rose-50 p-3 text-center">
+          <div className="rounded-xl bg-rose-50 p-3 text-center" data-testid="bulk-summary-fail">
             <p className="text-2xl font-black text-rose-700">{s.fail}</p>
             <p className="text-[11px] font-bold text-rose-700">فشل</p>
           </div>
@@ -699,6 +716,20 @@ function BulkSummaryDialog({ s, onClose }: {
         </div>
         {s.error && (
           <p className="mt-3 rounded-lg bg-rose-50 p-2 text-[11px] text-rose-700">{s.error}</p>
+        )}
+        {Object.keys(grouped).length > 0 && (
+          <div className="mt-4 space-y-2" data-testid="bulk-summary-failures">
+            <p className="text-xs font-black text-rose-700">تفاصيل الإخفاقات / التحذيرات:</p>
+            {Object.entries(grouped).map(([reason, ids]) => (
+              <details key={reason} className="rounded-lg bg-rose-50 p-2 text-[11px] text-rose-700">
+                <summary className="cursor-pointer font-bold">{reason} <span className="text-rose-500">({ids.length})</span></summary>
+                <ul className="mt-1.5 list-inside list-disc space-y-0.5 pr-2 font-mono text-[10px]" dir="ltr">
+                  {ids.slice(0, 50).map((id) => <li key={id}>{id}</li>)}
+                  {ids.length > 50 && <li>… و{ids.length - 50} أخرى</li>}
+                </ul>
+              </details>
+            ))}
+          </div>
         )}
         <div className="mt-4 flex justify-end">
           <button onClick={onClose} className="rounded-lg bg-primary px-4 py-2 text-xs font-black text-primary-foreground hover:bg-primary-deep">تم</button>
