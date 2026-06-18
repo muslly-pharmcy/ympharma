@@ -57,8 +57,25 @@ function matchesStatusFilter(r: Rx, f: StatusFilter): boolean {
   if (f === "all") return true;
   if (f === "archived") return r.status === "archived";
   if (f === "cancelled") return r.status === "cancelled";
-  // active = anything that is not archived/cancelled
   return r.status !== "archived" && r.status !== "cancelled";
+}
+
+// ---------- Expiry filter ----------
+type ExpiryFilter = "all" | "valid" | "soon" | "expired";
+const EXPIRY_FILTERS: { v: ExpiryFilter; label: string }[] = [
+  { v: "all", label: "كل الروابط" },
+  { v: "valid", label: "صالحة" },
+  { v: "soon", label: "تنتهي قريباً" },
+  { v: "expired", label: "منتهية" },
+];
+const SOON_MS = 3 * 86_400_000;
+type RxExpiry = "none" | "valid" | "soon" | "expired";
+function rxExpiryStatus(rx: Rx): RxExpiry {
+  if (!rx.image_urls?.length) return "none";
+  const infos = rx.image_urls.map(parseSignedUrl);
+  if (infos.some((i) => i.expired)) return "expired";
+  if (infos.some((i) => !i.expired && i.expiresInMs != null && i.expiresInMs < SOON_MS)) return "soon";
+  return "valid";
 }
 
 export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDelete, onBulkArchive, onRegenerateUrls, loading, error, onRetry }: {
