@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { ProductCard } from "@/components/product-card";
 import { categories, formatPrice, getProductById, products } from "@/lib/products";
+import { proxifyImage } from "@/lib/img-proxy";
 import { useCart } from "@/lib/cart";
 import { getVitaminInfo, type VitaminInfo } from "@/lib/vitamin-info.functions";
 import { readCache, writeCache, cacheKey } from "@/lib/vitamin-cache";
@@ -63,7 +64,7 @@ function ProductDetail() {
 
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="overflow-hidden rounded-3xl border border-border bg-card">
-            <img src={p.img} alt={p.name} className="aspect-square w-full object-cover" />
+            <img src={proxifyImage(p.img)} alt={p.name} className="aspect-square w-full object-cover" />
           </div>
           <div className="flex flex-col gap-4">
             <div>

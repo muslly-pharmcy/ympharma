@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { formatPrice, type Product } from "@/lib/products";
+import { proxifyImage } from "@/lib/img-proxy";
 import { useCart } from "@/lib/cart";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -31,7 +32,7 @@ export function ProductCard({ product }: { product: Product }) {
       <Link to="/product/$id" params={{ id: String(product.id) }} className="relative aspect-square overflow-hidden bg-secondary/60 block">
         {!loaded && <Skeleton className="absolute inset-0 rounded-none" />}
         <img
-          src={product.img}
+          src={proxifyImage(product.img)}
           alt={product.name}
           loading="lazy"
           decoding="async"

@@ -37,6 +37,7 @@ import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/publi
 import { Route as ApiPublicUptimeWebhookRouteImport } from './routes/api/public/uptime-webhook'
 import { Route as ApiPublicLogErrorRouteImport } from './routes/api/public/log-error'
 import { Route as ApiPublicIncidentCheckRouteImport } from './routes/api/public/incident-check'
+import { Route as ApiPublicImgRouteImport } from './routes/api/public/img'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -183,6 +184,11 @@ const ApiPublicIncidentCheckRoute = ApiPublicIncidentCheckRouteImport.update({
   path: '/api/public/incident-check',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicImgRoute = ApiPublicImgRouteImport.update({
+  id: '/api/public/img',
+  path: '/api/public/img',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
   id: '/api/public/health',
   path: '/api/public/health',
@@ -232,6 +238,7 @@ export interface FileRoutesByFullPath {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/img': typeof ApiPublicImgRoute
   '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
   '/api/public/log-error': typeof ApiPublicLogErrorRoute
   '/api/public/uptime-webhook': typeof ApiPublicUptimeWebhookRoute
@@ -266,6 +273,7 @@ export interface FileRoutesByTo {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/img': typeof ApiPublicImgRoute
   '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
   '/api/public/log-error': typeof ApiPublicLogErrorRoute
   '/api/public/uptime-webhook': typeof ApiPublicUptimeWebhookRoute
@@ -301,6 +309,7 @@ export interface FileRoutesById {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/img': typeof ApiPublicImgRoute
   '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
   '/api/public/log-error': typeof ApiPublicLogErrorRoute
   '/api/public/uptime-webhook': typeof ApiPublicUptimeWebhookRoute
@@ -337,6 +346,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/product/$id'
     | '/api/public/health'
+    | '/api/public/img'
     | '/api/public/incident-check'
     | '/api/public/log-error'
     | '/api/public/uptime-webhook'
@@ -371,6 +381,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/product/$id'
     | '/api/public/health'
+    | '/api/public/img'
     | '/api/public/incident-check'
     | '/api/public/log-error'
     | '/api/public/uptime-webhook'
@@ -405,6 +416,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/product/$id'
     | '/api/public/health'
+    | '/api/public/img'
     | '/api/public/incident-check'
     | '/api/public/log-error'
     | '/api/public/uptime-webhook'
@@ -440,6 +452,7 @@ export interface RootRouteChildren {
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ProductIdRoute: typeof ProductIdRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
+  ApiPublicImgRoute: typeof ApiPublicImgRoute
   ApiPublicIncidentCheckRoute: typeof ApiPublicIncidentCheckRoute
   ApiPublicLogErrorRoute: typeof ApiPublicLogErrorRoute
   ApiPublicUptimeWebhookRoute: typeof ApiPublicUptimeWebhookRoute
@@ -648,6 +661,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicIncidentCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/img': {
+      id: '/api/public/img'
+      path: '/api/public/img'
+      fullPath: '/api/public/img'
+      preLoaderRoute: typeof ApiPublicImgRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/health': {
       id: '/api/public/health'
       path: '/api/public/health'
@@ -704,6 +724,7 @@ const rootRouteChildren: RootRouteChildren = {
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ProductIdRoute: ProductIdRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
+  ApiPublicImgRoute: ApiPublicImgRoute,
   ApiPublicIncidentCheckRoute: ApiPublicIncidentCheckRoute,
   ApiPublicLogErrorRoute: ApiPublicLogErrorRoute,
   ApiPublicUptimeWebhookRoute: ApiPublicUptimeWebhookRoute,

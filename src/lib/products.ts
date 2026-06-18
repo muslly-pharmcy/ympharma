@@ -15,12 +15,21 @@ export type Category = { id: string; name: string };
 export const categories: Category[] = [
   { id: "medicine", name: "الأدوية" },
   { id: "kids", name: "الأم والطفل" },
-  { id: "devices", name: "أجهزة طبية" },
   { id: "cosmetics", name: "العناية والتجميل" },
-  { id: "vitamins", name: "فيتامينات ومكملات" },
+  { id: "vitamins", name: "فيتامينات ومكملات وأجهزة طبية" },
   { id: "now", name: "منتجات NOW Foods" },
   { id: "herbal", name: "أعشاب طبيعية" },
 ];
+
+// Categories merged into "vitamins" for display & filtering.
+export const CATEGORY_ALIASES: Record<string, string[]> = {
+  vitamins: ["vitamins", "devices"],
+};
+
+export function catMatches(activeCat: string, productCat: string): boolean {
+  const aliases = CATEGORY_ALIASES[activeCat];
+  return aliases ? aliases.includes(productCat) : productCat === activeCat;
+}
 
 // ---------- Image pools (Unsplash) ----------
 const IMG = {
