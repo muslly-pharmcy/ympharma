@@ -530,9 +530,54 @@ function CsvSettingsDialog({ selected, onChange, onClose }: {
   );
 }
 
+// ---------- Bulk summary dialog ----------
+function BulkSummaryDialog({ s, onClose }: {
+  s: { ok: number; fail: number; total: number; kind: "delete" | "archive"; error?: string };
+  onClose: () => void;
+}) {
+  const okPct = Math.round((s.ok / Math.max(1, s.total)) * 100);
+  const allOk = s.fail === 0;
+  const verb = s.kind === "delete" ? "الحذف" : "الأرشفة";
+  return (
+    <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4 animate-in fade-in" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} data-testid="bulk-summary" className="w-full max-w-md rounded-2xl bg-card p-5 shadow-elevated">
+        <div className="flex items-start gap-3">
+          <div className={`grid size-10 place-items-center rounded-xl ${allOk ? "bg-emerald-100 text-emerald-600" : "bg-amber-100 text-amber-700"}`}>
+            {allOk ? <CheckSquare className="size-5" /> : <AlertTriangle className="size-5" />}
+          </div>
+          <div className="flex-1">
+            <p className="text-base font-black">{allOk ? `اكتمل ${verb} بنجاح` : `اكتمل ${verb} مع وجود أخطاء`}</p>
+            <p className="mt-1 text-xs text-muted-foreground">إجمالي العمليات: {s.total}</p>
+          </div>
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <div className="rounded-xl bg-emerald-50 p-3 text-center">
+            <p className="text-2xl font-black text-emerald-700">{s.ok}</p>
+            <p className="text-[11px] font-bold text-emerald-700">نجاح</p>
+          </div>
+          <div className="rounded-xl bg-rose-50 p-3 text-center">
+            <p className="text-2xl font-black text-rose-700">{s.fail}</p>
+            <p className="text-[11px] font-bold text-rose-700">فشل</p>
+          </div>
+        </div>
+        <div className="mt-3 h-2 overflow-hidden rounded-full bg-secondary">
+          <div className="h-full bg-emerald-500 transition-all" style={{ width: `${okPct}%` }} />
+        </div>
+        {s.error && (
+          <p className="mt-3 rounded-lg bg-rose-50 p-2 text-[11px] text-rose-700">{s.error}</p>
+        )}
+        <div className="mt-4 flex justify-end">
+          <button onClick={onClose} className="rounded-lg bg-primary px-4 py-2 text-xs font-black text-primary-foreground hover:bg-primary-deep">تم</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ---------- Activity log dialog ----------
 function ActivityLogDialog({ onClose }: { onClose: () => void }) {
   const [entries, setEntries] = useState<RxActivityEntry[]>(() => getActivityLog());
+  const [confirmClear, setConfirmClear] = useState(false);
   useEffect(() => subscribeActivityLog(setEntries), []);
   return (
     <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4" onClick={onClose}>
@@ -540,10 +585,18 @@ function ActivityLogDialog({ onClose }: { onClose: () => void }) {
         <div className="flex items-center justify-between">
           <p className="text-base font-black flex items-center gap-2"><History className="size-4" /> سجل نشاط الروشتات</p>
           <div className="flex items-center gap-2">
-            <button onClick={() => { clearActivityLog(); toast.success("تم مسح السجل"); }} className="rounded-lg bg-secondary px-3 py-1.5 text-xs font-bold hover:bg-accent">مسح</button>
+            <button
+              onClick={() => setConfirmClear(true)}
+              disabled={entries.length === 0}
+              data-testid="clear-log-btn"
+              className="flex items-center gap-1.5 rounded-lg bg-rose-100 px-3 py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-200 disabled:opacity-40"
+            >
+              <Trash2 className="size-3.5" /> تصفير السجل
+            </button>
             <button onClick={onClose} className="grid size-8 place-items-center rounded-lg hover:bg-accent"><X className="size-4" /></button>
           </div>
         </div>
+        <p className="mt-1 text-[11px] text-muted-foreground">السجل محفوظ محلياً على هذا المتصفح ويبقى عند إعادة تحميل الصفحة. آخر {entries.length} عملية.</p>
         <div className="mt-3 max-h-[60vh] overflow-auto rounded-xl border border-border">
           {entries.length === 0 ? (
             <p className="p-8 text-center text-xs text-muted-foreground">لا يوجد نشاط بعد</p>
@@ -577,9 +630,34 @@ function ActivityLogDialog({ onClose }: { onClose: () => void }) {
           )}
         </div>
       </div>
+
+      {confirmClear && (
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-[60] grid place-items-center bg-black/70 p-4" onClick={() => setConfirmClear(false)}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm rounded-2xl bg-card p-5 shadow-elevated">
+            <div className="flex items-start gap-3">
+              <div className="grid size-10 place-items-center rounded-xl bg-rose-100 text-rose-600"><Trash2 className="size-5" /></div>
+              <div>
+                <p className="text-base font-black">تأكيد تصفير سجل النشاط</p>
+                <p className="mt-1 text-xs text-muted-foreground">سيتم حذف كافة سجلات النشاط المخزنة محلياً ({entries.length} عملية) ولا يمكن استرجاعها. تأثير الحذف على بيانات الروشتات الفعلية: لا يوجد.</p>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center justify-end gap-2">
+              <button onClick={() => setConfirmClear(false)} className="rounded-lg bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">إلغاء</button>
+              <button
+                data-testid="confirm-clear-log"
+                onClick={() => { clearActivityLog(); setConfirmClear(false); toast.success("تم تصفير سجل النشاط"); }}
+                className="flex items-center gap-1.5 rounded-lg bg-rose-500 px-4 py-2 text-xs font-black text-white hover:bg-rose-600"
+              >
+                <Trash2 className="size-3.5" /> تصفير
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
 
 // ---------- Cached image tile ----------
 function CachedImage({ url, alt, onClick, onPrefetch }: {
