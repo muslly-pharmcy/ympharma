@@ -42,7 +42,7 @@ export const Route = createFileRoute("/")({
           image: ["https://muslly.com/__l5e/assets-v1/a8ea62c1-1cf3-4707-a017-db411980bb36/pharmacy-storefront.jpg"],
           address: {
             "@type": "PostalAddress",
-            streetAddress: "المنصورة",
+            streetAddress: "المنصورة — ريمي، أمام مستشفى صابر",
             addressLocality: "عدن",
             addressCountry: "YE",
           },
@@ -336,8 +336,8 @@ function Home() {
               />
             </div>
             <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
-              <h3 className="text-lg font-black">الفرع الرئيسي — المنصورة</h3>
-              <p className="mt-1 text-sm text-muted-foreground">المنصورة، عدن، الجمهورية اليمنية</p>
+              <h3 className="text-lg font-black">الفرع الرئيسي — المنصورة، ريمي</h3>
+              <p className="mt-1 text-sm text-muted-foreground">عدن — المنصورة — ريمي، أمام مستشفى صابر، الجمهورية اليمنية</p>
 
               <ul className="mt-4 space-y-3 text-sm">
                 <li className="flex items-center gap-3">
@@ -351,14 +351,18 @@ function Home() {
                   <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><Phone className="size-5" /></span>
                   <div>
                     <p className="font-black">اتصال مباشر</p>
-                    <a href="tel:+967782878280" className="text-primary hover:underline" dir="ltr">+967 782 878 280</a>
+                    <div className="flex flex-wrap gap-x-3 gap-y-1">
+                      <a href="tel:+967782878280" className="text-primary hover:underline" dir="ltr">+967 782 878 280</a>
+                      <a href="tel:+967774068936" className="text-primary hover:underline" dir="ltr">+967 774 068 936</a>
+                      <a href="tel:+96702358921" className="text-primary hover:underline" dir="ltr">02 358921</a>
+                    </div>
                   </div>
                 </li>
                 <li className="flex items-center gap-3">
                   <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><MapPin className="size-5" /></span>
                   <div>
                     <p className="font-black">العنوان</p>
-                    <p className="text-muted-foreground">المنصورة — بالقرب من المعالم الرئيسية</p>
+                    <p className="text-muted-foreground">عدن — المنصورة — ريمي، أمام مستشفى صابر</p>
                   </div>
                 </li>
               </ul>
