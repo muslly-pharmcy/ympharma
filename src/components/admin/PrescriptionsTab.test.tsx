@@ -1,12 +1,25 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
+// Stub router-dependent chrome and TanStack route registration so we can render
+// PrescriptionPage in isolation without booting the router.
+vi.mock("@/components/site-chrome", () => ({
+  SiteHeader: () => null,
+  SiteFooter: () => null,
+}));
+vi.mock("@tanstack/react-router", async (orig) => {
+  const actual = (await orig()) as any;
+  return { ...actual, createFileRoute: () => (cfg: any) => ({ options: cfg }) };
+});
+
 import { PrescriptionsTab } from "@/components/admin/PrescriptionsTab";
 import type { Rx } from "@/components/admin/shared";
 import { clearActivityLog, getActivityLog } from "@/lib/rx-activity-log";
 import { dedupeProducts, productDedupeKey } from "@/lib/use-merged-products";
 
 function mkRx(i: number, over: Partial<Rx> = {}): Rx {
+
 
   return {
     id: `RX-${String(i).padStart(4, "0")}`,
