@@ -19,6 +19,7 @@ import { ErrorsTab } from "@/components/admin/ErrorsTab";
 import { InsuranceTab } from "@/components/admin/InsuranceTab";
 import { RetentionTab } from "@/components/admin/RetentionTab";
 import { EmailsTab } from "@/components/admin/EmailsTab";
+import { SecurityTab } from "@/components/admin/SecurityTab";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
