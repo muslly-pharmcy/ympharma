@@ -79,10 +79,12 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDel
   const [csvCols, setCsvCols] = useState<string[]>(() => loadCsvPrefs());
   const [bulkProgress, setBulkProgress] = useState<null | { done: number; total: number; currentId: string; kind: "delete" | "archive" }>(null);
   const [bulkSummary, setBulkSummary] = useState<null | { ok: number; fail: number; total: number; kind: "delete" | "archive"; error?: string }>(null);
+  const [exportPreview, setExportPreview] = useState<null | "csv" | "pdf">(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(() => {
     if (typeof localStorage === "undefined") return "active";
     return (localStorage.getItem("rx-status-filter-v1") as StatusFilter) || "active";
   });
+
 
   // persist CSV pref
   useEffect(() => {
