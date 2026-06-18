@@ -65,7 +65,7 @@ function ProductDetail() {
 
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="overflow-hidden rounded-3xl border border-border bg-card">
-            <img src={proxifyImage(p.img)} alt={p.name} className="aspect-square w-full object-cover" />
+            <img src={proxifyImage(p.img)} alt={p.name} onError={handleImageError} className="aspect-square w-full object-cover" />
           </div>
           <div className="flex flex-col gap-4">
             <div>
