@@ -57,6 +57,9 @@ describe("PrescriptionsTab — integration", () => {
 
     render(<PrescriptionsTab rxs={[mkRx(1), mkRx(2)]} onStatus={vi.fn()} />);
     await userEvent.click(screen.getByTestId("export-csv-btn"));
+    // Preview dialog appears first — confirm to actually export
+    expect(screen.getByTestId("export-preview")).toBeInTheDocument();
+    await userEvent.click(screen.getByTestId("export-confirm-btn"));
 
     expect(spy).toHaveBeenCalled();
     const csv = captured ? await (captured as Blob).text() : "";
@@ -66,6 +69,57 @@ describe("PrescriptionsTab — integration", () => {
     expect(csv).toContain("RX-0001");
     spy.mockRestore();
   });
+
+  it("shows export preview reflecting search, status filter, and selected columns", async () => {
+    localStorage.setItem("rx-csv-cols-v1", JSON.stringify(["id", "customer_name", "created_at", "updated_at"]));
+    const rxs = [
+      mkRx(1, { customer_name: "أحمد" }),
+      mkRx(2, { customer_name: "سارة", status: "archived" }),
+      mkRx(3, { customer_name: "أحمد ٢" }),
+    ];
+    render(<PrescriptionsTab rxs={rxs} onStatus={vi.fn()} />);
+    await userEvent.type(screen.getByPlaceholderText(/ابحث برقم الروشتة/), "أحمد");
+    await userEvent.click(screen.getByTestId("export-pdf-btn"));
+
+    await screen.findByTestId("export-preview");
+    expect(screen.getByTestId("export-preview-count")).toHaveTextContent("2");
+    expect(screen.getByTestId("export-preview-col-id")).toBeInTheDocument();
+    expect(screen.getByTestId("export-preview-col-created_at")).toBeInTheDocument();
+    expect(screen.getByTestId("export-preview-col-updated_at")).toBeInTheDocument();
+    expect(screen.queryByTestId("export-preview-col-customer_phone")).toBeNull();
+  });
+
+  it("PDF export honors search + status filter + custom columns (window.open content)", async () => {
+    localStorage.setItem("rx-csv-cols-v1", JSON.stringify(["id", "customer_name", "created_at", "updated_at"]));
+    const writes: string[] = [];
+    const fakeDoc = { open: vi.fn(), write: (s: string) => writes.push(s), close: vi.fn() };
+    const openSpy = vi.spyOn(window, "open").mockReturnValue({ document: fakeDoc } as any);
+
+    const rxs = [
+      mkRx(1, { customer_name: "أحمد", created_at: "2026-01-01T08:00:00Z" }),
+      mkRx(2, { customer_name: "سارة", status: "archived" }),
+      // updated_at missing → must fall back to created_at in the PDF
+      mkRx(3, { customer_name: "أحمد ٢", created_at: "2026-02-02T09:00:00Z", updated_at: undefined as any }),
+    ];
+    render(<PrescriptionsTab rxs={rxs} onStatus={vi.fn()} />);
+    await userEvent.type(screen.getByPlaceholderText(/ابحث برقم الروشتة/), "أحمد");
+    await userEvent.click(screen.getByTestId("export-pdf-btn"));
+    await userEvent.click(screen.getByTestId("export-confirm-btn"));
+
+    expect(openSpy).toHaveBeenCalled();
+    const html = writes.join("");
+    expect(html).toContain("نشطة");
+    expect(html).toContain("أحمد");
+    expect(html).toContain("RX-0001");
+    expect(html).toContain("RX-0003");
+    expect(html).not.toContain("RX-0002");
+    expect(html).toContain("<th>الاسم</th>");
+    expect(html).toContain("<th>تاريخ الإنشاء</th>");
+    expect(html).toContain("<th>آخر تحديث</th>");
+    expect(html).not.toContain("<th>الجوال</th>");
+    openSpy.mockRestore();
+  });
+
 
   it("confirms delete, calls onDelete, and writes an activity-log entry", async () => {
     const onDelete = vi.fn(async () => { /* ok */ });
