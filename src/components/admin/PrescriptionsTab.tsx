@@ -431,9 +431,9 @@ tr:nth-child(even) td { background:#f8fafc; }
           statusFilterLabel={STATUS_FILTERS.find((f) => f.v === statusFilter)?.label ?? "الكل"}
           searchText={q}
           onConfirm={() => {
-            const kind = exportPreview;
+            // Throws on failure — dialog catches and shows retry UI.
+            if (exportPreview === "csv") exportCSV(); else exportPDF();
             setExportPreview(null);
-            if (kind === "csv") exportCSV(); else exportPDF();
           }}
           onClose={() => setExportPreview(null)}
         />
