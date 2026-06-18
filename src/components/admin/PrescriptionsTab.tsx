@@ -101,7 +101,7 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDel
   const [showCsvSettings, setShowCsvSettings] = useState(false);
   const [csvCols, setCsvCols] = useState<string[]>(() => loadCsvPrefs());
   const [bulkProgress, setBulkProgress] = useState<null | { done: number; total: number; currentId: string; kind: "delete" | "archive" | "regenerate" }>(null);
-  const [bulkSummary, setBulkSummary] = useState<null | { ok: number; fail: number; total: number; kind: "delete" | "archive" | "regenerate"; error?: string }>(null);
+  const [bulkSummary, setBulkSummary] = useState<null | { ok: number; fail: number; total: number; kind: "delete" | "archive" | "regenerate"; error?: string; failures?: { id: string; reason: string }[] }>(null);
   const [exportPreview, setExportPreview] = useState<null | "csv" | "pdf">(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(() => {
     if (typeof localStorage === "undefined") return "active";
