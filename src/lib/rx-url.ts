@@ -1,10 +1,11 @@
-// Helpers for prescription Signed URLs.
-// Signed URL shape: https://<project>.supabase.co/storage/v1/object/sign/<bucket>/<path>?token=<JWT>
-// JWT payload contains `exp` (unix seconds) and `url` (the storage path).
+// Helpers for prescription image URLs.
+// Now uses Public URLs (no expiration) instead of Signed URLs.
+// Public URL shape: https://<project>.supabase.co/storage/v1/object/public/<bucket>/<path>
+// Legacy Signed URL shape: https://<project>.supabase.co/storage/v1/object/sign/<bucket>/<path>?token=<JWT>
 
 import { supabase } from "@/integrations/supabase/client";
 
-export const RX_SIGNED_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days
+export const RX_SIGNED_TTL_SECONDS = 60 * 60 * 24 * 30; // legacy, kept for compatibility
 
 export type RxUrlInfo = {
   url: string;
@@ -13,6 +14,7 @@ export type RxUrlInfo = {
   expiresAt: Date | null;
   expired: boolean;
   expiresInMs: number | null;
+  isPublic: boolean;
 };
 
 function decodeJwtPayload(token: string): any | null {
@@ -26,9 +28,16 @@ function decodeJwtPayload(token: string): any | null {
 }
 
 export function parseSignedUrl(url: string): RxUrlInfo {
-  const info: RxUrlInfo = { url, bucket: null, path: null, expiresAt: null, expired: false, expiresInMs: null };
+  const info: RxUrlInfo = { url, bucket: null, path: null, expiresAt: null, expired: false, expiresInMs: null, isPublic: false };
   try {
     const u = new URL(url);
+    const pub = u.pathname.match(/\/storage\/v1\/object\/public\/([^/]+)\/(.+)$/);
+    if (pub) {
+      info.bucket = pub[1];
+      info.path = decodeURIComponent(pub[2]);
+      info.isPublic = true;
+      return info;
+    }
     const m = u.pathname.match(/\/storage\/v1\/object\/sign\/([^/]+)\/(.+)$/);
     if (m) { info.bucket = m[1]; info.path = decodeURIComponent(m[2]); }
     const token = u.searchParams.get("token");
@@ -52,6 +61,7 @@ export function parseSignedUrl(url: string): RxUrlInfo {
 }
 
 export function formatExpiry(info: RxUrlInfo): { label: string; tone: "ok" | "warn" | "expired" | "unknown" } {
+  if (info.isPublic) return { label: "دائم (Public)", tone: "ok" };
   if (!info.expiresAt) return { label: "غير معروف", tone: "unknown" };
   if (info.expired) return { label: `منتهي منذ ${humanDelta(-info.expiresInMs!)}`, tone: "expired" };
   const days = info.expiresInMs! / 86_400_000;
@@ -70,14 +80,15 @@ function humanDelta(ms: number): string {
   return `${d} يوم`;
 }
 
+// Converts any legacy Signed URL to a Public URL for the same object.
+// Returns the input unchanged if already public.
 export async function regenerateSignedUrl(oldUrl: string): Promise<string> {
   const info = parseSignedUrl(oldUrl);
+  if (info.isPublic) return oldUrl;
   if (!info.bucket || !info.path) throw new Error("تعذر استخراج مسار الملف من الرابط");
-  const { data, error } = await supabase.storage
-    .from(info.bucket)
-    .createSignedUrl(info.path, RX_SIGNED_TTL_SECONDS);
-  if (error || !data?.signedUrl) throw error || new Error("فشل إنشاء رابط جديد");
-  return data.signedUrl;
+  const { data } = supabase.storage.from(info.bucket).getPublicUrl(info.path);
+  if (!data?.publicUrl) throw new Error("فشل إنشاء رابط عام");
+  return data.publicUrl;
 }
 
 export async function checkUrlReachable(url: string, timeoutMs = 8000): Promise<{ ok: boolean; status: number | null; ms: number; error?: string }> {
@@ -85,10 +96,10 @@ export async function checkUrlReachable(url: string, timeoutMs = 8000): Promise<
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
-    // HEAD against signed Supabase URL works without auth.
     const res = await fetch(url, { method: "HEAD", signal: ctrl.signal, cache: "no-store" });
     return { ok: res.ok, status: res.status, ms: Math.round(performance.now() - start) };
   } catch (e: any) {
     return { ok: false, status: null, ms: Math.round(performance.now() - start), error: e?.name === "AbortError" ? "انتهت المهلة" : (e?.message || "فشل الاتصال") };
   } finally { clearTimeout(t); }
 }
+
