@@ -1,11 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, within, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PrescriptionsTab } from "@/components/admin/PrescriptionsTab";
 import type { Rx } from "@/components/admin/shared";
 import { clearActivityLog, getActivityLog } from "@/lib/rx-activity-log";
+import { dedupeProducts, productDedupeKey } from "@/lib/use-merged-products";
 
 function mkRx(i: number, over: Partial<Rx> = {}): Rx {
+
   return {
     id: `RX-${String(i).padStart(4, "0")}`,
     customer_name: `عميل ${i}`,
