@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
-import { AlertTriangle, CheckCircle2, Activity, Wifi, Globe2, ShieldAlert } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Activity, Wifi, Globe2, ShieldAlert, Printer } from "lucide-react";
 
 export const Route = createFileRoute("/status")({
   head: () => ({
@@ -67,16 +67,37 @@ function StatusPage() {
         ? "degraded"
         : "ok";
 
+  function durationText(start: string, end: string | null): string {
+    const s = new Date(start).getTime();
+    const e = end ? new Date(end).getTime() : Date.now();
+    const mins = Math.max(1, Math.round((e - s) / 60000));
+    if (mins < 60) return `${mins} دقيقة`;
+    const h = Math.floor(mins / 60), m = mins % 60;
+    if (h < 24) return `${h} ساعة${m ? ` و${m} دقيقة` : ""}`;
+    const d = Math.floor(h / 24); return `${d} يوم${h % 24 ? ` و${h % 24} ساعة` : ""}`;
+  }
+
   return (
     <div dir="rtl" className="min-h-screen bg-background">
-      <SiteHeader />
+      <style>{`@media print {
+        header, footer, nav, .no-print { display: none !important; }
+        body { background: white; }
+        main { max-width: 100% !important; padding: 1cm !important; }
+      }`}</style>
+      <div className="no-print"><SiteHeader /></div>
 
       <main className="mx-auto max-w-4xl space-y-8 px-4 py-10">
-        <header className="space-y-2">
-          <h1 className="text-3xl font-black text-foreground">حالة الخدمة</h1>
-          <p className="text-sm text-muted-foreground">
-            تحديث آلي كل دقيقة. يعرض هذا الصفحة حالة الموقع الحالية وأي حوادث جارية.
-          </p>
+        <header className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-black text-foreground">حالة الخدمة</h1>
+            <p className="text-sm text-muted-foreground">
+              تحديث آلي كل دقيقة. تقرير الحالة الحالية وآخر الحوادث.
+            </p>
+          </div>
+          <button onClick={() => window.print()}
+            className="no-print inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-black text-primary-foreground hover:bg-primary-deep">
+            <Printer className="size-4" /> تنزيل تقرير PDF
+          </button>
         </header>
 
         <section className={`rounded-2xl border p-6 ${
@@ -156,7 +177,9 @@ function StatusPage() {
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {new Date(i.started_at).toLocaleString("ar")}
-                    {i.ended_at ? ` — انتهى ${new Date(i.ended_at).toLocaleString("ar")}` : " — جارٍ الآن"}
+                    {i.ended_at
+                      ? ` — انتهى ${new Date(i.ended_at).toLocaleString("ar")} · المدة: ${durationText(i.started_at, i.ended_at)}`
+                      : ` — جارٍ الآن · المدة حتى الآن: ${durationText(i.started_at, null)}`}
                   </p>
                 </li>
               ))}
