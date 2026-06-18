@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { MessageCircle, Trash2, Archive, Download, Loader2, AlertTriangle } from "lucide-react";
+import { MessageCircle, Trash2, Archive, Download, Loader2, AlertTriangle, History, Settings2, CheckSquare, Square, X } from "lucide-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { toast } from "sonner";
 import { openWhatsApp, buildStatusMessage } from "@/lib/whatsapp";
@@ -7,25 +7,65 @@ import { downloadCSV } from "@/lib/csv-export";
 import { STATUSES, statusBadge, type Rx } from "./shared";
 import { TabState, SearchBar, Pagination, PAGE_SIZE, RxCardSkeleton, Skeleton } from "./ui";
 import { fetchImageCached, getCachedImage, prefetchImageCached } from "@/lib/image-cache";
+import {
+  getActivityLog, logActivity, subscribeActivityLog, clearActivityLog,
+  actionLabel, type RxActivityEntry,
+} from "@/lib/rx-activity-log";
 
-// Stable estimated row height — used by the virtualizer before measurement.
-// Cards have a fixed text header + a 4×aspect-square image strip whose
-// aspect ratio is locked, so the measurable height is deterministic.
 const EST_ROW_HEIGHT = 320;
 
 type Action = (id: string) => Promise<void> | void;
+type BulkAction = (ids: string[], onProgress?: (done: number, total: number, currentId: string) => void) => Promise<void> | void;
 
-export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, loading, error, onRetry }: {
+// ---------- CSV columns ----------
+type CsvCol = { key: string; label: string; pick: (r: Rx) => unknown };
+const CSV_COLS: CsvCol[] = [
+  { key: "id", label: "رقم", pick: (r) => r.id },
+  { key: "created_at", label: "التاريخ", pick: (r) => new Date(r.created_at).toLocaleString("ar-EG") },
+  { key: "customer_name", label: "الاسم", pick: (r) => r.customer_name },
+  { key: "customer_phone", label: "الجوال", pick: (r) => r.customer_phone },
+  { key: "customer_address", label: "العنوان", pick: (r) => r.customer_address },
+  { key: "status", label: "الحالة", pick: (r) => statusBadge(r.status).label },
+  { key: "image_urls", label: "الصور", pick: (r) => (r.image_urls ?? []).join(" | ") },
+  { key: "image_count", label: "عدد الصور", pick: (r) => (r.image_urls ?? []).length },
+  { key: "notes", label: "ملاحظات", pick: (r) => r.notes ?? "" },
+];
+const CSV_PREF_KEY = "rx-csv-cols-v1";
+function loadCsvPrefs(): string[] {
+  if (typeof localStorage === "undefined") return CSV_COLS.map((c) => c.key);
+  try {
+    const raw = localStorage.getItem(CSV_PREF_KEY);
+    if (!raw) return CSV_COLS.map((c) => c.key);
+    const parsed = JSON.parse(raw) as string[];
+    const valid = parsed.filter((k) => CSV_COLS.some((c) => c.key === k));
+    return valid.length > 0 ? valid : CSV_COLS.map((c) => c.key);
+  } catch { return CSV_COLS.map((c) => c.key); }
+}
+
+export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDelete, onBulkArchive, loading, error, onRetry }: {
   rxs: Rx[];
   onStatus: (id: string, s: string) => Promise<void> | void;
   onDelete?: Action;
   onArchive?: Action;
+  onBulkDelete?: BulkAction;
+  onBulkArchive?: BulkAction;
   loading?: boolean; error?: string | null; onRetry?: () => void;
 }) {
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
   const [confirm, setConfirm] = useState<null | { kind: "delete" | "archive"; id: string }>(null);
+  const [bulkConfirm, setBulkConfirm] = useState<null | { kind: "delete" | "archive" }>(null);
   const [pending, setPending] = useState<Record<string, "status" | "delete" | "archive" | undefined>>({});
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [showLog, setShowLog] = useState(false);
+  const [showCsvSettings, setShowCsvSettings] = useState(false);
+  const [csvCols, setCsvCols] = useState<string[]>(() => loadCsvPrefs());
+  const [bulkProgress, setBulkProgress] = useState<null | { done: number; total: number; currentId: string; kind: "delete" | "archive" }>(null);
+
+  // persist CSV pref
+  useEffect(() => {
+    try { localStorage.setItem(CSV_PREF_KEY, JSON.stringify(csvCols)); } catch { /* quota */ }
+  }, [csvCols]);
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -41,7 +81,6 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, loading, 
   const safePage = Math.min(page, pageCount);
   const slice = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-  // Prefetch next-page images during idle time.
   useEffect(() => {
     if (safePage >= pageCount) return;
     const next = filtered.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
@@ -50,7 +89,16 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, loading, 
     idle(() => next.forEach((r) => r.image_urls.forEach(prefetchImageCached)));
   }, [filtered, safePage, pageCount]);
 
-  // --- Virtualization (fixed estimate + measureElement to avoid jumps) ---
+  // Drop selections that no longer exist (e.g. after refresh/delete)
+  useEffect(() => {
+    setSelected((cur) => {
+      const valid = new Set(rxs.map((r) => r.id));
+      const next = new Set<string>();
+      cur.forEach((id) => { if (valid.has(id)) next.add(id); });
+      return next.size === cur.size ? cur : next;
+    });
+  }, [rxs]);
+
   const parentRef = useRef<HTMLDivElement>(null);
   const virtualizer = useVirtualizer({
     count: slice.length,
@@ -70,25 +118,28 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, loading, 
   );
 
   function exportCSV() {
-    const rows = filtered.map((r) => [
-      r.id, new Date(r.created_at).toLocaleString("ar-EG"),
-      r.customer_name, r.customer_phone, r.customer_address,
-      r.status, (r.image_urls ?? []).join(" | "), r.notes ?? "",
-    ]);
+    const active = csvCols.map((k) => CSV_COLS.find((c) => c.key === k)!).filter(Boolean);
+    if (active.length === 0) { toast.error("اختر عموداً واحداً على الأقل للتصدير"); return; }
+    const rows = filtered.map((r) => active.map((c) => c.pick(r)));
     downloadCSV(
       `prescriptions-${new Date().toISOString().slice(0, 10)}.csv`,
-      ["رقم", "التاريخ", "الاسم", "الجوال", "العنوان", "الحالة", "الصور", "ملاحظات"],
+      active.map((c) => c.label),
       rows,
     );
-    toast.success(`تم تصدير ${filtered.length} روشتة`);
+    toast.success(`تم تصدير ${filtered.length} روشتة (${active.length} عمود)`);
   }
 
   const handleStatus = useCallback(async (id: string, s: string) => {
+    const prev = rxs.find((r) => r.id === id)?.status;
     setPending((p) => ({ ...p, [id]: "status" }));
-    try { await withRetry(() => Promise.resolve(onStatus(id, s)), 2); }
-    catch (e: any) { toast.error(humanizeError(e, "تحديث الحالة")); }
-    finally { setPending((p) => ({ ...p, [id]: undefined })); }
-  }, [onStatus]);
+    try {
+      await withRetry(() => Promise.resolve(onStatus(id, s)), 2);
+      logActivity({ rxId: id, action: "status", status: "success", details: `${prev ?? "?"} ← ${s}` });
+    } catch (e: any) {
+      logActivity({ rxId: id, action: "status", status: "error", details: `→ ${s}`, error: humanizeError(e, "تحديث الحالة") });
+      toast.error(humanizeError(e, "تحديث الحالة"));
+    } finally { setPending((p) => ({ ...p, [id]: undefined })); }
+  }, [onStatus, rxs]);
 
   async function runConfirmed() {
     if (!confirm) return;
@@ -99,33 +150,111 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, loading, 
     setPending((p) => ({ ...p, [id]: kind }));
     try {
       await withRetry(() => Promise.resolve(handler(id)), 2);
+      logActivity({ rxId: id, action: kind, status: "success" });
       toast.success(kind === "delete" ? `تم حذف الروشتة ${id}` : `تم أرشفة الروشتة ${id}`);
     } catch (e: any) {
+      logActivity({ rxId: id, action: kind, status: "error", error: humanizeError(e, kind === "delete" ? "حذف الروشتة" : "أرشفة الروشتة") });
       toast.error(humanizeError(e, kind === "delete" ? "حذف الروشتة" : "أرشفة الروشتة"));
     } finally {
       setPending((p) => ({ ...p, [id]: undefined }));
     }
   }
 
+  async function runBulk() {
+    if (!bulkConfirm) return;
+    const { kind } = bulkConfirm;
+    const handler = kind === "delete" ? onBulkDelete : onBulkArchive;
+    const ids = Array.from(selected);
+    if (!handler || ids.length === 0) { setBulkConfirm(null); return; }
+    setBulkConfirm(null);
+    setBulkProgress({ done: 0, total: ids.length, currentId: ids[0], kind });
+    try {
+      await handler(ids, (done, total, currentId) => {
+        setBulkProgress({ done, total, currentId, kind });
+        if (done > 0) {
+          // success for previously processed id is logged inside admin handler;
+          // we still log a coarse bulk-completion entry at the end.
+        }
+      });
+      logActivity({ rxId: `[${ids.length}]`, action: kind === "delete" ? "bulk-delete" : "bulk-archive", status: "success", details: ids.join(", ") });
+      toast.success(kind === "delete" ? `تم حذف ${ids.length} روشتة` : `تم أرشفة ${ids.length} روشتة`);
+      setSelected(new Set());
+    } catch (e: any) {
+      const msg = humanizeError(e, kind === "delete" ? "الحذف الجماعي" : "الأرشفة الجماعية");
+      logActivity({ rxId: `[${ids.length}]`, action: kind === "delete" ? "bulk-delete" : "bulk-archive", status: "error", details: ids.join(", "), error: msg });
+      toast.error(msg);
+    } finally {
+      setBulkProgress(null);
+    }
+  }
+
+  function toggleOne(id: string) {
+    setSelected((cur) => {
+      const next = new Set(cur);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+  function toggleAllOnPage() {
+    setSelected((cur) => {
+      const allSelected = slice.every((r) => cur.has(r.id));
+      const next = new Set(cur);
+      if (allSelected) slice.forEach((r) => next.delete(r.id));
+      else slice.forEach((r) => next.add(r.id));
+      return next;
+    });
+  }
+
+  const allOnPageSelected = slice.length > 0 && slice.every((r) => selected.has(r.id));
+
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" data-testid="prescriptions-tab">
       <SearchBar value={q} onChange={(v) => { setQ(v); setPage(1); }} placeholder="ابحث برقم الروشتة، الاسم، أو الجوال..." />
-      <div className="flex items-center justify-between gap-2">
+
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-[11px] text-muted-foreground">
           عرض {slice.length} من {filtered.length} (الإجمالي {rxs.length})
+          {selected.size > 0 && <span className="ms-2 rounded-full bg-primary/10 px-2 py-0.5 font-black text-primary">محدد: {selected.size}</span>}
         </p>
-        <button
-          onClick={exportCSV}
-          disabled={filtered.length === 0}
-          className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-black text-white hover:bg-emerald-600 disabled:opacity-50"
-        >
-          <Download className="size-3.5" /> تصدير CSV ({filtered.length})
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={toggleAllOnPage}
+            disabled={slice.length === 0}
+            className="flex items-center gap-1.5 rounded-lg bg-secondary px-3 py-1.5 text-xs font-black hover:bg-accent disabled:opacity-50"
+          >
+            {allOnPageSelected ? <CheckSquare className="size-3.5" /> : <Square className="size-3.5" />}
+            {allOnPageSelected ? "إلغاء تحديد الصفحة" : "تحديد الصفحة"}
+          </button>
+          {selected.size > 0 && onBulkArchive && (
+            <button onClick={() => setBulkConfirm({ kind: "archive" })} className="flex items-center gap-1.5 rounded-lg bg-slate-600 px-3 py-1.5 text-xs font-black text-white hover:bg-slate-700">
+              <Archive className="size-3.5" /> أرشفة ({selected.size})
+            </button>
+          )}
+          {selected.size > 0 && onBulkDelete && (
+            <button onClick={() => setBulkConfirm({ kind: "delete" })} className="flex items-center gap-1.5 rounded-lg bg-rose-500 px-3 py-1.5 text-xs font-black text-white hover:bg-rose-600">
+              <Trash2 className="size-3.5" /> حذف ({selected.size})
+            </button>
+          )}
+          <button onClick={() => setShowLog(true)} className="flex items-center gap-1.5 rounded-lg bg-secondary px-3 py-1.5 text-xs font-black hover:bg-accent" title="سجل النشاط">
+            <History className="size-3.5" /> سجل النشاط
+          </button>
+          <button onClick={() => setShowCsvSettings(true)} className="flex items-center gap-1.5 rounded-lg bg-secondary px-3 py-1.5 text-xs font-black hover:bg-accent" title="إعدادات التصدير">
+            <Settings2 className="size-3.5" />
+          </button>
+          <button
+            onClick={exportCSV}
+            disabled={filtered.length === 0}
+            data-testid="export-csv-btn"
+            className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-black text-white hover:bg-emerald-600 disabled:opacity-50"
+          >
+            <Download className="size-3.5" /> تصدير CSV ({filtered.length})
+          </button>
+        </div>
       </div>
 
       <TabState loading={loading} error={error} empty={filtered.length === 0} onRetry={onRetry} skeleton={skeleton}>
         {useVirtual ? (
-          <div ref={parentRef} className="max-h-[75vh] overflow-auto rounded-xl" style={{ contain: "strict" }}>
+          <div ref={parentRef} className="max-h-[75vh] overflow-auto rounded-xl" style={{ contain: "strict" }} data-testid="rx-virtual-list">
             <div style={{ height: virtualizer.getTotalSize(), position: "relative", width: "100%" }}>
               {virtualizer.getVirtualItems().map((vi) => {
                 const r = slice[vi.index];
@@ -139,6 +268,8 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, loading, 
                     <RxCard
                       rx={r}
                       pending={pending[r.id]}
+                      selected={selected.has(r.id)}
+                      onToggleSelect={toggleOne}
                       onStatus={handleStatus}
                       onDelete={onDelete ? (id) => setConfirm({ kind: "delete", id }) : undefined}
                       onArchive={onArchive ? (id) => setConfirm({ kind: "archive", id }) : undefined}
@@ -149,12 +280,14 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, loading, 
             </div>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-3" data-testid="rx-flat-list">
             {slice.map((r) => (
               <RxCard
                 key={r.id}
                 rx={r}
                 pending={pending[r.id]}
+                selected={selected.has(r.id)}
+                onToggleSelect={toggleOne}
                 onStatus={handleStatus}
                 onDelete={onDelete ? (id) => setConfirm({ kind: "delete", id }) : undefined}
                 onArchive={onArchive ? (id) => setConfirm({ kind: "archive", id }) : undefined}
@@ -173,13 +306,34 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, loading, 
           onConfirm={runConfirmed}
         />
       )}
+
+      {bulkConfirm && (
+        <ConfirmDialog
+          kind={bulkConfirm.kind}
+          rxId={`${selected.size} روشتة`}
+          bulk
+          onCancel={() => setBulkConfirm(null)}
+          onConfirm={runBulk}
+        />
+      )}
+
+      {bulkProgress && <BulkProgressOverlay p={bulkProgress} />}
+
+      {showLog && <ActivityLogDialog onClose={() => setShowLog(false)} />}
+      {showCsvSettings && (
+        <CsvSettingsDialog
+          selected={csvCols}
+          onChange={setCsvCols}
+          onClose={() => setShowCsvSettings(false)}
+        />
+      )}
     </div>
   );
 }
 
 // ---------- Confirm dialog ----------
-function ConfirmDialog({ kind, rxId, onConfirm, onCancel }: {
-  kind: "delete" | "archive"; rxId: string;
+function ConfirmDialog({ kind, rxId, bulk, onConfirm, onCancel }: {
+  kind: "delete" | "archive"; rxId: string; bulk?: boolean;
   onConfirm: () => Promise<void> | void; onCancel: () => void;
 }) {
   const [busy, setBusy] = useState(false);
@@ -193,12 +347,14 @@ function ConfirmDialog({ kind, rxId, onConfirm, onCancel }: {
           </div>
           <div className="flex-1">
             <p className="text-base font-black">
-              {isDelete ? "تأكيد حذف الروشتة" : "تأكيد أرشفة الروشتة"}
+              {bulk
+                ? (isDelete ? "تأكيد حذف جماعي" : "تأكيد أرشفة جماعية")
+                : (isDelete ? "تأكيد حذف الروشتة" : "تأكيد أرشفة الروشتة")}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
               {isDelete
-                ? `سيتم حذف الروشتة ${rxId} نهائياً ولا يمكن التراجع. هل تريد المتابعة؟`
-                : `سيتم نقل الروشتة ${rxId} إلى الأرشيف وإخفاؤها من القائمة الافتراضية.`}
+                ? `سيتم حذف ${rxId} نهائياً ولا يمكن التراجع. هل تريد المتابعة؟`
+                : `سيتم نقل ${rxId} إلى الأرشيف وإخفاؤها من القائمة الافتراضية.`}
             </p>
             {isDelete && (
               <div className="mt-3 flex items-start gap-2 rounded-lg bg-rose-50 p-2 text-[11px] text-rose-700">
@@ -213,11 +369,119 @@ function ConfirmDialog({ kind, rxId, onConfirm, onCancel }: {
           <button
             onClick={async () => { setBusy(true); try { await onConfirm(); } finally { setBusy(false); } }}
             disabled={busy}
+            data-testid="confirm-btn"
             className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-black text-white disabled:opacity-60 ${isDelete ? "bg-rose-500 hover:bg-rose-600" : "bg-slate-600 hover:bg-slate-700"}`}
           >
             {busy && <Loader2 className="size-3.5 animate-spin" />}
-            {isDelete ? "حذف نهائي" : "أرشفة"}
+            {isDelete ? (bulk ? "حذف الكل" : "حذف نهائي") : (bulk ? "أرشفة الكل" : "أرشفة")}
           </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Bulk progress ----------
+function BulkProgressOverlay({ p }: { p: { done: number; total: number; currentId: string; kind: "delete" | "archive" } }) {
+  const pct = Math.round((p.done / Math.max(1, p.total)) * 100);
+  return (
+    <div className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-md rounded-2xl bg-card p-4 shadow-elevated border border-border animate-in slide-in-from-bottom">
+      <div className="flex items-center justify-between text-xs font-black">
+        <span>{p.kind === "delete" ? "جارٍ الحذف الجماعي" : "جارٍ الأرشفة الجماعية"} — {p.done}/{p.total}</span>
+        <span className="text-primary">{pct}%</span>
+      </div>
+      <p className="mt-1 truncate text-[11px] text-muted-foreground">قيد المعالجة: {p.currentId}</p>
+      <div className="mt-2 h-2 overflow-hidden rounded-full bg-primary/15">
+        <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  );
+}
+
+// ---------- CSV settings ----------
+function CsvSettingsDialog({ selected, onChange, onClose }: {
+  selected: string[]; onChange: (next: string[]) => void; onClose: () => void;
+}) {
+  function toggle(k: string) {
+    if (selected.includes(k)) onChange(selected.filter((x) => x !== k));
+    else onChange([...selected, k]);
+  }
+  return (
+    <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-2xl bg-card p-5 shadow-elevated">
+        <div className="flex items-center justify-between">
+          <p className="text-base font-black">أعمدة التصدير</p>
+          <button onClick={onClose} className="grid size-8 place-items-center rounded-lg hover:bg-accent"><X className="size-4" /></button>
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">اختر الأعمدة المطلوبة — يتم حفظ التحديد تلقائياً لاستخدامه في المرات القادمة.</p>
+        <div className="mt-3 grid gap-2">
+          {CSV_COLS.map((c) => {
+            const checked = selected.includes(c.key);
+            return (
+              <label key={c.key} className="flex cursor-pointer items-center justify-between gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm hover:bg-accent">
+                <span className="font-bold">{c.label}</span>
+                <input type="checkbox" checked={checked} onChange={() => toggle(c.key)} className="size-4 accent-primary" />
+              </label>
+            );
+          })}
+        </div>
+        <div className="mt-4 flex items-center justify-between">
+          <button
+            onClick={() => onChange(CSV_COLS.map((c) => c.key))}
+            className="rounded-lg bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent"
+          >تحديد الكل</button>
+          <button onClick={onClose} className="rounded-lg bg-primary px-4 py-2 text-xs font-black text-primary-foreground hover:bg-primary-deep">تم</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Activity log dialog ----------
+function ActivityLogDialog({ onClose }: { onClose: () => void }) {
+  const [entries, setEntries] = useState<RxActivityEntry[]>(() => getActivityLog());
+  useEffect(() => subscribeActivityLog(setEntries), []);
+  return (
+    <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-2xl rounded-2xl bg-card p-5 shadow-elevated">
+        <div className="flex items-center justify-between">
+          <p className="text-base font-black flex items-center gap-2"><History className="size-4" /> سجل نشاط الروشتات</p>
+          <div className="flex items-center gap-2">
+            <button onClick={() => { clearActivityLog(); toast.success("تم مسح السجل"); }} className="rounded-lg bg-secondary px-3 py-1.5 text-xs font-bold hover:bg-accent">مسح</button>
+            <button onClick={onClose} className="grid size-8 place-items-center rounded-lg hover:bg-accent"><X className="size-4" /></button>
+          </div>
+        </div>
+        <div className="mt-3 max-h-[60vh] overflow-auto rounded-xl border border-border">
+          {entries.length === 0 ? (
+            <p className="p-8 text-center text-xs text-muted-foreground">لا يوجد نشاط بعد</p>
+          ) : (
+            <table className="w-full text-right text-xs">
+              <thead className="sticky top-0 bg-secondary text-[11px] font-black">
+                <tr>
+                  <th className="px-3 py-2">الوقت</th>
+                  <th className="px-3 py-2">الإجراء</th>
+                  <th className="px-3 py-2">الروشتة</th>
+                  <th className="px-3 py-2">التفاصيل / السبب</th>
+                  <th className="px-3 py-2">الحالة</th>
+                </tr>
+              </thead>
+              <tbody>
+                {entries.map((e) => (
+                  <tr key={e.id} className="border-t border-border hover:bg-accent/40">
+                    <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">{new Date(e.at).toLocaleString("ar-EG")}</td>
+                    <td className="px-3 py-2 font-bold">{actionLabel(e.action)}</td>
+                    <td className="px-3 py-2" dir="ltr">{e.rxId}</td>
+                    <td className="px-3 py-2 text-muted-foreground">{e.error || e.details || "—"}</td>
+                    <td className="px-3 py-2">
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${e.status === "success" ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}`}>
+                        {e.status === "success" ? "نجاح" : "فشل"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>
@@ -243,27 +507,21 @@ function CachedImage({ url, alt, onClick, onPrefetch }: {
   }, [url]);
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      onMouseEnter={onPrefetch}
-      onFocus={onPrefetch}
-      className="relative block aspect-square overflow-hidden rounded-lg border border-border"
-    >
+    <button type="button" onClick={onClick} onMouseEnter={onPrefetch} onFocus={onPrefetch}
+      className="relative block aspect-square overflow-hidden rounded-lg border border-border">
       {!src && !failed && <Skeleton className="absolute inset-0 rounded-none" />}
       {failed && <div className="absolute inset-0 grid place-items-center bg-rose-50 text-[10px] font-bold text-rose-600">تعذر التحميل</div>}
-      {src && (
-        <img src={src} alt={alt} loading="lazy" decoding="async"
-          className="size-full object-cover transition hover:scale-105" />
-      )}
+      {src && <img src={src} alt={alt} loading="lazy" decoding="async" className="size-full object-cover transition hover:scale-105" />}
     </button>
   );
 }
 
 // ---------- Row ----------
-function RxCard({ rx, pending, onStatus, onDelete, onArchive }: {
+function RxCard({ rx, pending, selected, onToggleSelect, onStatus, onDelete, onArchive }: {
   rx: Rx;
   pending?: "status" | "delete" | "archive";
+  selected: boolean;
+  onToggleSelect: (id: string) => void;
   onStatus: (id: string, s: string) => Promise<void> | void;
   onDelete?: (id: string) => void;
   onArchive?: (id: string) => void;
@@ -274,7 +532,7 @@ function RxCard({ rx, pending, onStatus, onDelete, onArchive }: {
   const busy = !!pending;
 
   return (
-    <div className={`relative rounded-2xl border border-border bg-card p-4 shadow-card transition ${busy ? "opacity-70" : ""}`}>
+    <div data-testid={`rx-card-${rx.id}`} className={`relative rounded-2xl border bg-card p-4 shadow-card transition ${selected ? "border-primary ring-2 ring-primary/30" : "border-border"} ${busy ? "opacity-70" : ""}`}>
       {busy && (
         <div className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full bg-primary/10 px-2 py-1 text-[10px] font-black text-primary">
           <Loader2 className="size-3 animate-spin" />
@@ -283,12 +541,24 @@ function RxCard({ rx, pending, onStatus, onDelete, onArchive }: {
       )}
 
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-base font-black text-primary-deep">{rx.id}</p>
-          <p className="text-xs text-muted-foreground">{new Date(rx.created_at).toLocaleString("ar-EG")}</p>
-          <p className="mt-1 text-sm font-bold">{rx.customer_name} · <span dir="ltr" className="text-muted-foreground">{rx.customer_phone}</span></p>
-          <p className="text-xs text-muted-foreground">📍 {rx.customer_address}</p>
-          {rx.notes && <p className="mt-1 text-xs">📝 {rx.notes}</p>}
+        <div className="flex items-start gap-3">
+          <label className="mt-1 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={selected}
+              onChange={() => onToggleSelect(rx.id)}
+              aria-label={`تحديد الروشتة ${rx.id}`}
+              data-testid={`select-${rx.id}`}
+              className="size-4 accent-primary"
+            />
+          </label>
+          <div>
+            <p className="text-base font-black text-primary-deep">{rx.id}</p>
+            <p className="text-xs text-muted-foreground">{new Date(rx.created_at).toLocaleString("ar-EG")}</p>
+            <p className="mt-1 text-sm font-bold">{rx.customer_name} · <span dir="ltr" className="text-muted-foreground">{rx.customer_phone}</span></p>
+            <p className="text-xs text-muted-foreground">📍 {rx.customer_address}</p>
+            {rx.notes && <p className="mt-1 text-xs">📝 {rx.notes}</p>}
+          </div>
         </div>
         <span className={`rounded-full px-3 py-1 text-[11px] font-black ${b.color}`}>{b.label}</span>
       </div>
@@ -296,13 +566,9 @@ function RxCard({ rx, pending, onStatus, onDelete, onArchive }: {
       {rx.image_urls.length > 0 && (
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {rx.image_urls.map((u, i) => (
-            <CachedImage
-              key={u}
-              url={u}
-              alt={`روشتة ${i + 1}`}
+            <CachedImage key={u} url={u} alt={`روشتة ${i + 1}`}
               onClick={() => { prefetch(u); setZoom(u); }}
-              onPrefetch={() => prefetch(u)}
-            />
+              onPrefetch={() => prefetch(u)} />
           ))}
         </div>
       )}
@@ -319,39 +585,35 @@ function RxCard({ rx, pending, onStatus, onDelete, onArchive }: {
       )}
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <select
-          value={rx.status}
-          disabled={busy}
-          onChange={(e) => onStatus(rx.id, e.target.value)}
-          className="rounded-lg border border-border bg-card px-2 py-1.5 text-xs font-bold disabled:opacity-50"
-        >
+        <select value={rx.status} disabled={busy} onChange={(e) => onStatus(rx.id, e.target.value)}
+          className="rounded-lg border border-border bg-card px-2 py-1.5 text-xs font-bold disabled:opacity-50">
           {STATUSES.map((s) => <option key={s.v} value={s.v}>{s.label}</option>)}
         </select>
-        <button
-          disabled={busy}
+        <button disabled={busy}
           onClick={() => openWhatsApp(buildStatusMessage({ name: rx.customer_name, orderId: rx.id, status: "confirmed" }), rx.customer_phone)}
-          className="flex items-center gap-1.5 rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-black text-white disabled:opacity-50"
-        ><MessageCircle className="size-3.5" /> إشعار: جاهز</button>
-        <button
-          disabled={busy}
+          className="flex items-center gap-1.5 rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-black text-white disabled:opacity-50">
+          <MessageCircle className="size-3.5" /> إشعار: جاهز
+        </button>
+        <button disabled={busy}
           onClick={() => openWhatsApp(`مرحبًا ${rx.customer_name}، بخصوص روشتتك ${rx.id} من صيدلية المصلي:`, rx.customer_phone)}
-          className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-black text-white disabled:opacity-50"
-        ><MessageCircle className="size-3.5" /> واتساب العميل</button>
+          className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-black text-white disabled:opacity-50">
+          <MessageCircle className="size-3.5" /> واتساب العميل
+        </button>
 
         <div className="ml-auto flex items-center gap-2">
           {onArchive && rx.status !== "archived" && (
-            <button
-              disabled={busy}
-              onClick={() => onArchive(rx.id)}
-              className="flex items-center gap-1.5 rounded-lg bg-slate-200 px-3 py-1.5 text-xs font-black text-slate-700 hover:bg-slate-300 disabled:opacity-50"
-            ><Archive className="size-3.5" /> أرشفة</button>
+            <button disabled={busy} onClick={() => onArchive(rx.id)}
+              data-testid={`archive-${rx.id}`}
+              className="flex items-center gap-1.5 rounded-lg bg-slate-200 px-3 py-1.5 text-xs font-black text-slate-700 hover:bg-slate-300 disabled:opacity-50">
+              <Archive className="size-3.5" /> أرشفة
+            </button>
           )}
           {onDelete && (
-            <button
-              disabled={busy}
-              onClick={() => onDelete(rx.id)}
-              className="flex items-center gap-1.5 rounded-lg bg-rose-500 px-3 py-1.5 text-xs font-black text-white hover:bg-rose-600 disabled:opacity-50"
-            ><Trash2 className="size-3.5" /> حذف</button>
+            <button disabled={busy} onClick={() => onDelete(rx.id)}
+              data-testid={`delete-${rx.id}`}
+              className="flex items-center gap-1.5 rounded-lg bg-rose-500 px-3 py-1.5 text-xs font-black text-white hover:bg-rose-600 disabled:opacity-50">
+              <Trash2 className="size-3.5" /> حذف
+            </button>
           )}
         </div>
       </div>
@@ -365,7 +627,7 @@ async function withRetry<T>(fn: () => Promise<T>, max = 2): Promise<T> {
   for (let i = 0; i <= max; i++) {
     try { return await fn(); } catch (e) {
       lastErr = e;
-      if (i < max) await new Promise((r) => setTimeout(r, 400 * (i + 1)));
+      if (i < max) await new Promise((r) => setTimeout(r, 400 * Math.pow(2, i)));
     }
   }
   throw lastErr;
