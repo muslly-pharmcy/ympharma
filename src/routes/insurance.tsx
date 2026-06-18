@@ -30,8 +30,8 @@ async function uploadImage(file: File, prefix: string): Promise<string> {
     upsert: false,
   });
   if (error) throw new Error(error.message);
-  const { data: signed } = await supabase.storage.from("insurance").createSignedUrl(path, 60 * 60 * 24 * 30);
-  return signed?.signedUrl ?? path;
+  // Return the storage path; staff will generate signed URLs when viewing.
+  return path;
 }
 
 function InsurancePage() {

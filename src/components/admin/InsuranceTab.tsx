@@ -53,6 +53,12 @@ export function InsuranceTab() {
     else { toast.success("تم تحديث الحالة"); void load(); }
   }
 
+  async function openSigned(path: string) {
+    const { data, error } = await supabase.storage.from("insurance").createSignedUrl(path, 600);
+    if (error || !data?.signedUrl) { toast.error("تعذّر فتح الصورة"); return; }
+    window.open(data.signedUrl, "_blank", "noopener");
+  }
+
   async function runWebhookTest(event: "down" | "up") {
     try {
       const res = await test({ data: { event, severity: "minor" } });
