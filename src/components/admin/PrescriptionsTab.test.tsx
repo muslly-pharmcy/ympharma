@@ -50,8 +50,7 @@ describe("PrescriptionsTab — integration", () => {
 
     const blobSpy = vi.fn();
     const origBlob = global.Blob;
-    // @ts-expect-error spy on constructor
-    global.Blob = vi.fn((parts: any, opts: any) => { blobSpy(parts, opts); return new origBlob(parts, opts); });
+    (global as any).Blob = vi.fn((parts: any, opts: any) => { blobSpy(parts, opts); return new origBlob(parts, opts); });
 
     render(<PrescriptionsTab rxs={[mkRx(1), mkRx(2)]} onStatus={vi.fn()} />);
     await userEvent.click(screen.getByTestId("export-csv-btn"));
