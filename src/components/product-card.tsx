@@ -32,7 +32,7 @@ export function ProductCard({ product }: { product: Product }) {
       <Link to="/product/$id" params={{ id: String(product.id) }} className="relative aspect-square overflow-hidden bg-secondary/60 block">
         {!loaded && <Skeleton className="absolute inset-0 rounded-none" />}
         <img
-          src={product.img}
+          src={proxifyImage(product.img)}
           alt={product.name}
           loading="lazy"
           decoding="async"
