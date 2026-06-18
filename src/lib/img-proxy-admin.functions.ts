@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-async function assertAdmin(supabase: ReturnType<typeof requireSupabaseAuth> extends never ? never : any, userId: string) {
+async function assertAdmin(supabase: any, userId: string) {
   const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
   const { data: isOwner } = await supabase.rpc("has_role", { _user_id: userId, _role: "owner" });
   if (!isAdmin && !isOwner) throw new Error("Forbidden");
