@@ -272,6 +272,63 @@ export type Database = {
         }
         Relationships: []
       }
+      img_proxy_logs: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          error: string | null
+          host: string | null
+          id: number
+          ok: boolean
+          status: number
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          error?: string | null
+          host?: string | null
+          id?: number
+          ok: boolean
+          status: number
+          url: string
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          error?: string | null
+          host?: string | null
+          id?: number
+          ok?: boolean
+          status?: number
+          url?: string
+        }
+        Relationships: []
+      }
+      img_proxy_settings: {
+        Row: {
+          allowed_hosts: string[]
+          id: number
+          image_domain: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          allowed_hosts?: string[]
+          id?: number
+          image_domain?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          allowed_hosts?: string[]
+          id?: number
+          image_domain?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       insurance_claims: {
         Row: {
           card_expiry: string | null
