@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { products as staticProducts, type Product } from "@/lib/products";
 import { importedProducts } from "@/lib/products-extra";
 import { listPublicProducts } from "@/lib/products-public.functions";
+import { listImageOverrides } from "@/lib/product-images.functions";
 
 // Maps a DB row to the storefront Product shape.
 function mapRow(r: any, idx: number): Product {
