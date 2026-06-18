@@ -135,7 +135,7 @@ export const Route = createFileRoute("/api/public/img")({
             error: "invalid_or_missing_url",
             duration_ms: Date.now() - started,
           });
-          return new Response("invalid url", { status: 400, headers: CORS });
+          return placeholderResponse({ "X-Img-Reason": "invalid_url" });
         }
 
         const allowed = await loadAllowedHosts();
