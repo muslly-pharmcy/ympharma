@@ -16,6 +16,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as PrescriptionRouteImport } from './routes/prescription'
+import { Route as InsuranceRouteImport } from './routes/insurance'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as AiSymptomsRouteImport } from './routes/ai-symptoms'
 import { Route as AiSupplementRouteImport } from './routes/ai-supplement'
@@ -29,8 +30,10 @@ import { Route as AdminBackupsRouteImport } from './routes/admin-backups'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
+import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/public/whatsapp-webhook'
 import { Route as ApiPublicUptimeWebhookRouteImport } from './routes/api/public/uptime-webhook'
 import { Route as ApiPublicLogErrorRouteImport } from './routes/api/public/log-error'
+import { Route as ApiPublicIncidentCheckRouteImport } from './routes/api/public/incident-check'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 
 const TrustRoute = TrustRouteImport.update({
@@ -66,6 +69,11 @@ const ProductsRoute = ProductsRouteImport.update({
 const PrescriptionRoute = PrescriptionRouteImport.update({
   id: '/prescription',
   path: '/prescription',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InsuranceRoute = InsuranceRouteImport.update({
+  id: '/insurance',
+  path: '/insurance',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CartRoute = CartRouteImport.update({
@@ -133,6 +141,12 @@ const ProductIdRoute = ProductIdRouteImport.update({
   path: '/product/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicWhatsappWebhookRoute =
+  ApiPublicWhatsappWebhookRouteImport.update({
+    id: '/api/public/whatsapp-webhook',
+    path: '/api/public/whatsapp-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicUptimeWebhookRoute = ApiPublicUptimeWebhookRouteImport.update({
   id: '/api/public/uptime-webhook',
   path: '/api/public/uptime-webhook',
@@ -141,6 +155,11 @@ const ApiPublicUptimeWebhookRoute = ApiPublicUptimeWebhookRouteImport.update({
 const ApiPublicLogErrorRoute = ApiPublicLogErrorRouteImport.update({
   id: '/api/public/log-error',
   path: '/api/public/log-error',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicIncidentCheckRoute = ApiPublicIncidentCheckRouteImport.update({
+  id: '/api/public/incident-check',
+  path: '/api/public/incident-check',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
@@ -162,6 +181,7 @@ export interface FileRoutesByFullPath {
   '/ai-supplement': typeof AiSupplementRoute
   '/ai-symptoms': typeof AiSymptomsRoute
   '/cart': typeof CartRoute
+  '/insurance': typeof InsuranceRoute
   '/prescription': typeof PrescriptionRoute
   '/products': typeof ProductsRoute
   '/settings': typeof SettingsRoute
@@ -171,8 +191,10 @@ export interface FileRoutesByFullPath {
   '/trust': typeof TrustRoute
   '/product/$id': typeof ProductIdRoute
   '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
   '/api/public/log-error': typeof ApiPublicLogErrorRoute
   '/api/public/uptime-webhook': typeof ApiPublicUptimeWebhookRoute
+  '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -187,6 +209,7 @@ export interface FileRoutesByTo {
   '/ai-supplement': typeof AiSupplementRoute
   '/ai-symptoms': typeof AiSymptomsRoute
   '/cart': typeof CartRoute
+  '/insurance': typeof InsuranceRoute
   '/prescription': typeof PrescriptionRoute
   '/products': typeof ProductsRoute
   '/settings': typeof SettingsRoute
@@ -196,8 +219,10 @@ export interface FileRoutesByTo {
   '/trust': typeof TrustRoute
   '/product/$id': typeof ProductIdRoute
   '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
   '/api/public/log-error': typeof ApiPublicLogErrorRoute
   '/api/public/uptime-webhook': typeof ApiPublicUptimeWebhookRoute
+  '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -213,6 +238,7 @@ export interface FileRoutesById {
   '/ai-supplement': typeof AiSupplementRoute
   '/ai-symptoms': typeof AiSymptomsRoute
   '/cart': typeof CartRoute
+  '/insurance': typeof InsuranceRoute
   '/prescription': typeof PrescriptionRoute
   '/products': typeof ProductsRoute
   '/settings': typeof SettingsRoute
@@ -222,8 +248,10 @@ export interface FileRoutesById {
   '/trust': typeof TrustRoute
   '/product/$id': typeof ProductIdRoute
   '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
   '/api/public/log-error': typeof ApiPublicLogErrorRoute
   '/api/public/uptime-webhook': typeof ApiPublicUptimeWebhookRoute
+  '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -240,6 +268,7 @@ export interface FileRouteTypes {
     | '/ai-supplement'
     | '/ai-symptoms'
     | '/cart'
+    | '/insurance'
     | '/prescription'
     | '/products'
     | '/settings'
@@ -249,8 +278,10 @@ export interface FileRouteTypes {
     | '/trust'
     | '/product/$id'
     | '/api/public/health'
+    | '/api/public/incident-check'
     | '/api/public/log-error'
     | '/api/public/uptime-webhook'
+    | '/api/public/whatsapp-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -265,6 +296,7 @@ export interface FileRouteTypes {
     | '/ai-supplement'
     | '/ai-symptoms'
     | '/cart'
+    | '/insurance'
     | '/prescription'
     | '/products'
     | '/settings'
@@ -274,8 +306,10 @@ export interface FileRouteTypes {
     | '/trust'
     | '/product/$id'
     | '/api/public/health'
+    | '/api/public/incident-check'
     | '/api/public/log-error'
     | '/api/public/uptime-webhook'
+    | '/api/public/whatsapp-webhook'
   id:
     | '__root__'
     | '/'
@@ -290,6 +324,7 @@ export interface FileRouteTypes {
     | '/ai-supplement'
     | '/ai-symptoms'
     | '/cart'
+    | '/insurance'
     | '/prescription'
     | '/products'
     | '/settings'
@@ -299,8 +334,10 @@ export interface FileRouteTypes {
     | '/trust'
     | '/product/$id'
     | '/api/public/health'
+    | '/api/public/incident-check'
     | '/api/public/log-error'
     | '/api/public/uptime-webhook'
+    | '/api/public/whatsapp-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -316,6 +353,7 @@ export interface RootRouteChildren {
   AiSupplementRoute: typeof AiSupplementRoute
   AiSymptomsRoute: typeof AiSymptomsRoute
   CartRoute: typeof CartRoute
+  InsuranceRoute: typeof InsuranceRoute
   PrescriptionRoute: typeof PrescriptionRoute
   ProductsRoute: typeof ProductsRoute
   SettingsRoute: typeof SettingsRoute
@@ -325,8 +363,10 @@ export interface RootRouteChildren {
   TrustRoute: typeof TrustRoute
   ProductIdRoute: typeof ProductIdRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
+  ApiPublicIncidentCheckRoute: typeof ApiPublicIncidentCheckRoute
   ApiPublicLogErrorRoute: typeof ApiPublicLogErrorRoute
   ApiPublicUptimeWebhookRoute: typeof ApiPublicUptimeWebhookRoute
+  ApiPublicWhatsappWebhookRoute: typeof ApiPublicWhatsappWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -378,6 +418,13 @@ declare module '@tanstack/react-router' {
       path: '/prescription'
       fullPath: '/prescription'
       preLoaderRoute: typeof PrescriptionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/insurance': {
+      id: '/insurance'
+      path: '/insurance'
+      fullPath: '/insurance'
+      preLoaderRoute: typeof InsuranceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cart': {
@@ -471,6 +518,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/whatsapp-webhook': {
+      id: '/api/public/whatsapp-webhook'
+      path: '/api/public/whatsapp-webhook'
+      fullPath: '/api/public/whatsapp-webhook'
+      preLoaderRoute: typeof ApiPublicWhatsappWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/uptime-webhook': {
       id: '/api/public/uptime-webhook'
       path: '/api/public/uptime-webhook'
@@ -483,6 +537,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/log-error'
       fullPath: '/api/public/log-error'
       preLoaderRoute: typeof ApiPublicLogErrorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/incident-check': {
+      id: '/api/public/incident-check'
+      path: '/api/public/incident-check'
+      fullPath: '/api/public/incident-check'
+      preLoaderRoute: typeof ApiPublicIncidentCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/health': {
@@ -508,6 +569,7 @@ const rootRouteChildren: RootRouteChildren = {
   AiSupplementRoute: AiSupplementRoute,
   AiSymptomsRoute: AiSymptomsRoute,
   CartRoute: CartRoute,
+  InsuranceRoute: InsuranceRoute,
   PrescriptionRoute: PrescriptionRoute,
   ProductsRoute: ProductsRoute,
   SettingsRoute: SettingsRoute,
@@ -517,8 +579,10 @@ const rootRouteChildren: RootRouteChildren = {
   TrustRoute: TrustRoute,
   ProductIdRoute: ProductIdRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
+  ApiPublicIncidentCheckRoute: ApiPublicIncidentCheckRoute,
   ApiPublicLogErrorRoute: ApiPublicLogErrorRoute,
   ApiPublicUptimeWebhookRoute: ApiPublicUptimeWebhookRoute,
+  ApiPublicWhatsappWebhookRoute: ApiPublicWhatsappWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
