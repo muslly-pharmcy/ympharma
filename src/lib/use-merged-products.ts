@@ -103,18 +103,35 @@ export function dedupeProducts(...lists: Product[][]): Product[] {
  */
 export function useMergedProducts(): Product[] & { importSummary?: DedupeSummary } {
   const fetchFn = useServerFn(listPublicProducts);
+  const fetchOverrides = useServerFn(listImageOverrides);
   const [dbItems, setDbItems] = useState<Product[]>([]);
+  const [overrides, setOverrides] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
     let cancelled = false;
     fetchFn()
       .then((rows: any[]) => { if (!cancelled) setDbItems((rows ?? []).map(mapRow)); })
       .catch(() => { /* fail silently — static catalog still renders */ });
+    fetchOverrides()
+      .then((rows) => {
+        if (cancelled) return;
+        const m = new Map<string, string>();
+        for (const r of rows) if (r.image_url) m.set(r.dedupe_key, r.image_url);
+        setOverrides(m);
+      })
+      .catch(() => { /* not critical */ });
     return () => { cancelled = true; };
-  }, [fetchFn]);
+  }, [fetchFn, fetchOverrides]);
 
   const { items, summary } = dedupeProductsWithSummary(dbItems, staticProducts, importedProducts);
-  // Attach summary as a non-enumerable property so existing array consumers are unaffected.
-  Object.defineProperty(items, "importSummary", { value: summary, enumerable: false });
-  return items as Product[] & { importSummary: DedupeSummary };
+  // Apply image overrides keyed by dedupe key.
+  const final = overrides.size === 0
+    ? items
+    : items.map((p) => {
+        const key = productDedupeKey(p);
+        const ov = overrides.get(key);
+        return ov ? { ...p, img: ov } : p;
+      });
+  Object.defineProperty(final, "importSummary", { value: summary, enumerable: false });
+  return final as Product[] & { importSummary: DedupeSummary };
 }
