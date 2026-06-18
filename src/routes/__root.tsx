@@ -21,6 +21,7 @@ import { CartProvider } from "../lib/cart";
 import { I18nProvider } from "../lib/i18n";
 import { Toaster } from "../components/ui/sonner";
 import { AiChatWidget } from "../components/ai-chat-widget";
+import { SwUpdateBanner } from "../components/sw-update-banner";
 
 function NotFoundComponent() {
   return (
@@ -159,6 +160,7 @@ function RootComponent() {
         <CartProvider>
           <Outlet />
           <AiChatWidget />
+          <SwUpdateBanner />
           <Toaster position="top-center" richColors />
         </CartProvider>
       </I18nProvider>
