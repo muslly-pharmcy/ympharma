@@ -24,6 +24,7 @@ import { Route as AiSymptomsRouteImport } from './routes/ai-symptoms'
 import { Route as AiSupplementRouteImport } from './routes/ai-supplement'
 import { Route as AiAssistantRouteImport } from './routes/ai-assistant'
 import { Route as AdminSettingsRouteImport } from './routes/admin-settings'
+import { Route as AdminRxCheckRouteImport } from './routes/admin-rx-check'
 import { Route as AdminProductsRouteImport } from './routes/admin-products'
 import { Route as AdminOffersRouteImport } from './routes/admin-offers'
 import { Route as AdminLogsRouteImport } from './routes/admin-logs'
@@ -117,6 +118,11 @@ const AiAssistantRoute = AiAssistantRouteImport.update({
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/admin-settings',
   path: '/admin-settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRxCheckRoute = AdminRxCheckRouteImport.update({
+  id: '/admin-rx-check',
+  path: '/admin-rx-check',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminProductsRoute = AdminProductsRouteImport.update({
@@ -227,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/admin-logs': typeof AdminLogsRoute
   '/admin-offers': typeof AdminOffersRoute
   '/admin-products': typeof AdminProductsRoute
+  '/admin-rx-check': typeof AdminRxCheckRoute
   '/admin-settings': typeof AdminSettingsRoute
   '/ai-assistant': typeof AiAssistantRoute
   '/ai-supplement': typeof AiSupplementRoute
@@ -263,6 +270,7 @@ export interface FileRoutesByTo {
   '/admin-logs': typeof AdminLogsRoute
   '/admin-offers': typeof AdminOffersRoute
   '/admin-products': typeof AdminProductsRoute
+  '/admin-rx-check': typeof AdminRxCheckRoute
   '/admin-settings': typeof AdminSettingsRoute
   '/ai-assistant': typeof AiAssistantRoute
   '/ai-supplement': typeof AiSupplementRoute
@@ -300,6 +308,7 @@ export interface FileRoutesById {
   '/admin-logs': typeof AdminLogsRoute
   '/admin-offers': typeof AdminOffersRoute
   '/admin-products': typeof AdminProductsRoute
+  '/admin-rx-check': typeof AdminRxCheckRoute
   '/admin-settings': typeof AdminSettingsRoute
   '/ai-assistant': typeof AiAssistantRoute
   '/ai-supplement': typeof AiSupplementRoute
@@ -338,6 +347,7 @@ export interface FileRouteTypes {
     | '/admin-logs'
     | '/admin-offers'
     | '/admin-products'
+    | '/admin-rx-check'
     | '/admin-settings'
     | '/ai-assistant'
     | '/ai-supplement'
@@ -374,6 +384,7 @@ export interface FileRouteTypes {
     | '/admin-logs'
     | '/admin-offers'
     | '/admin-products'
+    | '/admin-rx-check'
     | '/admin-settings'
     | '/ai-assistant'
     | '/ai-supplement'
@@ -410,6 +421,7 @@ export interface FileRouteTypes {
     | '/admin-logs'
     | '/admin-offers'
     | '/admin-products'
+    | '/admin-rx-check'
     | '/admin-settings'
     | '/ai-assistant'
     | '/ai-supplement'
@@ -447,6 +459,7 @@ export interface RootRouteChildren {
   AdminLogsRoute: typeof AdminLogsRoute
   AdminOffersRoute: typeof AdminOffersRoute
   AdminProductsRoute: typeof AdminProductsRoute
+  AdminRxCheckRoute: typeof AdminRxCheckRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AiAssistantRoute: typeof AiAssistantRoute
   AiSupplementRoute: typeof AiSupplementRoute
@@ -581,6 +594,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-settings'
       fullPath: '/admin-settings'
       preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-rx-check': {
+      id: '/admin-rx-check'
+      path: '/admin-rx-check'
+      fullPath: '/admin-rx-check'
+      preLoaderRoute: typeof AdminRxCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-products': {
@@ -727,6 +747,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminLogsRoute: AdminLogsRoute,
   AdminOffersRoute: AdminOffersRoute,
   AdminProductsRoute: AdminProductsRoute,
+  AdminRxCheckRoute: AdminRxCheckRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AiAssistantRoute: AiAssistantRoute,
   AiSupplementRoute: AiSupplementRoute,
@@ -758,13 +779,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

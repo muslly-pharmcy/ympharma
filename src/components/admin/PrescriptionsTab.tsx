@@ -1,5 +1,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { MessageCircle, Trash2, Archive, Download, Loader2, AlertTriangle, History, Settings2, CheckSquare, Square, X, FileText, Filter } from "lucide-react";
+import { MessageCircle, Trash2, Archive, Download, Loader2, AlertTriangle, History, Settings2, CheckSquare, Square, X, FileText, Filter, RefreshCw, Clock, ShieldCheck, ShieldAlert } from "lucide-react";
+import { parseSignedUrl, formatExpiry } from "@/lib/rx-url";
+
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { toast } from "sonner";
 import { openWhatsApp, buildStatusMessage } from "@/lib/whatsapp";
@@ -59,15 +61,17 @@ function matchesStatusFilter(r: Rx, f: StatusFilter): boolean {
   return r.status !== "archived" && r.status !== "cancelled";
 }
 
-export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDelete, onBulkArchive, loading, error, onRetry }: {
+export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDelete, onBulkArchive, onRegenerateUrls, loading, error, onRetry }: {
   rxs: Rx[];
   onStatus: (id: string, s: string) => Promise<void> | void;
   onDelete?: Action;
   onArchive?: Action;
   onBulkDelete?: BulkAction;
   onBulkArchive?: BulkAction;
+  onRegenerateUrls?: (id: string) => Promise<void> | void;
   loading?: boolean; error?: string | null; onRetry?: () => void;
 }) {
+
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
   const [confirm, setConfirm] = useState<null | { kind: "delete" | "archive"; id: string }>(null);
@@ -368,7 +372,9 @@ tr:nth-child(even) td { background:#f8fafc; }
                       onStatus={handleStatus}
                       onDelete={onDelete ? (id) => setConfirm({ kind: "delete", id }) : undefined}
                       onArchive={onArchive ? (id) => setConfirm({ kind: "archive", id }) : undefined}
+                      onRegenerateUrls={onRegenerateUrls}
                     />
+
                   </div>
                 );
               })}
@@ -386,7 +392,9 @@ tr:nth-child(even) td { background:#f8fafc; }
                 onStatus={handleStatus}
                 onDelete={onDelete ? (id) => setConfirm({ kind: "delete", id }) : undefined}
                 onArchive={onArchive ? (id) => setConfirm({ kind: "archive", id }) : undefined}
+                onRegenerateUrls={onRegenerateUrls}
               />
+
             ))}
           </div>
         )}
@@ -822,7 +830,7 @@ function CachedImage({ url, alt, onClick, onPrefetch }: {
 }
 
 // ---------- Row ----------
-function RxCard({ rx, pending, selected, onToggleSelect, onStatus, onDelete, onArchive }: {
+function RxCard({ rx, pending, selected, onToggleSelect, onStatus, onDelete, onArchive, onRegenerateUrls }: {
   rx: Rx;
   pending?: "status" | "delete" | "archive";
   selected: boolean;
@@ -830,14 +838,39 @@ function RxCard({ rx, pending, selected, onToggleSelect, onStatus, onDelete, onA
   onStatus: (id: string, s: string) => Promise<void> | void;
   onDelete?: (id: string) => void;
   onArchive?: (id: string) => void;
+  onRegenerateUrls?: (id: string) => Promise<void> | void;
 }) {
   const b = statusBadge(rx.status);
   const [zoom, setZoom] = useState<string | null>(null);
+  const [regenBusy, setRegenBusy] = useState(false);
   const prefetch = useCallback((u: string) => prefetchImageCached(u), []);
   const busy = !!pending;
 
+  const urlInfos = useMemo(() => rx.image_urls.map(parseSignedUrl), [rx.image_urls]);
+  const worst = useMemo(() => {
+    if (urlInfos.length === 0) return null;
+    const expired = urlInfos.filter((i) => i.expired).length;
+    const soon = urlInfos.filter((i) => !i.expired && i.expiresInMs != null && i.expiresInMs < 3 * 86_400_000).length;
+    if (expired > 0) return { tone: "expired" as const, label: `${expired}/${urlInfos.length} روابط منتهية` };
+    if (soon > 0) return { tone: "warn" as const, label: `${soon} رابط ينتهي قريبًا` };
+    const min = urlInfos.reduce((m, i) => (i.expiresInMs != null && (m == null || i.expiresInMs < m) ? i.expiresInMs : m), null as number | null);
+    return min != null ? { tone: "ok" as const, label: formatExpiry(urlInfos[0]).label } : null;
+  }, [urlInfos]);
+
+  async function handleRegen() {
+    if (!onRegenerateUrls) return;
+    setRegenBusy(true);
+    try {
+      await onRegenerateUrls(rx.id);
+      toast.success("تم تجديد روابط الصور");
+    } catch (e: any) {
+      toast.error(humanizeError(e, "تجديد الروابط"));
+    } finally { setRegenBusy(false); }
+  }
+
   return (
     <div data-testid={`rx-card-${rx.id}`} className={`relative rounded-2xl border bg-card p-4 shadow-card transition ${selected ? "border-primary ring-2 ring-primary/30" : "border-border"} ${busy ? "opacity-70" : ""}`}>
+
       {busy && (
         <div className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full bg-primary/10 px-2 py-1 text-[10px] font-black text-primary">
           <Loader2 className="size-3 animate-spin" />
@@ -877,6 +910,36 @@ function RxCard({ rx, pending, selected, onToggleSelect, onStatus, onDelete, onA
           ))}
         </div>
       )}
+
+      {worst && (
+        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-secondary/40 p-2 text-[11px]">
+          {worst.tone === "expired"
+            ? <ShieldAlert className="size-3.5 text-rose-600" />
+            : worst.tone === "warn"
+              ? <Clock className="size-3.5 text-amber-600" />
+              : <ShieldCheck className="size-3.5 text-emerald-600" />}
+          <span className={`font-black ${worst.tone === "expired" ? "text-rose-700" : worst.tone === "warn" ? "text-amber-700" : "text-emerald-700"}`}>
+            {worst.label}
+          </span>
+          <span className="text-muted-foreground">
+            ({urlInfos.map((i, idx) => i.expiresAt ? `${idx + 1}: ${i.expiresAt.toLocaleDateString("ar-EG")}` : `${idx + 1}: غير معروف`).join(" · ")})
+          </span>
+          {onRegenerateUrls && (
+            <button
+              onClick={handleRegen}
+              disabled={regenBusy || busy}
+              data-testid={`regen-${rx.id}`}
+              className="ms-auto flex items-center gap-1 rounded-lg bg-primary/10 px-2.5 py-1 text-[11px] font-black text-primary hover:bg-primary/20 disabled:opacity-50"
+              title="إعادة توليد روابط آمنة جديدة صالحة لـ 30 يوم"
+            >
+              {regenBusy ? <Loader2 className="size-3 animate-spin" /> : <RefreshCw className="size-3" />}
+              تجديد الروابط
+            </button>
+          )}
+        </div>
+      )}
+
+
 
       {zoom && (
         <div role="dialog" aria-modal="true" onClick={() => setZoom(null)} className="fixed inset-0 z-50 grid place-items-center bg-black/85 p-4 animate-in fade-in">
