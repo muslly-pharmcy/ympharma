@@ -138,21 +138,19 @@ function PrescriptionPage() {
           return;
         }
         updateStage(i, "signing");
-        let signedUrl = "";
+        let publicUrl = "";
         try {
-          signedUrl = await withRetry(`sign#${i + 1}`, async () => {
-            const { data, error } = await supabase.storage.from("prescriptions").createSignedUrl(path, 60 * 60 * 24 * 30);
-            if (error || !data?.signedUrl) throw error || new Error("no signed url");
-            return data.signedUrl;
-          });
+          const { data } = supabase.storage.from("prescriptions").getPublicUrl(path);
+          if (!data?.publicUrl) throw new Error("no public url");
+          publicUrl = data.publicUrl;
         } catch (e: any) {
-          console.error("[storage.signedUrl]", e);
-          updateStage(i, "error", e?.message || "فشل التوقيع");
+          console.error("[storage.publicUrl]", e);
+          updateStage(i, "error", e?.message || "فشل إنشاء الرابط");
           toast.error("فشل إنشاء رابط الصورة");
           setBusy(false);
           return;
         }
-        uploadedUrls.push(signedUrl);
+        uploadedUrls.push(publicUrl);
         updateStage(i, "done");
       }
 
