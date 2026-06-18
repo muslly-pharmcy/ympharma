@@ -78,21 +78,30 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDel
   const [showCsvSettings, setShowCsvSettings] = useState(false);
   const [csvCols, setCsvCols] = useState<string[]>(() => loadCsvPrefs());
   const [bulkProgress, setBulkProgress] = useState<null | { done: number; total: number; currentId: string; kind: "delete" | "archive" }>(null);
+  const [bulkSummary, setBulkSummary] = useState<null | { ok: number; fail: number; total: number; kind: "delete" | "archive"; error?: string }>(null);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>(() => {
+    if (typeof localStorage === "undefined") return "active";
+    return (localStorage.getItem("rx-status-filter-v1") as StatusFilter) || "active";
+  });
 
   // persist CSV pref
   useEffect(() => {
     try { localStorage.setItem(CSV_PREF_KEY, JSON.stringify(csvCols)); } catch { /* quota */ }
   }, [csvCols]);
+  useEffect(() => {
+    try { localStorage.setItem("rx-status-filter-v1", statusFilter); } catch { /* quota */ }
+  }, [statusFilter]);
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    if (!needle) return rxs;
-    return rxs.filter((r) =>
-      r.id.toLowerCase().includes(needle) ||
-      r.customer_name.toLowerCase().includes(needle) ||
-      r.customer_phone.includes(needle)
-    );
-  }, [rxs, q]);
+    return rxs.filter((r) => {
+      if (!matchesStatusFilter(r, statusFilter)) return false;
+      if (!needle) return true;
+      return r.id.toLowerCase().includes(needle) ||
+        r.customer_name.toLowerCase().includes(needle) ||
+        r.customer_phone.includes(needle);
+    });
+  }, [rxs, q, statusFilter]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, pageCount);
