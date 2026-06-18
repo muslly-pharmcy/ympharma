@@ -97,10 +97,12 @@ export type RxMsgInput = {
 };
 
 export function buildPrescriptionMessage(r: RxMsgInput) {
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://muslly.com";
+  const adminUrl = `${origin}/admin?rx=${encodeURIComponent(r.refId)}`;
   const lines = [
     "🏥 *صيدلية المصلي*",
     "━━━━━━━━━━━━━━━",
-    "📄 *طلب روشتة جديد*",
+    "📄 *تنبيه: روشتة جديدة بانتظار المراجعة*",
     `🆔 الرقم المرجعي: *${r.refId}*`,
     `📅 ${nowAr()}`,
     "",
@@ -110,8 +112,13 @@ export function buildPrescriptionMessage(r: RxMsgInput) {
     `📍 العنوان: ${r.customer.address}`,
     r.customer.notes ? `📝 ملاحظات: ${r.customer.notes}` : "",
     "",
-    `🖼️ *صور الروشتة (${r.imageUrls.length}):*`,
+    `🖼️ *صور الروشتة (${r.imageUrls.length}) — السحابة المشتركة:*`,
     ...r.imageUrls.map((u, i) => `   ${i + 1}. ${u}`),
+    "",
+    "━━━━━━━━━━━━━━━",
+    `🔐 *فتح الروشتة في لوحة الإدمن:*`,
+    `   ${adminUrl}`,
+    "━━━━━━━━━━━━━━━",
     "",
     "نرجو تجهيز الأدوية والتواصل لتأكيد الطلب 💊",
   ];
