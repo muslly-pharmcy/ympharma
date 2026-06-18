@@ -5,9 +5,8 @@ import { vi } from "vitest";
 if (typeof window !== "undefined") {
   (window as any).requestIdleCallback = (cb: any) => setTimeout(() => cb({ didTimeout: false, timeRemaining: () => 50 }), 0);
   (window as any).cancelIdleCallback = (id: any) => clearTimeout(id);
-  Object.defineProperty(window, "URL", {
-    value: { ...window.URL, createObjectURL: vi.fn(() => "blob:mock"), revokeObjectURL: vi.fn() },
-  });
+  (window.URL as any).createObjectURL = vi.fn(() => "blob:mock");
+  (window.URL as any).revokeObjectURL = vi.fn();
 }
 
 // Anchor click → jsdom no-op; CSV export relies on it.
