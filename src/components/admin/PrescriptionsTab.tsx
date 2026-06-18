@@ -238,21 +238,19 @@ tr:nth-child(even) td { background:#f8fafc; }
     if (!handler || ids.length === 0) { setBulkConfirm(null); return; }
     setBulkConfirm(null);
     setBulkProgress({ done: 0, total: ids.length, currentId: ids[0], kind });
+    let lastDone = 0;
     try {
       await handler(ids, (done, total, currentId) => {
+        lastDone = done;
         setBulkProgress({ done, total, currentId, kind });
-        if (done > 0) {
-          // success for previously processed id is logged inside admin handler;
-          // we still log a coarse bulk-completion entry at the end.
-        }
       });
       logActivity({ rxId: `[${ids.length}]`, action: kind === "delete" ? "bulk-delete" : "bulk-archive", status: "success", details: ids.join(", ") });
-      toast.success(kind === "delete" ? `تم حذف ${ids.length} روشتة` : `تم أرشفة ${ids.length} روشتة`);
+      setBulkSummary({ ok: ids.length, fail: 0, total: ids.length, kind });
       setSelected(new Set());
     } catch (e: any) {
       const msg = humanizeError(e, kind === "delete" ? "الحذف الجماعي" : "الأرشفة الجماعية");
       logActivity({ rxId: `[${ids.length}]`, action: kind === "delete" ? "bulk-delete" : "bulk-archive", status: "error", details: ids.join(", "), error: msg });
-      toast.error(msg);
+      setBulkSummary({ ok: lastDone, fail: ids.length - lastDone, total: ids.length, kind, error: msg });
     } finally {
       setBulkProgress(null);
     }
