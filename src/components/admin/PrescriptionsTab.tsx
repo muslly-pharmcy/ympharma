@@ -327,7 +327,7 @@ tr:nth-child(even) td { background:#f8fafc; }
             <Settings2 className="size-3.5" />
           </button>
           <button
-            onClick={exportCSV}
+            onClick={() => setExportPreview("csv")}
             disabled={filtered.length === 0}
             data-testid="export-csv-btn"
             className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-black text-white hover:bg-emerald-600 disabled:opacity-50"
@@ -335,13 +335,14 @@ tr:nth-child(even) td { background:#f8fafc; }
             <Download className="size-3.5" /> CSV ({filtered.length})
           </button>
           <button
-            onClick={exportPDF}
+            onClick={() => setExportPreview("pdf")}
             disabled={filtered.length === 0}
             data-testid="export-pdf-btn"
             className="flex items-center gap-1.5 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-black text-white hover:bg-rose-700 disabled:opacity-50"
           >
             <FileText className="size-3.5" /> PDF ({filtered.length})
           </button>
+
         </div>
       </div>
 
