@@ -937,10 +937,11 @@ function CachedImage({ url, alt, onClick, onPrefetch }: {
 }
 
 // ---------- Row ----------
-function RxCard({ rx, pending, selected, onToggleSelect, onStatus, onDelete, onArchive, onRegenerateUrls }: {
+function RxCard({ rx, pending, selected, affected, onToggleSelect, onStatus, onDelete, onArchive, onRegenerateUrls }: {
   rx: Rx;
   pending?: "status" | "delete" | "archive";
   selected: boolean;
+  affected?: "expired" | "soon" | null;
   onToggleSelect: (id: string) => void;
   onStatus: (id: string, s: string) => Promise<void> | void;
   onDelete?: (id: string) => void;
@@ -975,8 +976,20 @@ function RxCard({ rx, pending, selected, onToggleSelect, onStatus, onDelete, onA
     } finally { setRegenBusy(false); }
   }
 
+  const affectedRing = affected === "expired"
+    ? "border-rose-400 ring-2 ring-rose-300/40"
+    : affected === "soon"
+      ? "border-amber-400 ring-2 ring-amber-300/40"
+      : "border-border";
   return (
-    <div data-testid={`rx-card-${rx.id}`} className={`relative rounded-2xl border bg-card p-4 shadow-card transition ${selected ? "border-primary ring-2 ring-primary/30" : "border-border"} ${busy ? "opacity-70" : ""}`}>
+    <div data-testid={`rx-card-${rx.id}`} data-affected={affected ?? ""} className={`relative rounded-2xl border bg-card p-4 shadow-card transition ${selected ? "border-primary ring-2 ring-primary/30" : affectedRing} ${busy ? "opacity-70" : ""}`}>
+
+      {affected && !selected && (
+        <span className={`absolute -top-2 right-3 rounded-full px-2 py-0.5 text-[10px] font-black ${affected === "expired" ? "bg-rose-500 text-white" : "bg-amber-500 text-white"}`}>
+          {affected === "expired" ? "رابط منتهي" : "ينتهي قريباً"}
+        </span>
+      )}
+
 
       {busy && (
         <div className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full bg-primary/10 px-2 py-1 text-[10px] font-black text-primary">
