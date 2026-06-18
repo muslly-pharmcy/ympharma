@@ -45,24 +45,24 @@ describe("PrescriptionsTab — integration", () => {
   });
 
   it("exports CSV with the persisted column preference", async () => {
-    // Pre-seed preference: only id + name
     localStorage.setItem("rx-csv-cols-v1", JSON.stringify(["id", "customer_name"]));
 
-    const blobSpy = vi.fn();
-    const origBlob = global.Blob;
-    (global as any).Blob = vi.fn((parts: any, opts: any) => { blobSpy(parts, opts); return new origBlob(parts, opts); });
+    let captured: Blob | null = null;
+    const spy = vi.spyOn(URL, "createObjectURL").mockImplementation((b: Blob) => {
+      captured = b;
+      return "blob:mock";
+    });
 
     render(<PrescriptionsTab rxs={[mkRx(1), mkRx(2)]} onStatus={vi.fn()} />);
     await userEvent.click(screen.getByTestId("export-csv-btn"));
 
-    expect(blobSpy).toHaveBeenCalled();
-    const csv = String(blobSpy.mock.calls[0][0][1]); // [BOM, csvBody]
+    expect(spy).toHaveBeenCalled();
+    const csv = captured ? await (captured as Blob).text() : "";
     expect(csv).toContain("رقم");
     expect(csv).toContain("الاسم");
     expect(csv).not.toContain("الجوال");
     expect(csv).toContain("RX-0001");
-
-    global.Blob = origBlob;
+    spy.mockRestore();
   });
 
   it("confirms delete, calls onDelete, and writes an activity-log entry", async () => {
