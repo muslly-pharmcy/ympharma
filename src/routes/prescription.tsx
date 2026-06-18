@@ -6,6 +6,7 @@ import { openWhatsApp, WHATSAPP_NUMBER, buildPrescriptionMessage } from "@/lib/w
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { compressImage } from "@/lib/image-compress";
+import { RX_SIGNED_TTL_SECONDS } from "@/lib/rx-url";
 
 export const Route = createFileRoute("/prescription")({
   head: () => ({
@@ -138,19 +139,24 @@ function PrescriptionPage() {
           return;
         }
         updateStage(i, "signing");
-        let publicUrl = "";
+        let signedUrl = "";
         try {
-          const { data } = supabase.storage.from("prescriptions").getPublicUrl(path);
-          if (!data?.publicUrl) throw new Error("no public url");
-          publicUrl = data.publicUrl;
+          await withRetry(`sign#${i + 1}`, async () => {
+            const { data, error } = await supabase.storage
+              .from("prescriptions")
+              .createSignedUrl(path, RX_SIGNED_TTL_SECONDS);
+            if (error) throw error;
+            if (!data?.signedUrl) throw new Error("no signed url");
+            signedUrl = data.signedUrl;
+          });
         } catch (e: any) {
-          console.error("[storage.publicUrl]", e);
+          console.error("[storage.createSignedUrl]", e);
           updateStage(i, "error", e?.message || "فشل إنشاء الرابط");
           toast.error("فشل إنشاء رابط الصورة");
           setBusy(false);
           return;
         }
-        uploadedUrls.push(publicUrl);
+        uploadedUrls.push(signedUrl);
         updateStage(i, "done");
       }
 
