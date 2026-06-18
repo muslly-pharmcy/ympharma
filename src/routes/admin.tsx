@@ -444,7 +444,7 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
       </header>
 
       <main className="mx-auto max-w-7xl space-y-4 px-4 py-6">
-        {(canOrders || canRx) && tab !== "team" && tab !== "trust" && tab !== "errors" && tab !== "insurance" && tab !== "retention" && tab !== "emails" && tab !== "security" && <AdminStats refreshKey={statsKey} />}
+        {(canOrders || canRx) && tab !== "team" && tab !== "trust" && tab !== "errors" && tab !== "insurance" && tab !== "retention" && tab !== "emails" && tab !== "security" && tab !== "images" && <AdminStats refreshKey={statsKey} />}
         {tab === "orders" && canOrders && <OrdersTab orders={filteredOrders} onStatus={setOrderStatus} loading={busy && orders.length === 0} error={loadError} onRetry={load} />}
         {tab === "rx" && canRx && <PrescriptionsTab rxs={filteredRxs} onStatus={setRxStatus} onDelete={deleteRx} onArchive={archiveRx} onBulkDelete={bulkDeleteRx} onBulkArchive={bulkArchiveRx} loading={busy && rxs.length === 0} error={loadError} onRetry={load} />}
         {tab === "team" && me?.isOwner && <StaffTab currentUserId={userId} />}
