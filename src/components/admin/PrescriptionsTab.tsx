@@ -487,6 +487,7 @@ tr:nth-child(even) td { background:#f8fafc; }
                 rx={r}
                 pending={pending[r.id]}
                 selected={selected.has(r.id)}
+                affected={expiryMap.get(r.id) === "expired" || expiryMap.get(r.id) === "soon" ? (expiryMap.get(r.id) as "expired" | "soon") : null}
                 onToggleSelect={toggleOne}
                 onStatus={handleStatus}
                 onDelete={onDelete ? (id) => setConfirm({ kind: "delete", id }) : undefined}
