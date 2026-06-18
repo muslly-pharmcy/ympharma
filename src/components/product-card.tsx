@@ -38,7 +38,7 @@ export function ProductCard({ product }: { product: Product }) {
           loading="lazy"
           decoding="async"
           onLoad={() => setLoaded(true)}
-          onError={() => setLoaded(true)}
+          onError={(e) => { setLoaded(true); handleImageError(e); }}
           className={`size-full object-cover transition duration-500 group-hover:scale-110 ${loaded ? "opacity-100" : "opacity-0"}`}
         />
         {product.badge && (
