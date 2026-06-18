@@ -149,6 +149,8 @@ function RootComponent() {
     void import("../lib/client-error-logger").then((m) => m.installClientErrorLogger());
     // Anonymous network/error reporter — works for signed-out visitors too.
     void import("../lib/error-reporter").then((m) => m.installAnonErrorReporter());
+    // Offline-first SW so the app keeps loading on flaky YemenNet/TeleYemen.
+    void import("../lib/register-sw").then((m) => m.registerServiceWorker());
   }, []);
 
   return (
