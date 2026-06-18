@@ -8,6 +8,9 @@ const EXTERNAL_HOSTS = [
   "source.unsplash.com",
   "img.youtube.com",
   "i.imgur.com",
+  "images.openfoodfacts.org",
+  "static.openfoodfacts.org",
+  "world.openfoodfacts.org",
 ];
 
 export function proxifyImage(url: string | undefined | null): string {
