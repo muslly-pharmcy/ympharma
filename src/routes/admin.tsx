@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteFooter } from "@/components/site-chrome";
-import { LayoutDashboard, LogOut, Package, FileText, RefreshCw, Loader2, Lock, Filter, Users, Crown, Download, Bell, BellOff } from "lucide-react";
+import { LayoutDashboard, LogOut, Package, FileText, RefreshCw, Loader2, Lock, Filter, Users, Crown, Download, Bell, BellOff, Shield } from "lucide-react";
 import { openWhatsApp, buildStatusMessage } from "@/lib/whatsapp";
 import { toast } from "sonner";
 import { bootstrapOwner, getMyRole } from "@/lib/staff.functions";
@@ -14,6 +14,7 @@ import { STATUSES, applyChange, type Order, type Rx } from "@/components/admin/s
 import { OrdersTab } from "@/components/admin/OrdersTab";
 import { PrescriptionsTab } from "@/components/admin/PrescriptionsTab";
 import { StaffTab } from "@/components/admin/StaffTab";
+import { TrustTab } from "@/components/admin/TrustTab";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
