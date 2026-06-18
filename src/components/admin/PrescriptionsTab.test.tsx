@@ -231,23 +231,15 @@ describe("Imported products dedupe", () => {
 
 describe("Prescription submission (smoke, repeated)", () => {
   it("uploads → signs → inserts → opens WhatsApp across 3 consecutive runs", async () => {
-    const supabaseMod = await import("@/integrations/supabase/client");
     const whatsappMod = await import("@/lib/whatsapp");
-
-    const upload = vi.fn(async () => ({ data: { path: "p" }, error: null }));
-    const createSignedUrl = vi.fn(async () => ({ data: { signedUrl: "https://signed/url.jpg" }, error: null }));
-    const insert = vi.fn(async () => ({ error: null }));
-    (supabaseMod.supabase.storage as any).from = vi.fn(() => ({ upload, createSignedUrl }));
-    (supabaseMod.supabase as any).from = vi.fn(() => ({ insert }));
-    const openWa = vi.spyOn(whatsappMod, "openWhatsApp").mockImplementation(() => {});
-
+    const openWa = whatsappMod.openWhatsApp as unknown as ReturnType<typeof vi.fn>;
 
     const mod: any = await import("@/routes/prescription");
     const PrescriptionPage = mod.Route.options.component;
     const file = new File([new Uint8Array([1, 2, 3])], "rx.jpg", { type: "image/jpeg" });
 
     for (let run = 1; run <= 3; run++) {
-      upload.mockClear(); createSignedUrl.mockClear(); insert.mockClear(); openWa.mockClear();
+      supaUpload.mockClear(); supaSignedUrl.mockClear(); supaInsert.mockClear(); openWa.mockClear();
       const { unmount } = render(<PrescriptionPage />);
       const input = document.querySelector('input[type="file"]') as HTMLInputElement;
       await userEvent.upload(input, file);
@@ -256,14 +248,15 @@ describe("Prescription submission (smoke, repeated)", () => {
       await userEvent.type(screen.getByPlaceholderText(/العنوان للتوصيل/), "عدن — المنصورة");
       await userEvent.click(screen.getByRole("button", { name: /إرسال الروشتة/ }));
 
-      await waitFor(() => expect(insert).toHaveBeenCalledTimes(1), { timeout: 8000 });
-      expect(upload).toHaveBeenCalledTimes(1);
-      expect(createSignedUrl).toHaveBeenCalledTimes(1);
+      await waitFor(() => expect(supaInsert).toHaveBeenCalledTimes(1), { timeout: 8000 });
+      expect(supaUpload).toHaveBeenCalledTimes(1);
+      expect(supaSignedUrl).toHaveBeenCalledTimes(1);
       expect(openWa).toHaveBeenCalledTimes(1);
-      const payload = (insert.mock.calls[0] as any[])[0];
+      const payload = (supaInsert.mock.calls[0] as any[])[0];
       expect(payload.image_urls).toEqual(["https://signed/url.jpg"]);
       expect(payload.status).toBe("pending");
       unmount();
     }
   }, 30000);
 });
+
