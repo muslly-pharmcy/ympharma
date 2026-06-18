@@ -79,10 +79,12 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDel
   const [csvCols, setCsvCols] = useState<string[]>(() => loadCsvPrefs());
   const [bulkProgress, setBulkProgress] = useState<null | { done: number; total: number; currentId: string; kind: "delete" | "archive" }>(null);
   const [bulkSummary, setBulkSummary] = useState<null | { ok: number; fail: number; total: number; kind: "delete" | "archive"; error?: string }>(null);
+  const [exportPreview, setExportPreview] = useState<null | "csv" | "pdf">(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(() => {
     if (typeof localStorage === "undefined") return "active";
     return (localStorage.getItem("rx-status-filter-v1") as StatusFilter) || "active";
   });
+
 
   // persist CSV pref
   useEffect(() => {
@@ -325,7 +327,7 @@ tr:nth-child(even) td { background:#f8fafc; }
             <Settings2 className="size-3.5" />
           </button>
           <button
-            onClick={exportCSV}
+            onClick={() => setExportPreview("csv")}
             disabled={filtered.length === 0}
             data-testid="export-csv-btn"
             className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-black text-white hover:bg-emerald-600 disabled:opacity-50"
@@ -333,13 +335,14 @@ tr:nth-child(even) td { background:#f8fafc; }
             <Download className="size-3.5" /> CSV ({filtered.length})
           </button>
           <button
-            onClick={exportPDF}
+            onClick={() => setExportPreview("pdf")}
             disabled={filtered.length === 0}
             data-testid="export-pdf-btn"
             className="flex items-center gap-1.5 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-black text-white hover:bg-rose-700 disabled:opacity-50"
           >
             <FileText className="size-3.5" /> PDF ({filtered.length})
           </button>
+
         </div>
       </div>
 
@@ -420,9 +423,25 @@ tr:nth-child(even) td { background:#f8fafc; }
           onClose={() => setShowCsvSettings(false)}
         />
       )}
+      {exportPreview && (
+        <ExportPreviewDialog
+          kind={exportPreview}
+          rows={filtered}
+          columns={csvCols.map((k) => CSV_COLS.find((c) => c.key === k)!).filter(Boolean)}
+          statusFilterLabel={STATUS_FILTERS.find((f) => f.v === statusFilter)?.label ?? "الكل"}
+          searchText={q}
+          onConfirm={() => {
+            const kind = exportPreview;
+            setExportPreview(null);
+            if (kind === "csv") exportCSV(); else exportPDF();
+          }}
+          onClose={() => setExportPreview(null)}
+        />
+      )}
     </div>
   );
 }
+
 
 // ---------- Confirm dialog ----------
 function ConfirmDialog({ kind, rxId, bulk, onConfirm, onCancel }: {
@@ -573,6 +592,89 @@ function BulkSummaryDialog({ s, onClose }: {
     </div>
   );
 }
+
+// ---------- Export preview dialog (CSV / PDF) ----------
+function ExportPreviewDialog({ kind, rows, columns, statusFilterLabel, searchText, onConfirm, onClose }: {
+  kind: "csv" | "pdf";
+  rows: Rx[];
+  columns: CsvCol[];
+  statusFilterLabel: string;
+  searchText: string;
+  onConfirm: () => void;
+  onClose: () => void;
+}) {
+  const preview = rows.slice(0, 5);
+  const noCols = columns.length === 0;
+  const noRows = rows.length === 0;
+  const label = kind === "csv" ? "CSV" : "PDF";
+  return (
+    <div role="dialog" aria-modal="true" data-testid="export-preview" className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4 animate-in fade-in" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-3xl rounded-2xl bg-card p-5 shadow-elevated">
+        <div className="flex items-center justify-between">
+          <p className="text-base font-black flex items-center gap-2">
+            {kind === "csv" ? <Download className="size-4" /> : <FileText className="size-4" />}
+            معاينة تصدير {label}
+          </p>
+          <button onClick={onClose} className="grid size-8 place-items-center rounded-lg hover:bg-accent"><X className="size-4" /></button>
+        </div>
+        <div className="mt-2 grid gap-2 text-[11px] sm:grid-cols-3">
+          <div className="rounded-lg bg-secondary p-2"><span className="font-bold">حالة:</span> {statusFilterLabel}</div>
+          <div className="rounded-lg bg-secondary p-2"><span className="font-bold">بحث:</span> {searchText || "—"}</div>
+          <div className="rounded-lg bg-secondary p-2"><span className="font-bold">عدد السجلات:</span> <span data-testid="export-preview-count">{rows.length}</span></div>
+        </div>
+        <div className="mt-3">
+          <p className="mb-1 text-[11px] font-bold text-muted-foreground">الأعمدة المختارة ({columns.length}):</p>
+          <div className="flex flex-wrap gap-1.5" data-testid="export-preview-cols">
+            {noCols
+              ? <span className="text-[11px] text-rose-600">لم يتم اختيار أي عمود</span>
+              : columns.map((c) => (
+                <span key={c.key} data-testid={`export-preview-col-${c.key}`} className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary">{c.label}</span>
+              ))}
+          </div>
+        </div>
+        <div className="mt-3 max-h-[40vh] overflow-auto rounded-xl border border-border">
+          {noRows || noCols ? (
+            <p className="p-6 text-center text-xs text-muted-foreground">لا توجد بيانات للمعاينة</p>
+          ) : (
+            <table className="w-full text-right text-[11px]" data-testid="export-preview-table">
+              <thead className="sticky top-0 bg-secondary font-black">
+                <tr>{columns.map((c) => <th key={c.key} className="px-2 py-1.5 whitespace-nowrap">{c.label}</th>)}</tr>
+              </thead>
+              <tbody>
+                {preview.map((r) => (
+                  <tr key={r.id} className="border-t border-border">
+                    {columns.map((c) => (
+                      <td key={c.key} className="px-2 py-1.5 max-w-[200px] truncate" title={String(c.pick(r) ?? "")}>{String(c.pick(r) ?? "")}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          {rows.length > preview.length && (
+            <p className="border-t border-border bg-secondary/40 px-2 py-1.5 text-center text-[11px] text-muted-foreground">
+              معاينة أول {preview.length} من {rows.length} — سيتم تصدير الكل
+            </p>
+          )}
+        </div>
+        <div className="mt-4 flex items-center justify-end gap-2">
+          <button onClick={onClose} className="rounded-lg bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">إلغاء</button>
+          <button
+            onClick={onConfirm}
+            disabled={noCols || noRows}
+            data-testid="export-confirm-btn"
+            className="flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-black text-primary-foreground hover:bg-primary-deep disabled:opacity-50"
+          >
+            {kind === "csv" ? <Download className="size-3.5" /> : <FileText className="size-3.5" />}
+            تصدير {label}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 
 // ---------- Activity log dialog ----------
 function ActivityLogDialog({ onClose }: { onClose: () => void }) {
