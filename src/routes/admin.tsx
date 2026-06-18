@@ -386,7 +386,12 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
               <Users className="size-4" /> الفريق والصلاحيات
             </button>
           )}
-          {tab !== "team" && (
+          {me?.isOwner && (
+            <button onClick={() => setTab("trust")} className={`flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-1.5 text-xs font-black transition ${tab === "trust" ? "brand-gradient text-primary-foreground shadow-card" : "bg-secondary text-muted-foreground hover:text-primary"}`}>
+              <Shield className="size-4" /> الأمان والخصوصية
+            </button>
+          )}
+          {tab !== "team" && tab !== "trust" && (
             <>
               <div className="mx-2 h-6 w-px bg-border" />
               <Filter className="size-3.5 text-muted-foreground" />
@@ -403,10 +408,11 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
       </header>
 
       <main className="mx-auto max-w-7xl space-y-4 px-4 py-6">
-        {(canOrders || canRx) && tab !== "team" && <AdminStats refreshKey={statsKey} />}
+        {(canOrders || canRx) && tab !== "team" && tab !== "trust" && <AdminStats refreshKey={statsKey} />}
         {tab === "orders" && canOrders && <OrdersTab orders={filteredOrders} onStatus={setOrderStatus} loading={busy && orders.length === 0} error={loadError} onRetry={load} />}
         {tab === "rx" && canRx && <PrescriptionsTab rxs={filteredRxs} onStatus={setRxStatus} onDelete={deleteRx} onArchive={archiveRx} onBulkDelete={bulkDeleteRx} onBulkArchive={bulkArchiveRx} loading={busy && rxs.length === 0} error={loadError} onRetry={load} />}
         {tab === "team" && me?.isOwner && <StaffTab currentUserId={userId} />}
+        {tab === "trust" && me?.isOwner && <TrustTab />}
       </main>
 
       <SiteFooter />
