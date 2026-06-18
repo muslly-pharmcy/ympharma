@@ -48,10 +48,10 @@ describe("PrescriptionsTab — integration", () => {
     localStorage.setItem("rx-csv-cols-v1", JSON.stringify(["id", "customer_name"]));
 
     let captured: Blob | null = null;
-    const spy = vi.spyOn(URL, "createObjectURL").mockImplementation((b: Blob) => {
+    const spy = vi.spyOn(URL, "createObjectURL").mockImplementation(((b: Blob) => {
       captured = b;
       return "blob:mock";
-    });
+    }) as any);
 
     render(<PrescriptionsTab rxs={[mkRx(1), mkRx(2)]} onStatus={vi.fn()} />);
     await userEvent.click(screen.getByTestId("export-csv-btn"));
