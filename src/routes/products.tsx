@@ -61,7 +61,7 @@ function ProductsPage() {
     const maxN = Number(maxP) || Infinity;
     const term = query.trim().toLowerCase();
     let arr = products.filter((p) => {
-      if (activeCat !== "all" && p.cat !== activeCat) return false;
+      if (activeCat !== "all" && !catMatches(activeCat, p.cat)) return false;
       if (p.price < minN || p.price > maxN) return false;
       if (selectedBrands.length && !selectedBrands.includes(p.brand)) return false;
       if (term) {
