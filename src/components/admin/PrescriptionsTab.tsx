@@ -285,23 +285,25 @@ tr:nth-child(even) td { background:#f8fafc; }
   async function runBulk() {
     if (!bulkConfirm) return;
     const { kind } = bulkConfirm;
-    const handler = kind === "delete" ? onBulkDelete : onBulkArchive;
+    const handler = kind === "delete" ? onBulkDelete : kind === "archive" ? onBulkArchive : onBulkRegenerateUrls;
     const ids = Array.from(selected);
     if (!handler || ids.length === 0) { setBulkConfirm(null); return; }
     setBulkConfirm(null);
     setBulkProgress({ done: 0, total: ids.length, currentId: ids[0], kind });
     let lastDone = 0;
+    const actionName = kind === "delete" ? "الحذف الجماعي" : kind === "archive" ? "الأرشفة الجماعية" : "تجديد الروابط الجماعي";
+    const logAction = kind === "delete" ? "bulk-delete" : kind === "archive" ? "bulk-archive" : "bulk-regenerate";
     try {
       await handler(ids, (done, total, currentId) => {
         lastDone = done;
         setBulkProgress({ done, total, currentId, kind });
       });
-      logActivity({ rxId: `[${ids.length}]`, action: kind === "delete" ? "bulk-delete" : "bulk-archive", status: "success", details: ids.join(", ") });
+      logActivity({ rxId: `[${ids.length}]`, action: logAction as any, status: "success", details: ids.join(", ") });
       setBulkSummary({ ok: ids.length, fail: 0, total: ids.length, kind });
       setSelected(new Set());
     } catch (e: any) {
-      const msg = humanizeError(e, kind === "delete" ? "الحذف الجماعي" : "الأرشفة الجماعية");
-      logActivity({ rxId: `[${ids.length}]`, action: kind === "delete" ? "bulk-delete" : "bulk-archive", status: "error", details: ids.join(", "), error: msg });
+      const msg = humanizeError(e, actionName);
+      logActivity({ rxId: `[${ids.length}]`, action: logAction as any, status: "error", details: ids.join(", "), error: msg });
       setBulkSummary({ ok: lastDone, fail: ids.length - lastDone, total: ids.length, kind, error: msg });
     } finally {
       setBulkProgress(null);
