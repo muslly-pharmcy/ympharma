@@ -223,7 +223,7 @@ function StatusPage() {
         </p>
       </main>
 
-      <SiteFooter />
+      <div className="no-print"><SiteFooter /></div>
     </div>
   );
 }
