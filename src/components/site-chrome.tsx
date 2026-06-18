@@ -94,7 +94,6 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
             ))}
             <Link to="/ai-assistant" className="whitespace-nowrap rounded-xl px-4 py-2 font-black text-primary hover:underline">🤖 استشارة دوائية</Link>
             <Link to="/prescription" className="whitespace-nowrap rounded-xl px-4 py-2 text-emerald-700 hover:underline">{t("nav.prescription")}</Link>
-            <Link to="/insurance" className="whitespace-nowrap rounded-xl px-4 py-2 font-black text-primary hover:underline">🩺 التأمين الطبي</Link>
             <Link to="/track" className="whitespace-nowrap rounded-xl px-4 py-2 text-primary hover:underline">{t("nav.track")}</Link>
             <Link to="/trust" className="whitespace-nowrap rounded-xl px-4 py-2 text-muted-foreground transition hover:text-primary" activeProps={{ className: "brand-gradient text-primary-foreground shadow-card" }}>الأمان والخصوصية</Link>
           </div>
