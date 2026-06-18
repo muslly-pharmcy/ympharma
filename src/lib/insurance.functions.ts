@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { createClient } from "@supabase/supabase-js";
+
 
 const InsuranceSubmissionSchema = z.object({
   insuranceNumber: z.string().trim().min(3).max(80),
@@ -61,9 +61,12 @@ export const submitInsuranceClaim = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const validation = validateInsuranceSubmission(data);
 
+    // Use admin client because the public form has no session and the insert
+    // policy is INSERT-only for anon (no SELECT to read back the row).
+    const { createClient } = await import("@supabase/supabase-js");
     const supabase = createClient(
       process.env.SUPABASE_URL!,
-      process.env.SUPABASE_PUBLISHABLE_KEY!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
       { auth: { persistSession: false, autoRefreshToken: false } },
     );
 
