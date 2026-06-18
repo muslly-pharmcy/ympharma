@@ -19,6 +19,7 @@ import { ErrorsTab } from "@/components/admin/ErrorsTab";
 import { InsuranceTab } from "@/components/admin/InsuranceTab";
 import { RetentionTab } from "@/components/admin/RetentionTab";
 import { EmailsTab } from "@/components/admin/EmailsTab";
+import { SecurityTab } from "@/components/admin/SecurityTab";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -132,7 +133,7 @@ function NotAdmin({ email }: { email: string }) {
 }
 
 function Dashboard({ email, userId }: { email: string; userId: string }) {
-  const [tab, setTab] = useState<"orders" | "rx" | "team" | "trust" | "errors" | "insurance" | "retention" | "emails">("orders");
+  const [tab, setTab] = useState<"orders" | "rx" | "team" | "trust" | "errors" | "insurance" | "retention" | "emails" | "security">("orders");
   const [orders, setOrders] = useState<Order[]>([]);
   const [rxs, setRxs] = useState<Rx[]>([]);
   const [filter, setFilter] = useState<string>("all");
@@ -415,7 +416,12 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
               📧 البريد
             </button>
           )}
-          {tab !== "team" && tab !== "trust" && tab !== "errors" && tab !== "insurance" && tab !== "retention" && tab !== "emails" && (
+          {me?.isOwner && (
+            <button onClick={() => setTab("security")} className={`flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-1.5 text-xs font-black transition ${tab === "security" ? "brand-gradient text-primary-foreground shadow-card" : "bg-secondary text-muted-foreground hover:text-primary"}`}>
+              🛡️ الأمان
+            </button>
+          )}
+          {tab !== "team" && tab !== "trust" && tab !== "errors" && tab !== "insurance" && tab !== "retention" && tab !== "emails" && tab !== "security" && (
             <>
               <div className="mx-2 h-6 w-px bg-border" />
               <Filter className="size-3.5 text-muted-foreground" />
@@ -432,7 +438,7 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
       </header>
 
       <main className="mx-auto max-w-7xl space-y-4 px-4 py-6">
-        {(canOrders || canRx) && tab !== "team" && tab !== "trust" && tab !== "errors" && tab !== "insurance" && tab !== "retention" && tab !== "emails" && <AdminStats refreshKey={statsKey} />}
+        {(canOrders || canRx) && tab !== "team" && tab !== "trust" && tab !== "errors" && tab !== "insurance" && tab !== "retention" && tab !== "emails" && tab !== "security" && <AdminStats refreshKey={statsKey} />}
         {tab === "orders" && canOrders && <OrdersTab orders={filteredOrders} onStatus={setOrderStatus} loading={busy && orders.length === 0} error={loadError} onRetry={load} />}
         {tab === "rx" && canRx && <PrescriptionsTab rxs={filteredRxs} onStatus={setRxStatus} onDelete={deleteRx} onArchive={archiveRx} onBulkDelete={bulkDeleteRx} onBulkArchive={bulkArchiveRx} loading={busy && rxs.length === 0} error={loadError} onRetry={load} />}
         {tab === "team" && me?.isOwner && <StaffTab currentUserId={userId} />}
@@ -441,6 +447,7 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
         {tab === "insurance" && <InsuranceTab />}
         {tab === "retention" && me?.isOwner && <RetentionTab />}
         {tab === "emails" && me?.isOwner && <EmailsTab />}
+        {tab === "security" && me?.isOwner && <SecurityTab />}
       </main>
 
       <SiteFooter />
