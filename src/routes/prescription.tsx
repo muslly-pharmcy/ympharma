@@ -97,13 +97,18 @@ function PrescriptionPage() {
       const uploadedUrls: string[] = [];
 
       const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-      async function withRetry<T>(label: string, fn: () => Promise<T>, max = 3): Promise<T> {
+      // Exponential backoff: 600ms, 1.2s, 2.4s, 4.8s — capped at 5 attempts.
+      const MAX_UPLOAD_ATTEMPTS = 5;
+      async function withRetry<T>(label: string, fn: () => Promise<T>, max = MAX_UPLOAD_ATTEMPTS): Promise<T> {
         let lastErr: unknown;
         for (let attempt = 1; attempt <= max; attempt++) {
           try { return await fn(); } catch (e) {
             lastErr = e;
-            console.warn(`[${label}] attempt ${attempt} failed`, e);
-            if (attempt < max) await sleep(600 * attempt);
+            console.warn(`[${label}] attempt ${attempt}/${max} failed`, e);
+            if (attempt < max) {
+              const delay = Math.min(8000, 600 * Math.pow(2, attempt - 1)) + Math.floor(Math.random() * 200);
+              await sleep(delay);
+            }
           }
         }
         throw lastErr;
@@ -128,7 +133,7 @@ function PrescriptionPage() {
         } catch (e: any) {
           console.error("[storage.upload]", e);
           updateStage(i, "error", e?.message || "فشل الرفع");
-          toast.error(`فشل رفع الصورة ${i + 1} بعد عدة محاولات`);
+          toast.error(`فشل رفع الصورة ${i + 1} بعد ${MAX_UPLOAD_ATTEMPTS} محاولات (${e?.message ?? "خطأ غير معروف"})`);
           setBusy(false);
           return;
         }
