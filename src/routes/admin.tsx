@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteFooter } from "@/components/site-chrome";
-import { LayoutDashboard, LogOut, Package, FileText, RefreshCw, Loader2, Lock, Filter, Users, Crown, Download, Bell, BellOff } from "lucide-react";
+import { LayoutDashboard, LogOut, Package, FileText, RefreshCw, Loader2, Lock, Filter, Users, Crown, Download, Bell, BellOff, Shield } from "lucide-react";
 import { openWhatsApp, buildStatusMessage } from "@/lib/whatsapp";
 import { toast } from "sonner";
 import { bootstrapOwner, getMyRole } from "@/lib/staff.functions";
@@ -14,6 +14,7 @@ import { STATUSES, applyChange, type Order, type Rx } from "@/components/admin/s
 import { OrdersTab } from "@/components/admin/OrdersTab";
 import { PrescriptionsTab } from "@/components/admin/PrescriptionsTab";
 import { StaffTab } from "@/components/admin/StaffTab";
+import { TrustTab } from "@/components/admin/TrustTab";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -127,7 +128,7 @@ function NotAdmin({ email }: { email: string }) {
 }
 
 function Dashboard({ email, userId }: { email: string; userId: string }) {
-  const [tab, setTab] = useState<"orders" | "rx" | "team">("orders");
+  const [tab, setTab] = useState<"orders" | "rx" | "team" | "trust">("orders");
   const [orders, setOrders] = useState<Order[]>([]);
   const [rxs, setRxs] = useState<Rx[]>([]);
   const [filter, setFilter] = useState<string>("all");
@@ -385,7 +386,12 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
               <Users className="size-4" /> الفريق والصلاحيات
             </button>
           )}
-          {tab !== "team" && (
+          {me?.isOwner && (
+            <button onClick={() => setTab("trust")} className={`flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-1.5 text-xs font-black transition ${tab === "trust" ? "brand-gradient text-primary-foreground shadow-card" : "bg-secondary text-muted-foreground hover:text-primary"}`}>
+              <Shield className="size-4" /> الأمان والخصوصية
+            </button>
+          )}
+          {tab !== "team" && tab !== "trust" && (
             <>
               <div className="mx-2 h-6 w-px bg-border" />
               <Filter className="size-3.5 text-muted-foreground" />
@@ -402,10 +408,11 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
       </header>
 
       <main className="mx-auto max-w-7xl space-y-4 px-4 py-6">
-        {(canOrders || canRx) && tab !== "team" && <AdminStats refreshKey={statsKey} />}
+        {(canOrders || canRx) && tab !== "team" && tab !== "trust" && <AdminStats refreshKey={statsKey} />}
         {tab === "orders" && canOrders && <OrdersTab orders={filteredOrders} onStatus={setOrderStatus} loading={busy && orders.length === 0} error={loadError} onRetry={load} />}
         {tab === "rx" && canRx && <PrescriptionsTab rxs={filteredRxs} onStatus={setRxStatus} onDelete={deleteRx} onArchive={archiveRx} onBulkDelete={bulkDeleteRx} onBulkArchive={bulkArchiveRx} loading={busy && rxs.length === 0} error={loadError} onRetry={load} />}
         {tab === "team" && me?.isOwner && <StaffTab currentUserId={userId} />}
+        {tab === "trust" && me?.isOwner && <TrustTab />}
       </main>
 
       <SiteFooter />
