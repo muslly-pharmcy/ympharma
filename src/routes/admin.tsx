@@ -416,7 +416,12 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
               📧 البريد
             </button>
           )}
-          {tab !== "team" && tab !== "trust" && tab !== "errors" && tab !== "insurance" && tab !== "retention" && tab !== "emails" && (
+          {me?.isOwner && (
+            <button onClick={() => setTab("security")} className={`flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-1.5 text-xs font-black transition ${tab === "security" ? "brand-gradient text-primary-foreground shadow-card" : "bg-secondary text-muted-foreground hover:text-primary"}`}>
+              🛡️ الأمان
+            </button>
+          )}
+          {tab !== "team" && tab !== "trust" && tab !== "errors" && tab !== "insurance" && tab !== "retention" && tab !== "emails" && tab !== "security" && (
             <>
               <div className="mx-2 h-6 w-px bg-border" />
               <Filter className="size-3.5 text-muted-foreground" />
