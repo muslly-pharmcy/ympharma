@@ -148,7 +148,7 @@ export const Route = createFileRoute("/api/public/img")({
             error: upstream.protocol !== "https:" ? "non_https" : "host_not_in_allowlist",
             duration_ms: Date.now() - started,
           });
-          return new Response("host not allowed", { status: 403, headers: CORS });
+          return placeholderResponse({ "X-Img-Reason": "host_not_allowed" });
         }
 
         try {
