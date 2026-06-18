@@ -20,6 +20,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CartProvider } from "../lib/cart";
 import { I18nProvider } from "../lib/i18n";
 import { Toaster } from "../components/ui/sonner";
+import { AiChatWidget } from "../components/ai-chat-widget";
 
 function NotFoundComponent() {
   return (
@@ -155,6 +156,7 @@ function RootComponent() {
       <I18nProvider>
         <CartProvider>
           <Outlet />
+          <AiChatWidget />
           <Toaster position="top-center" richColors />
         </CartProvider>
       </I18nProvider>

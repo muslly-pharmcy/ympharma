@@ -53,6 +53,24 @@ export type Database = {
         }
         Relationships: []
       }
+      alert_dedupe: {
+        Row: {
+          alert_key: string
+          count: number
+          last_sent_at: string
+        }
+        Insert: {
+          alert_key: string
+          count?: number
+          last_sent_at?: string
+        }
+        Update: {
+          alert_key?: string
+          count?: number
+          last_sent_at?: string
+        }
+        Relationships: []
+      }
       backups: {
         Row: {
           created_at: string
@@ -119,6 +137,111 @@ export type Database = {
           url?: string | null
           user_agent?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      error_logs_archive: {
+        Row: {
+          archived_at: string
+          country: string | null
+          extra: Json | null
+          id: string
+          level: string
+          message: string
+          occurred_at: string
+          source: string
+          stack: string | null
+          url: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          archived_at?: string
+          country?: string | null
+          extra?: Json | null
+          id?: string
+          level?: string
+          message: string
+          occurred_at?: string
+          source: string
+          stack?: string | null
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          archived_at?: string
+          country?: string | null
+          extra?: Json | null
+          id?: string
+          level?: string
+          message?: string
+          occurred_at?: string
+          source?: string
+          stack?: string | null
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      insurance_claims: {
+        Row: {
+          card_expiry: string | null
+          card_image_url: string | null
+          channel: string
+          created_at: string
+          diagnosis: string | null
+          id: string
+          insurance_company: string
+          insurance_number: string
+          is_stamped: boolean | null
+          patient_name: string
+          patient_phone: string
+          prescription_date: string | null
+          prescription_image_url: string | null
+          staff_notes: string | null
+          status: string
+          updated_at: string
+          validation_notes: string | null
+        }
+        Insert: {
+          card_expiry?: string | null
+          card_image_url?: string | null
+          channel?: string
+          created_at?: string
+          diagnosis?: string | null
+          id?: string
+          insurance_company?: string
+          insurance_number: string
+          is_stamped?: boolean | null
+          patient_name: string
+          patient_phone: string
+          prescription_date?: string | null
+          prescription_image_url?: string | null
+          staff_notes?: string | null
+          status?: string
+          updated_at?: string
+          validation_notes?: string | null
+        }
+        Update: {
+          card_expiry?: string | null
+          card_image_url?: string | null
+          channel?: string
+          created_at?: string
+          diagnosis?: string | null
+          id?: string
+          insurance_company?: string
+          insurance_number?: string
+          is_stamped?: boolean | null
+          patient_name?: string
+          patient_phone?: string
+          prescription_date?: string | null
+          prescription_image_url?: string | null
+          staff_notes?: string | null
+          status?: string
+          updated_at?: string
+          validation_notes?: string | null
         }
         Relationships: []
       }
@@ -447,6 +570,42 @@ export type Database = {
         }
         Relationships: []
       }
+      uptime_incidents_archive: {
+        Row: {
+          archived_at: string
+          created_at: string
+          details: Json | null
+          ended_at: string | null
+          id: string
+          severity: string
+          started_at: string
+          summary: string
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string
+          created_at?: string
+          details?: Json | null
+          ended_at?: string | null
+          id?: string
+          severity?: string
+          started_at?: string
+          summary: string
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string
+          created_at?: string
+          details?: Json | null
+          ended_at?: string | null
+          id?: string
+          severity?: string
+          started_at?: string
+          summary?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -516,6 +675,7 @@ export type Database = {
         }
         Returns: string
       }
+      run_retention_policy: { Args: never; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "user" | "owner"

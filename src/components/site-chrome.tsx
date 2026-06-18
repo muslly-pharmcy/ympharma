@@ -93,6 +93,7 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
             ))}
             <Link to="/ai-assistant" className="whitespace-nowrap rounded-xl px-4 py-2 font-black text-primary hover:underline">🤖 استشارة دوائية</Link>
             <Link to="/prescription" className="whitespace-nowrap rounded-xl px-4 py-2 text-emerald-700 hover:underline">{t("nav.prescription")}</Link>
+            <Link to="/insurance" className="whitespace-nowrap rounded-xl px-4 py-2 font-black text-primary hover:underline">🩺 التأمين الطبي</Link>
             <Link to="/track" className="whitespace-nowrap rounded-xl px-4 py-2 text-primary hover:underline">{t("nav.track")}</Link>
             <Link to="/trust" className="whitespace-nowrap rounded-xl px-4 py-2 text-muted-foreground transition hover:text-primary" activeProps={{ className: "brand-gradient text-primary-foreground shadow-card" }}>الأمان والخصوصية</Link>
           </div>
@@ -127,6 +128,7 @@ export function SiteFooter() {
             <li><Link to="/cart" className="hover:text-primary">{t("nav.cart")}</Link></li>
             <li><Link to="/track" className="hover:text-primary">{t("nav.track")}</Link></li>
             <li><Link to="/prescription" className="hover:text-primary">{t("nav.prescription")}</Link></li>
+            <li><Link to="/insurance" className="hover:text-primary">🩺 التأمين الطبي</Link></li>
             <li><Link to="/trust" className="inline-flex items-center gap-1 transition hover:text-primary" activeProps={{ className: "text-primary font-black" }}><Shield className="size-3.5" /> الأمان والخصوصية</Link></li>
             <li><Link to="/status" className="inline-flex items-center gap-1 transition hover:text-primary" activeProps={{ className: "text-primary font-black" }}>📡 حالة الخدمة</Link></li>
           </ul>
