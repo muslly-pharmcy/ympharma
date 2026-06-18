@@ -447,6 +447,48 @@ export type Database = {
         }
         Relationships: []
       }
+      retention_config: {
+        Row: {
+          archive_enabled: boolean
+          email_alerts_enabled: boolean
+          email_cooldown_minutes: number
+          email_recipients: string[]
+          error_logs_archive_days: number
+          error_logs_days: number
+          id: number
+          incidents_archive_days: number
+          incidents_days: number
+          updated_at: string
+          uptime_checks_days: number
+        }
+        Insert: {
+          archive_enabled?: boolean
+          email_alerts_enabled?: boolean
+          email_cooldown_minutes?: number
+          email_recipients?: string[]
+          error_logs_archive_days?: number
+          error_logs_days?: number
+          id?: number
+          incidents_archive_days?: number
+          incidents_days?: number
+          updated_at?: string
+          uptime_checks_days?: number
+        }
+        Update: {
+          archive_enabled?: boolean
+          email_alerts_enabled?: boolean
+          email_cooldown_minutes?: number
+          email_recipients?: string[]
+          error_logs_archive_days?: number
+          error_logs_days?: number
+          id?: number
+          incidents_archive_days?: number
+          incidents_days?: number
+          updated_at?: string
+          uptime_checks_days?: number
+        }
+        Relationships: []
+      }
       staff_permissions: {
         Row: {
           created_at: string

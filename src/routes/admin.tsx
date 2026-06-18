@@ -17,6 +17,7 @@ import { StaffTab } from "@/components/admin/StaffTab";
 import { TrustTab } from "@/components/admin/TrustTab";
 import { ErrorsTab } from "@/components/admin/ErrorsTab";
 import { InsuranceTab } from "@/components/admin/InsuranceTab";
+import { RetentionTab } from "@/components/admin/RetentionTab";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -130,7 +131,7 @@ function NotAdmin({ email }: { email: string }) {
 }
 
 function Dashboard({ email, userId }: { email: string; userId: string }) {
-  const [tab, setTab] = useState<"orders" | "rx" | "team" | "trust" | "errors" | "insurance">("orders");
+  const [tab, setTab] = useState<"orders" | "rx" | "team" | "trust" | "errors" | "insurance" | "retention">("orders");
   const [orders, setOrders] = useState<Order[]>([]);
   const [rxs, setRxs] = useState<Rx[]>([]);
   const [filter, setFilter] = useState<string>("all");
@@ -403,7 +404,12 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
               <Shield className="size-4" /> طلبات التأمين
             </button>
           )}
-          {tab !== "team" && tab !== "trust" && tab !== "errors" && tab !== "insurance" && (
+          {me?.isOwner && (
+            <button onClick={() => setTab("retention")} className={`flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-1.5 text-xs font-black transition ${tab === "retention" ? "brand-gradient text-primary-foreground shadow-card" : "bg-secondary text-muted-foreground hover:text-primary"}`}>
+              🗄️ الاحتفاظ والتنبيهات
+            </button>
+          )}
+          {tab !== "team" && tab !== "trust" && tab !== "errors" && tab !== "insurance" && tab !== "retention" && (
             <>
               <div className="mx-2 h-6 w-px bg-border" />
               <Filter className="size-3.5 text-muted-foreground" />
@@ -420,13 +426,14 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
       </header>
 
       <main className="mx-auto max-w-7xl space-y-4 px-4 py-6">
-        {(canOrders || canRx) && tab !== "team" && tab !== "trust" && tab !== "errors" && tab !== "insurance" && <AdminStats refreshKey={statsKey} />}
+        {(canOrders || canRx) && tab !== "team" && tab !== "trust" && tab !== "errors" && tab !== "insurance" && tab !== "retention" && <AdminStats refreshKey={statsKey} />}
         {tab === "orders" && canOrders && <OrdersTab orders={filteredOrders} onStatus={setOrderStatus} loading={busy && orders.length === 0} error={loadError} onRetry={load} />}
         {tab === "rx" && canRx && <PrescriptionsTab rxs={filteredRxs} onStatus={setRxStatus} onDelete={deleteRx} onArchive={archiveRx} onBulkDelete={bulkDeleteRx} onBulkArchive={bulkArchiveRx} loading={busy && rxs.length === 0} error={loadError} onRetry={load} />}
         {tab === "team" && me?.isOwner && <StaffTab currentUserId={userId} />}
         {tab === "trust" && me?.isOwner && <TrustTab />}
         {tab === "errors" && me?.isOwner && <ErrorsTab />}
         {tab === "insurance" && <InsuranceTab />}
+        {tab === "retention" && me?.isOwner && <RetentionTab />}
       </main>
 
       <SiteFooter />
