@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TrustRouteImport } from './routes/trust'
 import { Route as TrackRouteImport } from './routes/track'
 import { Route as StatusRouteImport } from './routes/status'
@@ -41,6 +42,11 @@ import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lova
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 
+const UnsubscribeRoute = UnsubscribeRouteImport.update({
+  id: '/unsubscribe',
+  path: '/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TrustRoute = TrustRouteImport.update({
   id: '/trust',
   path: '/trust',
@@ -222,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/status': typeof StatusRoute
   '/track': typeof TrackRoute
   '/trust': typeof TrustRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/api/public/health': typeof ApiPublicHealthRoute
@@ -255,6 +262,7 @@ export interface FileRoutesByTo {
   '/status': typeof StatusRoute
   '/track': typeof TrackRoute
   '/trust': typeof TrustRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/api/public/health': typeof ApiPublicHealthRoute
@@ -289,6 +297,7 @@ export interface FileRoutesById {
   '/status': typeof StatusRoute
   '/track': typeof TrackRoute
   '/trust': typeof TrustRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/api/public/health': typeof ApiPublicHealthRoute
@@ -324,6 +333,7 @@ export interface FileRouteTypes {
     | '/status'
     | '/track'
     | '/trust'
+    | '/unsubscribe'
     | '/email/unsubscribe'
     | '/product/$id'
     | '/api/public/health'
@@ -357,6 +367,7 @@ export interface FileRouteTypes {
     | '/status'
     | '/track'
     | '/trust'
+    | '/unsubscribe'
     | '/email/unsubscribe'
     | '/product/$id'
     | '/api/public/health'
@@ -390,6 +401,7 @@ export interface FileRouteTypes {
     | '/status'
     | '/track'
     | '/trust'
+    | '/unsubscribe'
     | '/email/unsubscribe'
     | '/product/$id'
     | '/api/public/health'
@@ -424,6 +436,7 @@ export interface RootRouteChildren {
   StatusRoute: typeof StatusRoute
   TrackRoute: typeof TrackRoute
   TrustRoute: typeof TrustRoute
+  UnsubscribeRoute: typeof UnsubscribeRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ProductIdRoute: typeof ProductIdRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
@@ -439,6 +452,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/unsubscribe': {
+      id: '/unsubscribe'
+      path: '/unsubscribe'
+      fullPath: '/unsubscribe'
+      preLoaderRoute: typeof UnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/trust': {
       id: '/trust'
       path: '/trust'
@@ -680,6 +700,7 @@ const rootRouteChildren: RootRouteChildren = {
   StatusRoute: StatusRoute,
   TrackRoute: TrackRoute,
   TrustRoute: TrustRoute,
+  UnsubscribeRoute: UnsubscribeRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ProductIdRoute: ProductIdRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
