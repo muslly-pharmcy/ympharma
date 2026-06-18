@@ -91,6 +91,65 @@ export function EmailsTab() {
         </div>
       </div>
 
+      <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-black">اختبار عرض القوالب (Smoke Test)</h3>
+          <button onClick={runSmoke} disabled={smokeBusy} className="text-xs font-bold text-primary hover:underline disabled:opacity-50">
+            {smokeBusy ? "جارٍ الفحص…" : "إعادة الفحص"}
+          </button>
+        </div>
+        {!smokeResult && <p className="text-xs text-muted-foreground">جارٍ الفحص عند التحميل…</p>}
+        {smokeResult?.fatal && (
+          <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
+            <div className="font-black mb-1">فشل عام:</div>
+            <pre className="whitespace-pre-wrap break-all text-xs font-mono">{smokeResult.fatal}</pre>
+          </div>
+        )}
+        {smokeResult?.results?.length > 0 && (
+          <div className="space-y-1">
+            <div className="text-xs text-muted-foreground">المدة: {smokeResult.durationMs}ms — الحالة: {smokeResult.ok ? <span className="text-emerald-700 font-bold">جميع القوالب سليمة ✓</span> : <span className="text-rose-700 font-bold">يوجد فشل</span>}</div>
+            <ul className="text-sm space-y-1">
+              {smokeResult.results.map((r: any) => (
+                <li key={r.name} className="flex items-start gap-2 border-b border-border/50 py-1">
+                  <span className={r.ok ? "text-emerald-600" : "text-rose-600"}>{r.ok ? "✓" : "✗"}</span>
+                  <span className="font-mono text-xs">{r.name}</span>
+                  {r.ok && <span className="text-xs text-muted-foreground">({r.htmlBytes} bytes)</span>}
+                  {!r.ok && (
+                    <span className="text-xs text-rose-700">
+                      [{KIND_LABEL[r.errorKind] ?? r.errorKind}] {r.error}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+        <h3 className="text-lg font-black">تشخيص آخر 20 محاولة إرسال</h3>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="text-xs text-muted-foreground border-b border-border">
+              <tr><th className="text-right p-2">القالب</th><th className="text-right p-2">المستلم</th><th className="text-right p-2">الحالة</th><th className="text-right p-2">نوع الخطأ</th><th className="text-right p-2">تفاصيل</th><th className="text-right p-2">الوقت</th></tr>
+            </thead>
+            <tbody>
+              {diagRows.length === 0 && <tr><td colSpan={6} className="text-center text-muted-foreground py-6">لا توجد محاولات بعد.</td></tr>}
+              {diagRows.map(r => (
+                <tr key={r.id} className="border-b border-border/50 align-top">
+                  <td className="p-2 font-mono text-xs">{r.template_name}</td>
+                  <td className="p-2 text-xs">{r.recipient_email}</td>
+                  <td className="p-2 text-xs">{r.status}</td>
+                  <td className="p-2 text-xs">{r.errorKind ? KIND_LABEL[r.errorKind] ?? r.errorKind : "—"}</td>
+                  <td className="p-2 text-xs font-mono max-w-md break-all text-rose-700">{r.error_message ?? "—"}</td>
+                  <td className="p-2 text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleString("ar")}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <div className="rounded-2xl border border-border bg-card p-4">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-lg font-black">سجل آخر 50 رسالة</h3>
