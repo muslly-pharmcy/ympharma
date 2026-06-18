@@ -131,8 +131,8 @@ export function InsuranceTab() {
                   <p className="mt-2 rounded-md bg-amber-50 px-2 py-1 text-[12px] text-amber-900">ملاحظات تحقق: {r.validation_notes}</p>
                 )}
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  {r.card_image_url && <a href={r.card_image_url} target="_blank" rel="noopener" className="inline-flex items-center gap-1 rounded-md bg-secondary px-2 py-1 text-[11px] font-bold hover:bg-accent"><ExternalLink className="size-3" /> صورة البطاقة</a>}
-                  {r.prescription_image_url && <a href={r.prescription_image_url} target="_blank" rel="noopener" className="inline-flex items-center gap-1 rounded-md bg-secondary px-2 py-1 text-[11px] font-bold hover:bg-accent"><ExternalLink className="size-3" /> صورة الوصفة</a>}
+                  {r.card_image_url && <button onClick={() => openSigned(r.card_image_url!)} className="inline-flex items-center gap-1 rounded-md bg-secondary px-2 py-1 text-[11px] font-bold hover:bg-accent"><ExternalLink className="size-3" /> صورة البطاقة</button>}
+                  {r.prescription_image_url && <button onClick={() => openSigned(r.prescription_image_url!)} className="inline-flex items-center gap-1 rounded-md bg-secondary px-2 py-1 text-[11px] font-bold hover:bg-accent"><ExternalLink className="size-3" /> صورة الوصفة</button>}
                   <span className="mx-1 text-muted-foreground">|</span>
                   {(["approved","rejected","needs_info","fulfilled"] as const).map((s) => (
                     <button key={s} onClick={() => setStatus(r.id, s)}
