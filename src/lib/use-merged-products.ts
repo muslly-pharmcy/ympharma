@@ -37,29 +37,70 @@ export function productDedupeKey(p: Pick<Product, "name" | "desc">): string {
 }
 
 /**
- * Merge several product lists, dropping duplicates (case-insensitive, code-aware).
- * Earlier lists take precedence over later ones.
+ * Per-list dedupe stats — useful for reporting how many items came from each
+ * source (e.g. re-importing the Excel file).
  */
-export function dedupeProducts(...lists: Product[][]): Product[] {
+export type DedupeListStat = {
+  total: number;        // items in this list
+  added: number;        // new unique items contributed
+  duplicates: number;   // skipped because already seen
+  byCode: number;       // duplicates matched by internal code
+  byName: number;       // duplicates matched by normalized name
+};
+
+export type DedupeSummary = {
+  totalIn: number;
+  totalOut: number;
+  duplicates: number;
+  perList: DedupeListStat[];
+};
+
+/**
+ * Merge several product lists, dropping duplicates (case-insensitive, code-aware).
+ * Earlier lists take precedence over later ones. Returns both the merged list
+ * and a breakdown of how many items each list added vs. deduped (and by which key).
+ */
+export function dedupeProductsWithSummary(
+  ...lists: Product[][]
+): { items: Product[]; summary: DedupeSummary } {
   const seen = new Set<string>();
   const out: Product[] = [];
+  const perList: DedupeListStat[] = [];
   for (const list of lists) {
+    const stat: DedupeListStat = { total: list.length, added: 0, duplicates: 0, byCode: 0, byName: 0 };
     for (const p of list) {
       const key = productDedupeKey(p);
-      if (seen.has(key)) continue;
+      if (seen.has(key)) {
+        stat.duplicates++;
+        if (key.startsWith("code:")) stat.byCode++; else stat.byName++;
+        continue;
+      }
       seen.add(key);
       out.push(p);
+      stat.added++;
     }
+    perList.push(stat);
   }
-  return out;
+  const totalIn = perList.reduce((s, x) => s + x.total, 0);
+  return {
+    items: out,
+    summary: { totalIn, totalOut: out.length, duplicates: totalIn - out.length, perList },
+  };
 }
 
 /**
- * Returns DB-published products merged with the static catalog + imported Excel.
- * DB products take precedence; imported Excel rows are deduplicated against both
- * DB and the static catalog so re-importing the same sheet never creates copies.
+ * Backwards-compatible thin wrapper that returns just the merged items.
  */
-export function useMergedProducts(): Product[] {
+export function dedupeProducts(...lists: Product[][]): Product[] {
+  return dedupeProductsWithSummary(...lists).items;
+}
+
+/**
+ * Returns DB-published products merged with the static catalog + imported Excel,
+ * plus an import summary describing how many items each source contributed
+ * (and how many were skipped as duplicates, by which key).
+ */
+export function useMergedProducts(): Product[] & { importSummary?: DedupeSummary } {
   const fetchFn = useServerFn(listPublicProducts);
   const [dbItems, setDbItems] = useState<Product[]>([]);
 
@@ -71,5 +112,8 @@ export function useMergedProducts(): Product[] {
     return () => { cancelled = true; };
   }, [fetchFn]);
 
-  return dedupeProducts(dbItems, staticProducts, importedProducts);
+  const { items, summary } = dedupeProductsWithSummary(dbItems, staticProducts, importedProducts);
+  // Attach summary as a non-enumerable property so existing array consumers are unaffected.
+  Object.defineProperty(items, "importSummary", { value: summary, enumerable: false });
+  return items as Product[] & { importSummary: DedupeSummary };
 }

@@ -147,7 +147,7 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDel
 
   function exportCSV() {
     const active = csvCols.map((k) => CSV_COLS.find((c) => c.key === k)!).filter(Boolean);
-    if (active.length === 0) { toast.error("اختر عموداً واحداً على الأقل للتصدير"); return; }
+    if (active.length === 0) throw new Error("اختر عموداً واحداً على الأقل للتصدير");
     const rows = filtered.map((r) => active.map((c) => c.pick(r)));
     downloadCSV(
       `prescriptions-${new Date().toISOString().slice(0, 10)}.csv`,
@@ -159,8 +159,8 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDel
 
   function exportPDF() {
     const active = csvCols.map((k) => CSV_COLS.find((c) => c.key === k)!).filter(Boolean);
-    if (active.length === 0) { toast.error("اختر عموداً واحداً على الأقل للتصدير"); return; }
-    if (filtered.length === 0) { toast.error("لا توجد بيانات للتصدير"); return; }
+    if (active.length === 0) throw new Error("اختر عموداً واحداً على الأقل للتصدير");
+    if (filtered.length === 0) throw new Error("لا توجد بيانات للتصدير");
     const esc = (v: unknown) => String(v ?? "").replace(/[&<>"']/g, (c) => (
       { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
     const filterLabel = STATUS_FILTERS.find((f) => f.v === statusFilter)?.label ?? "الكل";
@@ -196,7 +196,7 @@ tr:nth-child(even) td { background:#f8fafc; }
 <script>window.addEventListener('load',()=>setTimeout(()=>window.print(),300));</script>
 </body></html>`;
     const w = window.open("", "_blank", "noopener,noreferrer");
-    if (!w) { toast.error("تعذر فتح نافذة الطباعة — تحقق من حاجب النوافذ المنبثقة"); return; }
+    if (!w) throw new Error("تعذر فتح نافذة الطباعة — تحقق من حاجب النوافذ المنبثقة");
     w.document.open(); w.document.write(html); w.document.close();
     toast.success(`تم تجهيز PDF لـ ${filtered.length} روشتة`);
   }
@@ -431,9 +431,9 @@ tr:nth-child(even) td { background:#f8fafc; }
           statusFilterLabel={STATUS_FILTERS.find((f) => f.v === statusFilter)?.label ?? "الكل"}
           searchText={q}
           onConfirm={() => {
-            const kind = exportPreview;
+            // Throws on failure — dialog catches and shows retry UI.
+            if (exportPreview === "csv") exportCSV(); else exportPDF();
             setExportPreview(null);
-            if (kind === "csv") exportCSV(); else exportPDF();
           }}
           onClose={() => setExportPreview(null)}
         />
@@ -657,20 +657,52 @@ function ExportPreviewDialog({ kind, rows, columns, statusFilterLabel, searchTex
             </p>
           )}
         </div>
-        <div className="mt-4 flex items-center justify-end gap-2">
-          <button onClick={onClose} className="rounded-lg bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">إلغاء</button>
-          <button
-            onClick={onConfirm}
-            disabled={noCols || noRows}
-            data-testid="export-confirm-btn"
-            className="flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-black text-primary-foreground hover:bg-primary-deep disabled:opacity-50"
-          >
-            {kind === "csv" ? <Download className="size-3.5" /> : <FileText className="size-3.5" />}
-            تصدير {label}
-          </button>
-        </div>
+        {/* Inline error + retry — surfaces failures from CSV/PDF generation right inside the preview */}
+        {/* Wraps onConfirm so a thrown error keeps the dialog open with a retry button */}
+        <ExportConfirmFooter
+          kind={kind}
+          disabled={noCols || noRows}
+          onCancel={onClose}
+          onConfirm={onConfirm}
+        />
       </div>
     </div>
+  );
+}
+
+function ExportConfirmFooter({ kind, disabled, onCancel, onConfirm }: {
+  kind: "csv" | "pdf"; disabled: boolean; onCancel: () => void; onConfirm: () => void;
+}) {
+  const [err, setErr] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  async function run() {
+    setBusy(true); setErr(null);
+    try { await onConfirm(); }
+    catch (e: any) { setErr(humanizeError(e, kind === "csv" ? "تصدير CSV" : "تصدير PDF")); }
+    finally { setBusy(false); }
+  }
+  return (
+    <>
+      {err && (
+        <div data-testid="export-error" className="mt-3 flex items-start gap-2 rounded-lg bg-rose-50 p-3 text-[11px] text-rose-700">
+          <AlertTriangle className="size-3.5 shrink-0 mt-0.5" />
+          <span className="flex-1">{err}</span>
+        </div>
+      )}
+      <div className="mt-4 flex items-center justify-end gap-2">
+        <button onClick={onCancel} disabled={busy} className="rounded-lg bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent disabled:opacity-50">إلغاء</button>
+        <button
+          onClick={run}
+          disabled={disabled || busy}
+          data-testid={err ? "export-retry-btn" : "export-confirm-btn"}
+          className="flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-black text-primary-foreground hover:bg-primary-deep disabled:opacity-50"
+        >
+          {busy && <Loader2 className="size-3.5 animate-spin" />}
+          {!busy && (kind === "csv" ? <Download className="size-3.5" /> : <FileText className="size-3.5" />)}
+          {err ? "إعادة المحاولة" : `تصدير ${kind === "csv" ? "CSV" : "PDF"}`}
+        </button>
+      </div>
+    </>
   );
 }
 
