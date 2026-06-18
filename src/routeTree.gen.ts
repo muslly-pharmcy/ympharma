@@ -17,6 +17,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as PrescriptionRouteImport } from './routes/prescription'
+import { Route as NetworkTestRouteImport } from './routes/network-test'
 import { Route as InsuranceRouteImport } from './routes/insurance'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as AiSymptomsRouteImport } from './routes/ai-symptoms'
@@ -81,6 +82,11 @@ const ProductsRoute = ProductsRouteImport.update({
 const PrescriptionRoute = PrescriptionRouteImport.update({
   id: '/prescription',
   path: '/prescription',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NetworkTestRoute = NetworkTestRouteImport.update({
+  id: '/network-test',
+  path: '/network-test',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InsuranceRoute = InsuranceRouteImport.update({
@@ -227,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/ai-symptoms': typeof AiSymptomsRoute
   '/cart': typeof CartRoute
   '/insurance': typeof InsuranceRoute
+  '/network-test': typeof NetworkTestRoute
   '/prescription': typeof PrescriptionRoute
   '/products': typeof ProductsRoute
   '/settings': typeof SettingsRoute
@@ -262,6 +269,7 @@ export interface FileRoutesByTo {
   '/ai-symptoms': typeof AiSymptomsRoute
   '/cart': typeof CartRoute
   '/insurance': typeof InsuranceRoute
+  '/network-test': typeof NetworkTestRoute
   '/prescription': typeof PrescriptionRoute
   '/products': typeof ProductsRoute
   '/settings': typeof SettingsRoute
@@ -298,6 +306,7 @@ export interface FileRoutesById {
   '/ai-symptoms': typeof AiSymptomsRoute
   '/cart': typeof CartRoute
   '/insurance': typeof InsuranceRoute
+  '/network-test': typeof NetworkTestRoute
   '/prescription': typeof PrescriptionRoute
   '/products': typeof ProductsRoute
   '/settings': typeof SettingsRoute
@@ -335,6 +344,7 @@ export interface FileRouteTypes {
     | '/ai-symptoms'
     | '/cart'
     | '/insurance'
+    | '/network-test'
     | '/prescription'
     | '/products'
     | '/settings'
@@ -370,6 +380,7 @@ export interface FileRouteTypes {
     | '/ai-symptoms'
     | '/cart'
     | '/insurance'
+    | '/network-test'
     | '/prescription'
     | '/products'
     | '/settings'
@@ -405,6 +416,7 @@ export interface FileRouteTypes {
     | '/ai-symptoms'
     | '/cart'
     | '/insurance'
+    | '/network-test'
     | '/prescription'
     | '/products'
     | '/settings'
@@ -441,6 +453,7 @@ export interface RootRouteChildren {
   AiSymptomsRoute: typeof AiSymptomsRoute
   CartRoute: typeof CartRoute
   InsuranceRoute: typeof InsuranceRoute
+  NetworkTestRoute: typeof NetworkTestRoute
   PrescriptionRoute: typeof PrescriptionRoute
   ProductsRoute: typeof ProductsRoute
   SettingsRoute: typeof SettingsRoute
@@ -519,6 +532,13 @@ declare module '@tanstack/react-router' {
       path: '/prescription'
       fullPath: '/prescription'
       preLoaderRoute: typeof PrescriptionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/network-test': {
+      id: '/network-test'
+      path: '/network-test'
+      fullPath: '/network-test'
+      preLoaderRoute: typeof NetworkTestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/insurance': {
@@ -713,6 +733,7 @@ const rootRouteChildren: RootRouteChildren = {
   AiSymptomsRoute: AiSymptomsRoute,
   CartRoute: CartRoute,
   InsuranceRoute: InsuranceRoute,
+  NetworkTestRoute: NetworkTestRoute,
   PrescriptionRoute: PrescriptionRoute,
   ProductsRoute: ProductsRoute,
   SettingsRoute: SettingsRoute,
