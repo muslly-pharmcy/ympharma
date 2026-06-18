@@ -7,7 +7,7 @@ import { listPublicProducts } from "@/lib/products-public.functions";
 // Maps a DB row to the storefront Product shape.
 function mapRow(r: any, idx: number): Product {
   return {
-    id: 100000 + idx, // numeric id space distinct from static catalog
+    id: 100000 + idx,
     name: r.name,
     brand: r.brand ?? "",
     price: Number(r.price) || 0,
@@ -20,8 +20,44 @@ function mapRow(r: any, idx: number): Product {
 }
 
 /**
- * Returns DB-published products merged with the static catalog.
- * DB products appear first (newest), then static fallback products.
+ * Normalize a product into a dedupe key:
+ *  - prefer the internal code embedded in the description (الكود: 0125618)
+ *  - else fall back to a normalized name (collapsed spaces, lower-case)
+ */
+export function productDedupeKey(p: Pick<Product, "name" | "desc">): string {
+  const codeMatch = (p.desc ?? "").match(/الكود[:\s]*([0-9A-Za-z\-]+)/);
+  if (codeMatch) return `code:${codeMatch[1].trim().toLowerCase()}`;
+  const norm = (p.name ?? "")
+    .toLowerCase()
+    .replace(/[\u200f\u200e]/g, "") // RTL/LTR marks
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+  return `name:${norm}`;
+}
+
+/**
+ * Merge several product lists, dropping duplicates (case-insensitive, code-aware).
+ * Earlier lists take precedence over later ones.
+ */
+export function dedupeProducts(...lists: Product[][]): Product[] {
+  const seen = new Set<string>();
+  const out: Product[] = [];
+  for (const list of lists) {
+    for (const p of list) {
+      const key = productDedupeKey(p);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(p);
+    }
+  }
+  return out;
+}
+
+/**
+ * Returns DB-published products merged with the static catalog + imported Excel.
+ * DB products take precedence; imported Excel rows are deduplicated against both
+ * DB and the static catalog so re-importing the same sheet never creates copies.
  */
 export function useMergedProducts(): Product[] {
   const fetchFn = useServerFn(listPublicProducts);
@@ -35,5 +71,5 @@ export function useMergedProducts(): Product[] {
     return () => { cancelled = true; };
   }, [fetchFn]);
 
-  return [...dbItems, ...staticProducts, ...importedProducts];
+  return dedupeProducts(dbItems, staticProducts, importedProducts);
 }
