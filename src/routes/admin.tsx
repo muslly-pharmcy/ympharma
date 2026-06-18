@@ -329,6 +329,32 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
     if (lastErr) throw lastErr;
   }
 
+  async function bulkRegenerateRxUrls(ids: string[], onProgress?: (done: number, total: number, currentId: string) => void): Promise<void> {
+    const { regenerateSignedUrl } = await import("@/lib/rx-url");
+    const { invalidateImagesMatching } = await import("@/lib/image-cache");
+    let lastErr: unknown = null;
+    let done = 0;
+    for (const id of ids) {
+      onProgress?.(done, ids.length, id);
+      try {
+        const rx = rxs.find((r) => r.id === id);
+        if (!rx) throw new Error("الروشتة غير موجودة");
+        const fresh: string[] = [];
+        for (const u of rx.image_urls) {
+          try { fresh.push(await regenerateSignedUrl(u)); }
+          catch { fresh.push(u); }
+        }
+        const { error } = await supabase.from("prescriptions").update({ image_urls: fresh }).eq("id", id);
+        if (error) throw new Error(error.message);
+        setRxs((p) => p.map((o) => (o.id === id ? { ...o, image_urls: fresh } : o)));
+        invalidateImagesMatching(id.toLowerCase());
+      } catch (e) { lastErr = e; }
+      done++;
+      onProgress?.(done, ids.length, id);
+    }
+    if (lastErr) throw lastErr;
+  }
+
   async function handlePromote() {
     try {
       const res = await promote({});
@@ -463,7 +489,7 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
       <main className="mx-auto max-w-7xl space-y-4 px-4 py-6">
         {(canOrders || canRx) && tab !== "team" && tab !== "trust" && tab !== "errors" && tab !== "insurance" && tab !== "retention" && tab !== "emails" && tab !== "security" && tab !== "images" && <AdminStats refreshKey={statsKey} />}
         {tab === "orders" && canOrders && <OrdersTab orders={filteredOrders} onStatus={setOrderStatus} loading={busy && orders.length === 0} error={loadError} onRetry={load} />}
-        {tab === "rx" && canRx && <PrescriptionsTab rxs={filteredRxs} onStatus={setRxStatus} onDelete={deleteRx} onArchive={archiveRx} onBulkDelete={bulkDeleteRx} onBulkArchive={bulkArchiveRx} onRegenerateUrls={regenerateRxUrls} loading={busy && rxs.length === 0} error={loadError} onRetry={load} />}
+        {tab === "rx" && canRx && <PrescriptionsTab rxs={filteredRxs} onStatus={setRxStatus} onDelete={deleteRx} onArchive={archiveRx} onBulkDelete={bulkDeleteRx} onBulkArchive={bulkArchiveRx} onBulkRegenerateUrls={bulkRegenerateRxUrls} onRegenerateUrls={regenerateRxUrls} loading={busy && rxs.length === 0} error={loadError} onRetry={load} />}
         {tab === "team" && me?.isOwner && <StaffTab currentUserId={userId} />}
         {tab === "trust" && me?.isOwner && <TrustTab />}
         {tab === "errors" && me?.isOwner && <ErrorsTab />}

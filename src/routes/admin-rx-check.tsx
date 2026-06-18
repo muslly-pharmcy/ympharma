@@ -3,8 +3,9 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { parseSignedUrl, formatExpiry, checkUrlReachable, regenerateSignedUrl } from "@/lib/rx-url";
-import { CheckCircle2, XCircle, Loader2, RefreshCw, Play, ShieldAlert, Clock } from "lucide-react";
+import { CheckCircle2, XCircle, Loader2, RefreshCw, Play, ShieldAlert, Clock, Download, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { downloadCSV } from "@/lib/csv-export";
 
 export const Route = createFileRoute("/admin-rx-check")({
   head: () => ({ meta: [{ title: "فحص روابط الروشتات — الإدارة" }, { name: "robots", content: "noindex,nofollow" }] }),
@@ -114,6 +115,64 @@ function RxCheckPage() {
   const failCount = rows.filter((r) => r.status === "fail").length;
   const expiredCount = rows.filter((r) => r.expired).length;
 
+  function exportCSV() {
+    if (rows.length === 0) return;
+    const headers = ["الروشتة", "العميل", "#", "الرابط", "ينتهي في", "صالحية", "حالة الفحص", "HTTP", "الزمن (ms)", "الخطأ"];
+    const data = rows.map((r) => [
+      r.rxId, r.customer, r.index, r.url,
+      r.expiresAt ? r.expiresAt.toISOString() : "",
+      r.expired ? "منتهي" : (r.expiryTone === "warn" ? "ينتهي قريباً" : "صالح"),
+      r.status === "ok" ? "سليم" : r.status === "fail" ? "فشل" : "—",
+      r.httpStatus ?? "", r.ms ?? "", r.error ?? "",
+    ]);
+    downloadCSV(`rx-check-${new Date().toISOString().slice(0, 10)}.csv`, headers, data);
+    toast.success(`تم تصدير ${rows.length} صف`);
+  }
+
+  function exportPDF() {
+    if (rows.length === 0) return;
+    const esc = (v: unknown) => String(v ?? "").replace(/[&<>"']/g, (c) => (
+      { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
+    const rowsHtml = rows.map((r) => `<tr class="${r.expired ? "ex" : r.expiryTone === "warn" ? "wa" : ""}">
+      <td dir="ltr">${esc(r.rxId)}</td><td>${esc(r.customer)}</td><td>${r.index}</td>
+      <td>${r.expired ? "منتهي" : (r.expiryTone === "warn" ? "ينتهي قريباً" : "صالح")}</td>
+      <td dir="ltr">${esc(r.expiresAt ? r.expiresAt.toLocaleString("ar-EG") : "—")}</td>
+      <td>${r.status === "ok" ? "سليم" : r.status === "fail" ? "فشل" : "—"}</td>
+      <td dir="ltr">${esc(r.httpStatus ?? "—")}</td><td dir="ltr">${esc(r.ms ?? "—")}</td>
+      <td>${esc(r.error ?? "")}</td>
+    </tr>`).join("");
+    const html = `<!doctype html><html dir="rtl" lang="ar"><head><meta charset="utf-8"/>
+<title>تقرير فحص روابط الروشتات</title><style>
+@page { size: A4 landscape; margin: 12mm; }
+body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; color: #0f172a; }
+.head { border-bottom: 2px solid #0d9488; padding-bottom: 8px; margin-bottom: 12px; }
+.head h1 { margin:0; font-size:18px; color:#0f766e; }
+.meta { font-size:11px; color:#475569; }
+table { width:100%; border-collapse:collapse; font-size:10px; }
+th, td { border:1px solid #cbd5e1; padding:4px 6px; text-align:right; vertical-align:top; }
+th { background:#f1f5f9; font-weight:800; }
+tr.ex td { background:#fee2e2; } tr.wa td { background:#fef3c7; }
+.footer { margin-top:10px; font-size:10px; color:#64748b; text-align:center; }
+.no-print { position: fixed; top: 10px; left: 10px; }
+.no-print button { background:#0d9488; color:white; border:0; padding:8px 14px; border-radius:8px; font-weight:800; cursor:pointer; }
+@media print { .no-print { display:none; } }
+</style></head><body>
+<div class="no-print"><button onclick="window.print()">طباعة / حفظ PDF</button></div>
+<div class="head"><h1>تقرير فحص روابط الروشتات</h1>
+<div class="meta">إجمالي: ${rows.length} · منتهية: ${expiredCount} · فحص ناجح: ${okCount} · فحص فاشل: ${failCount} · تاريخ: ${new Date().toLocaleString("ar-EG")}</div></div>
+<table><thead><tr>
+<th>الروشتة</th><th>العميل</th><th>#</th><th>الصلاحية</th><th>ينتهي في</th><th>حالة الفحص</th><th>HTTP</th><th>الزمن (ms)</th><th>الخطأ</th>
+</tr></thead><tbody>${rowsHtml}</tbody></table>
+<div class="footer">صيدلية المصلي — تقرير داخلي</div>
+<script>window.addEventListener('load',()=>setTimeout(()=>window.print(),300));</script>
+</body></html>`;
+    const w = window.open("", "_blank", "noopener,noreferrer");
+    if (!w) { toast.error("تعذر فتح نافذة الطباعة — تحقق من حاجب النوافذ المنبثقة"); return; }
+    w.document.open(); w.document.write(html); w.document.close();
+    toast.success(`تم تجهيز PDF لـ ${rows.length} صف`);
+  }
+
+
   return (
     <div dir="rtl" className="min-h-screen bg-background">
       <SiteHeader />
@@ -139,8 +198,19 @@ function RxCheckPage() {
             {running ? <Loader2 className="size-4 animate-spin" /> : <Play className="size-4" />}
             بدء الفحص ({rows.length})
           </button>
+          <button onClick={exportCSV} disabled={rows.length === 0}
+            data-testid="rxcheck-export-csv"
+            className="flex items-center gap-1.5 rounded-xl bg-emerald-500 px-3 py-2 text-xs font-black text-white disabled:opacity-50">
+            <Download className="size-4" /> CSV
+          </button>
+          <button onClick={exportPDF} disabled={rows.length === 0}
+            data-testid="rxcheck-export-pdf"
+            className="flex items-center gap-1.5 rounded-xl bg-rose-600 px-3 py-2 text-xs font-black text-white disabled:opacity-50">
+            <FileText className="size-4" /> PDF
+          </button>
           {running && <span className="text-xs text-muted-foreground">{done}/{total}</span>}
         </div>
+
 
         {total > 0 && (
           <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">

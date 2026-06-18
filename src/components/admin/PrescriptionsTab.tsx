@@ -57,17 +57,35 @@ function matchesStatusFilter(r: Rx, f: StatusFilter): boolean {
   if (f === "all") return true;
   if (f === "archived") return r.status === "archived";
   if (f === "cancelled") return r.status === "cancelled";
-  // active = anything that is not archived/cancelled
   return r.status !== "archived" && r.status !== "cancelled";
 }
 
-export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDelete, onBulkArchive, onRegenerateUrls, loading, error, onRetry }: {
+// ---------- Expiry filter ----------
+type ExpiryFilter = "all" | "valid" | "soon" | "expired";
+const EXPIRY_FILTERS: { v: ExpiryFilter; label: string }[] = [
+  { v: "all", label: "كل الروابط" },
+  { v: "valid", label: "صالحة" },
+  { v: "soon", label: "تنتهي قريباً" },
+  { v: "expired", label: "منتهية" },
+];
+const SOON_MS = 3 * 86_400_000;
+type RxExpiry = "none" | "valid" | "soon" | "expired";
+function rxExpiryStatus(rx: Rx): RxExpiry {
+  if (!rx.image_urls?.length) return "none";
+  const infos = rx.image_urls.map(parseSignedUrl);
+  if (infos.some((i) => i.expired)) return "expired";
+  if (infos.some((i) => !i.expired && i.expiresInMs != null && i.expiresInMs < SOON_MS)) return "soon";
+  return "valid";
+}
+
+export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDelete, onBulkArchive, onBulkRegenerateUrls, onRegenerateUrls, loading, error, onRetry }: {
   rxs: Rx[];
   onStatus: (id: string, s: string) => Promise<void> | void;
   onDelete?: Action;
   onArchive?: Action;
   onBulkDelete?: BulkAction;
   onBulkArchive?: BulkAction;
+  onBulkRegenerateUrls?: BulkAction;
   onRegenerateUrls?: (id: string) => Promise<void> | void;
   loading?: boolean; error?: string | null; onRetry?: () => void;
 }) {
@@ -75,19 +93,22 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDel
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
   const [confirm, setConfirm] = useState<null | { kind: "delete" | "archive"; id: string }>(null);
-  const [bulkConfirm, setBulkConfirm] = useState<null | { kind: "delete" | "archive" }>(null);
+  const [bulkConfirm, setBulkConfirm] = useState<null | { kind: "delete" | "archive" | "regenerate" }>(null);
   const [pending, setPending] = useState<Record<string, "status" | "delete" | "archive" | undefined>>({});
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showLog, setShowLog] = useState(false);
   const [showCsvSettings, setShowCsvSettings] = useState(false);
   const [csvCols, setCsvCols] = useState<string[]>(() => loadCsvPrefs());
-  const [bulkProgress, setBulkProgress] = useState<null | { done: number; total: number; currentId: string; kind: "delete" | "archive" }>(null);
-  const [bulkSummary, setBulkSummary] = useState<null | { ok: number; fail: number; total: number; kind: "delete" | "archive"; error?: string }>(null);
+  const [bulkProgress, setBulkProgress] = useState<null | { done: number; total: number; currentId: string; kind: "delete" | "archive" | "regenerate" }>(null);
+  const [bulkSummary, setBulkSummary] = useState<null | { ok: number; fail: number; total: number; kind: "delete" | "archive" | "regenerate"; error?: string }>(null);
   const [exportPreview, setExportPreview] = useState<null | "csv" | "pdf">(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(() => {
     if (typeof localStorage === "undefined") return "active";
     return (localStorage.getItem("rx-status-filter-v1") as StatusFilter) || "active";
   });
+  const [expiryFilter, setExpiryFilter] = useState<ExpiryFilter>("all");
+  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateTo, setDateTo] = useState<string>("");
 
 
   // persist CSV pref
@@ -98,16 +119,41 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDel
     try { localStorage.setItem("rx-status-filter-v1", statusFilter); } catch { /* quota */ }
   }, [statusFilter]);
 
+  // Pre-compute expiry status per rx so filter + banner + card all share it.
+  const expiryMap = useMemo(() => {
+    const m = new Map<string, RxExpiry>();
+    rxs.forEach((r) => m.set(r.id, rxExpiryStatus(r)));
+    return m;
+  }, [rxs]);
+
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
+    const fromTs = dateFrom ? new Date(dateFrom + "T00:00:00").getTime() : null;
+    const toTs = dateTo ? new Date(dateTo + "T23:59:59").getTime() : null;
     return rxs.filter((r) => {
       if (!matchesStatusFilter(r, statusFilter)) return false;
+      if (expiryFilter !== "all" && expiryMap.get(r.id) !== expiryFilter) return false;
+      const created = new Date(r.created_at).getTime();
+      if (fromTs != null && created < fromTs) return false;
+      if (toTs != null && created > toTs) return false;
       if (!needle) return true;
       return r.id.toLowerCase().includes(needle) ||
         r.customer_name.toLowerCase().includes(needle) ||
         r.customer_phone.includes(needle);
     });
-  }, [rxs, q, statusFilter]);
+  }, [rxs, q, statusFilter, expiryFilter, dateFrom, dateTo, expiryMap]);
+
+  // High-risk banner: when many rxs in the current view need attention.
+  const riskStats = useMemo(() => {
+    const withImgs = filtered.filter((r) => (expiryMap.get(r.id) ?? "none") !== "none");
+    const soon = withImgs.filter((r) => expiryMap.get(r.id) === "soon").length;
+    const expired = withImgs.filter((r) => expiryMap.get(r.id) === "expired").length;
+    const total = withImgs.length;
+    const atRisk = soon + expired;
+    const pct = total === 0 ? 0 : Math.round((atRisk / total) * 100);
+    const highRisk = total >= 4 && pct >= 25;
+    return { soon, expired, total, atRisk, pct, highRisk };
+  }, [filtered, expiryMap]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, pageCount);
@@ -239,23 +285,25 @@ tr:nth-child(even) td { background:#f8fafc; }
   async function runBulk() {
     if (!bulkConfirm) return;
     const { kind } = bulkConfirm;
-    const handler = kind === "delete" ? onBulkDelete : onBulkArchive;
+    const handler = kind === "delete" ? onBulkDelete : kind === "archive" ? onBulkArchive : onBulkRegenerateUrls;
     const ids = Array.from(selected);
     if (!handler || ids.length === 0) { setBulkConfirm(null); return; }
     setBulkConfirm(null);
     setBulkProgress({ done: 0, total: ids.length, currentId: ids[0], kind });
     let lastDone = 0;
+    const actionName = kind === "delete" ? "الحذف الجماعي" : kind === "archive" ? "الأرشفة الجماعية" : "تجديد الروابط الجماعي";
+    const logAction = kind === "delete" ? "bulk-delete" : kind === "archive" ? "bulk-archive" : "bulk-regenerate";
     try {
       await handler(ids, (done, total, currentId) => {
         lastDone = done;
         setBulkProgress({ done, total, currentId, kind });
       });
-      logActivity({ rxId: `[${ids.length}]`, action: kind === "delete" ? "bulk-delete" : "bulk-archive", status: "success", details: ids.join(", ") });
+      logActivity({ rxId: `[${ids.length}]`, action: logAction as any, status: "success", details: ids.join(", ") });
       setBulkSummary({ ok: ids.length, fail: 0, total: ids.length, kind });
       setSelected(new Set());
     } catch (e: any) {
-      const msg = humanizeError(e, kind === "delete" ? "الحذف الجماعي" : "الأرشفة الجماعية");
-      logActivity({ rxId: `[${ids.length}]`, action: kind === "delete" ? "bulk-delete" : "bulk-archive", status: "error", details: ids.join(", "), error: msg });
+      const msg = humanizeError(e, actionName);
+      logActivity({ rxId: `[${ids.length}]`, action: logAction as any, status: "error", details: ids.join(", "), error: msg });
       setBulkSummary({ ok: lastDone, fail: ids.length - lastDone, total: ids.length, kind, error: msg });
     } finally {
       setBulkProgress(null);
@@ -300,6 +348,48 @@ tr:nth-child(even) td { background:#f8fafc; }
         ))}
       </div>
 
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card/60 p-2">
+        <Clock className="size-3.5 text-muted-foreground ms-1" />
+        <span className="text-[11px] font-bold text-muted-foreground">صلاحية الروابط:</span>
+        {EXPIRY_FILTERS.map((f) => (
+          <button
+            key={f.v}
+            onClick={() => { setExpiryFilter(f.v); setPage(1); }}
+            data-testid={`expiry-filter-${f.v}`}
+            className={`rounded-lg px-3 py-1 text-[11px] font-black transition ${expiryFilter === f.v ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground hover:bg-accent"}`}
+          >
+            {f.label}
+          </button>
+        ))}
+        <span className="ms-3 text-[11px] font-bold text-muted-foreground">تاريخ الرفع:</span>
+        <input type="date" value={dateFrom} onChange={(e) => { setDateFrom(e.target.value); setPage(1); }} data-testid="date-from"
+          className="rounded-lg border border-border bg-card px-2 py-1 text-[11px]" />
+        <span className="text-[11px] text-muted-foreground">إلى</span>
+        <input type="date" value={dateTo} onChange={(e) => { setDateTo(e.target.value); setPage(1); }} data-testid="date-to"
+          className="rounded-lg border border-border bg-card px-2 py-1 text-[11px]" />
+        {(dateFrom || dateTo || expiryFilter !== "all") && (
+          <button onClick={() => { setDateFrom(""); setDateTo(""); setExpiryFilter("all"); setPage(1); }}
+            className="rounded-lg bg-secondary px-2 py-1 text-[11px] font-bold hover:bg-accent">مسح</button>
+        )}
+      </div>
+
+      {riskStats.highRisk && (
+        <div role="alert" data-testid="rx-risk-banner" className="flex flex-wrap items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+          <AlertTriangle className="size-4 shrink-0 text-amber-600" />
+          <span className="font-black">تنبيه:</span>
+          <span>
+            {riskStats.atRisk} من {riskStats.total} روشتة ({riskStats.pct}%) لديها روابط منتهية أو على وشك الانتهاء —
+            {riskStats.expired > 0 && <span className="font-bold text-rose-700"> منتهية: {riskStats.expired}</span>}
+            {riskStats.expired > 0 && riskStats.soon > 0 && " · "}
+            {riskStats.soon > 0 && <span className="font-bold text-amber-700">ينتهي قريباً: {riskStats.soon}</span>}
+          </span>
+          <button onClick={() => { setExpiryFilter(riskStats.expired > 0 ? "expired" : "soon"); setPage(1); }}
+            className="ms-auto rounded-lg bg-amber-600 px-3 py-1 text-[11px] font-black text-white hover:bg-amber-700">
+            عرض المتأثرة فقط
+          </button>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-[11px] text-muted-foreground">
           عرض {slice.length} من {filtered.length} (الإجمالي {rxs.length})
@@ -314,6 +404,13 @@ tr:nth-child(even) td { background:#f8fafc; }
             {allOnPageSelected ? <CheckSquare className="size-3.5" /> : <Square className="size-3.5" />}
             {allOnPageSelected ? "إلغاء تحديد الصفحة" : "تحديد الصفحة"}
           </button>
+          {selected.size > 0 && onBulkRegenerateUrls && (
+            <button onClick={() => setBulkConfirm({ kind: "regenerate" })}
+              data-testid="bulk-regen-btn"
+              className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-black text-primary-foreground hover:bg-primary-deep">
+              <RefreshCw className="size-3.5" /> تجديد الروابط ({selected.size})
+            </button>
+          )}
           {selected.size > 0 && onBulkArchive && (
             <button onClick={() => setBulkConfirm({ kind: "archive" })} className="flex items-center gap-1.5 rounded-lg bg-slate-600 px-3 py-1.5 text-xs font-black text-white hover:bg-slate-700">
               <Archive className="size-3.5" /> أرشفة ({selected.size})
@@ -351,6 +448,7 @@ tr:nth-child(even) td { background:#f8fafc; }
       </div>
 
 
+
       <TabState loading={loading} error={error} empty={filtered.length === 0} onRetry={onRetry} skeleton={skeleton}>
         {useVirtual ? (
           <div ref={parentRef} className="max-h-[75vh] overflow-auto rounded-xl" style={{ contain: "strict" }} data-testid="rx-virtual-list">
@@ -368,6 +466,7 @@ tr:nth-child(even) td { background:#f8fafc; }
                       rx={r}
                       pending={pending[r.id]}
                       selected={selected.has(r.id)}
+                      affected={expiryMap.get(r.id) === "expired" || expiryMap.get(r.id) === "soon" ? (expiryMap.get(r.id) as "expired" | "soon") : null}
                       onToggleSelect={toggleOne}
                       onStatus={handleStatus}
                       onDelete={onDelete ? (id) => setConfirm({ kind: "delete", id }) : undefined}
@@ -388,6 +487,7 @@ tr:nth-child(even) td { background:#f8fafc; }
                 rx={r}
                 pending={pending[r.id]}
                 selected={selected.has(r.id)}
+                affected={expiryMap.get(r.id) === "expired" || expiryMap.get(r.id) === "soon" ? (expiryMap.get(r.id) as "expired" | "soon") : null}
                 onToggleSelect={toggleOne}
                 onStatus={handleStatus}
                 onDelete={onDelete ? (id) => setConfirm({ kind: "delete", id }) : undefined}
@@ -453,28 +553,34 @@ tr:nth-child(even) td { background:#f8fafc; }
 
 // ---------- Confirm dialog ----------
 function ConfirmDialog({ kind, rxId, bulk, onConfirm, onCancel }: {
-  kind: "delete" | "archive"; rxId: string; bulk?: boolean;
+  kind: "delete" | "archive" | "regenerate"; rxId: string; bulk?: boolean;
   onConfirm: () => Promise<void> | void; onCancel: () => void;
 }) {
   const [busy, setBusy] = useState(false);
   const isDelete = kind === "delete";
+  const isArchive = kind === "archive";
+  const isRegen = kind === "regenerate";
   return (
     <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4 animate-in fade-in" onClick={() => !busy && onCancel()}>
       <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm rounded-2xl bg-card p-5 shadow-elevated">
         <div className="flex items-start gap-3">
-          <div className={`grid size-10 place-items-center rounded-xl ${isDelete ? "bg-rose-100 text-rose-600" : "bg-slate-100 text-slate-600"}`}>
-            {isDelete ? <Trash2 className="size-5" /> : <Archive className="size-5" />}
+          <div className={`grid size-10 place-items-center rounded-xl ${isDelete ? "bg-rose-100 text-rose-600" : isArchive ? "bg-slate-100 text-slate-600" : "bg-primary/10 text-primary"}`}>
+            {isDelete ? <Trash2 className="size-5" /> : isArchive ? <Archive className="size-5" /> : <RefreshCw className="size-5" />}
           </div>
           <div className="flex-1">
             <p className="text-base font-black">
-              {bulk
-                ? (isDelete ? "تأكيد حذف جماعي" : "تأكيد أرشفة جماعية")
-                : (isDelete ? "تأكيد حذف الروشتة" : "تأكيد أرشفة الروشتة")}
+              {isRegen
+                ? (bulk ? "تأكيد تجديد روابط جماعي" : "تأكيد تجديد الروابط")
+                : bulk
+                  ? (isDelete ? "تأكيد حذف جماعي" : "تأكيد أرشفة جماعية")
+                  : (isDelete ? "تأكيد حذف الروشتة" : "تأكيد أرشفة الروشتة")}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              {isDelete
-                ? `سيتم حذف ${rxId} نهائياً ولا يمكن التراجع. هل تريد المتابعة؟`
-                : `سيتم نقل ${rxId} إلى الأرشيف وإخفاؤها من القائمة الافتراضية.`}
+              {isRegen
+                ? `سيتم إنشاء روابط آمنة جديدة لـ ${rxId} (صالحة لـ 30 يوم). الروابط القديمة ستصبح غير صالحة.`
+                : isDelete
+                  ? `سيتم حذف ${rxId} نهائياً ولا يمكن التراجع. هل تريد المتابعة؟`
+                  : `سيتم نقل ${rxId} إلى الأرشيف وإخفاؤها من القائمة الافتراضية.`}
             </p>
             {isDelete && (
               <div className="mt-3 flex items-start gap-2 rounded-lg bg-rose-50 p-2 text-[11px] text-rose-700">
@@ -490,10 +596,10 @@ function ConfirmDialog({ kind, rxId, bulk, onConfirm, onCancel }: {
             onClick={async () => { setBusy(true); try { await onConfirm(); } finally { setBusy(false); } }}
             disabled={busy}
             data-testid="confirm-btn"
-            className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-black text-white disabled:opacity-60 ${isDelete ? "bg-rose-500 hover:bg-rose-600" : "bg-slate-600 hover:bg-slate-700"}`}
+            className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-black text-white disabled:opacity-60 ${isDelete ? "bg-rose-500 hover:bg-rose-600" : isArchive ? "bg-slate-600 hover:bg-slate-700" : "bg-primary hover:bg-primary-deep"}`}
           >
             {busy && <Loader2 className="size-3.5 animate-spin" />}
-            {isDelete ? (bulk ? "حذف الكل" : "حذف نهائي") : (bulk ? "أرشفة الكل" : "أرشفة")}
+            {isRegen ? (bulk ? "تجديد الكل" : "تجديد") : isDelete ? (bulk ? "حذف الكل" : "حذف نهائي") : (bulk ? "أرشفة الكل" : "أرشفة")}
           </button>
         </div>
       </div>
@@ -502,12 +608,13 @@ function ConfirmDialog({ kind, rxId, bulk, onConfirm, onCancel }: {
 }
 
 // ---------- Bulk progress ----------
-function BulkProgressOverlay({ p }: { p: { done: number; total: number; currentId: string; kind: "delete" | "archive" } }) {
+function BulkProgressOverlay({ p }: { p: { done: number; total: number; currentId: string; kind: "delete" | "archive" | "regenerate" } }) {
   const pct = Math.round((p.done / Math.max(1, p.total)) * 100);
+  const label = p.kind === "delete" ? "جارٍ الحذف الجماعي" : p.kind === "archive" ? "جارٍ الأرشفة الجماعية" : "جارٍ تجديد الروابط";
   return (
     <div className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-md rounded-2xl bg-card p-4 shadow-elevated border border-border animate-in slide-in-from-bottom">
       <div className="flex items-center justify-between text-xs font-black">
-        <span>{p.kind === "delete" ? "جارٍ الحذف الجماعي" : "جارٍ الأرشفة الجماعية"} — {p.done}/{p.total}</span>
+        <span>{label} — {p.done}/{p.total}</span>
         <span className="text-primary">{pct}%</span>
       </div>
       <p className="mt-1 truncate text-[11px] text-muted-foreground">قيد المعالجة: {p.currentId}</p>
@@ -559,12 +666,12 @@ function CsvSettingsDialog({ selected, onChange, onClose }: {
 
 // ---------- Bulk summary dialog ----------
 function BulkSummaryDialog({ s, onClose }: {
-  s: { ok: number; fail: number; total: number; kind: "delete" | "archive"; error?: string };
+  s: { ok: number; fail: number; total: number; kind: "delete" | "archive" | "regenerate"; error?: string };
   onClose: () => void;
 }) {
   const okPct = Math.round((s.ok / Math.max(1, s.total)) * 100);
   const allOk = s.fail === 0;
-  const verb = s.kind === "delete" ? "الحذف" : "الأرشفة";
+  const verb = s.kind === "delete" ? "الحذف" : s.kind === "archive" ? "الأرشفة" : "تجديد الروابط";
   return (
     <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4 animate-in fade-in" onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} data-testid="bulk-summary" className="w-full max-w-md rounded-2xl bg-card p-5 shadow-elevated">
@@ -830,10 +937,11 @@ function CachedImage({ url, alt, onClick, onPrefetch }: {
 }
 
 // ---------- Row ----------
-function RxCard({ rx, pending, selected, onToggleSelect, onStatus, onDelete, onArchive, onRegenerateUrls }: {
+function RxCard({ rx, pending, selected, affected, onToggleSelect, onStatus, onDelete, onArchive, onRegenerateUrls }: {
   rx: Rx;
   pending?: "status" | "delete" | "archive";
   selected: boolean;
+  affected?: "expired" | "soon" | null;
   onToggleSelect: (id: string) => void;
   onStatus: (id: string, s: string) => Promise<void> | void;
   onDelete?: (id: string) => void;
@@ -868,8 +976,20 @@ function RxCard({ rx, pending, selected, onToggleSelect, onStatus, onDelete, onA
     } finally { setRegenBusy(false); }
   }
 
+  const affectedRing = affected === "expired"
+    ? "border-rose-400 ring-2 ring-rose-300/40"
+    : affected === "soon"
+      ? "border-amber-400 ring-2 ring-amber-300/40"
+      : "border-border";
   return (
-    <div data-testid={`rx-card-${rx.id}`} className={`relative rounded-2xl border bg-card p-4 shadow-card transition ${selected ? "border-primary ring-2 ring-primary/30" : "border-border"} ${busy ? "opacity-70" : ""}`}>
+    <div data-testid={`rx-card-${rx.id}`} data-affected={affected ?? ""} className={`relative rounded-2xl border bg-card p-4 shadow-card transition ${selected ? "border-primary ring-2 ring-primary/30" : affectedRing} ${busy ? "opacity-70" : ""}`}>
+
+      {affected && !selected && (
+        <span className={`absolute -top-2 right-3 rounded-full px-2 py-0.5 text-[10px] font-black ${affected === "expired" ? "bg-rose-500 text-white" : "bg-amber-500 text-white"}`}>
+          {affected === "expired" ? "رابط منتهي" : "ينتهي قريباً"}
+        </span>
+      )}
+
 
       {busy && (
         <div className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full bg-primary/10 px-2 py-1 text-[10px] font-black text-primary">
