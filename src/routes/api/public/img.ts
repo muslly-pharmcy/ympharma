@@ -1,4 +1,29 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { IMAGE_PLACEHOLDER } from "@/lib/img-placeholder";
+
+// Inline SVG bytes used when upstream fails. Returning 200 with this body
+// keeps <img> happy and prevents the global error reporter from flagging
+// a 4xx/5xx route response as a runtime error / blank screen.
+const PLACEHOLDER_SVG_BYTES = (() => {
+  const dataUri = IMAGE_PLACEHOLDER;
+  const comma = dataUri.indexOf(",");
+  return decodeURIComponent(dataUri.slice(comma + 1));
+})();
+
+function placeholderResponse(extraHeaders: Record<string, string> = {}) {
+  return new Response(PLACEHOLDER_SVG_BYTES, {
+    status: 200,
+    headers: {
+      "Content-Type": "image/svg+xml; charset=utf-8",
+      "Cache-Control": "public, max-age=60",
+      "X-Img-Fallback": "1",
+      ...CORS,
+      ...extraHeaders,
+    },
+  });
+}
+
+
 
 // Fallback defaults if settings row is unavailable (cold start, DB hiccup).
 const DEFAULT_HOSTS = [
