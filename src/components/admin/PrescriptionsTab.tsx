@@ -372,7 +372,9 @@ tr:nth-child(even) td { background:#f8fafc; }
                       onStatus={handleStatus}
                       onDelete={onDelete ? (id) => setConfirm({ kind: "delete", id }) : undefined}
                       onArchive={onArchive ? (id) => setConfirm({ kind: "archive", id }) : undefined}
+                      onRegenerateUrls={onRegenerateUrls}
                     />
+
                   </div>
                 );
               })}
@@ -390,7 +392,9 @@ tr:nth-child(even) td { background:#f8fafc; }
                 onStatus={handleStatus}
                 onDelete={onDelete ? (id) => setConfirm({ kind: "delete", id }) : undefined}
                 onArchive={onArchive ? (id) => setConfirm({ kind: "archive", id }) : undefined}
+                onRegenerateUrls={onRegenerateUrls}
               />
+
             ))}
           </div>
         )}
