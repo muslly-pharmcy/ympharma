@@ -30,11 +30,15 @@ import { Route as AdminBackupsRouteImport } from './routes/admin-backups'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
+import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/public/whatsapp-webhook'
 import { Route as ApiPublicUptimeWebhookRouteImport } from './routes/api/public/uptime-webhook'
 import { Route as ApiPublicLogErrorRouteImport } from './routes/api/public/log-error'
 import { Route as ApiPublicIncidentCheckRouteImport } from './routes/api/public/incident-check'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
+import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 
 const TrustRoute = TrustRouteImport.update({
@@ -142,6 +146,16 @@ const ProductIdRoute = ProductIdRouteImport.update({
   path: '/product/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
+  id: '/email/unsubscribe',
+  path: '/email/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
+  id: '/lovable/email/suppression',
+  path: '/lovable/email/suppression',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicWhatsappWebhookRoute =
   ApiPublicWhatsappWebhookRouteImport.update({
     id: '/api/public/whatsapp-webhook',
@@ -168,6 +182,18 @@ const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
   path: '/api/public/health',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailTransactionalSendRoute =
+  LovableEmailTransactionalSendRouteImport.update({
+    id: '/lovable/email/transactional/send',
+    path: '/lovable/email/transactional/send',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -196,13 +222,17 @@ export interface FileRoutesByFullPath {
   '/status': typeof StatusRoute
   '/track': typeof TrackRoute
   '/trust': typeof TrustRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
   '/api/public/log-error': typeof ApiPublicLogErrorRoute
   '/api/public/uptime-webhook': typeof ApiPublicUptimeWebhookRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -225,13 +255,17 @@ export interface FileRoutesByTo {
   '/status': typeof StatusRoute
   '/track': typeof TrackRoute
   '/trust': typeof TrustRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
   '/api/public/log-error': typeof ApiPublicLogErrorRoute
   '/api/public/uptime-webhook': typeof ApiPublicUptimeWebhookRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -255,13 +289,17 @@ export interface FileRoutesById {
   '/status': typeof StatusRoute
   '/track': typeof TrackRoute
   '/trust': typeof TrustRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
   '/api/public/log-error': typeof ApiPublicLogErrorRoute
   '/api/public/uptime-webhook': typeof ApiPublicUptimeWebhookRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -286,13 +324,17 @@ export interface FileRouteTypes {
     | '/status'
     | '/track'
     | '/trust'
+    | '/email/unsubscribe'
     | '/product/$id'
     | '/api/public/health'
     | '/api/public/incident-check'
     | '/api/public/log-error'
     | '/api/public/uptime-webhook'
     | '/api/public/whatsapp-webhook'
+    | '/lovable/email/suppression'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -315,13 +357,17 @@ export interface FileRouteTypes {
     | '/status'
     | '/track'
     | '/trust'
+    | '/email/unsubscribe'
     | '/product/$id'
     | '/api/public/health'
     | '/api/public/incident-check'
     | '/api/public/log-error'
     | '/api/public/uptime-webhook'
     | '/api/public/whatsapp-webhook'
+    | '/lovable/email/suppression'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   id:
     | '__root__'
     | '/'
@@ -344,13 +390,17 @@ export interface FileRouteTypes {
     | '/status'
     | '/track'
     | '/trust'
+    | '/email/unsubscribe'
     | '/product/$id'
     | '/api/public/health'
     | '/api/public/incident-check'
     | '/api/public/log-error'
     | '/api/public/uptime-webhook'
     | '/api/public/whatsapp-webhook'
+    | '/lovable/email/suppression'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -374,13 +424,17 @@ export interface RootRouteChildren {
   StatusRoute: typeof StatusRoute
   TrackRoute: typeof TrackRoute
   TrustRoute: typeof TrustRoute
+  EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ProductIdRoute: typeof ProductIdRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
   ApiPublicIncidentCheckRoute: typeof ApiPublicIncidentCheckRoute
   ApiPublicLogErrorRoute: typeof ApiPublicLogErrorRoute
   ApiPublicUptimeWebhookRoute: typeof ApiPublicUptimeWebhookRoute
   ApiPublicWhatsappWebhookRoute: typeof ApiPublicWhatsappWebhookRoute
+  LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
+  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
+  LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -532,6 +586,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/email/unsubscribe': {
+      id: '/email/unsubscribe'
+      path: '/email/unsubscribe'
+      fullPath: '/email/unsubscribe'
+      preLoaderRoute: typeof EmailUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/suppression': {
+      id: '/lovable/email/suppression'
+      path: '/lovable/email/suppression'
+      fullPath: '/lovable/email/suppression'
+      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/whatsapp-webhook': {
       id: '/api/public/whatsapp-webhook'
       path: '/api/public/whatsapp-webhook'
@@ -567,6 +635,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/transactional/send': {
+      id: '/lovable/email/transactional/send'
+      path: '/lovable/email/transactional/send'
+      fullPath: '/lovable/email/transactional/send'
+      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
@@ -598,13 +680,17 @@ const rootRouteChildren: RootRouteChildren = {
   StatusRoute: StatusRoute,
   TrackRoute: TrackRoute,
   TrustRoute: TrustRoute,
+  EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ProductIdRoute: ProductIdRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
   ApiPublicIncidentCheckRoute: ApiPublicIncidentCheckRoute,
   ApiPublicLogErrorRoute: ApiPublicLogErrorRoute,
   ApiPublicUptimeWebhookRoute: ApiPublicUptimeWebhookRoute,
   ApiPublicWhatsappWebhookRoute: ApiPublicWhatsappWebhookRoute,
+  LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
+  LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
+  LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
