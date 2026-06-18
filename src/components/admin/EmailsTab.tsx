@@ -27,15 +27,31 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 export function EmailsTab() {
   const send = useServerFn(sendAdminEmail);
   const list = useServerFn(listEmailLogs);
+  const smoke = useServerFn(renderTemplatesSmokeTest);
+  const diag = useServerFn(listEmailDiagnostics);
   const [logs, setLogs] = useState<any[]>([]);
+  const [diagRows, setDiagRows] = useState<any[]>([]);
+  const [smokeResult, setSmokeResult] = useState<any>(null);
+  const [smokeBusy, setSmokeBusy] = useState(false);
   const [busy, setBusy] = useState(false);
   const [testTo, setTestTo] = useState("alimohmed.321@gmail.com");
 
   const refresh = async () => {
-    try { const r = await list({}); setLogs(r.logs ?? []); } catch (e: any) { toast.error(e.message); }
+    try {
+      const [r, d] = await Promise.all([list({}), diag({})]);
+      setLogs(r.logs ?? []);
+      setDiagRows(d.rows ?? []);
+    } catch (e: any) { toast.error(e.message); }
   };
 
-  useEffect(() => { refresh(); }, []);
+  const runSmoke = async () => {
+    setSmokeBusy(true);
+    try { setSmokeResult(await smoke({})); }
+    catch (e: any) { setSmokeResult({ ok: false, fatal: e.message, results: [] }); }
+    finally { setSmokeBusy(false); }
+  };
+
+  useEffect(() => { refresh(); runSmoke(); }, []);
 
   const sendTest = async () => {
     setBusy(true);
