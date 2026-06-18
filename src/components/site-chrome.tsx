@@ -126,6 +126,7 @@ export function SiteFooter() {
             <li><Link to="/cart" className="hover:text-primary">{t("nav.cart")}</Link></li>
             <li><Link to="/track" className="hover:text-primary">{t("nav.track")}</Link></li>
             <li><Link to="/prescription" className="hover:text-primary">{t("nav.prescription")}</Link></li>
+            <li><Link to="/trust" className="hover:text-primary">الأمان والخصوصية</Link></li>
           </ul>
         </div>
         <div>
