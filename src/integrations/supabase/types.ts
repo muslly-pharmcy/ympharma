@@ -80,6 +80,48 @@ export type Database = {
         }
         Relationships: []
       }
+      error_logs: {
+        Row: {
+          country: string | null
+          extra: Json | null
+          id: string
+          level: string
+          message: string
+          occurred_at: string
+          source: string
+          stack: string | null
+          url: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          country?: string | null
+          extra?: Json | null
+          id?: string
+          level?: string
+          message: string
+          occurred_at?: string
+          source: string
+          stack?: string | null
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          country?: string | null
+          extra?: Json | null
+          id?: string
+          level?: string
+          message?: string
+          occurred_at?: string
+          source?: string
+          stack?: string | null
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       offers: {
         Row: {
           created_at: string
@@ -342,6 +384,66 @@ export type Database = {
           title?: string
           updated_at?: string
           updated_by?: string | null
+        }
+        Relationships: []
+      }
+      uptime_checks: {
+        Row: {
+          checked_at: string
+          error: string | null
+          id: string
+          latency_ms: number | null
+          ok: boolean
+          region: string | null
+        }
+        Insert: {
+          checked_at?: string
+          error?: string | null
+          id?: string
+          latency_ms?: number | null
+          ok: boolean
+          region?: string | null
+        }
+        Update: {
+          checked_at?: string
+          error?: string | null
+          id?: string
+          latency_ms?: number | null
+          ok?: boolean
+          region?: string | null
+        }
+        Relationships: []
+      }
+      uptime_incidents: {
+        Row: {
+          created_at: string
+          details: Json | null
+          ended_at: string | null
+          id: string
+          severity: string
+          started_at: string
+          summary: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          ended_at?: string | null
+          id?: string
+          severity?: string
+          started_at?: string
+          summary: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          ended_at?: string | null
+          id?: string
+          severity?: string
+          started_at?: string
+          summary?: string
+          updated_at?: string
         }
         Relationships: []
       }
