@@ -911,6 +911,36 @@ function RxCard({ rx, pending, selected, onToggleSelect, onStatus, onDelete, onA
         </div>
       )}
 
+      {worst && (
+        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-secondary/40 p-2 text-[11px]">
+          {worst.tone === "expired"
+            ? <ShieldAlert className="size-3.5 text-rose-600" />
+            : worst.tone === "warn"
+              ? <Clock className="size-3.5 text-amber-600" />
+              : <ShieldCheck className="size-3.5 text-emerald-600" />}
+          <span className={`font-black ${worst.tone === "expired" ? "text-rose-700" : worst.tone === "warn" ? "text-amber-700" : "text-emerald-700"}`}>
+            {worst.label}
+          </span>
+          <span className="text-muted-foreground">
+            ({urlInfos.map((i, idx) => i.expiresAt ? `${idx + 1}: ${i.expiresAt.toLocaleDateString("ar-EG")}` : `${idx + 1}: غير معروف`).join(" · ")})
+          </span>
+          {onRegenerateUrls && (
+            <button
+              onClick={handleRegen}
+              disabled={regenBusy || busy}
+              data-testid={`regen-${rx.id}`}
+              className="ms-auto flex items-center gap-1 rounded-lg bg-primary/10 px-2.5 py-1 text-[11px] font-black text-primary hover:bg-primary/20 disabled:opacity-50"
+              title="إعادة توليد روابط آمنة جديدة صالحة لـ 30 يوم"
+            >
+              {regenBusy ? <Loader2 className="size-3 animate-spin" /> : <RefreshCw className="size-3" />}
+              تجديد الروابط
+            </button>
+          )}
+        </div>
+      )}
+
+
+
       {zoom && (
         <div role="dialog" aria-modal="true" onClick={() => setZoom(null)} className="fixed inset-0 z-50 grid place-items-center bg-black/85 p-4 animate-in fade-in">
           <button type="button" onClick={(e) => { e.stopPropagation(); setZoom(null); }} aria-label="إغلاق"
