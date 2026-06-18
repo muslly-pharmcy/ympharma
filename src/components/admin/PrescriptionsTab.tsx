@@ -551,28 +551,34 @@ tr:nth-child(even) td { background:#f8fafc; }
 
 // ---------- Confirm dialog ----------
 function ConfirmDialog({ kind, rxId, bulk, onConfirm, onCancel }: {
-  kind: "delete" | "archive"; rxId: string; bulk?: boolean;
+  kind: "delete" | "archive" | "regenerate"; rxId: string; bulk?: boolean;
   onConfirm: () => Promise<void> | void; onCancel: () => void;
 }) {
   const [busy, setBusy] = useState(false);
   const isDelete = kind === "delete";
+  const isArchive = kind === "archive";
+  const isRegen = kind === "regenerate";
   return (
     <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4 animate-in fade-in" onClick={() => !busy && onCancel()}>
       <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm rounded-2xl bg-card p-5 shadow-elevated">
         <div className="flex items-start gap-3">
-          <div className={`grid size-10 place-items-center rounded-xl ${isDelete ? "bg-rose-100 text-rose-600" : "bg-slate-100 text-slate-600"}`}>
-            {isDelete ? <Trash2 className="size-5" /> : <Archive className="size-5" />}
+          <div className={`grid size-10 place-items-center rounded-xl ${isDelete ? "bg-rose-100 text-rose-600" : isArchive ? "bg-slate-100 text-slate-600" : "bg-primary/10 text-primary"}`}>
+            {isDelete ? <Trash2 className="size-5" /> : isArchive ? <Archive className="size-5" /> : <RefreshCw className="size-5" />}
           </div>
           <div className="flex-1">
             <p className="text-base font-black">
-              {bulk
-                ? (isDelete ? "تأكيد حذف جماعي" : "تأكيد أرشفة جماعية")
-                : (isDelete ? "تأكيد حذف الروشتة" : "تأكيد أرشفة الروشتة")}
+              {isRegen
+                ? (bulk ? "تأكيد تجديد روابط جماعي" : "تأكيد تجديد الروابط")
+                : bulk
+                  ? (isDelete ? "تأكيد حذف جماعي" : "تأكيد أرشفة جماعية")
+                  : (isDelete ? "تأكيد حذف الروشتة" : "تأكيد أرشفة الروشتة")}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              {isDelete
-                ? `سيتم حذف ${rxId} نهائياً ولا يمكن التراجع. هل تريد المتابعة؟`
-                : `سيتم نقل ${rxId} إلى الأرشيف وإخفاؤها من القائمة الافتراضية.`}
+              {isRegen
+                ? `سيتم إنشاء روابط آمنة جديدة لـ ${rxId} (صالحة لـ 30 يوم). الروابط القديمة ستصبح غير صالحة.`
+                : isDelete
+                  ? `سيتم حذف ${rxId} نهائياً ولا يمكن التراجع. هل تريد المتابعة؟`
+                  : `سيتم نقل ${rxId} إلى الأرشيف وإخفاؤها من القائمة الافتراضية.`}
             </p>
             {isDelete && (
               <div className="mt-3 flex items-start gap-2 rounded-lg bg-rose-50 p-2 text-[11px] text-rose-700">
@@ -588,10 +594,10 @@ function ConfirmDialog({ kind, rxId, bulk, onConfirm, onCancel }: {
             onClick={async () => { setBusy(true); try { await onConfirm(); } finally { setBusy(false); } }}
             disabled={busy}
             data-testid="confirm-btn"
-            className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-black text-white disabled:opacity-60 ${isDelete ? "bg-rose-500 hover:bg-rose-600" : "bg-slate-600 hover:bg-slate-700"}`}
+            className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-black text-white disabled:opacity-60 ${isDelete ? "bg-rose-500 hover:bg-rose-600" : isArchive ? "bg-slate-600 hover:bg-slate-700" : "bg-primary hover:bg-primary-deep"}`}
           >
             {busy && <Loader2 className="size-3.5 animate-spin" />}
-            {isDelete ? (bulk ? "حذف الكل" : "حذف نهائي") : (bulk ? "أرشفة الكل" : "أرشفة")}
+            {isRegen ? (bulk ? "تجديد الكل" : "تجديد") : isDelete ? (bulk ? "حذف الكل" : "حذف نهائي") : (bulk ? "أرشفة الكل" : "أرشفة")}
           </button>
         </div>
       </div>
@@ -600,12 +606,13 @@ function ConfirmDialog({ kind, rxId, bulk, onConfirm, onCancel }: {
 }
 
 // ---------- Bulk progress ----------
-function BulkProgressOverlay({ p }: { p: { done: number; total: number; currentId: string; kind: "delete" | "archive" } }) {
+function BulkProgressOverlay({ p }: { p: { done: number; total: number; currentId: string; kind: "delete" | "archive" | "regenerate" } }) {
   const pct = Math.round((p.done / Math.max(1, p.total)) * 100);
+  const label = p.kind === "delete" ? "جارٍ الحذف الجماعي" : p.kind === "archive" ? "جارٍ الأرشفة الجماعية" : "جارٍ تجديد الروابط";
   return (
     <div className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-md rounded-2xl bg-card p-4 shadow-elevated border border-border animate-in slide-in-from-bottom">
       <div className="flex items-center justify-between text-xs font-black">
-        <span>{p.kind === "delete" ? "جارٍ الحذف الجماعي" : "جارٍ الأرشفة الجماعية"} — {p.done}/{p.total}</span>
+        <span>{label} — {p.done}/{p.total}</span>
         <span className="text-primary">{pct}%</span>
       </div>
       <p className="mt-1 truncate text-[11px] text-muted-foreground">قيد المعالجة: {p.currentId}</p>
