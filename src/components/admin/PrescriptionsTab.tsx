@@ -78,13 +78,14 @@ function rxExpiryStatus(rx: Rx): RxExpiry {
   return "valid";
 }
 
-export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDelete, onBulkArchive, onRegenerateUrls, loading, error, onRetry }: {
+export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDelete, onBulkArchive, onBulkRegenerateUrls, onRegenerateUrls, loading, error, onRetry }: {
   rxs: Rx[];
   onStatus: (id: string, s: string) => Promise<void> | void;
   onDelete?: Action;
   onArchive?: Action;
   onBulkDelete?: BulkAction;
   onBulkArchive?: BulkAction;
+  onBulkRegenerateUrls?: BulkAction;
   onRegenerateUrls?: (id: string) => Promise<void> | void;
   loading?: boolean; error?: string | null; onRetry?: () => void;
 }) {
@@ -92,19 +93,22 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDel
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
   const [confirm, setConfirm] = useState<null | { kind: "delete" | "archive"; id: string }>(null);
-  const [bulkConfirm, setBulkConfirm] = useState<null | { kind: "delete" | "archive" }>(null);
+  const [bulkConfirm, setBulkConfirm] = useState<null | { kind: "delete" | "archive" | "regenerate" }>(null);
   const [pending, setPending] = useState<Record<string, "status" | "delete" | "archive" | undefined>>({});
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showLog, setShowLog] = useState(false);
   const [showCsvSettings, setShowCsvSettings] = useState(false);
   const [csvCols, setCsvCols] = useState<string[]>(() => loadCsvPrefs());
-  const [bulkProgress, setBulkProgress] = useState<null | { done: number; total: number; currentId: string; kind: "delete" | "archive" }>(null);
-  const [bulkSummary, setBulkSummary] = useState<null | { ok: number; fail: number; total: number; kind: "delete" | "archive"; error?: string }>(null);
+  const [bulkProgress, setBulkProgress] = useState<null | { done: number; total: number; currentId: string; kind: "delete" | "archive" | "regenerate" }>(null);
+  const [bulkSummary, setBulkSummary] = useState<null | { ok: number; fail: number; total: number; kind: "delete" | "archive" | "regenerate"; error?: string }>(null);
   const [exportPreview, setExportPreview] = useState<null | "csv" | "pdf">(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(() => {
     if (typeof localStorage === "undefined") return "active";
     return (localStorage.getItem("rx-status-filter-v1") as StatusFilter) || "active";
   });
+  const [expiryFilter, setExpiryFilter] = useState<ExpiryFilter>("all");
+  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateTo, setDateTo] = useState<string>("");
 
 
   // persist CSV pref
@@ -115,16 +119,41 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDel
     try { localStorage.setItem("rx-status-filter-v1", statusFilter); } catch { /* quota */ }
   }, [statusFilter]);
 
+  // Pre-compute expiry status per rx so filter + banner + card all share it.
+  const expiryMap = useMemo(() => {
+    const m = new Map<string, RxExpiry>();
+    rxs.forEach((r) => m.set(r.id, rxExpiryStatus(r)));
+    return m;
+  }, [rxs]);
+
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
+    const fromTs = dateFrom ? new Date(dateFrom + "T00:00:00").getTime() : null;
+    const toTs = dateTo ? new Date(dateTo + "T23:59:59").getTime() : null;
     return rxs.filter((r) => {
       if (!matchesStatusFilter(r, statusFilter)) return false;
+      if (expiryFilter !== "all" && expiryMap.get(r.id) !== expiryFilter) return false;
+      const created = new Date(r.created_at).getTime();
+      if (fromTs != null && created < fromTs) return false;
+      if (toTs != null && created > toTs) return false;
       if (!needle) return true;
       return r.id.toLowerCase().includes(needle) ||
         r.customer_name.toLowerCase().includes(needle) ||
         r.customer_phone.includes(needle);
     });
-  }, [rxs, q, statusFilter]);
+  }, [rxs, q, statusFilter, expiryFilter, dateFrom, dateTo, expiryMap]);
+
+  // High-risk banner: when many rxs in the current view need attention.
+  const riskStats = useMemo(() => {
+    const withImgs = filtered.filter((r) => (expiryMap.get(r.id) ?? "none") !== "none");
+    const soon = withImgs.filter((r) => expiryMap.get(r.id) === "soon").length;
+    const expired = withImgs.filter((r) => expiryMap.get(r.id) === "expired").length;
+    const total = withImgs.length;
+    const atRisk = soon + expired;
+    const pct = total === 0 ? 0 : Math.round((atRisk / total) * 100);
+    const highRisk = total >= 4 && pct >= 25;
+    return { soon, expired, total, atRisk, pct, highRisk };
+  }, [filtered, expiryMap]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, pageCount);
