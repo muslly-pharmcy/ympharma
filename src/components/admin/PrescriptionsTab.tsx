@@ -147,7 +147,7 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDel
 
   function exportCSV() {
     const active = csvCols.map((k) => CSV_COLS.find((c) => c.key === k)!).filter(Boolean);
-    if (active.length === 0) { toast.error("اختر عموداً واحداً على الأقل للتصدير"); return; }
+    if (active.length === 0) throw new Error("اختر عموداً واحداً على الأقل للتصدير");
     const rows = filtered.map((r) => active.map((c) => c.pick(r)));
     downloadCSV(
       `prescriptions-${new Date().toISOString().slice(0, 10)}.csv`,
@@ -159,8 +159,8 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDel
 
   function exportPDF() {
     const active = csvCols.map((k) => CSV_COLS.find((c) => c.key === k)!).filter(Boolean);
-    if (active.length === 0) { toast.error("اختر عموداً واحداً على الأقل للتصدير"); return; }
-    if (filtered.length === 0) { toast.error("لا توجد بيانات للتصدير"); return; }
+    if (active.length === 0) throw new Error("اختر عموداً واحداً على الأقل للتصدير");
+    if (filtered.length === 0) throw new Error("لا توجد بيانات للتصدير");
     const esc = (v: unknown) => String(v ?? "").replace(/[&<>"']/g, (c) => (
       { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
     const filterLabel = STATUS_FILTERS.find((f) => f.v === statusFilter)?.label ?? "الكل";
@@ -196,7 +196,7 @@ tr:nth-child(even) td { background:#f8fafc; }
 <script>window.addEventListener('load',()=>setTimeout(()=>window.print(),300));</script>
 </body></html>`;
     const w = window.open("", "_blank", "noopener,noreferrer");
-    if (!w) { toast.error("تعذر فتح نافذة الطباعة — تحقق من حاجب النوافذ المنبثقة"); return; }
+    if (!w) throw new Error("تعذر فتح نافذة الطباعة — تحقق من حاجب النوافذ المنبثقة");
     w.document.open(); w.document.write(html); w.document.close();
     toast.success(`تم تجهيز PDF لـ ${filtered.length} روشتة`);
   }
