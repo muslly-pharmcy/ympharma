@@ -303,6 +303,48 @@ export type Database = {
         }
         Relationships: []
       }
+      trust_pages: {
+        Row: {
+          contact: string
+          cookies: string
+          data_collection: string
+          encryption: string
+          incident_reporting: string
+          intro: string
+          retention: string
+          slug: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          contact?: string
+          cookies?: string
+          data_collection?: string
+          encryption?: string
+          incident_reporting?: string
+          intro?: string
+          retention?: string
+          slug: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          contact?: string
+          cookies?: string
+          data_collection?: string
+          encryption?: string
+          incident_reporting?: string
+          intro?: string
+          retention?: string
+          slug?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
