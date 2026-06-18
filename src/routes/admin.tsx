@@ -454,6 +454,7 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
         {tab === "retention" && me?.isOwner && <RetentionTab />}
         {tab === "emails" && me?.isOwner && <EmailsTab />}
         {tab === "security" && me?.isOwner && <SecurityTab />}
+        {tab === "images" && me?.isOwner && <ImagesTab />}
       </main>
 
       <SiteFooter />
