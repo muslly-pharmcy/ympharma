@@ -15,7 +15,7 @@ import {
 const EST_ROW_HEIGHT = 320;
 
 type Action = (id: string) => Promise<void> | void;
-type BulkAction = (ids: string[], onProgress?: (done: number, total: number, currentId: string, ok: boolean, error?: string) => void) => Promise<void> | void;
+type BulkAction = (ids: string[], onProgress?: (done: number, total: number, currentId: string) => void) => Promise<void> | void;
 
 // ---------- CSV columns ----------
 type CsvCol = { key: string; label: string; pick: (r: Rx) => unknown };
