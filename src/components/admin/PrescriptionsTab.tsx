@@ -382,7 +382,7 @@ tr:nth-child(even) td { background:#f8fafc; }
       </div>
 
       {riskStats.highRisk && (
-        <div role="alert" data-testid="rx-risk-banner" className="flex flex-wrap items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+        <div role="alert" data-testid="rx-risk-banner" data-pct={riskStats.pct} data-total={riskStats.total} data-at-risk={riskStats.atRisk} className="flex flex-wrap items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
           <AlertTriangle className="size-4 shrink-0 text-amber-600" />
           <span className="font-black">تنبيه:</span>
           <span>
