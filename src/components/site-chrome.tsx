@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Search, ShoppingBag, MapPin, Menu, Phone, Truck, Clock3, Globe } from "lucide-react";
+import { Search, ShoppingBag, MapPin, Menu, Phone, Truck, Clock3, Globe, Shield } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { useI18n } from "@/lib/i18n";
