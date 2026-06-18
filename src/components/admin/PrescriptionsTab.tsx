@@ -1,5 +1,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { MessageCircle, Trash2, Archive, Download, Loader2, AlertTriangle, History, Settings2, CheckSquare, Square, X, FileText, Filter } from "lucide-react";
+import { MessageCircle, Trash2, Archive, Download, Loader2, AlertTriangle, History, Settings2, CheckSquare, Square, X, FileText, Filter, RefreshCw, Clock, ShieldCheck, ShieldAlert } from "lucide-react";
+import { parseSignedUrl, formatExpiry } from "@/lib/rx-url";
+
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { toast } from "sonner";
 import { openWhatsApp, buildStatusMessage } from "@/lib/whatsapp";
@@ -59,15 +61,17 @@ function matchesStatusFilter(r: Rx, f: StatusFilter): boolean {
   return r.status !== "archived" && r.status !== "cancelled";
 }
 
-export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDelete, onBulkArchive, loading, error, onRetry }: {
+export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDelete, onBulkArchive, onRegenerateUrls, loading, error, onRetry }: {
   rxs: Rx[];
   onStatus: (id: string, s: string) => Promise<void> | void;
   onDelete?: Action;
   onArchive?: Action;
   onBulkDelete?: BulkAction;
   onBulkArchive?: BulkAction;
+  onRegenerateUrls?: (id: string) => Promise<void> | void;
   loading?: boolean; error?: string | null; onRetry?: () => void;
 }) {
+
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
   const [confirm, setConfirm] = useState<null | { kind: "delete" | "archive"; id: string }>(null);
