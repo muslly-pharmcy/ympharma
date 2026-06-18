@@ -7,6 +7,7 @@ import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { ProductCard } from "@/components/product-card";
 import { categories, formatPrice, getProductById, products } from "@/lib/products";
 import { proxifyImage } from "@/lib/img-proxy";
+import { handleImageError } from "@/lib/img-placeholder";
 import { useCart } from "@/lib/cart";
 import { getVitaminInfo, type VitaminInfo } from "@/lib/vitamin-info.functions";
 import { readCache, writeCache, cacheKey } from "@/lib/vitamin-cache";
