@@ -410,6 +410,7 @@ tr:nth-child(even) td { background:#f8fafc; }
       )}
 
       {bulkProgress && <BulkProgressOverlay p={bulkProgress} />}
+      {bulkSummary && <BulkSummaryDialog s={bulkSummary} onClose={() => setBulkSummary(null)} />}
 
       {showLog && <ActivityLogDialog onClose={() => setShowLog(false)} />}
       {showCsvSettings && (
