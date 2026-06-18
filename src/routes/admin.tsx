@@ -133,7 +133,7 @@ function NotAdmin({ email }: { email: string }) {
 }
 
 function Dashboard({ email, userId }: { email: string; userId: string }) {
-  const [tab, setTab] = useState<"orders" | "rx" | "team" | "trust" | "errors" | "insurance" | "retention" | "emails">("orders");
+  const [tab, setTab] = useState<"orders" | "rx" | "team" | "trust" | "errors" | "insurance" | "retention" | "emails" | "security">("orders");
   const [orders, setOrders] = useState<Order[]>([]);
   const [rxs, setRxs] = useState<Rx[]>([]);
   const [filter, setFilter] = useState<string>("all");
