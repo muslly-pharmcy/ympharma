@@ -1,11 +1,14 @@
 // Helpers for prescription image URLs.
-// Now uses Public URLs (no expiration) instead of Signed URLs.
-// Public URL shape: https://<project>.supabase.co/storage/v1/object/public/<bucket>/<path>
-// Legacy Signed URL shape: https://<project>.supabase.co/storage/v1/object/sign/<bucket>/<path>?token=<JWT>
+// Uses long-lived Signed URLs (1 year) — bucket stays PRIVATE, but the same
+// signed link works in WhatsApp and on the admin website (shared cloud).
+// Signed URL shape: https://<project>.supabase.co/storage/v1/object/sign/<bucket>/<path>?token=<JWT>
+// Legacy Public URL shape (still parsed for backward compat):
+//   https://<project>.supabase.co/storage/v1/object/public/<bucket>/<path>
 
 import { supabase } from "@/integrations/supabase/client";
 
-export const RX_SIGNED_TTL_SECONDS = 60 * 60 * 24 * 30; // legacy, kept for compatibility
+// 1 year — long enough that links stay alive for WhatsApp/website sharing.
+export const RX_SIGNED_TTL_SECONDS = 60 * 60 * 24 * 365;
 
 export type RxUrlInfo = {
   url: string;
@@ -65,7 +68,7 @@ export function formatExpiry(info: RxUrlInfo): { label: string; tone: "ok" | "wa
   if (!info.expiresAt) return { label: "غير معروف", tone: "unknown" };
   if (info.expired) return { label: `منتهي منذ ${humanDelta(-info.expiresInMs!)}`, tone: "expired" };
   const days = info.expiresInMs! / 86_400_000;
-  const tone = days < 3 ? "warn" : "ok";
+  const tone = days < 7 ? "warn" : "ok";
   return { label: `صالح ${humanDelta(info.expiresInMs!)}`, tone };
 }
 
@@ -80,15 +83,17 @@ function humanDelta(ms: number): string {
   return `${d} يوم`;
 }
 
-// Converts any legacy Signed URL to a Public URL for the same object.
-// Returns the input unchanged if already public.
+// Regenerates a fresh long-lived Signed URL for the same object.
+// Works for both old signed URLs and legacy public URLs (extracts bucket/path).
 export async function regenerateSignedUrl(oldUrl: string): Promise<string> {
   const info = parseSignedUrl(oldUrl);
-  if (info.isPublic) return oldUrl;
   if (!info.bucket || !info.path) throw new Error("تعذر استخراج مسار الملف من الرابط");
-  const { data } = supabase.storage.from(info.bucket).getPublicUrl(info.path);
-  if (!data?.publicUrl) throw new Error("فشل إنشاء رابط عام");
-  return data.publicUrl;
+  const { data, error } = await supabase.storage
+    .from(info.bucket)
+    .createSignedUrl(info.path, RX_SIGNED_TTL_SECONDS);
+  if (error) throw error;
+  if (!data?.signedUrl) throw new Error("فشل إنشاء رابط موقّع");
+  return data.signedUrl;
 }
 
 export async function checkUrlReachable(url: string, timeoutMs = 8000): Promise<{ ok: boolean; status: number | null; ms: number; error?: string }> {
