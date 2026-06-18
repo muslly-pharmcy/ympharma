@@ -53,10 +53,10 @@ export const sendAdminEmail = createServerFn({ method: "POST" })
     if (!entry) return { sent: false, reason: "template_not_found", results: [] };
 
     const React = await import("react");
-    const { renderAsync } = await import("@react-email/components");
+    const { render } = await import("@react-email/components");
 
     const tplData = { statusUrl: STATUS_URL, ...data.templateData };
-    const html = await renderAsync(React.createElement(entry.component, tplData));
+    const html = await render(React.createElement(entry.component, tplData));
     const subject = typeof entry.subject === "function" ? entry.subject(tplData) : entry.subject;
 
     const results: Array<{ to: string; status: "accepted" | "rejected"; reason?: string }> = [];
