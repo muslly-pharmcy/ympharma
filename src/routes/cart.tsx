@@ -64,7 +64,7 @@ function CartPage() {
             <div className="space-y-3 lg:col-span-2">
               {detailed.map(({ product, qty }) => (
                 <div key={product.id} className="flex gap-3 rounded-2xl border border-border bg-card p-3 animate-in fade-in slide-in-from-bottom-2">
-                  <img src={product.img} alt={product.name} loading="lazy" decoding="async" className="size-20 rounded-xl object-cover" />
+                  <img src={proxifyImage(product.img)} alt={product.name} loading="lazy" decoding="async" className="size-20 rounded-xl object-cover" />
                   <div className="flex flex-1 flex-col">
                     <p className="text-[10px] font-bold uppercase text-muted-foreground">{product.brand}</p>
                     <h3 className="text-sm font-bold leading-snug">{product.name}</h3>
