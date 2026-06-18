@@ -155,6 +155,50 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDel
     toast.success(`تم تصدير ${filtered.length} روشتة (${active.length} عمود)`);
   }
 
+  function exportPDF() {
+    const active = csvCols.map((k) => CSV_COLS.find((c) => c.key === k)!).filter(Boolean);
+    if (active.length === 0) { toast.error("اختر عموداً واحداً على الأقل للتصدير"); return; }
+    if (filtered.length === 0) { toast.error("لا توجد بيانات للتصدير"); return; }
+    const esc = (v: unknown) => String(v ?? "").replace(/[&<>"']/g, (c) => (
+      { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
+    const filterLabel = STATUS_FILTERS.find((f) => f.v === statusFilter)?.label ?? "الكل";
+    const rowsHtml = filtered.map((r) =>
+      `<tr>${active.map((c) => `<td>${esc(c.pick(r))}</td>`).join("")}</tr>`
+    ).join("");
+    const html = `<!doctype html><html dir="rtl" lang="ar"><head><meta charset="utf-8" />
+<title>تقرير الروشتات</title>
+<style>
+@page { size: A4; margin: 14mm; }
+* { box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; color: #0f172a; padding: 0; margin: 0; }
+.head { display:flex; align-items:center; justify-content:space-between; border-bottom:2px solid #0d9488; padding-bottom:10px; margin-bottom:14px; }
+.head h1 { margin:0; font-size:18px; color:#0f766e; }
+.meta { font-size:11px; color:#475569; }
+table { width:100%; border-collapse:collapse; font-size:11px; }
+th, td { border:1px solid #cbd5e1; padding:6px 8px; text-align:right; vertical-align:top; }
+th { background:#f1f5f9; font-weight:800; color:#0f172a; }
+tr:nth-child(even) td { background:#f8fafc; }
+.footer { margin-top:14px; font-size:10px; color:#64748b; text-align:center; }
+@media print { .no-print { display:none; } }
+.no-print { position: fixed; top: 10px; left: 10px; }
+.no-print button { background:#0d9488; color:white; border:0; padding:8px 14px; border-radius:8px; font-weight:800; cursor:pointer; }
+</style></head><body>
+<div class="no-print"><button onclick="window.print()">طباعة / حفظ PDF</button></div>
+<div class="head">
+  <div><h1>صيدلية المصلي — تقرير الروشتات</h1>
+    <div class="meta">الحالة: ${esc(filterLabel)} · البحث: ${esc(q || "—")} · عدد السجلات: ${filtered.length} · تاريخ: ${new Date().toLocaleString("ar-EG")}</div></div>
+</div>
+<table><thead><tr>${active.map((c) => `<th>${esc(c.label)}</th>`).join("")}</tr></thead>
+<tbody>${rowsHtml}</tbody></table>
+<div class="footer">تم التوليد من لوحة إدارة صيدلية المصلي</div>
+<script>window.addEventListener('load',()=>setTimeout(()=>window.print(),300));</script>
+</body></html>`;
+    const w = window.open("", "_blank", "noopener,noreferrer");
+    if (!w) { toast.error("تعذر فتح نافذة الطباعة — تحقق من حاجب النوافذ المنبثقة"); return; }
+    w.document.open(); w.document.write(html); w.document.close();
+    toast.success(`تم تجهيز PDF لـ ${filtered.length} روشتة`);
+  }
+
   const handleStatus = useCallback(async (id: string, s: string) => {
     const prev = rxs.find((r) => r.id === id)?.status;
     setPending((p) => ({ ...p, [id]: "status" }));
