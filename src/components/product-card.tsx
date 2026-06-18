@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { formatPrice, type Product } from "@/lib/products";
+import { proxifyImage } from "@/lib/img-proxy";
 import { useCart } from "@/lib/cart";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
