@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrustRouteImport } from './routes/trust'
 import { Route as TrackRouteImport } from './routes/track'
+import { Route as StatusRouteImport } from './routes/status'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ProductsRouteImport } from './routes/products'
@@ -28,6 +29,9 @@ import { Route as AdminBackupsRouteImport } from './routes/admin-backups'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
+import { Route as ApiPublicUptimeWebhookRouteImport } from './routes/api/public/uptime-webhook'
+import { Route as ApiPublicLogErrorRouteImport } from './routes/api/public/log-error'
+import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 
 const TrustRoute = TrustRouteImport.update({
   id: '/trust',
@@ -37,6 +41,11 @@ const TrustRoute = TrustRouteImport.update({
 const TrackRoute = TrackRouteImport.update({
   id: '/track',
   path: '/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatusRoute = StatusRouteImport.update({
+  id: '/status',
+  path: '/status',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -124,6 +133,21 @@ const ProductIdRoute = ProductIdRouteImport.update({
   path: '/product/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicUptimeWebhookRoute = ApiPublicUptimeWebhookRouteImport.update({
+  id: '/api/public/uptime-webhook',
+  path: '/api/public/uptime-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicLogErrorRoute = ApiPublicLogErrorRouteImport.update({
+  id: '/api/public/log-error',
+  path: '/api/public/log-error',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
+  id: '/api/public/health',
+  path: '/api/public/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -142,9 +166,13 @@ export interface FileRoutesByFullPath {
   '/products': typeof ProductsRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/status': typeof StatusRoute
   '/track': typeof TrackRoute
   '/trust': typeof TrustRoute
   '/product/$id': typeof ProductIdRoute
+  '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/log-error': typeof ApiPublicLogErrorRoute
+  '/api/public/uptime-webhook': typeof ApiPublicUptimeWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -163,9 +191,13 @@ export interface FileRoutesByTo {
   '/products': typeof ProductsRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/status': typeof StatusRoute
   '/track': typeof TrackRoute
   '/trust': typeof TrustRoute
   '/product/$id': typeof ProductIdRoute
+  '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/log-error': typeof ApiPublicLogErrorRoute
+  '/api/public/uptime-webhook': typeof ApiPublicUptimeWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -185,9 +217,13 @@ export interface FileRoutesById {
   '/products': typeof ProductsRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/status': typeof StatusRoute
   '/track': typeof TrackRoute
   '/trust': typeof TrustRoute
   '/product/$id': typeof ProductIdRoute
+  '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/log-error': typeof ApiPublicLogErrorRoute
+  '/api/public/uptime-webhook': typeof ApiPublicUptimeWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -208,9 +244,13 @@ export interface FileRouteTypes {
     | '/products'
     | '/settings'
     | '/sitemap.xml'
+    | '/status'
     | '/track'
     | '/trust'
     | '/product/$id'
+    | '/api/public/health'
+    | '/api/public/log-error'
+    | '/api/public/uptime-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -229,9 +269,13 @@ export interface FileRouteTypes {
     | '/products'
     | '/settings'
     | '/sitemap.xml'
+    | '/status'
     | '/track'
     | '/trust'
     | '/product/$id'
+    | '/api/public/health'
+    | '/api/public/log-error'
+    | '/api/public/uptime-webhook'
   id:
     | '__root__'
     | '/'
@@ -250,9 +294,13 @@ export interface FileRouteTypes {
     | '/products'
     | '/settings'
     | '/sitemap.xml'
+    | '/status'
     | '/track'
     | '/trust'
     | '/product/$id'
+    | '/api/public/health'
+    | '/api/public/log-error'
+    | '/api/public/uptime-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -272,9 +320,13 @@ export interface RootRouteChildren {
   ProductsRoute: typeof ProductsRoute
   SettingsRoute: typeof SettingsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  StatusRoute: typeof StatusRoute
   TrackRoute: typeof TrackRoute
   TrustRoute: typeof TrustRoute
   ProductIdRoute: typeof ProductIdRoute
+  ApiPublicHealthRoute: typeof ApiPublicHealthRoute
+  ApiPublicLogErrorRoute: typeof ApiPublicLogErrorRoute
+  ApiPublicUptimeWebhookRoute: typeof ApiPublicUptimeWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -291,6 +343,13 @@ declare module '@tanstack/react-router' {
       path: '/track'
       fullPath: '/track'
       preLoaderRoute: typeof TrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/status': {
+      id: '/status'
+      path: '/status'
+      fullPath: '/status'
+      preLoaderRoute: typeof StatusRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -412,6 +471,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/uptime-webhook': {
+      id: '/api/public/uptime-webhook'
+      path: '/api/public/uptime-webhook'
+      fullPath: '/api/public/uptime-webhook'
+      preLoaderRoute: typeof ApiPublicUptimeWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/log-error': {
+      id: '/api/public/log-error'
+      path: '/api/public/log-error'
+      fullPath: '/api/public/log-error'
+      preLoaderRoute: typeof ApiPublicLogErrorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/health': {
+      id: '/api/public/health'
+      path: '/api/public/health'
+      fullPath: '/api/public/health'
+      preLoaderRoute: typeof ApiPublicHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -432,9 +512,13 @@ const rootRouteChildren: RootRouteChildren = {
   ProductsRoute: ProductsRoute,
   SettingsRoute: SettingsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  StatusRoute: StatusRoute,
   TrackRoute: TrackRoute,
   TrustRoute: TrustRoute,
   ProductIdRoute: ProductIdRoute,
+  ApiPublicHealthRoute: ApiPublicHealthRoute,
+  ApiPublicLogErrorRoute: ApiPublicLogErrorRoute,
+  ApiPublicUptimeWebhookRoute: ApiPublicUptimeWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
