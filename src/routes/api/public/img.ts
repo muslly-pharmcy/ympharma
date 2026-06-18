@@ -1,4 +1,29 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { IMAGE_PLACEHOLDER } from "@/lib/img-placeholder";
+
+// Inline SVG bytes used when upstream fails. Returning 200 with this body
+// keeps <img> happy and prevents the global error reporter from flagging
+// a 4xx/5xx route response as a runtime error / blank screen.
+const PLACEHOLDER_SVG_BYTES = (() => {
+  const dataUri = IMAGE_PLACEHOLDER;
+  const comma = dataUri.indexOf(",");
+  return decodeURIComponent(dataUri.slice(comma + 1));
+})();
+
+function placeholderResponse(extraHeaders: Record<string, string> = {}) {
+  return new Response(PLACEHOLDER_SVG_BYTES, {
+    status: 200,
+    headers: {
+      "Content-Type": "image/svg+xml; charset=utf-8",
+      "Cache-Control": "public, max-age=60",
+      "X-Img-Fallback": "1",
+      ...CORS,
+      ...extraHeaders,
+    },
+  });
+}
+
+
 
 // Fallback defaults if settings row is unavailable (cold start, DB hiccup).
 const DEFAULT_HOSTS = [
@@ -87,10 +112,8 @@ export const Route = createFileRoute("/api/public/img")({
               error: `rate_limited:${clientIp}`,
               duration_ms: Date.now() - started,
             });
-            return new Response("rate limited", {
-              status: 429,
-              headers: { ...CORS, "Retry-After": "60" },
-            });
+            return placeholderResponse({ "Retry-After": "60", "X-Img-Reason": "rate_limited" });
+
           }
         } catch {
           // fail open — never block legitimate traffic on a DB hiccup
@@ -112,7 +135,7 @@ export const Route = createFileRoute("/api/public/img")({
             error: "invalid_or_missing_url",
             duration_ms: Date.now() - started,
           });
-          return new Response("invalid url", { status: 400, headers: CORS });
+          return placeholderResponse({ "X-Img-Reason": "invalid_url" });
         }
 
         const allowed = await loadAllowedHosts();
@@ -125,7 +148,7 @@ export const Route = createFileRoute("/api/public/img")({
             error: upstream.protocol !== "https:" ? "non_https" : "host_not_in_allowlist",
             duration_ms: Date.now() - started,
           });
-          return new Response("host not allowed", { status: 403, headers: CORS });
+          return placeholderResponse({ "X-Img-Reason": "host_not_allowed" });
         }
 
         try {
@@ -141,7 +164,7 @@ export const Route = createFileRoute("/api/public/img")({
               error: `upstream_${upstreamRes.status}`,
               duration_ms: Date.now() - started,
             });
-            return new Response("upstream error", { status: 502, headers: CORS });
+            return placeholderResponse({ "X-Img-Reason": `upstream_${upstreamRes.status}` });
           }
           const ct = upstreamRes.headers.get("content-type") ?? "image/jpeg";
           // fire-and-forget success log
@@ -170,7 +193,7 @@ export const Route = createFileRoute("/api/public/img")({
             error: err instanceof Error ? err.message.slice(0, 500) : "fetch_failed",
             duration_ms: Date.now() - started,
           });
-          return new Response("fetch failed", { status: 502, headers: CORS });
+          return placeholderResponse({ "X-Img-Reason": "fetch_failed" });
         }
       },
     },
