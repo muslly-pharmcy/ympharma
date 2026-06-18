@@ -329,30 +329,43 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
     if (lastErr) throw lastErr;
   }
 
-  async function bulkRegenerateRxUrls(ids: string[], onProgress?: (done: number, total: number, currentId: string) => void): Promise<void> {
+  async function bulkRegenerateRxUrls(ids: string[], onProgress?: (done: number, total: number, currentId: string) => void) {
     const { regenerateSignedUrl } = await import("@/lib/rx-url");
     const { invalidateImagesMatching } = await import("@/lib/image-cache");
-    let lastErr: unknown = null;
+    const failures: { id: string; reason: string }[] = [];
+    let ok = 0;
     let done = 0;
     for (const id of ids) {
       onProgress?.(done, ids.length, id);
       try {
         const rx = rxs.find((r) => r.id === id);
         if (!rx) throw new Error("الروشتة غير موجودة");
+        if (!rx.image_urls || rx.image_urls.length === 0) throw new Error("لا توجد روابط لتجديدها");
         const fresh: string[] = [];
+        const perImageErrors: string[] = [];
         for (const u of rx.image_urls) {
           try { fresh.push(await regenerateSignedUrl(u)); }
-          catch { fresh.push(u); }
+          catch (ie: any) { fresh.push(u); perImageErrors.push(ie?.message || "فشل صورة"); }
+        }
+        if (perImageErrors.length === rx.image_urls.length) {
+          throw new Error(perImageErrors[0] || "فشل تجديد كل الصور");
         }
         const { error } = await supabase.from("prescriptions").update({ image_urls: fresh }).eq("id", id);
         if (error) throw new Error(error.message);
         setRxs((p) => p.map((o) => (o.id === id ? { ...o, image_urls: fresh } : o)));
         invalidateImagesMatching(id.toLowerCase());
-      } catch (e) { lastErr = e; }
+        ok++;
+        if (perImageErrors.length > 0) {
+          // partial: count as ok but record warning
+          failures.push({ id, reason: `جزئي: ${perImageErrors.length}/${rx.image_urls.length} صورة فشلت — ${perImageErrors[0]}` });
+        }
+      } catch (e: any) {
+        failures.push({ id, reason: e?.message || "خطأ غير معروف" });
+      }
       done++;
       onProgress?.(done, ids.length, id);
     }
-    if (lastErr) throw lastErr;
+    return { ok, fail: failures.length, failures };
   }
 
   async function handlePromote() {
