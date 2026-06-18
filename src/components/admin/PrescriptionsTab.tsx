@@ -703,8 +703,6 @@ function ExportConfirmFooter({ kind, disabled, onCancel, onConfirm }: {
         </button>
       </div>
     </>
-      </div>
-    </div>
   );
 }
 
