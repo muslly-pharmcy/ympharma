@@ -36,7 +36,7 @@ import { Route } from "@/routes/trust";
 
 describe("/trust page", () => {
   it("renders with dir=rtl and shows all policy sections", async () => {
-    const cfg = Route as unknown as { component: () => JSX.Element };
+    const cfg = Route as unknown as { component: () => React.ReactElement };
     render(<cfg.component />);
 
     await waitFor(() => expect(screen.getByText("عنوان تجريبي")).toBeTruthy());
