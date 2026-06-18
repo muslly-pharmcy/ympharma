@@ -193,7 +193,7 @@ export const Route = createFileRoute("/api/public/img")({
             error: err instanceof Error ? err.message.slice(0, 500) : "fetch_failed",
             duration_ms: Date.now() - started,
           });
-          return new Response("fetch failed", { status: 502, headers: CORS });
+          return placeholderResponse({ "X-Img-Reason": "fetch_failed" });
         }
       },
     },
