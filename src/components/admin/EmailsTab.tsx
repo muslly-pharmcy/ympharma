@@ -1,7 +1,18 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { sendAdminEmail, listEmailLogs } from "@/lib/email-alerts.functions";
+import { renderTemplatesSmokeTest, listEmailDiagnostics } from "@/lib/email-diagnostics.functions";
 import { toast } from "sonner";
+
+const KIND_LABEL: Record<string, string> = {
+  missing_module: "حزمة مفقودة",
+  export_mismatch: "تصدير غير متطابق",
+  render_error: "خطأ في العرض",
+  suppressed: "مستلم محظور",
+  timeout: "انتهاء المهلة",
+  other: "خطأ آخر",
+  unknown: "غير معروف",
+};
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   sent: { label: "تم الإرسال", color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
