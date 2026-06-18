@@ -146,6 +146,8 @@ function RootComponent() {
   useEffect(() => {
     // Install the client-side error logger once on mount (browser only).
     void import("../lib/client-error-logger").then((m) => m.installClientErrorLogger());
+    // Anonymous network/error reporter — works for signed-out visitors too.
+    void import("../lib/error-reporter").then((m) => m.installAnonErrorReporter());
   }, []);
 
   return (
