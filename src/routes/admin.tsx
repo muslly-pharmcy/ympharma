@@ -422,6 +422,11 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
               🛡️ الأمان
             </button>
           )}
+          {me?.isOwner && (
+            <button onClick={() => setTab("images")} className={`flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-1.5 text-xs font-black transition ${tab === "images" ? "brand-gradient text-primary-foreground shadow-card" : "bg-secondary text-muted-foreground hover:text-primary"}`}>
+              🖼️ الصور
+            </button>
+          )}
           {tab !== "team" && tab !== "trust" && tab !== "errors" && tab !== "insurance" && tab !== "retention" && tab !== "emails" && tab !== "security" && (
             <>
               <div className="mx-2 h-6 w-px bg-border" />
