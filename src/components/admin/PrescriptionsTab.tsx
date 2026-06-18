@@ -664,12 +664,12 @@ function CsvSettingsDialog({ selected, onChange, onClose }: {
 
 // ---------- Bulk summary dialog ----------
 function BulkSummaryDialog({ s, onClose }: {
-  s: { ok: number; fail: number; total: number; kind: "delete" | "archive"; error?: string };
+  s: { ok: number; fail: number; total: number; kind: "delete" | "archive" | "regenerate"; error?: string };
   onClose: () => void;
 }) {
   const okPct = Math.round((s.ok / Math.max(1, s.total)) * 100);
   const allOk = s.fail === 0;
-  const verb = s.kind === "delete" ? "الحذف" : "الأرشفة";
+  const verb = s.kind === "delete" ? "الحذف" : s.kind === "archive" ? "الأرشفة" : "تجديد الروابط";
   return (
     <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4 animate-in fade-in" onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} data-testid="bulk-summary" className="w-full max-w-md rounded-2xl bg-card p-5 shadow-elevated">
