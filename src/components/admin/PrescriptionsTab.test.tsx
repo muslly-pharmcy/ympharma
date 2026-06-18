@@ -13,6 +13,22 @@ vi.mock("@tanstack/react-router", async (orig) => {
   return { ...actual, createFileRoute: () => (cfg: any) => ({ options: cfg }) };
 });
 
+// Mockable Supabase client used by the prescription page.
+const supaUpload = vi.fn(async () => ({ data: { path: "p" }, error: null }));
+const supaSignedUrl = vi.fn(async () => ({ data: { signedUrl: "https://signed/url.jpg" }, error: null }));
+const supaInsert = vi.fn(async () => ({ error: null }));
+vi.mock("@/integrations/supabase/client", () => ({
+  supabase: {
+    storage: { from: () => ({ upload: supaUpload, createSignedUrl: supaSignedUrl }) },
+    from: () => ({ insert: supaInsert }),
+  },
+}));
+vi.mock("@/lib/whatsapp", async (orig) => {
+  const actual = (await orig()) as any;
+  return { ...actual, openWhatsApp: vi.fn() };
+});
+
+
 import { PrescriptionsTab } from "@/components/admin/PrescriptionsTab";
 import type { Rx } from "@/components/admin/shared";
 import { clearActivityLog, getActivityLog } from "@/lib/rx-activity-log";
