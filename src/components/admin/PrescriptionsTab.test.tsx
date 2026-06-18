@@ -221,9 +221,10 @@ describe("Prescription submission (smoke, repeated)", () => {
     const upload = vi.fn(async () => ({ data: { path: "p" }, error: null }));
     const createSignedUrl = vi.fn(async () => ({ data: { signedUrl: "https://signed/url.jpg" }, error: null }));
     const insert = vi.fn(async () => ({ error: null }));
-    vi.spyOn(supabaseMod.supabase.storage, "from").mockReturnValue({ upload, createSignedUrl } as any);
-    vi.spyOn(supabaseMod.supabase, "from").mockReturnValue({ insert } as any);
+    (supabaseMod.supabase.storage as any).from = vi.fn(() => ({ upload, createSignedUrl }));
+    (supabaseMod.supabase as any).from = vi.fn(() => ({ insert }));
     const openWa = vi.spyOn(whatsappMod, "openWhatsApp").mockImplementation(() => {});
+
 
     const mod: any = await import("@/routes/prescription");
     const PrescriptionPage = mod.Route.options.component;
