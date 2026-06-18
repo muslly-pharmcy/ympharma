@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { products as staticProducts, type Product } from "@/lib/products";
+import { importedProducts } from "@/lib/products-extra";
 import { listPublicProducts } from "@/lib/products-public.functions";
 
 // Maps a DB row to the storefront Product shape.
@@ -34,5 +35,5 @@ export function useMergedProducts(): Product[] {
     return () => { cancelled = true; };
   }, [fetchFn]);
 
-  return [...dbItems, ...staticProducts];
+  return [...dbItems, ...staticProducts, ...importedProducts];
 }

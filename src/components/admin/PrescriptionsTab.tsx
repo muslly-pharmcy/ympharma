@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { MessageCircle, Trash2, Archive, Download, Loader2, AlertTriangle, History, Settings2, CheckSquare, Square, X } from "lucide-react";
+import { MessageCircle, Trash2, Archive, Download, Loader2, AlertTriangle, History, Settings2, CheckSquare, Square, X, FileText, Filter } from "lucide-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { toast } from "sonner";
 import { openWhatsApp, buildStatusMessage } from "@/lib/whatsapp";
@@ -21,7 +21,8 @@ type BulkAction = (ids: string[], onProgress?: (done: number, total: number, cur
 type CsvCol = { key: string; label: string; pick: (r: Rx) => unknown };
 const CSV_COLS: CsvCol[] = [
   { key: "id", label: "رقم", pick: (r) => r.id },
-  { key: "created_at", label: "التاريخ", pick: (r) => new Date(r.created_at).toLocaleString("ar-EG") },
+  { key: "created_at", label: "تاريخ الإنشاء", pick: (r) => new Date(r.created_at).toLocaleString("ar-EG") },
+  { key: "updated_at", label: "آخر تحديث", pick: (r) => new Date(r.updated_at ?? r.created_at).toLocaleString("ar-EG") },
   { key: "customer_name", label: "الاسم", pick: (r) => r.customer_name },
   { key: "customer_phone", label: "الجوال", pick: (r) => r.customer_phone },
   { key: "customer_address", label: "العنوان", pick: (r) => r.customer_address },
@@ -40,6 +41,22 @@ function loadCsvPrefs(): string[] {
     const valid = parsed.filter((k) => CSV_COLS.some((c) => c.key === k));
     return valid.length > 0 ? valid : CSV_COLS.map((c) => c.key);
   } catch { return CSV_COLS.map((c) => c.key); }
+}
+
+// ---------- Status filter ----------
+type StatusFilter = "all" | "active" | "archived" | "cancelled";
+const STATUS_FILTERS: { v: StatusFilter; label: string }[] = [
+  { v: "all", label: "الكل" },
+  { v: "active", label: "نشطة" },
+  { v: "archived", label: "مؤرشفة" },
+  { v: "cancelled", label: "ملغية" },
+];
+function matchesStatusFilter(r: Rx, f: StatusFilter): boolean {
+  if (f === "all") return true;
+  if (f === "archived") return r.status === "archived";
+  if (f === "cancelled") return r.status === "cancelled";
+  // active = anything that is not archived/cancelled
+  return r.status !== "archived" && r.status !== "cancelled";
 }
 
 export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDelete, onBulkArchive, loading, error, onRetry }: {
@@ -61,21 +78,30 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDel
   const [showCsvSettings, setShowCsvSettings] = useState(false);
   const [csvCols, setCsvCols] = useState<string[]>(() => loadCsvPrefs());
   const [bulkProgress, setBulkProgress] = useState<null | { done: number; total: number; currentId: string; kind: "delete" | "archive" }>(null);
+  const [bulkSummary, setBulkSummary] = useState<null | { ok: number; fail: number; total: number; kind: "delete" | "archive"; error?: string }>(null);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>(() => {
+    if (typeof localStorage === "undefined") return "active";
+    return (localStorage.getItem("rx-status-filter-v1") as StatusFilter) || "active";
+  });
 
   // persist CSV pref
   useEffect(() => {
     try { localStorage.setItem(CSV_PREF_KEY, JSON.stringify(csvCols)); } catch { /* quota */ }
   }, [csvCols]);
+  useEffect(() => {
+    try { localStorage.setItem("rx-status-filter-v1", statusFilter); } catch { /* quota */ }
+  }, [statusFilter]);
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    if (!needle) return rxs;
-    return rxs.filter((r) =>
-      r.id.toLowerCase().includes(needle) ||
-      r.customer_name.toLowerCase().includes(needle) ||
-      r.customer_phone.includes(needle)
-    );
-  }, [rxs, q]);
+    return rxs.filter((r) => {
+      if (!matchesStatusFilter(r, statusFilter)) return false;
+      if (!needle) return true;
+      return r.id.toLowerCase().includes(needle) ||
+        r.customer_name.toLowerCase().includes(needle) ||
+        r.customer_phone.includes(needle);
+    });
+  }, [rxs, q, statusFilter]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, pageCount);
@@ -129,6 +155,50 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDel
     toast.success(`تم تصدير ${filtered.length} روشتة (${active.length} عمود)`);
   }
 
+  function exportPDF() {
+    const active = csvCols.map((k) => CSV_COLS.find((c) => c.key === k)!).filter(Boolean);
+    if (active.length === 0) { toast.error("اختر عموداً واحداً على الأقل للتصدير"); return; }
+    if (filtered.length === 0) { toast.error("لا توجد بيانات للتصدير"); return; }
+    const esc = (v: unknown) => String(v ?? "").replace(/[&<>"']/g, (c) => (
+      { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
+    const filterLabel = STATUS_FILTERS.find((f) => f.v === statusFilter)?.label ?? "الكل";
+    const rowsHtml = filtered.map((r) =>
+      `<tr>${active.map((c) => `<td>${esc(c.pick(r))}</td>`).join("")}</tr>`
+    ).join("");
+    const html = `<!doctype html><html dir="rtl" lang="ar"><head><meta charset="utf-8" />
+<title>تقرير الروشتات</title>
+<style>
+@page { size: A4; margin: 14mm; }
+* { box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; color: #0f172a; padding: 0; margin: 0; }
+.head { display:flex; align-items:center; justify-content:space-between; border-bottom:2px solid #0d9488; padding-bottom:10px; margin-bottom:14px; }
+.head h1 { margin:0; font-size:18px; color:#0f766e; }
+.meta { font-size:11px; color:#475569; }
+table { width:100%; border-collapse:collapse; font-size:11px; }
+th, td { border:1px solid #cbd5e1; padding:6px 8px; text-align:right; vertical-align:top; }
+th { background:#f1f5f9; font-weight:800; color:#0f172a; }
+tr:nth-child(even) td { background:#f8fafc; }
+.footer { margin-top:14px; font-size:10px; color:#64748b; text-align:center; }
+@media print { .no-print { display:none; } }
+.no-print { position: fixed; top: 10px; left: 10px; }
+.no-print button { background:#0d9488; color:white; border:0; padding:8px 14px; border-radius:8px; font-weight:800; cursor:pointer; }
+</style></head><body>
+<div class="no-print"><button onclick="window.print()">طباعة / حفظ PDF</button></div>
+<div class="head">
+  <div><h1>صيدلية المصلي — تقرير الروشتات</h1>
+    <div class="meta">الحالة: ${esc(filterLabel)} · البحث: ${esc(q || "—")} · عدد السجلات: ${filtered.length} · تاريخ: ${new Date().toLocaleString("ar-EG")}</div></div>
+</div>
+<table><thead><tr>${active.map((c) => `<th>${esc(c.label)}</th>`).join("")}</tr></thead>
+<tbody>${rowsHtml}</tbody></table>
+<div class="footer">تم التوليد من لوحة إدارة صيدلية المصلي</div>
+<script>window.addEventListener('load',()=>setTimeout(()=>window.print(),300));</script>
+</body></html>`;
+    const w = window.open("", "_blank", "noopener,noreferrer");
+    if (!w) { toast.error("تعذر فتح نافذة الطباعة — تحقق من حاجب النوافذ المنبثقة"); return; }
+    w.document.open(); w.document.write(html); w.document.close();
+    toast.success(`تم تجهيز PDF لـ ${filtered.length} روشتة`);
+  }
+
   const handleStatus = useCallback(async (id: string, s: string) => {
     const prev = rxs.find((r) => r.id === id)?.status;
     setPending((p) => ({ ...p, [id]: "status" }));
@@ -168,21 +238,19 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDel
     if (!handler || ids.length === 0) { setBulkConfirm(null); return; }
     setBulkConfirm(null);
     setBulkProgress({ done: 0, total: ids.length, currentId: ids[0], kind });
+    let lastDone = 0;
     try {
       await handler(ids, (done, total, currentId) => {
+        lastDone = done;
         setBulkProgress({ done, total, currentId, kind });
-        if (done > 0) {
-          // success for previously processed id is logged inside admin handler;
-          // we still log a coarse bulk-completion entry at the end.
-        }
       });
       logActivity({ rxId: `[${ids.length}]`, action: kind === "delete" ? "bulk-delete" : "bulk-archive", status: "success", details: ids.join(", ") });
-      toast.success(kind === "delete" ? `تم حذف ${ids.length} روشتة` : `تم أرشفة ${ids.length} روشتة`);
+      setBulkSummary({ ok: ids.length, fail: 0, total: ids.length, kind });
       setSelected(new Set());
     } catch (e: any) {
       const msg = humanizeError(e, kind === "delete" ? "الحذف الجماعي" : "الأرشفة الجماعية");
       logActivity({ rxId: `[${ids.length}]`, action: kind === "delete" ? "bulk-delete" : "bulk-archive", status: "error", details: ids.join(", "), error: msg });
-      toast.error(msg);
+      setBulkSummary({ ok: lastDone, fail: ids.length - lastDone, total: ids.length, kind, error: msg });
     } finally {
       setBulkProgress(null);
     }
@@ -210,6 +278,21 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDel
   return (
     <div className="space-y-3" data-testid="prescriptions-tab">
       <SearchBar value={q} onChange={(v) => { setQ(v); setPage(1); }} placeholder="ابحث برقم الروشتة، الاسم، أو الجوال..." />
+
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card/60 p-2">
+        <Filter className="size-3.5 text-muted-foreground ms-1" />
+        <span className="text-[11px] font-bold text-muted-foreground">فلتر الحالة:</span>
+        {STATUS_FILTERS.map((f) => (
+          <button
+            key={f.v}
+            onClick={() => { setStatusFilter(f.v); setPage(1); }}
+            data-testid={`status-filter-${f.v}`}
+            className={`rounded-lg px-3 py-1 text-[11px] font-black transition ${statusFilter === f.v ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground hover:bg-accent"}`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
 
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-[11px] text-muted-foreground">
@@ -247,10 +330,19 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDel
             data-testid="export-csv-btn"
             className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-black text-white hover:bg-emerald-600 disabled:opacity-50"
           >
-            <Download className="size-3.5" /> تصدير CSV ({filtered.length})
+            <Download className="size-3.5" /> CSV ({filtered.length})
+          </button>
+          <button
+            onClick={exportPDF}
+            disabled={filtered.length === 0}
+            data-testid="export-pdf-btn"
+            className="flex items-center gap-1.5 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-black text-white hover:bg-rose-700 disabled:opacity-50"
+          >
+            <FileText className="size-3.5" /> PDF ({filtered.length})
           </button>
         </div>
       </div>
+
 
       <TabState loading={loading} error={error} empty={filtered.length === 0} onRetry={onRetry} skeleton={skeleton}>
         {useVirtual ? (
@@ -318,6 +410,7 @@ export function PrescriptionsTab({ rxs, onStatus, onDelete, onArchive, onBulkDel
       )}
 
       {bulkProgress && <BulkProgressOverlay p={bulkProgress} />}
+      {bulkSummary && <BulkSummaryDialog s={bulkSummary} onClose={() => setBulkSummary(null)} />}
 
       {showLog && <ActivityLogDialog onClose={() => setShowLog(false)} />}
       {showCsvSettings && (
@@ -437,9 +530,54 @@ function CsvSettingsDialog({ selected, onChange, onClose }: {
   );
 }
 
+// ---------- Bulk summary dialog ----------
+function BulkSummaryDialog({ s, onClose }: {
+  s: { ok: number; fail: number; total: number; kind: "delete" | "archive"; error?: string };
+  onClose: () => void;
+}) {
+  const okPct = Math.round((s.ok / Math.max(1, s.total)) * 100);
+  const allOk = s.fail === 0;
+  const verb = s.kind === "delete" ? "الحذف" : "الأرشفة";
+  return (
+    <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4 animate-in fade-in" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} data-testid="bulk-summary" className="w-full max-w-md rounded-2xl bg-card p-5 shadow-elevated">
+        <div className="flex items-start gap-3">
+          <div className={`grid size-10 place-items-center rounded-xl ${allOk ? "bg-emerald-100 text-emerald-600" : "bg-amber-100 text-amber-700"}`}>
+            {allOk ? <CheckSquare className="size-5" /> : <AlertTriangle className="size-5" />}
+          </div>
+          <div className="flex-1">
+            <p className="text-base font-black">{allOk ? `اكتمل ${verb} بنجاح` : `اكتمل ${verb} مع وجود أخطاء`}</p>
+            <p className="mt-1 text-xs text-muted-foreground">إجمالي العمليات: {s.total}</p>
+          </div>
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <div className="rounded-xl bg-emerald-50 p-3 text-center">
+            <p className="text-2xl font-black text-emerald-700">{s.ok}</p>
+            <p className="text-[11px] font-bold text-emerald-700">نجاح</p>
+          </div>
+          <div className="rounded-xl bg-rose-50 p-3 text-center">
+            <p className="text-2xl font-black text-rose-700">{s.fail}</p>
+            <p className="text-[11px] font-bold text-rose-700">فشل</p>
+          </div>
+        </div>
+        <div className="mt-3 h-2 overflow-hidden rounded-full bg-secondary">
+          <div className="h-full bg-emerald-500 transition-all" style={{ width: `${okPct}%` }} />
+        </div>
+        {s.error && (
+          <p className="mt-3 rounded-lg bg-rose-50 p-2 text-[11px] text-rose-700">{s.error}</p>
+        )}
+        <div className="mt-4 flex justify-end">
+          <button onClick={onClose} className="rounded-lg bg-primary px-4 py-2 text-xs font-black text-primary-foreground hover:bg-primary-deep">تم</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ---------- Activity log dialog ----------
 function ActivityLogDialog({ onClose }: { onClose: () => void }) {
   const [entries, setEntries] = useState<RxActivityEntry[]>(() => getActivityLog());
+  const [confirmClear, setConfirmClear] = useState(false);
   useEffect(() => subscribeActivityLog(setEntries), []);
   return (
     <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4" onClick={onClose}>
@@ -447,10 +585,18 @@ function ActivityLogDialog({ onClose }: { onClose: () => void }) {
         <div className="flex items-center justify-between">
           <p className="text-base font-black flex items-center gap-2"><History className="size-4" /> سجل نشاط الروشتات</p>
           <div className="flex items-center gap-2">
-            <button onClick={() => { clearActivityLog(); toast.success("تم مسح السجل"); }} className="rounded-lg bg-secondary px-3 py-1.5 text-xs font-bold hover:bg-accent">مسح</button>
+            <button
+              onClick={() => setConfirmClear(true)}
+              disabled={entries.length === 0}
+              data-testid="clear-log-btn"
+              className="flex items-center gap-1.5 rounded-lg bg-rose-100 px-3 py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-200 disabled:opacity-40"
+            >
+              <Trash2 className="size-3.5" /> تصفير السجل
+            </button>
             <button onClick={onClose} className="grid size-8 place-items-center rounded-lg hover:bg-accent"><X className="size-4" /></button>
           </div>
         </div>
+        <p className="mt-1 text-[11px] text-muted-foreground">السجل محفوظ محلياً على هذا المتصفح ويبقى عند إعادة تحميل الصفحة. آخر {entries.length} عملية.</p>
         <div className="mt-3 max-h-[60vh] overflow-auto rounded-xl border border-border">
           {entries.length === 0 ? (
             <p className="p-8 text-center text-xs text-muted-foreground">لا يوجد نشاط بعد</p>
@@ -484,9 +630,34 @@ function ActivityLogDialog({ onClose }: { onClose: () => void }) {
           )}
         </div>
       </div>
+
+      {confirmClear && (
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-[60] grid place-items-center bg-black/70 p-4" onClick={() => setConfirmClear(false)}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm rounded-2xl bg-card p-5 shadow-elevated">
+            <div className="flex items-start gap-3">
+              <div className="grid size-10 place-items-center rounded-xl bg-rose-100 text-rose-600"><Trash2 className="size-5" /></div>
+              <div>
+                <p className="text-base font-black">تأكيد تصفير سجل النشاط</p>
+                <p className="mt-1 text-xs text-muted-foreground">سيتم حذف كافة سجلات النشاط المخزنة محلياً ({entries.length} عملية) ولا يمكن استرجاعها. تأثير الحذف على بيانات الروشتات الفعلية: لا يوجد.</p>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center justify-end gap-2">
+              <button onClick={() => setConfirmClear(false)} className="rounded-lg bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">إلغاء</button>
+              <button
+                data-testid="confirm-clear-log"
+                onClick={() => { clearActivityLog(); setConfirmClear(false); toast.success("تم تصفير سجل النشاط"); }}
+                className="flex items-center gap-1.5 rounded-lg bg-rose-500 px-4 py-2 text-xs font-black text-white hover:bg-rose-600"
+              >
+                <Trash2 className="size-3.5" /> تصفير
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
 
 // ---------- Cached image tile ----------
 function CachedImage({ url, alt, onClick, onPrefetch }: {

@@ -19,6 +19,7 @@ export type Rx = {
   image_urls: string[];
   status: string;
   created_at: string;
+  updated_at?: string;
 };
 
 export const STATUSES: { v: string; label: string; color: string }[] = [
