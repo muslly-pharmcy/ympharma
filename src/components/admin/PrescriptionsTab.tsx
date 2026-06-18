@@ -674,30 +674,39 @@ function CsvSettingsDialog({ selected, onChange, onClose }: {
 
 // ---------- Bulk summary dialog ----------
 function BulkSummaryDialog({ s, onClose }: {
-  s: { ok: number; fail: number; total: number; kind: "delete" | "archive" | "regenerate"; error?: string };
+  s: { ok: number; fail: number; total: number; kind: "delete" | "archive" | "regenerate"; error?: string; failures?: { id: string; reason: string }[] };
   onClose: () => void;
 }) {
   const okPct = Math.round((s.ok / Math.max(1, s.total)) * 100);
   const allOk = s.fail === 0;
   const verb = s.kind === "delete" ? "الحذف" : s.kind === "archive" ? "الأرشفة" : "تجديد الروابط";
+  // group failures by reason for compact display
+  const grouped = (s.failures ?? []).reduce<Record<string, string[]>>((m, f) => {
+    (m[f.reason] ||= []).push(f.id);
+    return m;
+  }, {});
   return (
     <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4 animate-in fade-in" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} data-testid="bulk-summary" className="w-full max-w-md rounded-2xl bg-card p-5 shadow-elevated">
+      <div onClick={(e) => e.stopPropagation()} data-testid="bulk-summary" className="w-full max-w-lg rounded-2xl bg-card p-5 shadow-elevated max-h-[85vh] overflow-auto">
         <div className="flex items-start gap-3">
           <div className={`grid size-10 place-items-center rounded-xl ${allOk ? "bg-emerald-100 text-emerald-600" : "bg-amber-100 text-amber-700"}`}>
             {allOk ? <CheckSquare className="size-5" /> : <AlertTriangle className="size-5" />}
           </div>
           <div className="flex-1">
             <p className="text-base font-black">{allOk ? `اكتمل ${verb} بنجاح` : `اكتمل ${verb} مع وجود أخطاء`}</p>
-            <p className="mt-1 text-xs text-muted-foreground">إجمالي العمليات: {s.total}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {s.kind === "regenerate"
+                ? `تم تجديد روابط ${s.ok} روشتة بنجاح من أصل ${s.total}${s.fail ? ` · فشل ${s.fail}` : ""}`
+                : `إجمالي العمليات: ${s.total}`}
+            </p>
           </div>
         </div>
         <div className="mt-4 grid grid-cols-2 gap-2">
-          <div className="rounded-xl bg-emerald-50 p-3 text-center">
+          <div className="rounded-xl bg-emerald-50 p-3 text-center" data-testid="bulk-summary-ok">
             <p className="text-2xl font-black text-emerald-700">{s.ok}</p>
             <p className="text-[11px] font-bold text-emerald-700">نجاح</p>
           </div>
-          <div className="rounded-xl bg-rose-50 p-3 text-center">
+          <div className="rounded-xl bg-rose-50 p-3 text-center" data-testid="bulk-summary-fail">
             <p className="text-2xl font-black text-rose-700">{s.fail}</p>
             <p className="text-[11px] font-bold text-rose-700">فشل</p>
           </div>
@@ -707,6 +716,20 @@ function BulkSummaryDialog({ s, onClose }: {
         </div>
         {s.error && (
           <p className="mt-3 rounded-lg bg-rose-50 p-2 text-[11px] text-rose-700">{s.error}</p>
+        )}
+        {Object.keys(grouped).length > 0 && (
+          <div className="mt-4 space-y-2" data-testid="bulk-summary-failures">
+            <p className="text-xs font-black text-rose-700">تفاصيل الإخفاقات / التحذيرات:</p>
+            {Object.entries(grouped).map(([reason, ids]) => (
+              <details key={reason} className="rounded-lg bg-rose-50 p-2 text-[11px] text-rose-700">
+                <summary className="cursor-pointer font-bold">{reason} <span className="text-rose-500">({ids.length})</span></summary>
+                <ul className="mt-1.5 list-inside list-disc space-y-0.5 pr-2 font-mono text-[10px]" dir="ltr">
+                  {ids.slice(0, 50).map((id) => <li key={id}>{id}</li>)}
+                  {ids.length > 50 && <li>… و{ids.length - 50} أخرى</li>}
+                </ul>
+              </details>
+            ))}
+          </div>
         )}
         <div className="mt-4 flex justify-end">
           <button onClick={onClose} className="rounded-lg bg-primary px-4 py-2 text-xs font-black text-primary-foreground hover:bg-primary-deep">تم</button>
