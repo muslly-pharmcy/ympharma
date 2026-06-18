@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TrustRouteImport } from './routes/trust'
 import { Route as TrackRouteImport } from './routes/track'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SettingsRouteImport } from './routes/settings'
@@ -28,6 +29,11 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 
+const TrustRoute = TrustRouteImport.update({
+  id: '/trust',
+  path: '/trust',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TrackRoute = TrackRouteImport.update({
   id: '/track',
   path: '/track',
@@ -137,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track': typeof TrackRoute
+  '/trust': typeof TrustRoute
   '/product/$id': typeof ProductIdRoute
 }
 export interface FileRoutesByTo {
@@ -157,6 +164,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track': typeof TrackRoute
+  '/trust': typeof TrustRoute
   '/product/$id': typeof ProductIdRoute
 }
 export interface FileRoutesById {
@@ -178,6 +186,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track': typeof TrackRoute
+  '/trust': typeof TrustRoute
   '/product/$id': typeof ProductIdRoute
 }
 export interface FileRouteTypes {
@@ -200,6 +209,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sitemap.xml'
     | '/track'
+    | '/trust'
     | '/product/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -220,6 +230,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sitemap.xml'
     | '/track'
+    | '/trust'
     | '/product/$id'
   id:
     | '__root__'
@@ -240,6 +251,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sitemap.xml'
     | '/track'
+    | '/trust'
     | '/product/$id'
   fileRoutesById: FileRoutesById
 }
@@ -261,11 +273,19 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TrackRoute: typeof TrackRoute
+  TrustRoute: typeof TrustRoute
   ProductIdRoute: typeof ProductIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/trust': {
+      id: '/trust'
+      path: '/trust'
+      fullPath: '/trust'
+      preLoaderRoute: typeof TrustRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/track': {
       id: '/track'
       path: '/track'
@@ -413,6 +433,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TrackRoute: TrackRoute,
+  TrustRoute: TrustRoute,
   ProductIdRoute: ProductIdRoute,
 }
 export const routeTree = rootRouteImport
