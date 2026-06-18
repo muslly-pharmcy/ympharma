@@ -348,6 +348,48 @@ tr:nth-child(even) td { background:#f8fafc; }
         ))}
       </div>
 
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card/60 p-2">
+        <Clock className="size-3.5 text-muted-foreground ms-1" />
+        <span className="text-[11px] font-bold text-muted-foreground">صلاحية الروابط:</span>
+        {EXPIRY_FILTERS.map((f) => (
+          <button
+            key={f.v}
+            onClick={() => { setExpiryFilter(f.v); setPage(1); }}
+            data-testid={`expiry-filter-${f.v}`}
+            className={`rounded-lg px-3 py-1 text-[11px] font-black transition ${expiryFilter === f.v ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground hover:bg-accent"}`}
+          >
+            {f.label}
+          </button>
+        ))}
+        <span className="ms-3 text-[11px] font-bold text-muted-foreground">تاريخ الرفع:</span>
+        <input type="date" value={dateFrom} onChange={(e) => { setDateFrom(e.target.value); setPage(1); }} data-testid="date-from"
+          className="rounded-lg border border-border bg-card px-2 py-1 text-[11px]" />
+        <span className="text-[11px] text-muted-foreground">إلى</span>
+        <input type="date" value={dateTo} onChange={(e) => { setDateTo(e.target.value); setPage(1); }} data-testid="date-to"
+          className="rounded-lg border border-border bg-card px-2 py-1 text-[11px]" />
+        {(dateFrom || dateTo || expiryFilter !== "all") && (
+          <button onClick={() => { setDateFrom(""); setDateTo(""); setExpiryFilter("all"); setPage(1); }}
+            className="rounded-lg bg-secondary px-2 py-1 text-[11px] font-bold hover:bg-accent">مسح</button>
+        )}
+      </div>
+
+      {riskStats.highRisk && (
+        <div role="alert" data-testid="rx-risk-banner" className="flex flex-wrap items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+          <AlertTriangle className="size-4 shrink-0 text-amber-600" />
+          <span className="font-black">تنبيه:</span>
+          <span>
+            {riskStats.atRisk} من {riskStats.total} روشتة ({riskStats.pct}%) لديها روابط منتهية أو على وشك الانتهاء —
+            {riskStats.expired > 0 && <span className="font-bold text-rose-700"> منتهية: {riskStats.expired}</span>}
+            {riskStats.expired > 0 && riskStats.soon > 0 && " · "}
+            {riskStats.soon > 0 && <span className="font-bold text-amber-700">ينتهي قريباً: {riskStats.soon}</span>}
+          </span>
+          <button onClick={() => { setExpiryFilter(riskStats.expired > 0 ? "expired" : "soon"); setPage(1); }}
+            className="ms-auto rounded-lg bg-amber-600 px-3 py-1 text-[11px] font-black text-white hover:bg-amber-700">
+            عرض المتأثرة فقط
+          </button>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-[11px] text-muted-foreground">
           عرض {slice.length} من {filtered.length} (الإجمالي {rxs.length})
@@ -362,6 +404,13 @@ tr:nth-child(even) td { background:#f8fafc; }
             {allOnPageSelected ? <CheckSquare className="size-3.5" /> : <Square className="size-3.5" />}
             {allOnPageSelected ? "إلغاء تحديد الصفحة" : "تحديد الصفحة"}
           </button>
+          {selected.size > 0 && onBulkRegenerateUrls && (
+            <button onClick={() => setBulkConfirm({ kind: "regenerate" })}
+              data-testid="bulk-regen-btn"
+              className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-black text-primary-foreground hover:bg-primary-deep">
+              <RefreshCw className="size-3.5" /> تجديد الروابط ({selected.size})
+            </button>
+          )}
           {selected.size > 0 && onBulkArchive && (
             <button onClick={() => setBulkConfirm({ kind: "archive" })} className="flex items-center gap-1.5 rounded-lg bg-slate-600 px-3 py-1.5 text-xs font-black text-white hover:bg-slate-700">
               <Archive className="size-3.5" /> أرشفة ({selected.size})
@@ -397,6 +446,7 @@ tr:nth-child(even) td { background:#f8fafc; }
 
         </div>
       </div>
+
 
 
       <TabState loading={loading} error={error} empty={filtered.length === 0} onRetry={onRetry} skeleton={skeleton}>
