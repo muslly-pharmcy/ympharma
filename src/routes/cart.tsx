@@ -4,6 +4,7 @@ import { Minus, Plus, Trash2, ShoppingBag, MessageCircle, CheckCircle2, Loader2 
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { useCart } from "@/lib/cart";
 import { formatPrice } from "@/lib/products";
+import { proxifyImage } from "@/lib/img-proxy";
 import { openWhatsApp, WHATSAPP_NUMBER, buildOrderMessage } from "@/lib/whatsapp";
 import { toast } from "sonner";
 
