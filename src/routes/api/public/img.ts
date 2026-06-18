@@ -143,9 +143,3 @@ export const Route = createFileRoute("/api/public/img")({
     },
   },
 });
-
-// Allow server fns to invalidate the cached allow-list when settings change.
-export function invalidateImgProxyCache() {
-  cachedHosts = null;
-  cacheExpiresAt = 0;
-}
