@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { ProductCard } from "@/components/product-card";
-import { categories } from "@/lib/products";
+import { categories, catMatches } from "@/lib/products";
 import { useMergedProducts } from "@/lib/use-merged-products";
 
 type Search = { cat?: string; q?: string; min?: number; max?: number; sort?: string; brands?: string };
