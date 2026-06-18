@@ -112,10 +112,8 @@ export const Route = createFileRoute("/api/public/img")({
               error: `rate_limited:${clientIp}`,
               duration_ms: Date.now() - started,
             });
-            return new Response("rate limited", {
-              status: 429,
-              headers: { ...CORS, "Retry-After": "60" },
-            });
+            return placeholderResponse({ "Retry-After": "60", "X-Img-Reason": "rate_limited" });
+
           }
         } catch {
           // fail open — never block legitimate traffic on a DB hiccup
