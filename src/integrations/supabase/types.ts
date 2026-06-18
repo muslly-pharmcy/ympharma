@@ -329,6 +329,27 @@ export type Database = {
         }
         Relationships: []
       }
+      img_rate_limit: {
+        Row: {
+          count: number
+          ip: string
+          updated_at: string
+          window_start: string
+        }
+        Insert: {
+          count?: number
+          ip: string
+          updated_at?: string
+          window_start?: string
+        }
+        Update: {
+          count?: number
+          ip?: string
+          updated_at?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       insurance_claims: {
         Row: {
           card_expiry: string | null
@@ -537,6 +558,33 @@ export type Database = {
           image_urls?: string[]
           notes?: string | null
           status?: string
+        }
+        Relationships: []
+      }
+      product_image_overrides: {
+        Row: {
+          dedupe_key: string
+          fetched_at: string
+          found: boolean
+          image_url: string | null
+          source: string
+          updated_by: string | null
+        }
+        Insert: {
+          dedupe_key: string
+          fetched_at?: string
+          found?: boolean
+          image_url?: string | null
+          source?: string
+          updated_by?: string | null
+        }
+        Update: {
+          dedupe_key?: string
+          fetched_at?: string
+          found?: boolean
+          image_url?: string | null
+          source?: string
+          updated_by?: string | null
         }
         Relationships: []
       }
@@ -844,6 +892,10 @@ export type Database = {
     Functions: {
       admin_stats: { Args: never; Returns: Json }
       bootstrap_owner: { Args: never; Returns: boolean }
+      check_img_rate_limit: {
+        Args: { _ip: string; _max: number; _window_seconds: number }
+        Returns: boolean
+      }
       create_backup: { Args: { _kind?: string }; Returns: string }
       create_scheduled_backup: { Args: { _kind: string }; Returns: string }
       delete_email: {

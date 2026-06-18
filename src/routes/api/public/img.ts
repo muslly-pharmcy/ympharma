@@ -63,6 +63,39 @@ export const Route = createFileRoute("/api/public/img")({
         const url = new URL(request.url);
         const target = url.searchParams.get("u") ?? "";
 
+        // Extract client IP from common edge headers (Cloudflare, generic).
+        const fwd = request.headers.get("cf-connecting-ip")
+          ?? request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+          ?? request.headers.get("x-real-ip")
+          ?? "unknown";
+        const clientIp = fwd.slice(0, 64);
+
+        // ---- Rate limit: 60 req / 60s per IP ----
+        try {
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const { data: allowed } = await supabaseAdmin.rpc("check_img_rate_limit", {
+            _ip: clientIp,
+            _max: 60,
+            _window_seconds: 60,
+          });
+          if (allowed === false) {
+            await logAttempt({
+              host: null,
+              url: target || "(empty)",
+              status: 429,
+              ok: false,
+              error: `rate_limited:${clientIp}`,
+              duration_ms: Date.now() - started,
+            });
+            return new Response("rate limited", {
+              status: 429,
+              headers: { ...CORS, "Retry-After": "60" },
+            });
+          }
+        } catch {
+          // fail open — never block legitimate traffic on a DB hiccup
+        }
+
         let upstream: URL | null = null;
         try {
           upstream = new URL(target);
