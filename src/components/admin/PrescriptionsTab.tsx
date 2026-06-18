@@ -279,6 +279,21 @@ tr:nth-child(even) td { background:#f8fafc; }
     <div className="space-y-3" data-testid="prescriptions-tab">
       <SearchBar value={q} onChange={(v) => { setQ(v); setPage(1); }} placeholder="ابحث برقم الروشتة، الاسم، أو الجوال..." />
 
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card/60 p-2">
+        <Filter className="size-3.5 text-muted-foreground ms-1" />
+        <span className="text-[11px] font-bold text-muted-foreground">فلتر الحالة:</span>
+        {STATUS_FILTERS.map((f) => (
+          <button
+            key={f.v}
+            onClick={() => { setStatusFilter(f.v); setPage(1); }}
+            data-testid={`status-filter-${f.v}`}
+            className={`rounded-lg px-3 py-1 text-[11px] font-black transition ${statusFilter === f.v ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground hover:bg-accent"}`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-[11px] text-muted-foreground">
           عرض {slice.length} من {filtered.length} (الإجمالي {rxs.length})
@@ -315,10 +330,19 @@ tr:nth-child(even) td { background:#f8fafc; }
             data-testid="export-csv-btn"
             className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-black text-white hover:bg-emerald-600 disabled:opacity-50"
           >
-            <Download className="size-3.5" /> تصدير CSV ({filtered.length})
+            <Download className="size-3.5" /> CSV ({filtered.length})
+          </button>
+          <button
+            onClick={exportPDF}
+            disabled={filtered.length === 0}
+            data-testid="export-pdf-btn"
+            className="flex items-center gap-1.5 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-black text-white hover:bg-rose-700 disabled:opacity-50"
+          >
+            <FileText className="size-3.5" /> PDF ({filtered.length})
           </button>
         </div>
       </div>
+
 
       <TabState loading={loading} error={error} empty={filtered.length === 0} onRetry={onRetry} skeleton={skeleton}>
         {useVirtual ? (
