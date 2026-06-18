@@ -137,10 +137,12 @@ export function SiteFooter() {
         <div>
           <p className="font-black mb-3">{t("footer.contact")}</p>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li className="flex items-center gap-2"><Phone className="size-4 text-primary" /> +967 782 878 280</li>
+            <li className="flex items-center gap-2" dir="ltr"><Phone className="size-4 text-primary" /> +967 782 878 280</li>
+            <li className="flex items-center gap-2" dir="ltr"><Phone className="size-4 text-primary" /> +967 774 068 936</li>
+            <li className="flex items-center gap-2" dir="ltr"><Phone className="size-4 text-primary" /> 02 358921</li>
             <li>
               <a href="https://maps.app.goo.gl/ZK1a6kAGn1KdUgSF9" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-primary">
-                <MapPin className="size-4 text-primary" /> {t("brand.tagline")}
+                <MapPin className="size-4 text-primary" /> عدن — المنصورة — ريمي، أمام مستشفى صابر
               </a>
             </li>
             <li className="flex items-center gap-2"><Clock3 className="size-4 text-primary" /> {t("footer.hours")}</li>
