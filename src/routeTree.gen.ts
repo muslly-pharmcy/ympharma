@@ -28,6 +28,7 @@ import { Route as AdminRxCheckRouteImport } from './routes/admin-rx-check'
 import { Route as AdminProductsRouteImport } from './routes/admin-products'
 import { Route as AdminOffersRouteImport } from './routes/admin-offers'
 import { Route as AdminLogsRouteImport } from './routes/admin-logs'
+import { Route as AdminInventoryRouteImport } from './routes/admin-inventory'
 import { Route as AdminDiagnosticsRouteImport } from './routes/admin-diagnostics'
 import { Route as AdminBackupsRouteImport } from './routes/admin-backups'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -140,6 +141,11 @@ const AdminLogsRoute = AdminLogsRouteImport.update({
   path: '/admin-logs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminInventoryRoute = AdminInventoryRouteImport.update({
+  id: '/admin-inventory',
+  path: '/admin-inventory',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminDiagnosticsRoute = AdminDiagnosticsRouteImport.update({
   id: '/admin-diagnostics',
   path: '/admin-diagnostics',
@@ -230,6 +236,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/admin-backups': typeof AdminBackupsRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
+  '/admin-inventory': typeof AdminInventoryRoute
   '/admin-logs': typeof AdminLogsRoute
   '/admin-offers': typeof AdminOffersRoute
   '/admin-products': typeof AdminProductsRoute
@@ -267,6 +274,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/admin-backups': typeof AdminBackupsRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
+  '/admin-inventory': typeof AdminInventoryRoute
   '/admin-logs': typeof AdminLogsRoute
   '/admin-offers': typeof AdminOffersRoute
   '/admin-products': typeof AdminProductsRoute
@@ -305,6 +313,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/admin-backups': typeof AdminBackupsRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
+  '/admin-inventory': typeof AdminInventoryRoute
   '/admin-logs': typeof AdminLogsRoute
   '/admin-offers': typeof AdminOffersRoute
   '/admin-products': typeof AdminProductsRoute
@@ -344,6 +353,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin-backups'
     | '/admin-diagnostics'
+    | '/admin-inventory'
     | '/admin-logs'
     | '/admin-offers'
     | '/admin-products'
@@ -381,6 +391,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin-backups'
     | '/admin-diagnostics'
+    | '/admin-inventory'
     | '/admin-logs'
     | '/admin-offers'
     | '/admin-products'
@@ -418,6 +429,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin-backups'
     | '/admin-diagnostics'
+    | '/admin-inventory'
     | '/admin-logs'
     | '/admin-offers'
     | '/admin-products'
@@ -456,6 +468,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AdminBackupsRoute: typeof AdminBackupsRoute
   AdminDiagnosticsRoute: typeof AdminDiagnosticsRoute
+  AdminInventoryRoute: typeof AdminInventoryRoute
   AdminLogsRoute: typeof AdminLogsRoute
   AdminOffersRoute: typeof AdminOffersRoute
   AdminProductsRoute: typeof AdminProductsRoute
@@ -624,6 +637,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLogsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin-inventory': {
+      id: '/admin-inventory'
+      path: '/admin-inventory'
+      fullPath: '/admin-inventory'
+      preLoaderRoute: typeof AdminInventoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin-diagnostics': {
       id: '/admin-diagnostics'
       path: '/admin-diagnostics'
@@ -744,6 +764,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AdminBackupsRoute: AdminBackupsRoute,
   AdminDiagnosticsRoute: AdminDiagnosticsRoute,
+  AdminInventoryRoute: AdminInventoryRoute,
   AdminLogsRoute: AdminLogsRoute,
   AdminOffersRoute: AdminOffersRoute,
   AdminProductsRoute: AdminProductsRoute,
