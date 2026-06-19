@@ -1,9 +1,15 @@
 // Client-side image compression using Canvas. Returns a JPEG Blob.
+// Defaults adapt to the device's current network quality (YemenNet / TeleYemen
+// often resolves to 2g/3g) so uploads succeed on slow links without us asking
+// the user to pick a quality.
+import { recommendedUploadParams } from "./net-quality";
+
 export async function compressImage(
   file: File,
   opts: { maxWidth?: number; maxHeight?: number; quality?: number } = {},
 ): Promise<File> {
-  const { maxWidth = 1600, maxHeight = 1600, quality = 0.82 } = opts;
+  const rec = recommendedUploadParams();
+  const { maxWidth = rec.maxWidth, maxHeight = rec.maxHeight, quality = rec.quality } = opts;
   if (!file.type.startsWith("image/")) return file;
   // Skip tiny files
   if (file.size < 300 * 1024) return file;

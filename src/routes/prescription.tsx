@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { FileText, Upload, X, MessageCircle, CheckCircle2, Camera, Loader2, WifiOff, AlertTriangle, RotateCw } from "lucide-react";
+import { FileText, Upload, X, MessageCircle, CheckCircle2, Camera, Loader2, WifiOff, AlertTriangle, RotateCw, Signal } from "lucide-react";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { openWhatsApp, WHATSAPP_NUMBER, buildPrescriptionMessage } from "@/lib/whatsapp";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { compressImage } from "@/lib/image-compress";
 import { RX_SIGNED_TTL_SECONDS } from "@/lib/rx-url";
+import { isSlowNetwork, getNetQuality, onNetworkChange } from "@/lib/net-quality";
 import {
   loadDraft, saveDraft, clearDraft,
   loadPending, savePending, clearPending,
@@ -63,6 +64,8 @@ function PrescriptionPage() {
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [online, setOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
+  const [slow, setSlow] = useState(false);
+  const [netType, setNetType] = useState<string>("unknown");
   const [pending, setPending] = useState<RxPending | null>(null);
   const [recovering, setRecovering] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -83,7 +86,14 @@ function PrescriptionPage() {
     const onOff = () => setOnline(false);
     window.addEventListener("online", onOn);
     window.addEventListener("offline", onOff);
-    return () => { window.removeEventListener("online", onOn); window.removeEventListener("offline", onOff); };
+    const updateNet = () => { setSlow(isSlowNetwork()); setNetType(getNetQuality()); };
+    updateNet();
+    const offNet = onNetworkChange(updateNet);
+    return () => {
+      window.removeEventListener("online", onOn);
+      window.removeEventListener("offline", onOff);
+      offNet();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -294,6 +304,13 @@ function PrescriptionPage() {
           <div className="flex items-center gap-2 rounded-2xl border border-amber-300 bg-amber-50 p-3 text-xs font-bold text-amber-800">
             <WifiOff className="size-4" />
             لا يوجد اتصال بالإنترنت — مسوّدتك محفوظة محلياً وستُستأنف عند عودة الاتصال.
+          </div>
+        )}
+
+        {online && slow && (
+          <div className="flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50/70 p-3 text-xs font-bold text-amber-800">
+            <Signal className="size-4" />
+            الشبكة بطيئة ({netType}) — سنقوم بضغط الصور تلقائياً وإعادة المحاولة عند الفشل. لا تغلق الصفحة.
           </div>
         )}
 

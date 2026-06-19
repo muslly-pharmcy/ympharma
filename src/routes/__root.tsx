@@ -119,7 +119,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", type: "image/png", sizes: "512x512", href: "/icon-512.png" },
       { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
       // Tajawal is self-hosted via @fontsource — no Google Fonts CDN dependency.
+      // Preconnect/dns-prefetch to high-latency origins so the first image/Supabase
+      // call doesn't pay a full TLS handshake on YemenNet/TeleYemen.
+      { rel: "preconnect", href: "https://swyqqlpbjemarzzdxctw.supabase.co", crossOrigin: "anonymous" },
+      { rel: "dns-prefetch", href: "https://swyqqlpbjemarzzdxctw.supabase.co" },
       { rel: "dns-prefetch", href: "https://images.unsplash.com" },
+      { rel: "dns-prefetch", href: "https://wa.me" },
     ],
   }),
   shellComponent: RootShell,
