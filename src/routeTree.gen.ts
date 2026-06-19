@@ -20,6 +20,7 @@ import { Route as PrescriptionRouteImport } from './routes/prescription'
 import { Route as NetworkTestRouteImport } from './routes/network-test'
 import { Route as InsuranceRouteImport } from './routes/insurance'
 import { Route as CartRouteImport } from './routes/cart'
+import { Route as BundlesRouteImport } from './routes/bundles'
 import { Route as AiSymptomsRouteImport } from './routes/ai-symptoms'
 import { Route as AiSupplementRouteImport } from './routes/ai-supplement'
 import { Route as AiAssistantRouteImport } from './routes/ai-assistant'
@@ -31,6 +32,9 @@ import { Route as AdminLogsRouteImport } from './routes/admin-logs'
 import { Route as AdminInventoryRouteImport } from './routes/admin-inventory'
 import { Route as AdminDiscountsRouteImport } from './routes/admin-discounts'
 import { Route as AdminDiagnosticsRouteImport } from './routes/admin-diagnostics'
+import { Route as AdminCampaignsRouteImport } from './routes/admin-campaigns'
+import { Route as AdminBundlesRouteImport } from './routes/admin-bundles'
+import { Route as AdminBannersRouteImport } from './routes/admin-banners'
 import { Route as AdminBackupsRouteImport } from './routes/admin-backups'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -103,6 +107,11 @@ const CartRoute = CartRouteImport.update({
   path: '/cart',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BundlesRoute = BundlesRouteImport.update({
+  id: '/bundles',
+  path: '/bundles',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AiSymptomsRoute = AiSymptomsRouteImport.update({
   id: '/ai-symptoms',
   path: '/ai-symptoms',
@@ -156,6 +165,21 @@ const AdminDiscountsRoute = AdminDiscountsRouteImport.update({
 const AdminDiagnosticsRoute = AdminDiagnosticsRouteImport.update({
   id: '/admin-diagnostics',
   path: '/admin-diagnostics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCampaignsRoute = AdminCampaignsRouteImport.update({
+  id: '/admin-campaigns',
+  path: '/admin-campaigns',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminBundlesRoute = AdminBundlesRouteImport.update({
+  id: '/admin-bundles',
+  path: '/admin-bundles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminBannersRoute = AdminBannersRouteImport.update({
+  id: '/admin-banners',
+  path: '/admin-banners',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminBackupsRoute = AdminBackupsRouteImport.update({
@@ -248,6 +272,9 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/admin-backups': typeof AdminBackupsRoute
+  '/admin-banners': typeof AdminBannersRoute
+  '/admin-bundles': typeof AdminBundlesRoute
+  '/admin-campaigns': typeof AdminCampaignsRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-inventory': typeof AdminInventoryRoute
@@ -259,6 +286,7 @@ export interface FileRoutesByFullPath {
   '/ai-assistant': typeof AiAssistantRoute
   '/ai-supplement': typeof AiSupplementRoute
   '/ai-symptoms': typeof AiSymptomsRoute
+  '/bundles': typeof BundlesRoute
   '/cart': typeof CartRoute
   '/insurance': typeof InsuranceRoute
   '/network-test': typeof NetworkTestRoute
@@ -288,6 +316,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/admin-backups': typeof AdminBackupsRoute
+  '/admin-banners': typeof AdminBannersRoute
+  '/admin-bundles': typeof AdminBundlesRoute
+  '/admin-campaigns': typeof AdminCampaignsRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-inventory': typeof AdminInventoryRoute
@@ -299,6 +330,7 @@ export interface FileRoutesByTo {
   '/ai-assistant': typeof AiAssistantRoute
   '/ai-supplement': typeof AiSupplementRoute
   '/ai-symptoms': typeof AiSymptomsRoute
+  '/bundles': typeof BundlesRoute
   '/cart': typeof CartRoute
   '/insurance': typeof InsuranceRoute
   '/network-test': typeof NetworkTestRoute
@@ -329,6 +361,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/admin-backups': typeof AdminBackupsRoute
+  '/admin-banners': typeof AdminBannersRoute
+  '/admin-bundles': typeof AdminBundlesRoute
+  '/admin-campaigns': typeof AdminCampaignsRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-inventory': typeof AdminInventoryRoute
@@ -340,6 +375,7 @@ export interface FileRoutesById {
   '/ai-assistant': typeof AiAssistantRoute
   '/ai-supplement': typeof AiSupplementRoute
   '/ai-symptoms': typeof AiSymptomsRoute
+  '/bundles': typeof BundlesRoute
   '/cart': typeof CartRoute
   '/insurance': typeof InsuranceRoute
   '/network-test': typeof NetworkTestRoute
@@ -371,6 +407,9 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/admin-backups'
+    | '/admin-banners'
+    | '/admin-bundles'
+    | '/admin-campaigns'
     | '/admin-diagnostics'
     | '/admin-discounts'
     | '/admin-inventory'
@@ -382,6 +421,7 @@ export interface FileRouteTypes {
     | '/ai-assistant'
     | '/ai-supplement'
     | '/ai-symptoms'
+    | '/bundles'
     | '/cart'
     | '/insurance'
     | '/network-test'
@@ -411,6 +451,9 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/admin-backups'
+    | '/admin-banners'
+    | '/admin-bundles'
+    | '/admin-campaigns'
     | '/admin-diagnostics'
     | '/admin-discounts'
     | '/admin-inventory'
@@ -422,6 +465,7 @@ export interface FileRouteTypes {
     | '/ai-assistant'
     | '/ai-supplement'
     | '/ai-symptoms'
+    | '/bundles'
     | '/cart'
     | '/insurance'
     | '/network-test'
@@ -451,6 +495,9 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/admin-backups'
+    | '/admin-banners'
+    | '/admin-bundles'
+    | '/admin-campaigns'
     | '/admin-diagnostics'
     | '/admin-discounts'
     | '/admin-inventory'
@@ -462,6 +509,7 @@ export interface FileRouteTypes {
     | '/ai-assistant'
     | '/ai-supplement'
     | '/ai-symptoms'
+    | '/bundles'
     | '/cart'
     | '/insurance'
     | '/network-test'
@@ -492,6 +540,9 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AdminBackupsRoute: typeof AdminBackupsRoute
+  AdminBannersRoute: typeof AdminBannersRoute
+  AdminBundlesRoute: typeof AdminBundlesRoute
+  AdminCampaignsRoute: typeof AdminCampaignsRoute
   AdminDiagnosticsRoute: typeof AdminDiagnosticsRoute
   AdminDiscountsRoute: typeof AdminDiscountsRoute
   AdminInventoryRoute: typeof AdminInventoryRoute
@@ -503,6 +554,7 @@ export interface RootRouteChildren {
   AiAssistantRoute: typeof AiAssistantRoute
   AiSupplementRoute: typeof AiSupplementRoute
   AiSymptomsRoute: typeof AiSymptomsRoute
+  BundlesRoute: typeof BundlesRoute
   CartRoute: typeof CartRoute
   InsuranceRoute: typeof InsuranceRoute
   NetworkTestRoute: typeof NetworkTestRoute
@@ -608,6 +660,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CartRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/bundles': {
+      id: '/bundles'
+      path: '/bundles'
+      fullPath: '/bundles'
+      preLoaderRoute: typeof BundlesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ai-symptoms': {
       id: '/ai-symptoms'
       path: '/ai-symptoms'
@@ -683,6 +742,27 @@ declare module '@tanstack/react-router' {
       path: '/admin-diagnostics'
       fullPath: '/admin-diagnostics'
       preLoaderRoute: typeof AdminDiagnosticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-campaigns': {
+      id: '/admin-campaigns'
+      path: '/admin-campaigns'
+      fullPath: '/admin-campaigns'
+      preLoaderRoute: typeof AdminCampaignsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-bundles': {
+      id: '/admin-bundles'
+      path: '/admin-bundles'
+      fullPath: '/admin-bundles'
+      preLoaderRoute: typeof AdminBundlesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-banners': {
+      id: '/admin-banners'
+      path: '/admin-banners'
+      fullPath: '/admin-banners'
+      preLoaderRoute: typeof AdminBannersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-backups': {
@@ -804,6 +884,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AdminBackupsRoute: AdminBackupsRoute,
+  AdminBannersRoute: AdminBannersRoute,
+  AdminBundlesRoute: AdminBundlesRoute,
+  AdminCampaignsRoute: AdminCampaignsRoute,
   AdminDiagnosticsRoute: AdminDiagnosticsRoute,
   AdminDiscountsRoute: AdminDiscountsRoute,
   AdminInventoryRoute: AdminInventoryRoute,
@@ -815,6 +898,7 @@ const rootRouteChildren: RootRouteChildren = {
   AiAssistantRoute: AiAssistantRoute,
   AiSupplementRoute: AiSupplementRoute,
   AiSymptomsRoute: AiSymptomsRoute,
+  BundlesRoute: BundlesRoute,
   CartRoute: CartRoute,
   InsuranceRoute: InsuranceRoute,
   NetworkTestRoute: NetworkTestRoute,
