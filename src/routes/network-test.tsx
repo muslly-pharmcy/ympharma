@@ -6,6 +6,7 @@ import {
   unregisterServiceWorker,
   type SwLogEntry,
 } from "@/lib/register-sw";
+import { readPerf, type PerfSnapshot } from "@/lib/perf-metrics";
 
 export const Route = createFileRoute("/network-test")({
   component: NetworkTestPage,
@@ -39,6 +40,7 @@ function NetworkTestPage() {
   const [logs, setLogs] = useState<SwLogEntry[]>([]);
   const [results, setResults] = useState<ProbeResult[]>([]);
   const [running, setRunning] = useState(false);
+  const [perf, setPerf] = useState<PerfSnapshot>(() => readPerf());
   const [swInfo, setSwInfo] = useState<{
     supported: boolean;
     controller: boolean;
@@ -81,14 +83,17 @@ function NetworkTestPage() {
     const onLogs = () => refreshLogs();
     const onOnline = () => setOnline(true);
     const onOffline = () => setOnline(false);
+    const onPerf = () => setPerf(readPerf());
     window.addEventListener("sw:log", onLogs);
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
-    const t = setInterval(refreshSw, 3000);
+    window.addEventListener("perf:update", onPerf);
+    const t = setInterval(() => { refreshSw(); setPerf(readPerf()); }, 3000);
     return () => {
       window.removeEventListener("sw:log", onLogs);
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
+      window.removeEventListener("perf:update", onPerf);
       clearInterval(t);
     };
   }, [refreshLogs, refreshSw]);
@@ -155,6 +160,37 @@ function NetworkTestPage() {
           يجب أن تظل الصفحة تعمل من الكاش.
         </p>
       </section>
+
+      <section className="rounded-xl border border-border bg-card p-4 space-y-3">
+        <h2 className="text-lg font-semibold">مؤشرات الأداء (Web Vitals)</h2>
+        <dl className="grid grid-cols-2 gap-2 text-sm">
+          <dt className="text-muted-foreground">First Contentful Paint</dt>
+          <dd>{perf.fcp != null ? `${perf.fcp} ms` : "—"}</dd>
+          <dt className="text-muted-foreground">Largest Contentful Paint</dt>
+          <dd>{perf.lcp != null ? `${perf.lcp} ms` : "—"}</dd>
+          <dt className="text-muted-foreground">Navigation Fetch Time</dt>
+          <dd>{perf.navFetch != null ? `${perf.navFetch} ms` : "—"}</dd>
+          <dt className="text-muted-foreground">TTFB</dt>
+          <dd>{perf.ttfb != null ? `${perf.ttfb} ms` : "—"}</dd>
+          <dt className="text-muted-foreground">DOM Ready</dt>
+          <dd>{perf.domReady != null ? `${perf.domReady} ms` : "—"}</dd>
+          <dt className="text-muted-foreground">SW Fallback Count</dt>
+          <dd>
+            <span className={perf.swFallbackCount > 0 ? "text-amber-600 font-medium" : ""}>
+              {perf.swFallbackCount}
+            </span>
+            {perf.lastSwFallbackAt ? (
+              <span className="text-xs text-muted-foreground mr-2">
+                {" "}(آخر مرة: {new Date(perf.lastSwFallbackAt).toLocaleTimeString("ar-EG")})
+              </span>
+            ) : null}
+          </dd>
+        </dl>
+        <p className="text-xs text-muted-foreground">
+          الهدف: FCP &lt; 2500ms على شبكة 3G، LCP &lt; 4000ms، وعدّاد SW Fallback يبقى 0 في الظروف العادية.
+        </p>
+      </section>
+
 
       <section className="rounded-xl border border-border bg-card p-4 space-y-3">
         <h2 className="text-lg font-semibold">حالة Service Worker</h2>
