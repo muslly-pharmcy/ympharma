@@ -759,6 +759,27 @@ export type Database = {
         }
         Relationships: []
       }
+      tracking_lookups: {
+        Row: {
+          count: number
+          ip: string
+          updated_at: string
+          window_start: string
+        }
+        Insert: {
+          count?: number
+          ip: string
+          updated_at?: string
+          window_start?: string
+        }
+        Update: {
+          count?: number
+          ip?: string
+          updated_at?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       trust_pages: {
         Row: {
           contact: string
@@ -929,6 +950,10 @@ export type Database = {
         Args: { _ip: string; _max: number; _window_seconds: number }
         Returns: boolean
       }
+      check_tracking_rate_limit: {
+        Args: { _ip: string; _max?: number; _window_seconds?: number }
+        Returns: boolean
+      }
       create_backup: { Args: { _kind?: string }; Returns: string }
       create_scheduled_backup: { Args: { _kind: string }; Returns: string }
       delete_email: {
@@ -940,7 +965,7 @@ export type Database = {
         Returns: number
       }
       get_order_history_public: {
-        Args: { _id: string }
+        Args: { _client_ip?: string; _id: string; _phone_last4: string }
         Returns: {
           created_at: string
           note: string
@@ -948,7 +973,7 @@ export type Database = {
         }[]
       }
       get_order_public: {
-        Args: { _id: string }
+        Args: { _client_ip?: string; _id: string; _phone_last4: string }
         Returns: {
           created_at: string
           customer_name: string
@@ -987,6 +1012,10 @@ export type Database = {
         }
         Returns: number
       }
+      place_order: {
+        Args: { _customer: Json; _id: string; _items: Json }
+        Returns: Json
+      }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
@@ -996,6 +1025,10 @@ export type Database = {
         }[]
       }
       run_retention_policy: { Args: never; Returns: Json }
+      submit_prescription: {
+        Args: { _customer: Json; _id: string; _image_urls: string[] }
+        Returns: Json
+      }
       verify_prescription_image_coverage: { Args: never; Returns: Json }
     }
     Enums: {
