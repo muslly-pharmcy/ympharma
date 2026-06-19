@@ -64,6 +64,8 @@ function PrescriptionPage() {
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [online, setOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
+  const [slow, setSlow] = useState(false);
+  const [netType, setNetType] = useState<string>("unknown");
   const [pending, setPending] = useState<RxPending | null>(null);
   const [recovering, setRecovering] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -84,7 +86,14 @@ function PrescriptionPage() {
     const onOff = () => setOnline(false);
     window.addEventListener("online", onOn);
     window.addEventListener("offline", onOff);
-    return () => { window.removeEventListener("online", onOn); window.removeEventListener("offline", onOff); };
+    const updateNet = () => { setSlow(isSlowNetwork()); setNetType(getNetQuality()); };
+    updateNet();
+    const offNet = onNetworkChange(updateNet);
+    return () => {
+      window.removeEventListener("online", onOn);
+      window.removeEventListener("offline", onOff);
+      offNet();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
