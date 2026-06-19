@@ -8,6 +8,9 @@ import { openWhatsApp, buildStatusMessage } from "@/lib/whatsapp";
 import { toast } from "sonner";
 import { bootstrapOwner, getMyRole } from "@/lib/staff.functions";
 import { AdminStats } from "@/components/admin-stats";
+import { MarketingBanner } from "@/components/marketing-banner";
+import { DashboardCharts } from "@/components/dashboard-charts";
+import { BundlePerformance } from "@/components/bundle-performance";
 import { playNotificationBeep } from "@/lib/notify-sound";
 import { downloadCSV } from "@/lib/csv-export";
 import { STATUSES, applyChange, type Order, type Rx } from "@/components/admin/shared";
@@ -419,6 +422,9 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
             <a href="/admin-inventory" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">المخزون</a>
             <a href="/admin-offers" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">العروض</a>
             <a href="/admin-discounts" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">الأكواد</a>
+            <a href="/admin-bundles" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">الباقات</a>
+            <a href="/admin-banners" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">البانرات</a>
+            <a href="/admin-campaigns" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">الحملات</a>
             <a href="/admin-settings" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">الإعدادات</a>
             {me?.isOwner && (
               <>
@@ -502,7 +508,14 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
       </header>
 
       <main className="mx-auto max-w-7xl space-y-4 px-4 py-6">
-        {(canOrders || canRx) && tab !== "team" && tab !== "trust" && tab !== "errors" && tab !== "insurance" && tab !== "retention" && tab !== "emails" && tab !== "security" && tab !== "images" && <AdminStats refreshKey={statsKey} />}
+        {(canOrders || canRx) && tab !== "team" && tab !== "trust" && tab !== "errors" && tab !== "insurance" && tab !== "retention" && tab !== "emails" && tab !== "security" && tab !== "images" && (
+          <>
+            <MarketingBanner placement="dashboard" />
+            <AdminStats refreshKey={statsKey} />
+            <DashboardCharts />
+            <BundlePerformance />
+          </>
+        )}
         {tab === "orders" && canOrders && <OrdersTab orders={filteredOrders} onStatus={setOrderStatus} loading={busy && orders.length === 0} error={loadError} onRetry={load} />}
         {tab === "rx" && canRx && <PrescriptionsTab rxs={filteredRxs} onStatus={setRxStatus} onDelete={deleteRx} onArchive={archiveRx} onBulkDelete={bulkDeleteRx} onBulkArchive={bulkArchiveRx} onBulkRegenerateUrls={bulkRegenerateRxUrls} onRegenerateUrls={regenerateRxUrls} loading={busy && rxs.length === 0} error={loadError} onRetry={load} />}
         {tab === "team" && me?.isOwner && <StaffTab currentUserId={userId} />}
