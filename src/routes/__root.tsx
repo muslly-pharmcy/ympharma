@@ -157,6 +157,8 @@ function RootComponent() {
     void import("../lib/error-reporter").then((m) => m.installAnonErrorReporter());
     // Offline-first SW so the app keeps loading on flaky YemenNet/TeleYemen.
     void import("../lib/register-sw").then((m) => m.registerServiceWorker());
+    // Perf telemetry (FCP/LCP/nav/SW fallback) for /network-test diagnostics.
+    void import("../lib/perf-metrics").then((m) => m.initPerfMetrics());
     // BLOCK-1: drain any orders left over from a previous failed network.
     void import("../lib/orders-pending").then((m) => m.drainPendingOrders().catch(() => {}));
   }, []);
