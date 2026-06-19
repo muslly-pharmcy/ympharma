@@ -307,6 +307,13 @@ function PrescriptionPage() {
           </div>
         )}
 
+        {online && slow && (
+          <div className="flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50/70 p-3 text-xs font-bold text-amber-800">
+            <Signal className="size-4" />
+            الشبكة بطيئة ({netType}) — سنقوم بضغط الصور تلقائياً وإعادة المحاولة عند الفشل. لا تغلق الصفحة.
+          </div>
+        )}
+
         {pending && (
           <div className="rounded-2xl border border-rose-300 bg-rose-50 p-4 text-rose-900">
             <div className="flex items-start gap-2">
