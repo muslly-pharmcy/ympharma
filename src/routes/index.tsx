@@ -13,6 +13,7 @@ import { NunDivider } from "@/components/nun-divider";
 import { ProductCard } from "@/components/product-card";
 import { useI18n } from "@/lib/i18n";
 import { useMergedProducts } from "@/lib/use-merged-products";
+import { useHomepageSections, useLegacyMap } from "@/lib/use-pharmacy-intel";
 import { waLink } from "@/lib/whatsapp";
 import storefrontUrl from "@/assets/pharmacy-storefront.jpg";
 import robotUrl from "@/assets/pharmacy-robot.jpg";
@@ -98,11 +99,23 @@ function Home() {
   const navigate = useNavigate();
   const products = useMergedProducts();
   const { t } = useI18n();
+  const sections = useHomepageSections();
+  const legacyMap = useLegacyMap(products);
   const featured = useMemo(
     () => products.filter((p) => query.trim() === "" || p.name.includes(query.trim())).slice(0, 8),
     [query, products],
   );
   const nowProducts = useMemo(() => products.filter((p) => p.cat === "now").slice(0, 4), [products]);
+  const intelSections = useMemo(
+    () => sections
+      .map((s) => ({
+        ...s,
+        products: (s.legacy_ids ?? []).map((id) => legacyMap.get(id)).filter(Boolean) as typeof products,
+      }))
+      .filter((s) => s.products.length >= 2)
+      .slice(0, 8),
+    [sections, legacyMap],
+  );
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -259,6 +272,32 @@ function Home() {
             ><MessageCircle className="size-4" /> تواصل واتساب</a>
           </div>
         </section>
+
+        {intelSections.length > 0 && (
+          <section className="space-y-6">
+            <SectionHeader
+              title="🩺 تسوّق حسب الحالة المرضية"
+              subtitle="أقسام ذكية مُولّدة تلقائيًا من تصنيف الأدوية"
+            />
+            {intelSections.map((s) => (
+              <div key={s.category}>
+                <div className="mb-3 flex items-end justify-between gap-3">
+                  <h3 className="text-base font-black">🔥 {s.label}</h3>
+                  <Link
+                    to="/products"
+                    search={{ q: s.label }}
+                    className="text-xs font-bold text-primary hover:underline"
+                  >
+                    عرض الكل ({s.count})
+                  </Link>
+                </div>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                  {s.products.slice(0, 4).map((p) => <ProductCard key={p.id} product={p} />)}
+                </div>
+              </div>
+            ))}
+          </section>
+        )}
 
 
         <section>

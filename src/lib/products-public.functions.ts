@@ -10,7 +10,7 @@ export const listPublicProducts = createServerFn({ method: "GET" }).handler(asyn
   );
   const { data, error } = await sb
     .from("products")
-    .select("id,name,brand,price,old_price,category,image_url,badge,description,is_published")
+    .select("id,legacy_id,name,brand,price,old_price,category,image_url,badge,description,is_published")
     .eq("is_published", true)
     .order("created_at", { ascending: false });
   if (error) return [];

@@ -1,9 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { Minus, Plus, Trash2, ShoppingBag, MessageCircle, CheckCircle2, Loader2, Tag, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Minus, Plus, Trash2, ShoppingBag, MessageCircle, CheckCircle2, Loader2, Tag, X, HeartPulse } from "lucide-react";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { useCart } from "@/lib/cart";
 import { formatPrice } from "@/lib/products";
+import { useMergedProducts } from "@/lib/use-merged-products";
+import { useChronicIds } from "@/lib/use-pharmacy-intel";
 import { proxifyImage } from "@/lib/img-proxy";
 import { handleImageError } from "@/lib/img-placeholder";
 import { openWhatsApp, WHATSAPP_NUMBER, buildOrderMessage } from "@/lib/whatsapp";
@@ -36,7 +38,32 @@ function CartPage() {
   const [appliedCode, setAppliedCode] = useState<{ code: string; amount_off: number; kind: string } | null>(null);
   const [validating, setValidating] = useState(false);
 
+  // Auto chronic-disease discount: detect chronic items in the cart and auto-apply CHRONIC10.
+  const merged = useMergedProducts();
+  const chronicIds = useChronicIds();
+  const chronicInCart = detailed.some(({ product }) => {
+    const m = merged.find((x) => x.id === product.id);
+    return m?.legacyId != null && chronicIds.has(m.legacyId);
+  });
+  useEffect(() => {
+    if (chronicInCart && !appliedCode && total > 0) {
+      const amount = Math.round(total * 0.1);
+      setAppliedCode({ code: "CHRONIC10", amount_off: amount, kind: "percent" });
+    }
+    if (!chronicInCart && appliedCode?.code === "CHRONIC10") {
+      setAppliedCode(null);
+    }
+    // recompute amount when total changes while CHRONIC10 is auto-applied
+    if (chronicInCart && appliedCode?.code === "CHRONIC10") {
+      const amount = Math.round(total * 0.1);
+      if (amount !== appliedCode.amount_off) {
+        setAppliedCode({ code: "CHRONIC10", amount_off: amount, kind: "percent" });
+      }
+    }
+  }, [chronicInCart, total, appliedCode]);
+
   const finalTotal = Math.max(0, total - (appliedCode?.amount_off ?? 0));
+
 
   async function applyDiscount() {
     const c = discountInput.trim();
@@ -128,6 +155,14 @@ function CartPage() {
               <div className="flex justify-between text-sm"><span>عدد المنتجات</span><span className="font-black">{detailed.reduce((s, x) => s + x.qty, 0)}</span></div>
               <div className="flex justify-between text-sm"><span className="text-muted-foreground">المجموع الفرعي</span><span className="font-bold">{formatPrice(total)} ر.ي</span></div>
 
+              {chronicInCart && appliedCode?.code === "CHRONIC10" && (
+                <div className="flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-2.5 text-[11px] text-emerald-800">
+                  <HeartPulse className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+                  <span className="font-bold leading-relaxed">
+                    🎁 برنامج مرضى الحالات المزمنة: تم تطبيق خصم 10% تلقائيًا على طلبك (سكري/ضغط/قلب…).
+                  </span>
+                </div>
+              )}
               {/* Discount code */}
               {appliedCode ? (
                 <div className="flex items-center justify-between rounded-xl bg-emerald-50 px-3 py-2 text-xs">

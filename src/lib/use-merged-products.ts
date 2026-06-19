@@ -17,6 +17,7 @@ function mapRow(r: any, idx: number): Product {
     img: r.image_url || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500",
     badge: r.badge ?? undefined,
     desc: r.description ?? undefined,
+    legacyId: typeof r.legacy_id === "number" ? r.legacy_id : undefined,
   };
 }
 

@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { Sparkles } from "lucide-react";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { ProductCard } from "@/components/product-card";
 import { categories, catMatches } from "@/lib/products";
 import { useMergedProducts } from "@/lib/use-merged-products";
+import { useSmartSearch, useLegacyMap, REASON_LABELS } from "@/lib/use-pharmacy-intel";
 
 type Search = { cat?: string; q?: string; min?: number; max?: number; sort?: string; brands?: string };
 
@@ -51,6 +53,19 @@ function ProductsPage() {
   );
   const activeCat = cat ?? "all";
   const products = useMergedProducts();
+  const legacyMap = useLegacyMap(products);
+  const { hits: smartHits, loading: smartLoading } = useSmartSearch(query);
+
+  // Map smart-search legacy_ids back to actual merged products + reasons.
+  const smartMatches = useMemo(() => {
+    if (smartHits.length === 0) return [] as { product: typeof products[number]; reasons: string[] }[];
+    const out: { product: typeof products[number]; reasons: string[] }[] = [];
+    for (const h of smartHits) {
+      const p = legacyMap.get(h.legacy_id);
+      if (p) out.push({ product: p, reasons: h.reasons });
+    }
+    return out;
+  }, [smartHits, legacyMap]);
 
   function toggleBrand(b: string) {
     setSelectedBrands((prev) => prev.includes(b) ? prev.filter((x) => x !== b) : [...prev, b]);
@@ -60,12 +75,14 @@ function ProductsPage() {
     const minN = Number(minP) || 0;
     const maxN = Number(maxP) || Infinity;
     const term = query.trim().toLowerCase();
+    // Promote smart-matched legacy_ids to the front (skip the simple text filter
+    // for those, since the SQL engine already matched them by ingredient/condition).
+    const smartIds = new Set(smartMatches.map((m) => m.product.id));
     let arr = products.filter((p) => {
       if (activeCat !== "all" && !catMatches(activeCat, p.cat)) return false;
       if (p.price < minN || p.price > maxN) return false;
       if (selectedBrands.length && !selectedBrands.includes(p.brand)) return false;
-      if (term) {
-        // Partial match across name + brand (case-insensitive, accent-tolerant for Arabic)
+      if (term && !smartIds.has(p.id)) {
         const hay = (p.name + " " + p.brand).toLowerCase();
         if (!hay.includes(term)) return false;
       }
@@ -74,8 +91,12 @@ function ProductsPage() {
     if (sortBy === "price-asc") arr = [...arr].sort((a, b) => a.price - b.price);
     else if (sortBy === "price-desc") arr = [...arr].sort((a, b) => b.price - a.price);
     else if (sortBy === "name") arr = [...arr].sort((a, b) => a.name.localeCompare(b.name, "ar"));
+    else if (smartIds.size > 0) {
+      // Default sort with smart matches first
+      arr = [...arr].sort((a, b) => Number(smartIds.has(b.id)) - Number(smartIds.has(a.id)));
+    }
     return arr;
-  }, [activeCat, query, products, minP, maxP, sortBy, selectedBrands]);
+  }, [activeCat, query, products, minP, maxP, sortBy, selectedBrands, smartMatches]);
 
   const currentCatName = categories.find((c) => c.id === activeCat)?.name ?? "كل المنتجات";
 
@@ -98,17 +119,38 @@ function ProductsPage() {
           </div>
         </div>
 
-        {/* Search bar */}
+        {/* Search bar with smart-search */}
         <div className="rounded-2xl border border-border bg-card p-3">
-          <label className="text-[11px] font-bold text-muted-foreground">ابحث بالاسم أو الماركة (مطابقة جزئية)</label>
+          <label className="flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground">
+            <Sparkles className="size-3 text-primary" />
+            بحث ذكي: بالاسم، الماركة، المادة الفعالة، الحالة المرضية (مثل: سكري، ضغط، Metformin)
+          </label>
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="مثال: بانادول، فيتامين، ديرما، نوفارتيس…"
+            placeholder="مثال: سكري، ضغط، حساسية، Metformin، Amlodipine…"
             className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
           />
+          {query.trim().length >= 2 && (
+            <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px]">
+              {smartLoading && <span className="text-muted-foreground">جاري البحث الذكي…</span>}
+              {!smartLoading && smartMatches.length > 0 && (
+                <>
+                  <span className="font-bold text-primary">
+                    🧬 {smartMatches.length} نتيجة ذكية
+                  </span>
+                  {[...new Set(smartMatches.flatMap((m) => m.reasons))].slice(0, 5).map((r) => (
+                    <span key={r} className="rounded-lg bg-primary/10 px-2 py-0.5 font-bold text-primary">
+                      {REASON_LABELS[r] ?? r}
+                    </span>
+                  ))}
+                </>
+              )}
+            </div>
+          )}
         </div>
+
 
         {/* Brand multi-filter */}
         <div className="rounded-2xl border border-border bg-card p-3">

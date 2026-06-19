@@ -6,6 +6,8 @@ import { useQuery } from "@tanstack/react-query";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { ProductCard } from "@/components/product-card";
 import { categories, formatPrice, getProductById, products } from "@/lib/products";
+import { useMergedProducts } from "@/lib/use-merged-products";
+import { useLegacyMap, useRelatedProducts } from "@/lib/use-pharmacy-intel";
 import { proxifyImage } from "@/lib/img-proxy";
 import { handleImageError } from "@/lib/img-placeholder";
 import { useCart } from "@/lib/cart";
@@ -49,6 +51,22 @@ function ProductDetail() {
   const { add } = useCart();
   const [qty, setQty] = useState(1);
   const catName = categories.find((c) => c.id === p.cat)?.name ?? p.cat;
+  const merged = useMergedProducts();
+  // Match the merged item by id to read its DB legacyId (when sourced from DB).
+  const mergedSelf = merged.find((m) => m.id === p.id);
+  const legacyId = mergedSelf?.legacyId;
+  const legacyMap = useLegacyMap(merged);
+  const buckets = useRelatedProducts(legacyId);
+  const intelRelated = buckets ? {
+    same_condition: buckets.same_condition.map((id) => legacyMap.get(id)).filter(Boolean) as typeof merged,
+    same_class: buckets.same_class.map((id) => legacyMap.get(id)).filter(Boolean) as typeof merged,
+    explicit: buckets.explicit.map((id) => legacyMap.get(id)).filter(Boolean) as typeof merged,
+    copurchase: buckets.copurchase.map((id) => legacyMap.get(id)).filter(Boolean) as typeof merged,
+  } : null;
+  const hasIntel = !!intelRelated && (
+    intelRelated.same_condition.length + intelRelated.same_class.length +
+    intelRelated.explicit.length + intelRelated.copurchase.length > 0
+  );
   const related = products.filter((x) => x.cat === p.cat && x.id !== p.id).slice(0, 8);
 
   return (
@@ -112,7 +130,24 @@ function ProductDetail() {
           <VitaminAIInfo name={p.name} brand={p.brand} />
         )}
 
-        {related.length > 0 && (
+        {hasIntel && intelRelated && (
+          <div className="space-y-6">
+            {intelRelated.same_condition.length > 0 && (
+              <IntelStrip title="💊 بدائل لنفس الحالة المرضية" items={intelRelated.same_condition} />
+            )}
+            {intelRelated.same_class.length > 0 && (
+              <IntelStrip title="🧬 بدائل من نفس التصنيف الدوائي" items={intelRelated.same_class} />
+            )}
+            {intelRelated.explicit.length > 0 && (
+              <IntelStrip title="✨ يُستخدم غالبًا مع هذا الدواء" items={intelRelated.explicit} />
+            )}
+            {intelRelated.copurchase.length > 0 && (
+              <IntelStrip title="🛒 العملاء اشتروا أيضًا" items={intelRelated.copurchase} />
+            )}
+          </div>
+        )}
+
+        {!hasIntel && related.length > 0 && (
           <section>
             <h2 className="mb-3 text-lg font-black">منتجات مشابهة</h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -123,6 +158,17 @@ function ProductDetail() {
       </main>
       <SiteFooter />
     </div>
+  );
+}
+
+function IntelStrip({ title, items }: { title: string; items: import("@/lib/products").Product[] }) {
+  return (
+    <section>
+      <h2 className="mb-3 text-lg font-black">{title}</h2>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        {items.slice(0, 8).map((r) => <ProductCard key={r.id} product={r} />)}
+      </div>
+    </section>
   );
 }
 
