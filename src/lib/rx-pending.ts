@@ -70,22 +70,24 @@ export async function verifyUploaded(signedUrl: string, timeoutMs = 10_000): Pro
   } catch { return false; }
 }
 
-/** Try to commit a pending prescription to the DB. Idempotent on refId. */
+/** Server-authoritative commit via `submit_prescription` SECURITY DEFINER
+ * RPC. The RPC validates the payload (lengths, image-URL origin) and is
+ * idempotent on `id` so safe to retry. */
 export async function commitPending(p: RxPending): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
-    // Idempotency: if a row with the same id already exists, treat as success.
-    const { data: existing } = await supabase.from("prescriptions").select("id").eq("id", p.refId).maybeSingle();
-    if (existing) return { ok: true };
-    const { error } = await supabase.from("prescriptions").insert({
-      id: p.refId,
-      customer_name: p.customer.name,
-      customer_phone: p.customer.phone,
-      customer_address: p.customer.address,
-      notes: p.customer.notes ?? null,
-      image_urls: p.imageUrls,
-      status: "pending",
-    });
+    const { data, error } = await supabase.rpc("submit_prescription" as never, {
+      _id: p.refId,
+      _customer: {
+        name: p.customer.name,
+        phone: p.customer.phone,
+        address: p.customer.address,
+        notes: p.customer.notes ?? null,
+      },
+      _image_urls: p.imageUrls,
+    } as never);
     if (error) return { ok: false, error: error.message };
+    const result = data as { ok?: boolean } | null;
+    if (!result || result.ok !== true) return { ok: false, error: "server_rejected" };
     return { ok: true };
   } catch (e: any) {
     return { ok: false, error: e?.message || "network" };
