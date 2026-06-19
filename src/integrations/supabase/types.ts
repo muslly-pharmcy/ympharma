@@ -528,6 +528,39 @@ export type Database = {
         }
         Relationships: []
       }
+      prescription_image_blobs: {
+        Row: {
+          byte_size: number
+          content_bytes: string
+          content_type: string
+          created_at: string
+          id: string
+          rx_id: string
+          sha256: string
+          storage_path: string
+        }
+        Insert: {
+          byte_size: number
+          content_bytes: string
+          content_type?: string
+          created_at?: string
+          id?: string
+          rx_id: string
+          sha256: string
+          storage_path: string
+        }
+        Update: {
+          byte_size?: number
+          content_bytes?: string
+          content_type?: string
+          created_at?: string
+          id?: string
+          rx_id?: string
+          sha256?: string
+          storage_path?: string
+        }
+        Relationships: []
+      }
       prescriptions: {
         Row: {
           created_at: string
@@ -963,6 +996,7 @@ export type Database = {
         }[]
       }
       run_retention_policy: { Args: never; Returns: Json }
+      verify_prescription_image_coverage: { Args: never; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "user" | "owner"
