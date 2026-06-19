@@ -98,6 +98,145 @@ export type Database = {
         }
         Relationships: []
       }
+      bundle_items: {
+        Row: {
+          bundle_id: string
+          created_at: string
+          id: string
+          product_legacy_id: number
+          qty: number
+        }
+        Insert: {
+          bundle_id: string
+          created_at?: string
+          id?: string
+          product_legacy_id: number
+          qty?: number
+        }
+        Update: {
+          bundle_id?: string
+          created_at?: string
+          id?: string
+          product_legacy_id?: number
+          qty?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bundle_items_bundle_id_fkey"
+            columns: ["bundle_id"]
+            isOneToOne: false
+            referencedRelation: "bundles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bundles: {
+        Row: {
+          created_at: string
+          description: string | null
+          discount_percent: number
+          fixed_price: number | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          kind: string
+          name: string
+          revenue: number
+          sales_count: number
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          discount_percent?: number
+          fixed_price?: number | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          kind?: string
+          name: string
+          revenue?: number
+          sales_count?: number
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          discount_percent?: number
+          fixed_price?: number | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          kind?: string
+          name?: string
+          revenue?: number
+          sales_count?: number
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      campaigns: {
+        Row: {
+          banner_id: string | null
+          condition_tag: string | null
+          created_at: string
+          description: string | null
+          discount_code: string | null
+          eligible_count: number
+          id: string
+          is_active: boolean
+          name: string
+          redemptions_count: number
+          revenue: number
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          banner_id?: string | null
+          condition_tag?: string | null
+          created_at?: string
+          description?: string | null
+          discount_code?: string | null
+          eligible_count?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          redemptions_count?: number
+          revenue?: number
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          banner_id?: string | null
+          condition_tag?: string | null
+          created_at?: string
+          description?: string | null
+          discount_code?: string | null
+          eligible_count?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          redemptions_count?: number
+          revenue?: number
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_banner_id_fkey"
+            columns: ["banner_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_banners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       discount_codes: {
         Row: {
           active: boolean
@@ -490,6 +629,63 @@ export type Database = {
           status?: string
           updated_at?: string
           validation_notes?: string | null
+        }
+        Relationships: []
+      }
+      marketing_banners: {
+        Row: {
+          clicks: number
+          created_at: string
+          cta_href: string | null
+          cta_label: string | null
+          expires_at: string | null
+          id: string
+          image_url: string | null
+          impressions: number
+          is_active: boolean
+          placement: string
+          sort_order: number
+          starts_at: string
+          subtitle: string | null
+          theme: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          clicks?: number
+          created_at?: string
+          cta_href?: string | null
+          cta_label?: string | null
+          expires_at?: string | null
+          id?: string
+          image_url?: string | null
+          impressions?: number
+          is_active?: boolean
+          placement?: string
+          sort_order?: number
+          starts_at?: string
+          subtitle?: string | null
+          theme?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          clicks?: number
+          created_at?: string
+          cta_href?: string | null
+          cta_label?: string | null
+          expires_at?: string | null
+          id?: string
+          image_url?: string | null
+          impressions?: number
+          is_active?: boolean
+          placement?: string
+          sort_order?: number
+          starts_at?: string
+          subtitle?: string | null
+          theme?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1109,8 +1305,11 @@ export type Database = {
     }
     Functions: {
       ack_staff_alert: { Args: { _id: string }; Returns: boolean }
+      admin_bundles_report: { Args: never; Returns: Json }
+      admin_revenue_series: { Args: { _days?: number }; Returns: Json }
       admin_stats: { Args: never; Returns: Json }
       bootstrap_owner: { Args: never; Returns: boolean }
+      campaign_report: { Args: never; Returns: Json }
       check_img_rate_limit: {
         Args: { _ip: string; _max: number; _window_seconds: number }
         Returns: boolean
@@ -1160,6 +1359,7 @@ export type Database = {
         Returns: boolean
       }
       inventory_report: { Args: never; Returns: Json }
+      list_bundles_public: { Args: never; Returns: Json }
       log_activity: {
         Args: {
           _action: string
@@ -1204,6 +1404,10 @@ export type Database = {
       submit_prescription: {
         Args: { _customer: Json; _id: string; _image_urls: string[] }
         Returns: Json
+      }
+      track_banner_event: {
+        Args: { _banner_id: string; _event: string }
+        Returns: boolean
       }
       validate_discount: {
         Args: { _code: string; _customer_phone?: string; _subtotal: number }
