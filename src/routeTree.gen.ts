@@ -52,6 +52,7 @@ import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as ApiPublicHooksNightlyIntelRouteImport } from './routes/api/public/hooks/nightly-intel'
 import { Route as ApiPublicHooksAlertsWorkerRouteImport } from './routes/api/public/hooks/alerts-worker'
 
 const YemenDebugRoute = YemenDebugRouteImport.update({
@@ -273,6 +274,12 @@ const LovableEmailQueueProcessRoute =
     path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksNightlyIntelRoute =
+  ApiPublicHooksNightlyIntelRouteImport.update({
+    id: '/api/public/hooks/nightly-intel',
+    path: '/api/public/hooks/nightly-intel',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksAlertsWorkerRoute =
   ApiPublicHooksAlertsWorkerRouteImport.update({
     id: '/api/public/hooks/alerts-worker',
@@ -322,6 +329,7 @@ export interface FileRoutesByFullPath {
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
+  '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -368,6 +376,7 @@ export interface FileRoutesByTo {
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
+  '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -415,6 +424,7 @@ export interface FileRoutesById {
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
+  '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -463,6 +473,7 @@ export interface FileRouteTypes {
     | '/api/public/whatsapp-webhook'
     | '/lovable/email/suppression'
     | '/api/public/hooks/alerts-worker'
+    | '/api/public/hooks/nightly-intel'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -509,6 +520,7 @@ export interface FileRouteTypes {
     | '/api/public/whatsapp-webhook'
     | '/lovable/email/suppression'
     | '/api/public/hooks/alerts-worker'
+    | '/api/public/hooks/nightly-intel'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -555,6 +567,7 @@ export interface FileRouteTypes {
     | '/api/public/whatsapp-webhook'
     | '/lovable/email/suppression'
     | '/api/public/hooks/alerts-worker'
+    | '/api/public/hooks/nightly-intel'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -602,6 +615,7 @@ export interface RootRouteChildren {
   ApiPublicWhatsappWebhookRoute: typeof ApiPublicWhatsappWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksAlertsWorkerRoute: typeof ApiPublicHooksAlertsWorkerRoute
+  ApiPublicHooksNightlyIntelRoute: typeof ApiPublicHooksNightlyIntelRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
@@ -910,6 +924,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/nightly-intel': {
+      id: '/api/public/hooks/nightly-intel'
+      path: '/api/public/hooks/nightly-intel'
+      fullPath: '/api/public/hooks/nightly-intel'
+      preLoaderRoute: typeof ApiPublicHooksNightlyIntelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/alerts-worker': {
       id: '/api/public/hooks/alerts-worker'
       path: '/api/public/hooks/alerts-worker'
@@ -962,6 +983,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicWhatsappWebhookRoute: ApiPublicWhatsappWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksAlertsWorkerRoute: ApiPublicHooksAlertsWorkerRoute,
+  ApiPublicHooksNightlyIntelRoute: ApiPublicHooksNightlyIntelRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
