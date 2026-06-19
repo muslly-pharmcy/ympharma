@@ -157,7 +157,10 @@ function RootComponent() {
     void import("../lib/error-reporter").then((m) => m.installAnonErrorReporter());
     // Offline-first SW so the app keeps loading on flaky YemenNet/TeleYemen.
     void import("../lib/register-sw").then((m) => m.registerServiceWorker());
+    // BLOCK-1: drain any orders left over from a previous failed network.
+    void import("../lib/orders-pending").then((m) => m.drainPendingOrders().catch(() => {}));
   }, []);
+
 
   return (
     <QueryClientProvider client={queryClient}>
