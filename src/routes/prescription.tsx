@@ -1,12 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useRef, useState } from "react";
-import { FileText, Upload, X, MessageCircle, CheckCircle2, Camera, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { FileText, Upload, X, MessageCircle, CheckCircle2, Camera, Loader2, WifiOff, AlertTriangle, RotateCw } from "lucide-react";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { openWhatsApp, WHATSAPP_NUMBER, buildPrescriptionMessage } from "@/lib/whatsapp";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { compressImage } from "@/lib/image-compress";
 import { RX_SIGNED_TTL_SECONDS } from "@/lib/rx-url";
+import {
+  loadDraft, saveDraft, clearDraft,
+  loadPending, savePending, clearPending,
+  verifyUploaded, commitPending,
+  type RxPending,
+} from "@/lib/rx-pending";
 
 export const Route = createFileRoute("/prescription")({
   head: () => ({
@@ -22,14 +28,15 @@ export const Route = createFileRoute("/prescription")({
   component: PrescriptionPage,
 });
 
-type UploadStage = "idle" | "compressing" | "uploading" | "signing" | "done" | "error";
-type FileItem = { file: File; url: string; stage: UploadStage; error?: string };
+type UploadStage = "idle" | "compressing" | "uploading" | "signing" | "verifying" | "done" | "error";
+type FileItem = { file: File; url: string; stage: UploadStage; error?: string; signedUrl?: string };
 
 function stageLabel(s: UploadStage) {
   switch (s) {
     case "compressing": return "ضغط الصورة...";
     case "uploading": return "رفع الصورة...";
     case "signing": return "إنشاء الرابط...";
+    case "verifying": return "التحقق من الحفظ...";
     case "done": return "تم ✓";
     case "error": return "فشل ✗";
     default: return "بانتظار الرفع";
@@ -37,9 +44,10 @@ function stageLabel(s: UploadStage) {
 }
 function stageProgress(s: UploadStage) {
   switch (s) {
-    case "compressing": return 25;
-    case "uploading": return 60;
-    case "signing": return 85;
+    case "compressing": return 20;
+    case "uploading": return 55;
+    case "signing": return 75;
+    case "verifying": return 90;
     case "done": return 100;
     case "error": return 100;
     default: return 0;
@@ -54,7 +62,65 @@ function PrescriptionPage() {
   const [notes, setNotes] = useState("");
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [online, setOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
+  const [pending, setPending] = useState<RxPending | null>(null);
+  const [recovering, setRecovering] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Restore draft + check for pending commit on mount
+  useEffect(() => {
+    const d = loadDraft();
+    if (d) {
+      setName(d.name || ""); setPhone(d.phone || ""); setAddress(d.address || ""); setNotes(d.notes || "");
+    }
+    const p = loadPending();
+    if (p) {
+      setPending(p);
+      // Auto-retry committing once on mount if it failed before.
+      if (p.stage === "committing") void recoverPending(p);
+    }
+    const onOn = () => setOnline(true);
+    const onOff = () => setOnline(false);
+    window.addEventListener("online", onOn);
+    window.addEventListener("offline", onOff);
+    return () => { window.removeEventListener("online", onOn); window.removeEventListener("offline", onOff); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persist text fields as draft (debounced via timeout)
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (name || phone || address || notes) saveDraft({ name, phone, address, notes });
+    }, 400);
+    return () => clearTimeout(t);
+  }, [name, phone, address, notes]);
+
+  async function recoverPending(p: RxPending) {
+    if (recovering) return;
+    setRecovering(true);
+    try {
+      const res = await commitPending(p);
+      if (res.ok) {
+        const next: RxPending = { ...p, stage: "awaiting-whatsapp" };
+        savePending(next);
+        setPending(next);
+        toast.success(`تمت استعادة الروشتة ${p.refId} وحفظها`);
+      } else {
+        const next: RxPending = { ...p, attempts: p.attempts + 1, lastError: res.error };
+        savePending(next);
+        setPending(next);
+      }
+    } finally { setRecovering(false); }
+  }
+
+  function reopenWhatsApp(p: RxPending) {
+    const msg = buildPrescriptionMessage({ refId: p.refId, imageUrls: p.imageUrls, customer: p.customer });
+    openWhatsApp(msg);
+  }
+
+  function dismissPending() {
+    clearPending(); setPending(null);
+  }
 
   function handleFiles(list: FileList | null) {
     if (!list) return;
@@ -81,14 +147,15 @@ function PrescriptionPage() {
     });
   }
 
-  function updateStage(i: number, stage: UploadStage, error?: string) {
-    setFiles((prev) => prev.map((f, idx) => idx === i ? { ...f, stage, error } : f));
+  function updateStage(i: number, stage: UploadStage, patch: Partial<FileItem> = {}) {
+    setFiles((prev) => prev.map((f, idx) => idx === i ? { ...f, stage, ...patch } : f));
   }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (files.length === 0) return toast.error("الرجاء إرفاق صورة الروشتة");
     if (!name.trim() || !phone.trim() || !address.trim()) return toast.error("الرجاء تعبئة بياناتك");
+    if (!online) return toast.error("لا يوجد اتصال بالإنترنت — حاول لاحقاً");
 
     setBusy(true);
     setFiles((prev) => prev.map((f) => ({ ...f, stage: "idle", error: undefined })));
@@ -98,7 +165,6 @@ function PrescriptionPage() {
       const uploadedUrls: string[] = [];
 
       const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-      // Exponential backoff: 600ms, 1.2s, 2.4s, 4.8s — capped at 5 attempts.
       const MAX_UPLOAD_ATTEMPTS = 5;
       async function withRetry<T>(label: string, fn: () => Promise<T>, max = MAX_UPLOAD_ATTEMPTS): Promise<T> {
         let lastErr: unknown;
@@ -118,23 +184,23 @@ function PrescriptionPage() {
       for (let i = 0; i < files.length; i++) {
         const original = files[i].file;
         updateStage(i, "compressing");
-        let f = original;
+        let f: File | Blob = original;
         try { f = await compressImage(original, { maxWidth: 1600, maxHeight: 1600, quality: 0.82 }); } catch { /* keep original */ }
-        const ext = (f.name.split(".").pop() || "jpg").toLowerCase();
+        const ext = (original.name.split(".").pop() || "jpg").toLowerCase();
         const path = `${folder}/${i + 1}-${Date.now()}.${ext}`;
         updateStage(i, "uploading");
         try {
           await withRetry(`upload#${i + 1}`, async () => {
             const { error } = await supabase.storage.from("prescriptions").upload(path, f, {
-              contentType: f.type || "image/jpeg",
+              contentType: (f as File).type || "image/jpeg",
               upsert: false,
             });
             if (error) throw error;
           });
         } catch (e: any) {
           console.error("[storage.upload]", e);
-          updateStage(i, "error", e?.message || "فشل الرفع");
-          toast.error(`فشل رفع الصورة ${i + 1} بعد ${MAX_UPLOAD_ATTEMPTS} محاولات (${e?.message ?? "خطأ غير معروف"})`);
+          updateStage(i, "error", { error: e?.message || "فشل الرفع" });
+          toast.error(`فشل رفع الصورة ${i + 1} بعد ${MAX_UPLOAD_ATTEMPTS} محاولات`);
           setBusy(false);
           return;
         }
@@ -151,36 +217,55 @@ function PrescriptionPage() {
           });
         } catch (e: any) {
           console.error("[storage.createSignedUrl]", e);
-          updateStage(i, "error", e?.message || "فشل إنشاء الرابط");
+          updateStage(i, "error", { error: e?.message || "فشل إنشاء الرابط" });
           toast.error("فشل إنشاء رابط الصورة");
           setBusy(false);
           return;
         }
+        // Verify the file is actually retrievable from storage (catches partial uploads).
+        updateStage(i, "verifying");
+        const reachable = await verifyUploaded(signedUrl);
+        if (!reachable) {
+          updateStage(i, "error", { error: "تعذر التحقق من حفظ الصورة" });
+          toast.error(`الصورة ${i + 1} لم يتم التحقق من حفظها — حاول مرة أخرى`);
+          setBusy(false);
+          return;
+        }
         uploadedUrls.push(signedUrl);
-        updateStage(i, "done");
+        updateStage(i, "done", { signedUrl });
       }
 
       const customer = { name: name.trim(), phone: phone.trim(), address: address.trim(), notes: notes.trim() || undefined };
 
-      const { error: insErr } = await supabase.from("prescriptions").insert({
-        id: refId,
-        customer_name: customer.name,
-        customer_phone: customer.phone,
-        customer_address: customer.address,
-        notes: customer.notes ?? null,
-        image_urls: uploadedUrls,
-        status: "pending",
-      });
-      if (insErr) {
-        console.error("[prescriptions.insert]", insErr);
-        toast.error("فشل حفظ الطلب، حاول مجدداً");
+      // STEP: persist pending commit BEFORE inserting — if insert fails we still
+      // have the uploaded URLs and can retry without re-uploading.
+      const pendingEntry: RxPending = {
+        refId, customer, imageUrls: uploadedUrls,
+        stage: "committing", createdAt: Date.now(), attempts: 0,
+      };
+      savePending(pendingEntry);
+      setPending(pendingEntry);
+
+      const commit = await commitPending(pendingEntry);
+      if (!commit.ok) {
+        console.error("[prescriptions.insert]", commit.error);
+        const next: RxPending = { ...pendingEntry, attempts: 1, lastError: commit.error };
+        savePending(next);
+        setPending(next);
+        toast.error("فشل حفظ الطلب — سنعيد المحاولة تلقائياً، صورك محفوظة بالسحابة");
         setBusy(false);
         return;
       }
 
+      // Mark as awaiting-whatsapp so the recovery banner can re-open WA if needed.
+      const wa: RxPending = { ...pendingEntry, stage: "awaiting-whatsapp" };
+      savePending(wa);
+      setPending(wa);
+
       const msg = buildPrescriptionMessage({ refId, imageUrls: uploadedUrls, customer });
       openWhatsApp(msg);
       setSent(true);
+      clearDraft();
       toast.success(`تم رفع الروشتة (${refId}) وفتح واتساب`);
     } finally {
       setBusy(false);
@@ -189,7 +274,6 @@ function PrescriptionPage() {
 
   const overallProgress = files.length === 0 ? 0
     : Math.round(files.reduce((acc, f) => acc + stageProgress(f.stage), 0) / files.length);
-
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -204,6 +288,61 @@ function PrescriptionPage() {
             </div>
           </div>
         </div>
+
+        {!online && (
+          <div className="flex items-center gap-2 rounded-2xl border border-amber-300 bg-amber-50 p-3 text-xs font-bold text-amber-800">
+            <WifiOff className="size-4" />
+            لا يوجد اتصال بالإنترنت — مسوّدتك محفوظة محلياً وستُستأنف عند عودة الاتصال.
+          </div>
+        )}
+
+        {pending && (
+          <div className="rounded-2xl border border-rose-300 bg-rose-50 p-4 text-rose-900">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="size-5 shrink-0 mt-0.5" />
+              <div className="flex-1 text-sm">
+                <p className="font-black">
+                  {pending.stage === "committing"
+                    ? `روشتة بانتظار الحفظ في النظام (${pending.refId})`
+                    : `روشتة جاهزة للإرسال عبر واتساب (${pending.refId})`}
+                </p>
+                <p className="mt-1 text-xs">
+                  صور الروشتة محفوظة بالسحابة بنجاح ({pending.imageUrls.length} صورة).
+                  {pending.lastError && <span className="block mt-1 text-rose-700" dir="ltr">خطأ: {pending.lastError}</span>}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {pending.stage === "committing" && (
+                    <button
+                      type="button"
+                      onClick={() => recoverPending(pending)}
+                      disabled={recovering || !online}
+                      className="inline-flex items-center gap-1 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-black text-white disabled:opacity-60"
+                    >
+                      {recovering ? <Loader2 className="size-3.5 animate-spin" /> : <RotateCw className="size-3.5" />}
+                      إعادة المحاولة
+                    </button>
+                  )}
+                  {pending.stage === "awaiting-whatsapp" && (
+                    <button
+                      type="button"
+                      onClick={() => reopenWhatsApp(pending)}
+                      className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-black text-white"
+                    >
+                      <MessageCircle className="size-3.5" /> فتح واتساب
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={dismissPending}
+                    className="rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-rose-700 border border-rose-200"
+                  >
+                    إخفاء
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={submit} className="space-y-5 rounded-3xl border border-border bg-card p-6 shadow-card">
           <div>
@@ -278,7 +417,7 @@ function PrescriptionPage() {
           <input required value={address} onChange={(e) => setAddress(e.target.value)} placeholder="العنوان للتوصيل" className="w-full rounded-xl border border-border bg-secondary/40 px-3 py-2.5 text-sm outline-none focus:border-primary" />
           <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} placeholder="ملاحظات (مثلاً: حساسية، بدائل...) " className="w-full rounded-xl border border-border bg-secondary/40 px-3 py-2.5 text-sm outline-none focus:border-primary" />
 
-          <button type="submit" disabled={busy} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3.5 text-sm font-black text-white shadow-elevated transition hover:scale-[1.02] disabled:opacity-60">
+          <button type="submit" disabled={busy || !online} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3.5 text-sm font-black text-white shadow-elevated transition hover:scale-[1.02] disabled:opacity-60">
             {busy ? <Loader2 className="size-5 animate-spin" /> : <MessageCircle className="size-5" />}
             {busy ? "جارٍ رفع الصور..." : "إرسال الروشتة عبر واتساب"}
           </button>
