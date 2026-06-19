@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { FileText, Upload, X, MessageCircle, CheckCircle2, Camera, Loader2, WifiOff, AlertTriangle, RotateCw } from "lucide-react";
+import { FileText, Upload, X, MessageCircle, CheckCircle2, Camera, Loader2, WifiOff, AlertTriangle, RotateCw, Signal } from "lucide-react";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { openWhatsApp, WHATSAPP_NUMBER, buildPrescriptionMessage } from "@/lib/whatsapp";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { compressImage } from "@/lib/image-compress";
 import { RX_SIGNED_TTL_SECONDS } from "@/lib/rx-url";
+import { isSlowNetwork, getNetQuality, onNetworkChange } from "@/lib/net-quality";
 import {
   loadDraft, saveDraft, clearDraft,
   loadPending, savePending, clearPending,
