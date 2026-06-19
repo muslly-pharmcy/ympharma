@@ -419,6 +419,7 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
               {busy ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
             </button>
             <a href="/admin-products" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">الأصناف</a>
+            <a href="/admin-classifications" className="flex items-center gap-1.5 rounded-xl bg-primary/15 px-3 py-2 text-xs font-bold text-primary hover:bg-primary/25">🧬 تصنيف الأدوية</a>
             <a href="/admin-inventory" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">المخزون</a>
             <a href="/admin-offers" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">العروض</a>
             <a href="/admin-discounts" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">الأكواد</a>

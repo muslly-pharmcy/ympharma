@@ -33,6 +33,7 @@ import { Route as AdminLogsRouteImport } from './routes/admin-logs'
 import { Route as AdminInventoryRouteImport } from './routes/admin-inventory'
 import { Route as AdminDiscountsRouteImport } from './routes/admin-discounts'
 import { Route as AdminDiagnosticsRouteImport } from './routes/admin-diagnostics'
+import { Route as AdminClassificationsRouteImport } from './routes/admin-classifications'
 import { Route as AdminCampaignsRouteImport } from './routes/admin-campaigns'
 import { Route as AdminBundlesRouteImport } from './routes/admin-bundles'
 import { Route as AdminBannersRouteImport } from './routes/admin-banners'
@@ -173,6 +174,11 @@ const AdminDiagnosticsRoute = AdminDiagnosticsRouteImport.update({
   path: '/admin-diagnostics',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminClassificationsRoute = AdminClassificationsRouteImport.update({
+  id: '/admin-classifications',
+  path: '/admin-classifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminCampaignsRoute = AdminCampaignsRouteImport.update({
   id: '/admin-campaigns',
   path: '/admin-campaigns',
@@ -281,6 +287,7 @@ export interface FileRoutesByFullPath {
   '/admin-banners': typeof AdminBannersRoute
   '/admin-bundles': typeof AdminBundlesRoute
   '/admin-campaigns': typeof AdminCampaignsRoute
+  '/admin-classifications': typeof AdminClassificationsRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-inventory': typeof AdminInventoryRoute
@@ -326,6 +333,7 @@ export interface FileRoutesByTo {
   '/admin-banners': typeof AdminBannersRoute
   '/admin-bundles': typeof AdminBundlesRoute
   '/admin-campaigns': typeof AdminCampaignsRoute
+  '/admin-classifications': typeof AdminClassificationsRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-inventory': typeof AdminInventoryRoute
@@ -372,6 +380,7 @@ export interface FileRoutesById {
   '/admin-banners': typeof AdminBannersRoute
   '/admin-bundles': typeof AdminBundlesRoute
   '/admin-campaigns': typeof AdminCampaignsRoute
+  '/admin-classifications': typeof AdminClassificationsRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-inventory': typeof AdminInventoryRoute
@@ -419,6 +428,7 @@ export interface FileRouteTypes {
     | '/admin-banners'
     | '/admin-bundles'
     | '/admin-campaigns'
+    | '/admin-classifications'
     | '/admin-diagnostics'
     | '/admin-discounts'
     | '/admin-inventory'
@@ -464,6 +474,7 @@ export interface FileRouteTypes {
     | '/admin-banners'
     | '/admin-bundles'
     | '/admin-campaigns'
+    | '/admin-classifications'
     | '/admin-diagnostics'
     | '/admin-discounts'
     | '/admin-inventory'
@@ -509,6 +520,7 @@ export interface FileRouteTypes {
     | '/admin-banners'
     | '/admin-bundles'
     | '/admin-campaigns'
+    | '/admin-classifications'
     | '/admin-diagnostics'
     | '/admin-discounts'
     | '/admin-inventory'
@@ -555,6 +567,7 @@ export interface RootRouteChildren {
   AdminBannersRoute: typeof AdminBannersRoute
   AdminBundlesRoute: typeof AdminBundlesRoute
   AdminCampaignsRoute: typeof AdminCampaignsRoute
+  AdminClassificationsRoute: typeof AdminClassificationsRoute
   AdminDiagnosticsRoute: typeof AdminDiagnosticsRoute
   AdminDiscountsRoute: typeof AdminDiscountsRoute
   AdminInventoryRoute: typeof AdminInventoryRoute
@@ -764,6 +777,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDiagnosticsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin-classifications': {
+      id: '/admin-classifications'
+      path: '/admin-classifications'
+      fullPath: '/admin-classifications'
+      preLoaderRoute: typeof AdminClassificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin-campaigns': {
       id: '/admin-campaigns'
       path: '/admin-campaigns'
@@ -907,6 +927,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminBannersRoute: AdminBannersRoute,
   AdminBundlesRoute: AdminBundlesRoute,
   AdminCampaignsRoute: AdminCampaignsRoute,
+  AdminClassificationsRoute: AdminClassificationsRoute,
   AdminDiagnosticsRoute: AdminDiagnosticsRoute,
   AdminDiscountsRoute: AdminDiscountsRoute,
   AdminInventoryRoute: AdminInventoryRoute,
