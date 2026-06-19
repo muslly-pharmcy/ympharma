@@ -11,7 +11,7 @@
  *   - SKIP_WAITING message lets the client activate a new SW immediately.
  */
 
-const VERSION = "v5-2026-06-18";
+const VERSION = "v6-2026-06-19-no-block";
 const SHELL_CACHE = `shell-${VERSION}`;
 const ASSET_CACHE = `assets-${VERSION}`;
 const IMG_CACHE = `img-${VERSION}`;
