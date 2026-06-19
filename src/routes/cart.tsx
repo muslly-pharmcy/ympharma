@@ -126,7 +126,22 @@ function CartPage() {
             <form onSubmit={handleCheckout} className="sticky top-32 h-fit space-y-3 rounded-3xl border border-border bg-card p-5 shadow-card">
               <h2 className="text-lg font-black">إتمام الطلب</h2>
               <div className="flex justify-between text-sm"><span>عدد المنتجات</span><span className="font-black">{detailed.reduce((s, x) => s + x.qty, 0)}</span></div>
-              <div className="flex justify-between border-t border-border pt-3 text-base"><span className="font-bold">الإجمالي</span><span className="font-black text-primary-deep">{formatPrice(total)} ر.ي</span></div>
+              <div className="flex justify-between text-sm"><span className="text-muted-foreground">المجموع الفرعي</span><span className="font-bold">{formatPrice(total)} ر.ي</span></div>
+
+              {/* Discount code */}
+              {appliedCode ? (
+                <div className="flex items-center justify-between rounded-xl bg-emerald-50 px-3 py-2 text-xs">
+                  <span className="flex items-center gap-1.5 font-black text-emerald-700"><Tag className="size-3.5" /> {appliedCode.code} — خصم {formatPrice(appliedCode.amount_off)} ر.ي</span>
+                  <button type="button" onClick={clearDiscount} className="grid size-6 place-items-center rounded text-emerald-700 hover:bg-emerald-100"><X className="size-3" /></button>
+                </div>
+              ) : (
+                <div className="flex gap-1">
+                  <input value={discountInput} onChange={(e) => setDiscountInput(e.target.value.toUpperCase())} placeholder="كود خصم" className="flex-1 rounded-xl border border-border bg-secondary/40 px-3 py-2 text-xs font-black tracking-wider outline-none focus:border-primary" />
+                  <button type="button" onClick={applyDiscount} disabled={validating || !discountInput.trim()} className="rounded-xl bg-secondary px-3 text-xs font-black hover:bg-accent disabled:opacity-50">{validating ? "..." : "تطبيق"}</button>
+                </div>
+              )}
+
+              <div className="flex justify-between border-t border-border pt-3 text-base"><span className="font-bold">الإجمالي</span><span className="font-black text-primary-deep">{formatPrice(finalTotal)} ر.ي</span></div>
 
               <div className="space-y-2 pt-3">
                 <input required value={name} onChange={(e) => setName(e.target.value)} placeholder="الاسم الكامل" className="w-full rounded-xl border border-border bg-secondary/40 px-3 py-2.5 text-sm outline-none focus:border-primary" />
