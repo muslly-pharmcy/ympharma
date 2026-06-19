@@ -40,6 +40,7 @@ function NetworkTestPage() {
   const [logs, setLogs] = useState<SwLogEntry[]>([]);
   const [results, setResults] = useState<ProbeResult[]>([]);
   const [running, setRunning] = useState(false);
+  const [perf, setPerf] = useState<PerfSnapshot>(() => readPerf());
   const [swInfo, setSwInfo] = useState<{
     supported: boolean;
     controller: boolean;
