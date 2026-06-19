@@ -33,6 +33,7 @@ import { Route as AdminLogsRouteImport } from './routes/admin-logs'
 import { Route as AdminInventoryRouteImport } from './routes/admin-inventory'
 import { Route as AdminDiscountsRouteImport } from './routes/admin-discounts'
 import { Route as AdminDiagnosticsRouteImport } from './routes/admin-diagnostics'
+import { Route as AdminCommandRouteImport } from './routes/admin-command'
 import { Route as AdminClassificationsRouteImport } from './routes/admin-classifications'
 import { Route as AdminCampaignsRouteImport } from './routes/admin-campaigns'
 import { Route as AdminBundlesRouteImport } from './routes/admin-bundles'
@@ -175,6 +176,11 @@ const AdminDiagnosticsRoute = AdminDiagnosticsRouteImport.update({
   path: '/admin-diagnostics',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminCommandRoute = AdminCommandRouteImport.update({
+  id: '/admin-command',
+  path: '/admin-command',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminClassificationsRoute = AdminClassificationsRouteImport.update({
   id: '/admin-classifications',
   path: '/admin-classifications',
@@ -295,6 +301,7 @@ export interface FileRoutesByFullPath {
   '/admin-bundles': typeof AdminBundlesRoute
   '/admin-campaigns': typeof AdminCampaignsRoute
   '/admin-classifications': typeof AdminClassificationsRoute
+  '/admin-command': typeof AdminCommandRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-inventory': typeof AdminInventoryRoute
@@ -342,6 +349,7 @@ export interface FileRoutesByTo {
   '/admin-bundles': typeof AdminBundlesRoute
   '/admin-campaigns': typeof AdminCampaignsRoute
   '/admin-classifications': typeof AdminClassificationsRoute
+  '/admin-command': typeof AdminCommandRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-inventory': typeof AdminInventoryRoute
@@ -390,6 +398,7 @@ export interface FileRoutesById {
   '/admin-bundles': typeof AdminBundlesRoute
   '/admin-campaigns': typeof AdminCampaignsRoute
   '/admin-classifications': typeof AdminClassificationsRoute
+  '/admin-command': typeof AdminCommandRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-inventory': typeof AdminInventoryRoute
@@ -439,6 +448,7 @@ export interface FileRouteTypes {
     | '/admin-bundles'
     | '/admin-campaigns'
     | '/admin-classifications'
+    | '/admin-command'
     | '/admin-diagnostics'
     | '/admin-discounts'
     | '/admin-inventory'
@@ -486,6 +496,7 @@ export interface FileRouteTypes {
     | '/admin-bundles'
     | '/admin-campaigns'
     | '/admin-classifications'
+    | '/admin-command'
     | '/admin-diagnostics'
     | '/admin-discounts'
     | '/admin-inventory'
@@ -533,6 +544,7 @@ export interface FileRouteTypes {
     | '/admin-bundles'
     | '/admin-campaigns'
     | '/admin-classifications'
+    | '/admin-command'
     | '/admin-diagnostics'
     | '/admin-discounts'
     | '/admin-inventory'
@@ -581,6 +593,7 @@ export interface RootRouteChildren {
   AdminBundlesRoute: typeof AdminBundlesRoute
   AdminCampaignsRoute: typeof AdminCampaignsRoute
   AdminClassificationsRoute: typeof AdminClassificationsRoute
+  AdminCommandRoute: typeof AdminCommandRoute
   AdminDiagnosticsRoute: typeof AdminDiagnosticsRoute
   AdminDiscountsRoute: typeof AdminDiscountsRoute
   AdminInventoryRoute: typeof AdminInventoryRoute
@@ -791,6 +804,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDiagnosticsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin-command': {
+      id: '/admin-command'
+      path: '/admin-command'
+      fullPath: '/admin-command'
+      preLoaderRoute: typeof AdminCommandRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin-classifications': {
       id: '/admin-classifications'
       path: '/admin-classifications'
@@ -949,6 +969,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminBundlesRoute: AdminBundlesRoute,
   AdminCampaignsRoute: AdminCampaignsRoute,
   AdminClassificationsRoute: AdminClassificationsRoute,
+  AdminCommandRoute: AdminCommandRoute,
   AdminDiagnosticsRoute: AdminDiagnosticsRoute,
   AdminDiscountsRoute: AdminDiscountsRoute,
   AdminInventoryRoute: AdminInventoryRoute,
