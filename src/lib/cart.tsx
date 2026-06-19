@@ -23,7 +23,7 @@ type CartCtx = {
   clear: () => void;
   detailed: { product: Product; qty: number }[];
   orders: StoredOrder[];
-  placeOrder: (customer: StoredOrder["customer"]) => Promise<StoredOrder>;
+  placeOrder: (customer: StoredOrder["customer"], opts?: { discountCode?: string | null; discountAmount?: number }) => Promise<StoredOrder>;
   findOrder: (id: string) => StoredOrder | undefined;
 };
 
@@ -89,23 +89,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const count = useMemo(() => items.reduce((s, x) => s + x.qty, 0), [items]);
 
   const placeOrder = useCallback<CartCtx["placeOrder"]>(
-    async (customer) => {
+    async (customer, opts) => {
       const id = generateOrderId();
       const orderItems = detailed.map((d) => ({ id: d.product.id, qty: d.qty, name: d.product.name, price: d.product.price }));
+      const discountAmount = Math.max(0, Number(opts?.discountAmount) || 0);
+      const optimisticTotal = Math.max(0, total - discountAmount);
       const order: StoredOrder = {
         id,
         createdAt: Date.now(),
         status: "pending",
         items: orderItems,
-        total,
+        total: optimisticTotal,
         customer,
       };
 
-      // BLOCK-1: Persist to local pending queue BEFORE awaiting network so the
-      // order survives tab close / network loss. Then await durable DB commit
-      // with retry. Only on success do we clear the cart.
       const pending: PendingOrder = {
-        id, customer, items: orderItems, total,
+        id, customer, items: orderItems, total: optimisticTotal,
+        discountCode: opts?.discountCode ?? null,
         createdAt: order.createdAt, attempts: 0, stage: "queued",
       };
       await persistAndCommit(pending);

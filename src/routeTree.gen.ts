@@ -28,6 +28,8 @@ import { Route as AdminRxCheckRouteImport } from './routes/admin-rx-check'
 import { Route as AdminProductsRouteImport } from './routes/admin-products'
 import { Route as AdminOffersRouteImport } from './routes/admin-offers'
 import { Route as AdminLogsRouteImport } from './routes/admin-logs'
+import { Route as AdminInventoryRouteImport } from './routes/admin-inventory'
+import { Route as AdminDiscountsRouteImport } from './routes/admin-discounts'
 import { Route as AdminDiagnosticsRouteImport } from './routes/admin-diagnostics'
 import { Route as AdminBackupsRouteImport } from './routes/admin-backups'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -44,6 +46,7 @@ import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as ApiPublicHooksAlertsWorkerRouteImport } from './routes/api/public/hooks/alerts-worker'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
@@ -140,6 +143,16 @@ const AdminLogsRoute = AdminLogsRouteImport.update({
   path: '/admin-logs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminInventoryRoute = AdminInventoryRouteImport.update({
+  id: '/admin-inventory',
+  path: '/admin-inventory',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminDiscountsRoute = AdminDiscountsRouteImport.update({
+  id: '/admin-discounts',
+  path: '/admin-discounts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminDiagnosticsRoute = AdminDiagnosticsRouteImport.update({
   id: '/admin-diagnostics',
   path: '/admin-diagnostics',
@@ -224,12 +237,20 @@ const LovableEmailQueueProcessRoute =
     path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksAlertsWorkerRoute =
+  ApiPublicHooksAlertsWorkerRouteImport.update({
+    id: '/api/public/hooks/alerts-worker',
+    path: '/api/public/hooks/alerts-worker',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/admin-backups': typeof AdminBackupsRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
+  '/admin-discounts': typeof AdminDiscountsRoute
+  '/admin-inventory': typeof AdminInventoryRoute
   '/admin-logs': typeof AdminLogsRoute
   '/admin-offers': typeof AdminOffersRoute
   '/admin-products': typeof AdminProductsRoute
@@ -258,6 +279,7 @@ export interface FileRoutesByFullPath {
   '/api/public/uptime-webhook': typeof ApiPublicUptimeWebhookRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -267,6 +289,8 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/admin-backups': typeof AdminBackupsRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
+  '/admin-discounts': typeof AdminDiscountsRoute
+  '/admin-inventory': typeof AdminInventoryRoute
   '/admin-logs': typeof AdminLogsRoute
   '/admin-offers': typeof AdminOffersRoute
   '/admin-products': typeof AdminProductsRoute
@@ -295,6 +319,7 @@ export interface FileRoutesByTo {
   '/api/public/uptime-webhook': typeof ApiPublicUptimeWebhookRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -305,6 +330,8 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/admin-backups': typeof AdminBackupsRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
+  '/admin-discounts': typeof AdminDiscountsRoute
+  '/admin-inventory': typeof AdminInventoryRoute
   '/admin-logs': typeof AdminLogsRoute
   '/admin-offers': typeof AdminOffersRoute
   '/admin-products': typeof AdminProductsRoute
@@ -333,6 +360,7 @@ export interface FileRoutesById {
   '/api/public/uptime-webhook': typeof ApiPublicUptimeWebhookRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -344,6 +372,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin-backups'
     | '/admin-diagnostics'
+    | '/admin-discounts'
+    | '/admin-inventory'
     | '/admin-logs'
     | '/admin-offers'
     | '/admin-products'
@@ -372,6 +402,7 @@ export interface FileRouteTypes {
     | '/api/public/uptime-webhook'
     | '/api/public/whatsapp-webhook'
     | '/lovable/email/suppression'
+    | '/api/public/hooks/alerts-worker'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -381,6 +412,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin-backups'
     | '/admin-diagnostics'
+    | '/admin-discounts'
+    | '/admin-inventory'
     | '/admin-logs'
     | '/admin-offers'
     | '/admin-products'
@@ -409,6 +442,7 @@ export interface FileRouteTypes {
     | '/api/public/uptime-webhook'
     | '/api/public/whatsapp-webhook'
     | '/lovable/email/suppression'
+    | '/api/public/hooks/alerts-worker'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -418,6 +452,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin-backups'
     | '/admin-diagnostics'
+    | '/admin-discounts'
+    | '/admin-inventory'
     | '/admin-logs'
     | '/admin-offers'
     | '/admin-products'
@@ -446,6 +482,7 @@ export interface FileRouteTypes {
     | '/api/public/uptime-webhook'
     | '/api/public/whatsapp-webhook'
     | '/lovable/email/suppression'
+    | '/api/public/hooks/alerts-worker'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -456,6 +493,8 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AdminBackupsRoute: typeof AdminBackupsRoute
   AdminDiagnosticsRoute: typeof AdminDiagnosticsRoute
+  AdminDiscountsRoute: typeof AdminDiscountsRoute
+  AdminInventoryRoute: typeof AdminInventoryRoute
   AdminLogsRoute: typeof AdminLogsRoute
   AdminOffersRoute: typeof AdminOffersRoute
   AdminProductsRoute: typeof AdminProductsRoute
@@ -484,6 +523,7 @@ export interface RootRouteChildren {
   ApiPublicUptimeWebhookRoute: typeof ApiPublicUptimeWebhookRoute
   ApiPublicWhatsappWebhookRoute: typeof ApiPublicWhatsappWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicHooksAlertsWorkerRoute: typeof ApiPublicHooksAlertsWorkerRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
@@ -624,6 +664,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLogsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin-inventory': {
+      id: '/admin-inventory'
+      path: '/admin-inventory'
+      fullPath: '/admin-inventory'
+      preLoaderRoute: typeof AdminInventoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-discounts': {
+      id: '/admin-discounts'
+      path: '/admin-discounts'
+      fullPath: '/admin-discounts'
+      preLoaderRoute: typeof AdminDiscountsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin-diagnostics': {
       id: '/admin-diagnostics'
       path: '/admin-diagnostics'
@@ -736,6 +790,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/alerts-worker': {
+      id: '/api/public/hooks/alerts-worker'
+      path: '/api/public/hooks/alerts-worker'
+      fullPath: '/api/public/hooks/alerts-worker'
+      preLoaderRoute: typeof ApiPublicHooksAlertsWorkerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -744,6 +805,8 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AdminBackupsRoute: AdminBackupsRoute,
   AdminDiagnosticsRoute: AdminDiagnosticsRoute,
+  AdminDiscountsRoute: AdminDiscountsRoute,
+  AdminInventoryRoute: AdminInventoryRoute,
   AdminLogsRoute: AdminLogsRoute,
   AdminOffersRoute: AdminOffersRoute,
   AdminProductsRoute: AdminProductsRoute,
@@ -772,6 +835,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicUptimeWebhookRoute: ApiPublicUptimeWebhookRoute,
   ApiPublicWhatsappWebhookRoute: ApiPublicWhatsappWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicHooksAlertsWorkerRoute: ApiPublicHooksAlertsWorkerRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,

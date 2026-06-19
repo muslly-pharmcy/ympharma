@@ -21,6 +21,7 @@ export type PendingOrder = {
   customer: { name: string; phone: string; address: string; notes?: string };
   items: PendingOrderItem[];
   total: number;
+  discountCode?: string | null;
   createdAt: number;
   attempts: number;
   lastError?: string;
@@ -92,6 +93,7 @@ export async function commitOrder(o: PendingOrder): Promise<{ ok: true } | { ok:
         notes: o.customer.notes ?? null,
       },
       _items: o.items.map((i) => ({ id: i.id, qty: i.qty })),
+      _discount_code: o.discountCode ?? null,
     } as never);
     if (error) return { ok: false, error: error.message };
     // Server may return an authoritative total — surface it through console

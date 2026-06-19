@@ -1,12 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Minus, Plus, Trash2, ShoppingBag, MessageCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, MessageCircle, CheckCircle2, Loader2, Tag, X } from "lucide-react";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { useCart } from "@/lib/cart";
 import { formatPrice } from "@/lib/products";
 import { proxifyImage } from "@/lib/img-proxy";
 import { handleImageError } from "@/lib/img-placeholder";
 import { openWhatsApp, WHATSAPP_NUMBER, buildOrderMessage } from "@/lib/whatsapp";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/cart")({
@@ -31,6 +32,38 @@ function CartPage() {
   const [address, setAddress] = useState("");
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
+  const [discountInput, setDiscountInput] = useState("");
+  const [appliedCode, setAppliedCode] = useState<{ code: string; amount_off: number; kind: string } | null>(null);
+  const [validating, setValidating] = useState(false);
+
+  const finalTotal = Math.max(0, total - (appliedCode?.amount_off ?? 0));
+
+  async function applyDiscount() {
+    const c = discountInput.trim();
+    if (!c) return;
+    setValidating(true);
+    try {
+      const { data, error } = await supabase.rpc("validate_discount" as never, {
+        _code: c, _subtotal: total, _customer_phone: phone.trim() || null,
+      } as never);
+      if (error) throw error;
+      const r = data as any;
+      if (!r?.ok) {
+        const errMap: Record<string, string> = {
+          not_found: "كود غير موجود", expired: "الكود منتهي", exhausted: "تم استنفاد الكود",
+          min_total: `الحد الأدنى ${formatPrice(Number(r?.min_total) || 0)} ر.ي`,
+          first_order_only: "الكود لأول طلب فقط", not_started: "الكود غير مفعّل بعد",
+        };
+        toast.error(errMap[r?.error] ?? "تعذّر تطبيق الكود");
+        return;
+      }
+      setAppliedCode({ code: r.code, amount_off: Number(r.amount_off) || 0, kind: r.kind });
+      toast.success(`تم تطبيق ${r.code}`);
+    } catch (e: any) { toast.error(String(e?.message ?? e)); }
+    finally { setValidating(false); }
+  }
+
+  function clearDiscount() { setAppliedCode(null); setDiscountInput(""); }
 
   async function handleCheckout(e: React.FormEvent) {
     e.preventDefault();
@@ -39,7 +72,10 @@ function CartPage() {
     setBusy(true);
     try {
       const customer = { name: name.trim(), phone: phone.trim(), address: address.trim(), notes: notes.trim() || undefined };
-      const order = await placeOrder(customer);
+      const order = await placeOrder(customer, {
+        discountCode: appliedCode?.code ?? null,
+        discountAmount: appliedCode?.amount_off ?? 0,
+      });
       const msg = buildOrderMessage({ orderId: order.id, items: order.items, total: order.total, customer });
       toast.success(`تم تأكيد الطلب ${order.id} — جارٍ فتح واتساب...`);
       openWhatsApp(msg);
@@ -90,7 +126,22 @@ function CartPage() {
             <form onSubmit={handleCheckout} className="sticky top-32 h-fit space-y-3 rounded-3xl border border-border bg-card p-5 shadow-card">
               <h2 className="text-lg font-black">إتمام الطلب</h2>
               <div className="flex justify-between text-sm"><span>عدد المنتجات</span><span className="font-black">{detailed.reduce((s, x) => s + x.qty, 0)}</span></div>
-              <div className="flex justify-between border-t border-border pt-3 text-base"><span className="font-bold">الإجمالي</span><span className="font-black text-primary-deep">{formatPrice(total)} ر.ي</span></div>
+              <div className="flex justify-between text-sm"><span className="text-muted-foreground">المجموع الفرعي</span><span className="font-bold">{formatPrice(total)} ر.ي</span></div>
+
+              {/* Discount code */}
+              {appliedCode ? (
+                <div className="flex items-center justify-between rounded-xl bg-emerald-50 px-3 py-2 text-xs">
+                  <span className="flex items-center gap-1.5 font-black text-emerald-700"><Tag className="size-3.5" /> {appliedCode.code} — خصم {formatPrice(appliedCode.amount_off)} ر.ي</span>
+                  <button type="button" onClick={clearDiscount} className="grid size-6 place-items-center rounded text-emerald-700 hover:bg-emerald-100"><X className="size-3" /></button>
+                </div>
+              ) : (
+                <div className="flex gap-1">
+                  <input value={discountInput} onChange={(e) => setDiscountInput(e.target.value.toUpperCase())} placeholder="كود خصم" className="flex-1 rounded-xl border border-border bg-secondary/40 px-3 py-2 text-xs font-black tracking-wider outline-none focus:border-primary" />
+                  <button type="button" onClick={applyDiscount} disabled={validating || !discountInput.trim()} className="rounded-xl bg-secondary px-3 text-xs font-black hover:bg-accent disabled:opacity-50">{validating ? "..." : "تطبيق"}</button>
+                </div>
+              )}
+
+              <div className="flex justify-between border-t border-border pt-3 text-base"><span className="font-bold">الإجمالي</span><span className="font-black text-primary-deep">{formatPrice(finalTotal)} ر.ي</span></div>
 
               <div className="space-y-2 pt-3">
                 <input required value={name} onChange={(e) => setName(e.target.value)} placeholder="الاسم الكامل" className="w-full rounded-xl border border-border bg-secondary/40 px-3 py-2.5 text-sm outline-none focus:border-primary" />
