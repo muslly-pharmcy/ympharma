@@ -13,6 +13,7 @@ import { NunDivider } from "@/components/nun-divider";
 import { ProductCard } from "@/components/product-card";
 import { useI18n } from "@/lib/i18n";
 import { useMergedProducts } from "@/lib/use-merged-products";
+import { useHomepageSections, useLegacyMap } from "@/lib/use-pharmacy-intel";
 import { waLink } from "@/lib/whatsapp";
 import storefrontUrl from "@/assets/pharmacy-storefront.jpg";
 import robotUrl from "@/assets/pharmacy-robot.jpg";
