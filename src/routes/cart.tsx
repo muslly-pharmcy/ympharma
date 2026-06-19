@@ -32,6 +32,38 @@ function CartPage() {
   const [address, setAddress] = useState("");
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
+  const [discountInput, setDiscountInput] = useState("");
+  const [appliedCode, setAppliedCode] = useState<{ code: string; amount_off: number; kind: string } | null>(null);
+  const [validating, setValidating] = useState(false);
+
+  const finalTotal = Math.max(0, total - (appliedCode?.amount_off ?? 0));
+
+  async function applyDiscount() {
+    const c = discountInput.trim();
+    if (!c) return;
+    setValidating(true);
+    try {
+      const { data, error } = await supabase.rpc("validate_discount" as never, {
+        _code: c, _subtotal: total, _customer_phone: phone.trim() || null,
+      } as never);
+      if (error) throw error;
+      const r = data as any;
+      if (!r?.ok) {
+        const errMap: Record<string, string> = {
+          not_found: "كود غير موجود", expired: "الكود منتهي", exhausted: "تم استنفاد الكود",
+          min_total: `الحد الأدنى ${formatPrice(Number(r?.min_total) || 0)} ر.ي`,
+          first_order_only: "الكود لأول طلب فقط", not_started: "الكود غير مفعّل بعد",
+        };
+        toast.error(errMap[r?.error] ?? "تعذّر تطبيق الكود");
+        return;
+      }
+      setAppliedCode({ code: r.code, amount_off: Number(r.amount_off) || 0, kind: r.kind });
+      toast.success(`تم تطبيق ${r.code}`);
+    } catch (e: any) { toast.error(String(e?.message ?? e)); }
+    finally { setValidating(false); }
+  }
+
+  function clearDiscount() { setAppliedCode(null); setDiscountInput(""); }
 
   async function handleCheckout(e: React.FormEvent) {
     e.preventDefault();
@@ -40,7 +72,10 @@ function CartPage() {
     setBusy(true);
     try {
       const customer = { name: name.trim(), phone: phone.trim(), address: address.trim(), notes: notes.trim() || undefined };
-      const order = await placeOrder(customer);
+      const order = await placeOrder(customer, {
+        discountCode: appliedCode?.code ?? null,
+        discountAmount: appliedCode?.amount_off ?? 0,
+      });
       const msg = buildOrderMessage({ orderId: order.id, items: order.items, total: order.total, customer });
       toast.success(`تم تأكيد الطلب ${order.id} — جارٍ فتح واتساب...`);
       openWhatsApp(msg);
