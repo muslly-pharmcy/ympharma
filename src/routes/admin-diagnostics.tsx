@@ -55,26 +55,24 @@ function DiagnosticsPage() {
       else update("storage", "ok", `bucket: prescriptions (${data?.length ?? 0} عنصر)`);
     } catch (e: any) { update("storage", "fail", String(e?.message ?? e)); }
 
-    // Realtime
+    // Realtime — guard against re-entry. removeChannel triggers a CLOSED event
+    // that fires the same callback; without a flag we recurse until the stack overflows.
     await new Promise<void>((resolve) => {
       const channel = supabase.channel("diag-" + Date.now());
-      const timer = setTimeout(() => {
-        update("realtime", "fail", "انتهت المهلة بدون استجابة");
-        supabase.removeChannel(channel);
+      let done = false;
+      const finish = (status: "ok" | "fail", msg: string) => {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        update("realtime", status, msg);
+        try { supabase.removeChannel(channel); } catch { /* noop */ }
         resolve();
-      }, 6000);
+      };
+      const timer = setTimeout(() => finish("fail", "انتهت المهلة بدون استجابة"), 6000);
       channel.subscribe((s) => {
-        if (s === "SUBSCRIBED") {
-          clearTimeout(timer);
-          update("realtime", "ok", "الاشتراك يعمل");
-          supabase.removeChannel(channel);
-          resolve();
-        } else if (s === "CHANNEL_ERROR" || s === "TIMED_OUT" || s === "CLOSED") {
-          clearTimeout(timer);
-          update("realtime", "fail", s);
-          supabase.removeChannel(channel);
-          resolve();
-        }
+        if (done) return;
+        if (s === "SUBSCRIBED") finish("ok", "الاشتراك يعمل");
+        else if (s === "CHANNEL_ERROR" || s === "TIMED_OUT" || s === "CLOSED") finish("fail", s);
       });
     });
 
