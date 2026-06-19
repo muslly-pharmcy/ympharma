@@ -119,17 +119,38 @@ function ProductsPage() {
           </div>
         </div>
 
-        {/* Search bar */}
+        {/* Search bar with smart-search */}
         <div className="rounded-2xl border border-border bg-card p-3">
-          <label className="text-[11px] font-bold text-muted-foreground">ابحث بالاسم أو الماركة (مطابقة جزئية)</label>
+          <label className="flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground">
+            <Sparkles className="size-3 text-primary" />
+            بحث ذكي: بالاسم، الماركة، المادة الفعالة، الحالة المرضية (مثل: سكري، ضغط، Metformin)
+          </label>
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="مثال: بانادول، فيتامين، ديرما، نوفارتيس…"
+            placeholder="مثال: سكري، ضغط، حساسية، Metformin، Amlodipine…"
             className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
           />
+          {query.trim().length >= 2 && (
+            <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px]">
+              {smartLoading && <span className="text-muted-foreground">جاري البحث الذكي…</span>}
+              {!smartLoading && smartMatches.length > 0 && (
+                <>
+                  <span className="font-bold text-primary">
+                    🧬 {smartMatches.length} نتيجة ذكية
+                  </span>
+                  {[...new Set(smartMatches.flatMap((m) => m.reasons))].slice(0, 5).map((r) => (
+                    <span key={r} className="rounded-lg bg-primary/10 px-2 py-0.5 font-bold text-primary">
+                      {REASON_LABELS[r] ?? r}
+                    </span>
+                  ))}
+                </>
+              )}
+            </div>
+          )}
         </div>
+
 
         {/* Brand multi-filter */}
         <div className="rounded-2xl border border-border bg-card p-3">
