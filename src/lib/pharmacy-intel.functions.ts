@@ -21,8 +21,8 @@ export const listClassificationsAdmin = createServerFn({ method: "POST" })
     }).parse(i ?? {}))
   .handler(async ({ context, data }) => {
     const { data: rows, error } = await context.supabase.rpc("list_classifications_admin", {
-      _status: data.status ?? null,
-      _category: data.category ?? null,
+      _status: data.status,
+      _category: data.category,
       _limit: data.limit ?? 200,
     });
     if (error) throw new Error(error.message);
