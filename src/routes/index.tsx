@@ -273,6 +273,32 @@ function Home() {
           </div>
         </section>
 
+        {intelSections.length > 0 && (
+          <section className="space-y-6">
+            <SectionHeader
+              title="🩺 تسوّق حسب الحالة المرضية"
+              subtitle="أقسام ذكية مُولّدة تلقائيًا من تصنيف الأدوية"
+            />
+            {intelSections.map((s) => (
+              <div key={s.category}>
+                <div className="mb-3 flex items-end justify-between gap-3">
+                  <h3 className="text-base font-black">🔥 {s.label}</h3>
+                  <Link
+                    to="/products"
+                    search={{ q: s.label }}
+                    className="text-xs font-bold text-primary hover:underline"
+                  >
+                    عرض الكل ({s.count})
+                  </Link>
+                </div>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                  {s.products.slice(0, 4).map((p) => <ProductCard key={p.id} product={p} />)}
+                </div>
+              </div>
+            ))}
+          </section>
+        )}
+
 
         <section>
           <SectionHeader
