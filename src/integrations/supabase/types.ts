@@ -53,6 +53,48 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_runs: {
+        Row: {
+          agent: string
+          confidence: number | null
+          created_at: string
+          details: Json
+          finished_at: string | null
+          id: string
+          impact_estimate: number | null
+          kind: string
+          started_at: string
+          status: string
+          summary: string | null
+        }
+        Insert: {
+          agent: string
+          confidence?: number | null
+          created_at?: string
+          details?: Json
+          finished_at?: string | null
+          id?: string
+          impact_estimate?: number | null
+          kind: string
+          started_at?: string
+          status?: string
+          summary?: string | null
+        }
+        Update: {
+          agent?: string
+          confidence?: number | null
+          created_at?: string
+          details?: Json
+          finished_at?: string | null
+          id?: string
+          impact_estimate?: number | null
+          kind?: string
+          started_at?: string
+          status?: string
+          summary?: string | null
+        }
+        Relationships: []
+      }
       alert_dedupe: {
         Row: {
           alert_key: string
@@ -234,6 +276,95 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "marketing_banners"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_profiles: {
+        Row: {
+          ai_insight: string | null
+          ai_insight_at: string | null
+          avg_order_value: number
+          cancelled_count: number
+          chronic_flags: Json
+          days_between_orders: number | null
+          dominant_category: string | null
+          first_seen: string
+          last_order_at: string | null
+          name: string | null
+          orders_count: number
+          phone: string
+          top_categories: Json
+          total_spent: number
+          updated_at: string
+        }
+        Insert: {
+          ai_insight?: string | null
+          ai_insight_at?: string | null
+          avg_order_value?: number
+          cancelled_count?: number
+          chronic_flags?: Json
+          days_between_orders?: number | null
+          dominant_category?: string | null
+          first_seen?: string
+          last_order_at?: string | null
+          name?: string | null
+          orders_count?: number
+          phone: string
+          top_categories?: Json
+          total_spent?: number
+          updated_at?: string
+        }
+        Update: {
+          ai_insight?: string | null
+          ai_insight_at?: string | null
+          avg_order_value?: number
+          cancelled_count?: number
+          chronic_flags?: Json
+          days_between_orders?: number | null
+          dominant_category?: string | null
+          first_seen?: string
+          last_order_at?: string | null
+          name?: string | null
+          orders_count?: number
+          phone?: string
+          top_categories?: Json
+          total_spent?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      customer_scores: {
+        Row: {
+          computed_at: string
+          health_score: number
+          phone: string
+          risk_score: number
+          segment: string
+          value_score: number
+        }
+        Insert: {
+          computed_at?: string
+          health_score?: number
+          phone: string
+          risk_score?: number
+          segment?: string
+          value_score?: number
+        }
+        Update: {
+          computed_at?: string
+          health_score?: number
+          phone?: string
+          risk_score?: number
+          segment?: string
+          value_score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_scores_phone_fkey"
+            columns: ["phone"]
+            isOneToOne: true
+            referencedRelation: "customer_profiles"
+            referencedColumns: ["phone"]
           },
         ]
       }
@@ -494,6 +625,27 @@ export type Database = {
         }
         Relationships: []
       }
+      executive_reports: {
+        Row: {
+          created_at: string
+          day: string
+          id: string
+          payload: Json
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          id?: string
+          payload: Json
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          id?: string
+          payload?: Json
+        }
+        Relationships: []
+      }
       img_proxy_logs: {
         Row: {
           created_at: string
@@ -686,6 +838,60 @@ export type Database = {
           theme?: string
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      marketing_queue: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          campaign_kind: string
+          customer_name: string | null
+          customer_phone: string
+          error: string | null
+          generated_at: string
+          id: string
+          message_text: string | null
+          payload: Json
+          reason: string | null
+          segment: string | null
+          sent_at: string | null
+          status: string
+          wamid: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          campaign_kind: string
+          customer_name?: string | null
+          customer_phone: string
+          error?: string | null
+          generated_at?: string
+          id?: string
+          message_text?: string | null
+          payload?: Json
+          reason?: string | null
+          segment?: string | null
+          sent_at?: string | null
+          status?: string
+          wamid?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          campaign_kind?: string
+          customer_name?: string | null
+          customer_phone?: string
+          error?: string | null
+          generated_at?: string
+          id?: string
+          message_text?: string | null
+          payload?: Json
+          reason?: string | null
+          segment?: string | null
+          sent_at?: string | null
+          status?: string
+          wamid?: string | null
         }
         Relationships: []
       }
@@ -1377,11 +1583,13 @@ export type Database = {
     }
     Functions: {
       _classif_can_manage: { Args: never; Returns: boolean }
+      _intel_can_manage: { Args: never; Returns: boolean }
       _therapeutic_label_ar: { Args: { _cat: string }; Returns: string }
       ack_staff_alert: { Args: { _id: string }; Returns: boolean }
       admin_bundles_report: { Args: never; Returns: Json }
       admin_revenue_series: { Args: { _days?: number }; Returns: Json }
       admin_stats: { Args: never; Returns: Json }
+      agent_runs_list: { Args: { _limit?: number }; Returns: Json }
       approve_classification: {
         Args: { _edits?: Json; _id: string }
         Returns: boolean
@@ -1406,6 +1614,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      exec_dashboard: { Args: never; Returns: Json }
       get_order_history_public: {
         Args: { _client_ip?: string; _id: string; _phone_last4: string }
         Returns: {
@@ -1452,6 +1661,16 @@ export type Database = {
         }
         Returns: string
       }
+      marketing_queue_approve: { Args: { _id: string }; Returns: boolean }
+      marketing_queue_list: {
+        Args: { _limit?: number; _status?: string }
+        Returns: Json
+      }
+      marketing_queue_mark_sent: {
+        Args: { _error?: string; _id: string; _wamid?: string }
+        Returns: boolean
+      }
+      marketing_queue_skip: { Args: { _id: string }; Returns: boolean }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -1488,6 +1707,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      rebuild_customer_intel: { Args: never; Returns: Json }
       reject_classification: { Args: { _id: string }; Returns: boolean }
       run_retention_policy: { Args: never; Returns: Json }
       submit_prescription: {
