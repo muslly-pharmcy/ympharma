@@ -77,7 +77,10 @@ function TrackPage() {
         if (/rate_limited/i.test(error.message)) setErrMsg("تم تجاوز عدد المحاولات المسموح، انتظر قليلاً ثم أعد المحاولة.");
         console.error(error); setOrder(null); setHistory([]); return;
       }
-      const row = Array.isArray(data) ? data[0] : data;
+      const row = (Array.isArray(data) ? data[0] : data) as {
+        id: string; status: string; total: number | string; created_at: string;
+        customer_name: string; items: CloudOrder["items"];
+      } | null | undefined;
       if (!row) { setOrder(null); setHistory([]); return; }
       setOrder({
         id: row.id,
@@ -87,7 +90,7 @@ function TrackPage() {
         customerName: row.customer_name,
         items: (row.items as CloudOrder["items"]) ?? [],
       });
-      setHistory((hist as HistoryRow[]) ?? []);
+      setHistory(((hist as unknown) as HistoryRow[]) ?? []);
     } finally {
       setLoading(false);
     }
