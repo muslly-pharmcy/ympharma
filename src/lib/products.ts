@@ -8,6 +8,9 @@ export type Product = {
   img: string;
   badge?: string;
   desc?: string;
+  /** DB legacy id, set only for products sourced from the database. Used by
+   * the pharmacy intelligence layer (search, related, chronic detection). */
+  legacyId?: number;
 };
 
 export type Category = { id: string; name: string };
