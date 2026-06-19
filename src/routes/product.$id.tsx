@@ -161,6 +161,17 @@ function ProductDetail() {
   );
 }
 
+function IntelStrip({ title, items }: { title: string; items: import("@/lib/products").Product[] }) {
+  return (
+    <section>
+      <h2 className="mb-3 text-lg font-black">{title}</h2>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        {items.slice(0, 8).map((r) => <ProductCard key={r.id} product={r} />)}
+      </div>
+    </section>
+  );
+}
+
 function VitaminAIInfo({ name, brand }: { name: string; brand: string }) {
   const fetchInfo = useServerFn(getVitaminInfo);
   const key = cacheKey(name, brand);
