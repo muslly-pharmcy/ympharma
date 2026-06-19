@@ -78,7 +78,7 @@ export const updateInventory = createServerFn({ method: "POST" })
       if (data[k] !== undefined) patch[k] = data[k];
     }
     if (Object.keys(patch).length === 0) return { ok: true };
-    const { error } = await context.supabase.from("products").update(patch).eq("id", data.id);
+    const { error } = await context.supabase.from("products").update(patch as never).eq("id", data.id);
     if (error) throw new Error(error.message);
     await context.supabase.rpc("log_activity", {
       _action: "inventory.updated",
