@@ -21,6 +21,7 @@ export type PendingOrder = {
   customer: { name: string; phone: string; address: string; notes?: string };
   items: PendingOrderItem[];
   total: number;
+  discountCode?: string | null;
   createdAt: number;
   attempts: number;
   lastError?: string;
