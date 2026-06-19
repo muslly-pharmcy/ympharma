@@ -76,22 +76,28 @@ export function generateOrderId(): string {
   return "AM-" + uuid.replace(/-/g, "").slice(0, 12).toUpperCase();
 }
 
-/** Idempotent insert: SELECT first so retries after a partial success no-op. */
+/** Server-authoritative commit: calls the `place_order` SECURITY DEFINER RPC,
+ * which recomputes the total from `public.products` and ignores any client
+ * price. Idempotent on `id`. The client-side `total` field on PendingOrder is
+ * only used for the optimistic UI; the persisted authoritative total comes
+ * from the DB. */
 export async function commitOrder(o: PendingOrder): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
-    const { data: existing } = await supabase.from("orders").select("id").eq("id", o.id).maybeSingle();
-    if (existing) return { ok: true };
-    const { error } = await supabase.from("orders").insert({
-      id: o.id,
-      customer_name: o.customer.name,
-      customer_phone: o.customer.phone,
-      customer_address: o.customer.address,
-      notes: o.customer.notes ?? null,
-      total: o.total,
-      status: "pending",
-      items: o.items as never,
-    });
+    const { data, error } = await supabase.rpc("place_order" as never, {
+      _id: o.id,
+      _customer: {
+        name: o.customer.name,
+        phone: o.customer.phone,
+        address: o.customer.address,
+        notes: o.customer.notes ?? null,
+      },
+      _items: o.items.map((i) => ({ id: i.id, qty: i.qty })),
+    } as never);
     if (error) return { ok: false, error: error.message };
+    // Server may return an authoritative total — surface it through console
+    // for the operator but do not block the user.
+    const result = data as { ok?: boolean; total?: number; id?: string } | null;
+    if (!result || result.ok !== true) return { ok: false, error: "server_rejected" };
     return { ok: true };
   } catch (e: any) {
     return { ok: false, error: e?.message || "network" };

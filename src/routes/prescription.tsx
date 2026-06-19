@@ -283,25 +283,15 @@ function PrescriptionPage() {
       clearDraft();
       toast.success(`تم رفع الروشتة (${refId}) وفتح واتساب`);
 
-      // BLOCK-3: persist image bytes to the DB for disaster recovery.
-      // Fire-and-forget — failure does not block the user; the cron-driven
-      // daily backup + storage bucket still hold the originals.
-      void (async () => {
-        try {
-          const { backupRxImage } = await import("@/lib/rx-backup.functions");
-          for (const item of backupQueue) {
-            try {
-              const buf = await item.blob.arrayBuffer();
-              const bytes = new Uint8Array(buf);
-              const digest = await crypto.subtle.digest("SHA-256", bytes);
-              const sha256 = Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
-              let bin = ""; for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-              const base64 = btoa(bin);
-              await backupRxImage({ data: { rxId: refId, storagePath: item.path, contentType: item.type, base64, sha256 } });
-            } catch (e) { console.warn("[rx-backup] image skipped", e); }
-          }
-        } catch (e) { console.warn("[rx-backup] module load failed", e); }
-      })();
+      // Image binaries are now backed up server-side by an admin-only
+      // workflow that reads from the storage bucket (see `rx-backup.functions.ts`
+      // + scheduled cron). The previous client-side blob upload was removed
+      // as part of the C-2 security fix — an unauthenticated server fn could
+      // be abused to write arbitrary bytes into the DB. The storage bucket
+      // already holds the original; the cron mirrors bytes into
+      // `prescription_image_blobs` with the service role on a trusted server.
+      void backupQueue; // backupQueue retained for future inline use
+
     } finally {
       setBusy(false);
     }
