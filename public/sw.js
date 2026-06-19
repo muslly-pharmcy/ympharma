@@ -71,6 +71,13 @@ function timeout(ms) {
   return new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), ms));
 }
 
+async function logDiag(msg, meta) {
+  try {
+    const clients = await self.clients.matchAll({ includeUncontrolled: true });
+    for (const c of clients) c.postMessage({ type: "SW_DIAG", msg, meta });
+  } catch { /* ignore */ }
+}
+
 async function cacheFirstNavigation(request) {
   const cache = await caches.open(NAV_CACHE);
   const cached = (await cache.match(request)) || (await cache.match("/"));
@@ -78,10 +85,10 @@ async function cacheFirstNavigation(request) {
   // Background revalidate — never blocks the response to the user.
   const revalidate = (async () => {
     try {
-      const fresh = await Promise.race([fetch(request), timeout(8000)]);
+      const fresh = await Promise.race([fetch(request), timeout(15000)]);
       if (fresh && fresh.ok) await cache.put(request, fresh.clone());
     } catch {
-      /* offline — ignore */
+      /* offline / slow — ignore */
     }
   })();
 
@@ -90,19 +97,31 @@ async function cacheFirstNavigation(request) {
     return cached;
   }
 
-  // No cache yet — try network with timeout, fall back to offline.html.
+  // No cache yet — try network with a generous timeout (YemenNet can be slow
+  // on first byte). Only fall back to offline.html on a real error, never on
+  // a still-pending fetch. 25s leaves room for slow mobile 2G/3G negotiation.
   try {
-    const fresh = await Promise.race([fetch(request), timeout(5000)]);
-    if (fresh && fresh.ok) {
-      cache.put(request, fresh.clone()).catch(() => {});
+    const fresh = await Promise.race([fetch(request), timeout(25000)]);
+    if (fresh) {
+      // Accept any response the origin returned, even 4xx/5xx, so users see
+      // the real page (or app-level error) instead of a false "blocked" screen.
+      if (fresh.ok) cache.put(request, fresh.clone()).catch(() => {});
       return fresh;
     }
-    throw new Error("bad-response");
-  } catch {
+    throw new Error("no-response");
+  } catch (err) {
+    logDiag("nav-fallback-offline", { url: request.url, error: String(err) });
+    // Last-resort: cached root, then offline.html, then a tiny inline retry page.
+    const root = await caches.match("/");
+    if (root) return root;
     const offline = await caches.match("/offline.html");
-    return (
-      offline ||
-      new Response("Offline", { status: 503, headers: { "Content-Type": "text/plain" } })
+    if (offline) return offline;
+    return new Response(
+      '<!doctype html><meta charset="utf-8"><title>إعادة المحاولة</title>' +
+      '<body style="font-family:system-ui;padding:2rem;text-align:center" dir="rtl">' +
+      '<h1>الشبكة بطيئة</h1><p>لم نتمكن من تحميل الصفحة الآن.</p>' +
+      '<p><a href="' + request.url + '">إعادة المحاولة</a></p></body>',
+      { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } }
     );
   }
 }
