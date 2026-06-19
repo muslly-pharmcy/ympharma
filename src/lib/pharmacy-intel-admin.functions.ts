@@ -22,7 +22,7 @@ export const listMarketingQueue = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const { data: rows, error } = await context.supabase.rpc("marketing_queue_list", {
-      _status: data.status ?? null,
+      _status: data.status ?? undefined,
       _limit: data.limit ?? 200,
     });
     if (error) throw new Error(error.message);
