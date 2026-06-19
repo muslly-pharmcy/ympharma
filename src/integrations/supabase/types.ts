@@ -882,6 +882,78 @@ export type Database = {
         }
         Relationships: []
       }
+      product_classifications: {
+        Row: {
+          active_ingredient: string | null
+          ai_model: string | null
+          ai_raw: Json | null
+          complementary_legacy_ids: number[]
+          conditions: string[]
+          confidence: number
+          created_at: string
+          generic_name: string | null
+          id: string
+          is_chronic: boolean
+          pharmacological_class: string | null
+          product_legacy_id: number
+          related_legacy_ids: number[]
+          requires_prescription: boolean
+          reviewed_at: string | null
+          reviewer_id: string | null
+          status: Database["public"]["Enums"]["classification_status"]
+          therapeutic_category:
+            | Database["public"]["Enums"]["therapeutic_category"]
+            | null
+          updated_at: string
+        }
+        Insert: {
+          active_ingredient?: string | null
+          ai_model?: string | null
+          ai_raw?: Json | null
+          complementary_legacy_ids?: number[]
+          conditions?: string[]
+          confidence?: number
+          created_at?: string
+          generic_name?: string | null
+          id?: string
+          is_chronic?: boolean
+          pharmacological_class?: string | null
+          product_legacy_id: number
+          related_legacy_ids?: number[]
+          requires_prescription?: boolean
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          status?: Database["public"]["Enums"]["classification_status"]
+          therapeutic_category?:
+            | Database["public"]["Enums"]["therapeutic_category"]
+            | null
+          updated_at?: string
+        }
+        Update: {
+          active_ingredient?: string | null
+          ai_model?: string | null
+          ai_raw?: Json | null
+          complementary_legacy_ids?: number[]
+          conditions?: string[]
+          confidence?: number
+          created_at?: string
+          generic_name?: string | null
+          id?: string
+          is_chronic?: boolean
+          pharmacological_class?: string | null
+          product_legacy_id?: number
+          related_legacy_ids?: number[]
+          requires_prescription?: boolean
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          status?: Database["public"]["Enums"]["classification_status"]
+          therapeutic_category?:
+            | Database["public"]["Enums"]["therapeutic_category"]
+            | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_image_overrides: {
         Row: {
           dedupe_key: string
@@ -1304,10 +1376,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _classif_can_manage: { Args: never; Returns: boolean }
       ack_staff_alert: { Args: { _id: string }; Returns: boolean }
       admin_bundles_report: { Args: never; Returns: Json }
       admin_revenue_series: { Args: { _days?: number }; Returns: Json }
       admin_stats: { Args: never; Returns: Json }
+      approve_classification: {
+        Args: { _edits?: Json; _id: string }
+        Returns: boolean
+      }
       bootstrap_owner: { Args: never; Returns: boolean }
       campaign_report: { Args: never; Returns: Json }
       check_img_rate_limit: {
@@ -1359,7 +1436,12 @@ export type Database = {
         Returns: boolean
       }
       inventory_report: { Args: never; Returns: Json }
+      list_approved_classifications_public: { Args: never; Returns: Json }
       list_bundles_public: { Args: never; Returns: Json }
+      list_classifications_admin: {
+        Args: { _category?: string; _limit?: number; _status?: string }
+        Returns: Json
+      }
       log_activity: {
         Args: {
           _action: string
@@ -1378,6 +1460,7 @@ export type Database = {
         }
         Returns: number
       }
+      pharmacy_taxonomy_stats: { Args: never; Returns: Json }
       place_order:
         | {
             Args: { _customer: Json; _id: string; _items: Json }
@@ -1400,6 +1483,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      reject_classification: { Args: { _id: string }; Returns: boolean }
       run_retention_policy: { Args: never; Returns: Json }
       submit_prescription: {
         Args: { _customer: Json; _id: string; _image_urls: string[] }
@@ -1409,6 +1493,7 @@ export type Database = {
         Args: { _banner_id: string; _event: string }
         Returns: boolean
       }
+      upsert_classification: { Args: { _payload: Json }; Returns: string }
       validate_discount: {
         Args: { _code: string; _customer_phone?: string; _subtotal: number }
         Returns: Json
@@ -1417,6 +1502,28 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user" | "owner"
+      classification_status: "pending" | "approved" | "rejected"
+      therapeutic_category:
+        | "diabetes"
+        | "hypertension"
+        | "cardiology"
+        | "allergy"
+        | "asthma"
+        | "gi"
+        | "antibiotics"
+        | "neurology"
+        | "dermatology"
+        | "pediatrics"
+        | "womens_health"
+        | "vitamins"
+        | "pain"
+        | "respiratory"
+        | "ophthalmology"
+        | "urology"
+        | "hormonal"
+        | "oncology"
+        | "mental_health"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1545,6 +1652,29 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user", "owner"],
+      classification_status: ["pending", "approved", "rejected"],
+      therapeutic_category: [
+        "diabetes",
+        "hypertension",
+        "cardiology",
+        "allergy",
+        "asthma",
+        "gi",
+        "antibiotics",
+        "neurology",
+        "dermatology",
+        "pediatrics",
+        "womens_health",
+        "vitamins",
+        "pain",
+        "respiratory",
+        "ophthalmology",
+        "urology",
+        "hormonal",
+        "oncology",
+        "mental_health",
+        "other",
+      ],
     },
   },
 } as const
