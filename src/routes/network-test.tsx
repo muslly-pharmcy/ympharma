@@ -6,6 +6,7 @@ import {
   unregisterServiceWorker,
   type SwLogEntry,
 } from "@/lib/register-sw";
+import { readPerf, type PerfSnapshot } from "@/lib/perf-metrics";
 
 export const Route = createFileRoute("/network-test")({
   component: NetworkTestPage,
