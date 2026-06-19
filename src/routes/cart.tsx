@@ -1,9 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { Minus, Plus, Trash2, ShoppingBag, MessageCircle, CheckCircle2, Loader2, Tag, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Minus, Plus, Trash2, ShoppingBag, MessageCircle, CheckCircle2, Loader2, Tag, X, HeartPulse } from "lucide-react";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { useCart } from "@/lib/cart";
 import { formatPrice } from "@/lib/products";
+import { useMergedProducts } from "@/lib/use-merged-products";
+import { useChronicIds } from "@/lib/use-pharmacy-intel";
 import { proxifyImage } from "@/lib/img-proxy";
 import { handleImageError } from "@/lib/img-placeholder";
 import { openWhatsApp, WHATSAPP_NUMBER, buildOrderMessage } from "@/lib/whatsapp";
