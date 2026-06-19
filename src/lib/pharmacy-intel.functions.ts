@@ -46,7 +46,7 @@ export const approveClassification = createServerFn({ method: "POST" })
     }).parse(i))
   .handler(async ({ context, data }) => {
     const { error } = await context.supabase.rpc("approve_classification", {
-      _id: data.id, _edits: data.edits ?? {},
+      _id: data.id, _edits: (data.edits ?? {}) as never,
     });
     if (error) throw new Error(error.message);
     return { ok: true };
