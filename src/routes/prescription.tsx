@@ -174,6 +174,8 @@ function PrescriptionPage() {
       // Path must start with "uploads/" to match storage RLS policy.
       const folder = `uploads/${refId.toLowerCase()}`;
       const uploadedUrls: string[] = [];
+      const backupQueue: { path: string; blob: Blob; type: string }[] = [];
+
 
       const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
       const MAX_UPLOAD_ATTEMPTS = 5;
@@ -243,8 +245,10 @@ function PrescriptionPage() {
           return;
         }
         uploadedUrls.push(signedUrl);
+        backupQueue.push({ path, blob: f as Blob, type: (f as File).type || "image/jpeg" });
         updateStage(i, "done", { signedUrl });
       }
+
 
       const customer = { name: name.trim(), phone: phone.trim(), address: address.trim(), notes: notes.trim() || undefined };
 
@@ -278,10 +282,31 @@ function PrescriptionPage() {
       setSent(true);
       clearDraft();
       toast.success(`تم رفع الروشتة (${refId}) وفتح واتساب`);
+
+      // BLOCK-3: persist image bytes to the DB for disaster recovery.
+      // Fire-and-forget — failure does not block the user; the cron-driven
+      // daily backup + storage bucket still hold the originals.
+      void (async () => {
+        try {
+          const { backupRxImage } = await import("@/lib/rx-backup.functions");
+          for (const item of backupQueue) {
+            try {
+              const buf = await item.blob.arrayBuffer();
+              const bytes = new Uint8Array(buf);
+              const digest = await crypto.subtle.digest("SHA-256", bytes);
+              const sha256 = Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
+              let bin = ""; for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+              const base64 = btoa(bin);
+              await backupRxImage({ data: { rxId: refId, storagePath: item.path, contentType: item.type, base64, sha256 } });
+            } catch (e) { console.warn("[rx-backup] image skipped", e); }
+          }
+        } catch (e) { console.warn("[rx-backup] module load failed", e); }
+      })();
     } finally {
       setBusy(false);
     }
   }
+
 
   const overallProgress = files.length === 0 ? 0
     : Math.round(files.reduce((acc, f) => acc + stageProgress(f.stage), 0) / files.length);

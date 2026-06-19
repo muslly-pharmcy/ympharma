@@ -41,13 +41,17 @@ function CartPage() {
       const customer = { name: name.trim(), phone: phone.trim(), address: address.trim(), notes: notes.trim() || undefined };
       const order = await placeOrder(customer);
       const msg = buildOrderMessage({ orderId: order.id, items: order.items, total: order.total, customer });
-      toast.success(`تم إنشاء الطلب ${order.id} — جارٍ فتح واتساب...`);
+      toast.success(`تم تأكيد الطلب ${order.id} — جارٍ فتح واتساب...`);
       openWhatsApp(msg);
       setTimeout(() => navigate({ to: "/track", search: { id: order.id } }), 600);
+    } catch (e: any) {
+      console.error("[checkout]", e);
+      toast.error("تعذّر حفظ الطلب — سيُعاد المحاولة تلقائياً عند تحسّن الشبكة. لا تغلق الصفحة.");
     } finally {
       setBusy(false);
     }
   }
+
 
   return (
     <div className="min-h-screen bg-background text-foreground">
