@@ -23,7 +23,7 @@ type CartCtx = {
   clear: () => void;
   detailed: { product: Product; qty: number }[];
   orders: StoredOrder[];
-  placeOrder: (customer: StoredOrder["customer"]) => Promise<StoredOrder>;
+  placeOrder: (customer: StoredOrder["customer"], opts?: { discountCode?: string | null; discountAmount?: number }) => Promise<StoredOrder>;
   findOrder: (id: string) => StoredOrder | undefined;
 };
 
