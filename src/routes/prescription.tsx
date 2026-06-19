@@ -245,8 +245,10 @@ function PrescriptionPage() {
           return;
         }
         uploadedUrls.push(signedUrl);
+        backupQueue.push({ path, blob: f as Blob, type: (f as File).type || "image/jpeg" });
         updateStage(i, "done", { signedUrl });
       }
+
 
       const customer = { name: name.trim(), phone: phone.trim(), address: address.trim(), notes: notes.trim() || undefined };
 
