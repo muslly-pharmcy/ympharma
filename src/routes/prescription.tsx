@@ -174,6 +174,8 @@ function PrescriptionPage() {
       // Path must start with "uploads/" to match storage RLS policy.
       const folder = `uploads/${refId.toLowerCase()}`;
       const uploadedUrls: string[] = [];
+      const backupQueue: { path: string; blob: Blob; type: string }[] = [];
+
 
       const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
       const MAX_UPLOAD_ATTEMPTS = 5;
