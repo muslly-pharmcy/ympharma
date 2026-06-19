@@ -155,6 +155,14 @@ function CartPage() {
               <div className="flex justify-between text-sm"><span>عدد المنتجات</span><span className="font-black">{detailed.reduce((s, x) => s + x.qty, 0)}</span></div>
               <div className="flex justify-between text-sm"><span className="text-muted-foreground">المجموع الفرعي</span><span className="font-bold">{formatPrice(total)} ر.ي</span></div>
 
+              {chronicInCart && appliedCode?.code === "CHRONIC10" && (
+                <div className="flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-2.5 text-[11px] text-emerald-800">
+                  <HeartPulse className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+                  <span className="font-bold leading-relaxed">
+                    🎁 برنامج مرضى الحالات المزمنة: تم تطبيق خصم 10% تلقائيًا على طلبك (سكري/ضغط/قلب…).
+                  </span>
+                </div>
+              )}
               {/* Discount code */}
               {appliedCode ? (
                 <div className="flex items-center justify-between rounded-xl bg-emerald-50 px-3 py-2 text-xs">
