@@ -182,8 +182,7 @@ export const runAiClassifierBatch = createServerFn({ method: "POST" })
     await context.supabase.rpc("log_activity", {
       _action: "pharmacy.ai_batch_classify",
       _entity_type: "product_classifications",
-      _entity_id: null,
-      _details: { scope: data.scope, requested: data.limit, processed: products.length, upserted, skipped },
+      _details: { scope: data.scope, requested: data.limit, processed: products.length, upserted, skipped } as never,
     });
 
     return { processed: products.length, upserted, skipped };
