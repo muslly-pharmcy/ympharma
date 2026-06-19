@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { getProductById, type Product } from "./products";
-import { supabase } from "@/integrations/supabase/client";
+import { generateOrderId, persistAndCommit, type PendingOrder } from "./orders-pending";
+
 
 type CartItem = { id: number; qty: number };
 type StoredOrder = {
