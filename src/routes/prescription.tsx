@@ -161,7 +161,8 @@ function PrescriptionPage() {
     setFiles((prev) => prev.map((f) => ({ ...f, stage: "idle", error: undefined })));
     try {
       const refId = "RX-" + Date.now().toString(36).toUpperCase().slice(-6);
-      const folder = refId.toLowerCase();
+      // Path must start with "uploads/" to match storage RLS policy.
+      const folder = `uploads/${refId.toLowerCase()}`;
       const uploadedUrls: string[] = [];
 
       const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
