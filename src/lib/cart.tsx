@@ -90,7 +90,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const placeOrder = useCallback<CartCtx["placeOrder"]>(
     async (customer) => {
-      const id = "AM-" + Date.now().toString(36).toUpperCase().slice(-6);
+      const id = generateOrderId();
       const orderItems = detailed.map((d) => ({ id: d.product.id, qty: d.qty, name: d.product.name, price: d.product.price }));
       const order: StoredOrder = {
         id,
@@ -101,33 +101,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
         customer,
       };
 
+      // BLOCK-1: Persist to local pending queue BEFORE awaiting network so the
+      // order survives tab close / network loss. Then await durable DB commit
+      // with retry. Only on success do we clear the cart.
+      const pending: PendingOrder = {
+        id, customer, items: orderItems, total,
+        createdAt: order.createdAt, attempts: 0, stage: "queued",
+      };
+      await persistAndCommit(pending);
+
       setOrders((prev) => [order, ...prev]);
       setItems([]);
-
-      // Save to cloud in background (fire-and-forget) so we don't break the
-      // user-gesture chain needed for window.open(whatsapp) on mobile browsers.
-      void (async () => {
-        try {
-          const { error } = await supabase.from("orders").insert({
-            id,
-            customer_name: customer.name,
-            customer_phone: customer.phone,
-            customer_address: customer.address,
-            notes: customer.notes ?? null,
-            total,
-            status: "pending",
-            items: orderItems as never,
-          });
-          if (error) console.error("[orders.insert]", error);
-        } catch (e) {
-          console.error("[orders.insert] network", e);
-        }
-      })();
-
       return order;
     },
     [detailed, total],
   );
+
 
 
   const findOrder = useCallback((id: string) => orders.find((o) => o.id.toLowerCase() === id.toLowerCase()), [orders]);
