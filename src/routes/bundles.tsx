@@ -43,8 +43,8 @@ function BundlesPage() {
   function addBundle(b: Bundle) {
     let added = 0;
     for (const it of b.items) {
-      if (it.legacy_id && it.price != null && it.name) {
-        for (let i = 0; i < it.qty; i++) add({ id: it.legacy_id, name: it.name, price: it.price, image_url: it.image_url ?? "" } as any);
+      if (it.legacy_id && it.qty > 0) {
+        add(it.legacy_id, it.qty);
         added += it.qty;
       }
     }
