@@ -1,12 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Minus, Plus, Trash2, ShoppingBag, MessageCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, MessageCircle, CheckCircle2, Loader2, Tag, X } from "lucide-react";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { useCart } from "@/lib/cart";
 import { formatPrice } from "@/lib/products";
 import { proxifyImage } from "@/lib/img-proxy";
 import { handleImageError } from "@/lib/img-placeholder";
 import { openWhatsApp, WHATSAPP_NUMBER, buildOrderMessage } from "@/lib/whatsapp";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/cart")({
