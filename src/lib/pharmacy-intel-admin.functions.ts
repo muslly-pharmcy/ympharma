@@ -61,8 +61,8 @@ export const markQueueSent = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const { error } = await context.supabase.rpc("marketing_queue_mark_sent", {
       _id: data.id,
-      _wamid: data.wamid ?? null,
-      _error: data.error ?? null,
+      _wamid: data.wamid ?? undefined,
+      _error: data.error ?? undefined,
     });
     if (error) throw new Error(error.message);
     return { ok: true };
