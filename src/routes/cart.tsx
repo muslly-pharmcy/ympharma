@@ -38,7 +38,32 @@ function CartPage() {
   const [appliedCode, setAppliedCode] = useState<{ code: string; amount_off: number; kind: string } | null>(null);
   const [validating, setValidating] = useState(false);
 
+  // Auto chronic-disease discount: detect chronic items in the cart and auto-apply CHRONIC10.
+  const merged = useMergedProducts();
+  const chronicIds = useChronicIds();
+  const chronicInCart = detailed.some(({ product }) => {
+    const m = merged.find((x) => x.id === product.id);
+    return m?.legacyId != null && chronicIds.has(m.legacyId);
+  });
+  useEffect(() => {
+    if (chronicInCart && !appliedCode && total > 0) {
+      const amount = Math.round(total * 0.1);
+      setAppliedCode({ code: "CHRONIC10", amount_off: amount, kind: "percent" });
+    }
+    if (!chronicInCart && appliedCode?.code === "CHRONIC10") {
+      setAppliedCode(null);
+    }
+    // recompute amount when total changes while CHRONIC10 is auto-applied
+    if (chronicInCart && appliedCode?.code === "CHRONIC10") {
+      const amount = Math.round(total * 0.1);
+      if (amount !== appliedCode.amount_off) {
+        setAppliedCode({ code: "CHRONIC10", amount_off: amount, kind: "percent" });
+      }
+    }
+  }, [chronicInCart, total, appliedCode]);
+
   const finalTotal = Math.max(0, total - (appliedCode?.amount_off ?? 0));
+
 
   async function applyDiscount() {
     const c = discountInput.trim();
