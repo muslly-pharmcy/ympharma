@@ -99,11 +99,23 @@ function Home() {
   const navigate = useNavigate();
   const products = useMergedProducts();
   const { t } = useI18n();
+  const sections = useHomepageSections();
+  const legacyMap = useLegacyMap(products);
   const featured = useMemo(
     () => products.filter((p) => query.trim() === "" || p.name.includes(query.trim())).slice(0, 8),
     [query, products],
   );
   const nowProducts = useMemo(() => products.filter((p) => p.cat === "now").slice(0, 4), [products]);
+  const intelSections = useMemo(
+    () => sections
+      .map((s) => ({
+        ...s,
+        products: (s.legacy_ids ?? []).map((id) => legacyMap.get(id)).filter(Boolean) as typeof products,
+      }))
+      .filter((s) => s.products.length >= 2)
+      .slice(0, 8),
+    [sections, legacyMap],
+  );
 
   return (
     <div className="min-h-screen bg-background text-foreground">
