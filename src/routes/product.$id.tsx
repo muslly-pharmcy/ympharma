@@ -130,7 +130,24 @@ function ProductDetail() {
           <VitaminAIInfo name={p.name} brand={p.brand} />
         )}
 
-        {related.length > 0 && (
+        {hasIntel && intelRelated && (
+          <div className="space-y-6">
+            {intelRelated.same_condition.length > 0 && (
+              <IntelStrip title="💊 بدائل لنفس الحالة المرضية" items={intelRelated.same_condition} />
+            )}
+            {intelRelated.same_class.length > 0 && (
+              <IntelStrip title="🧬 بدائل من نفس التصنيف الدوائي" items={intelRelated.same_class} />
+            )}
+            {intelRelated.explicit.length > 0 && (
+              <IntelStrip title="✨ يُستخدم غالبًا مع هذا الدواء" items={intelRelated.explicit} />
+            )}
+            {intelRelated.copurchase.length > 0 && (
+              <IntelStrip title="🛒 العملاء اشتروا أيضًا" items={intelRelated.copurchase} />
+            )}
+          </div>
+        )}
+
+        {!hasIntel && related.length > 0 && (
           <section>
             <h2 className="mb-3 text-lg font-black">منتجات مشابهة</h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
