@@ -50,21 +50,33 @@ function TrackPage() {
   const { id: initialId } = Route.useSearch();
   const { orders } = useCart();
   const [input, setInput] = useState(initialId ?? "");
+  const [phoneLast4, setPhoneLast4] = useState("");
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [order, setOrder] = useState<CloudOrder | null>(null);
   const [history, setHistory] = useState<HistoryRow[]>([]);
+  const [errMsg, setErrMsg] = useState<string | null>(null);
 
-  async function lookup(id: string) {
+  async function lookup(id: string, last4: string) {
     setLoading(true);
     setSearched(true);
+    setErrMsg(null);
     try {
       const trimmed = id.trim();
+      const digits = (last4.match(/\d/g) ?? []).join("").slice(-4);
+      if (digits.length !== 4) {
+        setErrMsg("أدخل آخر 4 أرقام من رقم جوال الطلب");
+        setOrder(null); setHistory([]);
+        return;
+      }
       const [{ data, error }, { data: hist }] = await Promise.all([
-        supabase.rpc("get_order_public", { _id: trimmed }),
-        supabase.rpc("get_order_history_public", { _id: trimmed }),
+        supabase.rpc("get_order_public" as never, { _id: trimmed, _phone_last4: digits } as never),
+        supabase.rpc("get_order_history_public" as never, { _id: trimmed, _phone_last4: digits } as never),
       ]);
-      if (error) { console.error(error); setOrder(null); setHistory([]); return; }
+      if (error) {
+        if (/rate_limited/i.test(error.message)) setErrMsg("تم تجاوز عدد المحاولات المسموح، انتظر قليلاً ثم أعد المحاولة.");
+        console.error(error); setOrder(null); setHistory([]); return;
+      }
       const row = Array.isArray(data) ? data[0] : data;
       if (!row) { setOrder(null); setHistory([]); return; }
       setOrder({
@@ -82,7 +94,8 @@ function TrackPage() {
   }
 
   useEffect(() => {
-    if (initialId) lookup(initialId);
+    // Do not auto-lookup on first paint — phone last-4 is now required.
+    if (initialId) setInput(initialId);
   }, [initialId]);
 
   return (
@@ -91,15 +104,22 @@ function TrackPage() {
       <main className="mx-auto max-w-4xl px-4 py-8 space-y-6">
         <div>
           <h1 className="text-2xl font-black">تتبع طلبك</h1>
-          <p className="text-sm text-muted-foreground">أدخل رقم الطلب (مثال AM-XXXXXX) لمتابعة حالته.</p>
+          <p className="text-sm text-muted-foreground">أدخل رقم الطلب وآخر 4 أرقام من جوالك لمتابعة الحالة.</p>
         </div>
 
-        <form onSubmit={(e) => { e.preventDefault(); if (input.trim()) lookup(input); }} className="flex gap-2 rounded-2xl border border-border bg-card p-2 shadow-card">
-          <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="مثال: AM-XXXXXX" className="flex-1 rounded-xl bg-secondary/40 px-4 py-3 text-sm font-bold outline-none focus:bg-card" />
-          <button className="brand-gradient flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-black text-primary-foreground">
+        <form onSubmit={(e) => { e.preventDefault(); if (input.trim() && phoneLast4.trim()) lookup(input, phoneLast4); }} className="grid gap-2 rounded-2xl border border-border bg-card p-2 shadow-card md:grid-cols-[1fr_140px_auto]">
+          <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="مثال: AM-XXXXXXXXXXXX" className="rounded-xl bg-secondary/40 px-4 py-3 text-sm font-bold outline-none focus:bg-card" />
+          <input value={phoneLast4} onChange={(e) => setPhoneLast4(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="آخر 4 أرقام" inputMode="numeric" pattern="\d{4}" maxLength={4} className="rounded-xl bg-secondary/40 px-4 py-3 text-sm font-bold outline-none focus:bg-card text-center tracking-widest" />
+          <button className="brand-gradient flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-black text-primary-foreground">
             {loading ? <Loader2 className="size-4 animate-spin" /> : <Search className="size-4" />} تتبع
           </button>
         </form>
+
+        {errMsg && (
+          <div className="rounded-2xl border border-amber-300 bg-amber-50 p-3 text-sm font-bold text-amber-800">{errMsg}</div>
+        )}
+
+
 
         {searched && !loading && !order && (
           <div className="rounded-3xl border border-dashed border-border bg-card p-10 text-center text-muted-foreground">
