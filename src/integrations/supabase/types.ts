@@ -98,6 +98,89 @@ export type Database = {
         }
         Relationships: []
       }
+      discount_codes: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          first_order_only: boolean
+          id: string
+          kind: string
+          max_uses: number | null
+          min_total: number
+          starts_at: string
+          uses: number
+          value: number
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          first_order_only?: boolean
+          id?: string
+          kind: string
+          max_uses?: number | null
+          min_total?: number
+          starts_at?: string
+          uses?: number
+          value?: number
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          first_order_only?: boolean
+          id?: string
+          kind?: string
+          max_uses?: number | null
+          min_total?: number
+          starts_at?: string
+          uses?: number
+          value?: number
+        }
+        Relationships: []
+      }
+      discount_redemptions: {
+        Row: {
+          amount_off: number
+          code_id: string
+          customer_phone: string
+          id: string
+          order_id: string
+          redeemed_at: string
+        }
+        Insert: {
+          amount_off?: number
+          code_id: string
+          customer_phone: string
+          id?: string
+          order_id: string
+          redeemed_at?: string
+        }
+        Update: {
+          amount_off?: number
+          code_id?: string
+          customer_phone?: string
+          id?: string
+          order_id?: string
+          redeemed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discount_redemptions_code_id_fkey"
+            columns: ["code_id"]
+            isOneToOne: false
+            referencedRelation: "discount_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -498,10 +581,13 @@ export type Database = {
           customer_address: string
           customer_name: string
           customer_phone: string
+          discount_amount: number
+          discount_code: string | null
           id: string
           items: Json
           notes: string | null
           status: string
+          subtotal: number | null
           total: number
         }
         Insert: {
@@ -509,10 +595,13 @@ export type Database = {
           customer_address: string
           customer_name: string
           customer_phone: string
+          discount_amount?: number
+          discount_code?: string | null
           id: string
           items?: Json
           notes?: string | null
           status?: string
+          subtotal?: number | null
           total?: number
         }
         Update: {
@@ -520,10 +609,13 @@ export type Database = {
           customer_address?: string
           customer_name?: string
           customer_phone?: string
+          discount_amount?: number
+          discount_code?: string | null
           id?: string
           items?: Json
           notes?: string | null
           status?: string
+          subtotal?: number | null
           total?: number
         }
         Relationships: []
@@ -628,6 +720,7 @@ export type Database = {
           category: string
           created_at: string
           description: string | null
+          expiry_date: string | null
           id: string
           image_url: string | null
           is_published: boolean
@@ -635,7 +728,12 @@ export type Database = {
           name: string
           old_price: number | null
           price: number
+          reorder_point: number
           sort_order: number
+          stock_qty: number
+          supplier_cost: number | null
+          supplier_name: string | null
+          track_stock: boolean
           updated_at: string
         }
         Insert: {
@@ -644,6 +742,7 @@ export type Database = {
           category: string
           created_at?: string
           description?: string | null
+          expiry_date?: string | null
           id?: string
           image_url?: string | null
           is_published?: boolean
@@ -651,7 +750,12 @@ export type Database = {
           name: string
           old_price?: number | null
           price?: number
+          reorder_point?: number
           sort_order?: number
+          stock_qty?: number
+          supplier_cost?: number | null
+          supplier_name?: string | null
+          track_stock?: boolean
           updated_at?: string
         }
         Update: {
@@ -660,6 +764,7 @@ export type Database = {
           category?: string
           created_at?: string
           description?: string | null
+          expiry_date?: string | null
           id?: string
           image_url?: string | null
           is_published?: boolean
@@ -667,7 +772,12 @@ export type Database = {
           name?: string
           old_price?: number | null
           price?: number
+          reorder_point?: number
           sort_order?: number
+          stock_qty?: number
+          supplier_cost?: number | null
+          supplier_name?: string | null
+          track_stock?: boolean
           updated_at?: string
         }
         Relationships: []
@@ -711,6 +821,60 @@ export type Database = {
           incidents_days?: number
           updated_at?: string
           uptime_checks_days?: number
+        }
+        Relationships: []
+      }
+      staff_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          body: string | null
+          channels: string[]
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          kind: string
+          payload: Json
+          severity: string
+          title: string
+          whatsapp_attempts: number
+          whatsapp_last_error: string | null
+          whatsapp_status: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          body?: string | null
+          channels?: string[]
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          kind: string
+          payload?: Json
+          severity?: string
+          title: string
+          whatsapp_attempts?: number
+          whatsapp_last_error?: string | null
+          whatsapp_status?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          body?: string | null
+          channels?: string[]
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          kind?: string
+          payload?: Json
+          severity?: string
+          title?: string
+          whatsapp_attempts?: number
+          whatsapp_last_error?: string | null
+          whatsapp_status?: string | null
         }
         Relationships: []
       }
@@ -944,6 +1108,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      ack_staff_alert: { Args: { _id: string }; Returns: boolean }
       admin_stats: { Args: never; Returns: Json }
       bootstrap_owner: { Args: never; Returns: boolean }
       check_img_rate_limit: {
@@ -994,6 +1159,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      inventory_report: { Args: never; Returns: Json }
       log_activity: {
         Args: {
           _action: string
@@ -1012,10 +1178,20 @@ export type Database = {
         }
         Returns: number
       }
-      place_order: {
-        Args: { _customer: Json; _id: string; _items: Json }
-        Returns: Json
-      }
+      place_order:
+        | {
+            Args: { _customer: Json; _id: string; _items: Json }
+            Returns: Json
+          }
+        | {
+            Args: {
+              _customer: Json
+              _discount_code?: string
+              _id: string
+              _items: Json
+            }
+            Returns: Json
+          }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
@@ -1027,6 +1203,10 @@ export type Database = {
       run_retention_policy: { Args: never; Returns: Json }
       submit_prescription: {
         Args: { _customer: Json; _id: string; _image_urls: string[] }
+        Returns: Json
+      }
+      validate_discount: {
+        Args: { _code: string; _customer_phone?: string; _subtotal: number }
         Returns: Json
       }
       verify_prescription_image_coverage: { Args: never; Returns: Json }
