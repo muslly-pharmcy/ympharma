@@ -1377,6 +1377,7 @@ export type Database = {
     }
     Functions: {
       _classif_can_manage: { Args: never; Returns: boolean }
+      _therapeutic_label_ar: { Args: { _cat: string }; Returns: string }
       ack_staff_alert: { Args: { _id: string }; Returns: boolean }
       admin_bundles_report: { Args: never; Returns: Json }
       admin_revenue_series: { Args: { _days?: number }; Returns: Json }
@@ -1460,6 +1461,10 @@ export type Database = {
         }
         Returns: number
       }
+      pharmacy_chronic_legacy_ids: { Args: never; Returns: Json }
+      pharmacy_homepage_sections: { Args: never; Returns: Json }
+      pharmacy_related_products: { Args: { _legacy_id: number }; Returns: Json }
+      pharmacy_search: { Args: { _q: string }; Returns: Json }
       pharmacy_taxonomy_stats: { Args: never; Returns: Json }
       place_order:
         | {
