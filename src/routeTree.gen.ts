@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as YemenDebugRouteImport } from './routes/yemen-debug'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TrustRouteImport } from './routes/trust'
 import { Route as TrackRouteImport } from './routes/track'
@@ -52,6 +53,11 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as ApiPublicHooksAlertsWorkerRouteImport } from './routes/api/public/hooks/alerts-worker'
 
+const YemenDebugRoute = YemenDebugRouteImport.update({
+  id: '/yemen-debug',
+  path: '/yemen-debug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
   path: '/unsubscribe',
@@ -298,6 +304,7 @@ export interface FileRoutesByFullPath {
   '/track': typeof TrackRoute
   '/trust': typeof TrustRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/yemen-debug': typeof YemenDebugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/api/public/health': typeof ApiPublicHealthRoute
@@ -342,6 +349,7 @@ export interface FileRoutesByTo {
   '/track': typeof TrackRoute
   '/trust': typeof TrustRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/yemen-debug': typeof YemenDebugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/api/public/health': typeof ApiPublicHealthRoute
@@ -387,6 +395,7 @@ export interface FileRoutesById {
   '/track': typeof TrackRoute
   '/trust': typeof TrustRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/yemen-debug': typeof YemenDebugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/api/public/health': typeof ApiPublicHealthRoute
@@ -433,6 +442,7 @@ export interface FileRouteTypes {
     | '/track'
     | '/trust'
     | '/unsubscribe'
+    | '/yemen-debug'
     | '/email/unsubscribe'
     | '/product/$id'
     | '/api/public/health'
@@ -477,6 +487,7 @@ export interface FileRouteTypes {
     | '/track'
     | '/trust'
     | '/unsubscribe'
+    | '/yemen-debug'
     | '/email/unsubscribe'
     | '/product/$id'
     | '/api/public/health'
@@ -521,6 +532,7 @@ export interface FileRouteTypes {
     | '/track'
     | '/trust'
     | '/unsubscribe'
+    | '/yemen-debug'
     | '/email/unsubscribe'
     | '/product/$id'
     | '/api/public/health'
@@ -566,6 +578,7 @@ export interface RootRouteChildren {
   TrackRoute: typeof TrackRoute
   TrustRoute: typeof TrustRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
+  YemenDebugRoute: typeof YemenDebugRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ProductIdRoute: typeof ProductIdRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
@@ -583,6 +596,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/yemen-debug': {
+      id: '/yemen-debug'
+      path: '/yemen-debug'
+      fullPath: '/yemen-debug'
+      preLoaderRoute: typeof YemenDebugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/unsubscribe': {
       id: '/unsubscribe'
       path: '/unsubscribe'
@@ -910,6 +930,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrackRoute: TrackRoute,
   TrustRoute: TrustRoute,
   UnsubscribeRoute: UnsubscribeRoute,
+  YemenDebugRoute: YemenDebugRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ProductIdRoute: ProductIdRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
