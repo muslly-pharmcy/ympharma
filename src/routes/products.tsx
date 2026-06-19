@@ -53,6 +53,19 @@ function ProductsPage() {
   );
   const activeCat = cat ?? "all";
   const products = useMergedProducts();
+  const legacyMap = useLegacyMap(products);
+  const { hits: smartHits, loading: smartLoading } = useSmartSearch(query);
+
+  // Map smart-search legacy_ids back to actual merged products + reasons.
+  const smartMatches = useMemo(() => {
+    if (smartHits.length === 0) return [] as { product: typeof products[number]; reasons: string[] }[];
+    const out: { product: typeof products[number]; reasons: string[] }[] = [];
+    for (const h of smartHits) {
+      const p = legacyMap.get(h.legacy_id);
+      if (p) out.push({ product: p, reasons: h.reasons });
+    }
+    return out;
+  }, [smartHits, legacyMap]);
 
   function toggleBrand(b: string) {
     setSelectedBrands((prev) => prev.includes(b) ? prev.filter((x) => x !== b) : [...prev, b]);
@@ -62,12 +75,14 @@ function ProductsPage() {
     const minN = Number(minP) || 0;
     const maxN = Number(maxP) || Infinity;
     const term = query.trim().toLowerCase();
+    // Promote smart-matched legacy_ids to the front (skip the simple text filter
+    // for those, since the SQL engine already matched them by ingredient/condition).
+    const smartIds = new Set(smartMatches.map((m) => m.product.id));
     let arr = products.filter((p) => {
       if (activeCat !== "all" && !catMatches(activeCat, p.cat)) return false;
       if (p.price < minN || p.price > maxN) return false;
       if (selectedBrands.length && !selectedBrands.includes(p.brand)) return false;
-      if (term) {
-        // Partial match across name + brand (case-insensitive, accent-tolerant for Arabic)
+      if (term && !smartIds.has(p.id)) {
         const hay = (p.name + " " + p.brand).toLowerCase();
         if (!hay.includes(term)) return false;
       }
@@ -76,8 +91,12 @@ function ProductsPage() {
     if (sortBy === "price-asc") arr = [...arr].sort((a, b) => a.price - b.price);
     else if (sortBy === "price-desc") arr = [...arr].sort((a, b) => b.price - a.price);
     else if (sortBy === "name") arr = [...arr].sort((a, b) => a.name.localeCompare(b.name, "ar"));
+    else if (smartIds.size > 0) {
+      // Default sort with smart matches first
+      arr = [...arr].sort((a, b) => Number(smartIds.has(b.id)) - Number(smartIds.has(a.id)));
+    }
     return arr;
-  }, [activeCat, query, products, minP, maxP, sortBy, selectedBrands]);
+  }, [activeCat, query, products, minP, maxP, sortBy, selectedBrands, smartMatches]);
 
   const currentCatName = categories.find((c) => c.id === activeCat)?.name ?? "كل المنتجات";
 
