@@ -167,8 +167,8 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
       ]);
       if (oe) throw oe;
       if (re) throw re;
-      setOrders((o as Order[]) ?? []);
-      setRxs((r as Rx[]) ?? []);
+      setOrders((o as unknown as Order[]) ?? []);
+      setRxs((r as unknown as Rx[]) ?? []);
       setStatsKey((k) => k + 1);
       loadedRef.current = true;
     } catch (e: any) {
