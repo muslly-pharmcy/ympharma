@@ -83,14 +83,17 @@ function NetworkTestPage() {
     const onLogs = () => refreshLogs();
     const onOnline = () => setOnline(true);
     const onOffline = () => setOnline(false);
+    const onPerf = () => setPerf(readPerf());
     window.addEventListener("sw:log", onLogs);
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
-    const t = setInterval(refreshSw, 3000);
+    window.addEventListener("perf:update", onPerf);
+    const t = setInterval(() => { refreshSw(); setPerf(readPerf()); }, 3000);
     return () => {
       window.removeEventListener("sw:log", onLogs);
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
+      window.removeEventListener("perf:update", onPerf);
       clearInterval(t);
     };
   }, [refreshLogs, refreshSw]);
