@@ -29,6 +29,7 @@ import { Route as AdminSettingsRouteImport } from './routes/admin-settings'
 import { Route as AdminRxCheckRouteImport } from './routes/admin-rx-check'
 import { Route as AdminProductsRouteImport } from './routes/admin-products'
 import { Route as AdminOffersRouteImport } from './routes/admin-offers'
+import { Route as AdminMarketingRouteImport } from './routes/admin-marketing'
 import { Route as AdminLogsRouteImport } from './routes/admin-logs'
 import { Route as AdminInventoryRouteImport } from './routes/admin-inventory'
 import { Route as AdminDiscountsRouteImport } from './routes/admin-discounts'
@@ -154,6 +155,11 @@ const AdminProductsRoute = AdminProductsRouteImport.update({
 const AdminOffersRoute = AdminOffersRouteImport.update({
   id: '/admin-offers',
   path: '/admin-offers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminMarketingRoute = AdminMarketingRouteImport.update({
+  id: '/admin-marketing',
+  path: '/admin-marketing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminLogsRoute = AdminLogsRouteImport.update({
@@ -306,6 +312,7 @@ export interface FileRoutesByFullPath {
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-inventory': typeof AdminInventoryRoute
   '/admin-logs': typeof AdminLogsRoute
+  '/admin-marketing': typeof AdminMarketingRoute
   '/admin-offers': typeof AdminOffersRoute
   '/admin-products': typeof AdminProductsRoute
   '/admin-rx-check': typeof AdminRxCheckRoute
@@ -354,6 +361,7 @@ export interface FileRoutesByTo {
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-inventory': typeof AdminInventoryRoute
   '/admin-logs': typeof AdminLogsRoute
+  '/admin-marketing': typeof AdminMarketingRoute
   '/admin-offers': typeof AdminOffersRoute
   '/admin-products': typeof AdminProductsRoute
   '/admin-rx-check': typeof AdminRxCheckRoute
@@ -403,6 +411,7 @@ export interface FileRoutesById {
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-inventory': typeof AdminInventoryRoute
   '/admin-logs': typeof AdminLogsRoute
+  '/admin-marketing': typeof AdminMarketingRoute
   '/admin-offers': typeof AdminOffersRoute
   '/admin-products': typeof AdminProductsRoute
   '/admin-rx-check': typeof AdminRxCheckRoute
@@ -453,6 +462,7 @@ export interface FileRouteTypes {
     | '/admin-discounts'
     | '/admin-inventory'
     | '/admin-logs'
+    | '/admin-marketing'
     | '/admin-offers'
     | '/admin-products'
     | '/admin-rx-check'
@@ -501,6 +511,7 @@ export interface FileRouteTypes {
     | '/admin-discounts'
     | '/admin-inventory'
     | '/admin-logs'
+    | '/admin-marketing'
     | '/admin-offers'
     | '/admin-products'
     | '/admin-rx-check'
@@ -549,6 +560,7 @@ export interface FileRouteTypes {
     | '/admin-discounts'
     | '/admin-inventory'
     | '/admin-logs'
+    | '/admin-marketing'
     | '/admin-offers'
     | '/admin-products'
     | '/admin-rx-check'
@@ -598,6 +610,7 @@ export interface RootRouteChildren {
   AdminDiscountsRoute: typeof AdminDiscountsRoute
   AdminInventoryRoute: typeof AdminInventoryRoute
   AdminLogsRoute: typeof AdminLogsRoute
+  AdminMarketingRoute: typeof AdminMarketingRoute
   AdminOffersRoute: typeof AdminOffersRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminRxCheckRoute: typeof AdminRxCheckRoute
@@ -774,6 +787,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-offers'
       fullPath: '/admin-offers'
       preLoaderRoute: typeof AdminOffersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-marketing': {
+      id: '/admin-marketing'
+      path: '/admin-marketing'
+      fullPath: '/admin-marketing'
+      preLoaderRoute: typeof AdminMarketingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-logs': {
@@ -974,6 +994,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminDiscountsRoute: AdminDiscountsRoute,
   AdminInventoryRoute: AdminInventoryRoute,
   AdminLogsRoute: AdminLogsRoute,
+  AdminMarketingRoute: AdminMarketingRoute,
   AdminOffersRoute: AdminOffersRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminRxCheckRoute: AdminRxCheckRoute,
