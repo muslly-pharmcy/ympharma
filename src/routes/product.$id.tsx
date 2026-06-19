@@ -51,6 +51,22 @@ function ProductDetail() {
   const { add } = useCart();
   const [qty, setQty] = useState(1);
   const catName = categories.find((c) => c.id === p.cat)?.name ?? p.cat;
+  const merged = useMergedProducts();
+  // Match the merged item by id to read its DB legacyId (when sourced from DB).
+  const mergedSelf = merged.find((m) => m.id === p.id);
+  const legacyId = mergedSelf?.legacyId;
+  const legacyMap = useLegacyMap(merged);
+  const buckets = useRelatedProducts(legacyId);
+  const intelRelated = buckets ? {
+    same_condition: buckets.same_condition.map((id) => legacyMap.get(id)).filter(Boolean) as typeof merged,
+    same_class: buckets.same_class.map((id) => legacyMap.get(id)).filter(Boolean) as typeof merged,
+    explicit: buckets.explicit.map((id) => legacyMap.get(id)).filter(Boolean) as typeof merged,
+    copurchase: buckets.copurchase.map((id) => legacyMap.get(id)).filter(Boolean) as typeof merged,
+  } : null;
+  const hasIntel = !!intelRelated && (
+    intelRelated.same_condition.length + intelRelated.same_class.length +
+    intelRelated.explicit.length + intelRelated.copurchase.length > 0
+  );
   const related = products.filter((x) => x.cat === p.cat && x.id !== p.id).slice(0, 8);
 
   return (
