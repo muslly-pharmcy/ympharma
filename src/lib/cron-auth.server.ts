@@ -15,10 +15,9 @@ export function verifyCronSecret(request: Request): Response | null {
       headers: { "Content-Type": "application/json" },
     });
   }
-  const provided =
-    request.headers.get("x-cron-secret") ??
-    new URL(request.url).searchParams.get("cron_secret") ??
-    "";
+  // Header-only. Query-param fallback removed (Batch 5a / C3): query strings leak into
+  // CDN / Supabase / proxy access logs in plaintext. Callers MUST send `x-cron-secret`.
+  const provided = request.headers.get("x-cron-secret") ?? "";
   const a = Buffer.from(provided);
   const b = Buffer.from(expected);
   if (a.length !== b.length || !timingSafeEqual(a, b)) {
