@@ -5,6 +5,7 @@ import { Loader2, RefreshCw, TrendingUp, Users, Heart, AlertTriangle, Package, A
 import { toast } from "sonner";
 import { fetchExecDashboard, listAgentRuns, runIntelNow } from "@/lib/pharmacy-intel-admin.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { CopilotPanels } from "@/components/admin/CopilotPanels";
 
 export const Route = createFileRoute("/admin-command")({
   head: () => ({
