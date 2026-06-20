@@ -119,9 +119,11 @@ export const Route = createFileRoute("/api/public/hooks/customer-rx-notify")({
               .in("key", [
                 "customer_whatsapp_enabled",
                 "prescription_notifications_enabled",
+                "order_notifications_enabled",
                 "whatsapp_retry_base_seconds",
                 "whatsapp_pharmacy_name",
                 "whatsapp_opt_out_base_url",
+                "whatsapp_tracking_base_url",
               ]),
             supabaseAdmin
               .from("whatsapp_notification_templates")
@@ -144,18 +146,24 @@ export const Route = createFileRoute("/api/public/hooks/customer-rx-notify")({
               typeof sMap.get("whatsapp_opt_out_base_url") === "string"
                 ? (sMap.get("whatsapp_opt_out_base_url") as string)
                 : "https://muslly.com/notifications",
+            trackingBaseUrl:
+              typeof sMap.get("whatsapp_tracking_base_url") === "string"
+                ? (sMap.get("whatsapp_tracking_base_url") as string)
+                : "https://muslly.com/track",
             masterOn: sMap.get("customer_whatsapp_enabled") === true,
             rxOn: sMap.get("prescription_notifications_enabled") === true,
+            ordersOn: sMap.get("order_notifications_enabled") === true,
           };
 
           // Master kill-switch (defense-in-depth — trigger also enforces).
-          if (!settings.masterOn || !settings.rxOn) {
+          if (!settings.masterOn || (!settings.rxOn && !settings.ordersOn)) {
             return Response.json({
               ok: true,
               skipped: "master_off",
               elapsed_ms: Date.now() - started,
             });
           }
+
 
           const templates = new Map<string, Template>(
             ((tplRows ?? []) as Template[]).map((t) => [t.id, t]),
