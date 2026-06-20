@@ -134,13 +134,23 @@ function PrescriptionPage() {
 
   function handleFiles(list: FileList | null) {
     if (!list) return;
+    const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "application/pdf"]);
+    const MAX_BYTES = 5 * 1024 * 1024; // 5MB hard cap (atomic-ingest gate)
     setFiles((prev) => {
       const seen = new Set(prev.map((p) => `${p.file.name}-${p.file.size}-${p.file.lastModified}`));
       const next = [...prev];
       for (const file of Array.from(list)) {
         if (next.length >= 5) break;
-        if (!file.type.startsWith("image/")) { toast.error("يسمح بالصور فقط"); continue; }
-        if (file.size > 10 * 1024 * 1024) { toast.error(`${file.name}: الحجم أكبر من 10MB`); continue; }
+        const mime = (file.type || "").toLowerCase();
+        if (!ALLOWED_MIME.has(mime)) {
+          toast.error(`${file.name}: نوع غير مسموح — JPEG / PNG / PDF فقط`);
+          continue;
+        }
+        if (file.size > MAX_BYTES) {
+          toast.error(`${file.name}: الحجم أكبر من 5MB`);
+          continue;
+        }
+        if (file.size <= 0) { toast.error(`${file.name}: ملف فارغ`); continue; }
         const key = `${file.name}-${file.size}-${file.lastModified}`;
         if (seen.has(key)) continue;
         seen.add(key);
@@ -149,6 +159,7 @@ function PrescriptionPage() {
       return next;
     });
   }
+
 
   function removeFile(i: number) {
     setFiles((prev) => {
