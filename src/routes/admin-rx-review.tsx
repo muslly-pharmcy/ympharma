@@ -49,17 +49,26 @@ const STATUS_TONE: Record<Status, string> = {
   REJECTED: "bg-zinc-200 text-zinc-800",
 };
 
-const searchSchema = z.object({
-  tab: fallback(z.enum(STATUSES), "PENDING_REVIEW").default("PENDING_REVIEW"),
-  q: fallback(z.string(), "").default(""),
-  page: fallback(z.number().int().min(1), 1).default(1),
-  rx: fallback(z.string(), "").default(""),
-});
+type Search = { tab: Status; q: string; page: number; rx: string };
+
+function parseSearch(s: Record<string, unknown>): Search {
+  const tab = (STATUSES as readonly string[]).includes(String(s.tab))
+    ? (s.tab as Status)
+    : "PENDING_REVIEW";
+  const page = Math.max(1, Number(s.page) || 1);
+  return {
+    tab,
+    q: typeof s.q === "string" ? s.q : "",
+    page,
+    rx: typeof s.rx === "string" ? s.rx : "",
+  };
+}
 
 const PAGE_SIZE = 25;
 
 export const Route = createFileRoute("/admin-rx-review")({
-  validateSearch: zodValidator(searchSchema),
+  validateSearch: parseSearch,
+
   head: () => ({
     meta: [
       { title: "مراجعة الروشتات — الإدارة" },
