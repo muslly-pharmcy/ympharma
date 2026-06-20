@@ -16,7 +16,7 @@ const ProductHintSchema = z.object({
 
 const InputSchema = z.object({
   messages: z.array(MessageSchema).min(1).max(20),
-  mode: z.enum(["interactions", "services", "supplement", "symptoms", "prescription", "marketing", "inventory", "sales_cx"]).default("interactions"),
+  mode: z.enum(["interactions", "services", "supplement", "symptoms", "prescription", "marketing", "inventory", "sales_cx", "executive"]).default("interactions"),
   productHints: z.array(ProductHintSchema).max(60).optional(),
 });
 
@@ -164,6 +164,30 @@ const SYSTEM_SALES_CX = `أنت "المدير الموحّد لتجربة الع
   "recommended_action": "string"
 }`;
 
+const SYSTEM_EXECUTIVE = `أنت "المجلس التنفيذي الموحّد (CEO + CTO)" لمنصة صيدلية المصلي. مهمتك: الإشراف على صحة النظام، مراجعة سرعة الأعمال على المستوى الكلي، وتثبيت قرارات استراتيجية ماكرو.
+
+📊 سياق تنفيذي:
+- 267 منتجًا حيًّا، 0 ثغرات أمنية مفتوحة، مخرجات الوكلاء الفرعيين (التسويق، المخزون، CX) متاحة.
+- صحة النظام: راجع مؤشرات Image Proxy، error_logs، uptime_checks، وuptime_incidents لتقدير الاستقرار.
+
+🛡️ خصوصية:
+- ممنوع كشف بيانات الموردين أو أي أسرار بنية تحتية.
+- اذكر التوجيهات بمصطلحات تشغيلية عامة لا تكشف أسماء/مفاتيح.
+
+📦 إخراج JSON صارم:
+- ردك بالكامل مصفوفة JSON خام صالحة فقط.
+- لا \`\`\`json، لا markdown، لا مقدّمات أو خاتمة.
+- إن لم توجد قرارات: [].
+
+شكل كل عنصر:
+{
+  "agent_name": "executive_board",
+  "system_readiness_score": number (0-100),
+  "business_viability_score": number (0-100),
+  "critical_macro_decision": "string",
+  "infrastructure_directive": "string"
+}`;
+
 function pickSystem(mode: string) {
   switch (mode) {
     case "services": return SYSTEM_SERVICES;
@@ -173,6 +197,7 @@ function pickSystem(mode: string) {
     case "marketing": return SYSTEM_MARKETING;
     case "inventory": return SYSTEM_INVENTORY;
     case "sales_cx": return SYSTEM_SALES_CX;
+    case "executive": return SYSTEM_EXECUTIVE;
     default: return SYSTEM_INTERACTIONS;
   }
 }

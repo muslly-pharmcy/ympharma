@@ -47,6 +47,7 @@ import { Route as AdminBackupsRouteImport } from './routes/admin-backups'
 import { Route as AdminAiSalesCxRouteImport } from './routes/admin-ai-sales-cx'
 import { Route as AdminAiMarketingRouteImport } from './routes/admin-ai-marketing'
 import { Route as AdminAiInventoryRouteImport } from './routes/admin-ai-inventory'
+import { Route as AdminAiExecutiveRouteImport } from './routes/admin-ai-executive'
 import { Route as AdminAgentsRouteImport } from './routes/admin-agents'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -267,6 +268,11 @@ const AdminAiInventoryRoute = AdminAiInventoryRouteImport.update({
   path: '/admin-ai-inventory',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAiExecutiveRoute = AdminAiExecutiveRouteImport.update({
+  id: '/admin-ai-executive',
+  path: '/admin-ai-executive',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAgentsRoute = AdminAgentsRouteImport.update({
   id: '/admin-agents',
   path: '/admin-agents',
@@ -430,6 +436,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/admin-agents': typeof AdminAgentsRoute
+  '/admin-ai-executive': typeof AdminAiExecutiveRoute
   '/admin-ai-inventory': typeof AdminAiInventoryRoute
   '/admin-ai-marketing': typeof AdminAiMarketingRoute
   '/admin-ai-sales-cx': typeof AdminAiSalesCxRoute
@@ -499,6 +506,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/admin-agents': typeof AdminAgentsRoute
+  '/admin-ai-executive': typeof AdminAiExecutiveRoute
   '/admin-ai-inventory': typeof AdminAiInventoryRoute
   '/admin-ai-marketing': typeof AdminAiMarketingRoute
   '/admin-ai-sales-cx': typeof AdminAiSalesCxRoute
@@ -569,6 +577,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/admin-agents': typeof AdminAgentsRoute
+  '/admin-ai-executive': typeof AdminAiExecutiveRoute
   '/admin-ai-inventory': typeof AdminAiInventoryRoute
   '/admin-ai-marketing': typeof AdminAiMarketingRoute
   '/admin-ai-sales-cx': typeof AdminAiSalesCxRoute
@@ -640,6 +649,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/admin-agents'
+    | '/admin-ai-executive'
     | '/admin-ai-inventory'
     | '/admin-ai-marketing'
     | '/admin-ai-sales-cx'
@@ -709,6 +719,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/admin-agents'
+    | '/admin-ai-executive'
     | '/admin-ai-inventory'
     | '/admin-ai-marketing'
     | '/admin-ai-sales-cx'
@@ -778,6 +789,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/admin-agents'
+    | '/admin-ai-executive'
     | '/admin-ai-inventory'
     | '/admin-ai-marketing'
     | '/admin-ai-sales-cx'
@@ -848,6 +860,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AdminAgentsRoute: typeof AdminAgentsRoute
+  AdminAiExecutiveRoute: typeof AdminAiExecutiveRoute
   AdminAiInventoryRoute: typeof AdminAiInventoryRoute
   AdminAiMarketingRoute: typeof AdminAiMarketingRoute
   AdminAiSalesCxRoute: typeof AdminAiSalesCxRoute
@@ -1181,6 +1194,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAiInventoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin-ai-executive': {
+      id: '/admin-ai-executive'
+      path: '/admin-ai-executive'
+      fullPath: '/admin-ai-executive'
+      preLoaderRoute: typeof AdminAiExecutiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin-agents': {
       id: '/admin-agents'
       path: '/admin-agents'
@@ -1403,6 +1423,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AdminAgentsRoute: AdminAgentsRoute,
+  AdminAiExecutiveRoute: AdminAiExecutiveRoute,
   AdminAiInventoryRoute: AdminAiInventoryRoute,
   AdminAiMarketingRoute: AdminAiMarketingRoute,
   AdminAiSalesCxRoute: AdminAiSalesCxRoute,
