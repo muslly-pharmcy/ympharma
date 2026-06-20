@@ -186,7 +186,7 @@ export type Database = {
       }
       agent_runs: {
         Row: {
-          agent: string
+          agent: Database["public"]["Enums"]["valid_agent_modes"]
           confidence: number | null
           created_at: string
           details: Json
@@ -202,7 +202,7 @@ export type Database = {
           summary: string | null
         }
         Insert: {
-          agent: string
+          agent: Database["public"]["Enums"]["valid_agent_modes"]
           confidence?: number | null
           created_at?: string
           details?: Json
@@ -218,7 +218,7 @@ export type Database = {
           summary?: string | null
         }
         Update: {
-          agent?: string
+          agent?: Database["public"]["Enums"]["valid_agent_modes"]
           confidence?: number | null
           created_at?: string
           details?: Json
@@ -2160,6 +2160,20 @@ export type Database = {
         | "oncology"
         | "mental_health"
         | "other"
+      valid_agent_modes:
+        | "pharmacist"
+        | "inventory"
+        | "procurement"
+        | "refill"
+        | "marketing"
+        | "import_excel_classifier"
+        | "bi"
+        | "ceo"
+        | "cto"
+        | "cx"
+        | "operations"
+        | "sales"
+        | "whatsapp"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2310,6 +2324,21 @@ export const Constants = {
         "oncology",
         "mental_health",
         "other",
+      ],
+      valid_agent_modes: [
+        "pharmacist",
+        "inventory",
+        "procurement",
+        "refill",
+        "marketing",
+        "import_excel_classifier",
+        "bi",
+        "ceo",
+        "cto",
+        "cx",
+        "operations",
+        "sales",
+        "whatsapp",
       ],
     },
   },
