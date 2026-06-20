@@ -238,8 +238,7 @@ export const markReceived = createServerFn({ method: "POST" })
     }
     if (data.items && data.items.length) {
       for (const it of data.items) {
-        const { error } = await context.supabase
-          .from("transfer_items")
+        const { error } = await (context.supabase.from("transfer_items") as any)
           .update({ qty_received: it.qty_received })
           .eq("id", it.item_id).eq("transfer_id", data.id);
         if (error) throw new Error(error.message);
