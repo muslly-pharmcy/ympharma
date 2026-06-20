@@ -37,6 +37,7 @@ import { Route as AdminOffersRouteImport } from './routes/admin-offers'
 import { Route as AdminMarketingRouteImport } from './routes/admin-marketing'
 import { Route as AdminLogsRouteImport } from './routes/admin-logs'
 import { Route as AdminInventoryRouteImport } from './routes/admin-inventory'
+import { Route as AdminEventBusRouteImport } from './routes/admin-event-bus'
 import { Route as AdminDiscountsRouteImport } from './routes/admin-discounts'
 import { Route as AdminDiagnosticsRouteImport } from './routes/admin-diagnostics'
 import { Route as AdminCommandRouteImport } from './routes/admin-command'
@@ -228,6 +229,11 @@ const AdminLogsRoute = AdminLogsRouteImport.update({
 const AdminInventoryRoute = AdminInventoryRouteImport.update({
   id: '/admin-inventory',
   path: '/admin-inventory',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminEventBusRoute = AdminEventBusRouteImport.update({
+  id: '/admin-event-bus',
+  path: '/admin-event-bus',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminDiscountsRoute = AdminDiscountsRouteImport.update({
@@ -531,6 +537,7 @@ export interface FileRoutesByFullPath {
   '/admin-command': typeof AdminCommandRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
   '/admin-discounts': typeof AdminDiscountsRoute
+  '/admin-event-bus': typeof AdminEventBusRoute
   '/admin-inventory': typeof AdminInventoryRoute
   '/admin-logs': typeof AdminLogsRoute
   '/admin-marketing': typeof AdminMarketingRoute
@@ -613,6 +620,7 @@ export interface FileRoutesByTo {
   '/admin-command': typeof AdminCommandRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
   '/admin-discounts': typeof AdminDiscountsRoute
+  '/admin-event-bus': typeof AdminEventBusRoute
   '/admin-inventory': typeof AdminInventoryRoute
   '/admin-logs': typeof AdminLogsRoute
   '/admin-marketing': typeof AdminMarketingRoute
@@ -696,6 +704,7 @@ export interface FileRoutesById {
   '/admin-command': typeof AdminCommandRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
   '/admin-discounts': typeof AdminDiscountsRoute
+  '/admin-event-bus': typeof AdminEventBusRoute
   '/admin-inventory': typeof AdminInventoryRoute
   '/admin-logs': typeof AdminLogsRoute
   '/admin-marketing': typeof AdminMarketingRoute
@@ -780,6 +789,7 @@ export interface FileRouteTypes {
     | '/admin-command'
     | '/admin-diagnostics'
     | '/admin-discounts'
+    | '/admin-event-bus'
     | '/admin-inventory'
     | '/admin-logs'
     | '/admin-marketing'
@@ -862,6 +872,7 @@ export interface FileRouteTypes {
     | '/admin-command'
     | '/admin-diagnostics'
     | '/admin-discounts'
+    | '/admin-event-bus'
     | '/admin-inventory'
     | '/admin-logs'
     | '/admin-marketing'
@@ -944,6 +955,7 @@ export interface FileRouteTypes {
     | '/admin-command'
     | '/admin-diagnostics'
     | '/admin-discounts'
+    | '/admin-event-bus'
     | '/admin-inventory'
     | '/admin-logs'
     | '/admin-marketing'
@@ -1027,6 +1039,7 @@ export interface RootRouteChildren {
   AdminCommandRoute: typeof AdminCommandRoute
   AdminDiagnosticsRoute: typeof AdminDiagnosticsRoute
   AdminDiscountsRoute: typeof AdminDiscountsRoute
+  AdminEventBusRoute: typeof AdminEventBusRoute
   AdminInventoryRoute: typeof AdminInventoryRoute
   AdminLogsRoute: typeof AdminLogsRoute
   AdminMarketingRoute: typeof AdminMarketingRoute
@@ -1280,6 +1293,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-inventory'
       fullPath: '/admin-inventory'
       preLoaderRoute: typeof AdminInventoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-event-bus': {
+      id: '/admin-event-bus'
+      path: '/admin-event-bus'
+      fullPath: '/admin-event-bus'
+      preLoaderRoute: typeof AdminEventBusRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-discounts': {
@@ -1686,6 +1706,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminCommandRoute: AdminCommandRoute,
   AdminDiagnosticsRoute: AdminDiagnosticsRoute,
   AdminDiscountsRoute: AdminDiscountsRoute,
+  AdminEventBusRoute: AdminEventBusRoute,
   AdminInventoryRoute: AdminInventoryRoute,
   AdminLogsRoute: AdminLogsRoute,
   AdminMarketingRoute: AdminMarketingRoute,
