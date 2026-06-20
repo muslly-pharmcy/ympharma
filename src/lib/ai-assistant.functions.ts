@@ -459,6 +459,7 @@ function pickSystem(mode: string) {
     case "inventory": return SYSTEM_INVENTORY;
     case "sales_cx": return SYSTEM_SALES_CX;
     case "executive": return SYSTEM_EXECUTIVE;
+    case "executive_dashboard": return SYSTEM_EXECUTIVE_DASHBOARD;
     case "whatsapp": return SYSTEM_WHATSAPP;
     case "catalog": return SYSTEM_CATALOG;
     case "pharmacist": return SYSTEM_PHARMACIST;
