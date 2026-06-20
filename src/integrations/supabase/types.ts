@@ -89,7 +89,7 @@ export type Database = {
           category: string
           confidence: number | null
           created_at: string
-          dedupe_key: string | null
+          dedupe_key: string
           id: string
           impact_estimate: number | null
           payload: Json
@@ -103,7 +103,7 @@ export type Database = {
           category: string
           confidence?: number | null
           created_at?: string
-          dedupe_key?: string | null
+          dedupe_key?: string
           id?: string
           impact_estimate?: number | null
           payload?: Json
@@ -117,7 +117,7 @@ export type Database = {
           category?: string
           confidence?: number | null
           created_at?: string
-          dedupe_key?: string | null
+          dedupe_key?: string
           id?: string
           impact_estimate?: number | null
           payload?: Json
@@ -1029,7 +1029,7 @@ export type Database = {
       operations_alerts: {
         Row: {
           created_at: string
-          dedupe_key: string | null
+          dedupe_key: string
           id: string
           kind: string
           ref_id: string | null
@@ -1040,7 +1040,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          dedupe_key?: string | null
+          dedupe_key?: string
           id?: string
           kind: string
           ref_id?: string | null
@@ -1051,7 +1051,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          dedupe_key?: string | null
+          dedupe_key?: string
           id?: string
           kind?: string
           ref_id?: string | null
@@ -1519,7 +1519,7 @@ export type Database = {
       }
       system_incidents: {
         Row: {
-          dedupe_key: string | null
+          dedupe_key: string
           evidence: Json
           id: string
           opened_at: string
@@ -1531,7 +1531,7 @@ export type Database = {
           title: string
         }
         Insert: {
-          dedupe_key?: string | null
+          dedupe_key?: string
           evidence?: Json
           id?: string
           opened_at?: string
@@ -1543,7 +1543,7 @@ export type Database = {
           title: string
         }
         Update: {
-          dedupe_key?: string | null
+          dedupe_key?: string
           evidence?: Json
           id?: string
           opened_at?: string
