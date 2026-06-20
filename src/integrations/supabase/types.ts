@@ -59,45 +59,81 @@ export type Database = {
           agent_name: string
           approved_at: string | null
           approved_by: string | null
+          compiled_arabic_output: string | null
           created_at: string
           error_message: string | null
           executed_at: string | null
+          execution_status:
+            | Database["public"]["Enums"]["action_execution_status"]
+            | null
           id: string
+          originating_agent:
+            | Database["public"]["Enums"]["valid_agent_modes"]
+            | null
           payload: Json
+          priority_level: string | null
           recommendation_id: string | null
           result: Json | null
           status: string
+          target_pipeline:
+            | Database["public"]["Enums"]["action_target_pipeline"]
+            | null
           updated_at: string
+          updated_by_admin: string | null
         }
         Insert: {
           action_type: string
           agent_name: string
           approved_at?: string | null
           approved_by?: string | null
+          compiled_arabic_output?: string | null
           created_at?: string
           error_message?: string | null
           executed_at?: string | null
+          execution_status?:
+            | Database["public"]["Enums"]["action_execution_status"]
+            | null
           id?: string
+          originating_agent?:
+            | Database["public"]["Enums"]["valid_agent_modes"]
+            | null
           payload?: Json
+          priority_level?: string | null
           recommendation_id?: string | null
           result?: Json | null
           status?: string
+          target_pipeline?:
+            | Database["public"]["Enums"]["action_target_pipeline"]
+            | null
           updated_at?: string
+          updated_by_admin?: string | null
         }
         Update: {
           action_type?: string
           agent_name?: string
           approved_at?: string | null
           approved_by?: string | null
+          compiled_arabic_output?: string | null
           created_at?: string
           error_message?: string | null
           executed_at?: string | null
+          execution_status?:
+            | Database["public"]["Enums"]["action_execution_status"]
+            | null
           id?: string
+          originating_agent?:
+            | Database["public"]["Enums"]["valid_agent_modes"]
+            | null
           payload?: Json
+          priority_level?: string | null
           recommendation_id?: string | null
           result?: Json | null
           status?: string
+          target_pipeline?:
+            | Database["public"]["Enums"]["action_target_pipeline"]
+            | null
           updated_at?: string
+          updated_by_admin?: string | null
         }
         Relationships: [
           {
@@ -1993,6 +2029,15 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      enqueue_chronic_refill_action: {
+        Args: {
+          _customer_phone: string
+          _discount_code: string
+          _message_arabic: string
+          _tier: string
+        }
+        Returns: string
+      }
       enqueue_chronic_refills: {
         Args: { _discount_pct?: number; _limit?: number }
         Returns: Json
@@ -2137,6 +2182,16 @@ export type Database = {
       weekly_exec_report_build: { Args: never; Returns: Json }
     }
     Enums: {
+      action_execution_status:
+        | "PENDING_APPROVAL"
+        | "EXECUTED"
+        | "SKIPPED"
+        | "FAILED"
+      action_target_pipeline:
+        | "PRESCRIPTIONS"
+        | "ORDERS"
+        | "MARKETING_QUEUE"
+        | "INVENTORY"
       app_role: "admin" | "user" | "owner"
       classification_status: "pending" | "approved" | "rejected"
       therapeutic_category:
@@ -2301,6 +2356,18 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      action_execution_status: [
+        "PENDING_APPROVAL",
+        "EXECUTED",
+        "SKIPPED",
+        "FAILED",
+      ],
+      action_target_pipeline: [
+        "PRESCRIPTIONS",
+        "ORDERS",
+        "MARKETING_QUEUE",
+        "INVENTORY",
+      ],
       app_role: ["admin", "user", "owner"],
       classification_status: ["pending", "approved", "rejected"],
       therapeutic_category: [
