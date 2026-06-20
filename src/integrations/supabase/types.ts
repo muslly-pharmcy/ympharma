@@ -2007,6 +2007,9 @@ export type Database = {
           prescription_file_id: string
           prescription_id: string
           raw_response: Json | null
+          reviewer_approved_at: string | null
+          reviewer_approved_by: string | null
+          reviewer_edits: Json | null
           source_type: string
           status: string
           updated_at: string
@@ -2029,6 +2032,9 @@ export type Database = {
           prescription_file_id: string
           prescription_id: string
           raw_response?: Json | null
+          reviewer_approved_at?: string | null
+          reviewer_approved_by?: string | null
+          reviewer_edits?: Json | null
           source_type?: string
           status?: string
           updated_at?: string
@@ -2051,6 +2057,9 @@ export type Database = {
           prescription_file_id?: string
           prescription_id?: string
           raw_response?: Json | null
+          reviewer_approved_at?: string | null
+          reviewer_approved_by?: string | null
+          reviewer_edits?: Json | null
           source_type?: string
           status?: string
           updated_at?: string
