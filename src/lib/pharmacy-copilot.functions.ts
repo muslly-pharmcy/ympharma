@@ -10,7 +10,7 @@ async function assertAdmin(ctx: { supabase: any; userId: string }) {
   const { data: isOwner } = await ctx.supabase.rpc("has_role", { _user_id: ctx.userId, _role: "owner" });
   const { data: isAdmin } = await ctx.supabase.rpc("has_role", { _user_id: ctx.userId, _role: "admin" });
   if (!isOwner && !isAdmin) {
-    const { data: hasOrders } = await ctx.supabase.rpc("has_permission", { _user_id: ctx.userId, _permission: "orders" });
+    const { data: hasOrders } = await ctx.supabase.rpc("has_permission", { _user_id: ctx.userId, _perm: "orders" });
     if (!hasOrders) throw new Error("forbidden");
   }
 }
