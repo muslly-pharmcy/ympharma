@@ -14,10 +14,20 @@ type Status = "ALL" | "UNPROCESSED" | "PROCESSED";
 function EventBusPage() {
   const [status, setStatus] = useState<Status>("UNPROCESSED");
   const [eventName, setEventName] = useState<string>("");
+  const [installing, setInstalling] = useState(false);
+  const [installMsg, setInstallMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
   const list = useServerFn(listAgentEvents);
   const stats = useServerFn(agentEventStats);
   const mark = useServerFn(markAgentEventProcessed);
+  const installSchedule = useServerFn(installEventConsumerSchedule);
+  const getSchedule = useServerFn(getEventConsumerSchedule);
   const qc = useQueryClient();
+
+  const scheduleQ = useQuery({
+    queryKey: ["event_consumer_schedule"],
+    queryFn: () => getSchedule(),
+    refetchInterval: 60_000,
+  });
 
   const rowsQ = useQuery({
     queryKey: ["agent_events", status, eventName],
