@@ -158,6 +158,7 @@ function CommandCenter() {
           <div className="flex flex-wrap items-center gap-2">
             <Link to="/admin-marketing" className="rounded-xl bg-primary/15 px-3 py-2 text-xs font-bold text-primary hover:bg-primary/25">📣 قائمة الحملات</Link>
             <Link to="/admin-agents" className="rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">🤖 سجل الوكلاء</Link>
+            <Link to="/admin-workforce" className="rounded-xl bg-primary px-3 py-2 text-xs font-bold text-primary-foreground hover:opacity-90">⚡ غرفة الوكلاء</Link>
             <button onClick={onRebuild} disabled={rebuilding} className="flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-bold text-primary-foreground disabled:opacity-50">
               {rebuilding ? <Loader2 className="size-4 animate-spin" /> : <PlayCircle className="size-4" />}
               إعادة بناء الآن
