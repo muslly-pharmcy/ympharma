@@ -2428,6 +2428,59 @@ export type Database = {
         }
         Relationships: []
       }
+      supplier_link_audit: {
+        Row: {
+          after_supplier_cost: number | null
+          after_supplier_name: string | null
+          batch_id: string
+          before_supplier_cost: number | null
+          before_supplier_name: string | null
+          created_at: string
+          id: string
+          performed_by: string | null
+          product_id: string
+          reason: string | null
+          rolled_back_at: string | null
+          rolled_back_by: string | null
+        }
+        Insert: {
+          after_supplier_cost?: number | null
+          after_supplier_name?: string | null
+          batch_id?: string
+          before_supplier_cost?: number | null
+          before_supplier_name?: string | null
+          created_at?: string
+          id?: string
+          performed_by?: string | null
+          product_id: string
+          reason?: string | null
+          rolled_back_at?: string | null
+          rolled_back_by?: string | null
+        }
+        Update: {
+          after_supplier_cost?: number | null
+          after_supplier_name?: string | null
+          batch_id?: string
+          before_supplier_cost?: number | null
+          before_supplier_name?: string | null
+          created_at?: string
+          id?: string
+          performed_by?: string | null
+          product_id?: string
+          reason?: string | null
+          rolled_back_at?: string | null
+          rolled_back_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_link_audit_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppressed_emails: {
         Row: {
           created_at: string
@@ -2594,6 +2647,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      trigger_metrics: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          error_message: string | null
+          id: string
+          payload: Json
+          status: string
+          trigger_name: string
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          payload?: Json
+          status: string
+          trigger_name: string
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          payload?: Json
+          status?: string
+          trigger_name?: string
+        }
+        Relationships: []
       }
       trust_pages: {
         Row: {
