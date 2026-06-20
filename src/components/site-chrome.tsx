@@ -132,7 +132,7 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
 export function SiteFooter() {
   const { t } = useI18n();
   return (
-    <footer className="mt-12 border-t border-border bg-card">
+    <footer id="site-footer" className="mt-12 border-t border-border bg-card">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <div className="flex items-center gap-3">
