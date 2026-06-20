@@ -100,3 +100,35 @@ export const markAgentEventProcessed = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
+
+// Batch 5b — DLQ surface for the admin event-bus page.
+export const agentEventsDlqStats = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { data, error } = await context.supabase.rpc("agent_events_dlq_stats" as never);
+    if (error) throw new Error(error.message);
+    return { ok: true as const, stats: (data as Record<string, unknown>) ?? {} };
+  });
+
+const DlqListInput = z.object({
+  unresolved_only: z.boolean().default(true),
+  limit: z.number().int().min(1).max(200).default(50),
+});
+
+export const listAgentEventsDlq = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => DlqListInput.parse(d ?? {}))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    let q = context.supabase
+      .from("agent_events_dlq" as never)
+      .select("id, original_id, event_name, entity_type, entity_id, retry_count, last_error, failed_at, resolved_at, resolution_note")
+      .order("failed_at", { ascending: false })
+      .limit(data.limit);
+    if (data.unresolved_only) q = q.is("resolved_at", null);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return { ok: true as const, rows: (rows as unknown[]) ?? [] };
+  });
+
