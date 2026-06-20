@@ -62,7 +62,7 @@ function Page() {
           <ul className="text-sm space-y-1">
             {s.low_stock.map((p: any) => (
               <li key={p.id} className="flex justify-between">
-                <span>{p.name_ar ?? p.name_en}</span>
+                <span>{p.name}</span>
                 <span className="font-mono">stock={p.stock_qty} · reorder@{p.reorder_point ?? "—"}</span>
               </li>
             ))}
