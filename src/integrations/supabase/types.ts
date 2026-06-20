@@ -2587,6 +2587,28 @@ export type Database = {
       }
       auto_populate_bundle_items: { Args: never; Returns: number }
       bootstrap_owner: { Args: never; Returns: boolean }
+      branch_reorder_suggestions: {
+        Args: {
+          _branch_id: string
+          _coverage_days?: number
+          _limit?: number
+          _lookback_days?: number
+        }
+        Returns: {
+          available: number
+          branch_id: string
+          daily_velocity: number
+          movement_qty_30d: number
+          on_hand: number
+          product_id: string
+          product_name: string
+          reason: string
+          reorder_point: number
+          reserved: number
+          suggested_restock_qty: number
+          urgency: string
+        }[]
+      }
       campaign_report: { Args: never; Returns: Json }
       cancel_transfer: {
         Args: { _reason?: string; _transfer_id: string }
