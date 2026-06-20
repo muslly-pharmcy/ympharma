@@ -40,7 +40,7 @@ function Page() {
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
           <Link to="/admin-inventory" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent"><ArrowRight className="size-4" /> رجوع</Link>
           <h1 className="text-base font-black">المتشابهات + المخزون + الموردين</h1>
-          <div />
+          <Link to="/admin-trigger-failures" className="rounded-xl bg-rose-500/10 text-rose-600 px-3 py-2 text-xs font-bold hover:bg-rose-500/20">⚠ أحداث فشل</Link>
         </div>
         <div className="mx-auto flex max-w-7xl flex-wrap gap-1 px-4 pb-2">
           <TabBtn active={tab === "duplicates"} onClick={() => setTab("duplicates")} icon={<Copy className="size-4" />} label="المتشابهات" />
