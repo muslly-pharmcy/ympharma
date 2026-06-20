@@ -26,7 +26,7 @@ function ConditionsIndex() {
   useEffect(() => {
     let cancel = false;
     (async () => {
-      const { data, error } = await supabase.rpc("conditions_catalog");
+      const { data, error } = await (supabase as any).rpc("conditions_catalog");
       if (cancel) return;
       if (error) setErr(error.message);
       else setRows((data ?? []) as Row[]);

@@ -36,7 +36,7 @@ function ConditionPage() {
   useEffect(() => {
     let cancel = false;
     (async () => {
-      const { data, error } = await supabase.rpc("products_by_condition", { _condition: condition });
+      const { data, error } = await (supabase as any).rpc("products_by_condition", { _condition: condition });
       if (cancel) return;
       if (error) setErr(error.message);
       else setRows((data ?? []) as Row[]);

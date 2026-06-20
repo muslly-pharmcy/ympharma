@@ -21,6 +21,7 @@ import { Route as PrescriptionRouteImport } from './routes/prescription'
 import { Route as NetworkTestRouteImport } from './routes/network-test'
 import { Route as NetworkHealthRouteImport } from './routes/network-health'
 import { Route as InsuranceRouteImport } from './routes/insurance'
+import { Route as ConditionsRouteImport } from './routes/conditions'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as BundlesRouteImport } from './routes/bundles'
 import { Route as AiSymptomsRouteImport } from './routes/ai-symptoms'
@@ -46,6 +47,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/public/whatsapp-webhook'
 import { Route as ApiPublicUptimeWebhookRouteImport } from './routes/api/public/uptime-webhook'
@@ -59,6 +61,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as ApiPublicHooksWeeklyExecReportRouteImport } from './routes/api/public/hooks/weekly-exec-report'
 import { Route as ApiPublicHooksWeeklyAiEnrichRouteImport } from './routes/api/public/hooks/weekly-ai-enrich'
 import { Route as ApiPublicHooksNightlyIntelRouteImport } from './routes/api/public/hooks/nightly-intel'
+import { Route as ApiPublicHooksChronicRefillsRouteImport } from './routes/api/public/hooks/chronic-refills'
 import { Route as ApiPublicHooksAlertsWorkerRouteImport } from './routes/api/public/hooks/alerts-worker'
 
 const YemenDebugRoute = YemenDebugRouteImport.update({
@@ -119,6 +122,11 @@ const NetworkHealthRoute = NetworkHealthRouteImport.update({
 const InsuranceRoute = InsuranceRouteImport.update({
   id: '/insurance',
   path: '/insurance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConditionsRoute = ConditionsRouteImport.update({
+  id: '/conditions',
+  path: '/conditions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CartRoute = CartRouteImport.update({
@@ -246,6 +254,11 @@ const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   path: '/email/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConditionsSlugRoute = ConditionsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ConditionsRoute,
+} as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -318,6 +331,12 @@ const ApiPublicHooksNightlyIntelRoute =
     path: '/api/public/hooks/nightly-intel',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksChronicRefillsRoute =
+  ApiPublicHooksChronicRefillsRouteImport.update({
+    id: '/api/public/hooks/chronic-refills',
+    path: '/api/public/hooks/chronic-refills',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksAlertsWorkerRoute =
   ApiPublicHooksAlertsWorkerRouteImport.update({
     id: '/api/public/hooks/alerts-worker',
@@ -349,6 +368,7 @@ export interface FileRoutesByFullPath {
   '/ai-symptoms': typeof AiSymptomsRoute
   '/bundles': typeof BundlesRoute
   '/cart': typeof CartRoute
+  '/conditions': typeof ConditionsRouteWithChildren
   '/insurance': typeof InsuranceRoute
   '/network-health': typeof NetworkHealthRoute
   '/network-test': typeof NetworkTestRoute
@@ -361,6 +381,7 @@ export interface FileRoutesByFullPath {
   '/trust': typeof TrustRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/yemen-debug': typeof YemenDebugRoute
+  '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/api/public/health': typeof ApiPublicHealthRoute
@@ -371,6 +392,7 @@ export interface FileRoutesByFullPath {
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
+  '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
@@ -402,6 +424,7 @@ export interface FileRoutesByTo {
   '/ai-symptoms': typeof AiSymptomsRoute
   '/bundles': typeof BundlesRoute
   '/cart': typeof CartRoute
+  '/conditions': typeof ConditionsRouteWithChildren
   '/insurance': typeof InsuranceRoute
   '/network-health': typeof NetworkHealthRoute
   '/network-test': typeof NetworkTestRoute
@@ -414,6 +437,7 @@ export interface FileRoutesByTo {
   '/trust': typeof TrustRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/yemen-debug': typeof YemenDebugRoute
+  '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/api/public/health': typeof ApiPublicHealthRoute
@@ -424,6 +448,7 @@ export interface FileRoutesByTo {
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
+  '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
@@ -456,6 +481,7 @@ export interface FileRoutesById {
   '/ai-symptoms': typeof AiSymptomsRoute
   '/bundles': typeof BundlesRoute
   '/cart': typeof CartRoute
+  '/conditions': typeof ConditionsRouteWithChildren
   '/insurance': typeof InsuranceRoute
   '/network-health': typeof NetworkHealthRoute
   '/network-test': typeof NetworkTestRoute
@@ -468,6 +494,7 @@ export interface FileRoutesById {
   '/trust': typeof TrustRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/yemen-debug': typeof YemenDebugRoute
+  '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/api/public/health': typeof ApiPublicHealthRoute
@@ -478,6 +505,7 @@ export interface FileRoutesById {
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
+  '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
@@ -511,6 +539,7 @@ export interface FileRouteTypes {
     | '/ai-symptoms'
     | '/bundles'
     | '/cart'
+    | '/conditions'
     | '/insurance'
     | '/network-health'
     | '/network-test'
@@ -523,6 +552,7 @@ export interface FileRouteTypes {
     | '/trust'
     | '/unsubscribe'
     | '/yemen-debug'
+    | '/conditions/$slug'
     | '/email/unsubscribe'
     | '/product/$id'
     | '/api/public/health'
@@ -533,6 +563,7 @@ export interface FileRouteTypes {
     | '/api/public/whatsapp-webhook'
     | '/lovable/email/suppression'
     | '/api/public/hooks/alerts-worker'
+    | '/api/public/hooks/chronic-refills'
     | '/api/public/hooks/nightly-intel'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
@@ -564,6 +595,7 @@ export interface FileRouteTypes {
     | '/ai-symptoms'
     | '/bundles'
     | '/cart'
+    | '/conditions'
     | '/insurance'
     | '/network-health'
     | '/network-test'
@@ -576,6 +608,7 @@ export interface FileRouteTypes {
     | '/trust'
     | '/unsubscribe'
     | '/yemen-debug'
+    | '/conditions/$slug'
     | '/email/unsubscribe'
     | '/product/$id'
     | '/api/public/health'
@@ -586,6 +619,7 @@ export interface FileRouteTypes {
     | '/api/public/whatsapp-webhook'
     | '/lovable/email/suppression'
     | '/api/public/hooks/alerts-worker'
+    | '/api/public/hooks/chronic-refills'
     | '/api/public/hooks/nightly-intel'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
@@ -617,6 +651,7 @@ export interface FileRouteTypes {
     | '/ai-symptoms'
     | '/bundles'
     | '/cart'
+    | '/conditions'
     | '/insurance'
     | '/network-health'
     | '/network-test'
@@ -629,6 +664,7 @@ export interface FileRouteTypes {
     | '/trust'
     | '/unsubscribe'
     | '/yemen-debug'
+    | '/conditions/$slug'
     | '/email/unsubscribe'
     | '/product/$id'
     | '/api/public/health'
@@ -639,6 +675,7 @@ export interface FileRouteTypes {
     | '/api/public/whatsapp-webhook'
     | '/lovable/email/suppression'
     | '/api/public/hooks/alerts-worker'
+    | '/api/public/hooks/chronic-refills'
     | '/api/public/hooks/nightly-intel'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
@@ -671,6 +708,7 @@ export interface RootRouteChildren {
   AiSymptomsRoute: typeof AiSymptomsRoute
   BundlesRoute: typeof BundlesRoute
   CartRoute: typeof CartRoute
+  ConditionsRoute: typeof ConditionsRouteWithChildren
   InsuranceRoute: typeof InsuranceRoute
   NetworkHealthRoute: typeof NetworkHealthRoute
   NetworkTestRoute: typeof NetworkTestRoute
@@ -693,6 +731,7 @@ export interface RootRouteChildren {
   ApiPublicWhatsappWebhookRoute: typeof ApiPublicWhatsappWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksAlertsWorkerRoute: typeof ApiPublicHooksAlertsWorkerRoute
+  ApiPublicHooksChronicRefillsRoute: typeof ApiPublicHooksChronicRefillsRoute
   ApiPublicHooksNightlyIntelRoute: typeof ApiPublicHooksNightlyIntelRoute
   ApiPublicHooksWeeklyAiEnrichRoute: typeof ApiPublicHooksWeeklyAiEnrichRoute
   ApiPublicHooksWeeklyExecReportRoute: typeof ApiPublicHooksWeeklyExecReportRoute
@@ -785,6 +824,13 @@ declare module '@tanstack/react-router' {
       path: '/insurance'
       fullPath: '/insurance'
       preLoaderRoute: typeof InsuranceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conditions': {
+      id: '/conditions'
+      path: '/conditions'
+      fullPath: '/conditions'
+      preLoaderRoute: typeof ConditionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cart': {
@@ -962,6 +1008,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmailUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/conditions/$slug': {
+      id: '/conditions/$slug'
+      path: '/$slug'
+      fullPath: '/conditions/$slug'
+      preLoaderRoute: typeof ConditionsSlugRouteImport
+      parentRoute: typeof ConditionsRoute
+    }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
       path: '/lovable/email/suppression'
@@ -1053,6 +1106,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksNightlyIntelRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/chronic-refills': {
+      id: '/api/public/hooks/chronic-refills'
+      path: '/api/public/hooks/chronic-refills'
+      fullPath: '/api/public/hooks/chronic-refills'
+      preLoaderRoute: typeof ApiPublicHooksChronicRefillsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/alerts-worker': {
       id: '/api/public/hooks/alerts-worker'
       path: '/api/public/hooks/alerts-worker'
@@ -1062,6 +1122,18 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface ConditionsRouteChildren {
+  ConditionsSlugRoute: typeof ConditionsSlugRoute
+}
+
+const ConditionsRouteChildren: ConditionsRouteChildren = {
+  ConditionsSlugRoute: ConditionsSlugRoute,
+}
+
+const ConditionsRouteWithChildren = ConditionsRoute._addFileChildren(
+  ConditionsRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -1087,6 +1159,7 @@ const rootRouteChildren: RootRouteChildren = {
   AiSymptomsRoute: AiSymptomsRoute,
   BundlesRoute: BundlesRoute,
   CartRoute: CartRoute,
+  ConditionsRoute: ConditionsRouteWithChildren,
   InsuranceRoute: InsuranceRoute,
   NetworkHealthRoute: NetworkHealthRoute,
   NetworkTestRoute: NetworkTestRoute,
@@ -1109,6 +1182,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicWhatsappWebhookRoute: ApiPublicWhatsappWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksAlertsWorkerRoute: ApiPublicHooksAlertsWorkerRoute,
+  ApiPublicHooksChronicRefillsRoute: ApiPublicHooksChronicRefillsRoute,
   ApiPublicHooksNightlyIntelRoute: ApiPublicHooksNightlyIntelRoute,
   ApiPublicHooksWeeklyAiEnrichRoute: ApiPublicHooksWeeklyAiEnrichRoute,
   ApiPublicHooksWeeklyExecReportRoute: ApiPublicHooksWeeklyExecReportRoute,
