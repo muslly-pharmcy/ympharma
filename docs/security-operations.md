@@ -102,20 +102,24 @@ RPCs that call it inherit the privileges via SECURITY DEFINER.
 
 ### What it does
 `src/lib/sentry.ts` initialises `@sentry/react` once on the client when
-`SENTRY_DSN` is set; otherwise it is a no-op. The root error boundary
+the server-fn `getSentryConfig()` returns a non-empty `SENTRY_DSN`;
+otherwise it is a no-op. The root error boundary
 (`src/routes/__root.tsx`) forwards every caught error to
 `captureClientError(error, { boundary: ... })`.
+
+The DSN is read on the server (not the client) and shipped via RPC.
+This avoids the reserved `VITE_` build-secret prefix and keeps DSN
+rotation a server-side concern. The DSN itself is a **public** identifier
+designed to be embedded in client bundles, so the round-trip is for
+configuration management, not secrecy.
 
 ### Configuration
 
 1. Create a Sentry project (or pick an existing one) and copy its DSN.
-2. Store it as a Lovable build secret named `SENTRY_DSN` — the
-   `VITE_` prefix makes it available to the client bundle, which Sentry
-   requires.
-3. Trigger a new build/deploy. No code change is needed.
-
-The DSN is a **public** identifier; it is meant to be embedded in client
-bundles and ingest endpoints are designed for hostile environments.
+2. Store it as a Lovable runtime secret named **`SENTRY_DSN`** (no `VITE_`
+   prefix — that prefix is reserved by Lovable Cloud).
+3. Trigger a new deploy. No code change is needed; `initSentry()` picks it
+   up on the next app boot.
 
 ### Verification
 
@@ -125,29 +129,25 @@ After deploy, open the published site and run in the browser console:
 throw new Error("sentry_smoke_test")
 ```
 
-The error appears in Sentry within ~30 s.
-
-To verify locally without a real DSN you can hardcode any string for one
-session and watch the network panel:
-
-```js
-import.meta.env.SENTRY_DSN
-// → "https://abcdef@o1.ingest.sentry.io/123"
-```
+The error appears in Sentry within ~30 s. You can also confirm the DSN
+made it to the client by checking the network panel for a POST to
+`*.ingest.sentry.io`.
 
 ### Operating
 
 | Task | How |
 | ---- | --- |
-| **Disable Sentry temporarily** | Delete the `SENTRY_DSN` secret and redeploy — `initSentry()` becomes a no-op |
+| **Disable Sentry temporarily** | Delete the `SENTRY_DSN` secret and redeploy — `getSentryConfig()` returns `null` and `initSentry()` becomes a no-op |
+| **Rotate the DSN** | Update the `SENTRY_DSN` secret and redeploy |
 | **Attach correlation_id to events** | Call `setCorrelationId(orderId)` from `src/lib/sentry.ts` after the user completes an order; every subsequent event carries the tag |
 | **Tune sample rates** | Edit `src/lib/sentry.ts` (`tracesSampleRate`, `replaysOnErrorSampleRate`) |
 | **Verify a release** | Trigger a deliberate error; ensure the event lands under the new release tag in Sentry |
 
 ### Failure modes
-- **Build succeeds but no events arrive** → `SENTRY_DSN` was set as a runtime-only (non-`VITE_`) secret. Rename to `SENTRY_DSN` and redeploy.
+- **Build succeeds but no events arrive** → `SENTRY_DSN` secret missing or empty. Re-add and redeploy.
 - **`Sentry is not defined` console errors** → `@sentry/react` not installed; run `bun add @sentry/react`.
-- **Builds fail after enabling** → `initSentry()` is wrapped in `try/catch` and the dependency is optional; if the build itself fails, the package install was incomplete. Re-run install.
+- **DSN request 401** → only happens if `getSentryConfig` is mistakenly wrapped with `requireSupabaseAuth`; it must remain unauthenticated (the DSN is publishable).
+
 
 ---
 
