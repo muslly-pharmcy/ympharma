@@ -72,7 +72,7 @@ export const listTransfers = createServerFn({ method: "GET" })
       .select("id,correlation_id,transfer_type,status,source_branch_id,destination_branch_id,requested_by,reason,created_at,updated_at")
       .order("created_at", { ascending: false })
       .limit(data.limit ?? 100);
-    if (data.status) q = q.eq("status", data.status);
+    if (data.status) q = q.eq("status", data.status as any);
     if (data.branch_id) {
       q = q.or(`source_branch_id.eq.${data.branch_id},destination_branch_id.eq.${data.branch_id}`);
     }

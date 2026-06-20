@@ -60,8 +60,8 @@ export const upsertBranch = createServerFn({ method: "POST" })
       if (error) throw new Error(error.message);
       return { ok: true, id: data.id };
     }
-    const { data: ins, error } = await context.supabase
-      .from("branches").insert(payload).select("id").single();
+    const { data: ins, error } = await (context.supabase.from("branches") as any)
+      .insert(payload).select("id").single();
     if (error) throw new Error(error.message);
     return { ok: true, id: (ins as { id: string }).id };
   });
