@@ -80,6 +80,7 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as ApiPublicHooksWeeklyExecReportRouteImport } from './routes/api/public/hooks/weekly-exec-report'
 import { Route as ApiPublicHooksWeeklyAiEnrichRouteImport } from './routes/api/public/hooks/weekly-ai-enrich'
+import { Route as ApiPublicHooksRxNotifyRouteImport } from './routes/api/public/hooks/rx-notify'
 import { Route as ApiPublicHooksRxMirrorRouteImport } from './routes/api/public/hooks/rx-mirror'
 import { Route as ApiPublicHooksNightlyIntelRouteImport } from './routes/api/public/hooks/nightly-intel'
 import { Route as ApiPublicHooksEventConsumerRouteImport } from './routes/api/public/hooks/event-consumer'
@@ -458,6 +459,11 @@ const ApiPublicHooksWeeklyAiEnrichRoute =
     path: '/api/public/hooks/weekly-ai-enrich',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksRxNotifyRoute = ApiPublicHooksRxNotifyRouteImport.update({
+  id: '/api/public/hooks/rx-notify',
+  path: '/api/public/hooks/rx-notify',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksRxMirrorRoute = ApiPublicHooksRxMirrorRouteImport.update({
   id: '/api/public/hooks/rx-mirror',
   path: '/api/public/hooks/rx-mirror',
@@ -610,6 +616,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
+  '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -697,6 +704,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
+  '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -785,6 +793,7 @@ export interface FileRoutesById {
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
+  '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -874,6 +883,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/nightly-intel'
     | '/api/public/hooks/rx-mirror'
+    | '/api/public/hooks/rx-notify'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
     | '/lovable/email/queue/process'
@@ -961,6 +971,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/nightly-intel'
     | '/api/public/hooks/rx-mirror'
+    | '/api/public/hooks/rx-notify'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
     | '/lovable/email/queue/process'
@@ -1048,6 +1059,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/nightly-intel'
     | '/api/public/hooks/rx-mirror'
+    | '/api/public/hooks/rx-notify'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
     | '/lovable/email/queue/process'
@@ -1135,6 +1147,7 @@ export interface RootRouteChildren {
   ApiPublicHooksEventConsumerRoute: typeof ApiPublicHooksEventConsumerRoute
   ApiPublicHooksNightlyIntelRoute: typeof ApiPublicHooksNightlyIntelRoute
   ApiPublicHooksRxMirrorRoute: typeof ApiPublicHooksRxMirrorRoute
+  ApiPublicHooksRxNotifyRoute: typeof ApiPublicHooksRxNotifyRoute
   ApiPublicHooksWeeklyAiEnrichRoute: typeof ApiPublicHooksWeeklyAiEnrichRoute
   ApiPublicHooksWeeklyExecReportRoute: typeof ApiPublicHooksWeeklyExecReportRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -1650,6 +1663,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksWeeklyAiEnrichRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/rx-notify': {
+      id: '/api/public/hooks/rx-notify'
+      path: '/api/public/hooks/rx-notify'
+      fullPath: '/api/public/hooks/rx-notify'
+      preLoaderRoute: typeof ApiPublicHooksRxNotifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/rx-mirror': {
       id: '/api/public/hooks/rx-mirror'
       path: '/api/public/hooks/rx-mirror'
@@ -1834,6 +1854,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksEventConsumerRoute: ApiPublicHooksEventConsumerRoute,
   ApiPublicHooksNightlyIntelRoute: ApiPublicHooksNightlyIntelRoute,
   ApiPublicHooksRxMirrorRoute: ApiPublicHooksRxMirrorRoute,
+  ApiPublicHooksRxNotifyRoute: ApiPublicHooksRxNotifyRoute,
   ApiPublicHooksWeeklyAiEnrichRoute: ApiPublicHooksWeeklyAiEnrichRoute,
   ApiPublicHooksWeeklyExecReportRoute: ApiPublicHooksWeeklyExecReportRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
