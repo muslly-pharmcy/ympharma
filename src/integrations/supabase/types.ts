@@ -2307,6 +2307,7 @@ export type Database = {
       }
       generate_agent_actions: { Args: never; Returns: number }
       generate_marketing_campaigns: { Args: never; Returns: Json }
+      get_event_consumer_schedule: { Args: never; Returns: Json }
       get_order_history_public: {
         Args: { _client_ip?: string; _id: string; _phone_last4: string }
         Returns: {
@@ -2433,6 +2434,15 @@ export type Database = {
       save_customer_ai_insight: {
         Args: { _insight: string; _phone: string }
         Returns: undefined
+      }
+      schedule_event_consumer: {
+        Args: {
+          _batch?: number
+          _cron_secret: string
+          _project_host?: string
+          _schedule?: string
+        }
+        Returns: Json
       }
       submit_prescription: {
         Args: { _customer: Json; _id: string; _image_urls: string[] }
