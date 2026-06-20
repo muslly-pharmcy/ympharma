@@ -2204,6 +2204,36 @@ export type Database = {
         }
         Relationships: []
       }
+      product_classifications_public: {
+        Row: {
+          conditions: string[] | null
+          id: string | null
+          pharmacological_class: string | null
+          related_legacy_ids: number[] | null
+          requires_prescription: boolean | null
+          status: Database["public"]["Enums"]["classification_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          conditions?: string[] | null
+          id?: string | null
+          pharmacological_class?: string | null
+          related_legacy_ids?: number[] | null
+          requires_prescription?: boolean | null
+          status?: Database["public"]["Enums"]["classification_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          conditions?: string[] | null
+          id?: string | null
+          pharmacological_class?: string | null
+          related_legacy_ids?: number[] | null
+          requires_prescription?: boolean | null
+          status?: Database["public"]["Enums"]["classification_status"] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       unprocessed_agent_events: {
         Row: {
           entity_id: string | null
