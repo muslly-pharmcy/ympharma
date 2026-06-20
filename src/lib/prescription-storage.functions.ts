@@ -55,7 +55,7 @@ export const listPrescriptionFiles = createServerFn({ method: "GET" })
   .handler(async ({ context, data }): Promise<{ rows: PrescriptionFileRow[]; total: number }> => {
     await assertAdmin(context.supabase, context.userId);
     let q = context.supabase
-      .from("prescription_files")
+      .from("prescription_files" as never)
       .select(
         "id, prescription_id, storage_provider, bucket, object_path, mime_type, size_bytes, sha256, legacy_blob_id, uploaded_via, created_at",
         { count: "exact" },
@@ -83,7 +83,7 @@ export const getPrescriptionFileUrl = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase, context.userId);
 
     const { data: file, error } = await context.supabase
-      .from("prescription_files")
+      .from("prescription_files" as never)
       .select("id, bucket, object_path, prescription_id, mime_type")
       .eq("id", data.fileId)
       .is("deleted_at", null)
@@ -141,12 +141,12 @@ export const getPrescriptionStorageReport = createServerFn({ method: "GET" })
 
     const [rxTotal, regTotal, blobTotal, regWithLink, mode, rxWithReg] = await Promise.all([
       supabaseAdmin.from("prescriptions").select("id", { count: "exact", head: true }),
-      supabaseAdmin.from("prescription_files").select("id", { count: "exact", head: true }).is("deleted_at", null),
+      supabaseAdmin.from("prescription_files" as never).select("id", { count: "exact", head: true }).is("deleted_at", null),
       supabaseAdmin.from("prescription_image_blobs" as never).select("id", { count: "exact", head: true }),
-      supabaseAdmin.from("prescription_files").select("id", { count: "exact", head: true })
+      supabaseAdmin.from("prescription_files" as never).select("id", { count: "exact", head: true })
         .not("legacy_blob_id", "is", null).is("deleted_at", null),
       supabaseAdmin.from("app_settings").select("value").eq("key", "prescription_storage_mode").maybeSingle(),
-      supabaseAdmin.from("prescription_files").select("prescription_id").is("deleted_at", null).limit(10000),
+      supabaseAdmin.from("prescription_files" as never).select("prescription_id").is("deleted_at", null).limit(10000),
     ]);
 
     const distinctRx = new Set<string>();
