@@ -82,14 +82,21 @@ export const getPrescriptionFileUrl = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context.supabase, context.userId);
 
-    const { data: file, error } = await context.supabase
+    const { data: fileRow, error } = await context.supabase
       .from("prescription_files" as never)
       .select("id, bucket, object_path, prescription_id, mime_type")
       .eq("id", data.fileId)
       .is("deleted_at", null)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    if (!file) throw new Error("not_found");
+    if (!fileRow) throw new Error("not_found");
+    const file = fileRow as unknown as {
+      id: string;
+      bucket: string;
+      object_path: string;
+      prescription_id: string;
+      mime_type: string | null;
+    };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const ttl = TTL[data.audience];
