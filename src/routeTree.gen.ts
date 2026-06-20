@@ -70,6 +70,7 @@ import { Route as ApiPublicHooksWeeklyAiEnrichRouteImport } from './routes/api/p
 import { Route as ApiPublicHooksNightlyIntelRouteImport } from './routes/api/public/hooks/nightly-intel'
 import { Route as ApiPublicHooksChronicRefillsRouteImport } from './routes/api/public/hooks/chronic-refills'
 import { Route as ApiPublicHooksAlertsWorkerRouteImport } from './routes/api/public/hooks/alerts-worker'
+import { Route as ApiPublicHooksAgentsWhatsappRouteImport } from './routes/api/public/hooks/agents/whatsapp'
 import { Route as ApiPublicHooksAgentsSalesRouteImport } from './routes/api/public/hooks/agents/sales'
 import { Route as ApiPublicHooksAgentsOperationsRouteImport } from './routes/api/public/hooks/agents/operations'
 import { Route as ApiPublicHooksAgentsMarketingRouteImport } from './routes/api/public/hooks/agents/marketing'
@@ -393,6 +394,12 @@ const ApiPublicHooksAlertsWorkerRoute =
     path: '/api/public/hooks/alerts-worker',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksAgentsWhatsappRoute =
+  ApiPublicHooksAgentsWhatsappRouteImport.update({
+    id: '/api/public/hooks/agents/whatsapp',
+    path: '/api/public/hooks/agents/whatsapp',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksAgentsSalesRoute =
   ApiPublicHooksAgentsSalesRouteImport.update({
     id: '/api/public/hooks/agents/sales',
@@ -508,6 +515,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/agents/marketing': typeof ApiPublicHooksAgentsMarketingRoute
   '/api/public/hooks/agents/operations': typeof ApiPublicHooksAgentsOperationsRoute
   '/api/public/hooks/agents/sales': typeof ApiPublicHooksAgentsSalesRoute
+  '/api/public/hooks/agents/whatsapp': typeof ApiPublicHooksAgentsWhatsappRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -579,6 +587,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/agents/marketing': typeof ApiPublicHooksAgentsMarketingRoute
   '/api/public/hooks/agents/operations': typeof ApiPublicHooksAgentsOperationsRoute
   '/api/public/hooks/agents/sales': typeof ApiPublicHooksAgentsSalesRoute
+  '/api/public/hooks/agents/whatsapp': typeof ApiPublicHooksAgentsWhatsappRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -651,6 +660,7 @@ export interface FileRoutesById {
   '/api/public/hooks/agents/marketing': typeof ApiPublicHooksAgentsMarketingRoute
   '/api/public/hooks/agents/operations': typeof ApiPublicHooksAgentsOperationsRoute
   '/api/public/hooks/agents/sales': typeof ApiPublicHooksAgentsSalesRoute
+  '/api/public/hooks/agents/whatsapp': typeof ApiPublicHooksAgentsWhatsappRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -724,6 +734,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/agents/marketing'
     | '/api/public/hooks/agents/operations'
     | '/api/public/hooks/agents/sales'
+    | '/api/public/hooks/agents/whatsapp'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -795,6 +806,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/agents/marketing'
     | '/api/public/hooks/agents/operations'
     | '/api/public/hooks/agents/sales'
+    | '/api/public/hooks/agents/whatsapp'
   id:
     | '__root__'
     | '/'
@@ -866,6 +878,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/agents/marketing'
     | '/api/public/hooks/agents/operations'
     | '/api/public/hooks/agents/sales'
+    | '/api/public/hooks/agents/whatsapp'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -937,6 +950,7 @@ export interface RootRouteChildren {
   ApiPublicHooksAgentsMarketingRoute: typeof ApiPublicHooksAgentsMarketingRoute
   ApiPublicHooksAgentsOperationsRoute: typeof ApiPublicHooksAgentsOperationsRoute
   ApiPublicHooksAgentsSalesRoute: typeof ApiPublicHooksAgentsSalesRoute
+  ApiPublicHooksAgentsWhatsappRoute: typeof ApiPublicHooksAgentsWhatsappRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1368,6 +1382,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksAlertsWorkerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/agents/whatsapp': {
+      id: '/api/public/hooks/agents/whatsapp'
+      path: '/api/public/hooks/agents/whatsapp'
+      fullPath: '/api/public/hooks/agents/whatsapp'
+      preLoaderRoute: typeof ApiPublicHooksAgentsWhatsappRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/agents/sales': {
       id: '/api/public/hooks/agents/sales'
       path: '/api/public/hooks/agents/sales'
@@ -1508,6 +1529,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksAgentsMarketingRoute: ApiPublicHooksAgentsMarketingRoute,
   ApiPublicHooksAgentsOperationsRoute: ApiPublicHooksAgentsOperationsRoute,
   ApiPublicHooksAgentsSalesRoute: ApiPublicHooksAgentsSalesRoute,
+  ApiPublicHooksAgentsWhatsappRoute: ApiPublicHooksAgentsWhatsappRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
