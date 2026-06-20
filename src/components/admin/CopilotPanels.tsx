@@ -149,6 +149,18 @@ export function CopilotPanels() {
     }
   };
 
+  const onRotateCron = async () => {
+    setBusy("rotate");
+    try {
+      const out = (await triggerRotate()) as { rescheduled?: number };
+      toast.success(`تم تدوير سر الجدولة لـ ${out.rescheduled ?? 0} مهمة`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "فشل التدوير");
+    } finally {
+      setBusy(null);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Executive alerts */}
