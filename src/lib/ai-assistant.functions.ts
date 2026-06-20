@@ -332,6 +332,7 @@ function pickSystem(mode: string) {
     case "whatsapp": return SYSTEM_WHATSAPP;
     case "catalog": return SYSTEM_CATALOG;
     case "pharmacist": return SYSTEM_PHARMACIST;
+    case "chronic_refill": return SYSTEM_CHRONIC_REFILL;
     default: return SYSTEM_INTERACTIONS;
   }
 }
