@@ -102,14 +102,14 @@ RPCs that call it inherit the privileges via SECURITY DEFINER.
 
 ### What it does
 `src/lib/sentry.ts` initialises `@sentry/react` once on the client when
-`VITE_SENTRY_DSN` is set; otherwise it is a no-op. The root error boundary
+`SENTRY_DSN` is set; otherwise it is a no-op. The root error boundary
 (`src/routes/__root.tsx`) forwards every caught error to
 `captureClientError(error, { boundary: ... })`.
 
 ### Configuration
 
 1. Create a Sentry project (or pick an existing one) and copy its DSN.
-2. Store it as a Lovable build secret named `VITE_SENTRY_DSN` — the
+2. Store it as a Lovable build secret named `SENTRY_DSN` — the
    `VITE_` prefix makes it available to the client bundle, which Sentry
    requires.
 3. Trigger a new build/deploy. No code change is needed.
@@ -131,7 +131,7 @@ To verify locally without a real DSN you can hardcode any string for one
 session and watch the network panel:
 
 ```js
-import.meta.env.VITE_SENTRY_DSN
+import.meta.env.SENTRY_DSN
 // → "https://abcdef@o1.ingest.sentry.io/123"
 ```
 
@@ -139,13 +139,13 @@ import.meta.env.VITE_SENTRY_DSN
 
 | Task | How |
 | ---- | --- |
-| **Disable Sentry temporarily** | Delete the `VITE_SENTRY_DSN` secret and redeploy — `initSentry()` becomes a no-op |
+| **Disable Sentry temporarily** | Delete the `SENTRY_DSN` secret and redeploy — `initSentry()` becomes a no-op |
 | **Attach correlation_id to events** | Call `setCorrelationId(orderId)` from `src/lib/sentry.ts` after the user completes an order; every subsequent event carries the tag |
 | **Tune sample rates** | Edit `src/lib/sentry.ts` (`tracesSampleRate`, `replaysOnErrorSampleRate`) |
 | **Verify a release** | Trigger a deliberate error; ensure the event lands under the new release tag in Sentry |
 
 ### Failure modes
-- **Build succeeds but no events arrive** → `VITE_SENTRY_DSN` was set as a runtime-only (non-`VITE_`) secret. Rename to `VITE_SENTRY_DSN` and redeploy.
+- **Build succeeds but no events arrive** → `SENTRY_DSN` was set as a runtime-only (non-`VITE_`) secret. Rename to `SENTRY_DSN` and redeploy.
 - **`Sentry is not defined` console errors** → `@sentry/react` not installed; run `bun add @sentry/react`.
 - **Builds fail after enabling** → `initSentry()` is wrapped in `try/catch` and the dependency is optional; if the build itself fails, the package install was incomplete. Re-run install.
 
