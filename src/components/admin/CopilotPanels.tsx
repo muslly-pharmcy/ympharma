@@ -178,6 +178,9 @@ export function CopilotPanels() {
     } finally {
       setBusy(null);
     }
+  };
+
+
 
   const onEnqueueRefills = async () => {
     setBusy("refills");
