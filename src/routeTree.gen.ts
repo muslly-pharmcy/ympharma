@@ -32,6 +32,7 @@ import { Route as AiAssistantRouteImport } from './routes/ai-assistant'
 import { Route as AdminWorkforceRouteImport } from './routes/admin-workforce'
 import { Route as AdminTransfersRouteImport } from './routes/admin-transfers'
 import { Route as AdminSettingsRouteImport } from './routes/admin-settings'
+import { Route as AdminRxReviewRouteImport } from './routes/admin-rx-review'
 import { Route as AdminRxCheckRouteImport } from './routes/admin-rx-check'
 import { Route as AdminProductsRouteImport } from './routes/admin-products'
 import { Route as AdminOffersRouteImport } from './routes/admin-offers'
@@ -209,6 +210,11 @@ const AdminTransfersRoute = AdminTransfersRouteImport.update({
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/admin-settings',
   path: '/admin-settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRxReviewRoute = AdminRxReviewRouteImport.update({
+  id: '/admin-rx-review',
+  path: '/admin-rx-review',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRxCheckRoute = AdminRxCheckRouteImport.update({
@@ -578,6 +584,7 @@ export interface FileRoutesByFullPath {
   '/admin-offers': typeof AdminOffersRoute
   '/admin-products': typeof AdminProductsRoute
   '/admin-rx-check': typeof AdminRxCheckRoute
+  '/admin-rx-review': typeof AdminRxReviewRoute
   '/admin-settings': typeof AdminSettingsRoute
   '/admin-transfers': typeof AdminTransfersRoute
   '/admin-workforce': typeof AdminWorkforceRoute
@@ -666,6 +673,7 @@ export interface FileRoutesByTo {
   '/admin-offers': typeof AdminOffersRoute
   '/admin-products': typeof AdminProductsRoute
   '/admin-rx-check': typeof AdminRxCheckRoute
+  '/admin-rx-review': typeof AdminRxReviewRoute
   '/admin-settings': typeof AdminSettingsRoute
   '/admin-transfers': typeof AdminTransfersRoute
   '/admin-workforce': typeof AdminWorkforceRoute
@@ -755,6 +763,7 @@ export interface FileRoutesById {
   '/admin-offers': typeof AdminOffersRoute
   '/admin-products': typeof AdminProductsRoute
   '/admin-rx-check': typeof AdminRxCheckRoute
+  '/admin-rx-review': typeof AdminRxReviewRoute
   '/admin-settings': typeof AdminSettingsRoute
   '/admin-transfers': typeof AdminTransfersRoute
   '/admin-workforce': typeof AdminWorkforceRoute
@@ -845,6 +854,7 @@ export interface FileRouteTypes {
     | '/admin-offers'
     | '/admin-products'
     | '/admin-rx-check'
+    | '/admin-rx-review'
     | '/admin-settings'
     | '/admin-transfers'
     | '/admin-workforce'
@@ -933,6 +943,7 @@ export interface FileRouteTypes {
     | '/admin-offers'
     | '/admin-products'
     | '/admin-rx-check'
+    | '/admin-rx-review'
     | '/admin-settings'
     | '/admin-transfers'
     | '/admin-workforce'
@@ -1021,6 +1032,7 @@ export interface FileRouteTypes {
     | '/admin-offers'
     | '/admin-products'
     | '/admin-rx-check'
+    | '/admin-rx-review'
     | '/admin-settings'
     | '/admin-transfers'
     | '/admin-workforce'
@@ -1110,6 +1122,7 @@ export interface RootRouteChildren {
   AdminOffersRoute: typeof AdminOffersRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminRxCheckRoute: typeof AdminRxCheckRoute
+  AdminRxReviewRoute: typeof AdminRxReviewRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTransfersRoute: typeof AdminTransfersRoute
   AdminWorkforceRoute: typeof AdminWorkforceRoute
@@ -1325,6 +1338,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-settings'
       fullPath: '/admin-settings'
       preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-rx-review': {
+      id: '/admin-rx-review'
+      path: '/admin-rx-review'
+      fullPath: '/admin-rx-review'
+      preLoaderRoute: typeof AdminRxReviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-rx-check': {
@@ -1817,6 +1837,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminOffersRoute: AdminOffersRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminRxCheckRoute: AdminRxCheckRoute,
+  AdminRxReviewRoute: AdminRxReviewRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTransfersRoute: AdminTransfersRoute,
   AdminWorkforceRoute: AdminWorkforceRoute,
