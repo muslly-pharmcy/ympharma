@@ -193,11 +193,11 @@ export const Route = createFileRoute("/api/public/hooks/rx-notify")({
 
               // Sprint 2: follow-up events
               await supabaseAdmin.rpc("emit_agent_event", {
-                p_event_name: "PRESCRIPTION_URL_GENERATED",
-                p_entity_type: "prescription",
-                p_entity_id: rxId,
-                p_payload: { ttl_seconds: ttl, count: signedUrls.length } as never,
-                p_source: "rx-notify",
+                _event_name: "PRESCRIPTION_URL_GENERATED",
+                _entity_type: "prescription",
+                _entity_id: rxId,
+                _payload: { ttl_seconds: ttl, count: signedUrls.length } as never,
+                _source: "rx-notify",
               } as never).then(() => undefined, () => undefined);
 
               // Mark original event processed
