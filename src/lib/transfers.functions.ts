@@ -63,22 +63,68 @@ export const listTransfers = createServerFn({ method: "GET" })
     z.object({
       status: z.string().optional(),
       branch_id: z.string().uuid().optional(),
+      source_branch_id: z.string().uuid().optional(),
+      destination_branch_id: z.string().uuid().optional(),
+      correlation_search: z.string().trim().max(80).optional(),
+      transfer_type: z.enum(["WH_TO_BRANCH","BRANCH_TO_BRANCH","BRANCH_TO_WH"]).optional(),
       limit: z.number().int().min(1).max(200).optional(),
+      offset: z.number().int().min(0).max(100_000).optional(),
     }).parse(d ?? {}),
   )
   .handler(async ({ data, context }) => {
+    const limit = data.limit ?? 25;
+    const offset = data.offset ?? 0;
     let q = context.supabase
       .from("inventory_transfers")
-      .select("id,correlation_id,transfer_type,status,source_branch_id,destination_branch_id,requested_by,reason,created_at,updated_at")
+      .select(
+        "id,correlation_id,transfer_type,status,source_branch_id,destination_branch_id,requested_by,reason,created_at,updated_at",
+        { count: "exact" },
+      )
       .order("created_at", { ascending: false })
-      .limit(data.limit ?? 100);
+      .range(offset, offset + limit - 1);
     if (data.status) q = q.eq("status", data.status as any);
+    if (data.transfer_type) q = q.eq("transfer_type", data.transfer_type);
+    if (data.source_branch_id) q = q.eq("source_branch_id", data.source_branch_id);
+    if (data.destination_branch_id) q = q.eq("destination_branch_id", data.destination_branch_id);
     if (data.branch_id) {
       q = q.or(`source_branch_id.eq.${data.branch_id},destination_branch_id.eq.${data.branch_id}`);
     }
-    const { data: rows, error } = await q;
+    if (data.correlation_search) q = q.ilike("correlation_id", `%${data.correlation_search}%`);
+    const { data: rows, error, count } = await q;
     if (error) throw new Error(error.message);
-    return (rows ?? []) as any[];
+    return { rows: (rows ?? []) as any[], count: count ?? 0, limit, offset };
+  });
+
+// Dashboard KPI counts grouped by status — single round-trip, no full scan
+// (relies on the idx_transfers_status index for each filtered query).
+export const transferDashboardMetrics = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ branch_id: z.string().uuid().optional() }).parse(d ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    const make = (statuses: string[]) => {
+      let q = context.supabase
+        .from("inventory_transfers")
+        .select("id", { count: "exact", head: true })
+        .in("status", statuses as any);
+      if (data.branch_id) {
+        q = q.or(`source_branch_id.eq.${data.branch_id},destination_branch_id.eq.${data.branch_id}`);
+      }
+      return q;
+    };
+    const [pending, inTransit, completed, failed] = await Promise.all([
+      make(["REQUESTED","APPROVED","RESERVED","PICKING","PACKED"]),
+      make(["DISPATCHED","IN_TRANSIT","RECEIVED"]),
+      make(["COMPLETED"]),
+      make(["CANCELLED","REJECTED"]),
+    ]);
+    return {
+      pending:    pending.count   ?? 0,
+      in_transit: inTransit.count ?? 0,
+      completed:  completed.count ?? 0,
+      failed:     failed.count    ?? 0,
+    };
   });
 
 export const getTransfer = createServerFn({ method: "GET" })
