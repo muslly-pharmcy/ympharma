@@ -74,6 +74,7 @@ export function CopilotPanels() {
   const getReport = useServerFn(fetchLatestExecReport);
   const triggerReport = useServerFn(runWeeklyReportNow);
   const triggerEnrich = useServerFn(runWeeklyEnrichNow);
+  const triggerRotate = useServerFn(rotateCronSecretNow);
 
   const [agent, setAgent] = useState<keyof typeof AGENT_LABELS>("ceo");
   const [question, setQuestion] = useState("");
