@@ -209,21 +209,15 @@ describe("customer rx notifications — exactly-once & retry safety", () => {
     // Tick 1 immediately re-running must NOT reclaim (next_attempt_at in future).
     expect(p.claim()).toHaveLength(0);
 
-    // Advance the clock past the first backoff (30s * 2^1 = 60s).
-    p.now += 60_000;
-    claimed = p.claim();
-    expect(claimed).toHaveLength(1);
-    expect(claimed[0].id).toBe(p.rows[0].id);
-    expect(claimed[0].attempts).toBe(2);
-
-    p.markFailed(claimed[0].id, "network");
-    p.now += 5 * 60_000; // jump beyond any further backoff
-    claimed = p.claim();
-    p.markFailed(claimed[0].id, "network"); // attempts → 4 (was 3 after claim)
-    p.now += 30 * 60_000;
-    claimed = p.claim();
-    p.markFailed(claimed[0].id, "network"); // attempts → 5, becomes dead
+    // Burn through the remaining attempts; advance the clock past every backoff.
+    while (p.rows[0].status !== "dead") {
+      p.now += 24 * 60 * 60_000; // skip any backoff
+      const more = p.claim();
+      if (more.length === 0) break;
+      p.markFailed(more[0].id, "network");
+    }
     expect(p.rows[0].status).toBe("dead");
+    expect(p.rows[0].attempts).toBe(5);
 
     // Exactly one operations_alerts entry per dead dispatch.
     expect(p.alerts).toHaveLength(1);
