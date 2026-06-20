@@ -1810,6 +1810,72 @@ export type Database = {
           },
         ]
       }
+      prescription_files: {
+        Row: {
+          bucket: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          legacy_blob_id: string | null
+          mime_type: string
+          object_path: string
+          prescription_id: string
+          sha256: string | null
+          size_bytes: number
+          storage_provider: string
+          updated_at: string
+          uploaded_by: string | null
+          uploaded_via: string
+        }
+        Insert: {
+          bucket?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          legacy_blob_id?: string | null
+          mime_type: string
+          object_path: string
+          prescription_id: string
+          sha256?: string | null
+          size_bytes: number
+          storage_provider?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          uploaded_via?: string
+        }
+        Update: {
+          bucket?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          legacy_blob_id?: string | null
+          mime_type?: string
+          object_path?: string
+          prescription_id?: string
+          sha256?: string | null
+          size_bytes?: number
+          storage_provider?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          uploaded_via?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescription_files_legacy_blob_id_fkey"
+            columns: ["legacy_blob_id"]
+            isOneToOne: false
+            referencedRelation: "prescription_image_blobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prescription_files_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prescription_image_blobs: {
         Row: {
           byte_size: number
@@ -3143,6 +3209,10 @@ export type Database = {
             }
             Returns: Json
           }
+      prescription_file_count: {
+        Args: { _prescription_id: string }
+        Returns: number
+      }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {

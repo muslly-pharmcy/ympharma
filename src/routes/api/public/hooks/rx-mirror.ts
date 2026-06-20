@@ -35,7 +35,7 @@ export const Route = createFileRoute("/api/public/hooks/rx-mirror")({
             });
           }
 
-          let mirrored = 0, skipped = 0, failed = 0;
+          let mirrored = 0, skipped = 0, failed = 0, registry_new = 0;
           for (const row of rxRows ?? []) {
             const urls = (row.image_urls ?? []) as string[];
             for (const url of urls) {
@@ -50,7 +50,19 @@ export const Route = createFileRoute("/api/public/hooks/rx-mirror")({
                   .eq("rx_id", row.id)
                   .eq("storage_path", storagePath)
                   .maybeSingle();
-                if (existing) { skipped++; continue; }
+                const blobAlreadyExists = !!existing;
+
+                // Always need bytes if either side (blob or registry) is missing.
+                const { data: registryExisting } = await supabaseAdmin
+                  .from("prescription_files" as never)
+                  .select("id")
+                  .eq("bucket", "prescriptions")
+                  .eq("object_path", storagePath)
+                  .is("deleted_at", null)
+                  .maybeSingle();
+                const registryAlreadyExists = !!registryExisting;
+
+                if (blobAlreadyExists && registryAlreadyExists) { skipped++; continue; }
 
                 const { data: file, error: dlErr } = await supabaseAdmin.storage
                   .from("prescriptions").download(storagePath);
@@ -60,25 +72,50 @@ export const Route = createFileRoute("/api/public/hooks/rx-mirror")({
                 const digest = await crypto.subtle.digest("SHA-256", bytes);
                 const sha256 = Array.from(new Uint8Array(digest))
                   .map((b) => b.toString(16).padStart(2, "0")).join("");
+                const contentType = (file as Blob).type || "application/octet-stream";
 
-                const { error: insErr } = await supabaseAdmin
-                  .from("prescription_image_blobs" as never)
-                  .insert({
-                    rx_id: row.id,
-                    storage_path: storagePath,
-                    content_bytes: bytes as never,
-                    content_type: (file as Blob).type || "application/octet-stream",
-                    byte_size: bytes.byteLength,
-                    sha256,
-                  } as never);
-                if (insErr && !/duplicate key/i.test(insErr.message)) { failed++; continue; }
-                mirrored++;
+                let blobId: string | null = (existing as { id?: string } | null)?.id ?? null;
+                if (!blobAlreadyExists) {
+                  const { data: ins, error: insErr } = await supabaseAdmin
+                    .from("prescription_image_blobs" as never)
+                    .insert({
+                      rx_id: row.id,
+                      storage_path: storagePath,
+                      content_bytes: bytes as never,
+                      content_type: contentType,
+                      byte_size: bytes.byteLength,
+                      sha256,
+                    } as never)
+                    .select("id")
+                    .maybeSingle();
+                  if (insErr && !/duplicate key/i.test(insErr.message)) { failed++; continue; }
+                  blobId = (ins as { id?: string } | null)?.id ?? blobId;
+                  mirrored++;
+                }
+
+                // Phase 6A — dual-write into the registry.
+                if (!registryAlreadyExists) {
+                  const { error: regErr } = await supabaseAdmin
+                    .from("prescription_files" as never)
+                    .insert({
+                      prescription_id: row.id,
+                      storage_provider: "supabase",
+                      bucket: "prescriptions",
+                      object_path: storagePath,
+                      mime_type: contentType,
+                      size_bytes: bytes.byteLength,
+                      sha256,
+                      legacy_blob_id: blobId,
+                      uploaded_via: "migration",
+                    } as never);
+                  if (!regErr) registry_new++;
+                }
               } catch { failed++; }
             }
           }
 
           return new Response(
-            JSON.stringify({ ok: true, scanned: rxRows?.length ?? 0, mirrored, skipped, failed }),
+            JSON.stringify({ ok: true, scanned: rxRows?.length ?? 0, mirrored, registry_new, skipped, failed }),
             { headers: { "Content-Type": "application/json" } },
           );
         } catch (e) {
