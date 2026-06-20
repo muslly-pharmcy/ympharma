@@ -30,6 +30,7 @@ function AdminInventory() {
   const [busy, setBusy] = useState(false);
   const [search, setSearch] = useState("");
   const [onlyLow, setOnlyLow] = useState(false);
+  const [onlyOut, setOnlyOut] = useState(false);
   const [onlyTracked, setOnlyTracked] = useState(false);
   const [edits, setEdits] = useState<Record<string, Partial<Row>>>({});
 
