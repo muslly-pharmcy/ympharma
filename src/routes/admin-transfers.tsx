@@ -5,14 +5,16 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AdminGate } from "@/components/admin/AdminGate";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   Loader2, Plus, ArrowRight, X, CheckCircle2, XCircle, PackageCheck,
-  Truck, ClipboardCheck, ArchiveRestore, Boxes,
+  Truck, ClipboardCheck, ArchiveRestore, Boxes, ChevronRight, ChevronLeft,
+  Clock, Activity, CheckCheck, AlertTriangle,
 } from "lucide-react";
 import { listBranches } from "@/lib/branches.functions";
 import {
-  listTransfers, getTransfer, createTransfer,
+  listTransfers, transferDashboardMetrics, getTransfer, createTransfer,
   approveTransfer, reserveTransfer, markPicking, markPacked,
   markDispatched, markInTransit, markReceived, completeTransfer,
   cancelTransfer, rejectTransfer,
@@ -67,37 +69,76 @@ const TYPE_AR: Record<TransferRow["transfer_type"], string> = {
   BRANCH_TO_WH: "فرع → مستودع",
 };
 
+const PAGE_SIZE = 25;
+
 function AdminTransfers() {
-  const [rows, setRows] = useState<TransferRow[]>([]);
-  const [branches, setBranches] = useState<Branch[]>([]);
-  const [filter, setFilter] = useState<Status | "">("");
-  const [busy, setBusy] = useState(false);
+  const qc = useQueryClient();
+  const [status, setStatus] = useState<Status | "">("");
+  const [typeFilter, setTypeFilter] = useState<TransferRow["transfer_type"] | "">("");
+  const [sourceFilter, setSourceFilter] = useState<string>("");
+  const [destFilter, setDestFilter] = useState<string>("");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
   const [openId, setOpenId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
   const load = useServerFn(listTransfers);
   const loadBranches = useServerFn(listBranches);
+  const loadMetrics = useServerFn(transferDashboardMetrics);
 
-  const refresh = useCallback(async () => {
-    setBusy(true);
-    try {
-      const [list, bs] = await Promise.all([
-        load({ data: { status: filter || undefined, limit: 100 } }),
-        loadBranches({ data: { includeInactive: false } }),
-      ]);
-      setRows(list as TransferRow[]);
-      setBranches(bs as Branch[]);
-    } catch (e: any) { toast.error(String(e?.message ?? e)); }
-    finally { setBusy(false); }
-  }, [load, loadBranches, filter]);
+  // reset to page 0 whenever filters change
+  useEffect(() => { setPage(0); }, [status, typeFilter, sourceFilter, destFilter, search]);
 
-  useEffect(() => { refresh(); }, [refresh]);
+  const branchesQ = useQuery({
+    queryKey: ["branches", "active"],
+    queryFn: () => loadBranches({ data: { includeInactive: false } }),
+    staleTime: 60_000,
+  });
+  const branches = (branchesQ.data ?? []) as Branch[];
+
+  const metricsQ = useQuery({
+    queryKey: ["transfers", "metrics"],
+    queryFn: () => loadMetrics({ data: {} }),
+    staleTime: 15_000,
+    refetchInterval: 30_000,
+  });
+
+  const listQ = useQuery({
+    queryKey: ["transfers", "list", { status, typeFilter, sourceFilter, destFilter, search, page }],
+    queryFn: () => load({ data: {
+      status: status || undefined,
+      transfer_type: typeFilter || undefined,
+      source_branch_id: sourceFilter || undefined,
+      destination_branch_id: destFilter || undefined,
+      correlation_search: search.trim() || undefined,
+      limit: PAGE_SIZE,
+      offset: page * PAGE_SIZE,
+    } }),
+    staleTime: 10_000,
+    placeholderData: (prev) => prev,
+  });
+
+  const rows = (listQ.data?.rows ?? []) as TransferRow[];
+  const total = listQ.data?.count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const branchMap = useMemo(() => {
     const m = new Map<string, Branch>();
     branches.forEach((b) => m.set(b.id, b));
     return m;
   }, [branches]);
+
+  function invalidateAll() {
+    qc.invalidateQueries({ queryKey: ["transfers"] });
+  }
+
+  const m = metricsQ.data ?? { pending: 0, in_transit: 0, completed: 0, failed: 0 };
+  const kpis = [
+    { label: "قيد المعالجة", value: m.pending,    Icon: Clock,          color: "text-amber-700"  },
+    { label: "في الطريق",     value: m.in_transit, Icon: Activity,       color: "text-sky-700"    },
+    { label: "مكتملة",        value: m.completed,  Icon: CheckCheck,     color: "text-emerald-700"},
+    { label: "فاشلة/ملغاة",   value: m.failed,     Icon: AlertTriangle,  color: "text-red-700"    },
+  ];
 
   return (
     <div dir="rtl" className="min-h-screen bg-background">
@@ -120,17 +161,65 @@ function AdminTransfers() {
       </header>
 
       <main className="container mx-auto space-y-4 py-6">
-        <div className="flex items-center gap-2 text-sm">
-          <span>الحالة:</span>
-          <select className="rounded border bg-background p-1" value={filter}
-            onChange={(e) => setFilter(e.target.value as Status | "")}>
-            <option value="">الكل</option>
-            {Object.entries(STATUS_AR).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-          </select>
-          <button onClick={refresh} className="rounded border px-2 py-1">تحديث</button>
+        {/* KPI Dashboard */}
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          {kpis.map((k) => (
+            <div key={k.label} className="rounded-lg border bg-card p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">{k.label}</span>
+                <k.Icon className={`size-4 ${k.color}`} />
+              </div>
+              <div className="mt-1 text-2xl font-bold">{k.value.toLocaleString("ar-EG")}</div>
+            </div>
+          ))}
         </div>
 
-        {busy && <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="size-4 animate-spin" /> جارٍ التحميل…</div>}
+        {/* Filters — server-side */}
+        <div className="grid grid-cols-2 gap-2 rounded border bg-card p-3 text-sm md:grid-cols-5">
+          <div>
+            <label className="mb-1 block text-xs text-muted-foreground">الحالة</label>
+            <select className="w-full rounded border bg-background p-1" value={status}
+              onChange={(e) => setStatus(e.target.value as Status | "")}>
+              <option value="">الكل</option>
+              {Object.entries(STATUS_AR).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-muted-foreground">النوع</label>
+            <select className="w-full rounded border bg-background p-1" value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value as any)}>
+              <option value="">الكل</option>
+              {Object.entries(TYPE_AR).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-muted-foreground">المصدر</label>
+            <select className="w-full rounded border bg-background p-1" value={sourceFilter}
+              onChange={(e) => setSourceFilter(e.target.value)}>
+              <option value="">الكل</option>
+              {branches.map((b) => <option key={b.id} value={b.id}>{b.code}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-muted-foreground">الوجهة</label>
+            <select className="w-full rounded border bg-background p-1" value={destFilter}
+              onChange={(e) => setDestFilter(e.target.value)}>
+              <option value="">الكل</option>
+              {branches.map((b) => <option key={b.id} value={b.id}>{b.code}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-muted-foreground">بحث المرجع</label>
+            <input className="w-full rounded border bg-background p-1" placeholder="TR-…"
+              value={search} onChange={(e) => setSearch(e.target.value)} />
+          </div>
+        </div>
+
+        {listQ.isFetching && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="size-4 animate-spin" /> جارٍ التحميل…
+          </div>
+        )}
 
         <div className="overflow-x-auto rounded border bg-card">
           <table className="w-full text-sm">
@@ -159,11 +248,31 @@ function AdminTransfers() {
                   </td>
                 </tr>
               ))}
-              {!busy && rows.length === 0 && (
+              {!listQ.isFetching && rows.length === 0 && (
                 <tr><td colSpan={7} className="p-6 text-center text-muted-foreground">لا توجد تحويلات.</td></tr>
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-between text-sm">
+          <div className="text-muted-foreground">
+            {total > 0
+              ? `${page * PAGE_SIZE + 1}–${Math.min((page + 1) * PAGE_SIZE, total)} من ${total.toLocaleString("ar-EG")}`
+              : "—"}
+          </div>
+          <div className="flex items-center gap-1">
+            <button disabled={page === 0} onClick={() => setPage((p) => Math.max(0, p - 1))}
+              className="flex items-center gap-1 rounded border px-2 py-1 disabled:opacity-40">
+              <ChevronRight className="size-4" /> السابق
+            </button>
+            <span className="px-2">صفحة {page + 1} / {totalPages}</span>
+            <button disabled={page + 1 >= totalPages} onClick={() => setPage((p) => p + 1)}
+              className="flex items-center gap-1 rounded border px-2 py-1 disabled:opacity-40">
+              التالي <ChevronLeft className="size-4" />
+            </button>
+          </div>
         </div>
       </main>
 
@@ -171,7 +280,7 @@ function AdminTransfers() {
         <CreateTransferDialog
           branches={branches}
           onClose={() => setCreating(false)}
-          onCreated={() => { setCreating(false); refresh(); }}
+          onCreated={() => { setCreating(false); invalidateAll(); }}
         />
       )}
       {openId && (
