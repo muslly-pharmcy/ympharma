@@ -18,16 +18,18 @@ import { BundlePerformance } from "@/components/bundle-performance";
 import { playNotificationBeep } from "@/lib/notify-sound";
 import { downloadCSV } from "@/lib/csv-export";
 import { STATUSES, applyChange, type Order, type Rx } from "@/components/admin/shared";
-import { OrdersTab } from "@/components/admin/OrdersTab";
-import { PrescriptionsTab } from "@/components/admin/PrescriptionsTab";
-import { StaffTab } from "@/components/admin/StaffTab";
-import { TrustTab } from "@/components/admin/TrustTab";
-import { ErrorsTab } from "@/components/admin/ErrorsTab";
-import { InsuranceTab } from "@/components/admin/InsuranceTab";
-import { RetentionTab } from "@/components/admin/RetentionTab";
-import { EmailsTab } from "@/components/admin/EmailsTab";
-import { SecurityTab } from "@/components/admin/SecurityTab";
-import { ImagesTab } from "@/components/admin/ImagesTab";
+// Lazy-loaded tabs — each tab is a distinct route's worth of code; loading
+// them on demand keeps the admin entry chunk small.
+const OrdersTab        = lazy(() => import("@/components/admin/OrdersTab").then((m) => ({ default: m.OrdersTab })));
+const PrescriptionsTab = lazy(() => import("@/components/admin/PrescriptionsTab").then((m) => ({ default: m.PrescriptionsTab })));
+const StaffTab         = lazy(() => import("@/components/admin/StaffTab").then((m) => ({ default: m.StaffTab })));
+const TrustTab         = lazy(() => import("@/components/admin/TrustTab").then((m) => ({ default: m.TrustTab })));
+const ErrorsTab        = lazy(() => import("@/components/admin/ErrorsTab").then((m) => ({ default: m.ErrorsTab })));
+const InsuranceTab     = lazy(() => import("@/components/admin/InsuranceTab").then((m) => ({ default: m.InsuranceTab })));
+const RetentionTab     = lazy(() => import("@/components/admin/RetentionTab").then((m) => ({ default: m.RetentionTab })));
+const EmailsTab        = lazy(() => import("@/components/admin/EmailsTab").then((m) => ({ default: m.EmailsTab })));
+const SecurityTab      = lazy(() => import("@/components/admin/SecurityTab").then((m) => ({ default: m.SecurityTab })));
+const ImagesTab        = lazy(() => import("@/components/admin/ImagesTab").then((m) => ({ default: m.ImagesTab })));
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -526,16 +528,18 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
             <BundlePerformance />
           </>
         )}
-        {tab === "orders" && canOrders && <OrdersTab orders={filteredOrders} onStatus={setOrderStatus} loading={busy && orders.length === 0} error={loadError} onRetry={load} />}
-        {tab === "rx" && canRx && <PrescriptionsTab rxs={filteredRxs} onStatus={setRxStatus} onDelete={deleteRx} onArchive={archiveRx} onBulkDelete={bulkDeleteRx} onBulkArchive={bulkArchiveRx} onBulkRegenerateUrls={bulkRegenerateRxUrls} onRegenerateUrls={regenerateRxUrls} loading={busy && rxs.length === 0} error={loadError} onRetry={load} />}
-        {tab === "team" && me?.isOwner && <StaffTab currentUserId={userId} />}
-        {tab === "trust" && me?.isOwner && <TrustTab />}
-        {tab === "errors" && me?.isOwner && <ErrorsTab />}
-        {tab === "insurance" && <InsuranceTab />}
-        {tab === "retention" && me?.isOwner && <RetentionTab />}
-        {tab === "emails" && me?.isOwner && <EmailsTab />}
-        {tab === "security" && me?.isOwner && <SecurityTab />}
-        {tab === "images" && me?.isOwner && <ImagesTab />}
+        <Suspense fallback={<div className="h-72 animate-pulse rounded-2xl bg-muted/40" />}>
+          {tab === "orders" && canOrders && <OrdersTab orders={filteredOrders} onStatus={setOrderStatus} loading={busy && orders.length === 0} error={loadError} onRetry={load} />}
+          {tab === "rx" && canRx && <PrescriptionsTab rxs={filteredRxs} onStatus={setRxStatus} onDelete={deleteRx} onArchive={archiveRx} onBulkDelete={bulkDeleteRx} onBulkArchive={bulkArchiveRx} onBulkRegenerateUrls={bulkRegenerateRxUrls} onRegenerateUrls={regenerateRxUrls} loading={busy && rxs.length === 0} error={loadError} onRetry={load} />}
+          {tab === "team" && me?.isOwner && <StaffTab currentUserId={userId} />}
+          {tab === "trust" && me?.isOwner && <TrustTab />}
+          {tab === "errors" && me?.isOwner && <ErrorsTab />}
+          {tab === "insurance" && <InsuranceTab />}
+          {tab === "retention" && me?.isOwner && <RetentionTab />}
+          {tab === "emails" && me?.isOwner && <EmailsTab />}
+          {tab === "security" && me?.isOwner && <SecurityTab />}
+          {tab === "images" && me?.isOwner && <ImagesTab />}
+        </Suspense>
       </main>
 
       <SiteFooter />
