@@ -2386,6 +2386,42 @@ export type Database = {
         }
         Relationships: []
       }
+      whatsapp_conversations: {
+        Row: {
+          created_at: string
+          customer_id: string | null
+          id: string
+          last_intent: string | null
+          last_message_at: string
+          metadata: Json
+          phone_number: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          last_intent?: string | null
+          last_message_at?: string
+          metadata?: Json
+          phone_number: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          last_intent?: string | null
+          last_message_at?: string
+          metadata?: Json
+          phone_number?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       whatsapp_delivery_logs: {
         Row: {
           created_at: string
@@ -2430,6 +2466,97 @@ export type Database = {
           wamid?: string | null
         }
         Relationships: []
+      }
+      whatsapp_escalations: {
+        Row: {
+          assigned_to: string | null
+          conversation_id: string
+          created_at: string
+          id: string
+          payload: Json
+          reason: string
+          resolved_at: string | null
+          status: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          conversation_id: string
+          created_at?: string
+          id?: string
+          payload?: Json
+          reason: string
+          resolved_at?: string | null
+          status?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          payload?: Json
+          reason?: string
+          resolved_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_escalations_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_messages: {
+        Row: {
+          agent_run_id: string | null
+          content: string | null
+          conversation_id: string
+          created_at: string
+          direction: string
+          error: string | null
+          id: string
+          intent: string | null
+          message_type: string
+          status: string
+          wa_message_id: string | null
+        }
+        Insert: {
+          agent_run_id?: string | null
+          content?: string | null
+          conversation_id: string
+          created_at?: string
+          direction: string
+          error?: string | null
+          id?: string
+          intent?: string | null
+          message_type?: string
+          status?: string
+          wa_message_id?: string | null
+        }
+        Update: {
+          agent_run_id?: string | null
+          content?: string | null
+          conversation_id?: string
+          created_at?: string
+          direction?: string
+          error?: string | null
+          id?: string
+          intent?: string | null
+          message_type?: string
+          status?: string
+          wa_message_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -2569,6 +2696,38 @@ export type Database = {
       agent_events_dlq_stats: { Args: never; Returns: Json }
       agent_runs_list: { Args: { _limit?: number }; Returns: Json }
       agent_workforce_summary: { Args: never; Returns: Json }
+      ai_get_order_status: {
+        Args: { _order_id: string; _phone: string }
+        Returns: {
+          created_at: string
+          id: string
+          item_count: number
+          status: string
+          total: number
+        }[]
+      }
+      ai_list_branches: {
+        Args: never
+        Returns: {
+          address: string
+          code: string
+          id: string
+          name: string
+          phone: string
+        }[]
+      }
+      ai_search_products: {
+        Args: { _limit?: number; _query: string }
+        Returns: {
+          brand: string
+          category: string
+          description: string
+          id: string
+          in_stock: boolean
+          name: string
+          price: number
+        }[]
+      }
       approve_classification: {
         Args: { _edits?: Json; _id: string }
         Returns: boolean
