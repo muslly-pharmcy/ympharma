@@ -1594,6 +1594,18 @@ export type Database = {
         Args: { _edits?: Json; _id: string }
         Returns: boolean
       }
+      auto_bundle_candidates: {
+        Args: { _days?: number }
+        Returns: {
+          a_id: number
+          a_name: string
+          avg_combined_price: number
+          b_id: number
+          b_name: string
+          co_count: number
+          lift: number
+        }[]
+      }
       bootstrap_owner: { Args: never; Returns: boolean }
       campaign_report: { Args: never; Returns: Json }
       check_img_rate_limit: {
@@ -1603,6 +1615,19 @@ export type Database = {
       check_tracking_rate_limit: {
         Args: { _ip: string; _max?: number; _window_seconds?: number }
         Returns: boolean
+      }
+      chronic_overdue: {
+        Args: { _grace?: number }
+        Returns: {
+          chronic_flags: Json
+          days_between: number
+          days_since: number
+          dominant_category: string
+          last_order_at: string
+          name: string
+          phone: string
+          total_spent: number
+        }[]
       }
       create_backup: { Args: { _kind?: string }; Returns: string }
       create_scheduled_backup: { Args: { _kind: string }; Returns: string }
@@ -1623,9 +1648,25 @@ export type Database = {
           value_score: number
         }[]
       }
+      declining_products: {
+        Args: never
+        Returns: {
+          drop_pct: number
+          legacy_id: number
+          name: string
+          revenue_prev: number
+          revenue_this: number
+          units_prev: number
+          units_this: number
+        }[]
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
+      }
+      enqueue_chronic_refills: {
+        Args: { _discount_pct?: number; _limit?: number }
+        Returns: Json
       }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }

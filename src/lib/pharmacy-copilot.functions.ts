@@ -60,6 +60,59 @@ export const fetchLatestExecReport = createServerFn({ method: "GET" })
     return data;
   });
 
+export const fetchRevenueByCondition = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { data, error } = await (context.supabase as any).rpc("revenue_by_condition", { _days: 30 });
+    if (error) throw new Error(error.message);
+    return data;
+  });
+
+export const fetchDecliningProducts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { data, error } = await (context.supabase as any).rpc("declining_products");
+    if (error) throw new Error(error.message);
+    return data;
+  });
+
+export const fetchChronicOverdue = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { data, error } = await (context.supabase as any).rpc("chronic_overdue", { _grace: 1.5 });
+    if (error) throw new Error(error.message);
+    return data;
+  });
+
+export const fetchAutoBundleCandidates = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { data, error } = await (context.supabase as any).rpc("auto_bundle_candidates", { _days: 90 });
+    if (error) throw new Error(error.message);
+    return data;
+  });
+
+export const enqueueChronicRefills = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => z.object({
+    discount_pct: z.number().int().min(5).max(50).optional(),
+    limit: z.number().int().min(1).max(200).optional(),
+  }).parse(i ?? {}))
+  .handler(async ({ context, data }) => {
+    await assertOwnerOrAdmin(context);
+    const { data: out, error } = await (context.supabase as any).rpc("enqueue_chronic_refills", {
+      _discount_pct: data.discount_pct ?? 15,
+      _limit: data.limit ?? 50,
+    });
+    if (error) throw new Error(error.message);
+    return out;
+  });
+
+
 // ---------- Triggers (owner/admin only) ----------
 
 async function assertOwnerOrAdmin(ctx: { supabase: any; userId: string }) {

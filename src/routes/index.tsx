@@ -8,6 +8,7 @@ import {
 
 
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
+import { ConditionsStrip } from "@/components/conditions-strip";
 import { MarketingBanner } from "@/components/marketing-banner";
 import { NunDivider } from "@/components/nun-divider";
 import { ProductCard } from "@/components/product-card";
@@ -219,6 +220,13 @@ function Home() {
               </div>
             ))}
           </div>
+        </section>
+
+        <NunDivider />
+
+        <section>
+          <SectionHeader title="تسوّق حسب الحالة" subtitle="منتجات مختارة لحالتك المرضية" />
+          <ConditionsStrip />
         </section>
 
         <NunDivider />

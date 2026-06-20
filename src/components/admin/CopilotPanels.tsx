@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Sparkles, AlertTriangle, Package, TrendingUp, Bug, FileText, PlayCircle, Wand2, ShieldCheck } from "lucide-react";
+import { Loader2, Sparkles, AlertTriangle, Package, TrendingUp, Bug, FileText, PlayCircle, Wand2, ShieldCheck, Activity, TrendingDown, HeartPulse, Layers, Send } from "lucide-react";
 import { toast } from "sonner";
 import {
   askExecutiveCopilot,
@@ -12,6 +12,11 @@ import {
   rotateCronSecretNow,
   runWeeklyEnrichNow,
   runWeeklyReportNow,
+  fetchRevenueByCondition,
+  fetchDecliningProducts,
+  fetchChronicOverdue,
+  fetchAutoBundleCandidates,
+  enqueueChronicRefills,
 } from "@/lib/pharmacy-copilot.functions";
 
 type Alert = {
@@ -76,6 +81,12 @@ export function CopilotPanels() {
   const triggerEnrich = useServerFn(runWeeklyEnrichNow);
   const triggerRotate = useServerFn(rotateCronSecretNow);
 
+  const getRevByCond = useServerFn(fetchRevenueByCondition);
+  const getDeclining = useServerFn(fetchDecliningProducts);
+  const getChronic = useServerFn(fetchChronicOverdue);
+  const getBundleCands = useServerFn(fetchAutoBundleCandidates);
+  const runEnqueue = useServerFn(enqueueChronicRefills);
+
   const [agent, setAgent] = useState<keyof typeof AGENT_LABELS>("ceo");
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<string>("");
@@ -86,24 +97,32 @@ export function CopilotPanels() {
   const [sales, setSales] = useState<any>(null);
   const [cto, setCto] = useState<any>(null);
   const [report, setReport] = useState<any>(null);
+  const [revByCond, setRevByCond] = useState<any[] | null>(null);
+  const [declining, setDeclining] = useState<any[] | null>(null);
+  const [chronic, setChronic] = useState<any[] | null>(null);
+  const [bundles, setBundles] = useState<any[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [a, i, s, c, r] = await Promise.all([getAlerts(), getInv(), getSales(), getCto(), getReport()]);
+      const [a, i, s, c, r, rc, dp, co, bc] = await Promise.all([
+        getAlerts(), getInv(), getSales(), getCto(), getReport(),
+        getRevByCond(), getDeclining(), getChronic(), getBundleCands(),
+      ]);
       setAlerts(((a as any)?.alerts ?? []) as Alert[]);
-      setInv(i);
-      setSales(s);
-      setCto(c);
-      setReport(r);
+      setInv(i); setSales(s); setCto(c); setReport(r);
+      setRevByCond((rc as any[]) ?? []);
+      setDeclining((dp as any[]) ?? []);
+      setChronic((co as any[]) ?? []);
+      setBundles((bc as any[]) ?? []);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "تعذر تحميل البيانات الذكية");
     } finally {
       setLoading(false);
     }
-  }, [getAlerts, getInv, getSales, getCto, getReport]);
+  }, [getAlerts, getInv, getSales, getCto, getReport, getRevByCond, getDeclining, getChronic, getBundleCands]);
 
   useEffect(() => {
     load();
@@ -160,6 +179,22 @@ export function CopilotPanels() {
       setBusy(null);
     }
   };
+
+
+
+  const onEnqueueRefills = async () => {
+    setBusy("refills");
+    try {
+      const out = (await runEnqueue({ data: { discount_pct: 15, limit: 50 } })) as { enqueued?: number; discount_code?: string };
+      toast.success(`أُضيف ${out.enqueued ?? 0} تذكير مزمن (${out.discount_code})`);
+      load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "فشل توليد التذكيرات");
+    } finally {
+      setBusy(null);
+    }
+  };
+
 
   return (
     <div className="space-y-4">
@@ -322,6 +357,97 @@ export function CopilotPanels() {
           )}
         </Section>
       </div>
+
+      {/* Pharmacy Intelligence — disease & chronic care */}
+      <div className="grid gap-3 md:grid-cols-2">
+        <Section icon={<Activity className="size-4 text-emerald-600" />} title="الإيراد حسب الحالة المرضية" subtitle="آخر 30 يوم — مرتب حسب الإيراد">
+          {!revByCond ? (
+            <Loader2 className="size-5 animate-spin" />
+          ) : revByCond.length === 0 ? (
+            <p className="text-xs text-muted-foreground">لا توجد منتجات مُصنّفة بإيراد بعد. اربط منتجات بحالاتها في /admin-classifications.</p>
+          ) : (
+            <ul className="space-y-1.5">
+              {revByCond.slice(0, 8).map((r: any) => (
+                <li key={r.condition} className="flex items-center gap-2 text-xs">
+                  <span className="line-clamp-1 flex-1 font-bold">{r.condition}</span>
+                  <span className="text-muted-foreground">{r.units} وحدة</span>
+                  <span className="font-extrabold text-emerald-700">{fmt(Number(r.revenue))} ر.ي</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Section>
+
+        <Section icon={<TrendingDown className="size-4 text-rose-600" />} title="منتجات في تراجع" subtitle="انخفاض ≥30% أسبوع/أسبوع">
+          {!declining ? (
+            <Loader2 className="size-5 animate-spin" />
+          ) : declining.length === 0 ? (
+            <p className="text-xs text-emerald-700">لا توجد منتجات في تراجع حاد ✅</p>
+          ) : (
+            <ul className="space-y-1.5">
+              {declining.slice(0, 8).map((p: any) => (
+                <li key={p.legacy_id} className="flex items-center gap-2 text-xs">
+                  <span className="line-clamp-1 flex-1 font-bold">{p.name}</span>
+                  <span className="rounded-full bg-rose-100 px-1.5 py-0.5 font-bold text-rose-700">{p.drop_pct}%</span>
+                  <span className="text-muted-foreground">{fmt(Number(p.revenue_this))} ← {fmt(Number(p.revenue_prev))}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Section>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <Section icon={<HeartPulse className="size-4 text-pink-600" />} title="مرضى مزمنون متأخرون عن الإعادة" subtitle="حسب وسطي الفاصل بين الطلبات">
+          {!chronic ? (
+            <Loader2 className="size-5 animate-spin" />
+          ) : (
+            <>
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">{chronic.length} مريض يحتاج تذكير</span>
+                <button
+                  onClick={onEnqueueRefills}
+                  disabled={busy === "refills" || chronic.length === 0}
+                  className="flex items-center gap-1.5 rounded-lg bg-pink-600 px-2.5 py-1 text-[11px] font-bold text-white disabled:opacity-50"
+                >
+                  {busy === "refills" ? <Loader2 className="size-3 animate-spin" /> : <Send className="size-3" />}
+                  أرسل تذكير واتساب (خصم 15%)
+                </button>
+              </div>
+              <List
+                items={chronic.slice(0, 8).map((c: any) => ({
+                  primary: `${c.name ?? c.phone} • ${c.dominant_category ?? "مزمن"}`,
+                  secondary: `${c.days_since}ي منذ آخر طلب • وسطي ${Math.round(Number(c.days_between))}ي`,
+                }))}
+                empty="لا توجد حالات متأخرة 🎉"
+              />
+            </>
+          )}
+        </Section>
+
+        <Section icon={<Layers className="size-4 text-violet-600" />} title="مرشحات حزم تلقائية" subtitle="أزواج بأعلى lift في آخر 90 يوم">
+          {!bundles ? (
+            <Loader2 className="size-5 animate-spin" />
+          ) : bundles.length === 0 ? (
+            <p className="text-xs text-muted-foreground">لم تُكتشف أزواج بعد — يحتاج المزيد من الطلبات.</p>
+          ) : (
+            <ul className="space-y-1.5">
+              {bundles.slice(0, 8).map((b: any, i: number) => (
+                <li key={i} className="rounded-lg border border-border bg-background p-2 text-xs">
+                  <div className="font-bold">{b.a_name} ↔ {b.b_name}</div>
+                  <div className="mt-0.5 flex items-center gap-2 text-muted-foreground">
+                    <span className="rounded-full bg-violet-100 px-1.5 py-0.5 font-bold text-violet-700">lift {b.lift}×</span>
+                    <span>{b.co_count} طلب مشترك</span>
+                    <span className="ms-auto">≈ {fmt(Number(b.avg_combined_price))} ر.ي</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Section>
+      </div>
+
+
 
       {/* CTO health + Weekly report */}
       <div className="grid gap-3 md:grid-cols-2">
