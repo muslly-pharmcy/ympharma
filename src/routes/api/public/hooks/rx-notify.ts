@@ -109,11 +109,11 @@ export const Route = createFileRoute("/api/public/hooks/rx-notify")({
             return Response.json({ ok: true, skipped: "disabled_or_no_recipients", picked: 0 });
           }
 
-          // 2) Pick unprocessed PrescriptionUploaded events
+          // 2) Pick unprocessed prescription-uploaded events (canonical + legacy alias)
           const { data: events, error: evErr } = await supabaseAdmin
             .from("agent_events")
-            .select("id, entity_id, payload, occurred_at")
-            .eq("event_name", "PrescriptionUploaded")
+            .select("id, entity_id, payload, occurred_at, correlation_id")
+            .in("event_name", ["PRESCRIPTION_UPLOADED", "PrescriptionUploaded"])
             .is("processed_at", null)
             .order("occurred_at", { ascending: true })
             .limit(limit);
@@ -174,13 +174,19 @@ export const Route = createFileRoute("/api/public/hooks/rx-notify")({
                 adminUrl,
               });
 
+              const correlationId = (ev as { correlation_id?: string | null }).correlation_id ?? null;
+
               let anySent = false;
               for (const to of recipients) {
                 const r = await sendWhatsAppText(to, message);
                 await supabaseAdmin.from("whatsapp_delivery_logs").insert({
                   message_kind: "prescription_review_request",
                   recipient_phone: to,
-                  payload: { rxId, signedUrlCount: signedUrls.length } as never,
+                  payload: {
+                    rxId,
+                    correlation_id: correlationId,
+                    signedUrlCount: signedUrls.length,
+                  } as never,
                   wamid: r.wamid,
                   status: r.ok ? "sent" : "failed",
                   error_message: r.error ?? null,
@@ -191,12 +197,18 @@ export const Route = createFileRoute("/api/public/hooks/rx-notify")({
                 if (r.ok) anySent = true;
               }
 
-              // Sprint 2: follow-up events
-              await supabaseAdmin.rpc("emit_agent_event", {
+              // Sprint 2: follow-up event via the canonical emitter
+              await supabaseAdmin.rpc("emit_prescription_event", {
                 _event_name: "PRESCRIPTION_URL_GENERATED",
-                _entity_type: "prescription",
-                _entity_id: rxId,
-                _payload: { ttl_seconds: ttl, count: signedUrls.length } as never,
+                _prescription_id: rxId,
+                _actor_id: null,
+                _actor_type: "system",
+                _order_id: null,
+                _metadata: {
+                  ttl_seconds: ttl,
+                  count: signedUrls.length,
+                  delivered: anySent,
+                } as never,
                 _source: "rx-notify",
               } as never).then(() => undefined, () => undefined);
 

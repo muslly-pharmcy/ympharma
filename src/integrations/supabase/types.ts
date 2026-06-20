@@ -1820,6 +1820,7 @@ export type Database = {
           mime_type: string
           object_path: string
           prescription_id: string
+          review_status: string
           sha256: string | null
           size_bytes: number
           storage_provider: string
@@ -1836,6 +1837,7 @@ export type Database = {
           mime_type: string
           object_path: string
           prescription_id: string
+          review_status?: string
           sha256?: string | null
           size_bytes: number
           storage_provider?: string
@@ -1852,6 +1854,7 @@ export type Database = {
           mime_type?: string
           object_path?: string
           prescription_id?: string
+          review_status?: string
           sha256?: string | null
           size_bytes?: number
           storage_provider?: string
@@ -3068,6 +3071,18 @@ export type Database = {
           _entity_type?: string
           _event_name: string
           _payload?: Json
+          _source?: string
+        }
+        Returns: string
+      }
+      emit_prescription_event: {
+        Args: {
+          _actor_id?: string
+          _actor_type?: string
+          _event_name: string
+          _metadata?: Json
+          _order_id?: string
+          _prescription_id: string
           _source?: string
         }
         Returns: string
