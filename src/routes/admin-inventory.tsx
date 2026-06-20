@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { AdminGate } from "@/components/admin/AdminGate";
 import { useEffect, useState, useCallback } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +11,7 @@ import { fetchInventoryReport, listInventoryRows, updateInventory } from "@/lib/
 
 export const Route = createFileRoute("/admin-inventory")({
   head: () => ({ meta: [{ title: "إدارة المخزون — صيدلية المصلي" }, { name: "robots", content: "noindex,nofollow" }] }),
-  component: AdminInventory,
+  component: () => (<AdminGate><AdminInventory /></AdminGate>),
 });
 
 type Row = {

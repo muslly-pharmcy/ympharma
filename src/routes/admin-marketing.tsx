@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { AdminGate } from "@/components/admin/AdminGate";
 import { useCallback, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, RefreshCw, Send, X, Check, ArrowLeft, MessageCircle } from "lucide-react";
@@ -18,7 +19,7 @@ export const Route = createFileRoute("/admin-marketing")({
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
-  component: MarketingQueue,
+  component: () => (<AdminGate><MarketingQueue /></AdminGate>),
 });
 
 type Item = {

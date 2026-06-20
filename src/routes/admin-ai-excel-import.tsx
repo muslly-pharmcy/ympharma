@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { AdminGate } from "@/components/admin/AdminGate";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -16,7 +17,7 @@ export const Route = createFileRoute("/admin-ai-excel-import")({
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
-  component: ExcelImportAgentRunner,
+  component: () => (<AdminGate><ExcelImportAgentRunner /></AdminGate>),
 });
 
 type Row = {

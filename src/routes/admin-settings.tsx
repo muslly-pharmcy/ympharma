@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { AdminGate } from "@/components/admin/AdminGate";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -8,7 +9,7 @@ import { testWhatsAppCloud } from "@/lib/whatsapp-test.functions";
 
 export const Route = createFileRoute("/admin-settings")({
   head: () => ({ meta: [{ title: "الإعدادات والتكاملات — صيدلية المصلي" }, { name: "robots", content: "noindex,nofollow" }] }),
-  component: AdminSettings,
+  component: () => (<AdminGate><AdminSettings /></AdminGate>),
 });
 
 function AdminSettings() {
