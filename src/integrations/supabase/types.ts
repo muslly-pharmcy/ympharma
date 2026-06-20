@@ -1985,6 +1985,7 @@ export type Database = {
           expiry_date: string | null
           id: string
           image_url: string | null
+          inventory_migration_group: string | null
           is_published: boolean
           legacy_id: number | null
           name: string
@@ -2007,6 +2008,7 @@ export type Database = {
           expiry_date?: string | null
           id?: string
           image_url?: string | null
+          inventory_migration_group?: string | null
           is_published?: boolean
           legacy_id?: number | null
           name: string
@@ -2029,6 +2031,7 @@ export type Database = {
           expiry_date?: string | null
           id?: string
           image_url?: string | null
+          inventory_migration_group?: string | null
           is_published?: boolean
           legacy_id?: number | null
           name?: string
@@ -3070,6 +3073,7 @@ export type Database = {
         Returns: boolean
       }
       inventory_intel: { Args: never; Returns: Json }
+      inventory_pilot_report: { Args: never; Returns: Json }
       inventory_readiness_report: { Args: never; Returns: Json }
       inventory_report: { Args: never; Returns: Json }
       is_branch_manager_of: {
@@ -3192,6 +3196,10 @@ export type Database = {
           _project_host?: string
           _schedule?: string
         }
+        Returns: Json
+      }
+      set_inventory_pilot: {
+        Args: { _group?: string; _legacy_ids: number[] }
         Returns: Json
       }
       submit_prescription: {
