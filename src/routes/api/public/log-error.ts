@@ -18,6 +18,42 @@ function clip(v: unknown, max: number): string | null {
   return s.length > max ? s.slice(0, max) : s;
 }
 
+// Per-IP token bucket: max 5 requests per rolling 60s window.
+// In-memory (per-isolate) — acceptable for client error noise gating.
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const ipHits = new Map<string, number[]>();
+
+function rateLimited(ip: string): boolean {
+  const now = Date.now();
+  const cutoff = now - RATE_LIMIT_WINDOW_MS;
+  const hits = (ipHits.get(ip) ?? []).filter((t) => t > cutoff);
+  if (hits.length >= RATE_LIMIT_MAX) {
+    ipHits.set(ip, hits);
+    return true;
+  }
+  hits.push(now);
+  ipHits.set(ip, hits);
+  // Opportunistic cleanup to bound memory.
+  if (ipHits.size > 5000) {
+    for (const [k, v] of ipHits) {
+      const fresh = v.filter((t) => t > cutoff);
+      if (fresh.length === 0) ipHits.delete(k);
+      else ipHits.set(k, fresh);
+    }
+  }
+  return false;
+}
+
+function clientIp(request: Request): string {
+  return (
+    request.headers.get("cf-connecting-ip") ||
+    request.headers.get("x-real-ip") ||
+    (request.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() ||
+    "unknown"
+  );
+}
+
 export const Route = createFileRoute("/api/public/log-error")({
   server: {
     handlers: {
