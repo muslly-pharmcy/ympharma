@@ -36,6 +36,7 @@ import { Route as AdminProductsRouteImport } from './routes/admin-products'
 import { Route as AdminOffersRouteImport } from './routes/admin-offers'
 import { Route as AdminMarketingRouteImport } from './routes/admin-marketing'
 import { Route as AdminLogsRouteImport } from './routes/admin-logs'
+import { Route as AdminInventoryReservationsRouteImport } from './routes/admin-inventory-reservations'
 import { Route as AdminInventoryRouteImport } from './routes/admin-inventory'
 import { Route as AdminEventBusRouteImport } from './routes/admin-event-bus'
 import { Route as AdminDiscountsRouteImport } from './routes/admin-discounts'
@@ -226,6 +227,12 @@ const AdminLogsRoute = AdminLogsRouteImport.update({
   path: '/admin-logs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminInventoryReservationsRoute =
+  AdminInventoryReservationsRouteImport.update({
+    id: '/admin-inventory-reservations',
+    path: '/admin-inventory-reservations',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AdminInventoryRoute = AdminInventoryRouteImport.update({
   id: '/admin-inventory',
   path: '/admin-inventory',
@@ -539,6 +546,7 @@ export interface FileRoutesByFullPath {
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-event-bus': typeof AdminEventBusRoute
   '/admin-inventory': typeof AdminInventoryRoute
+  '/admin-inventory-reservations': typeof AdminInventoryReservationsRoute
   '/admin-logs': typeof AdminLogsRoute
   '/admin-marketing': typeof AdminMarketingRoute
   '/admin-offers': typeof AdminOffersRoute
@@ -622,6 +630,7 @@ export interface FileRoutesByTo {
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-event-bus': typeof AdminEventBusRoute
   '/admin-inventory': typeof AdminInventoryRoute
+  '/admin-inventory-reservations': typeof AdminInventoryReservationsRoute
   '/admin-logs': typeof AdminLogsRoute
   '/admin-marketing': typeof AdminMarketingRoute
   '/admin-offers': typeof AdminOffersRoute
@@ -706,6 +715,7 @@ export interface FileRoutesById {
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-event-bus': typeof AdminEventBusRoute
   '/admin-inventory': typeof AdminInventoryRoute
+  '/admin-inventory-reservations': typeof AdminInventoryReservationsRoute
   '/admin-logs': typeof AdminLogsRoute
   '/admin-marketing': typeof AdminMarketingRoute
   '/admin-offers': typeof AdminOffersRoute
@@ -791,6 +801,7 @@ export interface FileRouteTypes {
     | '/admin-discounts'
     | '/admin-event-bus'
     | '/admin-inventory'
+    | '/admin-inventory-reservations'
     | '/admin-logs'
     | '/admin-marketing'
     | '/admin-offers'
@@ -874,6 +885,7 @@ export interface FileRouteTypes {
     | '/admin-discounts'
     | '/admin-event-bus'
     | '/admin-inventory'
+    | '/admin-inventory-reservations'
     | '/admin-logs'
     | '/admin-marketing'
     | '/admin-offers'
@@ -957,6 +969,7 @@ export interface FileRouteTypes {
     | '/admin-discounts'
     | '/admin-event-bus'
     | '/admin-inventory'
+    | '/admin-inventory-reservations'
     | '/admin-logs'
     | '/admin-marketing'
     | '/admin-offers'
@@ -1041,6 +1054,7 @@ export interface RootRouteChildren {
   AdminDiscountsRoute: typeof AdminDiscountsRoute
   AdminEventBusRoute: typeof AdminEventBusRoute
   AdminInventoryRoute: typeof AdminInventoryRoute
+  AdminInventoryReservationsRoute: typeof AdminInventoryReservationsRoute
   AdminLogsRoute: typeof AdminLogsRoute
   AdminMarketingRoute: typeof AdminMarketingRoute
   AdminOffersRoute: typeof AdminOffersRoute
@@ -1286,6 +1300,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-logs'
       fullPath: '/admin-logs'
       preLoaderRoute: typeof AdminLogsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-inventory-reservations': {
+      id: '/admin-inventory-reservations'
+      path: '/admin-inventory-reservations'
+      fullPath: '/admin-inventory-reservations'
+      preLoaderRoute: typeof AdminInventoryReservationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-inventory': {
@@ -1708,6 +1729,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminDiscountsRoute: AdminDiscountsRoute,
   AdminEventBusRoute: AdminEventBusRoute,
   AdminInventoryRoute: AdminInventoryRoute,
+  AdminInventoryReservationsRoute: AdminInventoryReservationsRoute,
   AdminLogsRoute: AdminLogsRoute,
   AdminMarketingRoute: AdminMarketingRoute,
   AdminOffersRoute: AdminOffersRoute,
