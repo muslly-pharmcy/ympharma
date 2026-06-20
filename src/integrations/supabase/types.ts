@@ -1409,6 +1409,53 @@ export type Database = {
         }
         Relationships: []
       }
+      inventory_manual_adjustments: {
+        Row: {
+          after_qty: number
+          before_qty: number
+          created_at: string
+          db_user: string | null
+          delta: number
+          id: string
+          performed_by: string | null
+          product_id: string
+          reason: string | null
+          source: string
+        }
+        Insert: {
+          after_qty: number
+          before_qty: number
+          created_at?: string
+          db_user?: string | null
+          delta: number
+          id?: string
+          performed_by?: string | null
+          product_id: string
+          reason?: string | null
+          source?: string
+        }
+        Update: {
+          after_qty?: number
+          before_qty?: number
+          created_at?: string
+          db_user?: string | null
+          delta?: number
+          id?: string
+          performed_by?: string | null
+          product_id?: string
+          reason?: string | null
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_manual_adjustments_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventory_reservation_state: {
         Row: {
           correlation_id: string | null
