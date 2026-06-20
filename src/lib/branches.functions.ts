@@ -29,12 +29,7 @@ export const listBranches = createServerFn({ method: "GET" })
     if (!data.includeInactive) q = q.eq("is_active", true);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    return (rows ?? []) as Array<{
-      id: string; code: string; name: string; type: string;
-      address: string | null; phone: string | null;
-      manager_user_id: string | null; is_active: boolean;
-      metadata: Record<string, unknown>; created_at: string;
-    }>;
+    return (rows ?? []) as any[];
   });
 
 const upsertSchema = z.object({
@@ -53,7 +48,7 @@ export const upsertBranch = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => upsertSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertOwnerOrAdmin(context.supabase, context.userId);
-    const payload: Record<string, unknown> = {
+    const payload: any = {
       code: data.code, name: data.name, type: data.type,
       address: data.address ?? null, phone: data.phone ?? null,
       manager_user_id: data.manager_user_id ?? null,
@@ -61,7 +56,7 @@ export const upsertBranch = createServerFn({ method: "POST" })
     if (data.is_active !== undefined) payload.is_active = data.is_active;
 
     if (data.id) {
-      const { error } = await context.supabase.from("branches").update(payload).eq("id", data.id);
+      const { error } = await (context.supabase.from("branches") as any).update(payload).eq("id", data.id);
       if (error) throw new Error(error.message);
       return { ok: true, id: data.id };
     }
