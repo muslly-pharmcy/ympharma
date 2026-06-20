@@ -81,6 +81,12 @@ export function CopilotPanels() {
   const triggerEnrich = useServerFn(runWeeklyEnrichNow);
   const triggerRotate = useServerFn(rotateCronSecretNow);
 
+  const getRevByCond = useServerFn(fetchRevenueByCondition);
+  const getDeclining = useServerFn(fetchDecliningProducts);
+  const getChronic = useServerFn(fetchChronicOverdue);
+  const getBundleCands = useServerFn(fetchAutoBundleCandidates);
+  const runEnqueue = useServerFn(enqueueChronicRefills);
+
   const [agent, setAgent] = useState<keyof typeof AGENT_LABELS>("ceo");
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<string>("");
@@ -91,24 +97,32 @@ export function CopilotPanels() {
   const [sales, setSales] = useState<any>(null);
   const [cto, setCto] = useState<any>(null);
   const [report, setReport] = useState<any>(null);
+  const [revByCond, setRevByCond] = useState<any[] | null>(null);
+  const [declining, setDeclining] = useState<any[] | null>(null);
+  const [chronic, setChronic] = useState<any[] | null>(null);
+  const [bundles, setBundles] = useState<any[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [a, i, s, c, r] = await Promise.all([getAlerts(), getInv(), getSales(), getCto(), getReport()]);
+      const [a, i, s, c, r, rc, dp, co, bc] = await Promise.all([
+        getAlerts(), getInv(), getSales(), getCto(), getReport(),
+        getRevByCond(), getDeclining(), getChronic(), getBundleCands(),
+      ]);
       setAlerts(((a as any)?.alerts ?? []) as Alert[]);
-      setInv(i);
-      setSales(s);
-      setCto(c);
-      setReport(r);
+      setInv(i); setSales(s); setCto(c); setReport(r);
+      setRevByCond((rc as any[]) ?? []);
+      setDeclining((dp as any[]) ?? []);
+      setChronic((co as any[]) ?? []);
+      setBundles((bc as any[]) ?? []);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "تعذر تحميل البيانات الذكية");
     } finally {
       setLoading(false);
     }
-  }, [getAlerts, getInv, getSales, getCto, getReport]);
+  }, [getAlerts, getInv, getSales, getCto, getReport, getRevByCond, getDeclining, getChronic, getBundleCands]);
 
   useEffect(() => {
     load();
