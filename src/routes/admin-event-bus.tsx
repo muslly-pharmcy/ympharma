@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listAgentEvents, agentEventStats, markAgentEventProcessed } from "@/lib/event-bus.functions";
+import { listAgentEvents, agentEventStats, markAgentEventProcessed, installEventConsumerSchedule, getEventConsumerSchedule } from "@/lib/event-bus.functions";
 
 export const Route = createFileRoute("/admin-event-bus")({
   head: () => ({ meta: [{ title: "Event Bus — Admin" }] }),
