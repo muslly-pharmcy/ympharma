@@ -52,7 +52,7 @@ export async function runAgentHook(request: Request, agent: AgentName, kind: "sc
         status: "ok",
         finished_at: new Date().toISOString(),
         summary,
-        details: payload,
+        details: payload as never,
         findings_count: findings,
         recommendations_count: recs,
         execution_time_ms: Date.now() - started,
