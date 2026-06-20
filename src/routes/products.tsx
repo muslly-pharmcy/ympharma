@@ -246,8 +246,3 @@ function ProductGrid({ visible }: { visible: ReturnType<typeof Array.prototype.s
     </>
   );
 }
-      </main>
-      <SiteFooter />
-    </div>
-  );
-}
