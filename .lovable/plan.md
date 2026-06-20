@@ -1,74 +1,75 @@
+## Pharmacy Intelligence Platform — Build Plan
 
-# Muslly Pharmacy OS — 9-Phase Build Plan
+Infrastructure is green. Before I start shipping new revenue features I must close the **critical security findings** the scanner just surfaced — they directly threaten the same revenue this phase is trying to grow (anyone on the internet can drain WhatsApp credits, trigger AI enrichment, and burn API budget).
 
-You picked **all 9 phases**, **SQL nightly + Lovable AI weekly**, and **queue + staff approval** for WhatsApp. That is too large for one turn — I will ship it in **4 sequential batches**, each one a single approval. Every batch is functional on its own; later batches enrich earlier ones.
-
----
-
-## Batch 1 — Foundation (this turn after approval)
-
-**Schema** (one migration, all RLS + GRANTs):
-- `customer_profiles` (phone PK, name, first_seen, last_order_at, orders_count, total_spent, avg_order_value, dominant_category, chronic_flags jsonb, ai_insight text, ai_insight_at)
-- `customer_scores` (phone PK, health_score 0-100, value_score 0-100, risk_score 0-100, segment text — `new|active|chronic|dormant|declining|vip`, computed_at)
-- `agent_runs` (id, agent text, kind text, status, started_at, finished_at, summary, details jsonb, impact_estimate numeric, confidence int)
-- `marketing_queue` (id, campaign_kind, customer_phone, customer_name, payload jsonb, status `pending|approved|sent|skipped|failed`, approved_by, approved_at, sent_at, wamid, error)
-- `executive_reports` (id, day date unique, payload jsonb)
-
-**Nightly SQL job** (`pg_cron` → `/api/public/hooks/nightly-intel`):
-- Rebuilds `customer_profiles` + `customer_scores` from `orders` + approved `product_classifications` (chronic detection already exists via `pharmacy_chronic_legacy_ids`).
-- Generates `marketing_queue` entries: dormant (>45d, was active), refill-due (chronic, ~25d since last refill), abandoned-cart (cart present, no order 24h — uses existing client data, skipped if not tracked).
-- Inserts a row in `agent_runs` per agent.
-
-**RPCs**:
-- `exec_dashboard()` — revenue today/month, repeat %, chronic count, top diseases/classes/bundles/campaigns, low-stock, recovered revenue (from marketing_queue→orders join), lost revenue (cancelled + dormant value).
-- `marketing_queue_list(status)`, `marketing_queue_approve(id)`, `marketing_queue_skip(id)`.
-
-**Routes**:
-- `/admin-command` — CEO Command Center (real-time KPIs, segments donut, top diseases/classes, agent runs feed).
-- `/admin-marketing` — Campaign queue with Approve/Skip/Send (Send calls existing `sendWhatsAppOrderStatus` flow adapted).
-- `/admin-agents` — agent_runs feed with impact/confidence ranking.
-
-**Worker route**: `/api/public/hooks/nightly-intel` (calls `rebuild_customer_intel()` RPC; secured by `apikey` header).
+I'll do this in 3 waves. Each wave is independently shippable and produces evidence.
 
 ---
 
-## Batch 2 — AI Copilot + Weekly Enrichment
+### Wave 0 — Security Hardening (BLOCKER, ~1 short batch)
 
-- `/api/public/hooks/weekly-ai-enrich` — picks top 200 customers by value, asks Gemini for: dominant disease label, 1-line Arabic insight, suggested next action. Writes to `customer_profiles.ai_insight`.
-- **Pharmacy Copilot** server fn (`pharmacy-copilot.functions.ts`): analyzes orders/stock/customers, returns ranked recommendations `{ kind, title, impact_yer, confidence, action }`. Surfaced in `/admin-command` as "Copilot Recommendations" panel.
-- Adds `agent_runs` entries for `copilot.daily`.
+Without this, every cron endpoint we add in later phases inherits the same hole.
 
-## Batch 3 — Agent Board + Self-Audit
+- Replace `apikey === SUPABASE_PUBLISHABLE_KEY` checks on `nightly-intel`, `weekly-ai-enrich`, `weekly-exec-report`, `incident-check`, `alerts-worker` with a server-only `CRON_SECRET` + HMAC-SHA256 (same pattern as `uptime-webhook.ts`).
+- Add Meta `X-Hub-Signature-256` verification to `whatsapp-webhook` using `WHATSAPP_APP_SECRET`.
+- Rotate `pg_cron` jobs to send the new signed header.
+- Remove `discount_code` from the public `campaigns` SELECT exposure (use a security-barrier view).
+- Add the two missing secrets via `add_secret` (`CRON_SECRET`, `WHATSAPP_APP_SECRET`).
 
-- 10 agent functions (CEO/CTO/Marketing/Sales/Inventory/Operations/CX/BI/Security/IT) — each is a SQL-backed analyzer that writes to `agent_runs`. Most run nightly, security weekly.
-- `/api/public/hooks/daily-audit` produces `executive_reports` row: security (uses existing scan), performance (uses uptime_checks), inventory (uses inventory_report), revenue (admin_revenue_series), customer (new from Batch 1).
-- `/admin-reports` — calendar of daily executive reports, download JSON.
-
-## Batch 4 — AI Bundles + Marketing Polish
-
-- `bundle_suggestions` table + nightly generator: groups co-purchased products per disease/season → ranked bundle proposals with predicted conversion & margin.
-- Admin UI to promote a suggested bundle into the real `bundles` table.
-- WhatsApp template wiring for each campaign_kind (refill/dormant/loyalty/chronic_care/rx_followup) — staff still approves before send.
-- Per-campaign tracking: sent/delivered/opened/clicked (via WA webhook already at `api/public/whatsapp-webhook.ts`)/converted (matched order within 7d).
+Evidence: scanner re-run shows the 3 `error` findings cleared.
 
 ---
 
-## Technical notes
+### Wave 1 — Master Taxonomy + Condition-First Shopping (Phases 1 & 2)
 
-- All cron uses `pg_cron` + `pg_net` with the `apikey` header pattern (no new shared secret).
-- All admin RPCs gated by `has_role('owner'|'admin')` or `has_permission('orders')`.
-- AI weekly job uses existing `createLovableAiGatewayProvider` + Gemini-3-flash, batched to stay under credit budget.
-- WhatsApp sends reuse existing `WHATSAPP_TOKEN` / `WHATSAPP_PHONE_NUMBER_ID` / `WHATSAPP_TEMPLATE_NAME` — no new secrets in Batch 1.
-- Performance: nightly job indexes (`orders(customer_phone, created_at)`, `customer_scores(segment)`).
+The existing `product_classifications` table already covers most of the 9 axes (generic, ingredient, therapeutic_category, pharmacological_class, conditions, is_chronic, requires_prescription). Gaps to add:
+
+- `dosage_form` enum (tablet, syrup, injection, cream, drops, inhaler, suppository, sachet)
+- `age_group` enum (infant, child, adult, elderly, all)
+- `gender_relevance` enum (all, female, male)
+- Backfill via a one-shot AI enrichment job over published products with no/low confidence rows.
+
+UI:
+- New `/conditions` route + `/conditions/$slug` (diabetes, hypertension, asthma, allergies, flu, cold, gastritis, pregnancy, pediatrics) driven by `conditions` array in `product_classifications`.
+- Home gets a "تسوّق حسب الحالة" strip above the current category grid.
+
+Evidence: condition pages render ≥10 real products each from production data.
 
 ---
 
-## What I will NOT do (per the "no vanity features" rule)
+### Wave 2 — AI Health Navigator + Smart Product Pages (Phases 3 & 5)
 
-- No new auth flows, no redesigns, no marketing pages, no mobile-only UI.
-- No realtime websockets in Batch 1 — dashboard polls every 60s.
-- No SMS fallback — WhatsApp only (Yemen reality).
+- `/health-navigator` route: free-text Arabic input → Lovable AI Gateway (Gemini Flash) with a strict system prompt: NEVER diagnose, NEVER prescribe, only map symptom → conditions → OTC products from our catalog (gated by `requires_prescription=false`). Tool-call style response listing condition tags + legacy_ids it found in our DB.
+- Product page upgrade (`/product/$id`): show active ingredient, therapeutic class, conditions treated, alternatives (same active ingredient), complementary (from `pharmacy_related_products` RPC + co-purchase).
+
+Evidence: 5 sample queries return only real catalog products; product page screenshots show all 6 panels populated.
 
 ---
 
-Reply **"go"** to ship Batch 1 now. Batches 2-4 follow as separate turns so each is reviewable. If you want a different first batch (e.g. start with AI Copilot), say so.
+### Wave 3 — Chronic Care + Revenue Engine + Exec Intel (Phases 4, 6, 7)
+
+- `/chronic/$program` pages (diabetes / hypertension / heart / asthma) with auto-applied discount code, WhatsApp refill-reminder opt-in, and a "subscribe monthly" CTA that creates a recurring `marketing_queue` job.
+- Auto-bundle generator: nightly SQL job over `orders.items` to compute top co-purchase pairs/triples by lift, write proposals into `bundles` table with `is_active=false` for staff approval.
+- CEO dashboard additions on `/admin-command`:
+  - Revenue by disease category (week vs prev week, % change)
+  - Declining products (4-week trend, p-value)
+  - Chronic patients overdue for refill (using `days_between_orders`)
+  - Suggested next campaign (highest-ROI segment from `customer_profiles`)
+
+Evidence: SQL snapshots + screenshots from production data.
+
+---
+
+### Out of scope for now
+
+- No payment gateway changes.
+- No new auth flows.
+- No mobile-app changes.
+
+---
+
+### Decisions I need from you
+
+1. **Go-order**: do Wave 0 first (recommended — security is a hard blocker), then 1 → 2 → 3? Or batch Wave 0 + Wave 1 together?
+2. **AI model for Navigator**: stay on `google/gemini-3-flash-preview` (cheap, fast, current default) or upgrade to a stronger model for symptom mapping?
+3. **Chronic discount %**: what auto-discount should the chronic programs apply (current campaigns use 10%)?
