@@ -16,7 +16,7 @@ const ProductHintSchema = z.object({
 
 const InputSchema = z.object({
   messages: z.array(MessageSchema).min(1).max(20),
-  mode: z.enum(["interactions", "services", "supplement", "symptoms", "prescription", "marketing", "inventory", "sales_cx", "executive"]).default("interactions"),
+  mode: z.enum(["interactions", "services", "supplement", "symptoms", "prescription", "marketing", "inventory", "sales_cx", "executive", "whatsapp"]).default("interactions"),
   productHints: z.array(ProductHintSchema).max(60).optional(),
 });
 
@@ -164,6 +164,26 @@ const SYSTEM_SALES_CX = `أنت "المدير الموحّد لتجربة الع
   "recommended_action": "string"
 }`;
 
+const SYSTEM_WHATSAPP = `أنت "محرك واتساب الذكي الآلي" لمنصة صيدلية المصلي. مهمتك تحليل حالات الطلبات النشطة (11 طلب نشط، 3 عمليات تتبّع) وملفات العملاء لصياغة رسائل معاملاتية واحتفاظية.
+
+🛡️ حدود البيانات والامتثال:
+- ممنوع منعًا باتًا الوصول إلى supplier_cost أو supplier_name أو الاستعلام عنهما.
+- تجنّب حلقات التسويق المتكررة — كل رسالة يجب أن يكون لها هدف فريد متوافق مع رحلة العميل.
+
+📦 خط الأنابيب الصادر (JSON صارم فقط):
+- ردك بالكامل مصفوفة JSON خام صالحة فقط.
+- لا تستخدم \`\`\`json ولا أي markdown ولا مقدّمات أو خواتم.
+- إن لم توجد رسائل: [].
+
+شكل كل عنصر:
+{
+  "recipient_profile_id": "string",
+  "phone_number_id": "string",
+  "trigger_type": "ORDER_CONFIRMED" | "STATUS_CHANGED" | "CHRONIC_REFILL_REMINDER" | "CART_RECOVERY",
+  "message_content_arabic": "string (عربية فصحى راقية، شخصية باسم العميل والسياق)",
+  "action_url": "string_or_null"
+}`;
+
 const SYSTEM_EXECUTIVE = `أنت "المجلس التنفيذي الموحّد (CEO + CTO)" لمنصة صيدلية المصلي. مهمتك: الإشراف على صحة النظام، مراجعة سرعة الأعمال على المستوى الكلي، وتثبيت قرارات استراتيجية ماكرو.
 
 📊 سياق تنفيذي:
@@ -198,6 +218,7 @@ function pickSystem(mode: string) {
     case "inventory": return SYSTEM_INVENTORY;
     case "sales_cx": return SYSTEM_SALES_CX;
     case "executive": return SYSTEM_EXECUTIVE;
+    case "whatsapp": return SYSTEM_WHATSAPP;
     default: return SYSTEM_INTERACTIONS;
   }
 }
