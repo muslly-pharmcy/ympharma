@@ -46,8 +46,27 @@ function EventBusPage() {
     qc.invalidateQueries({ queryKey: ["agent_events_stats"] });
   };
 
+  const onInstallSchedule = async () => {
+    setInstalling(true);
+    setInstallMsg(null);
+    try {
+      const r = await installSchedule();
+      const s = r.schedule ?? {};
+      setInstallMsg({
+        kind: "ok",
+        text: `✓ تم تثبيت الجدولة: ${s.job_name ?? "event_consumer"} (${s.schedule ?? "* * * * *"}) — job_id=${s.job_id ?? "—"}`,
+      });
+      qc.invalidateQueries({ queryKey: ["event_consumer_schedule"] });
+    } catch (e: any) {
+      setInstallMsg({ kind: "err", text: `✗ فشل التثبيت: ${e?.message ?? String(e)}` });
+    } finally {
+      setInstalling(false);
+    }
+  };
+
   const byEvent = statsQ.data?.by_event ?? {};
   const alerts = statsQ.data?.alerts ?? [];
+  const sched = scheduleQ.data?.schedule ?? {};
 
   return (
     <div dir="rtl" className="mx-auto max-w-6xl p-4 space-y-6">
@@ -58,6 +77,31 @@ function EventBusPage() {
         </div>
         <a href="/admin-automation-hub" className="text-sm underline text-primary">→ Automation Hub</a>
       </header>
+
+      <section className="rounded-lg border p-3 flex flex-wrap items-center gap-3">
+        <div className="text-sm">
+          <span className="text-muted-foreground">جدولة المُستهلِك: </span>
+          {sched.installed ? (
+            <span className="text-emerald-600">
+              ✓ مثبَّتة — {sched.job_name} ({sched.schedule}) {sched.active === false ? "· متوقفة" : "· نشطة"}
+            </span>
+          ) : (
+            <span className="text-amber-600">⚠ غير مثبَّتة</span>
+          )}
+        </div>
+        <button
+          onClick={onInstallSchedule}
+          disabled={installing}
+          className="ms-auto rounded bg-primary text-primary-foreground px-3 py-1.5 text-sm font-medium disabled:opacity-50"
+        >
+          {installing ? "جارٍ التثبيت..." : (sched.installed ? "Reinstall Schedule" : "Install Schedule")}
+        </button>
+        {installMsg && (
+          <div className={`w-full text-xs ${installMsg.kind === "ok" ? "text-emerald-600" : "text-destructive"}`}>
+            {installMsg.text}
+          </div>
+        )}
+      </section>
 
       {alerts.length > 0 && (
         <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-3 space-y-1">
