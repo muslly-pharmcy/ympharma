@@ -326,6 +326,13 @@ tr.ex td { background:#fee2e2; } tr.wa td { background:#fef3c7; }
             className="flex items-center gap-1.5 rounded-xl bg-rose-600 px-3 py-2 text-xs font-black text-white disabled:opacity-50 shadow-card">
             <FileText className="size-4" /> تنزيل PDF
           </button>
+          <button onClick={runMirror} disabled={mirrorBusy}
+            data-testid="rxcheck-mirror-now"
+            title="نسخ صور الروشتات من Storage إلى prescription_image_blobs (نسخة احتياطية داخل قاعدة البيانات)"
+            className="flex items-center gap-1.5 rounded-xl bg-indigo-600 px-3 py-2 text-xs font-black text-white disabled:opacity-50 shadow-card">
+            {mirrorBusy ? <Loader2 className="size-4 animate-spin" /> : <HardDriveDownload className="size-4" />}
+            مرآة الصور الآن
+          </button>
           {running && <span className="text-xs text-muted-foreground">{done}/{rows.filter((r) => r.status === "pending").length || total}</span>}
         </div>
 
