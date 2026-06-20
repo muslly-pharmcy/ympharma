@@ -550,7 +550,7 @@ export type TimelineEntry = {
   at: string;
   kind: "event" | "activity" | "escalation";
   label: string;
-  details: Record<string, unknown> | null;
+  details: any;
 };
 
 export type PrescriptionFileLite = {
