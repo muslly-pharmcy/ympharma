@@ -43,7 +43,7 @@ export function extractDosages(raw: string): string[] {
   const out: string[] = [];
   const seen = new Set<string>();
   // Number + optional space + unit
-  const re = /(\d+(?:\.\d+)?)\s*(mcg|µg|ug|mg|gm|gr|g|kg|ml|cc|l|iu|ui|mmol|%)\b/g;
+  const re = /(\d+(?:\.\d+)?)\s*(mcg|µg|ug|mg|gm|gr|g|kg|ml|cc|l|iu|ui|mmol|%)(?![\p{L}\p{N}])/gu;
   let m: RegExpExecArray | null;
   while ((m = re.exec(s)) !== null) {
     let unit = m[2];
