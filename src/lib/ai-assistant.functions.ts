@@ -273,6 +273,7 @@ function pickSystem(mode: string) {
     case "sales_cx": return SYSTEM_SALES_CX;
     case "executive": return SYSTEM_EXECUTIVE;
     case "whatsapp": return SYSTEM_WHATSAPP;
+    case "catalog": return SYSTEM_CATALOG;
     default: return SYSTEM_INTERACTIONS;
   }
 }
