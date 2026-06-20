@@ -6,7 +6,7 @@ import { buildAiHandoffMessage, waLink } from "@/lib/whatsapp";
 import { useMergedProducts } from "@/lib/use-merged-products";
 
 type Msg = { role: "user" | "assistant"; content: string };
-type Mode = "interactions" | "services" | "supplement" | "symptoms" | "prescription";
+type Mode = "interactions" | "services" | "supplement" | "symptoms" | "prescription" | "marketing";
 
 export function AiChat({
   mode,
