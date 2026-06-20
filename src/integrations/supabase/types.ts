@@ -2240,6 +2240,7 @@ export type Database = {
       }
       rebuild_customer_intel: { Args: never; Returns: Json }
       reject_classification: { Args: { _id: string }; Returns: boolean }
+      reserve_order_stock: { Args: { _order_id: string }; Returns: Json }
       rotate_cron_secret: {
         Args: { _base_url?: string; _secret: string }
         Returns: Json
