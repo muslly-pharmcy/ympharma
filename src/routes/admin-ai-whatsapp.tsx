@@ -16,8 +16,7 @@ export const Route = createFileRoute("/admin-ai-whatsapp")({
 });
 
 type Rec = {
-  recipient_profile_id: string;
-  phone_number_id: string;
+  recipient_name: string;
   trigger_type: "ORDER_CONFIRMED" | "STATUS_CHANGED" | "CHRONIC_REFILL_REMINDER" | "CART_RECOVERY" | string;
   message_content_arabic: string;
   action_url: string | null;
