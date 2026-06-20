@@ -288,7 +288,7 @@ function AdminTransfers() {
           id={openId}
           branchMap={branchMap}
           onClose={() => setOpenId(null)}
-          onChanged={() => refresh()}
+          onChanged={() => invalidateAll()}
         />
       )}
     </div>
