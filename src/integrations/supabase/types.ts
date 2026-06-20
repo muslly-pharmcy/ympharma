@@ -421,6 +421,125 @@ export type Database = {
         }
         Relationships: []
       }
+      branch_inventory: {
+        Row: {
+          branch_id: string
+          id: string
+          product_id: string
+          qty: number
+          reorder_point: number
+          reserved_qty: number
+          updated_at: string
+        }
+        Insert: {
+          branch_id: string
+          id?: string
+          product_id: string
+          qty?: number
+          reorder_point?: number
+          reserved_qty?: number
+          updated_at?: string
+        }
+        Update: {
+          branch_id?: string
+          id?: string
+          product_id?: string
+          qty?: number
+          reorder_point?: number
+          reserved_qty?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "branch_inventory_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "branch_inventory_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      branch_user_assignments: {
+        Row: {
+          branch_id: string
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["branch_role"]
+          user_id: string
+        }
+        Insert: {
+          branch_id: string
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["branch_role"]
+          user_id: string
+        }
+        Update: {
+          branch_id?: string
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["branch_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "branch_user_assignments_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      branches: {
+        Row: {
+          address: string | null
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          manager_user_id: string | null
+          metadata: Json
+          name: string
+          phone: string | null
+          type: Database["public"]["Enums"]["branch_type"]
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          manager_user_id?: string | null
+          metadata?: Json
+          name: string
+          phone?: string | null
+          type: Database["public"]["Enums"]["branch_type"]
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          manager_user_id?: string | null
+          metadata?: Json
+          name?: string
+          phone?: string | null
+          type?: Database["public"]["Enums"]["branch_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bundle_items: {
         Row: {
           bundle_id: string
@@ -1226,6 +1345,69 @@ export type Database = {
           },
         ]
       }
+      inventory_transfers: {
+        Row: {
+          approved_by: string | null
+          correlation_id: string
+          created_at: string
+          destination_branch_id: string | null
+          id: string
+          metadata: Json
+          notes: string | null
+          reason: string | null
+          requested_by: string | null
+          source_branch_id: string | null
+          status: Database["public"]["Enums"]["transfer_status"]
+          transfer_type: Database["public"]["Enums"]["transfer_type"]
+          updated_at: string
+        }
+        Insert: {
+          approved_by?: string | null
+          correlation_id: string
+          created_at?: string
+          destination_branch_id?: string | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          reason?: string | null
+          requested_by?: string | null
+          source_branch_id?: string | null
+          status?: Database["public"]["Enums"]["transfer_status"]
+          transfer_type: Database["public"]["Enums"]["transfer_type"]
+          updated_at?: string
+        }
+        Update: {
+          approved_by?: string | null
+          correlation_id?: string
+          created_at?: string
+          destination_branch_id?: string | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          reason?: string | null
+          requested_by?: string | null
+          source_branch_id?: string | null
+          status?: Database["public"]["Enums"]["transfer_status"]
+          transfer_type?: Database["public"]["Enums"]["transfer_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_transfers_destination_branch_id_fkey"
+            columns: ["destination_branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_transfers_source_branch_id_fkey"
+            columns: ["source_branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marketing_banners: {
         Row: {
           clicks: number
@@ -1962,6 +2144,89 @@ export type Database = {
         }
         Relationships: []
       }
+      transfer_audit_log: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          from_status: Database["public"]["Enums"]["transfer_status"] | null
+          id: string
+          metadata: Json
+          reason: string | null
+          to_status: Database["public"]["Enums"]["transfer_status"]
+          transfer_id: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          from_status?: Database["public"]["Enums"]["transfer_status"] | null
+          id?: string
+          metadata?: Json
+          reason?: string | null
+          to_status: Database["public"]["Enums"]["transfer_status"]
+          transfer_id: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          from_status?: Database["public"]["Enums"]["transfer_status"] | null
+          id?: string
+          metadata?: Json
+          reason?: string | null
+          to_status?: Database["public"]["Enums"]["transfer_status"]
+          transfer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transfer_audit_log_transfer_id_fkey"
+            columns: ["transfer_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_transfers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transfer_items: {
+        Row: {
+          id: string
+          product_id: string
+          qty_picked: number
+          qty_received: number
+          qty_requested: number
+          transfer_id: string
+        }
+        Insert: {
+          id?: string
+          product_id: string
+          qty_picked?: number
+          qty_received?: number
+          qty_requested: number
+          transfer_id: string
+        }
+        Update: {
+          id?: string
+          product_id?: string
+          qty_picked?: number
+          qty_received?: number
+          qty_requested?: number
+          transfer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transfer_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transfer_items_transfer_id_fkey"
+            columns: ["transfer_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_transfers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trust_pages: {
         Row: {
           contact: string
@@ -2357,6 +2622,10 @@ export type Database = {
           source: string
         }[]
       }
+      commit_transfer_receipt: {
+        Args: { _transfer_id: string }
+        Returns: string
+      }
       conditions_catalog: {
         Args: never
         Returns: {
@@ -2466,6 +2735,10 @@ export type Database = {
           total: number
         }[]
       }
+      has_branch_access: {
+        Args: { _branch_id: string; _user_id: string }
+        Returns: boolean
+      }
       has_permission: {
         Args: { _perm: string; _user_id: string }
         Returns: boolean
@@ -2479,6 +2752,11 @@ export type Database = {
       }
       inventory_intel: { Args: never; Returns: Json }
       inventory_report: { Args: never; Returns: Json }
+      is_branch_manager_of: {
+        Args: { _branch_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_owner_or_admin: { Args: { _user_id: string }; Returns: boolean }
       latest_executive_report: { Args: never; Returns: Json }
       list_approved_classifications_public: { Args: never; Returns: Json }
       list_bundles_public: { Args: never; Returns: Json }
@@ -2551,9 +2829,17 @@ export type Database = {
         Args: { _actor?: string; _order_id: string; _reason?: string }
         Returns: Json
       }
+      release_transfer_reservation: {
+        Args: { _reason?: string; _transfer_id: string }
+        Returns: string
+      }
       reserve_order_stock: {
         Args: { _actor?: string; _order_id: string; _reason?: string }
         Returns: Json
+      }
+      reserve_transfer_stock: {
+        Args: { _transfer_id: string }
+        Returns: string
       }
       rotate_cron_secret: {
         Args: { _base_url?: string; _secret: string }
@@ -2611,6 +2897,8 @@ export type Database = {
         | "MARKETING_QUEUE"
         | "INVENTORY"
       app_role: "admin" | "user" | "owner"
+      branch_role: "manager" | "staff" | "viewer"
+      branch_type: "WAREHOUSE" | "BRANCH" | "OFFICE"
       classification_status: "pending" | "approved" | "rejected"
       therapeutic_category:
         | "diabetes"
@@ -2633,6 +2921,19 @@ export type Database = {
         | "oncology"
         | "mental_health"
         | "other"
+      transfer_status:
+        | "REQUESTED"
+        | "APPROVED"
+        | "RESERVED"
+        | "PICKING"
+        | "PACKED"
+        | "DISPATCHED"
+        | "IN_TRANSIT"
+        | "RECEIVED"
+        | "COMPLETED"
+        | "CANCELLED"
+        | "REJECTED"
+      transfer_type: "WH_TO_BRANCH" | "BRANCH_TO_BRANCH" | "BRANCH_TO_WH"
       valid_agent_modes:
         | "pharmacist"
         | "inventory"
@@ -2787,6 +3088,8 @@ export const Constants = {
         "INVENTORY",
       ],
       app_role: ["admin", "user", "owner"],
+      branch_role: ["manager", "staff", "viewer"],
+      branch_type: ["WAREHOUSE", "BRANCH", "OFFICE"],
       classification_status: ["pending", "approved", "rejected"],
       therapeutic_category: [
         "diabetes",
@@ -2810,6 +3113,20 @@ export const Constants = {
         "mental_health",
         "other",
       ],
+      transfer_status: [
+        "REQUESTED",
+        "APPROVED",
+        "RESERVED",
+        "PICKING",
+        "PACKED",
+        "DISPATCHED",
+        "IN_TRANSIT",
+        "RECEIVED",
+        "COMPLETED",
+        "CANCELLED",
+        "REJECTED",
+      ],
+      transfer_type: ["WH_TO_BRANCH", "BRANCH_TO_BRANCH", "BRANCH_TO_WH"],
       valid_agent_modes: [
         "pharmacist",
         "inventory",
