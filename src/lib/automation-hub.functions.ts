@@ -30,7 +30,7 @@ export const listAgentActions = createServerFn({ method: "POST" })
       .limit(data.limit);
     if (data.execution_status !== "ALL") q = q.eq("execution_status", data.execution_status);
     if (data.target_pipeline !== "ALL") q = q.eq("target_pipeline", data.target_pipeline);
-    if (data.originating_agent) q = q.eq("originating_agent", data.originating_agent);
+    if (data.originating_agent) q = q.eq("originating_agent", data.originating_agent as never);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
     return { ok: true as const, rows: rows ?? [] };
