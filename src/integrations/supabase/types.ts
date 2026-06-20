@@ -53,6 +53,62 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_actions: {
+        Row: {
+          action_type: string
+          agent_name: string
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          error_message: string | null
+          executed_at: string | null
+          id: string
+          payload: Json
+          recommendation_id: string | null
+          result: Json | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          action_type: string
+          agent_name: string
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          payload?: Json
+          recommendation_id?: string | null
+          result?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string
+          agent_name?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          payload?: Json
+          recommendation_id?: string | null
+          result?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_actions_recommendation_id_fkey"
+            columns: ["recommendation_id"]
+            isOneToOne: false
+            referencedRelation: "agent_recommendations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_kpis: {
         Row: {
           agent_name: string
@@ -534,6 +590,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      email_delivery_logs: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          message_id: string | null
+          payload: Json
+          recipient_email: string
+          ref_id: string | null
+          ref_kind: string | null
+          sent_at: string | null
+          status: string
+          subject: string | null
+          template_name: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_id?: string | null
+          payload?: Json
+          recipient_email: string
+          ref_id?: string | null
+          ref_kind?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          template_name: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_id?: string | null
+          payload?: Json
+          recipient_email?: string
+          ref_id?: string | null
+          ref_kind?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          template_name?: string
+        }
+        Relationships: []
       }
       email_send_log: {
         Row: {
@@ -1736,6 +1837,51 @@ export type Database = {
         }
         Relationships: []
       }
+      whatsapp_delivery_logs: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          message_kind: string
+          payload: Json
+          recipient_phone: string
+          ref_id: string | null
+          ref_kind: string | null
+          sent_at: string | null
+          status: string
+          template_name: string | null
+          wamid: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_kind: string
+          payload?: Json
+          recipient_phone: string
+          ref_id?: string | null
+          ref_kind?: string | null
+          sent_at?: string | null
+          status?: string
+          template_name?: string | null
+          wamid?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_kind?: string
+          payload?: Json
+          recipient_phone?: string
+          ref_id?: string | null
+          ref_kind?: string | null
+          sent_at?: string | null
+          status?: string
+          template_name?: string | null
+          wamid?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -1788,6 +1934,7 @@ export type Database = {
           lift: number
         }[]
       }
+      auto_populate_bundle_items: { Args: never; Returns: number }
       bootstrap_owner: { Args: never; Returns: boolean }
       campaign_report: { Args: never; Returns: Json }
       check_img_rate_limit: {
@@ -1856,6 +2003,8 @@ export type Database = {
       }
       exec_dashboard: { Args: never; Returns: Json }
       executive_alerts: { Args: never; Returns: Json }
+      generate_agent_actions: { Args: never; Returns: number }
+      generate_marketing_campaigns: { Args: never; Returns: Json }
       get_order_history_public: {
         Args: { _client_ip?: string; _id: string; _phone_last4: string }
         Returns: {
