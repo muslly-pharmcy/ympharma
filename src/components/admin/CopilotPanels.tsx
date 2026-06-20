@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Sparkles, AlertTriangle, Package, TrendingUp, Bug, FileText, PlayCircle, Wand2, ShieldCheck } from "lucide-react";
+import { Loader2, Sparkles, AlertTriangle, Package, TrendingUp, Bug, FileText, PlayCircle, Wand2, ShieldCheck, Activity, TrendingDown, HeartPulse, Layers, Send } from "lucide-react";
 import { toast } from "sonner";
 import {
   askExecutiveCopilot,
@@ -12,6 +12,11 @@ import {
   rotateCronSecretNow,
   runWeeklyEnrichNow,
   runWeeklyReportNow,
+  fetchRevenueByCondition,
+  fetchDecliningProducts,
+  fetchChronicOverdue,
+  fetchAutoBundleCandidates,
+  enqueueChronicRefills,
 } from "@/lib/pharmacy-copilot.functions";
 
 type Alert = {
