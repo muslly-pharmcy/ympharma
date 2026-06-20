@@ -145,15 +145,41 @@ export const listAgentEventsDlq = createServerFn({ method: "POST" })
 export const installEventConsumerSchedule = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    // Strict perms: only admin/owner can invoke the service_role RPC.
     await assertAdmin(context);
     const secret = process.env.CRON_SECRET;
     if (!secret) throw new Error("CRON_SECRET not configured on the server");
+
+    const correlationId =
+      (globalThis.crypto as Crypto | undefined)?.randomUUID?.() ??
+      `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin.rpc("schedule_event_consumer" as never, {
       _cron_secret: secret,
     } as never);
+
+    const parsed = (JSON.parse(JSON.stringify(data ?? {})) as {
+      ok?: boolean; job_id?: number; job_name?: string; schedule?: string;
+      url?: string; batch?: number; active?: boolean; installed?: boolean; reinstalled?: boolean;
+    });
+
+    // Audit log — every install attempt, success or failure, tied to correlation_id.
+    await supabaseAdmin.from("event_consumer_schedule_log" as never).insert({
+      correlation_id: correlationId,
+      action: parsed.reinstalled ? "reinstall" : "install",
+      actor_user_id: context.userId,
+      status: error ? "error" : "ok",
+      job_id: parsed.job_id ?? null,
+      job_name: parsed.job_name ?? "event-consumer-tick",
+      schedule: parsed.schedule ?? null,
+      url: parsed.url ?? null,
+      batch: parsed.batch ?? null,
+      error: error ? error.message : null,
+    } as never);
+
     if (error) throw new Error(error.message);
-    return { ok: true as const, schedule: (JSON.parse(JSON.stringify(data ?? {})) as { ok?: boolean; job_id?: number; job_name?: string; schedule?: string; url?: string; batch?: number; active?: boolean; installed?: boolean }) };
+    return { ok: true as const, correlation_id: correlationId, schedule: parsed };
   });
 
 export const getEventConsumerSchedule = createServerFn({ method: "POST" })
@@ -164,6 +190,26 @@ export const getEventConsumerSchedule = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true as const, schedule: (JSON.parse(JSON.stringify(data ?? {})) as { ok?: boolean; job_id?: number; job_name?: string; schedule?: string; url?: string; batch?: number; active?: boolean; installed?: boolean }) };
   });
+
+// Batch 5c — read schedule install/reinstall audit log (admin/owner only via RLS).
+export const listScheduleLog = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ limit: z.number().int().min(1).max(200).default(50) }).parse(d ?? {}))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { data: rows, error } = await context.supabase
+      .from("event_consumer_schedule_log" as never)
+      .select("id, correlation_id, action, actor_user_id, status, job_id, job_name, schedule, url, batch, error, created_at")
+      .order("created_at", { ascending: false })
+      .limit(data.limit);
+    if (error) throw new Error(error.message);
+    return { ok: true as const, rows: (rows ?? []) as Array<{
+      id: string; correlation_id: string; action: string; actor_user_id: string | null;
+      status: string; job_id: number | null; job_name: string | null; schedule: string | null;
+      url: string | null; batch: number | null; error: string | null; created_at: string;
+    }> };
+  });
+
 
 
 

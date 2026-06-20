@@ -942,6 +942,51 @@ export type Database = {
         }
         Relationships: []
       }
+      event_consumer_schedule_log: {
+        Row: {
+          action: string
+          actor_user_id: string | null
+          batch: number | null
+          correlation_id: string
+          created_at: string
+          error: string | null
+          id: string
+          job_id: number | null
+          job_name: string | null
+          schedule: string | null
+          status: string
+          url: string | null
+        }
+        Insert: {
+          action: string
+          actor_user_id?: string | null
+          batch?: number | null
+          correlation_id: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          job_id?: number | null
+          job_name?: string | null
+          schedule?: string | null
+          status: string
+          url?: string | null
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string | null
+          batch?: number | null
+          correlation_id?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          job_id?: number | null
+          job_name?: string | null
+          schedule?: string | null
+          status?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
       executive_reports: {
         Row: {
           created_at: string

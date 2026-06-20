@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listAgentEvents, agentEventStats, markAgentEventProcessed, installEventConsumerSchedule, getEventConsumerSchedule } from "@/lib/event-bus.functions";
+import { listAgentEvents, agentEventStats, markAgentEventProcessed, installEventConsumerSchedule, getEventConsumerSchedule, listScheduleLog } from "@/lib/event-bus.functions";
 
 export const Route = createFileRoute("/admin-event-bus")({
   head: () => ({ meta: [{ title: "Event Bus — Admin" }] }),
@@ -21,12 +21,19 @@ function EventBusPage() {
   const mark = useServerFn(markAgentEventProcessed);
   const installSchedule = useServerFn(installEventConsumerSchedule);
   const getSchedule = useServerFn(getEventConsumerSchedule);
+  const fetchLog = useServerFn(listScheduleLog);
   const qc = useQueryClient();
 
   const scheduleQ = useQuery({
     queryKey: ["event_consumer_schedule"],
     queryFn: () => getSchedule(),
     refetchInterval: 60_000,
+  });
+
+  const logQ = useQuery({
+    queryKey: ["event_consumer_schedule_log"],
+    queryFn: () => fetchLog({ data: { limit: 50 } }),
+    refetchInterval: 30_000,
   });
 
   const rowsQ = useQuery({
@@ -54,9 +61,11 @@ function EventBusPage() {
       const s = r.schedule ?? {};
       setInstallMsg({
         kind: "ok",
-        text: `✓ تم تثبيت الجدولة: ${s.job_name ?? "event_consumer"} (${s.schedule ?? "* * * * *"}) — job_id=${s.job_id ?? "—"}`,
+        text: `✓ ${s.reinstalled ? "أُعيد تثبيت" : "تم تثبيت"} الجدولة: ${s.job_name ?? "event-consumer-tick"} (${s.schedule ?? "* * * * *"}) — job_id=${s.job_id ?? "—"} · cid=${r.correlation_id.slice(0, 8)}`,
       });
       qc.invalidateQueries({ queryKey: ["event_consumer_schedule"] });
+      qc.invalidateQueries({ queryKey: ["event_consumer_schedule_log"] });
+
     } catch (e: any) {
       setInstallMsg({ kind: "err", text: `✗ فشل التثبيت: ${e?.message ?? String(e)}` });
     } finally {
@@ -199,6 +208,49 @@ function EventBusPage() {
               ))}
               {(rowsQ.data?.rows ?? []).length === 0 && (
                 <tr><td colSpan={6} className="p-3 text-center text-muted-foreground">لا نتائج.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="rounded-lg border p-3 space-y-2">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-sm font-semibold">سجل عمليات الجدولة</h2>
+          <button className="text-xs underline" onClick={() => logQ.refetch()}>تحديث</button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="text-muted-foreground">
+              <tr>
+                <th className="text-right p-2">الوقت</th>
+                <th className="text-right p-2">العملية</th>
+                <th className="text-right p-2">الحالة</th>
+                <th className="text-right p-2">job_id</th>
+                <th className="text-right p-2">الجدولة</th>
+                <th className="text-right p-2">correlation_id</th>
+                <th className="text-right p-2">المنفِّذ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(logQ.data?.rows ?? []).map((r) => (
+                <tr key={r.id} className="border-t align-top">
+                  <td className="p-2 text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleString("ar")}</td>
+                  <td className="p-2 text-xs font-mono">{r.action}</td>
+                  <td className="p-2 text-xs">
+                    {r.status === "ok"
+                      ? <span className="text-emerald-600">✓ ok</span>
+                      : <span className="text-destructive">✗ error</span>}
+                    {r.error && <div className="text-destructive text-[10px] mt-1">{r.error}</div>}
+                  </td>
+                  <td className="p-2 text-xs">{r.job_id ?? "—"}</td>
+                  <td className="p-2 text-xs font-mono">{r.schedule ?? "—"}</td>
+                  <td className="p-2 text-[10px] font-mono" title={r.correlation_id}>{r.correlation_id.slice(0, 8)}</td>
+                  <td className="p-2 text-[10px] font-mono" title={r.actor_user_id ?? ""}>{r.actor_user_id ? r.actor_user_id.slice(0, 8) : "—"}</td>
+                </tr>
+              ))}
+              {(logQ.data?.rows ?? []).length === 0 && (
+                <tr><td colSpan={7} className="p-3 text-center text-muted-foreground">لا عمليات تثبيت مسجَّلة بعد.</td></tr>
               )}
             </tbody>
           </table>
