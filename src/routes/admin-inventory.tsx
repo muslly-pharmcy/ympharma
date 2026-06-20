@@ -168,9 +168,9 @@ function Num({ value, onChange, step = 1 }: { value: number; onChange: (v: numbe
   return <input type="number" step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="w-20 rounded-md border border-border bg-secondary/40 px-2 py-1 text-xs text-center" />;
 }
 
-function Kpi({ icon, label, value }: { icon: React.ReactNode; label: string; value: number | string }) {
+function Kpi({ icon, label, value, active }: { icon: React.ReactNode; label: string; value: number | string; active?: boolean }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-3">
+    <div className={`rounded-2xl border bg-card p-3 ${active ? "border-primary ring-2 ring-primary/30" : "border-border"}`}>
       <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">{icon}{label}</div>
       <div className="mt-1 text-xl font-black">{value}</div>
     </div>
