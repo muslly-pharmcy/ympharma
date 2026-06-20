@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { AdminGate } from "@/components/admin/AdminGate";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -12,7 +13,7 @@ import { ArrowRight, RefreshCw } from "lucide-react";
 export const Route = createFileRoute("/admin-logs")({
   ssr: false,
   head: () => ({ meta: [{ title: "سجل النشاط — مصلي" }, { name: "robots", content: "noindex,nofollow" }] }),
-  component: AdminLogs,
+  component: () => (<AdminGate><AdminLogs /></AdminGate>),
   errorComponent: ({ error }) => (
     <div className="p-6 text-destructive">خطأ: {error.message}</div>
   ),

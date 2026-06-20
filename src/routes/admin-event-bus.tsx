@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AdminGate } from "@/components/admin/AdminGate";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -6,7 +7,7 @@ import { listAgentEvents, agentEventStats, markAgentEventProcessed, installEvent
 
 export const Route = createFileRoute("/admin-event-bus")({
   head: () => ({ meta: [{ title: "Event Bus — Admin" }] }),
-  component: EventBusPage,
+  component: () => (<AdminGate><EventBusPage /></AdminGate>),
 });
 
 type Status = "ALL" | "UNPROCESSED" | "PROCESSED";

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { AdminGate } from "@/components/admin/AdminGate";
 import { useCallback, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, RefreshCw, TrendingUp, Users, Heart, AlertTriangle, Package, ArrowLeft, PlayCircle } from "lucide-react";
@@ -14,7 +15,7 @@ export const Route = createFileRoute("/admin-command")({
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
-  component: CommandCenter,
+  component: () => (<AdminGate><CommandCenter /></AdminGate>),
 });
 
 const SEGMENT_LABELS: Record<string, string> = {

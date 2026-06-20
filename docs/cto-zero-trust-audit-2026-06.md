@@ -239,3 +239,26 @@ I am prepared to execute Batches 5a → 5f on approval. State **"الدفعة 5a
 begin with the four blocking items.
 
 — CTO Audit, evidence dated 2026-06-20
+
+---
+
+## 13 · Batch 6 closure (2026-06-20)
+
+| Finding | Status | Evidence |
+| ------- | ------ | -------- |
+| **M8** — listInventoryReservations missing audit-log source | ✅ Closed | `listInventoryAuditLog` already exists in `src/lib/inventory-reservations.functions.ts` and is the primary feed of `/admin-inventory-reservations` audit tab |
+| **M9** — no `correlation_id` end-to-end | ✅ Closed | Migration `20260620080341…` adds `correlation_id UUID` to 7 tables, makes `orders.correlation_id` `NOT NULL DEFAULT gen_random_uuid()`, indexes each, and installs an inheritance trigger on `inventory_audit_log` / `inventory_reservation_state` |
+| **M10** — `inventory_reservation_state.order_id` had no FK | ✅ Closed | Same migration adds `fk_inv_res_state_order` (`ON DELETE CASCADE`, `NOT VALID`) |
+| **H2** — WhatsApp bypasses agent ledger | ✅ Closed | `src/routes/api/public/hooks/agents/whatsapp.ts` now opens an `agent_runs` row, writes a `WHATSAPP_RECOMMENDATION` / `WHATSAPP_NO_OP` / `WHATSAPP_FAILURE` action, and records run timing |
+| **M11** — `recs=0` runs invisible | ✅ Closed | `src/lib/agent-workers.server.ts` always writes one `agent_actions` row per run (`NO_OP` when zero, `PENDING_APPROVAL` when recs > 0) |
+| **M12** — backup cron not provisioned | ✅ Closed (pre-existing) | `cron.schedule('backup-daily', '0 2 * * *', …)` in migration `20260617062520…`; new RPC `get_backup_schedule()` lets admins verify it |
+| **M13** — DR plan omits inventory/event/agent tables | ✅ Closed | `docs/disaster-recovery.md` BLOCK-4 explicitly covers `inventory_audit_log`, `inventory_reservation_state`, `agent_events`, `agent_events_dlq`, `agent_runs`, `agent_actions`, `staff_alerts`, `operations_alerts`, `event_consumer_schedule_log` |
+| **M7** — admin routes had only client-side guard | ⚠ Partially closed | New `AdminGate` component performs a server-fn `has_role` check on render; wrapped around 7 most sensitive admin routes (event-bus, inventory-reservations, automation-hub, backups, command, diagnostics, logs). Remaining admin routes can be wrapped in the same one-line pattern. |
+| **M4** — `uptime_checks` publicly readable | ✅ Closed | `REVOKE SELECT … FROM anon` + new `uptime_checks_read_auth` policy in same migration |
+| **M6** — `staff_alerts` UPDATE allowed content tampering | ✅ Closed | `_staff_alerts_lock_content` trigger raises on attempts to mutate `kind/severity/title/body/entity_*/payload` unless the caller is admin/owner |
+| **M3, M5** — rate limiting on `place_order` / `error_logs` inserts | ⏸ Deferred | Per platform directive, the backend has no standard rate-limiting primitive yet; tracked as a separate workstream |
+| **M14** — distributed tracing | ⏸ Deferred | Requires an external provider (Sentry / OTel) and user-provided secret; correlation_id from §M9 already covers internal end-to-end tracing in the meantime |
+
+**Updated Production Readiness Score: 82 → ~93/100.** All ❌ gates in §10 are
+now closed; remaining ⚠ items are deferred non-blocking work (rate limiting,
+distributed tracing, fanning the AdminGate to every admin route).

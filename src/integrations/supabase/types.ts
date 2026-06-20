@@ -60,6 +60,7 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           compiled_arabic_output: string | null
+          correlation_id: string | null
           created_at: string
           error_message: string | null
           executed_at: string | null
@@ -87,6 +88,7 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           compiled_arabic_output?: string | null
+          correlation_id?: string | null
           created_at?: string
           error_message?: string | null
           executed_at?: string | null
@@ -114,6 +116,7 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           compiled_arabic_output?: string | null
+          correlation_id?: string | null
           created_at?: string
           error_message?: string | null
           executed_at?: string | null
@@ -147,6 +150,7 @@ export type Database = {
       }
       agent_events: {
         Row: {
+          correlation_id: string | null
           created_at: string
           entity_id: string | null
           entity_type: string | null
@@ -161,6 +165,7 @@ export type Database = {
           source: string
         }
         Insert: {
+          correlation_id?: string | null
           created_at?: string
           entity_id?: string | null
           entity_type?: string | null
@@ -175,6 +180,7 @@ export type Database = {
           source?: string
         }
         Update: {
+          correlation_id?: string | null
           created_at?: string
           entity_id?: string | null
           entity_type?: string | null
@@ -320,6 +326,7 @@ export type Database = {
         Row: {
           agent: Database["public"]["Enums"]["valid_agent_modes"]
           confidence: number | null
+          correlation_id: string | null
           created_at: string
           details: Json
           execution_time_ms: number | null
@@ -336,6 +343,7 @@ export type Database = {
         Insert: {
           agent: Database["public"]["Enums"]["valid_agent_modes"]
           confidence?: number | null
+          correlation_id?: string | null
           created_at?: string
           details?: Json
           execution_time_ms?: number | null
@@ -352,6 +360,7 @@ export type Database = {
         Update: {
           agent?: Database["public"]["Enums"]["valid_agent_modes"]
           confidence?: number | null
+          correlation_id?: string | null
           created_at?: string
           details?: Json
           execution_time_ms?: number | null
@@ -1150,6 +1159,7 @@ export type Database = {
         Row: {
           action: string
           actor: string | null
+          correlation_id: string | null
           created_at: string
           id: string
           order_id: string
@@ -1160,6 +1170,7 @@ export type Database = {
         Insert: {
           action: string
           actor?: string | null
+          correlation_id?: string | null
           created_at?: string
           id?: string
           order_id: string
@@ -1170,6 +1181,7 @@ export type Database = {
         Update: {
           action?: string
           actor?: string | null
+          correlation_id?: string | null
           created_at?: string
           id?: string
           order_id?: string
@@ -1181,6 +1193,7 @@ export type Database = {
       }
       inventory_reservation_state: {
         Row: {
+          correlation_id: string | null
           order_id: string
           released_at: string | null
           reserved_at: string | null
@@ -1188,6 +1201,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          correlation_id?: string | null
           order_id: string
           released_at?: string | null
           reserved_at?: string | null
@@ -1195,13 +1209,22 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          correlation_id?: string | null
           order_id?: string
           released_at?: string | null
           reserved_at?: string | null
           state?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_inv_res_state_order"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       marketing_banners: {
         Row: {
@@ -1434,6 +1457,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          correlation_id: string
           created_at: string
           customer_address: string
           customer_name: string
@@ -1448,6 +1472,7 @@ export type Database = {
           total: number
         }
         Insert: {
+          correlation_id?: string
           created_at?: string
           customer_address: string
           customer_name: string
@@ -1462,6 +1487,7 @@ export type Database = {
           total?: number
         }
         Update: {
+          correlation_id?: string
           created_at?: string
           customer_address?: string
           customer_name?: string
@@ -1759,6 +1785,7 @@ export type Database = {
           acknowledged_by: string | null
           body: string | null
           channels: string[]
+          correlation_id: string | null
           created_at: string
           entity_id: string | null
           entity_type: string | null
@@ -1776,6 +1803,7 @@ export type Database = {
           acknowledged_by?: string | null
           body?: string | null
           channels?: string[]
+          correlation_id?: string | null
           created_at?: string
           entity_id?: string | null
           entity_type?: string | null
@@ -1793,6 +1821,7 @@ export type Database = {
           acknowledged_by?: string | null
           body?: string | null
           channels?: string[]
+          correlation_id?: string | null
           created_at?: string
           entity_id?: string | null
           entity_type?: string | null
@@ -2352,6 +2381,7 @@ export type Database = {
       }
       generate_agent_actions: { Args: never; Returns: number }
       generate_marketing_campaigns: { Args: never; Returns: Json }
+      get_backup_schedule: { Args: never; Returns: Json }
       get_event_consumer_schedule: { Args: never; Returns: Json }
       get_order_history_public: {
         Args: { _client_ip?: string; _id: string; _phone_last4: string }
