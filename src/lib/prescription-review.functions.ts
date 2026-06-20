@@ -463,3 +463,200 @@ export const getPrescriptionReview = createServerFn({ method: "GET" })
       correlation_ref: correlationIdFor(data.prescriptionId),
     };
   });
+
+// ────────────────────────────────────────────────────────────────────────
+// listPrescriptionReviews — paginated, server-side filtered list.
+// ────────────────────────────────────────────────────────────────────────
+const REVIEW_STATUSES = [
+  "PENDING_REVIEW",
+  "ASSIGNED",
+  "IN_REVIEW",
+  "ESCALATED",
+  "APPROVED",
+  "REJECTED",
+] as const;
+
+export type PrescriptionReviewListRow = {
+  prescription_id: string;
+  status: ReviewStatus;
+  reviewer_id: string | null;
+  customer_name: string | null;
+  customer_phone: string | null;
+  prescription_created_at: string | null;
+  updated_at: string;
+  assigned_at: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+  correlation_ref: string;
+};
+
+export const listPrescriptionReviews = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z
+      .object({
+        status: z.enum(REVIEW_STATUSES).optional(),
+        search: z.string().trim().max(120).optional(),
+        limit: z.number().int().min(1).max(100).default(25),
+        offset: z.number().int().min(0).default(0),
+      })
+      .parse(d ?? {}),
+  )
+  .handler(
+    async ({
+      context,
+      data,
+    }): Promise<{ rows: PrescriptionReviewListRow[]; total: number }> => {
+      let q = context.supabase
+        .from("prescription_reviews")
+        .select(
+          "prescription_id, status, reviewer_id, updated_at, assigned_at, started_at, completed_at, prescriptions!inner(customer_name, customer_phone, created_at)",
+          { count: "exact" },
+        )
+        .order("updated_at", { ascending: false })
+        .range(data.offset, data.offset + data.limit - 1);
+      if (data.status) q = q.eq("status", data.status);
+      if (data.search) {
+        const s = data.search.replace(/[%,]/g, "");
+        q = q.ilike("prescription_id", `%${s}%`);
+      }
+      const { data: rows, error, count } = await q;
+      if (error) {
+        if (/permission|rls/i.test(error.message)) throw new Error("forbidden");
+        throw new Error(error.message);
+      }
+      const mapped: PrescriptionReviewListRow[] = ((rows as any[]) ?? []).map((r) => ({
+        prescription_id: r.prescription_id,
+        status: r.status,
+        reviewer_id: r.reviewer_id,
+        customer_name: r.prescriptions?.customer_name ?? null,
+        customer_phone: r.prescriptions?.customer_phone ?? null,
+        prescription_created_at: r.prescriptions?.created_at ?? null,
+        updated_at: r.updated_at,
+        assigned_at: r.assigned_at,
+        started_at: r.started_at,
+        completed_at: r.completed_at,
+        correlation_ref: `RX-${r.prescription_id}`,
+      }));
+      return { rows: mapped, total: count ?? 0 };
+    },
+  );
+
+// ────────────────────────────────────────────────────────────────────────
+// getPrescriptionReviewDetail — review + escalations + files + timeline
+// (agent_events ∪ activity_logs ∪ escalations), sorted chronologically.
+// ────────────────────────────────────────────────────────────────────────
+export type TimelineEntry = {
+  at: string;
+  kind: "event" | "activity" | "escalation";
+  label: string;
+  details: any;
+};
+
+export type PrescriptionFileLite = {
+  id: string;
+  bucket: string;
+  object_path: string;
+  mime_type: string | null;
+  size_bytes: number;
+  created_at: string;
+};
+
+export const getPrescriptionReviewDetail = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ prescriptionId: rxIdSchema }).parse(d))
+  .handler(async ({ context, data }) => {
+    const review = await loadReview(context.supabase, data.prescriptionId);
+
+    const [rxRes, escRes, evtRes, actRes, fileRes] = await Promise.all([
+      context.supabase
+        .from("prescriptions")
+        .select("id, customer_name, customer_phone, customer_address, notes, created_at")
+        .eq("id", data.prescriptionId)
+        .maybeSingle(),
+      context.supabase
+        .from("prescription_escalations")
+        .select(
+          "id, reason, assigned_to, status, resolution_note, created_by, created_at, resolved_at",
+        )
+        .eq("prescription_id", data.prescriptionId)
+        .order("created_at", { ascending: false }),
+      context.supabase
+        .from("agent_events")
+        .select("id, event_name, created_at, payload, source, correlation_id")
+        .eq("entity_type", "prescription")
+        .eq("entity_id", data.prescriptionId)
+        .order("created_at", { ascending: true })
+        .limit(200),
+      context.supabase
+        .from("activity_logs")
+        .select("id, action, details, created_at")
+        .eq("entity_type", "prescription_review")
+        .eq("entity_id", data.prescriptionId)
+        .order("created_at", { ascending: true })
+        .limit(200),
+      context.supabase
+        .from("prescription_files" as never)
+        .select("id, bucket, object_path, mime_type, size_bytes, created_at")
+        .eq("prescription_id", data.prescriptionId)
+        .is("deleted_at", null)
+        .order("created_at", { ascending: false }),
+    ]);
+
+    for (const r of [rxRes, escRes, evtRes, actRes, fileRes] as any[]) {
+      if (r.error) {
+        if (/permission|rls/i.test(r.error.message)) throw new Error("forbidden");
+        throw new Error(r.error.message);
+      }
+    }
+
+    const timeline: TimelineEntry[] = [];
+    for (const e of (evtRes.data as any[]) ?? []) {
+      timeline.push({
+        at: e.created_at,
+        kind: "event",
+        label: e.event_name,
+        details: { source: e.source, payload: e.payload },
+      });
+    }
+    for (const a of (actRes.data as any[]) ?? []) {
+      timeline.push({
+        at: a.created_at,
+        kind: "activity",
+        label: a.action,
+        details: (a.details as any) ?? null,
+      });
+    }
+    for (const e of (escRes.data as any[]) ?? []) {
+      timeline.push({
+        at: e.created_at,
+        kind: "escalation",
+        label: `escalation.${String(e.status).toLowerCase()}`,
+        details: {
+          reason: e.reason,
+          assigned_to: e.assigned_to,
+          resolution_note: e.resolution_note,
+          resolved_at: e.resolved_at,
+        },
+      });
+    }
+    timeline.sort((a, b) => a.at.localeCompare(b.at));
+
+    return {
+      review,
+      prescription: (rxRes.data as any) ?? null,
+      escalations: ((escRes.data as any[]) ?? []) as Array<{
+        id: string;
+        reason: string;
+        assigned_to: string | null;
+        status: "OPEN" | "RESOLVED" | "CANCELLED";
+        resolution_note: string | null;
+        created_by: string | null;
+        created_at: string;
+        resolved_at: string | null;
+      }>,
+      files: ((fileRes.data as any[]) ?? []) as PrescriptionFileLite[],
+      timeline,
+      correlation_ref: correlationIdFor(data.prescriptionId),
+    };
+  });
