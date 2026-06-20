@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { parseSignedUrl, formatExpiry, checkUrlReachable, regenerateSignedUrl } from "@/lib/rx-url";
-import { CheckCircle2, XCircle, Loader2, RefreshCw, Play, ShieldAlert, Clock, Download, FileText } from "lucide-react";
+import { CheckCircle2, XCircle, Loader2, RefreshCw, Play, ShieldAlert, Clock, Download, FileText, HardDriveDownload } from "lucide-react";
 import { toast } from "sonner";
 import { downloadCSV } from "@/lib/csv-export";
+import { mirrorRxImagesFromStorage } from "@/lib/rx-backup.functions";
 
 export const Route = createFileRoute("/admin-rx-check")({
   head: () => ({ meta: [{ title: "فحص روابط الروشتات — الإدارة" }, { name: "robots", content: "noindex,nofollow" }] }),
@@ -47,6 +49,20 @@ function RxCheckPage() {
   const [regenBusy, setRegenBusy] = useState<string | null>(null);
   const [expiryFilter, setExpiryFilter] = useState<ExpiryFilter>("all");
   const [userEmail, setUserEmail] = useState<string>("");
+  const [mirrorBusy, setMirrorBusy] = useState(false);
+  const mirrorFn = useServerFn(mirrorRxImagesFromStorage);
+
+  async function runMirror() {
+    setMirrorBusy(true);
+    try {
+      const res = await mirrorFn({ data: { limit: 100 } }) as {
+        ok: boolean; scanned: number; mirrored: number; skipped: number; failed: number;
+      };
+      toast.success(`المرآة: نسخ ${res.mirrored} / تم تخطي ${res.skipped} / فشل ${res.failed} (مسح ${res.scanned})`);
+    } catch (e: any) {
+      toast.error(e?.message || "فشل تشغيل مرآة الصور");
+    } finally { setMirrorBusy(false); }
+  }
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -309,6 +325,13 @@ tr.ex td { background:#fee2e2; } tr.wa td { background:#fef3c7; }
             data-testid="rxcheck-export-pdf"
             className="flex items-center gap-1.5 rounded-xl bg-rose-600 px-3 py-2 text-xs font-black text-white disabled:opacity-50 shadow-card">
             <FileText className="size-4" /> تنزيل PDF
+          </button>
+          <button onClick={runMirror} disabled={mirrorBusy}
+            data-testid="rxcheck-mirror-now"
+            title="نسخ صور الروشتات من Storage إلى prescription_image_blobs (نسخة احتياطية داخل قاعدة البيانات)"
+            className="flex items-center gap-1.5 rounded-xl bg-indigo-600 px-3 py-2 text-xs font-black text-white disabled:opacity-50 shadow-card">
+            {mirrorBusy ? <Loader2 className="size-4 animate-spin" /> : <HardDriveDownload className="size-4" />}
+            مرآة الصور الآن
           </button>
           {running && <span className="text-xs text-muted-foreground">{done}/{rows.filter((r) => r.status === "pending").length || total}</span>}
         </div>
