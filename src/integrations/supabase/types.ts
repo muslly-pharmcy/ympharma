@@ -1988,6 +1988,83 @@ export type Database = {
           },
         ]
       }
+      prescription_extractions: {
+        Row: {
+          allergies: Json
+          attempts: number
+          confidence: number | null
+          created_at: string
+          diagnosis: string | null
+          doctor_name: string | null
+          error: string | null
+          id: string
+          interactions: Json
+          medications: Json
+          model_tier: string
+          model_used: string | null
+          next_attempt_at: string
+          prescription_date: string | null
+          prescription_file_id: string
+          prescription_id: string
+          raw_response: Json | null
+          source_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          allergies?: Json
+          attempts?: number
+          confidence?: number | null
+          created_at?: string
+          diagnosis?: string | null
+          doctor_name?: string | null
+          error?: string | null
+          id?: string
+          interactions?: Json
+          medications?: Json
+          model_tier?: string
+          model_used?: string | null
+          next_attempt_at?: string
+          prescription_date?: string | null
+          prescription_file_id: string
+          prescription_id: string
+          raw_response?: Json | null
+          source_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          allergies?: Json
+          attempts?: number
+          confidence?: number | null
+          created_at?: string
+          diagnosis?: string | null
+          doctor_name?: string | null
+          error?: string | null
+          id?: string
+          interactions?: Json
+          medications?: Json
+          model_tier?: string
+          model_used?: string | null
+          next_attempt_at?: string
+          prescription_date?: string | null
+          prescription_file_id?: string
+          prescription_id?: string
+          raw_response?: Json | null
+          source_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescription_extractions_prescription_file_id_fkey"
+            columns: ["prescription_file_id"]
+            isOneToOne: false
+            referencedRelation: "prescription_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prescription_files: {
         Row: {
           bucket: string
