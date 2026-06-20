@@ -147,8 +147,32 @@ export const Route = createFileRoute("/api/public/whatsapp-webhook")({
 
         let payload: unknown = null;
         try { payload = rawBody ? JSON.parse(rawBody) : null; } catch { /* ignore */ }
-        const entry = (payload as { entry?: Array<{ changes?: Array<{ value?: { messages?: Array<{ id?: string; from?: string; text?: { body?: string }; button?: { text?: string }; type?: string }> }}>}> })
+        const entry = (payload as { entry?: Array<{ changes?: Array<{ value?: { messages?: Array<{ id?: string; from?: string; text?: { body?: string }; button?: { text?: string }; type?: string }>; statuses?: Array<{ id?: string; status?: string; timestamp?: string; errors?: Array<{ title?: string; message?: string }> }> }}>}> })
           ?.entry?.[0]?.changes?.[0]?.value;
+
+        // Phase 6C — Meta delivery status callbacks (sent / delivered / read / failed).
+        const statuses = entry?.statuses ?? [];
+        if (statuses.length > 0) {
+          for (const s of statuses) {
+            if (!s?.id || !s?.status) continue;
+            const nowIso = new Date().toISOString();
+            const patch: Record<string, unknown> = { status: s.status };
+            if (s.status === "delivered") patch.delivered_at = nowIso;
+            else if (s.status === "read") patch.read_at = nowIso;
+            else if (s.status === "failed") {
+              patch.failed_at = nowIso;
+              patch.error_message = s.errors?.[0]?.message ?? s.errors?.[0]?.title ?? "failed";
+            }
+            try {
+              await supabaseAdmin.from("whatsapp_delivery_logs").update(patch as never).eq("wamid", s.id);
+              await supabaseAdmin.from("whatsapp_messages").update({ status: s.status }).eq("wa_message_id", s.id);
+            } catch (e) {
+              console.error("[wa-webhook] status update failed", e);
+            }
+          }
+          return Response.json({ ok: true, statuses: statuses.length });
+        }
+
         const msg = entry?.messages?.[0];
         if (!msg?.from) return Response.json({ ok: true });
 
