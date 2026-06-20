@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { generateText } from "ai";
+import { createHmac, timingSafeEqual } from "crypto";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 
 /**
