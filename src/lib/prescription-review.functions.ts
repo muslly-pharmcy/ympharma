@@ -663,6 +663,7 @@ export const getPrescriptionReviewDetail = createServerFn({ method: "POST" })
         resolved_at: string | null;
       }>,
       files: ((fileRes.data as any[]) ?? []) as PrescriptionFileLite[],
+      extraction: (extRes.data as any) ?? null,
       timeline,
       correlation_ref: correlationIdFor(data.prescriptionId),
     };
