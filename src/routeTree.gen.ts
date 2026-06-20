@@ -40,6 +40,7 @@ import { Route as AdminOffersRouteImport } from './routes/admin-offers'
 import { Route as AdminMarketingRouteImport } from './routes/admin-marketing'
 import { Route as AdminLogsRouteImport } from './routes/admin-logs'
 import { Route as AdminInventoryReservationsRouteImport } from './routes/admin-inventory-reservations'
+import { Route as AdminInventoryDuplicatesRouteImport } from './routes/admin-inventory-duplicates'
 import { Route as AdminInventoryRouteImport } from './routes/admin-inventory'
 import { Route as AdminEventBusRouteImport } from './routes/admin-event-bus'
 import { Route as AdminDiscountsRouteImport } from './routes/admin-discounts'
@@ -253,6 +254,12 @@ const AdminInventoryReservationsRoute =
   AdminInventoryReservationsRouteImport.update({
     id: '/admin-inventory-reservations',
     path: '/admin-inventory-reservations',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AdminInventoryDuplicatesRoute =
+  AdminInventoryDuplicatesRouteImport.update({
+    id: '/admin-inventory-duplicates',
+    path: '/admin-inventory-duplicates',
     getParentRoute: () => rootRouteImport,
   } as any)
 const AdminInventoryRoute = AdminInventoryRouteImport.update({
@@ -591,6 +598,7 @@ export interface FileRoutesByFullPath {
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-event-bus': typeof AdminEventBusRoute
   '/admin-inventory': typeof AdminInventoryRoute
+  '/admin-inventory-duplicates': typeof AdminInventoryDuplicatesRoute
   '/admin-inventory-reservations': typeof AdminInventoryReservationsRoute
   '/admin-logs': typeof AdminLogsRoute
   '/admin-marketing': typeof AdminMarketingRoute
@@ -682,6 +690,7 @@ export interface FileRoutesByTo {
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-event-bus': typeof AdminEventBusRoute
   '/admin-inventory': typeof AdminInventoryRoute
+  '/admin-inventory-duplicates': typeof AdminInventoryDuplicatesRoute
   '/admin-inventory-reservations': typeof AdminInventoryReservationsRoute
   '/admin-logs': typeof AdminLogsRoute
   '/admin-marketing': typeof AdminMarketingRoute
@@ -774,6 +783,7 @@ export interface FileRoutesById {
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-event-bus': typeof AdminEventBusRoute
   '/admin-inventory': typeof AdminInventoryRoute
+  '/admin-inventory-duplicates': typeof AdminInventoryDuplicatesRoute
   '/admin-inventory-reservations': typeof AdminInventoryReservationsRoute
   '/admin-logs': typeof AdminLogsRoute
   '/admin-marketing': typeof AdminMarketingRoute
@@ -867,6 +877,7 @@ export interface FileRouteTypes {
     | '/admin-discounts'
     | '/admin-event-bus'
     | '/admin-inventory'
+    | '/admin-inventory-duplicates'
     | '/admin-inventory-reservations'
     | '/admin-logs'
     | '/admin-marketing'
@@ -958,6 +969,7 @@ export interface FileRouteTypes {
     | '/admin-discounts'
     | '/admin-event-bus'
     | '/admin-inventory'
+    | '/admin-inventory-duplicates'
     | '/admin-inventory-reservations'
     | '/admin-logs'
     | '/admin-marketing'
@@ -1049,6 +1061,7 @@ export interface FileRouteTypes {
     | '/admin-discounts'
     | '/admin-event-bus'
     | '/admin-inventory'
+    | '/admin-inventory-duplicates'
     | '/admin-inventory-reservations'
     | '/admin-logs'
     | '/admin-marketing'
@@ -1141,6 +1154,7 @@ export interface RootRouteChildren {
   AdminDiscountsRoute: typeof AdminDiscountsRoute
   AdminEventBusRoute: typeof AdminEventBusRoute
   AdminInventoryRoute: typeof AdminInventoryRoute
+  AdminInventoryDuplicatesRoute: typeof AdminInventoryDuplicatesRoute
   AdminInventoryReservationsRoute: typeof AdminInventoryReservationsRoute
   AdminLogsRoute: typeof AdminLogsRoute
   AdminMarketingRoute: typeof AdminMarketingRoute
@@ -1421,6 +1435,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-inventory-reservations'
       fullPath: '/admin-inventory-reservations'
       preLoaderRoute: typeof AdminInventoryReservationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-inventory-duplicates': {
+      id: '/admin-inventory-duplicates'
+      path: '/admin-inventory-duplicates'
+      fullPath: '/admin-inventory-duplicates'
+      preLoaderRoute: typeof AdminInventoryDuplicatesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-inventory': {
@@ -1872,6 +1893,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminDiscountsRoute: AdminDiscountsRoute,
   AdminEventBusRoute: AdminEventBusRoute,
   AdminInventoryRoute: AdminInventoryRoute,
+  AdminInventoryDuplicatesRoute: AdminInventoryDuplicatesRoute,
   AdminInventoryReservationsRoute: AdminInventoryReservationsRoute,
   AdminLogsRoute: AdminLogsRoute,
   AdminMarketingRoute: AdminMarketingRoute,
