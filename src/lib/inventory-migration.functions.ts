@@ -21,7 +21,7 @@ export const getInventoryReadiness = createServerFn({ method: "GET" })
     await assertAdmin(context.supabase, context.userId);
     const { data, error } = await context.supabase.rpc("inventory_readiness_report" as never);
     if (error) throw new Error(error.message);
-    return data as Record<string, number | string | null | object>;
+    return data as Record<string, string | number | boolean | null | Array<unknown> | Record<string, unknown>>;
   });
 
 export const listShadowLog = createServerFn({ method: "GET" })
