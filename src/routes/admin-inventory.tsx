@@ -30,6 +30,7 @@ function AdminInventory() {
   const [busy, setBusy] = useState(false);
   const [search, setSearch] = useState("");
   const [onlyLow, setOnlyLow] = useState(false);
+  const [onlyOut, setOnlyOut] = useState(false);
   const [onlyTracked, setOnlyTracked] = useState(false);
   const [edits, setEdits] = useState<Record<string, Partial<Row>>>({});
 
@@ -49,13 +50,15 @@ function AdminInventory() {
     try {
       const [rep, list] = await Promise.all([
         loadReport({}),
-        loadRows({ data: { search: search || undefined, onlyLow, onlyTracked, limit: 300 } }),
+        loadRows({ data: { search: search || undefined, onlyLow: onlyLow || onlyOut, onlyTracked, limit: 300 } }),
       ]);
       setReport(rep);
-      setRows(list as Row[]);
+      let result = list as Row[];
+      if (onlyOut) result = result.filter((r) => (r.stock_qty ?? 0) <= 0);
+      setRows(result);
     } catch (e: any) { toast.error(String(e?.message ?? e)); }
     finally { setBusy(false); }
-  }, [loadReport, loadRows, search, onlyLow, onlyTracked]);
+  }, [loadReport, loadRows, search, onlyLow, onlyOut, onlyTracked]);
 
   useEffect(() => { if (ready) refresh(); }, [ready, refresh]);
 
@@ -89,8 +92,12 @@ function AdminInventory() {
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-6">
         {/* KPI tiles */}
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <Kpi icon={<AlertTriangle className="size-4 text-amber-500" />} label="مخزون منخفض" value={report?.low_stock?.length ?? 0} />
-          <Kpi icon={<PackageX className="size-4 text-rose-500" />} label="نفد المخزون" value={report?.out_of_stock?.length ?? 0} />
+          <button type="button" onClick={() => { setOnlyLow(true); setOnlyOut(false); }} className="text-right">
+            <Kpi icon={<AlertTriangle className="size-4 text-amber-500" />} label="مخزون منخفض" value={report?.low_stock?.length ?? 0} active={onlyLow && !onlyOut} />
+          </button>
+          <button type="button" onClick={() => { setOnlyOut(true); setOnlyLow(false); }} className="text-right">
+            <Kpi icon={<PackageX className="size-4 text-rose-500" />} label="النواقص (نفد المخزون)" value={report?.out_of_stock?.length ?? 0} active={onlyOut} />
+          </button>
           <Kpi icon={<CalendarClock className="size-4 text-orange-500" />} label="قارب على الانتهاء (90 يوم)" value={report?.near_expiry?.length ?? 0} />
           <Kpi icon={<Wallet className="size-4 text-emerald-500" />} label="قيمة المخزون (ر.ي)" value={(report?.inventory_value ?? 0).toLocaleString("ar-EG")} />
         </div>
@@ -101,7 +108,8 @@ function AdminInventory() {
             <Search className="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <input value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => e.key === "Enter" && refresh()} placeholder="ابحث باسم الصنف..." className="w-full rounded-xl border border-border bg-secondary/40 px-3 py-2 pr-9 text-sm outline-none focus:border-primary" />
           </div>
-          <label className="flex items-center gap-2 text-xs font-bold"><input type="checkbox" checked={onlyLow} onChange={(e) => setOnlyLow(e.target.checked)} /> منخفضة فقط</label>
+          <label className="flex items-center gap-2 text-xs font-bold"><input type="checkbox" checked={onlyLow} onChange={(e) => { setOnlyLow(e.target.checked); if (e.target.checked) setOnlyOut(false); }} /> منخفضة فقط</label>
+          <label className="flex items-center gap-2 text-xs font-bold"><input type="checkbox" checked={onlyOut} onChange={(e) => { setOnlyOut(e.target.checked); if (e.target.checked) setOnlyLow(false); }} /> النواقص فقط</label>
           <label className="flex items-center gap-2 text-xs font-bold"><input type="checkbox" checked={onlyTracked} onChange={(e) => setOnlyTracked(e.target.checked)} /> ذات تتبع مخزون</label>
           <button onClick={refresh} disabled={busy} className="rounded-xl brand-gradient px-4 py-2 text-xs font-black text-primary-foreground disabled:opacity-50">تطبيق</button>
         </div>
@@ -160,9 +168,9 @@ function Num({ value, onChange, step = 1 }: { value: number; onChange: (v: numbe
   return <input type="number" step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="w-20 rounded-md border border-border bg-secondary/40 px-2 py-1 text-xs text-center" />;
 }
 
-function Kpi({ icon, label, value }: { icon: React.ReactNode; label: string; value: number | string }) {
+function Kpi({ icon, label, value, active }: { icon: React.ReactNode; label: string; value: number | string; active?: boolean }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-3">
+    <div className={`rounded-2xl border bg-card p-3 ${active ? "border-primary ring-2 ring-primary/30" : "border-border"}`}>
       <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">{icon}{label}</div>
       <div className="mt-1 text-xl font-black">{value}</div>
     </div>
