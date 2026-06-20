@@ -137,8 +137,7 @@ export const createTransfer = createServerFn({ method: "POST" })
     const correlation =
       data.correlation_id ?? `TR-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-    const { data: head, error } = await context.supabase
-      .from("inventory_transfers")
+    const { data: head, error } = await (context.supabase.from("inventory_transfers") as any)
       .insert({
         correlation_id: correlation,
         transfer_type: data.transfer_type,
@@ -157,7 +156,7 @@ export const createTransfer = createServerFn({ method: "POST" })
       product_id: i.product_id,
       qty_requested: i.qty_requested,
     }));
-    const { error: itemsErr } = await context.supabase.from("transfer_items").insert(items);
+    const { error: itemsErr } = await (context.supabase.from("transfer_items") as any).insert(items);
     if (itemsErr) {
       // best-effort rollback so we don't leave a transfer with no lines
       await context.supabase.from("inventory_transfers").delete().eq("id", transferId);
