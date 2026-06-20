@@ -2588,6 +2588,10 @@ export type Database = {
       auto_populate_bundle_items: { Args: never; Returns: number }
       bootstrap_owner: { Args: never; Returns: boolean }
       campaign_report: { Args: never; Returns: Json }
+      cancel_transfer: {
+        Args: { _reason?: string; _transfer_id: string }
+        Returns: string
+      }
       check_img_rate_limit: {
         Args: { _ip: string; _max: number; _window_seconds: number }
         Returns: boolean
