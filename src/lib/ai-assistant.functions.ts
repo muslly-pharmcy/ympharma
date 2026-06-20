@@ -16,7 +16,7 @@ const ProductHintSchema = z.object({
 
 const InputSchema = z.object({
   messages: z.array(MessageSchema).min(1).max(20),
-  mode: z.enum(["interactions", "services", "supplement", "symptoms", "prescription", "marketing", "inventory", "sales_cx", "executive", "whatsapp"]).default("interactions"),
+  mode: z.enum(["interactions", "services", "supplement", "symptoms", "prescription", "marketing", "inventory", "sales_cx", "executive", "whatsapp", "catalog"]).default("interactions"),
   productHints: z.array(ProductHintSchema).max(60).optional(),
 });
 
@@ -234,6 +234,34 @@ const SYSTEM_EXECUTIVE = `أنت "المجلس التنفيذي الموحّد (
   "infrastructure_directive": "string"
 }`;
 
+const SYSTEM_CATALOG = `أنت "أخصائي الكتالوج السريري بالذكاء الاصطناعي" لصيدلية المصلي. هدفك تعيين 267 منتجًا حيًّا داخل إطار الباقات التجارية المعتمد حديثًا للقضاء على العروض الفارغة في الواجهة.
+
+🎯 الباقات المستهدفة (4 باقات حصرًا):
+1. باقة السكري (Diabetic Care Bundle)
+2. باقة الضغط (Hypertension Management Bundle)
+3. باقة الفيتامينات (Daily Wellness & Vitamins Bundle)
+4. باقة الأطفال (Pediatric & Child Care Bundle)
+
+🧭 الاستراتيجية:
+- امسح أسماء المنتجات وبياناتها الوصفية من بين الـ 267 عنصرًا الحي.
+- طابق أجهزة الفحص، المكملات اليومية، والعناصر الصحية الأساسية إلى باقتها المناسبة.
+- لا تقترح أبدًا معرّفات منتجات وهمية أو غير موجودة — اعتمد فقط على كلمات مفتاحية قابلة للمطابقة على products.name.
+
+🛡️ خصوصية:
+- ممنوع منعًا باتًا استخدام أو ذكر supplier_cost أو supplier_name.
+
+📦 إخراج JSON صارم:
+- ردك بالكامل مصفوفة JSON خام صالحة فقط.
+- لا \`\`\`json، لا markdown، لا مقدّمات أو خاتمة.
+- إن لم توجد مطابقات: [].
+
+شكل كل عنصر (مصمَّم لتغذية أو تحديث جدول bundle_items):
+{
+  "bundle_name": "باقة السكري" | "باقة الضغط" | "باقة الفيتامينات" | "باقة الأطفال",
+  "product_keywords": ["string", "string", ...],
+  "clinical_reasoning": "string (تبرير سريري موجز بالعربية الفصحى)"
+}`;
+
 function pickSystem(mode: string) {
   switch (mode) {
     case "services": return SYSTEM_SERVICES;
@@ -245,6 +273,7 @@ function pickSystem(mode: string) {
     case "sales_cx": return SYSTEM_SALES_CX;
     case "executive": return SYSTEM_EXECUTIVE;
     case "whatsapp": return SYSTEM_WHATSAPP;
+    case "catalog": return SYSTEM_CATALOG;
     default: return SYSTEM_INTERACTIONS;
   }
 }
