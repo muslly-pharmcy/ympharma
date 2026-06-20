@@ -50,6 +50,7 @@ import { Route as AdminAiSalesCxRouteImport } from './routes/admin-ai-sales-cx'
 import { Route as AdminAiMarketingRouteImport } from './routes/admin-ai-marketing'
 import { Route as AdminAiInventoryRouteImport } from './routes/admin-ai-inventory'
 import { Route as AdminAiExecutiveRouteImport } from './routes/admin-ai-executive'
+import { Route as AdminAiChronicRefillRouteImport } from './routes/admin-ai-chronic-refill'
 import { Route as AdminAiCatalogRouteImport } from './routes/admin-ai-catalog'
 import { Route as AdminAgentsRouteImport } from './routes/admin-agents'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -287,6 +288,11 @@ const AdminAiExecutiveRoute = AdminAiExecutiveRouteImport.update({
   path: '/admin-ai-executive',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAiChronicRefillRoute = AdminAiChronicRefillRouteImport.update({
+  id: '/admin-ai-chronic-refill',
+  path: '/admin-ai-chronic-refill',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAiCatalogRoute = AdminAiCatalogRouteImport.update({
   id: '/admin-ai-catalog',
   path: '/admin-ai-catalog',
@@ -462,6 +468,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/admin-agents': typeof AdminAgentsRoute
   '/admin-ai-catalog': typeof AdminAiCatalogRoute
+  '/admin-ai-chronic-refill': typeof AdminAiChronicRefillRoute
   '/admin-ai-executive': typeof AdminAiExecutiveRoute
   '/admin-ai-inventory': typeof AdminAiInventoryRoute
   '/admin-ai-marketing': typeof AdminAiMarketingRoute
@@ -536,6 +543,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/admin-agents': typeof AdminAgentsRoute
   '/admin-ai-catalog': typeof AdminAiCatalogRoute
+  '/admin-ai-chronic-refill': typeof AdminAiChronicRefillRoute
   '/admin-ai-executive': typeof AdminAiExecutiveRoute
   '/admin-ai-inventory': typeof AdminAiInventoryRoute
   '/admin-ai-marketing': typeof AdminAiMarketingRoute
@@ -611,6 +619,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/admin-agents': typeof AdminAgentsRoute
   '/admin-ai-catalog': typeof AdminAiCatalogRoute
+  '/admin-ai-chronic-refill': typeof AdminAiChronicRefillRoute
   '/admin-ai-executive': typeof AdminAiExecutiveRoute
   '/admin-ai-inventory': typeof AdminAiInventoryRoute
   '/admin-ai-marketing': typeof AdminAiMarketingRoute
@@ -687,6 +696,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin-agents'
     | '/admin-ai-catalog'
+    | '/admin-ai-chronic-refill'
     | '/admin-ai-executive'
     | '/admin-ai-inventory'
     | '/admin-ai-marketing'
@@ -761,6 +771,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin-agents'
     | '/admin-ai-catalog'
+    | '/admin-ai-chronic-refill'
     | '/admin-ai-executive'
     | '/admin-ai-inventory'
     | '/admin-ai-marketing'
@@ -835,6 +846,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin-agents'
     | '/admin-ai-catalog'
+    | '/admin-ai-chronic-refill'
     | '/admin-ai-executive'
     | '/admin-ai-inventory'
     | '/admin-ai-marketing'
@@ -910,6 +922,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AdminAgentsRoute: typeof AdminAgentsRoute
   AdminAiCatalogRoute: typeof AdminAiCatalogRoute
+  AdminAiChronicRefillRoute: typeof AdminAiChronicRefillRoute
   AdminAiExecutiveRoute: typeof AdminAiExecutiveRoute
   AdminAiInventoryRoute: typeof AdminAiInventoryRoute
   AdminAiMarketingRoute: typeof AdminAiMarketingRoute
@@ -1268,6 +1281,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAiExecutiveRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin-ai-chronic-refill': {
+      id: '/admin-ai-chronic-refill'
+      path: '/admin-ai-chronic-refill'
+      fullPath: '/admin-ai-chronic-refill'
+      preLoaderRoute: typeof AdminAiChronicRefillRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin-ai-catalog': {
       id: '/admin-ai-catalog'
       path: '/admin-ai-catalog'
@@ -1505,6 +1525,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AdminAgentsRoute: AdminAgentsRoute,
   AdminAiCatalogRoute: AdminAiCatalogRoute,
+  AdminAiChronicRefillRoute: AdminAiChronicRefillRoute,
   AdminAiExecutiveRoute: AdminAiExecutiveRoute,
   AdminAiInventoryRoute: AdminAiInventoryRoute,
   AdminAiMarketingRoute: AdminAiMarketingRoute,
