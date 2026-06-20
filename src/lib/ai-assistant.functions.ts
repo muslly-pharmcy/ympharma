@@ -325,7 +325,7 @@ export const askAssistant = createServerFn({ method: "POST" })
     const model = gateway("google/gemini-3-flash-preview");
 
     const baseSystem = pickSystem(data.mode);
-    const productsAddon = data.productHints && (data.mode === "supplement" || data.mode === "symptoms")
+    const productsAddon = data.productHints && (data.mode === "supplement" || data.mode === "symptoms" || data.mode === "pharmacist")
       ? formatProductHints(data.productHints)
       : "";
 
