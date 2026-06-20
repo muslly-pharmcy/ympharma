@@ -31,6 +31,7 @@ import { Route as AiPrescriptionRouteImport } from './routes/ai-prescription'
 import { Route as AiPharmacistRouteImport } from './routes/ai-pharmacist'
 import { Route as AiAssistantRouteImport } from './routes/ai-assistant'
 import { Route as AdminWorkforceRouteImport } from './routes/admin-workforce'
+import { Route as AdminWhatsappDeliveryRouteImport } from './routes/admin-whatsapp-delivery'
 import { Route as AdminTriggerFailuresRouteImport } from './routes/admin-trigger-failures'
 import { Route as AdminTransfersRouteImport } from './routes/admin-transfers'
 import { Route as AdminSettingsRouteImport } from './routes/admin-settings'
@@ -210,6 +211,11 @@ const AiAssistantRoute = AiAssistantRouteImport.update({
 const AdminWorkforceRoute = AdminWorkforceRouteImport.update({
   id: '/admin-workforce',
   path: '/admin-workforce',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminWhatsappDeliveryRoute = AdminWhatsappDeliveryRouteImport.update({
+  id: '/admin-whatsapp-delivery',
+  path: '/admin-whatsapp-delivery',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminTriggerFailuresRoute = AdminTriggerFailuresRouteImport.update({
@@ -622,6 +628,7 @@ export interface FileRoutesByFullPath {
   '/admin-settings': typeof AdminSettingsRoute
   '/admin-transfers': typeof AdminTransfersRoute
   '/admin-trigger-failures': typeof AdminTriggerFailuresRoute
+  '/admin-whatsapp-delivery': typeof AdminWhatsappDeliveryRoute
   '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
   '/ai-pharmacist': typeof AiPharmacistRoute
@@ -716,6 +723,7 @@ export interface FileRoutesByTo {
   '/admin-settings': typeof AdminSettingsRoute
   '/admin-transfers': typeof AdminTransfersRoute
   '/admin-trigger-failures': typeof AdminTriggerFailuresRoute
+  '/admin-whatsapp-delivery': typeof AdminWhatsappDeliveryRoute
   '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
   '/ai-pharmacist': typeof AiPharmacistRoute
@@ -811,6 +819,7 @@ export interface FileRoutesById {
   '/admin-settings': typeof AdminSettingsRoute
   '/admin-transfers': typeof AdminTransfersRoute
   '/admin-trigger-failures': typeof AdminTriggerFailuresRoute
+  '/admin-whatsapp-delivery': typeof AdminWhatsappDeliveryRoute
   '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
   '/ai-pharmacist': typeof AiPharmacistRoute
@@ -907,6 +916,7 @@ export interface FileRouteTypes {
     | '/admin-settings'
     | '/admin-transfers'
     | '/admin-trigger-failures'
+    | '/admin-whatsapp-delivery'
     | '/admin-workforce'
     | '/ai-assistant'
     | '/ai-pharmacist'
@@ -1001,6 +1011,7 @@ export interface FileRouteTypes {
     | '/admin-settings'
     | '/admin-transfers'
     | '/admin-trigger-failures'
+    | '/admin-whatsapp-delivery'
     | '/admin-workforce'
     | '/ai-assistant'
     | '/ai-pharmacist'
@@ -1095,6 +1106,7 @@ export interface FileRouteTypes {
     | '/admin-settings'
     | '/admin-transfers'
     | '/admin-trigger-failures'
+    | '/admin-whatsapp-delivery'
     | '/admin-workforce'
     | '/ai-assistant'
     | '/ai-pharmacist'
@@ -1190,6 +1202,7 @@ export interface RootRouteChildren {
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTransfersRoute: typeof AdminTransfersRoute
   AdminTriggerFailuresRoute: typeof AdminTriggerFailuresRoute
+  AdminWhatsappDeliveryRoute: typeof AdminWhatsappDeliveryRoute
   AdminWorkforceRoute: typeof AdminWorkforceRoute
   AiAssistantRoute: typeof AiAssistantRoute
   AiPharmacistRoute: typeof AiPharmacistRoute
@@ -1399,6 +1412,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-workforce'
       fullPath: '/admin-workforce'
       preLoaderRoute: typeof AdminWorkforceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-whatsapp-delivery': {
+      id: '/admin-whatsapp-delivery'
+      path: '/admin-whatsapp-delivery'
+      fullPath: '/admin-whatsapp-delivery'
+      preLoaderRoute: typeof AdminWhatsappDeliveryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-trigger-failures': {
@@ -1945,6 +1965,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTransfersRoute: AdminTransfersRoute,
   AdminTriggerFailuresRoute: AdminTriggerFailuresRoute,
+  AdminWhatsappDeliveryRoute: AdminWhatsappDeliveryRoute,
   AdminWorkforceRoute: AdminWorkforceRoute,
   AiAssistantRoute: AiAssistantRoute,
   AiPharmacistRoute: AiPharmacistRoute,
