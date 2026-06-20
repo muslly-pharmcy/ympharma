@@ -53,16 +53,94 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_kpis: {
+        Row: {
+          agent_name: string
+          as_of: string
+          created_at: string
+          details: Json
+          id: string
+          metric: string
+          score: number | null
+        }
+        Insert: {
+          agent_name: string
+          as_of?: string
+          created_at?: string
+          details?: Json
+          id?: string
+          metric: string
+          score?: number | null
+        }
+        Update: {
+          agent_name?: string
+          as_of?: string
+          created_at?: string
+          details?: Json
+          id?: string
+          metric?: string
+          score?: number | null
+        }
+        Relationships: []
+      }
+      agent_recommendations: {
+        Row: {
+          agent_name: string
+          category: string
+          confidence: number | null
+          created_at: string
+          dedupe_key: string
+          id: string
+          impact_estimate: number | null
+          payload: Json
+          rationale: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          agent_name: string
+          category: string
+          confidence?: number | null
+          created_at?: string
+          dedupe_key?: string
+          id?: string
+          impact_estimate?: number | null
+          payload?: Json
+          rationale?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          agent_name?: string
+          category?: string
+          confidence?: number | null
+          created_at?: string
+          dedupe_key?: string
+          id?: string
+          impact_estimate?: number | null
+          payload?: Json
+          rationale?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       agent_runs: {
         Row: {
           agent: string
           confidence: number | null
           created_at: string
           details: Json
+          execution_time_ms: number | null
+          findings_count: number | null
           finished_at: string | null
           id: string
           impact_estimate: number | null
           kind: string
+          recommendations_count: number | null
           started_at: string
           status: string
           summary: string | null
@@ -72,10 +150,13 @@ export type Database = {
           confidence?: number | null
           created_at?: string
           details?: Json
+          execution_time_ms?: number | null
+          findings_count?: number | null
           finished_at?: string | null
           id?: string
           impact_estimate?: number | null
           kind: string
+          recommendations_count?: number | null
           started_at?: string
           status?: string
           summary?: string | null
@@ -85,10 +166,13 @@ export type Database = {
           confidence?: number | null
           created_at?: string
           details?: Json
+          execution_time_ms?: number | null
+          findings_count?: number | null
           finished_at?: string | null
           id?: string
           impact_estimate?: number | null
           kind?: string
+          recommendations_count?: number | null
           started_at?: string
           status?: string
           summary?: string | null
@@ -942,6 +1026,42 @@ export type Database = {
           },
         ]
       }
+      operations_alerts: {
+        Row: {
+          created_at: string
+          dedupe_key: string
+          id: string
+          kind: string
+          ref_id: string | null
+          resolved_at: string | null
+          severity: string
+          status: string
+          summary: string
+        }
+        Insert: {
+          created_at?: string
+          dedupe_key?: string
+          id?: string
+          kind: string
+          ref_id?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          summary: string
+        }
+        Update: {
+          created_at?: string
+          dedupe_key?: string
+          id?: string
+          kind?: string
+          ref_id?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          summary?: string
+        }
+        Relationships: []
+      }
       order_status_history: {
         Row: {
           changed_by: string | null
@@ -1397,6 +1517,45 @@ export type Database = {
         }
         Relationships: []
       }
+      system_incidents: {
+        Row: {
+          dedupe_key: string
+          evidence: Json
+          id: string
+          opened_at: string
+          resolved_at: string | null
+          severity: string
+          source: string
+          status: string
+          summary: string | null
+          title: string
+        }
+        Insert: {
+          dedupe_key?: string
+          evidence?: Json
+          id?: string
+          opened_at?: string
+          resolved_at?: string | null
+          severity?: string
+          source: string
+          status?: string
+          summary?: string | null
+          title: string
+        }
+        Update: {
+          dedupe_key?: string
+          evidence?: Json
+          id?: string
+          opened_at?: string
+          resolved_at?: string | null
+          severity?: string
+          source?: string
+          status?: string
+          summary?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       tracking_lookups: {
         Row: {
           count: number
@@ -1582,6 +1741,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _agent_kpi_upsert: {
+        Args: {
+          _agent: string
+          _details: Json
+          _metric: string
+          _score: number
+        }
+        Returns: undefined
+      }
+      _agent_rec_upsert: {
+        Args: {
+          _agent: string
+          _category: string
+          _confidence: number
+          _dedupe: string
+          _impact: number
+          _payload: Json
+          _rationale: string
+          _title: string
+        }
+        Returns: string
+      }
       _classif_can_manage: { Args: never; Returns: boolean }
       _intel_can_manage: { Args: never; Returns: boolean }
       _therapeutic_label_ar: { Args: { _cat: string }; Returns: string }
@@ -1590,6 +1771,7 @@ export type Database = {
       admin_revenue_series: { Args: { _days?: number }; Returns: Json }
       admin_stats: { Args: never; Returns: Json }
       agent_runs_list: { Args: { _limit?: number }; Returns: Json }
+      agent_workforce_summary: { Args: never; Returns: Json }
       approve_classification: {
         Args: { _edits?: Json; _id: string }
         Returns: boolean
@@ -1774,7 +1956,16 @@ export type Database = {
         Args: { _base_url?: string; _secret: string }
         Returns: Json
       }
+      run_all_agents_now: { Args: never; Returns: Json }
+      run_bi_worker: { Args: never; Returns: Json }
+      run_ceo_worker: { Args: never; Returns: Json }
+      run_cto_worker: { Args: never; Returns: Json }
+      run_cx_worker: { Args: never; Returns: Json }
+      run_inventory_worker: { Args: never; Returns: Json }
+      run_marketing_worker: { Args: never; Returns: Json }
+      run_operations_worker: { Args: never; Returns: Json }
       run_retention_policy: { Args: never; Returns: Json }
+      run_sales_worker: { Args: never; Returns: Json }
       sales_opportunities: { Args: never; Returns: Json }
       save_customer_ai_insight: {
         Args: { _insight: string; _phone: string }
