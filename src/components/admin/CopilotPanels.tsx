@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Sparkles, AlertTriangle, Package, TrendingUp, Bug, FileText, PlayCircle, Wand2 } from "lucide-react";
+import { Loader2, Sparkles, AlertTriangle, Package, TrendingUp, Bug, FileText, PlayCircle, Wand2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import {
   askExecutiveCopilot,
@@ -9,6 +9,7 @@ import {
   fetchInventoryIntel,
   fetchLatestExecReport,
   fetchSalesOpportunities,
+  rotateCronSecretNow,
   runWeeklyEnrichNow,
   runWeeklyReportNow,
 } from "@/lib/pharmacy-copilot.functions";
