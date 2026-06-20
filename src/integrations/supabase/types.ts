@@ -1753,6 +1753,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          branch_id: string | null
           correlation_id: string
           created_at: string
           customer_address: string
@@ -1768,6 +1769,7 @@ export type Database = {
           total: number
         }
         Insert: {
+          branch_id?: string | null
           correlation_id?: string
           created_at?: string
           customer_address: string
@@ -1783,6 +1785,7 @@ export type Database = {
           total?: number
         }
         Update: {
+          branch_id?: string | null
           correlation_id?: string
           created_at?: string
           customer_address?: string
@@ -1797,7 +1800,15 @@ export type Database = {
           subtotal?: number | null
           total?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       prescription_image_blobs: {
         Row: {
@@ -2942,6 +2953,7 @@ export type Database = {
       create_backup: { Args: { _kind?: string }; Returns: string }
       create_scheduled_backup: { Args: { _kind: string }; Returns: string }
       cto_health: { Args: never; Returns: Json }
+      current_inventory_write_mode: { Args: never; Returns: string }
       customers_for_enrichment: {
         Args: { _limit?: number }
         Returns: {
