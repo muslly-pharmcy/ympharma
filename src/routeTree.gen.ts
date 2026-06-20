@@ -49,6 +49,7 @@ import { Route as AdminAiWhatsappRouteImport } from './routes/admin-ai-whatsapp'
 import { Route as AdminAiSalesCxRouteImport } from './routes/admin-ai-sales-cx'
 import { Route as AdminAiProcurementRouteImport } from './routes/admin-ai-procurement'
 import { Route as AdminAiMarketingRouteImport } from './routes/admin-ai-marketing'
+import { Route as AdminAiLoyaltyRouteImport } from './routes/admin-ai-loyalty'
 import { Route as AdminAiInventoryRouteImport } from './routes/admin-ai-inventory'
 import { Route as AdminAiExecutiveRouteImport } from './routes/admin-ai-executive'
 import { Route as AdminAiChronicRefillRouteImport } from './routes/admin-ai-chronic-refill'
@@ -284,6 +285,11 @@ const AdminAiMarketingRoute = AdminAiMarketingRouteImport.update({
   path: '/admin-ai-marketing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAiLoyaltyRoute = AdminAiLoyaltyRouteImport.update({
+  id: '/admin-ai-loyalty',
+  path: '/admin-ai-loyalty',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAiInventoryRoute = AdminAiInventoryRouteImport.update({
   id: '/admin-ai-inventory',
   path: '/admin-ai-inventory',
@@ -477,6 +483,7 @@ export interface FileRoutesByFullPath {
   '/admin-ai-chronic-refill': typeof AdminAiChronicRefillRoute
   '/admin-ai-executive': typeof AdminAiExecutiveRoute
   '/admin-ai-inventory': typeof AdminAiInventoryRoute
+  '/admin-ai-loyalty': typeof AdminAiLoyaltyRoute
   '/admin-ai-marketing': typeof AdminAiMarketingRoute
   '/admin-ai-procurement': typeof AdminAiProcurementRoute
   '/admin-ai-sales-cx': typeof AdminAiSalesCxRoute
@@ -553,6 +560,7 @@ export interface FileRoutesByTo {
   '/admin-ai-chronic-refill': typeof AdminAiChronicRefillRoute
   '/admin-ai-executive': typeof AdminAiExecutiveRoute
   '/admin-ai-inventory': typeof AdminAiInventoryRoute
+  '/admin-ai-loyalty': typeof AdminAiLoyaltyRoute
   '/admin-ai-marketing': typeof AdminAiMarketingRoute
   '/admin-ai-procurement': typeof AdminAiProcurementRoute
   '/admin-ai-sales-cx': typeof AdminAiSalesCxRoute
@@ -630,6 +638,7 @@ export interface FileRoutesById {
   '/admin-ai-chronic-refill': typeof AdminAiChronicRefillRoute
   '/admin-ai-executive': typeof AdminAiExecutiveRoute
   '/admin-ai-inventory': typeof AdminAiInventoryRoute
+  '/admin-ai-loyalty': typeof AdminAiLoyaltyRoute
   '/admin-ai-marketing': typeof AdminAiMarketingRoute
   '/admin-ai-procurement': typeof AdminAiProcurementRoute
   '/admin-ai-sales-cx': typeof AdminAiSalesCxRoute
@@ -708,6 +717,7 @@ export interface FileRouteTypes {
     | '/admin-ai-chronic-refill'
     | '/admin-ai-executive'
     | '/admin-ai-inventory'
+    | '/admin-ai-loyalty'
     | '/admin-ai-marketing'
     | '/admin-ai-procurement'
     | '/admin-ai-sales-cx'
@@ -784,6 +794,7 @@ export interface FileRouteTypes {
     | '/admin-ai-chronic-refill'
     | '/admin-ai-executive'
     | '/admin-ai-inventory'
+    | '/admin-ai-loyalty'
     | '/admin-ai-marketing'
     | '/admin-ai-procurement'
     | '/admin-ai-sales-cx'
@@ -860,6 +871,7 @@ export interface FileRouteTypes {
     | '/admin-ai-chronic-refill'
     | '/admin-ai-executive'
     | '/admin-ai-inventory'
+    | '/admin-ai-loyalty'
     | '/admin-ai-marketing'
     | '/admin-ai-procurement'
     | '/admin-ai-sales-cx'
@@ -937,6 +949,7 @@ export interface RootRouteChildren {
   AdminAiChronicRefillRoute: typeof AdminAiChronicRefillRoute
   AdminAiExecutiveRoute: typeof AdminAiExecutiveRoute
   AdminAiInventoryRoute: typeof AdminAiInventoryRoute
+  AdminAiLoyaltyRoute: typeof AdminAiLoyaltyRoute
   AdminAiMarketingRoute: typeof AdminAiMarketingRoute
   AdminAiProcurementRoute: typeof AdminAiProcurementRoute
   AdminAiSalesCxRoute: typeof AdminAiSalesCxRoute
@@ -1287,6 +1300,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAiMarketingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin-ai-loyalty': {
+      id: '/admin-ai-loyalty'
+      path: '/admin-ai-loyalty'
+      fullPath: '/admin-ai-loyalty'
+      preLoaderRoute: typeof AdminAiLoyaltyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin-ai-inventory': {
       id: '/admin-ai-inventory'
       path: '/admin-ai-inventory'
@@ -1548,6 +1568,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminAiChronicRefillRoute: AdminAiChronicRefillRoute,
   AdminAiExecutiveRoute: AdminAiExecutiveRoute,
   AdminAiInventoryRoute: AdminAiInventoryRoute,
+  AdminAiLoyaltyRoute: AdminAiLoyaltyRoute,
   AdminAiMarketingRoute: AdminAiMarketingRoute,
   AdminAiProcurementRoute: AdminAiProcurementRoute,
   AdminAiSalesCxRoute: AdminAiSalesCxRoute,
