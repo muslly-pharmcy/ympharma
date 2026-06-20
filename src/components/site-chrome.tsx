@@ -80,11 +80,14 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
               )}
             </Link>
             <button
+              type="button"
+              data-testid="mobile-menu-toggle"
               onClick={() => setMobileOpen((v) => !v)}
               aria-expanded={mobileOpen}
               aria-controls="site-mobile-nav"
+              aria-haspopup="menu"
               className="md:hidden grid size-11 place-items-center rounded-2xl bg-secondary transition hover:bg-accent"
-              aria-label={t("nav.menu")}
+              aria-label={mobileOpen ? t("nav.close") ?? "إغلاق القائمة" : t("nav.menu")}
             >
               <Menu className="size-5" />
             </button>
@@ -93,8 +96,11 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
 
         <nav
           id="site-mobile-nav"
+          role="navigation"
+          aria-label="Main"
+          data-state={mobileOpen ? "open" : "closed"}
           className={`border-t border-border bg-card transition-all duration-300 overflow-hidden ${
-            scrolled ? "max-h-0 border-t-0" : mobileOpen ? "max-h-[60vh]" : "max-h-0 md:max-h-20 md:border-t"
+            mobileOpen ? "max-h-[70vh]" : "max-h-0 md:max-h-20 md:border-t"
           }`}
         >
           <div
@@ -102,17 +108,20 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
             onClick={() => setMobileOpen(false)}
           >
             <Link to="/" className="whitespace-nowrap rounded-xl px-4 py-2 text-muted-foreground transition hover:text-primary" activeProps={{ className: "brand-gradient text-primary-foreground shadow-card" }} activeOptions={{ exact: true }}>{t("nav.home")}</Link>
-            <Link to="/insurance" className="whitespace-nowrap rounded-xl px-4 py-2 font-black text-primary hover:underline">🩺 التأمين الطبي</Link>
-            <Link to="/products" className="whitespace-nowrap rounded-xl px-4 py-2 text-muted-foreground transition hover:text-primary" activeProps={{ className: "brand-gradient text-primary-foreground shadow-card" }}>{t("nav.products")}</Link>
-            {categories.map((c) => (
-              <Link key={c.id} to="/products" search={{ cat: c.id }} className="whitespace-nowrap rounded-xl px-4 py-2 text-muted-foreground transition hover:text-primary">
-                {c.name}
-              </Link>
-            ))}
-            <Link to="/ai-assistant" className="whitespace-nowrap rounded-xl px-4 py-2 font-black text-primary hover:underline">🤖 استشارة دوائية</Link>
-            <Link to="/prescription" className="whitespace-nowrap rounded-xl px-4 py-2 text-emerald-700 hover:underline">{t("nav.prescription")}</Link>
-            <Link to="/track" className="whitespace-nowrap rounded-xl px-4 py-2 text-primary hover:underline">{t("nav.track")}</Link>
-            <Link to="/trust" className="whitespace-nowrap rounded-xl px-4 py-2 text-muted-foreground transition hover:text-primary" activeProps={{ className: "brand-gradient text-primary-foreground shadow-card" }}>الأمان والخصوصية</Link>
+            <Link to="/products" className="whitespace-nowrap rounded-xl px-4 py-2 text-muted-foreground transition hover:text-primary" activeProps={{ className: "brand-gradient text-primary-foreground shadow-card" }}>🏪 الصيدليات</Link>
+            <Link to="/prescription" className="whitespace-nowrap rounded-xl px-4 py-2 text-emerald-700 transition hover:underline" activeProps={{ className: "brand-gradient text-primary-foreground shadow-card" }}>📋 {t("nav.prescription")}</Link>
+            <Link to="/track" className="whitespace-nowrap rounded-xl px-4 py-2 text-primary transition hover:underline" activeProps={{ className: "brand-gradient text-primary-foreground shadow-card" }}>{t("nav.track")}</Link>
+            <Link to="/insurance" className="whitespace-nowrap rounded-xl px-4 py-2 font-black text-primary hover:underline" activeProps={{ className: "brand-gradient text-primary-foreground shadow-card" }}>🩺 التأمين الطبي</Link>
+            <Link to="/ai-assistant" className="whitespace-nowrap rounded-xl px-4 py-2 font-black text-primary hover:underline" activeProps={{ className: "brand-gradient text-primary-foreground shadow-card" }}>🤖 استشارة دوائية</Link>
+            <Link to="/trust" className="whitespace-nowrap rounded-xl px-4 py-2 text-muted-foreground transition hover:text-primary" activeProps={{ className: "brand-gradient text-primary-foreground shadow-card" }}>🛡️ الأمان والخصوصية</Link>
+            <a href="#site-footer" className="whitespace-nowrap rounded-xl px-4 py-2 text-muted-foreground transition hover:text-primary md:hidden">✉️ تواصل معنا</a>
+            <div className="hidden md:flex md:items-center md:gap-1 md:border-s md:border-border md:ps-2">
+              {categories.map((c) => (
+                <Link key={c.id} to="/products" search={{ cat: c.id }} className="whitespace-nowrap rounded-xl px-3 py-2 text-muted-foreground transition hover:text-primary">
+                  {c.name}
+                </Link>
+              ))}
+            </div>
           </div>
         </nav>
       </header>
