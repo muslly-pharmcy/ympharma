@@ -29,8 +29,7 @@ export const decideApproval = createServerFn({ method: "POST" })
     // Authorize: owner/admin/pharmacist only
     const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
     const { data: isOwner } = await supabase.rpc("has_role", { _user_id: userId, _role: "owner" });
-    const { data: isPharm } = await supabase.rpc("has_role", { _user_id: userId, _role: "pharmacist" });
-    if (!isAdmin && !isOwner && !isPharm) throw new Error("Forbidden");
+    if (!isAdmin && !isOwner) throw new Error("Forbidden");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
