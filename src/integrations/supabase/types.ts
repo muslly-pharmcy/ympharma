@@ -1050,6 +1050,63 @@ export type Database = {
         }
         Relationships: []
       }
+      inventory_audit_log: {
+        Row: {
+          action: string
+          actor: string | null
+          created_at: string
+          id: string
+          order_id: string
+          payload: Json
+          reason: string | null
+          status: string
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          created_at?: string
+          id?: string
+          order_id: string
+          payload?: Json
+          reason?: string | null
+          status: string
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          created_at?: string
+          id?: string
+          order_id?: string
+          payload?: Json
+          reason?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      inventory_reservation_state: {
+        Row: {
+          order_id: string
+          released_at: string | null
+          reserved_at: string | null
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          order_id: string
+          released_at?: string | null
+          reserved_at?: string | null
+          state: string
+          updated_at?: string
+        }
+        Update: {
+          order_id?: string
+          released_at?: string | null
+          reserved_at?: string | null
+          state?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       marketing_banners: {
         Row: {
           clicks: number
@@ -2276,8 +2333,14 @@ export type Database = {
       }
       rebuild_customer_intel: { Args: never; Returns: Json }
       reject_classification: { Args: { _id: string }; Returns: boolean }
-      release_order_stock: { Args: { _order_id: string }; Returns: Json }
-      reserve_order_stock: { Args: { _order_id: string }; Returns: Json }
+      release_order_stock: {
+        Args: { _actor?: string; _order_id: string; _reason?: string }
+        Returns: Json
+      }
+      reserve_order_stock: {
+        Args: { _actor?: string; _order_id: string; _reason?: string }
+        Returns: Json
+      }
       rotate_cron_secret: {
         Args: { _base_url?: string; _secret: string }
         Returns: Json
