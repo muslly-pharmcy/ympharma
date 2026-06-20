@@ -21,12 +21,19 @@ function EventBusPage() {
   const mark = useServerFn(markAgentEventProcessed);
   const installSchedule = useServerFn(installEventConsumerSchedule);
   const getSchedule = useServerFn(getEventConsumerSchedule);
+  const fetchLog = useServerFn(listScheduleLog);
   const qc = useQueryClient();
 
   const scheduleQ = useQuery({
     queryKey: ["event_consumer_schedule"],
     queryFn: () => getSchedule(),
     refetchInterval: 60_000,
+  });
+
+  const logQ = useQuery({
+    queryKey: ["event_consumer_schedule_log"],
+    queryFn: () => fetchLog({ data: { limit: 50 } }),
+    refetchInterval: 30_000,
   });
 
   const rowsQ = useQuery({
