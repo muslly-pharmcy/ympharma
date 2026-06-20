@@ -378,6 +378,8 @@ function ReviewDetail({ prescriptionId }: { prescriptionId: string }) {
         )}
       </section>
 
+      <ExtractionContext extraction={(d as any).extraction} prescriptionId={prescriptionId} />
+
       <section>
         <h3 className="mb-1 text-xs font-black text-muted-foreground">سجل التتبع</h3>
         <ol className="max-h-72 overflow-auto rounded-xl border border-border bg-secondary/40 p-2 text-[11px]">
