@@ -16,7 +16,7 @@ const ProductHintSchema = z.object({
 
 const InputSchema = z.object({
   messages: z.array(MessageSchema).min(1).max(20),
-  mode: z.enum(["interactions", "services", "supplement", "symptoms", "prescription", "marketing", "inventory", "sales_cx", "executive", "whatsapp", "catalog"]).default("interactions"),
+  mode: z.enum(["interactions", "services", "supplement", "symptoms", "prescription", "marketing", "inventory", "sales_cx", "executive", "whatsapp", "catalog", "pharmacist"]).default("interactions"),
   productHints: z.array(ProductHintSchema).max(60).optional(),
 });
 
