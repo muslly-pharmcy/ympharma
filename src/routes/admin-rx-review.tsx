@@ -100,7 +100,7 @@ function RxReviewPage() {
           <input
             value={q}
             onChange={(e) =>
-              navigate({ search: (p) => ({ ...p, q: e.target.value, page: 1 }) })
+              navigate({ search: (p: Search) => ({ ...p, q: e.target.value, page: 1 }) })
             }
             placeholder="بحث بمعرّف الروشتة…"
             className="w-72 rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
@@ -114,7 +114,7 @@ function RxReviewPage() {
               role="tab"
               aria-selected={tab === s}
               onClick={() =>
-                navigate({ search: (p) => ({ ...p, tab: s, page: 1 }) })
+                navigate({ search: (p: Search) => ({ ...p, tab: s, page: 1 }) })
               }
               className={`rounded-xl px-3 py-1.5 text-xs font-bold transition ${
                 tab === s
@@ -134,10 +134,10 @@ function RxReviewPage() {
             page={page}
             selectedRx={rx}
             onSelect={(id) =>
-              navigate({ search: (p) => ({ ...p, rx: id }) })
+              navigate({ search: (p: Search) => ({ ...p, rx: id }) })
             }
             onPage={(np) =>
-              navigate({ search: (p) => ({ ...p, page: np }) })
+              navigate({ search: (p: Search) => ({ ...p, page: np }) })
             }
           />
           <aside className="min-h-[200px] rounded-2xl border border-border bg-card p-3">
