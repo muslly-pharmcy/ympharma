@@ -136,7 +136,7 @@ function WhatsAppAgentRunner() {
                           {r.trigger_type}
                         </span>
                       </td>
-                      <td className="py-2 pe-2 text-xs text-muted-foreground">{r.recipient_profile_id || "—"}</td>
+                      <td className="py-2 pe-2 text-xs text-muted-foreground">{r.recipient_name || "—"}</td>
                       <td className="py-2 pe-2 text-xs leading-relaxed whitespace-pre-wrap">{r.message_content_arabic}</td>
                       <td className="py-2 pe-2">
                         <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-black text-emerald-800">جاهز للبث</span>
