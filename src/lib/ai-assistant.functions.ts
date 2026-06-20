@@ -432,6 +432,7 @@ function pickSystem(mode: string) {
     case "chronic_refill": return SYSTEM_CHRONIC_REFILL;
     case "procurement": return SYSTEM_PROCUREMENT;
     case "loyalty": return SYSTEM_LOYALTY;
+    case "excel_import": return SYSTEM_EXCEL_IMPORT;
     default: return SYSTEM_INTERACTIONS;
   }
 }
