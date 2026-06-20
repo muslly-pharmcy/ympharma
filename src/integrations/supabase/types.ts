@@ -1729,6 +1729,10 @@ export type Database = {
       }
       rebuild_customer_intel: { Args: never; Returns: Json }
       reject_classification: { Args: { _id: string }; Returns: boolean }
+      rotate_cron_secret: {
+        Args: { _base_url?: string; _secret: string }
+        Returns: Json
+      }
       run_retention_policy: { Args: never; Returns: Json }
       sales_opportunities: { Args: never; Returns: Json }
       save_customer_ai_insight: {
