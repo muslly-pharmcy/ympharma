@@ -290,19 +290,70 @@ export const applyBulkAddStock = createServerFn({ method: "POST" })
       } as never);
     } catch { /* optional rpc — trigger still logs with NULL reason */ }
 
-    let applied = 0;
+    const results: Array<{
+      id: string; legacy_id: number | null; name: string;
+      supplier_name: string | null; before_qty: number; after_qty: number;
+      outcome: "applied" | "skipped" | "failed"; error?: string;
+    }> = [];
+    let applied = 0, failed = 0, skipped = 0;
     for (const r of rows) {
       const next = Math.max(0, (r.stock_qty ?? 0) + data.delta);
+      if (next === r.stock_qty) {
+        results.push({ id: r.id, legacy_id: r.legacy_id, name: r.name, supplier_name: r.supplier_name, before_qty: r.stock_qty, after_qty: next, outcome: "skipped" });
+        skipped++;
+        continue;
+      }
       const { error } = await context.supabase
         .from("products").update({ stock_qty: next } as never).eq("id", r.id);
-      if (!error) applied++;
+      if (error) {
+        results.push({ id: r.id, legacy_id: r.legacy_id, name: r.name, supplier_name: r.supplier_name, before_qty: r.stock_qty, after_qty: r.stock_qty, outcome: "failed", error: error.message });
+        failed++;
+      } else {
+        results.push({ id: r.id, legacy_id: r.legacy_id, name: r.name, supplier_name: r.supplier_name, before_qty: r.stock_qty, after_qty: next, outcome: "applied" });
+        applied++;
+      }
     }
     await context.supabase.rpc("log_activity", {
       _action: "inventory.bulk_add",
-      _details: { applied, count: rows.length, delta: data.delta, scope: data.scope, reason: data.reason } as never,
+      _details: { applied, failed, skipped, count: rows.length, delta: data.delta, scope: data.scope, reason: data.reason } as never,
     });
-    return { applied, count: rows.length };
+    return { applied, failed, skipped, count: rows.length, results };
   });
+
+// ---------- Trigger failures listing & search ----------
+
+export const listTriggerFailures = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      search: z.string().trim().max(160).optional(),
+      hours: z.number().int().min(1).max(720).optional(),
+      limit: z.number().int().min(1).max(1000).optional(),
+    }).parse(d ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const since = new Date(Date.now() - (data.hours ?? 24) * 3600 * 1000).toISOString();
+    let q = context.supabase
+      .from("trigger_metrics")
+      .select("id, trigger_name, status, duration_ms, error_message, payload, created_at")
+      .eq("status", "failed")
+      .gte("created_at", since)
+      .order("created_at", { ascending: false })
+      .limit(data.limit ?? 500);
+    if (data.search) {
+      // Search across error message + payload (cast to text for ILIKE).
+      q = q.or(`error_message.ilike.%${data.search}%,payload.cs.{"reason":"${data.search}"}`);
+    }
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return (rows ?? []) as Array<{
+      id: string; trigger_name: string; status: string;
+      duration_ms: number | null; error_message: string | null;
+      payload: Record<string, unknown>; created_at: string;
+    }>;
+  });
+
 
 // ---------- Trigger health / monitoring ----------
 
