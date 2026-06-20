@@ -117,3 +117,69 @@ export const getInventoryWriteMode = createServerFn({ method: "GET" })
       updated_at: data?.updated_at ?? null,
     };
   });
+
+// ─── Phase 5C: Pilot group management ──────────────────────────────────────
+
+export const getInventoryPilotReport = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { data, error } = await context.supabase.rpc("inventory_pilot_report" as never);
+    if (error) throw new Error(error.message);
+    return data as {
+      inventory_write_mode: string;
+      pilot_count: number;
+      pilot_tracked_count: number;
+      products: Array<{
+        legacy_id: number;
+        name: string;
+        stock_qty: number;
+        track_stock: boolean;
+        branch_inventory_total: number;
+      }>;
+      generated_at: string;
+    };
+  });
+
+export const setInventoryPilot = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z
+      .object({
+        legacyIds: z.array(z.number().int().positive()).min(1).max(50),
+        group: z.string().regex(/^[a-z0-9_]{2,32}$/).nullable().default("pilot"),
+      })
+      .parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { data: res, error } = await context.supabase.rpc("set_inventory_pilot" as never, {
+      _legacy_ids: data.legacyIds,
+      _group: data.group,
+    } as never);
+    if (error) throw new Error(error.message);
+    return res as { ok: boolean; updated: number; group: string | null };
+  });
+
+export const setInventoryWriteMode = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({ mode: z.enum(["legacy_only", "dual_write"]) }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("app_settings")
+      .upsert(
+        { key: "inventory_write_mode", value: data.mode, updated_at: new Date().toISOString() } as never,
+        { onConflict: "key" },
+      );
+    if (error) throw new Error(error.message);
+    await context.supabase.rpc("log_activity", {
+      _action: "inventory.write_mode_changed",
+      _details: { mode: data.mode } as never,
+    });
+    return { ok: true, mode: data.mode };
+  });
+
