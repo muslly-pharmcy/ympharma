@@ -194,18 +194,95 @@ export const branchReorderSuggestions = createServerFn({ method: "GET" })
       lookback_days: z.number().int().min(1).max(365).optional(),
       coverage_days: z.number().int().min(1).max(180).optional(),
       limit: z.number().int().min(1).max(500).optional(),
+      offset: z.number().int().min(0).max(100_000).optional(),
     }).parse(d),
   )
   .handler(async ({ data, context }) => {
+    const limit = data.limit ?? 100;
+    const offset = data.offset ?? 0;
     const { data: rows, error } = await context.supabase.rpc(
       "branch_reorder_suggestions" as never,
       {
         _branch_id: data.branch_id,
         _lookback_days: data.lookback_days ?? 30,
         _coverage_days: data.coverage_days ?? 14,
-        _limit: data.limit ?? 100,
+        _limit: limit,
+        _offset: offset,
       } as never,
     );
     if (error) throw new Error(error.message);
-    return { rows: (rows ?? []) as any[] };
+    const list = (rows ?? []) as any[];
+    return {
+      rows: list,
+      limit,
+      offset,
+      // Cursor for next page: caller passes next_offset back as `offset`.
+      // null when fewer than `limit` rows came back (end of stream).
+      next_offset: list.length < limit ? null : offset + limit,
+    };
+  });
+
+// ── Phase 4A: Operations Alerts reader (evidence/diagnostics; no UI change) ──
+// Read-only, filterable by status / age / severity / branch (via transfer ref).
+export const listOperationsAlerts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      status: z.enum(["open", "resolved", "all"]).optional(),
+      kind: z.string().trim().max(60).optional(),
+      branch_id: z.string().uuid().optional(),
+      min_age_hours: z.number().int().min(0).max(24 * 365).optional(),
+      severity: z.enum(["medium", "high", "critical"]).optional(),
+      limit: z.number().int().min(1).max(500).optional(),
+      offset: z.number().int().min(0).max(100_000).optional(),
+    }).parse(d ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    await assertOwnerOrAdmin(context.supabase, context.userId);
+    const limit = data.limit ?? 50;
+    const offset = data.offset ?? 0;
+    let q = context.supabase
+      .from("operations_alerts")
+      .select(
+        "id,kind,ref_id,summary,severity,dedupe_key,status,created_at,resolved_at",
+        { count: "exact" },
+      )
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
+    const status = data.status ?? "open";
+    if (status !== "all") q = q.eq("status", status);
+    if (data.kind) q = q.eq("kind", data.kind);
+    if (data.severity) q = q.eq("severity", data.severity);
+    if (data.min_age_hours !== undefined) {
+      const cutoff = new Date(Date.now() - data.min_age_hours * 3600_000).toISOString();
+      q = q.lte("created_at", cutoff);
+    }
+    const { data: rows, error, count } = await q;
+    if (error) throw new Error(error.message);
+    let list = (rows ?? []) as any[];
+    // branch_id filter applied in-memory (ref_id → inventory_transfers lookup)
+    // because operations_alerts is generic. Cheap: scoped to one page.
+    if (data.branch_id && list.length) {
+      const refIds = list
+        .filter((r) => r.kind === "STALE_TRANSFER")
+        .map((r) => r.ref_id);
+      if (refIds.length) {
+        const { data: t } = await context.supabase
+          .from("inventory_transfers")
+          .select("id,source_branch_id,destination_branch_id")
+          .in("id", refIds);
+        const match = new Set(
+          (t ?? []).filter((x: any) =>
+            x.source_branch_id === data.branch_id ||
+            x.destination_branch_id === data.branch_id,
+          ).map((x: any) => x.id as string),
+        );
+        list = list.filter(
+          (r) => r.kind !== "STALE_TRANSFER" || match.has(r.ref_id),
+        );
+      } else {
+        list = [];
+      }
+    }
+    return { rows: list, count: count ?? 0, limit, offset };
   });

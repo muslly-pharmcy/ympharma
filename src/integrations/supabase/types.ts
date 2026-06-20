@@ -2593,6 +2593,7 @@ export type Database = {
           _coverage_days?: number
           _limit?: number
           _lookback_days?: number
+          _offset?: number
         }
         Returns: {
           available: number
