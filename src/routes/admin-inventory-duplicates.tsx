@@ -9,7 +9,7 @@ import {
   Download, History, Undo2, Activity,
 } from "lucide-react";
 import {
-  listDuplicateProducts, linkSuppliersBatch, rollbackSupplierBatch, listSupplierBatches,
+  listDuplicateProducts, linkSuppliersBatch, rollbackSupplierBatch, previewRollbackBatch, listSupplierBatches,
   previewBulkAddStock, applyBulkAddStock, triggerHealth,
   type DuplicateGroup,
 } from "@/lib/inventory-duplicates.functions";
@@ -40,7 +40,7 @@ function Page() {
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
           <Link to="/admin-inventory" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent"><ArrowRight className="size-4" /> رجوع</Link>
           <h1 className="text-base font-black">المتشابهات + المخزون + الموردين</h1>
-          <div />
+          <Link to="/admin-trigger-failures" className="rounded-xl bg-rose-500/10 text-rose-600 px-3 py-2 text-xs font-bold hover:bg-rose-500/20">⚠ أحداث فشل</Link>
         </div>
         <div className="mx-auto flex max-w-7xl flex-wrap gap-1 px-4 pb-2">
           <TabBtn active={tab === "duplicates"} onClick={() => setTab("duplicates")} icon={<Copy className="size-4" />} label="المتشابهات" />
@@ -197,12 +197,13 @@ function BulkTab() {
   const [scope, setScope] = useState<"published" | "tracked" | "out_of_stock">("published");
   const [reason, setReason] = useState("استلام شحنة");
   const [preview, setPreview] = useState<Awaited<ReturnType<typeof previewBulkAddStock>> | null>(null);
+  const [applyResult, setApplyResult] = useState<Awaited<ReturnType<typeof applyBulkAddStock>> | null>(null);
   const [busy, setBusy] = useState(false);
   const previewFn = useServerFn(previewBulkAddStock);
   const applyFn = useServerFn(applyBulkAddStock);
 
   async function runPreview() {
-    setBusy(true);
+    setBusy(true); setApplyResult(null);
     try { setPreview(await previewFn({ data: { delta, scope, reason } })); }
     catch (e: any) { toast.error(String(e?.message ?? e)); }
     finally { setBusy(false); }
@@ -215,13 +216,13 @@ function BulkTab() {
     setBusy(true);
     try {
       const res = await applyFn({ data: { delta, scope, reason: reason.trim(), confirm: true } });
-      toast.success(`تم تطبيق التعديل على ${res.applied}/${res.count} صنف`);
-      setPreview(null);
+      setApplyResult(res);
+      toast.success(`نجاح: ${res.applied} · فشل: ${res.failed} · تخطي: ${res.skipped}`);
     } catch (e: any) { toast.error(String(e?.message ?? e)); }
     finally { setBusy(false); }
   }
 
-  function exportCSV(stage: "preview" | "after") {
+  function exportPreviewCSV(stage: "preview" | "projected_after") {
     if (!preview) return;
     const csv = toCSV(preview.rows.map((r) => ({
       legacy_id: r.legacy_id ?? "",
@@ -234,6 +235,22 @@ function BulkTab() {
       stage,
     })));
     downloadCSV(`bulk-stock-${stage}-${Date.now()}.csv`, csv);
+  }
+
+  function exportFinalCSV() {
+    if (!applyResult) return;
+    const csv = toCSV(applyResult.results.map((r) => ({
+      legacy_id: r.legacy_id ?? "",
+      name: r.name,
+      supplier_name: r.supplier_name ?? "",
+      before_qty: r.before_qty,
+      after_qty: r.after_qty,
+      delta: r.after_qty - r.before_qty,
+      outcome: r.outcome, // applied | skipped | failed
+      error: r.error ?? "",
+      reason,
+    })));
+    downloadCSV(`bulk-stock-final-${Date.now()}.csv`, csv);
   }
 
   return (
@@ -262,15 +279,46 @@ function BulkTab() {
           <button onClick={runApply} disabled={busy || !preview} className="flex items-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-2 text-xs font-black text-white disabled:opacity-40"><Save className="size-4" /> تطبيق</button>
           {preview && (
             <>
-              <button onClick={() => exportCSV("preview")} className="flex items-center gap-1.5 rounded-xl bg-secondary px-4 py-2 text-xs font-black"><Download className="size-4" /> CSV قبل</button>
-              <button onClick={() => exportCSV("after")} disabled={busy} className="flex items-center gap-1.5 rounded-xl bg-secondary px-4 py-2 text-xs font-black disabled:opacity-40"><Download className="size-4" /> CSV بعد</button>
+              <button onClick={() => exportPreviewCSV("preview")} className="flex items-center gap-1.5 rounded-xl bg-secondary px-4 py-2 text-xs font-black"><Download className="size-4" /> CSV معاينة</button>
+              <button onClick={() => exportPreviewCSV("projected_after")} className="flex items-center gap-1.5 rounded-xl bg-secondary px-4 py-2 text-xs font-black"><Download className="size-4" /> CSV متوقع</button>
             </>
           )}
-          {!preview && <span className="text-[11px] text-muted-foreground flex items-center gap-1"><AlertTriangle className="size-3" /> يجب المعاينة أولاً</span>}
+          {applyResult && (
+            <button onClick={exportFinalCSV} className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-black text-white"><Download className="size-4" /> CSV نهائي (نتائج التطبيق)</button>
+          )}
+          {!preview && !applyResult && <span className="text-[11px] text-muted-foreground flex items-center gap-1"><AlertTriangle className="size-3" /> يجب المعاينة أولاً</span>}
         </div>
       </div>
 
-      {preview && (
+      {applyResult && (
+        <div className="rounded-2xl border border-emerald-500/40 bg-emerald-500/5 p-4">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <Stat label="نجاح" value={applyResult.applied} />
+            <Stat label="فشل" value={applyResult.failed} />
+            <Stat label="تخطي" value={applyResult.skipped} />
+            <Stat label="إجمالي" value={applyResult.count} />
+          </div>
+          <div className="mt-4 max-h-[480px] overflow-auto rounded-xl border border-border bg-card">
+            <table className="w-full min-w-[800px] text-xs">
+              <thead className="sticky top-0 bg-secondary/80 backdrop-blur"><tr><th className="px-2 py-1 text-right">#</th><th className="px-2 py-1 text-right">الصنف</th><th className="px-2 py-1">قبل</th><th className="px-2 py-1">بعد</th><th className="px-2 py-1">النتيجة</th><th className="px-2 py-1">خطأ</th></tr></thead>
+              <tbody>
+                {applyResult.results.map((r) => (
+                  <tr key={r.id} className="border-t border-border">
+                    <td className="px-2 py-1 text-center text-muted-foreground">{r.legacy_id ?? "—"}</td>
+                    <td className="px-2 py-1">{r.name}</td>
+                    <td className="px-2 py-1 text-center">{r.before_qty}</td>
+                    <td className="px-2 py-1 text-center font-bold">{r.after_qty}</td>
+                    <td className={`px-2 py-1 text-center font-black ${r.outcome === "applied" ? "text-emerald-600" : r.outcome === "failed" ? "text-rose-600" : "text-muted-foreground"}`}>{r.outcome}</td>
+                    <td className="px-2 py-1 text-rose-600">{r.error ?? ""}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {preview && !applyResult && (
         <div className="rounded-2xl border border-primary/40 bg-primary/5 p-4">
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <Stat label="عدد المنتجات" value={preview.count} />
@@ -301,12 +349,15 @@ function BulkTab() {
   );
 }
 
+
 // ============== History Tab (supplier link rollback) ==============
 
 function HistoryTab() {
   const [rows, setRows] = useState<Array<{ batch_id: string; reason: string; count: number; rolled_back: number; created_at: string }>>([]);
   const [busy, setBusy] = useState(false);
+  const [pv, setPv] = useState<Awaited<ReturnType<typeof previewRollbackBatch>> | null>(null);
   const listFn = useServerFn(listSupplierBatches);
+  const previewFn = useServerFn(previewRollbackBatch);
   const rb = useServerFn(rollbackSupplierBatch);
 
   const load = useCallback(async () => {
@@ -317,11 +368,19 @@ function HistoryTab() {
   }, [listFn]);
   useEffect(() => { load(); }, [load]);
 
-  async function rollback(batch_id: string) {
-    if (!confirm(`تأكيد استرجاع جميع الأصناف في هذه العملية إلى موردها السابق؟`)) return;
+  async function openPreview(batch_id: string) {
+    setBusy(true);
+    try { setPv(await previewFn({ data: { batch_id } })); }
+    catch (e: any) { toast.error(String(e?.message ?? e)); }
+    finally { setBusy(false); }
+  }
+
+  async function confirmRollback() {
+    if (!pv) return;
     try {
-      const res = await rb({ data: { batch_id } });
+      const res = await rb({ data: { batch_id: pv.batch_id, confirm: true } });
       toast.success(`تم استرجاع ${res.restored}/${res.total} صنف`);
+      setPv(null);
       await load();
     } catch (e: any) { toast.error(String(e?.message ?? e)); }
   }
@@ -332,6 +391,42 @@ function HistoryTab() {
         <div className="text-sm text-muted-foreground">{busy ? "جارٍ التحميل..." : `${rows.length} عملية ربط مورد`}</div>
         <button onClick={load} disabled={busy} className="rounded-xl bg-secondary px-3 py-2 text-xs font-bold disabled:opacity-50">{busy ? "..." : "تحديث"}</button>
       </div>
+
+      {pv && (
+        <div className="rounded-2xl border-2 border-rose-500/40 bg-rose-500/5 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="text-sm font-black">معاينة الـ Rollback — batch <code className="font-mono text-xs">{pv.batch_id.slice(0, 12)}</code></div>
+            <div className="flex gap-2">
+              <button onClick={() => setPv(null)} className="rounded-lg bg-secondary px-3 py-1.5 text-[11px] font-bold">إلغاء</button>
+              <button onClick={confirmRollback} disabled={pv.will_change === 0} className="flex items-center gap-1 rounded-lg bg-rose-500 px-3 py-1.5 text-[11px] font-black text-white disabled:opacity-40"><Undo2 className="size-3" /> تأكيد الـ Rollback ({pv.will_change} صنف)</button>
+            </div>
+          </div>
+          <div className="mt-2 grid grid-cols-3 gap-3">
+            <Stat label="إجمالي" value={pv.total} />
+            <Stat label="سيتغير" value={pv.will_change} />
+            <Stat label="تم استرجاعه سابقاً" value={pv.already_rolled_back} />
+          </div>
+          <div className="mt-3 max-h-[400px] overflow-auto rounded-xl border border-border bg-card">
+            <table className="w-full min-w-[800px] text-xs">
+              <thead className="sticky top-0 bg-secondary/80 backdrop-blur"><tr><th className="px-2 py-1 text-right">#</th><th className="px-2 py-1 text-right">الصنف</th><th className="px-2 py-1">المورد الحالي</th><th className="px-2 py-1">سيُسترجع إلى</th><th className="px-2 py-1">الحالة</th></tr></thead>
+              <tbody>
+                {pv.diffs.map((d, i) => (
+                  <tr key={i} className={`border-t border-border ${d.already_rolled_back ? "opacity-50" : d.will_change ? "" : "text-muted-foreground"}`}>
+                    <td className="px-2 py-1 text-center">{d.legacy_id ?? "—"}</td>
+                    <td className="px-2 py-1">{d.name}</td>
+                    <td className="px-2 py-1 text-center">{d.current_supplier ?? "—"}</td>
+                    <td className="px-2 py-1 text-center font-bold">{d.restore_supplier ?? "—"}</td>
+                    <td className="px-2 py-1 text-center">
+                      {d.already_rolled_back ? "↩ سبق استرجاعه" : d.will_change ? "سيتغير" : "بدون تغيير"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       <div className="overflow-x-auto rounded-2xl border border-border bg-card">
         <table className="w-full min-w-[700px] text-xs">
           <thead className="bg-secondary/40"><tr><th className="px-2 py-2 text-right">التاريخ</th><th className="px-2 py-2 text-right">السبب</th><th className="px-2 py-2">عدد الأصناف</th><th className="px-2 py-2">مُسترجَع</th><th className="px-2 py-2">معرف العملية</th><th className="px-2 py-2">إجراء</th></tr></thead>
@@ -345,7 +440,7 @@ function HistoryTab() {
                 <td className="px-2 py-2 text-center">{r.rolled_back}/{r.count}</td>
                 <td className="px-2 py-2 text-center font-mono text-[10px]">{r.batch_id.slice(0, 12)}</td>
                 <td className="px-2 py-2 text-center">
-                  <button disabled={r.rolled_back >= r.count} onClick={() => rollback(r.batch_id)} className="flex items-center gap-1 rounded-lg bg-rose-500 px-3 py-1.5 text-[10px] font-black text-white disabled:opacity-40"><Undo2 className="size-3" /> rollback</button>
+                  <button disabled={r.rolled_back >= r.count} onClick={() => openPreview(r.batch_id)} className="flex items-center gap-1 rounded-lg bg-rose-500 px-3 py-1.5 text-[10px] font-black text-white disabled:opacity-40"><Eye className="size-3" /> معاينة Rollback</button>
                 </td>
               </tr>
             ))}
@@ -355,6 +450,7 @@ function HistoryTab() {
     </div>
   );
 }
+
 
 // ============== Health Tab ==============
 

@@ -31,6 +31,7 @@ import { Route as AiPrescriptionRouteImport } from './routes/ai-prescription'
 import { Route as AiPharmacistRouteImport } from './routes/ai-pharmacist'
 import { Route as AiAssistantRouteImport } from './routes/ai-assistant'
 import { Route as AdminWorkforceRouteImport } from './routes/admin-workforce'
+import { Route as AdminTriggerFailuresRouteImport } from './routes/admin-trigger-failures'
 import { Route as AdminTransfersRouteImport } from './routes/admin-transfers'
 import { Route as AdminSettingsRouteImport } from './routes/admin-settings'
 import { Route as AdminRxReviewRouteImport } from './routes/admin-rx-review'
@@ -208,6 +209,11 @@ const AiAssistantRoute = AiAssistantRouteImport.update({
 const AdminWorkforceRoute = AdminWorkforceRouteImport.update({
   id: '/admin-workforce',
   path: '/admin-workforce',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTriggerFailuresRoute = AdminTriggerFailuresRouteImport.update({
+  id: '/admin-trigger-failures',
+  path: '/admin-trigger-failures',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminTransfersRoute = AdminTransfersRouteImport.update({
@@ -608,6 +614,7 @@ export interface FileRoutesByFullPath {
   '/admin-rx-review': typeof AdminRxReviewRoute
   '/admin-settings': typeof AdminSettingsRoute
   '/admin-transfers': typeof AdminTransfersRoute
+  '/admin-trigger-failures': typeof AdminTriggerFailuresRoute
   '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
   '/ai-pharmacist': typeof AiPharmacistRoute
@@ -700,6 +707,7 @@ export interface FileRoutesByTo {
   '/admin-rx-review': typeof AdminRxReviewRoute
   '/admin-settings': typeof AdminSettingsRoute
   '/admin-transfers': typeof AdminTransfersRoute
+  '/admin-trigger-failures': typeof AdminTriggerFailuresRoute
   '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
   '/ai-pharmacist': typeof AiPharmacistRoute
@@ -793,6 +801,7 @@ export interface FileRoutesById {
   '/admin-rx-review': typeof AdminRxReviewRoute
   '/admin-settings': typeof AdminSettingsRoute
   '/admin-transfers': typeof AdminTransfersRoute
+  '/admin-trigger-failures': typeof AdminTriggerFailuresRoute
   '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
   '/ai-pharmacist': typeof AiPharmacistRoute
@@ -887,6 +896,7 @@ export interface FileRouteTypes {
     | '/admin-rx-review'
     | '/admin-settings'
     | '/admin-transfers'
+    | '/admin-trigger-failures'
     | '/admin-workforce'
     | '/ai-assistant'
     | '/ai-pharmacist'
@@ -979,6 +989,7 @@ export interface FileRouteTypes {
     | '/admin-rx-review'
     | '/admin-settings'
     | '/admin-transfers'
+    | '/admin-trigger-failures'
     | '/admin-workforce'
     | '/ai-assistant'
     | '/ai-pharmacist'
@@ -1071,6 +1082,7 @@ export interface FileRouteTypes {
     | '/admin-rx-review'
     | '/admin-settings'
     | '/admin-transfers'
+    | '/admin-trigger-failures'
     | '/admin-workforce'
     | '/ai-assistant'
     | '/ai-pharmacist'
@@ -1164,6 +1176,7 @@ export interface RootRouteChildren {
   AdminRxReviewRoute: typeof AdminRxReviewRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTransfersRoute: typeof AdminTransfersRoute
+  AdminTriggerFailuresRoute: typeof AdminTriggerFailuresRoute
   AdminWorkforceRoute: typeof AdminWorkforceRoute
   AiAssistantRoute: typeof AiAssistantRoute
   AiPharmacistRoute: typeof AiPharmacistRoute
@@ -1372,6 +1385,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-workforce'
       fullPath: '/admin-workforce'
       preLoaderRoute: typeof AdminWorkforceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-trigger-failures': {
+      id: '/admin-trigger-failures'
+      path: '/admin-trigger-failures'
+      fullPath: '/admin-trigger-failures'
+      preLoaderRoute: typeof AdminTriggerFailuresRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-transfers': {
@@ -1903,6 +1923,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRxReviewRoute: AdminRxReviewRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTransfersRoute: AdminTransfersRoute,
+  AdminTriggerFailuresRoute: AdminTriggerFailuresRoute,
   AdminWorkforceRoute: AdminWorkforceRoute,
   AiAssistantRoute: AiAssistantRoute,
   AiPharmacistRoute: AiPharmacistRoute,

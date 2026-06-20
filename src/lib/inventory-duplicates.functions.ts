@@ -123,9 +123,51 @@ export const linkSuppliersBatch = createServerFn({ method: "POST" })
     return { applied, count: data.items.length, batch_id: batchId };
   });
 
-export const rollbackSupplierBatch = createServerFn({ method: "POST" })
+export const previewRollbackBatch = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ batch_id: z.string().min(8).max(64) }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { data: rows, error } = await context.supabase
+      .from("supplier_link_audit")
+      .select("id, product_id, before_supplier_name, before_supplier_cost, after_supplier_name, after_supplier_cost, rolled_back_at")
+      .eq("batch_id", data.batch_id);
+    if (error) throw new Error(error.message);
+    if (!rows || rows.length === 0) throw new Error("لا توجد عملية بهذا المعرف");
+
+    const ids = rows.map((r: any) => r.product_id);
+    const { data: prods } = await context.supabase
+      .from("products").select("id, name, legacy_id, supplier_name, supplier_cost").in("id", ids);
+    const pmap = new Map<string, any>((prods ?? []).map((p: any) => [p.id, p]));
+
+    const diffs = (rows as any[]).map((r) => {
+      const p = pmap.get(r.product_id) ?? {};
+      return {
+        product_id: r.product_id,
+        legacy_id: p.legacy_id ?? null,
+        name: p.name ?? "—",
+        current_supplier: p.supplier_name ?? null,
+        current_cost: p.supplier_cost ?? null,
+        restore_supplier: r.before_supplier_name,
+        restore_cost: r.before_supplier_cost,
+        will_change: (p.supplier_name ?? null) !== (r.before_supplier_name ?? null)
+                  || Number(p.supplier_cost ?? 0) !== Number(r.before_supplier_cost ?? 0),
+        already_rolled_back: !!r.rolled_back_at,
+      };
+    });
+
+    return {
+      batch_id: data.batch_id,
+      total: diffs.length,
+      will_change: diffs.filter((d) => d.will_change && !d.already_rolled_back).length,
+      already_rolled_back: diffs.filter((d) => d.already_rolled_back).length,
+      diffs,
+    };
+  });
+
+export const rollbackSupplierBatch = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ batch_id: z.string().min(8).max(64), confirm: z.literal(true) }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { data: rows, error } = await context.supabase
@@ -154,6 +196,7 @@ export const rollbackSupplierBatch = createServerFn({ method: "POST" })
     });
     return { restored, total: rows.length };
   });
+
 
 export const listSupplierBatches = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -247,19 +290,70 @@ export const applyBulkAddStock = createServerFn({ method: "POST" })
       } as never);
     } catch { /* optional rpc — trigger still logs with NULL reason */ }
 
-    let applied = 0;
+    const results: Array<{
+      id: string; legacy_id: number | null; name: string;
+      supplier_name: string | null; before_qty: number; after_qty: number;
+      outcome: "applied" | "skipped" | "failed"; error?: string;
+    }> = [];
+    let applied = 0, failed = 0, skipped = 0;
     for (const r of rows) {
       const next = Math.max(0, (r.stock_qty ?? 0) + data.delta);
+      if (next === r.stock_qty) {
+        results.push({ id: r.id, legacy_id: r.legacy_id, name: r.name, supplier_name: r.supplier_name, before_qty: r.stock_qty, after_qty: next, outcome: "skipped" });
+        skipped++;
+        continue;
+      }
       const { error } = await context.supabase
         .from("products").update({ stock_qty: next } as never).eq("id", r.id);
-      if (!error) applied++;
+      if (error) {
+        results.push({ id: r.id, legacy_id: r.legacy_id, name: r.name, supplier_name: r.supplier_name, before_qty: r.stock_qty, after_qty: r.stock_qty, outcome: "failed", error: error.message });
+        failed++;
+      } else {
+        results.push({ id: r.id, legacy_id: r.legacy_id, name: r.name, supplier_name: r.supplier_name, before_qty: r.stock_qty, after_qty: next, outcome: "applied" });
+        applied++;
+      }
     }
     await context.supabase.rpc("log_activity", {
       _action: "inventory.bulk_add",
-      _details: { applied, count: rows.length, delta: data.delta, scope: data.scope, reason: data.reason } as never,
+      _details: { applied, failed, skipped, count: rows.length, delta: data.delta, scope: data.scope, reason: data.reason } as never,
     });
-    return { applied, count: rows.length };
+    return { applied, failed, skipped, count: rows.length, results };
   });
+
+// ---------- Trigger failures listing & search ----------
+
+export const listTriggerFailures = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      search: z.string().trim().max(160).optional(),
+      hours: z.number().int().min(1).max(720).optional(),
+      limit: z.number().int().min(1).max(1000).optional(),
+    }).parse(d ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const since = new Date(Date.now() - (data.hours ?? 24) * 3600 * 1000).toISOString();
+    let q = context.supabase
+      .from("trigger_metrics")
+      .select("id, trigger_name, status, duration_ms, error_message, payload, created_at")
+      .eq("status", "failed")
+      .gte("created_at", since)
+      .order("created_at", { ascending: false })
+      .limit(data.limit ?? 500);
+    if (data.search) {
+      // Search across error message + payload (cast to text for ILIKE).
+      q = q.or(`error_message.ilike.%${data.search}%,payload.cs.{"reason":"${data.search}"}`);
+    }
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return (rows ?? []) as Array<{
+      id: string; trigger_name: string; status: string;
+      duration_ms: number | null; error_message: string | null;
+      payload: any; created_at: string;
+    }>;
+  });
+
 
 // ---------- Trigger health / monitoring ----------
 
