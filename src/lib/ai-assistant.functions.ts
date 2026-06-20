@@ -394,6 +394,7 @@ function pickSystem(mode: string) {
     case "pharmacist": return SYSTEM_PHARMACIST;
     case "chronic_refill": return SYSTEM_CHRONIC_REFILL;
     case "procurement": return SYSTEM_PROCUREMENT;
+    case "loyalty": return SYSTEM_LOYALTY;
     default: return SYSTEM_INTERACTIONS;
   }
 }
