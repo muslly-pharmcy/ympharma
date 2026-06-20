@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { AdminGate } from "@/components/admin/AdminGate";
 import { useEffect, useState, useCallback } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,7 +17,7 @@ function downloadTemplate(name: string, content: string, mime: string) {
 
 export const Route = createFileRoute("/admin-products")({
   head: () => ({ meta: [{ title: "إدارة الأصناف — صيدلية المصلي" }, { name: "robots", content: "noindex,nofollow" }] }),
-  component: AdminProducts,
+  component: () => (<AdminGate><AdminProducts /></AdminGate>),
 });
 
 type Row = {

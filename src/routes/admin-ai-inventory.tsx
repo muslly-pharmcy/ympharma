@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { AdminGate } from "@/components/admin/AdminGate";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { ArrowLeft, Loader2, Boxes, AlertTriangle } from "lucide-react";
@@ -11,7 +12,7 @@ export const Route = createFileRoute("/admin-ai-inventory")({
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
-  component: InventoryAgentRunner,
+  component: () => (<AdminGate><InventoryAgentRunner /></AdminGate>),
 });
 
 type Rec = {

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { AdminGate } from "@/components/admin/AdminGate";
 import { useEffect, useState, useCallback } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +10,7 @@ import { formatPrice } from "@/lib/products";
 
 export const Route = createFileRoute("/admin-campaigns")({
   head: () => ({ meta: [{ title: "الحملات الترويجية" }, { name: "robots", content: "noindex" }] }),
-  component: AdminCampaigns,
+  component: () => (<AdminGate><AdminCampaigns /></AdminGate>),
 });
 
 type Camp = {

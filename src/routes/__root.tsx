@@ -17,6 +17,11 @@ import "@fontsource/tajawal/500.css";
 import "@fontsource/tajawal/700.css";
 import "@fontsource/tajawal/900.css";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { initSentry, captureClientError } from "../lib/sentry";
+
+if (typeof window !== "undefined") {
+  initSentry();
+}
 import { CartProvider } from "../lib/cart";
 import { I18nProvider } from "../lib/i18n";
 import { Toaster } from "../components/ui/sonner";
@@ -50,6 +55,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    captureClientError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
 
   return (

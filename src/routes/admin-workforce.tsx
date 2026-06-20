@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { AdminGate } from "@/components/admin/AdminGate";
 import { useEffect, useState, useCallback } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, RefreshCw, ArrowLeft, Play, PlayCircle, Activity, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
@@ -27,7 +28,7 @@ export const Route = createFileRoute("/admin-workforce")({
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
-  component: WorkforcePage,
+  component: () => (<AdminGate><WorkforcePage /></AdminGate>),
 });
 
 function statusBadge(status?: string) {

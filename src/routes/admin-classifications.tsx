@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AdminGate } from "@/components/admin/AdminGate";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
@@ -18,7 +19,7 @@ export const Route = createFileRoute("/admin-classifications")({
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
-  component: Page,
+  component: () => (<AdminGate><Page /></AdminGate>),
 });
 
 const CATEGORY_LABELS: Record<string, string> = {

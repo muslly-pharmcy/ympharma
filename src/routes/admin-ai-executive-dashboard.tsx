@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { AdminGate } from "@/components/admin/AdminGate";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { ArrowLeft, Loader2, LayoutDashboard, AlertTriangle, Activity, Package, Bot, UserX } from "lucide-react";
@@ -11,7 +12,7 @@ export const Route = createFileRoute("/admin-ai-executive-dashboard")({
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
-  component: ExecutiveDashboardRunner,
+  component: () => (<AdminGate><ExecutiveDashboardRunner /></AdminGate>),
 });
 
 type KPI = {

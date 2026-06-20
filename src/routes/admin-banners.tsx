@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { AdminGate } from "@/components/admin/AdminGate";
 import { useEffect, useState, useCallback } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +9,7 @@ import { listBannersAdmin, upsertBanner, deleteBanner } from "@/lib/banners.func
 
 export const Route = createFileRoute("/admin-banners")({
   head: () => ({ meta: [{ title: "البانرات التسويقية" }, { name: "robots", content: "noindex" }] }),
-  component: AdminBanners,
+  component: () => (<AdminGate><AdminBanners /></AdminGate>),
 });
 
 const THEMES = ["gradient-emerald", "gradient-rose", "gradient-amber", "gradient-indigo", "solid-card"];

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { AdminGate } from "@/components/admin/AdminGate";
 import { useEffect, useState, useCallback } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +9,7 @@ import { listBundlesAdmin, upsertBundle, deleteBundle } from "@/lib/bundles.func
 
 export const Route = createFileRoute("/admin-bundles")({
   head: () => ({ meta: [{ title: "إدارة الباقات" }, { name: "robots", content: "noindex" }] }),
-  component: AdminBundles,
+  component: () => (<AdminGate><AdminBundles /></AdminGate>),
 });
 
 type Item = { product_legacy_id: number; qty: number };

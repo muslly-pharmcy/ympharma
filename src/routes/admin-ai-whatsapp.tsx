@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { AdminGate } from "@/components/admin/AdminGate";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -12,7 +13,7 @@ export const Route = createFileRoute("/admin-ai-whatsapp")({
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
-  component: WhatsAppAgentRunner,
+  component: () => (<AdminGate><WhatsAppAgentRunner /></AdminGate>),
 });
 
 type Rec = {
