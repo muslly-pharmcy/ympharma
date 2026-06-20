@@ -44,6 +44,7 @@ import { Route as AdminCampaignsRouteImport } from './routes/admin-campaigns'
 import { Route as AdminBundlesRouteImport } from './routes/admin-bundles'
 import { Route as AdminBannersRouteImport } from './routes/admin-banners'
 import { Route as AdminBackupsRouteImport } from './routes/admin-backups'
+import { Route as AdminAiSalesCxRouteImport } from './routes/admin-ai-sales-cx'
 import { Route as AdminAiMarketingRouteImport } from './routes/admin-ai-marketing'
 import { Route as AdminAiInventoryRouteImport } from './routes/admin-ai-inventory'
 import { Route as AdminAgentsRouteImport } from './routes/admin-agents'
@@ -251,6 +252,11 @@ const AdminBackupsRoute = AdminBackupsRouteImport.update({
   path: '/admin-backups',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAiSalesCxRoute = AdminAiSalesCxRouteImport.update({
+  id: '/admin-ai-sales-cx',
+  path: '/admin-ai-sales-cx',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAiMarketingRoute = AdminAiMarketingRouteImport.update({
   id: '/admin-ai-marketing',
   path: '/admin-ai-marketing',
@@ -426,6 +432,7 @@ export interface FileRoutesByFullPath {
   '/admin-agents': typeof AdminAgentsRoute
   '/admin-ai-inventory': typeof AdminAiInventoryRoute
   '/admin-ai-marketing': typeof AdminAiMarketingRoute
+  '/admin-ai-sales-cx': typeof AdminAiSalesCxRoute
   '/admin-backups': typeof AdminBackupsRoute
   '/admin-banners': typeof AdminBannersRoute
   '/admin-bundles': typeof AdminBundlesRoute
@@ -494,6 +501,7 @@ export interface FileRoutesByTo {
   '/admin-agents': typeof AdminAgentsRoute
   '/admin-ai-inventory': typeof AdminAiInventoryRoute
   '/admin-ai-marketing': typeof AdminAiMarketingRoute
+  '/admin-ai-sales-cx': typeof AdminAiSalesCxRoute
   '/admin-backups': typeof AdminBackupsRoute
   '/admin-banners': typeof AdminBannersRoute
   '/admin-bundles': typeof AdminBundlesRoute
@@ -563,6 +571,7 @@ export interface FileRoutesById {
   '/admin-agents': typeof AdminAgentsRoute
   '/admin-ai-inventory': typeof AdminAiInventoryRoute
   '/admin-ai-marketing': typeof AdminAiMarketingRoute
+  '/admin-ai-sales-cx': typeof AdminAiSalesCxRoute
   '/admin-backups': typeof AdminBackupsRoute
   '/admin-banners': typeof AdminBannersRoute
   '/admin-bundles': typeof AdminBundlesRoute
@@ -633,6 +642,7 @@ export interface FileRouteTypes {
     | '/admin-agents'
     | '/admin-ai-inventory'
     | '/admin-ai-marketing'
+    | '/admin-ai-sales-cx'
     | '/admin-backups'
     | '/admin-banners'
     | '/admin-bundles'
@@ -701,6 +711,7 @@ export interface FileRouteTypes {
     | '/admin-agents'
     | '/admin-ai-inventory'
     | '/admin-ai-marketing'
+    | '/admin-ai-sales-cx'
     | '/admin-backups'
     | '/admin-banners'
     | '/admin-bundles'
@@ -769,6 +780,7 @@ export interface FileRouteTypes {
     | '/admin-agents'
     | '/admin-ai-inventory'
     | '/admin-ai-marketing'
+    | '/admin-ai-sales-cx'
     | '/admin-backups'
     | '/admin-banners'
     | '/admin-bundles'
@@ -838,6 +850,7 @@ export interface RootRouteChildren {
   AdminAgentsRoute: typeof AdminAgentsRoute
   AdminAiInventoryRoute: typeof AdminAiInventoryRoute
   AdminAiMarketingRoute: typeof AdminAiMarketingRoute
+  AdminAiSalesCxRoute: typeof AdminAiSalesCxRoute
   AdminBackupsRoute: typeof AdminBackupsRoute
   AdminBannersRoute: typeof AdminBannersRoute
   AdminBundlesRoute: typeof AdminBundlesRoute
@@ -1147,6 +1160,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBackupsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin-ai-sales-cx': {
+      id: '/admin-ai-sales-cx'
+      path: '/admin-ai-sales-cx'
+      fullPath: '/admin-ai-sales-cx'
+      preLoaderRoute: typeof AdminAiSalesCxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin-ai-marketing': {
       id: '/admin-ai-marketing'
       path: '/admin-ai-marketing'
@@ -1385,6 +1405,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminAgentsRoute: AdminAgentsRoute,
   AdminAiInventoryRoute: AdminAiInventoryRoute,
   AdminAiMarketingRoute: AdminAiMarketingRoute,
+  AdminAiSalesCxRoute: AdminAiSalesCxRoute,
   AdminBackupsRoute: AdminBackupsRoute,
   AdminBannersRoute: AdminBannersRoute,
   AdminBundlesRoute: AdminBundlesRoute,
