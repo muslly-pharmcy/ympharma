@@ -132,6 +132,7 @@ const TOPIC_LABEL: Record<string, string> = {
   services: "استفسار عن الخدمات",
   prescription: "رفع روشتة طبية",
   marketing: "توصيات تسويقية (داخلي)",
+  pharmacist: "استشارة صيدلي ذكي",
 };
 
 export type AiHandoffInput = {
