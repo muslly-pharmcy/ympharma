@@ -72,33 +72,38 @@ export async function runAgentHook(request: Request, agent: AgentName, kind: "sc
       })
       .eq("id", runId);
 
-    // Write an agent_actions ledger row ONLY when this run produced
-    // recommendations — keeps the action queue actionable, not a log dump.
-    if (recs > 0) {
-      const defaults = DEFAULTS_BY_AGENT[agent];
-      const actionType = (payload.action_type as string) ?? `${agent.toUpperCase()}_RECOMMENDATION`;
-      const arabic = (payload.compiled_arabic_output as string) ?? summary;
-      const { error: actErr } = await supabaseAdmin
-        .from("agent_actions")
-        .insert({
-          agent_name: agent,
-          originating_agent: agent as never,
-          target_pipeline: ((payload.target_pipeline as string) ?? defaults.pipeline) as never,
-          priority_level: (payload.priority_level as string) ?? defaults.priority,
-          action_type: actionType,
-          payload: { run_id: runId, findings, recommendations: recs, source: "hook", details: payload } as never,
-          status: "pending",
-          execution_status: "PENDING_APPROVAL" as never,
-          compiled_arabic_output: arabic,
-        } as never);
-      if (actErr) {
-        // Don't fail the whole hook — observability failure is non-fatal.
-        await supabaseAdmin.from("error_logs").insert({
-          source: `agent-actions-insert/${agent}`,
-          message: actErr.message,
-          metadata: { run_id: runId } as never,
-        } as never).then(() => null, () => null);
-      }
+    // Audit ledger: always write one agent_actions row per run.
+    // When recs > 0, it's a real PENDING_APPROVAL recommendation.
+    // When recs == 0, it's a NO_OP marker (M11) so the run is still visible
+    // in /admin-automation-hub instead of vanishing.
+    const defaults = DEFAULTS_BY_AGENT[agent];
+    const isNoop = recs === 0;
+    const actionType = isNoop
+      ? `${agent.toUpperCase()}_NO_OP`
+      : ((payload.action_type as string) ?? `${agent.toUpperCase()}_RECOMMENDATION`);
+    const arabic = isNoop
+      ? `لا توصيات من وكيل ${agent} في هذا التشغيل (findings=${findings})`
+      : ((payload.compiled_arabic_output as string) ?? summary);
+    const { error: actErr } = await supabaseAdmin
+      .from("agent_actions")
+      .insert({
+        agent_name: agent,
+        originating_agent: agent as never,
+        target_pipeline: ((payload.target_pipeline as string) ?? defaults.pipeline) as never,
+        priority_level: isNoop ? "LOW" : ((payload.priority_level as string) ?? defaults.priority),
+        action_type: actionType,
+        payload: { run_id: runId, findings, recommendations: recs, source: "hook", details: payload } as never,
+        status: isNoop ? "noop" : "pending",
+        execution_status: (isNoop ? "NO_OP" : "PENDING_APPROVAL") as never,
+        compiled_arabic_output: arabic,
+      } as never);
+    if (actErr) {
+      // Don't fail the whole hook — observability failure is non-fatal.
+      await supabaseAdmin.from("error_logs").insert({
+        source: `agent-actions-insert/${agent}`,
+        message: actErr.message,
+        metadata: { run_id: runId } as never,
+      } as never).then(() => null, () => null);
     }
 
     return new Response(
