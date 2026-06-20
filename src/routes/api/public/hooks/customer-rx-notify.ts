@@ -27,6 +27,7 @@ type DispatchRow = {
   event_name: string;
   correlation_id: string | null;
   prescription_id: string | null;
+  order_id: string | null;
   recipient_phone: string;
   template_id: string;
   attempts: number;
@@ -44,9 +45,12 @@ type Settings = {
   baseSeconds: number;
   pharmacyName: string;
   optOutBaseUrl: string;
+  trackingBaseUrl: string;
   masterOn: boolean;
   rxOn: boolean;
+  ordersOn: boolean;
 };
+
 
 function renderTemplate(tpl: string, vars: Record<string, string>): string {
   return tpl.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (_m, k) =>
