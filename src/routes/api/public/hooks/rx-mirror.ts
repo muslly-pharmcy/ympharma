@@ -115,7 +115,7 @@ export const Route = createFileRoute("/api/public/hooks/rx-mirror")({
           }
 
           return new Response(
-            JSON.stringify({ ok: true, scanned: rxRows?.length ?? 0, mirrored, skipped, failed }),
+            JSON.stringify({ ok: true, scanned: rxRows?.length ?? 0, mirrored, registry_new, skipped, failed }),
             { headers: { "Content-Type": "application/json" } },
           );
         } catch (e) {
