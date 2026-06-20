@@ -216,7 +216,7 @@ function ProductsPage() {
   );
 }
 
-function ProductGrid({ visible }: { visible: ReturnType<typeof Array.prototype.slice> extends infer T ? any[] : never }) {
+function ProductGrid({ visible }: { visible: any[] }) {
   const [count, setCount] = useState(PAGE_SIZE);
   // Reset paging whenever the filtered set changes (new filter/search/sort).
   useEffect(() => { setCount(PAGE_SIZE); }, [visible]);
