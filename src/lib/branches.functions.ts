@@ -77,18 +77,23 @@ export const listBranchInventory = createServerFn({ method: "GET" })
     }).parse(d),
   )
   .handler(async ({ data, context }) => {
+    const limit = data.limit ?? 50;
+    const offset = (data as any).offset ?? 0;
     let q = context.supabase
       .from("branch_inventory")
-      .select("id,product_id,qty,reserved_qty,reorder_point,updated_at,products!inner(name,brand,price,legacy_id)")
+      .select(
+        "id,product_id,qty,reserved_qty,reorder_point,updated_at,products!inner(name,brand,price,legacy_id)",
+        { count: "exact" },
+      )
       .eq("branch_id", data.branch_id)
       .order("updated_at", { ascending: false })
-      .limit(data.limit ?? 200);
+      .range(offset, offset + limit - 1);
     if (data.search) q = q.ilike("products.name", `%${data.search}%`);
-    const { data: rows, error } = await q;
+    const { data: rows, error, count } = await q;
     if (error) throw new Error(error.message);
     let out = (rows ?? []) as any[];
     if (data.onlyLow) out = out.filter((r) => r.qty - r.reserved_qty <= (r.reorder_point ?? 0));
-    return out;
+    return { rows: out, count: count ?? 0, limit, offset };
   });
 
 export const listMyBranchAssignments = createServerFn({ method: "GET" })
@@ -100,4 +105,81 @@ export const listMyBranchAssignments = createServerFn({ method: "GET" })
       .eq("user_id", context.userId);
     if (error) throw new Error(error.message);
     return (data ?? []) as any[];
+  });
+
+export const toggleBranchActive = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ id: z.string().uuid(), is_active: z.boolean() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertOwnerOrAdmin(context.supabase, context.userId);
+    const { error } = await (context.supabase.from("branches") as any)
+      .update({ is_active: data.is_active }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const listBranchAssignments = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ branch_id: z.string().uuid() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await context.supabase
+      .from("branch_user_assignments")
+      .select("id,user_id,role,created_at")
+      .eq("branch_id", data.branch_id)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    if (!rows || rows.length === 0) return [];
+    // hydrate emails via auth admin (best-effort)
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const out = await Promise.all((rows as any[]).map(async (r) => {
+        const { data: u } = await supabaseAdmin.auth.admin.getUserById(r.user_id);
+        return { ...r, email: u?.user?.email ?? null };
+      }));
+      return out;
+    } catch {
+      return rows as any[];
+    }
+  });
+
+export const assignUserToBranch = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      branch_id: z.string().uuid(),
+      email: z.string().trim().email().max(255),
+      role: z.enum(["manager","staff","viewer"]).default("staff"),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertOwnerOrAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // resolve email → user id via admin API (lists 1 page; OK for ops scale)
+    const { data: usersPage, error: listErr } = await supabaseAdmin.auth.admin
+      .listUsers({ page: 1, perPage: 1000 });
+    if (listErr) throw new Error(listErr.message);
+    const u = usersPage.users.find((x) => x.email?.toLowerCase() === data.email.toLowerCase());
+    if (!u) throw new Error("لم يُعثر على مستخدم بهذا البريد");
+    const { error } = await (context.supabase.from("branch_user_assignments") as any)
+      .upsert({ branch_id: data.branch_id, user_id: u.id, role: data.role },
+              { onConflict: "user_id,branch_id" });
+    if (error) throw new Error(error.message);
+    return { ok: true, user_id: u.id };
+  });
+
+export const unassignUserFromBranch = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ id: z.string().uuid() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertOwnerOrAdmin(context.supabase, context.userId);
+    const { error } = await context.supabase
+      .from("branch_user_assignments").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
