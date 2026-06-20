@@ -62,7 +62,7 @@ function nameTokens(raw: string): string[] {
   const folded = foldArabic((raw ?? "").toLowerCase());
   // strip dosage tokens (with their unit) so they don't pollute the name bag
   const dosageStripped = folded.replace(
-    /\d+(?:\.\d+)?\s*(?:mcg|µg|ug|mg|gm|gr|g|kg|ml|cc|l|iu|ui|mmol|%)\b/g,
+    /\d+(?:\.\d+)?\s*(?:mcg|µg|ug|mg|gm|gr|g|kg|ml|cc|l|iu|ui|mmol|%)(?![\p{L}\p{N}])/gu,
     " ",
   );
   return dosageStripped
