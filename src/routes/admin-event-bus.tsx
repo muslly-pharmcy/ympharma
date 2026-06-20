@@ -61,9 +61,11 @@ function EventBusPage() {
       const s = r.schedule ?? {};
       setInstallMsg({
         kind: "ok",
-        text: `✓ تم تثبيت الجدولة: ${s.job_name ?? "event_consumer"} (${s.schedule ?? "* * * * *"}) — job_id=${s.job_id ?? "—"}`,
+        text: `✓ ${s.reinstalled ? "أُعيد تثبيت" : "تم تثبيت"} الجدولة: ${s.job_name ?? "event-consumer-tick"} (${s.schedule ?? "* * * * *"}) — job_id=${s.job_id ?? "—"} · cid=${r.correlation_id.slice(0, 8)}`,
       });
       qc.invalidateQueries({ queryKey: ["event_consumer_schedule"] });
+      qc.invalidateQueries({ queryKey: ["event_consumer_schedule_log"] });
+
     } catch (e: any) {
       setInstallMsg({ kind: "err", text: `✗ فشل التثبيت: ${e?.message ?? String(e)}` });
     } finally {
