@@ -3,7 +3,10 @@ import { AdminGate } from "@/components/admin/AdminGate";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import * as XLSX from "xlsx";
+// xlsx is lazy-loaded on demand inside handlers to keep it out of the initial admin chunk.
+type XLSXModule = typeof import("xlsx");
+let _xlsxPromise: Promise<XLSXModule> | null = null;
+const loadXLSX = () => (_xlsxPromise ??= import("xlsx"));
 import {
   ArrowLeft, Loader2, FileSpreadsheet, AlertTriangle, Send, Upload,
   Download, FileJson, Sheet, Bell, ShieldCheck,

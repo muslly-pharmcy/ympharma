@@ -115,7 +115,7 @@ function CommandCenter() {
   useEffect(() => {
     if (authed) {
       load();
-      const t = setInterval(load, 60_000);
+      const t = setInterval(() => { if (document.visibilityState === "hidden") return; load(); }, 60_000);
       return () => clearInterval(t);
     }
   }, [authed, load]);

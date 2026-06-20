@@ -161,8 +161,9 @@ export function registerServiceWorker() {
         trackInstallingWorker(reg, reg.installing);
       });
 
-      // Re-check for updates every 30 minutes while the tab is open.
+      // Re-check for updates every 30 minutes while the tab is visible.
       setInterval(() => {
+        if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
         reg.update().catch((err) => pushLog("warn", "update_check_failed", { err: String(err) }));
       }, 30 * 60 * 1000);
     } catch (err) {
