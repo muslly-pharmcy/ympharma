@@ -183,3 +183,29 @@ export const unassignUserFromBranch = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// ── Phase 4B: Branch Reorder Suggestions (recommendation only) ────────
+// Pure read. Does NOT create transfers or mutate inventory.
+export const branchReorderSuggestions = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      branch_id: z.string().uuid(),
+      lookback_days: z.number().int().min(1).max(365).optional(),
+      coverage_days: z.number().int().min(1).max(180).optional(),
+      limit: z.number().int().min(1).max(500).optional(),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await context.supabase.rpc(
+      "branch_reorder_suggestions" as never,
+      {
+        _branch_id: data.branch_id,
+        _lookback_days: data.lookback_days ?? 30,
+        _coverage_days: data.coverage_days ?? 14,
+        _limit: data.limit ?? 100,
+      } as never,
+    );
+    if (error) throw new Error(error.message);
+    return { rows: (rows ?? []) as any[] };
+  });
