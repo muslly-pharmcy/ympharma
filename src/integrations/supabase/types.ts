@@ -148,6 +148,57 @@ export type Database = {
           },
         ]
       }
+      agent_approval_requests: {
+        Row: {
+          action_type: string
+          agent_id: string
+          conversation_id: string | null
+          correlation_id: string | null
+          created_at: string
+          customer_message: string | null
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          id: string
+          payload: Json
+          status: string
+          updated_at: string
+          user_phone: string | null
+        }
+        Insert: {
+          action_type: string
+          agent_id?: string
+          conversation_id?: string | null
+          correlation_id?: string | null
+          created_at?: string
+          customer_message?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          payload?: Json
+          status?: string
+          updated_at?: string
+          user_phone?: string | null
+        }
+        Update: {
+          action_type?: string
+          agent_id?: string
+          conversation_id?: string | null
+          correlation_id?: string | null
+          created_at?: string
+          customer_message?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          payload?: Json
+          status?: string
+          updated_at?: string
+          user_phone?: string | null
+        }
+        Relationships: []
+      }
       agent_events: {
         Row: {
           correlation_id: string | null
@@ -380,6 +431,7 @@ export type Database = {
         Row: {
           agent_id: string
           conversation_id: string | null
+          correlation_id: string | null
           created_at: string
           duration_ms: number | null
           error_message: string | null
@@ -393,6 +445,7 @@ export type Database = {
         Insert: {
           agent_id?: string
           conversation_id?: string | null
+          correlation_id?: string | null
           created_at?: string
           duration_ms?: number | null
           error_message?: string | null
@@ -406,6 +459,7 @@ export type Database = {
         Update: {
           agent_id?: string
           conversation_id?: string | null
+          correlation_id?: string | null
           created_at?: string
           duration_ms?: number | null
           error_message?: string | null
@@ -3283,6 +3337,15 @@ export type Database = {
       agent_events_dlq_stats: { Args: never; Returns: Json }
       agent_runs_list: { Args: { _limit?: number }; Returns: Json }
       agent_workforce_summary: { Args: never; Returns: Json }
+      ai_get_branch_availability: {
+        Args: { _product_query: string }
+        Returns: {
+          branch_name: string
+          in_stock: boolean
+          product_id: string
+          product_name: string
+        }[]
+      }
       ai_get_order_status: {
         Args: { _order_id: string; _phone: string }
         Returns: {
@@ -3291,6 +3354,15 @@ export type Database = {
           item_count: number
           status: string
           total: number
+        }[]
+      }
+      ai_get_prescription_status: {
+        Args: { _phone: string; _prescription_id: string }
+        Returns: {
+          created_at: string
+          has_review: boolean
+          id: string
+          status: string
         }[]
       }
       ai_list_branches: {
