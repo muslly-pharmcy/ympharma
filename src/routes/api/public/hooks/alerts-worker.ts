@@ -41,7 +41,9 @@ async function sendText(phoneId: string, token: string, to: string, body: string
 export const Route = createFileRoute("/api/public/hooks/alerts-worker")({
   server: {
     handlers: {
-      POST: async () => {
+      POST: async ({ request }) => {
+        const denied = verifyCronSecret(request);
+        if (denied) return denied;
         const token = process.env.WHATSAPP_TOKEN;
         const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
         const recipientsCsv = process.env.STAFF_ALERT_RECIPIENTS ?? "";
