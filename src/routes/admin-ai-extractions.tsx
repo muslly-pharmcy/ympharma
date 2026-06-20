@@ -58,7 +58,7 @@ function Page() {
     if (status !== "all") query = query.eq("status", status);
     const { data, error } = await query;
     if (error) toast.error(error.message);
-    setRows((data ?? []) as Row[]);
+    setRows((data ?? []) as unknown as Row[]);
     setBusy(false);
   };
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [status]);

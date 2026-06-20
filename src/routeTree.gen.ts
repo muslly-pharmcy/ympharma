@@ -62,6 +62,7 @@ import { Route as AdminAiOrchestratorRouteImport } from './routes/admin-ai-orche
 import { Route as AdminAiMarketingRouteImport } from './routes/admin-ai-marketing'
 import { Route as AdminAiLoyaltyRouteImport } from './routes/admin-ai-loyalty'
 import { Route as AdminAiInventoryRouteImport } from './routes/admin-ai-inventory'
+import { Route as AdminAiExtractionsRouteImport } from './routes/admin-ai-extractions'
 import { Route as AdminAiExecutiveDashboardRouteImport } from './routes/admin-ai-executive-dashboard'
 import { Route as AdminAiExecutiveRouteImport } from './routes/admin-ai-executive'
 import { Route as AdminAiExcelImportRouteImport } from './routes/admin-ai-excel-import'
@@ -89,6 +90,7 @@ import { Route as ApiPublicHooksWeeklyExecReportRouteImport } from './routes/api
 import { Route as ApiPublicHooksWeeklyAiEnrichRouteImport } from './routes/api/public/hooks/weekly-ai-enrich'
 import { Route as ApiPublicHooksRxNotifyRouteImport } from './routes/api/public/hooks/rx-notify'
 import { Route as ApiPublicHooksRxMirrorRouteImport } from './routes/api/public/hooks/rx-mirror'
+import { Route as ApiPublicHooksPrescriptionExtractRouteImport } from './routes/api/public/hooks/prescription-extract'
 import { Route as ApiPublicHooksNightlyIntelRouteImport } from './routes/api/public/hooks/nightly-intel'
 import { Route as ApiPublicHooksEventConsumerRouteImport } from './routes/api/public/hooks/event-consumer'
 import { Route as ApiPublicHooksCustomerRxNotifyRouteImport } from './routes/api/public/hooks/customer-rx-notify'
@@ -371,6 +373,11 @@ const AdminAiInventoryRoute = AdminAiInventoryRouteImport.update({
   path: '/admin-ai-inventory',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAiExtractionsRoute = AdminAiExtractionsRouteImport.update({
+  id: '/admin-ai-extractions',
+  path: '/admin-ai-extractions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAiExecutiveDashboardRoute =
   AdminAiExecutiveDashboardRouteImport.update({
     id: '/admin-ai-executive-dashboard',
@@ -514,6 +521,12 @@ const ApiPublicHooksRxMirrorRoute = ApiPublicHooksRxMirrorRouteImport.update({
   path: '/api/public/hooks/rx-mirror',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksPrescriptionExtractRoute =
+  ApiPublicHooksPrescriptionExtractRouteImport.update({
+    id: '/api/public/hooks/prescription-extract',
+    path: '/api/public/hooks/prescription-extract',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksNightlyIntelRoute =
   ApiPublicHooksNightlyIntelRouteImport.update({
     id: '/api/public/hooks/nightly-intel',
@@ -605,6 +618,7 @@ export interface FileRoutesByFullPath {
   '/admin-ai-excel-import': typeof AdminAiExcelImportRoute
   '/admin-ai-executive': typeof AdminAiExecutiveRoute
   '/admin-ai-executive-dashboard': typeof AdminAiExecutiveDashboardRoute
+  '/admin-ai-extractions': typeof AdminAiExtractionsRoute
   '/admin-ai-inventory': typeof AdminAiInventoryRoute
   '/admin-ai-loyalty': typeof AdminAiLoyaltyRoute
   '/admin-ai-marketing': typeof AdminAiMarketingRoute
@@ -673,6 +687,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/customer-rx-notify': typeof ApiPublicHooksCustomerRxNotifyRoute
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
+  '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
   '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
@@ -701,6 +716,7 @@ export interface FileRoutesByTo {
   '/admin-ai-excel-import': typeof AdminAiExcelImportRoute
   '/admin-ai-executive': typeof AdminAiExecutiveRoute
   '/admin-ai-executive-dashboard': typeof AdminAiExecutiveDashboardRoute
+  '/admin-ai-extractions': typeof AdminAiExtractionsRoute
   '/admin-ai-inventory': typeof AdminAiInventoryRoute
   '/admin-ai-loyalty': typeof AdminAiLoyaltyRoute
   '/admin-ai-marketing': typeof AdminAiMarketingRoute
@@ -769,6 +785,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/customer-rx-notify': typeof ApiPublicHooksCustomerRxNotifyRoute
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
+  '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
   '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
@@ -798,6 +815,7 @@ export interface FileRoutesById {
   '/admin-ai-excel-import': typeof AdminAiExcelImportRoute
   '/admin-ai-executive': typeof AdminAiExecutiveRoute
   '/admin-ai-executive-dashboard': typeof AdminAiExecutiveDashboardRoute
+  '/admin-ai-extractions': typeof AdminAiExtractionsRoute
   '/admin-ai-inventory': typeof AdminAiInventoryRoute
   '/admin-ai-loyalty': typeof AdminAiLoyaltyRoute
   '/admin-ai-marketing': typeof AdminAiMarketingRoute
@@ -866,6 +884,7 @@ export interface FileRoutesById {
   '/api/public/hooks/customer-rx-notify': typeof ApiPublicHooksCustomerRxNotifyRoute
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
+  '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
   '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
@@ -896,6 +915,7 @@ export interface FileRouteTypes {
     | '/admin-ai-excel-import'
     | '/admin-ai-executive'
     | '/admin-ai-executive-dashboard'
+    | '/admin-ai-extractions'
     | '/admin-ai-inventory'
     | '/admin-ai-loyalty'
     | '/admin-ai-marketing'
@@ -964,6 +984,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/customer-rx-notify'
     | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/nightly-intel'
+    | '/api/public/hooks/prescription-extract'
     | '/api/public/hooks/rx-mirror'
     | '/api/public/hooks/rx-notify'
     | '/api/public/hooks/weekly-ai-enrich'
@@ -992,6 +1013,7 @@ export interface FileRouteTypes {
     | '/admin-ai-excel-import'
     | '/admin-ai-executive'
     | '/admin-ai-executive-dashboard'
+    | '/admin-ai-extractions'
     | '/admin-ai-inventory'
     | '/admin-ai-loyalty'
     | '/admin-ai-marketing'
@@ -1060,6 +1082,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/customer-rx-notify'
     | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/nightly-intel'
+    | '/api/public/hooks/prescription-extract'
     | '/api/public/hooks/rx-mirror'
     | '/api/public/hooks/rx-notify'
     | '/api/public/hooks/weekly-ai-enrich'
@@ -1088,6 +1111,7 @@ export interface FileRouteTypes {
     | '/admin-ai-excel-import'
     | '/admin-ai-executive'
     | '/admin-ai-executive-dashboard'
+    | '/admin-ai-extractions'
     | '/admin-ai-inventory'
     | '/admin-ai-loyalty'
     | '/admin-ai-marketing'
@@ -1156,6 +1180,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/customer-rx-notify'
     | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/nightly-intel'
+    | '/api/public/hooks/prescription-extract'
     | '/api/public/hooks/rx-mirror'
     | '/api/public/hooks/rx-notify'
     | '/api/public/hooks/weekly-ai-enrich'
@@ -1185,6 +1210,7 @@ export interface RootRouteChildren {
   AdminAiExcelImportRoute: typeof AdminAiExcelImportRoute
   AdminAiExecutiveRoute: typeof AdminAiExecutiveRoute
   AdminAiExecutiveDashboardRoute: typeof AdminAiExecutiveDashboardRoute
+  AdminAiExtractionsRoute: typeof AdminAiExtractionsRoute
   AdminAiInventoryRoute: typeof AdminAiInventoryRoute
   AdminAiLoyaltyRoute: typeof AdminAiLoyaltyRoute
   AdminAiMarketingRoute: typeof AdminAiMarketingRoute
@@ -1252,6 +1278,7 @@ export interface RootRouteChildren {
   ApiPublicHooksCustomerRxNotifyRoute: typeof ApiPublicHooksCustomerRxNotifyRoute
   ApiPublicHooksEventConsumerRoute: typeof ApiPublicHooksEventConsumerRoute
   ApiPublicHooksNightlyIntelRoute: typeof ApiPublicHooksNightlyIntelRoute
+  ApiPublicHooksPrescriptionExtractRoute: typeof ApiPublicHooksPrescriptionExtractRoute
   ApiPublicHooksRxMirrorRoute: typeof ApiPublicHooksRxMirrorRoute
   ApiPublicHooksRxNotifyRoute: typeof ApiPublicHooksRxNotifyRoute
   ApiPublicHooksWeeklyAiEnrichRoute: typeof ApiPublicHooksWeeklyAiEnrichRoute
@@ -1644,6 +1671,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAiInventoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin-ai-extractions': {
+      id: '/admin-ai-extractions'
+      path: '/admin-ai-extractions'
+      fullPath: '/admin-ai-extractions'
+      preLoaderRoute: typeof AdminAiExtractionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin-ai-executive-dashboard': {
       id: '/admin-ai-executive-dashboard'
       path: '/admin-ai-executive-dashboard'
@@ -1833,6 +1867,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksRxMirrorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/prescription-extract': {
+      id: '/api/public/hooks/prescription-extract'
+      path: '/api/public/hooks/prescription-extract'
+      fullPath: '/api/public/hooks/prescription-extract'
+      preLoaderRoute: typeof ApiPublicHooksPrescriptionExtractRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/nightly-intel': {
       id: '/api/public/hooks/nightly-intel'
       path: '/api/public/hooks/nightly-intel'
@@ -1956,6 +1997,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminAiExcelImportRoute: AdminAiExcelImportRoute,
   AdminAiExecutiveRoute: AdminAiExecutiveRoute,
   AdminAiExecutiveDashboardRoute: AdminAiExecutiveDashboardRoute,
+  AdminAiExtractionsRoute: AdminAiExtractionsRoute,
   AdminAiInventoryRoute: AdminAiInventoryRoute,
   AdminAiLoyaltyRoute: AdminAiLoyaltyRoute,
   AdminAiMarketingRoute: AdminAiMarketingRoute,
@@ -2023,6 +2065,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksCustomerRxNotifyRoute: ApiPublicHooksCustomerRxNotifyRoute,
   ApiPublicHooksEventConsumerRoute: ApiPublicHooksEventConsumerRoute,
   ApiPublicHooksNightlyIntelRoute: ApiPublicHooksNightlyIntelRoute,
+  ApiPublicHooksPrescriptionExtractRoute:
+    ApiPublicHooksPrescriptionExtractRoute,
   ApiPublicHooksRxMirrorRoute: ApiPublicHooksRxMirrorRoute,
   ApiPublicHooksRxNotifyRoute: ApiPublicHooksRxNotifyRoute,
   ApiPublicHooksWeeklyAiEnrichRoute: ApiPublicHooksWeeklyAiEnrichRoute,
