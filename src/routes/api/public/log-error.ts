@@ -59,6 +59,13 @@ export const Route = createFileRoute("/api/public/log-error")({
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: CORS }),
       POST: async ({ request }) => {
+        const ip = clientIp(request);
+        if (rateLimited(ip)) {
+          return Response.json(
+            { ok: false, error: "rate_limited" },
+            { status: 429, headers: { ...CORS, "Retry-After": "60" } },
+          );
+        }
         let body: Record<string, unknown> = {};
         try {
           body = (await request.json()) as Record<string, unknown>;
