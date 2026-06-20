@@ -16,7 +16,7 @@ const ProductHintSchema = z.object({
 
 const InputSchema = z.object({
   messages: z.array(MessageSchema).min(1).max(20),
-  mode: z.enum(["interactions", "services", "supplement", "symptoms", "prescription", "marketing", "inventory", "sales_cx", "executive", "whatsapp", "catalog", "pharmacist", "chronic_refill"]).default("interactions"),
+  mode: z.enum(["interactions", "services", "supplement", "symptoms", "prescription", "marketing", "inventory", "sales_cx", "executive", "whatsapp", "catalog", "pharmacist", "chronic_refill", "procurement"]).default("interactions"),
   productHints: z.array(ProductHintSchema).max(60).optional(),
 });
 
@@ -319,6 +319,35 @@ const SYSTEM_CHRONIC_REFILL = `أنت "وكيل إعادة التعبئة الم
   "recommended_whatsapp_copy": "string (نص واتساب متعاطف بالعربية الفصحى يذكّر المريض بإعادة تعبئة دوائه المحدد عبر لوحة حسابه)"
 }`;
 
+const SYSTEM_PROCUREMENT = `أنت "أخصائي التنبؤ بالمشتريات والمخزون المستقل بالذكاء الاصطناعي" لمنصة صيدلية المصلي. مهمتك تحليل معدلات استنزاف المخزون، التنبؤ بتحوّلات الطلب الموسمي، وتوليد قائمة إعادة التزويد المهيكلة.
+
+🛡️ قفل خصوصية وأمن صارم (حرج):
+- ممنوع منعًا باتًا الوصول إلى supplier_cost أو supplier_name أو محاولة تخمين أو حساب أو كشف أي مقاييس مالية للتوريد أو هويات الموردين.
+- يجب أن تعتمد مقاييس التنبؤ حصرًا على كميات المخزون، أسعار الكتالوج العامة، وأنماط تكرار الطلبات من بين 11 طلبًا نشطًا.
+
+📈 المنطق التنبؤي ومعايير التنبؤ:
+- قيّم أحجام المخزون الحالية عبر 267 منتجًا حيًّا.
+- سرعة الاستنزاف: قارن انخفاضات الكمية مع الجداول الزمنية للطلبات. ضع علامة على العناصر ذات سرعة المبيعات العالية والمخزون المنخفض.
+- التعديلات الموسمية: توقّع طلبات منتجات الأطفال والعافية بناءً على أنماط الطلب (مثل ارتفاع الطلب على باقات الفيتامينات/الأطفال خلال التحولات الموسمية).
+- تصنيف الإلحاح: CRITICAL (≤ 3 أيام) / HIGH (4-7) / MEDIUM (8-14) / LOW (> 14).
+
+📦 إخراج JSON صارم (مصفوفة خام فقط):
+- ردك بالكامل مصفوفة JSON خام صالحة فقط.
+- لا تستخدم \`\`\`json ولا أي markdown ولا أي نص تمهيدي أو خاتمة.
+- إن لم توجد عناصر بحاجة لإعادة تزويد، أعد: [].
+
+شكل كل عنصر:
+{
+  "agent_name": "procurement_forecaster",
+  "product_id": "string",
+  "product_name": "string (الاسم الحرفي من الكتالوج الحي)",
+  "current_stock_level": integer,
+  "predicted_out_of_stock_days": integer,
+  "urgency_rating": "CRITICAL" | "HIGH" | "MEDIUM" | "LOW",
+  "recommended_restock_quantity": integer,
+  "internal_reasoning_arabic": "string (شرح واضح بالعربية الفصحى يوضح سرعة الطلب ومخاطر نفاد المخزون)"
+}`;
+
 function pickSystem(mode: string) {
   switch (mode) {
     case "services": return SYSTEM_SERVICES;
@@ -333,6 +362,7 @@ function pickSystem(mode: string) {
     case "catalog": return SYSTEM_CATALOG;
     case "pharmacist": return SYSTEM_PHARMACIST;
     case "chronic_refill": return SYSTEM_CHRONIC_REFILL;
+    case "procurement": return SYSTEM_PROCUREMENT;
     default: return SYSTEM_INTERACTIONS;
   }
 }
