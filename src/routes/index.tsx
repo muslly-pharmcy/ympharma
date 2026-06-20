@@ -224,6 +224,13 @@ function Home() {
         <NunDivider />
 
         <section>
+          <SectionHeader title="تسوّق حسب الحالة" subtitle="منتجات مختارة لحالتك المرضية" />
+          <ConditionsStrip />
+        </section>
+
+        <NunDivider />
+
+        <section>
           <SectionHeader title="تسوّق حسب الفئة" subtitle="اختر القسم الذي يناسبك" />
           <div className="grid grid-cols-3 gap-3 sm:grid-cols-7">
             {cats.map((c) => (
