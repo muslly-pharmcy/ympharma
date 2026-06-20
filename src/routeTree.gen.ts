@@ -44,6 +44,7 @@ import { Route as AdminCampaignsRouteImport } from './routes/admin-campaigns'
 import { Route as AdminBundlesRouteImport } from './routes/admin-bundles'
 import { Route as AdminBannersRouteImport } from './routes/admin-banners'
 import { Route as AdminBackupsRouteImport } from './routes/admin-backups'
+import { Route as AdminAiMarketingRouteImport } from './routes/admin-ai-marketing'
 import { Route as AdminAgentsRouteImport } from './routes/admin-agents'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -249,6 +250,11 @@ const AdminBackupsRoute = AdminBackupsRouteImport.update({
   path: '/admin-backups',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAiMarketingRoute = AdminAiMarketingRouteImport.update({
+  id: '/admin-ai-marketing',
+  path: '/admin-ai-marketing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAgentsRoute = AdminAgentsRouteImport.update({
   id: '/admin-agents',
   path: '/admin-agents',
@@ -412,6 +418,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/admin-agents': typeof AdminAgentsRoute
+  '/admin-ai-marketing': typeof AdminAiMarketingRoute
   '/admin-backups': typeof AdminBackupsRoute
   '/admin-banners': typeof AdminBannersRoute
   '/admin-bundles': typeof AdminBundlesRoute
@@ -478,6 +485,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/admin-agents': typeof AdminAgentsRoute
+  '/admin-ai-marketing': typeof AdminAiMarketingRoute
   '/admin-backups': typeof AdminBackupsRoute
   '/admin-banners': typeof AdminBannersRoute
   '/admin-bundles': typeof AdminBundlesRoute
@@ -545,6 +553,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/admin-agents': typeof AdminAgentsRoute
+  '/admin-ai-marketing': typeof AdminAiMarketingRoute
   '/admin-backups': typeof AdminBackupsRoute
   '/admin-banners': typeof AdminBannersRoute
   '/admin-bundles': typeof AdminBundlesRoute
@@ -613,6 +622,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/admin-agents'
+    | '/admin-ai-marketing'
     | '/admin-backups'
     | '/admin-banners'
     | '/admin-bundles'
@@ -679,6 +689,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/admin-agents'
+    | '/admin-ai-marketing'
     | '/admin-backups'
     | '/admin-banners'
     | '/admin-bundles'
@@ -745,6 +756,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/admin-agents'
+    | '/admin-ai-marketing'
     | '/admin-backups'
     | '/admin-banners'
     | '/admin-bundles'
@@ -812,6 +824,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AdminAgentsRoute: typeof AdminAgentsRoute
+  AdminAiMarketingRoute: typeof AdminAiMarketingRoute
   AdminBackupsRoute: typeof AdminBackupsRoute
   AdminBannersRoute: typeof AdminBannersRoute
   AdminBundlesRoute: typeof AdminBundlesRoute
@@ -1121,6 +1134,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBackupsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin-ai-marketing': {
+      id: '/admin-ai-marketing'
+      path: '/admin-ai-marketing'
+      fullPath: '/admin-ai-marketing'
+      preLoaderRoute: typeof AdminAiMarketingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin-agents': {
       id: '/admin-agents'
       path: '/admin-agents'
@@ -1343,6 +1363,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AdminAgentsRoute: AdminAgentsRoute,
+  AdminAiMarketingRoute: AdminAiMarketingRoute,
   AdminBackupsRoute: AdminBackupsRoute,
   AdminBannersRoute: AdminBannersRoute,
   AdminBundlesRoute: AdminBundlesRoute,
