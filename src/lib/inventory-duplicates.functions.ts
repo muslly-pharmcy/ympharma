@@ -156,9 +156,11 @@ export const applyBulkAddStock = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase, context.userId);
     const rows = await fetchScope(context.supabase, data.scope);
     // Set audit context so the stock-change trigger picks up the reason/source.
-    await context.supabase.rpc("set_config" as never, {
-      key: "app.adjust_reason", value: data.reason, is_local: true,
-    } as never).catch(() => { /* optional rpc; trigger still logs with NULL reason */ });
+    try {
+      await context.supabase.rpc("set_config" as never, {
+        key: "app.adjust_reason", value: data.reason, is_local: true,
+      } as never);
+    } catch { /* optional rpc; trigger still logs with NULL reason */ }
 
     let applied = 0;
     for (const r of rows) {
