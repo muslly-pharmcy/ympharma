@@ -30,6 +30,7 @@ import { Route as AiPrescriptionRouteImport } from './routes/ai-prescription'
 import { Route as AiPharmacistRouteImport } from './routes/ai-pharmacist'
 import { Route as AiAssistantRouteImport } from './routes/ai-assistant'
 import { Route as AdminWorkforceRouteImport } from './routes/admin-workforce'
+import { Route as AdminTransfersRouteImport } from './routes/admin-transfers'
 import { Route as AdminSettingsRouteImport } from './routes/admin-settings'
 import { Route as AdminRxCheckRouteImport } from './routes/admin-rx-check'
 import { Route as AdminProductsRouteImport } from './routes/admin-products'
@@ -45,6 +46,7 @@ import { Route as AdminCommandRouteImport } from './routes/admin-command'
 import { Route as AdminClassificationsRouteImport } from './routes/admin-classifications'
 import { Route as AdminCampaignsRouteImport } from './routes/admin-campaigns'
 import { Route as AdminBundlesRouteImport } from './routes/admin-bundles'
+import { Route as AdminBranchesRouteImport } from './routes/admin-branches'
 import { Route as AdminBannersRouteImport } from './routes/admin-banners'
 import { Route as AdminBackupsRouteImport } from './routes/admin-backups'
 import { Route as AdminAutomationHubRouteImport } from './routes/admin-automation-hub'
@@ -198,6 +200,11 @@ const AdminWorkforceRoute = AdminWorkforceRouteImport.update({
   path: '/admin-workforce',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminTransfersRoute = AdminTransfersRouteImport.update({
+  id: '/admin-transfers',
+  path: '/admin-transfers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/admin-settings',
   path: '/admin-settings',
@@ -272,6 +279,11 @@ const AdminCampaignsRoute = AdminCampaignsRouteImport.update({
 const AdminBundlesRoute = AdminBundlesRouteImport.update({
   id: '/admin-bundles',
   path: '/admin-bundles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminBranchesRoute = AdminBranchesRouteImport.update({
+  id: '/admin-branches',
+  path: '/admin-branches',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminBannersRoute = AdminBannersRouteImport.update({
@@ -545,6 +557,7 @@ export interface FileRoutesByFullPath {
   '/admin-automation-hub': typeof AdminAutomationHubRoute
   '/admin-backups': typeof AdminBackupsRoute
   '/admin-banners': typeof AdminBannersRoute
+  '/admin-branches': typeof AdminBranchesRoute
   '/admin-bundles': typeof AdminBundlesRoute
   '/admin-campaigns': typeof AdminCampaignsRoute
   '/admin-classifications': typeof AdminClassificationsRoute
@@ -560,6 +573,7 @@ export interface FileRoutesByFullPath {
   '/admin-products': typeof AdminProductsRoute
   '/admin-rx-check': typeof AdminRxCheckRoute
   '/admin-settings': typeof AdminSettingsRoute
+  '/admin-transfers': typeof AdminTransfersRoute
   '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
   '/ai-pharmacist': typeof AiPharmacistRoute
@@ -630,6 +644,7 @@ export interface FileRoutesByTo {
   '/admin-automation-hub': typeof AdminAutomationHubRoute
   '/admin-backups': typeof AdminBackupsRoute
   '/admin-banners': typeof AdminBannersRoute
+  '/admin-branches': typeof AdminBranchesRoute
   '/admin-bundles': typeof AdminBundlesRoute
   '/admin-campaigns': typeof AdminCampaignsRoute
   '/admin-classifications': typeof AdminClassificationsRoute
@@ -645,6 +660,7 @@ export interface FileRoutesByTo {
   '/admin-products': typeof AdminProductsRoute
   '/admin-rx-check': typeof AdminRxCheckRoute
   '/admin-settings': typeof AdminSettingsRoute
+  '/admin-transfers': typeof AdminTransfersRoute
   '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
   '/ai-pharmacist': typeof AiPharmacistRoute
@@ -716,6 +732,7 @@ export interface FileRoutesById {
   '/admin-automation-hub': typeof AdminAutomationHubRoute
   '/admin-backups': typeof AdminBackupsRoute
   '/admin-banners': typeof AdminBannersRoute
+  '/admin-branches': typeof AdminBranchesRoute
   '/admin-bundles': typeof AdminBundlesRoute
   '/admin-campaigns': typeof AdminCampaignsRoute
   '/admin-classifications': typeof AdminClassificationsRoute
@@ -731,6 +748,7 @@ export interface FileRoutesById {
   '/admin-products': typeof AdminProductsRoute
   '/admin-rx-check': typeof AdminRxCheckRoute
   '/admin-settings': typeof AdminSettingsRoute
+  '/admin-transfers': typeof AdminTransfersRoute
   '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
   '/ai-pharmacist': typeof AiPharmacistRoute
@@ -803,6 +821,7 @@ export interface FileRouteTypes {
     | '/admin-automation-hub'
     | '/admin-backups'
     | '/admin-banners'
+    | '/admin-branches'
     | '/admin-bundles'
     | '/admin-campaigns'
     | '/admin-classifications'
@@ -818,6 +837,7 @@ export interface FileRouteTypes {
     | '/admin-products'
     | '/admin-rx-check'
     | '/admin-settings'
+    | '/admin-transfers'
     | '/admin-workforce'
     | '/ai-assistant'
     | '/ai-pharmacist'
@@ -888,6 +908,7 @@ export interface FileRouteTypes {
     | '/admin-automation-hub'
     | '/admin-backups'
     | '/admin-banners'
+    | '/admin-branches'
     | '/admin-bundles'
     | '/admin-campaigns'
     | '/admin-classifications'
@@ -903,6 +924,7 @@ export interface FileRouteTypes {
     | '/admin-products'
     | '/admin-rx-check'
     | '/admin-settings'
+    | '/admin-transfers'
     | '/admin-workforce'
     | '/ai-assistant'
     | '/ai-pharmacist'
@@ -973,6 +995,7 @@ export interface FileRouteTypes {
     | '/admin-automation-hub'
     | '/admin-backups'
     | '/admin-banners'
+    | '/admin-branches'
     | '/admin-bundles'
     | '/admin-campaigns'
     | '/admin-classifications'
@@ -988,6 +1011,7 @@ export interface FileRouteTypes {
     | '/admin-products'
     | '/admin-rx-check'
     | '/admin-settings'
+    | '/admin-transfers'
     | '/admin-workforce'
     | '/ai-assistant'
     | '/ai-pharmacist'
@@ -1059,6 +1083,7 @@ export interface RootRouteChildren {
   AdminAutomationHubRoute: typeof AdminAutomationHubRoute
   AdminBackupsRoute: typeof AdminBackupsRoute
   AdminBannersRoute: typeof AdminBannersRoute
+  AdminBranchesRoute: typeof AdminBranchesRoute
   AdminBundlesRoute: typeof AdminBundlesRoute
   AdminCampaignsRoute: typeof AdminCampaignsRoute
   AdminClassificationsRoute: typeof AdminClassificationsRoute
@@ -1074,6 +1099,7 @@ export interface RootRouteChildren {
   AdminProductsRoute: typeof AdminProductsRoute
   AdminRxCheckRoute: typeof AdminRxCheckRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminTransfersRoute: typeof AdminTransfersRoute
   AdminWorkforceRoute: typeof AdminWorkforceRoute
   AiAssistantRoute: typeof AiAssistantRoute
   AiPharmacistRoute: typeof AiPharmacistRoute
@@ -1274,6 +1300,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminWorkforceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin-transfers': {
+      id: '/admin-transfers'
+      path: '/admin-transfers'
+      fullPath: '/admin-transfers'
+      preLoaderRoute: typeof AdminTransfersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin-settings': {
       id: '/admin-settings'
       path: '/admin-settings'
@@ -1377,6 +1410,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-bundles'
       fullPath: '/admin-bundles'
       preLoaderRoute: typeof AdminBundlesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-branches': {
+      id: '/admin-branches'
+      path: '/admin-branches'
+      fullPath: '/admin-branches'
+      preLoaderRoute: typeof AdminBranchesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-banners': {
@@ -1742,6 +1782,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminAutomationHubRoute: AdminAutomationHubRoute,
   AdminBackupsRoute: AdminBackupsRoute,
   AdminBannersRoute: AdminBannersRoute,
+  AdminBranchesRoute: AdminBranchesRoute,
   AdminBundlesRoute: AdminBundlesRoute,
   AdminCampaignsRoute: AdminCampaignsRoute,
   AdminClassificationsRoute: AdminClassificationsRoute,
@@ -1757,6 +1798,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminProductsRoute: AdminProductsRoute,
   AdminRxCheckRoute: AdminRxCheckRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminTransfersRoute: AdminTransfersRoute,
   AdminWorkforceRoute: AdminWorkforceRoute,
   AiAssistantRoute: AiAssistantRoute,
   AiPharmacistRoute: AiPharmacistRoute,
