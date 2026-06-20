@@ -364,6 +364,15 @@ export function CopilotPanels() {
               {busy === "enrich" ? <Loader2 className="size-3.5 animate-spin" /> : <Wand2 className="size-3.5" />}
               إثراء العملاء بالذكاء
             </button>
+            <button
+              onClick={onRotateCron}
+              disabled={busy === "rotate"}
+              title="يُحدّث المهام المجدولة لتستخدم سر CRON_SECRET الحالي"
+              className="flex items-center gap-1.5 rounded-xl border border-border bg-background px-3 py-1.5 text-xs font-bold hover:bg-accent disabled:opacity-50"
+            >
+              {busy === "rotate" ? <Loader2 className="size-3.5 animate-spin" /> : <ShieldCheck className="size-3.5" />}
+              تدوير سر الجدولة
+            </button>
           </div>
 
           {!report ? (
