@@ -1,137 +1,66 @@
-# AI Workforce Activation — Implementation Plan
+المراحل المتبقية ضخمة (3 إلى 10). لتجنّب تغييرات سطحية أو كسر النظام، سأنفّذها كـ **6 دفعات متتالية**، كل دفعة قابلة للمراجعة والتراجع. الواتساب سيبقى كما هو يعمل (بدون تطوير) كما طلبت.
 
-Goal: take the 8 existing personas (CEO, CTO, Sales, Inventory, Operations, Marketing, CX, BI) and ship them as autonomous workers that run on a cron, write real recommendations to dedicated tables, score KPIs, log every execution to `agent_runs`, and surface in a workforce dashboard.
+## الوضع الحالي (مفحوص)
 
-No new persona definitions. No LLM rewrite. Reuse existing tables and the existing cron auth (`x-cron-secret`) so we don't double the secret surface.
+موجود فعلياً في قاعدة البيانات والكود:
+- `agent_runs` + `agent_actions` (جدولا الرصد المركزي) ✓
+- Triggers: `intercept_new_prescription`, `intercept_new_order` تكتب في `agent_actions` تلقائياً ✓
+- `enqueue_chronic_refill_action()` RPC للاحتفاظ بالمرضى ✓
+- `marketing_queue`, `staff_alerts`, `operations_alerts`, `email_send_log`, `error_logs`, `system_incidents` ✓
+- 9 وكلاء AI (مسارات `/api/public/hooks/agents/*`) ✓
+- Cron hooks: `chronic-refills`, `nightly-intel`, `alerts-worker`, `weekly-*`, `rx-mirror` (جديد) ✓
+- `admin-ai-orchestrator.tsx` لوحة عرض ✓
 
----
+ناقص أو غير مفعّل:
+- لا يوجد جدول `agent_events` (event bus قابل لإعادة التشغيل)
+- `agent_actions` يُكتب فيه من 2 trigger فقط — باقي الوكلاء لا يسجلون
+- لا توجد لوحة موحّدة لـ `agent_actions` (التنفيذ/الموافقة/إعادة المحاولة)
+- لا توجد حلقة `reserve_stock` فعلية على `orders` (الـ trigger يكتب action فقط، لا ينقص المخزون)
+- لا قياسات أداء (slow queries، latency)
+- لا تقرير production-readiness نهائي
 
-## 1. Database (single migration)
+## الدفعات
 
-### New tables (all RLS-enabled, admin/owner read, service_role write)
+### الدفعة 1 — Phase 3 إكمال: Observability Wrapper موحّد
+- إضافة helper `logAgentAction()` في `src/lib/agent-actions.ts` يكتب كل دخول/خروج/خطأ.
+- تغليف الـ 9 endpoints في `api/public/hooks/agents/*` به (تعديل ميكانيكي، لا منطق جديد).
+- نتيجة: كل تشغيل وكيل يخلق صف في `agent_actions` تلقائياً.
 
-- `public.agent_recommendations`
-  - `agent_name`, `category` (`sales`/`inventory`/`cx`/`marketing`/`bi`), `title`, `rationale`, `payload jsonb`, `impact_estimate numeric`, `confidence int`, `status` (`open|acted|dismissed`), `created_at`
-- `public.agent_kpis`
-  - `agent_name`, `metric` (`revenue_growth_score` etc.), `score numeric` 0–100, `details jsonb`, `as_of date`, unique(`agent_name`,`metric`,`as_of`)
-- `public.system_incidents`
-  - `source` (`cron`/`api`/`runtime`), `severity`, `title`, `summary`, `evidence jsonb`, `opened_at`, `resolved_at`, `status`
-- `public.operations_alerts`
-  - `kind` (`sla_breach`/`pending_rx`/`order_delay`), `ref_id`, `summary`, `severity`, `created_at`, `resolved_at`
+### الدفعة 2 — Phase 4 إكمال: لوحة Automation Hub التشغيلية
+- صفحة `/admin-automation-hub` تعرض `agent_actions` مع فلاتر (الحالة/الأولوية/الوكيل/الـ pipeline).
+- أزرار: موافقة (Execute) / تخطي (Skip) / إعادة محاولة.
+- اعتماد على RLS موجود + role check.
 
-Extend `agent_runs` (already exists, 11 cols) — add missing columns if absent: `findings_count int`, `recommendations_count int`, `execution_time_ms int`. ALTER ADD COLUMN IF NOT EXISTS.
+### الدفعة 3 — Phase 5: Event Bus
+- migration: جدول `agent_events` (event_name, entity_type, entity_id, payload, occurred_at, processed_at, retry_count).
+- دوال DB لإصدار حدث `emit_event()` + view `unprocessed_events`.
+- ربط 3 أحداث أساسية: `PrescriptionUploaded`, `OrderCreated`, `RefillDue` عبر triggers موجودة.
+- لا processor خلفي في هذه الدفعة (للحفاظ على البساطة) — العرض فقط.
 
-### Analysis RPCs (SECURITY DEFINER, owner/admin only via has_role check at top)
+### الدفعة 4 — Phase 6: حلقة Inventory الفعلية
+- RPC `reserve_order_stock(order_id)` ينقص `products.stock` ذرّياً مع تسجيل في `agent_actions` (action_type=`RESERVE_STOCK`).
+- تحديث trigger `intercept_new_order` ليستدعي RPC ويضع الحالة `EXECUTED` أو `FAILED`.
+- تنبيه `staff_alerts` عند `stock < min_stock`.
 
-One RPC per worker — pure SQL, no LLM. Each returns `jsonb` `{findings, recommendations, kpis}` AND writes rows into `agent_recommendations` / `agent_kpis` / output table. The worker route just calls the RPC and logs the summary to `agent_runs`.
+### الدفعة 5 — Phase 7+8: Retention + Notifications Foundation
+- تفعيل cron `chronic-refills` (موجود لكن نتأكد من جدولته).
+- إضافة جدول `internal_notifications` + helper `notify_admins(title, body, severity)`.
+- ربط فشل `agent_actions` و`uptime_incidents` به (بديل WhatsApp).
 
-- `run_ceo_worker()` → reads `orders`, `products`, `customer_scores`; computes WoW revenue, gross margin proxy, top-growth categories; inserts row in `executive_reports`; scores `revenue_growth_score` + `profitability_score`.
-- `run_cto_worker()` → reads `error_logs` (last 24h grouped), `uptime_incidents` (open), `cron.job_run_details` (failed last 24h); opens `system_incidents` for new clusters (dedupe by hash); scores `uptime_score` (from uptime_checks) + `system_health_score` (inverse of error rate).
-- `run_sales_worker()` → uses existing `auto_bundle_candidates` for cross-sell lift; recent order line co-occurrence for upsell; inserts top-N into `agent_recommendations` (category `sales`); scores `cross_sell_score` + `upsell_score`.
-- `run_inventory_worker()` → reads `products.stock`, 14-day consumption velocity from `orders`/items; predicts days-to-stockout; flags items <7 days; inserts reorder recommendations; scores `stock_health_score` + `stockout_risk_score`.
-- `run_operations_worker()` → reads `orders` where `status IN ('pending','processing')` older than SLA thresholds (configurable: 2h pending, 24h processing); writes to `operations_alerts` (dedupe by order_id+kind); scores `sla_score` + `fulfillment_score`.
-- `run_marketing_worker()` → dormant customers (no order >60d), chronic segments from `customer_scores`; calls existing `enqueue_chronic_refills` for chronic; inserts campaign blueprints into `agent_recommendations` (category `marketing`); scores `engagement_score` + `campaign_readiness_score`.
-- `run_cx_worker()` → reads `customer_scores` (churn signals), enrichment data; recommends retention actions (WhatsApp template + discount code); scores `retention_score` + `churn_risk_score`.
-- `run_bi_worker()` → reads `revenue_by_condition`, weekly trend, declining_products; writes consolidated `business_insights` row into `agent_recommendations` (category `bi`); naive 7-day linear forecast; scores `forecast_accuracy_score` (vs prior forecast) + `growth_opportunity_score`.
+### الدفعة 6 — Phase 9+10: Performance Audit + Production Report
+- فحص slow queries عبر `pg_stat_statements`، إضافة indexes ناقصة.
+- توليد `docs/production-readiness-final-2026-06.md` يحوي: حالة كل معيار، الأدلة، المخاطر المتبقية، Mermaid diagrams (architecture/DB/agents/event flow).
+- لا تغييرات كود في هذه الدفعة، توثيق فقط.
 
-All RPCs are idempotent for a given day (UPSERT by `(agent_name, as_of)` for KPIs; dedupe recommendations by title-hash + day).
+## التفاصيل التقنية
 
----
+- كل migration تحترم قاعدة GRANT + RLS + service_role.
+- لا تعديل على ملفات `whatsapp.*` أو القنوات الخارجية.
+- كل دفعة تنتهي بتشغيل اختبار يدوي مختصر (psql counts، استدعاء endpoint).
+- زمن متوقع لكل دفعة: 1-3 ملفات + migration واحد كحد أقصى.
 
-## 2. Worker hook routes
+## ما أحتاجه منك
 
-Under `src/routes/api/public/hooks/agents/`:
-
-```
-ceo.ts  cto.ts  sales.ts  inventory.ts  operations.ts  marketing.ts  cx.ts  bi.ts
-```
-
-Each file follows the same shape:
-
-```ts
-verifyCronSecret(request)               // existing helper
-const started = Date.now()
-const runId = insert agent_runs {agent_name, kind:'scheduled', status:'running', started_at}
-try {
-  const { data } = await supabaseAdmin.rpc(`run_${name}_worker`)
-  update agent_runs {status:'ok', finished_at, summary, details:data,
-                     findings_count, recommendations_count,
-                     execution_time_ms}
-} catch (e) {
-  update agent_runs {status:'error', finished_at, summary: e.message}
-}
-```
-
-GET returns `{ok:true, hint:"POST with x-cron-secret"}` for manual probing.
-
----
-
-## 3. Cron schedule
-
-Extend `public.rotate_cron_secret` to register/unschedule 8 new jobs alongside the existing ones:
-
-| Job | Cron (UTC) | Endpoint |
-|---|---|---|
-| muslly-agent-ceo | `0 4 * * *` (07:00 Sana'a) | /api/public/hooks/agents/ceo |
-| muslly-agent-cto | `*/15 * * * *` | /api/public/hooks/agents/cto |
-| muslly-agent-sales | `30 4 * * *` | /api/public/hooks/agents/sales |
-| muslly-agent-inventory | `0 5 * * *` | /api/public/hooks/agents/inventory |
-| muslly-agent-operations | `*/10 * * * *` | /api/public/hooks/agents/operations |
-| muslly-agent-marketing | `0 6 * * *` | /api/public/hooks/agents/marketing |
-| muslly-agent-cx | `30 6 * * *` | /api/public/hooks/agents/cx |
-| muslly-agent-bi | `0 7 * * *` | /api/public/hooks/agents/bi |
-
-User runs **"تدوير سر الجدولة"** once to register.
-
-For the 24-hour success criterion, expose a `run_all_agents_now()` server fn callable from the dashboard ("تشغيل كل الوكلاء الآن") so the user can produce the first day's `agent_runs` rows immediately without waiting for cron.
-
----
-
-## 4. Workforce Dashboard
-
-New route `src/routes/admin-workforce.tsx` (admin-gated, RTL, matches existing admin styling).
-
-Per-agent card grid (8 cards) showing:
-
-- Agent name + icon + role
-- Last run: timestamp + status badge (ok/error/running)
-- Findings count, recommendations count, exec time
-- Latest 2 KPI scores with mini bar
-- "تشغيل الآن" button → `runAgentNow({ data:{ agent } })` server fn (admin only)
-- "عرض التوصيات" → opens drawer with `agent_recommendations` for that agent
-
-Footer: aggregate readiness score = avg of all agent latest KPI scores.
-
-Link added to `/admin-command`.
-
----
-
-## 5. Server fns (admin)
-
-In `src/lib/pharmacy-copilot.functions.ts`:
-
-- `runAgentNow({agent})` — admin-only, executes the agent's RPC inline and logs to agent_runs (same code path as the hook).
-- `listAgentWorkforce()` — returns `{ agents: [{name, last_run, kpis, counts}], readiness_score }`.
-- `listAgentRecommendations({agent, limit})`.
-
----
-
-## 6. Out of scope (explicit)
-
-- No new LLM personas; the existing `askExecutiveCopilot` Q&A stays.
-- No edits to the Copilot prompt set.
-- No changes to existing chronic-refills / weekly-exec-report / nightly-intel jobs — the BI/CEO/Marketing workers complement them, not replace them.
-- No new secrets (reuse `CRON_SECRET`).
-- No mock data — every RPC reads live tables; if a table is empty, the worker writes 0 findings and a KPI score of `null` so it's visibly empty rather than fake.
-
----
-
-## 7. Verification (after build)
-
-1. Apply migration → check linter clean.
-2. Click "تدوير سر الجدولة" → confirm 8 new cron jobs present in `cron.job`.
-3. Click "تشغيل كل الوكلاء الآن" → confirm 8 fresh `agent_runs` rows (status `ok` or `error` with real message — no silent success).
-4. Open `/admin-workforce` → 8 cards populated, readiness score displayed.
-5. Re-run audit query: `SELECT agent_name, COUNT(*), MAX(started_at) FROM agent_runs GROUP BY 1` should show 8 distinct agents within 24h window.
-
-Estimated readiness after this wave: ~85/100 (the missing 15 is true ML forecasting, supplier-API integration, and per-agent A/B feedback loops — flagged but not built).
+- موافقة على هذه البنية، **والبدء بالدفعة 1**.
+- إذا كنت تريد تخطي/دمج/تأجيل دفعة معينة، أخبرني الآن.
+- بعد كل دفعة، أتوقف للمراجعة قبل الانتقال للتالية (لا أُنفّذ الست دفعات دفعة واحدة).
