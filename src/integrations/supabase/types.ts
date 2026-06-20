@@ -745,6 +745,39 @@ export type Database = {
           },
         ]
       }
+      customer_notification_preferences: {
+        Row: {
+          created_at: string
+          last_opt_in_at: string | null
+          last_opt_out_at: string | null
+          opt_out_token: string
+          phone: string
+          prescription_notifications_enabled: boolean
+          updated_at: string
+          whatsapp_enabled: boolean
+        }
+        Insert: {
+          created_at?: string
+          last_opt_in_at?: string | null
+          last_opt_out_at?: string | null
+          opt_out_token?: string
+          phone: string
+          prescription_notifications_enabled?: boolean
+          updated_at?: string
+          whatsapp_enabled?: boolean
+        }
+        Update: {
+          created_at?: string
+          last_opt_in_at?: string | null
+          last_opt_out_at?: string | null
+          opt_out_token?: string
+          phone?: string
+          prescription_notifications_enabled?: boolean
+          updated_at?: string
+          whatsapp_enabled?: boolean
+        }
+        Relationships: []
+      }
       customer_profiles: {
         Row: {
           ai_insight: string | null
@@ -2846,6 +2879,105 @@ export type Database = {
           },
         ]
       }
+      whatsapp_notification_dispatch: {
+        Row: {
+          attempts: number
+          correlation_id: string | null
+          created_at: string
+          duration_ms: number | null
+          event_id: string
+          event_name: string
+          id: string
+          last_error: string | null
+          max_attempts: number
+          next_attempt_at: string
+          prescription_id: string | null
+          recipient_phone: string
+          rendered_body: string | null
+          sent_at: string | null
+          status: string
+          template_id: string
+          updated_at: string
+          wamid: string | null
+        }
+        Insert: {
+          attempts?: number
+          correlation_id?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          event_id: string
+          event_name: string
+          id?: string
+          last_error?: string | null
+          max_attempts?: number
+          next_attempt_at?: string
+          prescription_id?: string | null
+          recipient_phone: string
+          rendered_body?: string | null
+          sent_at?: string | null
+          status?: string
+          template_id: string
+          updated_at?: string
+          wamid?: string | null
+        }
+        Update: {
+          attempts?: number
+          correlation_id?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          event_id?: string
+          event_name?: string
+          id?: string
+          last_error?: string | null
+          max_attempts?: number
+          next_attempt_at?: string
+          prescription_id?: string | null
+          recipient_phone?: string
+          rendered_body?: string | null
+          sent_at?: string | null
+          status?: string
+          template_id?: string
+          updated_at?: string
+          wamid?: string | null
+        }
+        Relationships: []
+      }
+      whatsapp_notification_templates: {
+        Row: {
+          body_template: string
+          created_at: string
+          description: string | null
+          enabled: boolean
+          event_name: string
+          id: string
+          updated_at: string
+          updated_by: string | null
+          variables: string[]
+        }
+        Insert: {
+          body_template: string
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          event_name: string
+          id: string
+          updated_at?: string
+          updated_by?: string | null
+          variables?: string[]
+        }
+        Update: {
+          body_template?: string
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          event_name?: string
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+          variables?: string[]
+        }
+        Relationships: []
+      }
     }
     Views: {
       pending_admin_notifications: {
@@ -2947,6 +3079,19 @@ export type Database = {
           payload?: Json | null
           retry_count?: number | null
           source?: string | null
+        }
+        Relationships: []
+      }
+      whatsapp_notification_health: {
+        Row: {
+          avg_attempts: number | null
+          avg_duration_ms: number | null
+          cnt: number | null
+          dead_cnt: number | null
+          event_name: string | null
+          hour: string | null
+          max_attempts_seen: number | null
+          status: string | null
         }
         Relationships: []
       }
@@ -3096,6 +3241,35 @@ export type Database = {
           source: string
         }[]
       }
+      claim_customer_rx_notifications: {
+        Args: { _limit?: number }
+        Returns: {
+          attempts: number
+          correlation_id: string | null
+          created_at: string
+          duration_ms: number | null
+          event_id: string
+          event_name: string
+          id: string
+          last_error: string | null
+          max_attempts: number
+          next_attempt_at: string
+          prescription_id: string | null
+          recipient_phone: string
+          rendered_body: string | null
+          sent_at: string | null
+          status: string
+          template_id: string
+          updated_at: string
+          wamid: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "whatsapp_notification_dispatch"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       commit_transfer_receipt: {
         Args: { _transfer_id: string }
         Returns: string
@@ -3117,6 +3291,14 @@ export type Database = {
       create_scheduled_backup: { Args: { _kind: string }; Returns: string }
       cto_health: { Args: never; Returns: Json }
       current_inventory_write_mode: { Args: never; Returns: string }
+      customer_notification_get_status: {
+        Args: { _token: string }
+        Returns: Json
+      }
+      customer_notification_set_optout: {
+        Args: { _opt_out: boolean; _token: string }
+        Returns: Json
+      }
       customers_for_enrichment: {
         Args: { _limit?: number }
         Returns: {
@@ -3271,6 +3453,19 @@ export type Database = {
       }
       log_inventory_shadow: {
         Args: { _legacy_id: number; _order_id: string; _requested_qty: number }
+        Returns: undefined
+      }
+      mark_customer_rx_notification_failed: {
+        Args: { _base_seconds?: number; _error: string; _id: string }
+        Returns: Json
+      }
+      mark_customer_rx_notification_sent: {
+        Args: {
+          _duration_ms: number
+          _id: string
+          _rendered_body: string
+          _wamid: string
+        }
         Returns: undefined
       }
       mark_event_processed: {
