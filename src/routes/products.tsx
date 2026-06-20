@@ -209,13 +209,43 @@ function ProductsPage() {
           </div>
         </div>
 
-        {visible.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-card py-16 text-center text-muted-foreground">لا توجد نتائج مطابقة</div>
-        ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {visible.map((p) => <ProductCard key={p.id} product={p} />)}
-          </div>
-        )}
+        <ProductGrid visible={visible} />
+      </main>
+      <SiteFooter />
+    </div>
+  );
+}
+
+function ProductGrid({ visible }: { visible: ReturnType<typeof Array.prototype.slice> extends infer T ? any[] : never }) {
+  const [count, setCount] = useState(PAGE_SIZE);
+  // Reset paging whenever the filtered set changes (new filter/search/sort).
+  useEffect(() => { setCount(PAGE_SIZE); }, [visible]);
+
+  if (visible.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-border bg-card py-16 text-center text-muted-foreground">لا توجد نتائج مطابقة</div>
+    );
+  }
+  const shown = visible.slice(0, count);
+  const remaining = visible.length - shown.length;
+  return (
+    <>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        {shown.map((p) => <ProductCard key={p.id} product={p} />)}
+      </div>
+      {remaining > 0 && (
+        <div className="flex justify-center pt-2">
+          <button
+            onClick={() => setCount((c) => c + PAGE_SIZE)}
+            className="rounded-xl bg-secondary px-5 py-2.5 text-sm font-bold text-secondary-foreground hover:bg-accent"
+          >
+            تحميل المزيد ({Math.min(PAGE_SIZE, remaining)} من {remaining})
+          </button>
+        </div>
+      )}
+    </>
+  );
+}
       </main>
       <SiteFooter />
     </div>
