@@ -2678,6 +2678,13 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      detect_stale_transfers: {
+        Args: { _stale_minutes?: number }
+        Returns: {
+          alerts_created: number
+          alerts_updated: number
+        }[]
+      }
       emit_agent_event: {
         Args: {
           _entity_id?: string
