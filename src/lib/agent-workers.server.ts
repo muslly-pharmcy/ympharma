@@ -1,6 +1,7 @@
 // Shared worker runner for agent hook routes.
-// Calls the matching `run_<agent>_worker()` RPC, writes an agent_runs row,
-// and returns a JSON Response.
+// Writes BOTH an `agent_runs` row (observability for every hook tick) AND,
+// when the RPC returns recommendations, one `agent_actions` row per agent run
+// (centralized audit ledger consumed by /admin-automation-hub).
 
 import { verifyCronSecret } from "@/lib/cron-auth.server";
 
@@ -17,6 +18,18 @@ const RPC_BY_AGENT: Record<AgentName, string> = {
   bi: "run_bi_worker",
 };
 
+// Default pipeline + priority per agent (used when the agent doesn't supply its own).
+const DEFAULTS_BY_AGENT: Record<AgentName, { pipeline: string; priority: string }> = {
+  ceo: { pipeline: "MARKETING_QUEUE", priority: "MEDIUM" },
+  cto: { pipeline: "INVENTORY", priority: "MEDIUM" },
+  sales: { pipeline: "ORDERS", priority: "HIGH" },
+  inventory: { pipeline: "INVENTORY", priority: "HIGH" },
+  operations: { pipeline: "ORDERS", priority: "MEDIUM" },
+  marketing: { pipeline: "MARKETING_QUEUE", priority: "MEDIUM" },
+  cx: { pipeline: "MARKETING_QUEUE", priority: "MEDIUM" },
+  bi: { pipeline: "INVENTORY", priority: "LOW" },
+};
+
 export async function runAgentHook(request: Request, agent: AgentName, kind: "scheduled" | "manual" = "scheduled"): Promise<Response> {
   const denied = verifyCronSecret(request);
   if (denied) return denied;
@@ -25,7 +38,6 @@ export async function runAgentHook(request: Request, agent: AgentName, kind: "sc
   const started = Date.now();
   const startedAt = new Date().toISOString();
 
-  // Open a running row
   const { data: runRow, error: runErr } = await supabaseAdmin
     .from("agent_runs")
     .insert({ agent, kind, status: "running", started_at: startedAt })
@@ -45,6 +57,7 @@ export async function runAgentHook(request: Request, agent: AgentName, kind: "sc
     const summary = (payload.summary as string) ?? `agent ${agent} completed`;
     const findings = Number(payload.findings_count ?? 0);
     const recs = Number(payload.recommendations_count ?? 0);
+    const executionMs = Date.now() - started;
 
     await supabaseAdmin
       .from("agent_runs")
@@ -55,9 +68,38 @@ export async function runAgentHook(request: Request, agent: AgentName, kind: "sc
         details: payload as never,
         findings_count: findings,
         recommendations_count: recs,
-        execution_time_ms: Date.now() - started,
+        execution_time_ms: executionMs,
       })
       .eq("id", runId);
+
+    // Write an agent_actions ledger row ONLY when this run produced
+    // recommendations — keeps the action queue actionable, not a log dump.
+    if (recs > 0) {
+      const defaults = DEFAULTS_BY_AGENT[agent];
+      const actionType = (payload.action_type as string) ?? `${agent.toUpperCase()}_RECOMMENDATION`;
+      const arabic = (payload.compiled_arabic_output as string) ?? summary;
+      const { error: actErr } = await supabaseAdmin
+        .from("agent_actions")
+        .insert({
+          agent_name: agent,
+          originating_agent: agent as never,
+          target_pipeline: ((payload.target_pipeline as string) ?? defaults.pipeline) as never,
+          priority_level: (payload.priority_level as string) ?? defaults.priority,
+          action_type: actionType,
+          payload: { run_id: runId, findings, recommendations: recs, source: "hook", details: payload } as never,
+          status: "pending",
+          execution_status: "PENDING_APPROVAL" as never,
+          compiled_arabic_output: arabic,
+        } as never);
+      if (actErr) {
+        // Don't fail the whole hook — observability failure is non-fatal.
+        await supabaseAdmin.from("error_logs").insert({
+          source: `agent-actions-insert/${agent}`,
+          message: actErr.message,
+          metadata: { run_id: runId } as never,
+        } as never).then(() => null, () => null);
+      }
+    }
 
     return new Response(
       JSON.stringify({ ok: true, agent, run_id: runId, findings, recommendations: recs, summary, details: payload }),
@@ -65,17 +107,33 @@ export async function runAgentHook(request: Request, agent: AgentName, kind: "sc
     );
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
+    const executionMs = Date.now() - started;
     await supabaseAdmin
       .from("agent_runs")
       .update({
         status: "error",
         finished_at: new Date().toISOString(),
         summary: msg,
-        execution_time_ms: Date.now() - started,
+        execution_time_ms: executionMs,
       })
       .eq("id", runId);
+    // Audit ledger: record the failed run as a FAILED action so admins see it.
+    const defaults = DEFAULTS_BY_AGENT[agent];
+    await supabaseAdmin.from("agent_actions").insert({
+      agent_name: agent,
+      originating_agent: agent as never,
+      target_pipeline: defaults.pipeline as never,
+      priority_level: "HIGH",
+      action_type: `${agent.toUpperCase()}_FAILURE`,
+      payload: { run_id: runId, source: "hook" } as never,
+      status: "failed",
+      execution_status: "FAILED" as never,
+      compiled_arabic_output: `فشل تشغيل وكيل ${agent}: ${msg}`,
+      error_message: msg,
+    } as never).then(() => null, () => null);
     return new Response(JSON.stringify({ ok: false, agent, run_id: runId, error: msg }), {
       status: 500, headers: { "Content-Type": "application/json" },
     });
   }
 }
+
