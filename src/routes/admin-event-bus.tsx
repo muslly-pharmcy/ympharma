@@ -3,7 +3,7 @@ import { AdminGate } from "@/components/admin/AdminGate";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listAgentEvents, agentEventStats, markAgentEventProcessed, installEventConsumerSchedule, getEventConsumerSchedule, listScheduleLog } from "@/lib/event-bus.functions";
+import { listAgentEvents, agentEventStats, markAgentEventProcessed, installEventConsumerSchedule, getEventConsumerSchedule, listScheduleLog, listThrottlingHits } from "@/lib/event-bus.functions";
 
 export const Route = createFileRoute("/admin-event-bus")({
   head: () => ({ meta: [{ title: "Event Bus — Admin" }] }),
@@ -23,6 +23,7 @@ function EventBusPage() {
   const installSchedule = useServerFn(installEventConsumerSchedule);
   const getSchedule = useServerFn(getEventConsumerSchedule);
   const fetchLog = useServerFn(listScheduleLog);
+  const fetchThrottle = useServerFn(listThrottlingHits);
   const qc = useQueryClient();
 
   const scheduleQ = useQuery({
@@ -34,6 +35,12 @@ function EventBusPage() {
   const logQ = useQuery({
     queryKey: ["event_consumer_schedule_log"],
     queryFn: () => fetchLog({ data: { limit: 50 } }),
+    refetchInterval: 30_000,
+  });
+
+  const throttleQ = useQuery({
+    queryKey: ["rate_limit_throttle"],
+    queryFn: () => fetchThrottle({ data: { limit: 50 } }),
     refetchInterval: 30_000,
   });
 
@@ -252,6 +259,46 @@ function EventBusPage() {
               ))}
               {(logQ.data?.rows ?? []).length === 0 && (
                 <tr><td colSpan={7} className="p-3 text-center text-muted-foreground">لا عمليات تثبيت مسجَّلة بعد.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="rounded-lg border p-3 space-y-2">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-sm font-semibold">Throttling — آخر طلبات محظورة (place_order / error_logs)</h2>
+          <button className="text-xs underline" onClick={() => throttleQ.refetch()}>تحديث</button>
+        </div>
+        <p className="text-[11px] text-muted-foreground">
+          يعرض رؤوس المعدّل التي بلغت الحد الأقصى (≥5). <code>place_order</code> يُحسب لكل رقم هاتف ضمن نافذة 60ث.
+          <code>error_logs</code> ينفَّذ تحديده داخل الذاكرة لكل عامل (per-isolate) ولا يَعبر هذه الواجهة — راجع لوحة الأخطاء للتفصيل.
+        </p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="text-muted-foreground">
+              <tr>
+                <th className="text-right p-2">النطاق</th>
+                <th className="text-right p-2">النوع</th>
+                <th className="text-right p-2">الموضوع</th>
+                <th className="text-right p-2">عدد المحاولات</th>
+                <th className="text-right p-2">بدء النافذة</th>
+                <th className="text-right p-2">آخر محاولة</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(throttleQ.data?.rows ?? []).map((r) => (
+                <tr key={r.key} className="border-t">
+                  <td className="p-2 text-xs font-mono">{r.scope}</td>
+                  <td className="p-2 text-xs">{r.subject_kind}</td>
+                  <td className="p-2 text-xs font-mono" dir="ltr">{r.subject}</td>
+                  <td className={`p-2 text-xs font-bold ${r.count >= 5 ? "text-destructive" : "text-amber-600"}`}>{r.count}</td>
+                  <td className="p-2 text-xs whitespace-nowrap">{new Date(r.window_start).toLocaleString("ar")}</td>
+                  <td className="p-2 text-xs whitespace-nowrap">{new Date(r.updated_at).toLocaleString("ar")}</td>
+                </tr>
+              ))}
+              {(throttleQ.data?.rows ?? []).length === 0 && (
+                <tr><td colSpan={6} className="p-3 text-center text-muted-foreground">لا حالات تحديد معدّل نشطة.</td></tr>
               )}
             </tbody>
           </table>
