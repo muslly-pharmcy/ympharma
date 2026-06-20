@@ -121,7 +121,7 @@ function severityFor(r: Row): { sev: Severity; reasons: string[] } {
       const days = Math.floor((+exp - +now) / 86400000);
       if (days < 0) { sev = "critical"; reasons.push(`منتهي منذ ${-days} يوم`); }
       else if (days <= 90) { sev = "critical"; reasons.push(`ينتهي خلال ${days} يوم`); }
-      else if (days <= 180) { if (sev !== "critical") sev = "warning"; reasons.push(`ينتهي خلال ${days} يوم`); }
+      else if (days <= 180) { sev = "warning"; reasons.push(`ينتهي خلال ${days} يوم`); }
     }
   }
   if (stock !== null) {
