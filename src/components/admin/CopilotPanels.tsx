@@ -178,7 +178,20 @@ export function CopilotPanels() {
     } finally {
       setBusy(null);
     }
+
+  const onEnqueueRefills = async () => {
+    setBusy("refills");
+    try {
+      const out = (await runEnqueue({ data: { discount_pct: 15, limit: 50 } })) as { enqueued?: number; discount_code?: string };
+      toast.success(`أُضيف ${out.enqueued ?? 0} تذكير مزمن (${out.discount_code})`);
+      load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "فشل توليد التذكيرات");
+    } finally {
+      setBusy(null);
+    }
   };
+
 
   return (
     <div className="space-y-4">
