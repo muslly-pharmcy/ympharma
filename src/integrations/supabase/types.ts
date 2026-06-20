@@ -436,6 +436,30 @@ export type Database = {
         }
         Relationships: []
       }
+      app_settings: {
+        Row: {
+          description: string | null
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          description?: string | null
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value: Json
+        }
+        Update: {
+          description?: string | null
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       backups: {
         Row: {
           created_at: string
@@ -1386,6 +1410,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      inventory_shadow_log: {
+        Row: {
+          branch_code: string | null
+          branch_id: string | null
+          branch_stock: number | null
+          created_at: string
+          id: string
+          legacy_id: number | null
+          legacy_stock: number | null
+          note: string | null
+          order_id: string | null
+          product_id: string | null
+          requested_qty: number
+          shortfall: number | null
+          would_succeed: boolean
+        }
+        Insert: {
+          branch_code?: string | null
+          branch_id?: string | null
+          branch_stock?: number | null
+          created_at?: string
+          id?: string
+          legacy_id?: number | null
+          legacy_stock?: number | null
+          note?: string | null
+          order_id?: string | null
+          product_id?: string | null
+          requested_qty: number
+          shortfall?: number | null
+          would_succeed: boolean
+        }
+        Update: {
+          branch_code?: string | null
+          branch_id?: string | null
+          branch_stock?: number | null
+          created_at?: string
+          id?: string
+          legacy_id?: number | null
+          legacy_stock?: number | null
+          note?: string | null
+          order_id?: string | null
+          product_id?: string | null
+          requested_qty?: number
+          shortfall?: number | null
+          would_succeed?: boolean
+        }
+        Relationships: []
       }
       inventory_transfers: {
         Row: {
@@ -2986,6 +3058,7 @@ export type Database = {
         Returns: boolean
       }
       inventory_intel: { Args: never; Returns: Json }
+      inventory_readiness_report: { Args: never; Returns: Json }
       inventory_report: { Args: never; Returns: Json }
       is_branch_manager_of: {
         Args: { _branch_id: string; _user_id: string }
@@ -3007,6 +3080,10 @@ export type Database = {
           _entity_type?: string
         }
         Returns: string
+      }
+      log_inventory_shadow: {
+        Args: { _legacy_id: number; _order_id: string; _requested_qty: number }
+        Returns: undefined
       }
       mark_event_processed: {
         Args: { _error?: string; _event_id: string; _processed_by?: string }
@@ -3059,6 +3136,7 @@ export type Database = {
         }[]
       }
       rebuild_customer_intel: { Args: never; Returns: Json }
+      reconcile_inventory_mismatch: { Args: never; Returns: Json }
       reject_classification: { Args: { _id: string }; Returns: boolean }
       release_order_stock: {
         Args: { _actor?: string; _order_id: string; _reason?: string }
