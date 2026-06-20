@@ -59,7 +59,7 @@ export const inventoryReservationStats = createServerFn({ method: "POST" })
     // Low stock from products
     const { data: low } = await context.supabase
       .from("products")
-      .select("id, name_ar, name_en, stock_qty, reorder_point")
+      .select("id, name, stock_qty, reorder_point")
       .eq("track_stock", true)
       .lte("stock_qty", 5)
       .order("stock_qty", { ascending: true })
