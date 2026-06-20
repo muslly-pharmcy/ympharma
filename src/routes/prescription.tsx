@@ -402,7 +402,7 @@ function PrescriptionPage() {
               </div>
               <p className="mt-3 text-sm font-black">اضغط لاختيار الصور أو اسحبها هنا</p>
               <p className="text-xs text-muted-foreground">PNG / JPG — يمكنك التقاط الصورة من الكاميرا مباشرة</p>
-              <input ref={inputRef} type="file" accept="image/*" capture="environment" multiple hidden onChange={(e) => handleFiles(e.target.files)} />
+              <input ref={inputRef} type="file" accept="image/jpeg,image/png,application/pdf" capture="environment" multiple hidden onChange={(e) => handleFiles(e.target.files)} />
             </div>
 
             {files.length > 0 && (
