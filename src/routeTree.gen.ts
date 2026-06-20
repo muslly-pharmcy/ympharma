@@ -27,6 +27,7 @@ import { Route as BundlesRouteImport } from './routes/bundles'
 import { Route as AiSymptomsRouteImport } from './routes/ai-symptoms'
 import { Route as AiSupplementRouteImport } from './routes/ai-supplement'
 import { Route as AiAssistantRouteImport } from './routes/ai-assistant'
+import { Route as AdminWorkforceRouteImport } from './routes/admin-workforce'
 import { Route as AdminSettingsRouteImport } from './routes/admin-settings'
 import { Route as AdminRxCheckRouteImport } from './routes/admin-rx-check'
 import { Route as AdminProductsRouteImport } from './routes/admin-products'
@@ -160,6 +161,11 @@ const AiSupplementRoute = AiSupplementRouteImport.update({
 const AiAssistantRoute = AiAssistantRouteImport.update({
   id: '/ai-assistant',
   path: '/ai-assistant',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminWorkforceRoute = AdminWorkforceRouteImport.update({
+  id: '/admin-workforce',
+  path: '/admin-workforce',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
@@ -415,6 +421,7 @@ export interface FileRoutesByFullPath {
   '/admin-products': typeof AdminProductsRoute
   '/admin-rx-check': typeof AdminRxCheckRoute
   '/admin-settings': typeof AdminSettingsRoute
+  '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
   '/ai-supplement': typeof AiSupplementRoute
   '/ai-symptoms': typeof AiSymptomsRoute
@@ -479,6 +486,7 @@ export interface FileRoutesByTo {
   '/admin-products': typeof AdminProductsRoute
   '/admin-rx-check': typeof AdminRxCheckRoute
   '/admin-settings': typeof AdminSettingsRoute
+  '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
   '/ai-supplement': typeof AiSupplementRoute
   '/ai-symptoms': typeof AiSymptomsRoute
@@ -544,6 +552,7 @@ export interface FileRoutesById {
   '/admin-products': typeof AdminProductsRoute
   '/admin-rx-check': typeof AdminRxCheckRoute
   '/admin-settings': typeof AdminSettingsRoute
+  '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
   '/ai-supplement': typeof AiSupplementRoute
   '/ai-symptoms': typeof AiSymptomsRoute
@@ -610,6 +619,7 @@ export interface FileRouteTypes {
     | '/admin-products'
     | '/admin-rx-check'
     | '/admin-settings'
+    | '/admin-workforce'
     | '/ai-assistant'
     | '/ai-supplement'
     | '/ai-symptoms'
@@ -674,6 +684,7 @@ export interface FileRouteTypes {
     | '/admin-products'
     | '/admin-rx-check'
     | '/admin-settings'
+    | '/admin-workforce'
     | '/ai-assistant'
     | '/ai-supplement'
     | '/ai-symptoms'
@@ -738,6 +749,7 @@ export interface FileRouteTypes {
     | '/admin-products'
     | '/admin-rx-check'
     | '/admin-settings'
+    | '/admin-workforce'
     | '/ai-assistant'
     | '/ai-supplement'
     | '/ai-symptoms'
@@ -803,6 +815,7 @@ export interface RootRouteChildren {
   AdminProductsRoute: typeof AdminProductsRoute
   AdminRxCheckRoute: typeof AdminRxCheckRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminWorkforceRoute: typeof AdminWorkforceRoute
   AiAssistantRoute: typeof AiAssistantRoute
   AiSupplementRoute: typeof AiSupplementRoute
   AiSymptomsRoute: typeof AiSymptomsRoute
@@ -974,6 +987,13 @@ declare module '@tanstack/react-router' {
       path: '/ai-assistant'
       fullPath: '/ai-assistant'
       preLoaderRoute: typeof AiAssistantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-workforce': {
+      id: '/admin-workforce'
+      path: '/admin-workforce'
+      fullPath: '/admin-workforce'
+      preLoaderRoute: typeof AdminWorkforceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-settings': {
@@ -1318,6 +1338,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminProductsRoute: AdminProductsRoute,
   AdminRxCheckRoute: AdminRxCheckRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminWorkforceRoute: AdminWorkforceRoute,
   AiAssistantRoute: AiAssistantRoute,
   AiSupplementRoute: AiSupplementRoute,
   AiSymptomsRoute: AiSymptomsRoute,
