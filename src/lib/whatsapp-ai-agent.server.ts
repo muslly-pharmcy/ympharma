@@ -53,7 +53,8 @@ export async function runWhatsAppAgent(args: {
   let escalated = false;
   let intent: string | null = null;
 
-  // Append-only audit. Failure here must never break the agent loop.
+  // Append-only audit. Failure here must never break the agent loop,
+  // but it must NOT be silent — raise a staff alert so SecOps can act.
   async function audit(
     toolName: string,
     input: unknown,
@@ -61,7 +62,7 @@ export async function runWhatsAppAgent(args: {
     result: { status: "ok" | "error" | "denied"; summary?: unknown; error?: string },
   ) {
     try {
-      await supabaseAdmin.from("ai_tool_events").insert({
+      const { error } = await supabaseAdmin.from("ai_tool_events").insert({
         agent_id: "whatsapp-ai",
         conversation_id: conversationId,
         tool_name: toolName,
@@ -72,10 +73,28 @@ export async function runWhatsAppAgent(args: {
         duration_ms: Date.now() - started,
         error_message: result.error ?? null,
       });
+      if (error) throw error;
     } catch (e) {
-      console.error("[wa-agent] audit insert failed", e);
+      const message = e instanceof Error ? e.message : String(e);
+      console.error("[wa-agent] audit insert failed", message);
+      // Best-effort SYSTEM_ALERT — deduped by staff_alerts.kind+entity to
+      // avoid flooding when the audit table itself is unavailable.
+      try {
+        await supabaseAdmin.from("staff_alerts").insert({
+          kind: "ai_audit_failure",
+          severity: "error",
+          title: "فشل تسجيل تدقيق أداة AI",
+          body: `tool=${toolName} reason=${message.slice(0, 240)}`,
+          entity_type: "ai_tool_event",
+          entity_id: conversationId,
+          payload: { tool: toolName, status: result.status, phone, error: message },
+        });
+      } catch (alertErr) {
+        console.error("[wa-agent] audit failure alert also failed", alertErr);
+      }
     }
   }
+
 
   const tools = {
     search_products: tool({
