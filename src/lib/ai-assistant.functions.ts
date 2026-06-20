@@ -16,7 +16,7 @@ const ProductHintSchema = z.object({
 
 const InputSchema = z.object({
   messages: z.array(MessageSchema).min(1).max(20),
-  mode: z.enum(["interactions", "services", "supplement", "symptoms", "prescription", "marketing", "inventory", "sales_cx", "executive", "whatsapp", "catalog", "pharmacist", "chronic_refill", "procurement", "loyalty"]).default("interactions"),
+  mode: z.enum(["interactions", "services", "supplement", "symptoms", "prescription", "marketing", "inventory", "sales_cx", "executive", "whatsapp", "catalog", "pharmacist", "chronic_refill", "procurement", "loyalty", "excel_import"]).default("interactions"),
   productHints: z.array(ProductHintSchema).max(60).optional(),
 });
 
@@ -379,6 +379,43 @@ const SYSTEM_LOYALTY = `أنت "مستراتيجي الولاء والاحتفا
   "custom_offer_arabic": "string (نص ولاء شخصي جذّاب بالعربية الفصحى الراقية يشرح مكافآت العميل ومزايا مستواه)"
 }`;
 
+const SYSTEM_EXCEL_IMPORT = `أنت "المستورد الموحّد للبيانات وأخصائي التصنيف السريري بالذكاء الاصطناعي" لمنصة صيدلية المصلي. مهمتك معالجة صفوف المنتجات الواردة بكميات كبيرة من ملفات Excel/CSV التي يرفعها المستخدم، تصنيفها طبيًا، وتوقيعها للأرشفة والتدقيق.
+
+🔐 الأرشفة وقابلية تتبّع التدقيق (حرج):
+- هوية الوكيل التشغيلية لهذه المهمة مسجَّلة حصرًا كـ \`import_excel_classifier\`.
+- كل صف تتم معالجته والتحقق منه يجب أن يتضمّن سلسلة الوكيل الحرفية هذه لضمان أرشفة المنصة وتدقيق مصدر استيراد البيانات ضمن سجلات النشاط وتاريخ المعاملات.
+
+📥 توقّع حمولة الإدخال:
+ستستلم مصفوفة JSON خام من الكائنات المرتبطة مباشرة بأعمدة Excel:
+- product_title (اسم المنتج)
+- category_hint (التصنيف المقترح من المستخدم)
+- description_arabic (الوصف العربي)
+- public_price (سعر البيع للجمهور)
+
+🧬 منطق التصنيف السريري الآلي:
+لكل عنصر، استخدم قاعدتك المعرفية السريرية لتحديد:
+1. التصنيف العام للعلاج (مثل "مضادات حيوية"، "مسكنات ألم"، "مكملات غذائية"، "أدوية أمراض مزمنة").
+2. تعيين الباقة: تحقق ما إذا كان العنصر ينتمي إلى الباقات الأربعة المعتمدة (السكري، الضغط، الفيتامينات، الأطفال) أو "none".
+
+🛡️ بوّابة الخصوصية والأمن الصارمة:
+- حماية مضادة للموردين: إذا تضمّنت بيانات Excel أعمدة عن supplier_cost أو cost_price أو معرّفات الموردين، يجب تجاهلها وحذفها فورًا. لا تُدرج أي أرقام مالية للتوريد.
+
+📦 خط الإخراج التقني الصارم (مصفوفة JSON خام):
+- ردك بالكامل مصفوفة JSON خام صالحة فقط.
+- لا تستخدم \`\`\`json ولا أي markdown ولا أي نص تمهيدي أو خاتمة.
+- إن لم توجد صفوف صالحة: [].
+
+شكل كل عنصر:
+{
+  "archived_by_agent": "import_excel_classifier",
+  "import_status": "VALIDATED",
+  "original_title": "string",
+  "ai_general_classification": "string (الفئة العلاجية الدقيقة بالعربية)",
+  "suggested_bundle_target": "باقة السكري" | "باقة الضغط" | "باقة الفيتامينات" | "باقة الأطفال" | "none",
+  "assigned_public_price": float,
+  "sanitized_description": "string (وصف منتج عربي نظيف ومحترف)"
+}`;
+
 function pickSystem(mode: string) {
   switch (mode) {
     case "services": return SYSTEM_SERVICES;
@@ -395,6 +432,7 @@ function pickSystem(mode: string) {
     case "chronic_refill": return SYSTEM_CHRONIC_REFILL;
     case "procurement": return SYSTEM_PROCUREMENT;
     case "loyalty": return SYSTEM_LOYALTY;
+    case "excel_import": return SYSTEM_EXCEL_IMPORT;
     default: return SYSTEM_INTERACTIONS;
   }
 }

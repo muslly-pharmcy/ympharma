@@ -52,6 +52,7 @@ import { Route as AdminAiMarketingRouteImport } from './routes/admin-ai-marketin
 import { Route as AdminAiLoyaltyRouteImport } from './routes/admin-ai-loyalty'
 import { Route as AdminAiInventoryRouteImport } from './routes/admin-ai-inventory'
 import { Route as AdminAiExecutiveRouteImport } from './routes/admin-ai-executive'
+import { Route as AdminAiExcelImportRouteImport } from './routes/admin-ai-excel-import'
 import { Route as AdminAiChronicRefillRouteImport } from './routes/admin-ai-chronic-refill'
 import { Route as AdminAiCatalogRouteImport } from './routes/admin-ai-catalog'
 import { Route as AdminAgentsRouteImport } from './routes/admin-agents'
@@ -300,6 +301,11 @@ const AdminAiExecutiveRoute = AdminAiExecutiveRouteImport.update({
   path: '/admin-ai-executive',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAiExcelImportRoute = AdminAiExcelImportRouteImport.update({
+  id: '/admin-ai-excel-import',
+  path: '/admin-ai-excel-import',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAiChronicRefillRoute = AdminAiChronicRefillRouteImport.update({
   id: '/admin-ai-chronic-refill',
   path: '/admin-ai-chronic-refill',
@@ -481,6 +487,7 @@ export interface FileRoutesByFullPath {
   '/admin-agents': typeof AdminAgentsRoute
   '/admin-ai-catalog': typeof AdminAiCatalogRoute
   '/admin-ai-chronic-refill': typeof AdminAiChronicRefillRoute
+  '/admin-ai-excel-import': typeof AdminAiExcelImportRoute
   '/admin-ai-executive': typeof AdminAiExecutiveRoute
   '/admin-ai-inventory': typeof AdminAiInventoryRoute
   '/admin-ai-loyalty': typeof AdminAiLoyaltyRoute
@@ -558,6 +565,7 @@ export interface FileRoutesByTo {
   '/admin-agents': typeof AdminAgentsRoute
   '/admin-ai-catalog': typeof AdminAiCatalogRoute
   '/admin-ai-chronic-refill': typeof AdminAiChronicRefillRoute
+  '/admin-ai-excel-import': typeof AdminAiExcelImportRoute
   '/admin-ai-executive': typeof AdminAiExecutiveRoute
   '/admin-ai-inventory': typeof AdminAiInventoryRoute
   '/admin-ai-loyalty': typeof AdminAiLoyaltyRoute
@@ -636,6 +644,7 @@ export interface FileRoutesById {
   '/admin-agents': typeof AdminAgentsRoute
   '/admin-ai-catalog': typeof AdminAiCatalogRoute
   '/admin-ai-chronic-refill': typeof AdminAiChronicRefillRoute
+  '/admin-ai-excel-import': typeof AdminAiExcelImportRoute
   '/admin-ai-executive': typeof AdminAiExecutiveRoute
   '/admin-ai-inventory': typeof AdminAiInventoryRoute
   '/admin-ai-loyalty': typeof AdminAiLoyaltyRoute
@@ -715,6 +724,7 @@ export interface FileRouteTypes {
     | '/admin-agents'
     | '/admin-ai-catalog'
     | '/admin-ai-chronic-refill'
+    | '/admin-ai-excel-import'
     | '/admin-ai-executive'
     | '/admin-ai-inventory'
     | '/admin-ai-loyalty'
@@ -792,6 +802,7 @@ export interface FileRouteTypes {
     | '/admin-agents'
     | '/admin-ai-catalog'
     | '/admin-ai-chronic-refill'
+    | '/admin-ai-excel-import'
     | '/admin-ai-executive'
     | '/admin-ai-inventory'
     | '/admin-ai-loyalty'
@@ -869,6 +880,7 @@ export interface FileRouteTypes {
     | '/admin-agents'
     | '/admin-ai-catalog'
     | '/admin-ai-chronic-refill'
+    | '/admin-ai-excel-import'
     | '/admin-ai-executive'
     | '/admin-ai-inventory'
     | '/admin-ai-loyalty'
@@ -947,6 +959,7 @@ export interface RootRouteChildren {
   AdminAgentsRoute: typeof AdminAgentsRoute
   AdminAiCatalogRoute: typeof AdminAiCatalogRoute
   AdminAiChronicRefillRoute: typeof AdminAiChronicRefillRoute
+  AdminAiExcelImportRoute: typeof AdminAiExcelImportRoute
   AdminAiExecutiveRoute: typeof AdminAiExecutiveRoute
   AdminAiInventoryRoute: typeof AdminAiInventoryRoute
   AdminAiLoyaltyRoute: typeof AdminAiLoyaltyRoute
@@ -1321,6 +1334,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAiExecutiveRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin-ai-excel-import': {
+      id: '/admin-ai-excel-import'
+      path: '/admin-ai-excel-import'
+      fullPath: '/admin-ai-excel-import'
+      preLoaderRoute: typeof AdminAiExcelImportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin-ai-chronic-refill': {
       id: '/admin-ai-chronic-refill'
       path: '/admin-ai-chronic-refill'
@@ -1566,6 +1586,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminAgentsRoute: AdminAgentsRoute,
   AdminAiCatalogRoute: AdminAiCatalogRoute,
   AdminAiChronicRefillRoute: AdminAiChronicRefillRoute,
+  AdminAiExcelImportRoute: AdminAiExcelImportRoute,
   AdminAiExecutiveRoute: AdminAiExecutiveRoute,
   AdminAiInventoryRoute: AdminAiInventoryRoute,
   AdminAiLoyaltyRoute: AdminAiLoyaltyRoute,
