@@ -145,6 +145,51 @@ export type Database = {
           },
         ]
       }
+      agent_events: {
+        Row: {
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          event_name: string
+          id: string
+          last_error: string | null
+          occurred_at: string
+          payload: Json
+          processed_at: string | null
+          processed_by: string | null
+          retry_count: number
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          event_name: string
+          id?: string
+          last_error?: string | null
+          occurred_at?: string
+          payload?: Json
+          processed_at?: string | null
+          processed_by?: string | null
+          retry_count?: number
+          source?: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          event_name?: string
+          id?: string
+          last_error?: string | null
+          occurred_at?: string
+          payload?: Json
+          processed_at?: string | null
+          processed_by?: string | null
+          retry_count?: number
+          source?: string
+        }
+        Relationships: []
+      }
       agent_kpis: {
         Row: {
           agent_name: string
@@ -1920,7 +1965,42 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      unprocessed_agent_events: {
+        Row: {
+          entity_id: string | null
+          entity_type: string | null
+          event_name: string | null
+          id: string | null
+          last_error: string | null
+          occurred_at: string | null
+          payload: Json | null
+          retry_count: number | null
+          source: string | null
+        }
+        Insert: {
+          entity_id?: string | null
+          entity_type?: string | null
+          event_name?: string | null
+          id?: string | null
+          last_error?: string | null
+          occurred_at?: string | null
+          payload?: Json | null
+          retry_count?: number | null
+          source?: string | null
+        }
+        Update: {
+          entity_id?: string | null
+          entity_type?: string | null
+          event_name?: string | null
+          id?: string | null
+          last_error?: string | null
+          occurred_at?: string | null
+          payload?: Json | null
+          retry_count?: number | null
+          source?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       _agent_kpi_upsert: {
@@ -2029,6 +2109,16 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      emit_agent_event: {
+        Args: {
+          _entity_id?: string
+          _entity_type?: string
+          _event_name: string
+          _payload?: Json
+          _source?: string
+        }
+        Returns: string
+      }
       enqueue_chronic_refill_action: {
         Args: {
           _customer_phone: string
@@ -2097,6 +2187,10 @@ export type Database = {
           _entity_type?: string
         }
         Returns: string
+      }
+      mark_event_processed: {
+        Args: { _error?: string; _event_id: string; _processed_by?: string }
+        Returns: boolean
       }
       marketing_queue_approve: { Args: { _id: string }; Returns: boolean }
       marketing_queue_list: {
