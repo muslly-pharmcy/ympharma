@@ -355,7 +355,9 @@ function BulkTab() {
 function HistoryTab() {
   const [rows, setRows] = useState<Array<{ batch_id: string; reason: string; count: number; rolled_back: number; created_at: string }>>([]);
   const [busy, setBusy] = useState(false);
+  const [pv, setPv] = useState<Awaited<ReturnType<typeof previewRollbackBatch>> | null>(null);
   const listFn = useServerFn(listSupplierBatches);
+  const previewFn = useServerFn(previewRollbackBatch);
   const rb = useServerFn(rollbackSupplierBatch);
 
   const load = useCallback(async () => {
@@ -366,11 +368,19 @@ function HistoryTab() {
   }, [listFn]);
   useEffect(() => { load(); }, [load]);
 
-  async function rollback(batch_id: string) {
-    if (!confirm(`تأكيد استرجاع جميع الأصناف في هذه العملية إلى موردها السابق؟`)) return;
+  async function openPreview(batch_id: string) {
+    setBusy(true);
+    try { setPv(await previewFn({ data: { batch_id } })); }
+    catch (e: any) { toast.error(String(e?.message ?? e)); }
+    finally { setBusy(false); }
+  }
+
+  async function confirmRollback() {
+    if (!pv) return;
     try {
-      const res = await rb({ data: { batch_id } });
+      const res = await rb({ data: { batch_id: pv.batch_id, confirm: true } });
       toast.success(`تم استرجاع ${res.restored}/${res.total} صنف`);
+      setPv(null);
       await load();
     } catch (e: any) { toast.error(String(e?.message ?? e)); }
   }
@@ -381,6 +391,42 @@ function HistoryTab() {
         <div className="text-sm text-muted-foreground">{busy ? "جارٍ التحميل..." : `${rows.length} عملية ربط مورد`}</div>
         <button onClick={load} disabled={busy} className="rounded-xl bg-secondary px-3 py-2 text-xs font-bold disabled:opacity-50">{busy ? "..." : "تحديث"}</button>
       </div>
+
+      {pv && (
+        <div className="rounded-2xl border-2 border-rose-500/40 bg-rose-500/5 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="text-sm font-black">معاينة الـ Rollback — batch <code className="font-mono text-xs">{pv.batch_id.slice(0, 12)}</code></div>
+            <div className="flex gap-2">
+              <button onClick={() => setPv(null)} className="rounded-lg bg-secondary px-3 py-1.5 text-[11px] font-bold">إلغاء</button>
+              <button onClick={confirmRollback} disabled={pv.will_change === 0} className="flex items-center gap-1 rounded-lg bg-rose-500 px-3 py-1.5 text-[11px] font-black text-white disabled:opacity-40"><Undo2 className="size-3" /> تأكيد الـ Rollback ({pv.will_change} صنف)</button>
+            </div>
+          </div>
+          <div className="mt-2 grid grid-cols-3 gap-3">
+            <Stat label="إجمالي" value={pv.total} />
+            <Stat label="سيتغير" value={pv.will_change} />
+            <Stat label="تم استرجاعه سابقاً" value={pv.already_rolled_back} />
+          </div>
+          <div className="mt-3 max-h-[400px] overflow-auto rounded-xl border border-border bg-card">
+            <table className="w-full min-w-[800px] text-xs">
+              <thead className="sticky top-0 bg-secondary/80 backdrop-blur"><tr><th className="px-2 py-1 text-right">#</th><th className="px-2 py-1 text-right">الصنف</th><th className="px-2 py-1">المورد الحالي</th><th className="px-2 py-1">سيُسترجع إلى</th><th className="px-2 py-1">الحالة</th></tr></thead>
+              <tbody>
+                {pv.diffs.map((d, i) => (
+                  <tr key={i} className={`border-t border-border ${d.already_rolled_back ? "opacity-50" : d.will_change ? "" : "text-muted-foreground"}`}>
+                    <td className="px-2 py-1 text-center">{d.legacy_id ?? "—"}</td>
+                    <td className="px-2 py-1">{d.name}</td>
+                    <td className="px-2 py-1 text-center">{d.current_supplier ?? "—"}</td>
+                    <td className="px-2 py-1 text-center font-bold">{d.restore_supplier ?? "—"}</td>
+                    <td className="px-2 py-1 text-center">
+                      {d.already_rolled_back ? "↩ سبق استرجاعه" : d.will_change ? "سيتغير" : "بدون تغيير"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       <div className="overflow-x-auto rounded-2xl border border-border bg-card">
         <table className="w-full min-w-[700px] text-xs">
           <thead className="bg-secondary/40"><tr><th className="px-2 py-2 text-right">التاريخ</th><th className="px-2 py-2 text-right">السبب</th><th className="px-2 py-2">عدد الأصناف</th><th className="px-2 py-2">مُسترجَع</th><th className="px-2 py-2">معرف العملية</th><th className="px-2 py-2">إجراء</th></tr></thead>
@@ -394,7 +440,7 @@ function HistoryTab() {
                 <td className="px-2 py-2 text-center">{r.rolled_back}/{r.count}</td>
                 <td className="px-2 py-2 text-center font-mono text-[10px]">{r.batch_id.slice(0, 12)}</td>
                 <td className="px-2 py-2 text-center">
-                  <button disabled={r.rolled_back >= r.count} onClick={() => rollback(r.batch_id)} className="flex items-center gap-1 rounded-lg bg-rose-500 px-3 py-1.5 text-[10px] font-black text-white disabled:opacity-40"><Undo2 className="size-3" /> rollback</button>
+                  <button disabled={r.rolled_back >= r.count} onClick={() => openPreview(r.batch_id)} className="flex items-center gap-1 rounded-lg bg-rose-500 px-3 py-1.5 text-[10px] font-black text-white disabled:opacity-40"><Eye className="size-3" /> معاينة Rollback</button>
                 </td>
               </tr>
             ))}
@@ -404,6 +450,7 @@ function HistoryTab() {
     </div>
   );
 }
+
 
 // ============== Health Tab ==============
 
