@@ -75,6 +75,7 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as ApiPublicHooksWeeklyExecReportRouteImport } from './routes/api/public/hooks/weekly-exec-report'
 import { Route as ApiPublicHooksWeeklyAiEnrichRouteImport } from './routes/api/public/hooks/weekly-ai-enrich'
+import { Route as ApiPublicHooksRxMirrorRouteImport } from './routes/api/public/hooks/rx-mirror'
 import { Route as ApiPublicHooksNightlyIntelRouteImport } from './routes/api/public/hooks/nightly-intel'
 import { Route as ApiPublicHooksChronicRefillsRouteImport } from './routes/api/public/hooks/chronic-refills'
 import { Route as ApiPublicHooksAlertsWorkerRouteImport } from './routes/api/public/hooks/alerts-worker'
@@ -425,6 +426,11 @@ const ApiPublicHooksWeeklyAiEnrichRoute =
     path: '/api/public/hooks/weekly-ai-enrich',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksRxMirrorRoute = ApiPublicHooksRxMirrorRouteImport.update({
+  id: '/api/public/hooks/rx-mirror',
+  path: '/api/public/hooks/rx-mirror',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksNightlyIntelRoute =
   ApiPublicHooksNightlyIntelRouteImport.update({
     id: '/api/public/hooks/nightly-intel',
@@ -559,6 +565,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
   '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
+  '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -639,6 +646,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
   '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
+  '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -720,6 +728,7 @@ export interface FileRoutesById {
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
   '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
+  '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -802,6 +811,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/alerts-worker'
     | '/api/public/hooks/chronic-refills'
     | '/api/public/hooks/nightly-intel'
+    | '/api/public/hooks/rx-mirror'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
     | '/lovable/email/queue/process'
@@ -882,6 +892,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/alerts-worker'
     | '/api/public/hooks/chronic-refills'
     | '/api/public/hooks/nightly-intel'
+    | '/api/public/hooks/rx-mirror'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
     | '/lovable/email/queue/process'
@@ -962,6 +973,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/alerts-worker'
     | '/api/public/hooks/chronic-refills'
     | '/api/public/hooks/nightly-intel'
+    | '/api/public/hooks/rx-mirror'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
     | '/lovable/email/queue/process'
@@ -1042,6 +1054,7 @@ export interface RootRouteChildren {
   ApiPublicHooksAlertsWorkerRoute: typeof ApiPublicHooksAlertsWorkerRoute
   ApiPublicHooksChronicRefillsRoute: typeof ApiPublicHooksChronicRefillsRoute
   ApiPublicHooksNightlyIntelRoute: typeof ApiPublicHooksNightlyIntelRoute
+  ApiPublicHooksRxMirrorRoute: typeof ApiPublicHooksRxMirrorRoute
   ApiPublicHooksWeeklyAiEnrichRoute: typeof ApiPublicHooksWeeklyAiEnrichRoute
   ApiPublicHooksWeeklyExecReportRoute: typeof ApiPublicHooksWeeklyExecReportRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -1522,6 +1535,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksWeeklyAiEnrichRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/rx-mirror': {
+      id: '/api/public/hooks/rx-mirror'
+      path: '/api/public/hooks/rx-mirror'
+      fullPath: '/api/public/hooks/rx-mirror'
+      preLoaderRoute: typeof ApiPublicHooksRxMirrorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/nightly-intel': {
       id: '/api/public/hooks/nightly-intel'
       path: '/api/public/hooks/nightly-intel'
@@ -1685,6 +1705,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksAlertsWorkerRoute: ApiPublicHooksAlertsWorkerRoute,
   ApiPublicHooksChronicRefillsRoute: ApiPublicHooksChronicRefillsRoute,
   ApiPublicHooksNightlyIntelRoute: ApiPublicHooksNightlyIntelRoute,
+  ApiPublicHooksRxMirrorRoute: ApiPublicHooksRxMirrorRoute,
   ApiPublicHooksWeeklyAiEnrichRoute: ApiPublicHooksWeeklyAiEnrichRoute,
   ApiPublicHooksWeeklyExecReportRoute: ApiPublicHooksWeeklyExecReportRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
