@@ -1,7 +1,7 @@
 // Phase 6B Sprint 5 — Rx Review Admin UI
 // All mutations go through Sprint 4 server functions; no direct DB writes.
 
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AdminGate } from "@/components/admin/AdminGate";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { useServerFn } from "@tanstack/react-start";
