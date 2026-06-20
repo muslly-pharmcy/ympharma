@@ -85,7 +85,10 @@ function AdminInventory() {
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
           <Link to="/admin" className="flex items-center gap-1.5 rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent"><ArrowRight className="size-4" /> رجوع</Link>
           <h1 className="text-base font-black">إدارة المخزون</h1>
-          <button onClick={refresh} disabled={busy} className="rounded-xl bg-secondary px-3 py-2 text-xs font-bold disabled:opacity-50">{busy ? "..." : "تحديث"}</button>
+          <div className="flex items-center gap-2">
+            <Link to="/admin-inventory-duplicates" className="rounded-xl bg-secondary px-3 py-2 text-xs font-bold hover:bg-accent">المتشابهات + إضافة بالجملة</Link>
+            <button onClick={refresh} disabled={busy} className="rounded-xl bg-secondary px-3 py-2 text-xs font-bold disabled:opacity-50">{busy ? "..." : "تحديث"}</button>
+          </div>
         </div>
       </header>
 
