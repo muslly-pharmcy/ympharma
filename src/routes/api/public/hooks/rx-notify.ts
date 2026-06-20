@@ -109,11 +109,11 @@ export const Route = createFileRoute("/api/public/hooks/rx-notify")({
             return Response.json({ ok: true, skipped: "disabled_or_no_recipients", picked: 0 });
           }
 
-          // 2) Pick unprocessed PrescriptionUploaded events
+          // 2) Pick unprocessed prescription-uploaded events (canonical + legacy alias)
           const { data: events, error: evErr } = await supabaseAdmin
             .from("agent_events")
-            .select("id, entity_id, payload, occurred_at")
-            .eq("event_name", "PrescriptionUploaded")
+            .select("id, entity_id, payload, occurred_at, correlation_id")
+            .in("event_name", ["PRESCRIPTION_UPLOADED", "PrescriptionUploaded"])
             .is("processed_at", null)
             .order("occurred_at", { ascending: true })
             .limit(limit);
