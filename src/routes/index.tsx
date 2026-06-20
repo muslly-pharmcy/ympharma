@@ -13,8 +13,8 @@ import { MarketingBanner } from "@/components/marketing-banner";
 import { NunDivider } from "@/components/nun-divider";
 import { ProductCard } from "@/components/product-card";
 import { useI18n } from "@/lib/i18n";
-import { useMergedProducts } from "@/lib/use-merged-products";
-import { useHomepageSections, useLegacyMap } from "@/lib/use-pharmacy-intel";
+import { useHomepageBundle } from "@/lib/use-homepage-bundle";
+import { useLegacyMap } from "@/lib/use-pharmacy-intel";
 import { waLink } from "@/lib/whatsapp";
 import storefrontUrl from "@/assets/pharmacy-storefront.jpg";
 import robotUrl from "@/assets/pharmacy-robot.jpg";
@@ -98,9 +98,8 @@ function Home() {
   const [query, setQuery] = useState("");
   const [trackId, setTrackId] = useState("");
   const navigate = useNavigate();
-  const products = useMergedProducts();
+  const { products, sections, banners } = useHomepageBundle();
   const { t } = useI18n();
-  const sections = useHomepageSections();
   const legacyMap = useLegacyMap(products);
   const featured = useMemo(
     () => products.filter((p) => query.trim() === "" || p.name.includes(query.trim())).slice(0, 8),
@@ -123,7 +122,7 @@ function Home() {
       <SiteHeader search={query} onSearch={setQuery} />
 
       <main className="mx-auto max-w-7xl px-4 py-6 space-y-10">
-        <MarketingBanner placement="home" />
+        <MarketingBanner placement="home" banners={banners} />
         <section className="grid gap-6 lg:grid-cols-[1.05fr_.95fr] items-center overflow-hidden rounded-2xl brand-gradient p-6 text-primary-foreground shadow-elevated sm:p-10">
           <div className="relative">
             <span className="inline-flex items-center gap-1.5 rounded-md bg-white/15 px-3 py-1.5 text-[12px] font-bold ring-1 ring-white/25">
