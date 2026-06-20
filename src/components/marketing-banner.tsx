@@ -32,7 +32,10 @@ export function MarketingBanner({ placement = "home", className = "" }: { placem
 
   useEffect(() => {
     if (banners.length <= 1) return;
-    const t = setInterval(() => setIdx((i) => (i + 1) % banners.length), 7000);
+    const t = setInterval(() => {
+      if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
+      setIdx((i) => (i + 1) % banners.length);
+    }, 7000);
     return () => clearInterval(t);
   }, [banners.length]);
 

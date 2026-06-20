@@ -197,7 +197,7 @@ function NetworkHealthPage() {
 
   useEffect(() => {
     run();
-    const id = setInterval(run, 60_000);
+    const id = setInterval(() => { if (document.visibilityState === "hidden") return; run(); }, 60_000);
     return () => clearInterval(id);
   }, [run]);
 

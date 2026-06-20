@@ -3,7 +3,10 @@ import { AdminGate } from "@/components/admin/AdminGate";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import * as XLSX from "xlsx";
+// xlsx is lazy-loaded on demand inside handlers to keep it out of the initial admin chunk.
+type XLSXModule = typeof import("xlsx");
+let _xlsxPromise: Promise<XLSXModule> | null = null;
+const loadXLSX = () => (_xlsxPromise ??= import("xlsx"));
 import {
   ArrowLeft, Loader2, FileSpreadsheet, AlertTriangle, Send, Upload,
   Download, FileJson, Sheet, Bell, ShieldCheck,
@@ -215,11 +218,12 @@ function ExcelImportAgentRunner() {
     const name = f.name.toLowerCase();
     try {
       if (name.endsWith(".xlsx") || name.endsWith(".xls")) {
+        const XLSX = await loadXLSX();
         const buf = await f.arrayBuffer();
         const wb = XLSX.read(buf, { type: "array" });
         const ws = wb.Sheets[wb.SheetNames[0]];
         const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: "" });
-        const cleaned = json.map((r) => sanitize(r));
+        const cleaned = json.map((r: Record<string, unknown>) => sanitize(r));
         setInput(JSON.stringify(cleaned, null, 2));
         toast.success(`تم تحميل ${f.name} — ${cleaned.length} صف (تم تجريد أعمدة الخصوصية)`);
       } else {
@@ -271,8 +275,9 @@ function ExcelImportAgentRunner() {
     if (!rows.length) return;
     downloadBlob(`muslly_import_${Date.now()}.csv`, new Blob(["\uFEFF" + rowsToCSV(rows)], { type: "text/csv;charset=utf-8" }));
   }
-  function exportXLSX() {
+  async function exportXLSX() {
     if (!rows.length) return;
+    const XLSX = await loadXLSX();
     const ws = XLSX.utils.json_to_sheet(rows.map(sanitizeRowForExport));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Classified");

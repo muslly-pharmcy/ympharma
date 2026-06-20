@@ -88,7 +88,7 @@ function NetworkTestPage() {
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
     window.addEventListener("perf:update", onPerf);
-    const t = setInterval(() => { refreshSw(); setPerf(readPerf()); }, 3000);
+    const t = setInterval(() => { if (document.visibilityState === "hidden") return; refreshSw(); setPerf(readPerf()); }, 3000);
     return () => {
       window.removeEventListener("sw:log", onLogs);
       window.removeEventListener("online", onOnline);

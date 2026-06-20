@@ -101,7 +101,7 @@ export function ImagesTab() {
 
   // Auto-refresh logs every 30s so the alert banner stays current.
   useEffect(() => {
-    const t = setInterval(() => { void loadLogs(); }, 30_000);
+    const t = setInterval(() => { if (document.visibilityState === "hidden") return; void loadLogs(); }, 30_000);
     return () => clearInterval(t);
   }, []);
 

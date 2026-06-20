@@ -2357,6 +2357,15 @@ export type Database = {
           source: string
         }[]
       }
+      conditions_catalog: {
+        Args: never
+        Returns: {
+          chronic_count: number
+          condition: string
+          product_count: number
+          sample_image: string
+        }[]
+      }
       consume_rate_limit: {
         Args: { _key: string; _max: number; _window_seconds: number }
         Returns: boolean

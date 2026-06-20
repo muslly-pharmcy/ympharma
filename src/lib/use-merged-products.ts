@@ -110,8 +110,13 @@ export function useMergedProducts(): Product[] & { importSummary?: DedupeSummary
 
   useEffect(() => {
     let cancelled = false;
-    fetchFn()
-      .then((rows: any[]) => { if (!cancelled) setDbItems((rows ?? []).map(mapRow)); })
+    // Catalog page — explicit upper bound prevents unbounded growth.
+    fetchFn({ data: { limit: 500 } })
+      .then((res: any) => {
+        if (cancelled) return;
+        const rows: any[] = Array.isArray(res) ? res : res?.items ?? [];
+        setDbItems(rows.map(mapRow));
+      })
       .catch(() => { /* fail silently — static catalog still renders */ });
     fetchOverrides()
       .then((rows) => {
