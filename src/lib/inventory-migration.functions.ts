@@ -15,13 +15,29 @@ async function assertAdmin(supabase: any, userId: string) {
   if (!data) throw new Error("forbidden");
 }
 
+export type InventoryReadiness = {
+  products_count: number;
+  published_count: number;
+  track_stock_enabled_count: number;
+  track_stock_disabled_count: number;
+  branches_active: number;
+  branch_inventory_rows: number;
+  products_with_branch_inv: number;
+  products_without_branch_inv: number;
+  shadow_log_total: number;
+  shadow_log_mismatches: number;
+  open_inventory_mismatch_alerts: number;
+  inventory_write_mode: string;
+  generated_at: string;
+};
+
 export const getInventoryReadiness = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .handler(async ({ context }): Promise<InventoryReadiness> => {
     await assertAdmin(context.supabase, context.userId);
     const { data, error } = await context.supabase.rpc("inventory_readiness_report" as never);
     if (error) throw new Error(error.message);
-    return data as Record<string, string | number | boolean | null | Array<unknown> | Record<string, unknown>>;
+    return data as InventoryReadiness;
   });
 
 export const listShadowLog = createServerFn({ method: "GET" })
