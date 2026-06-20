@@ -197,12 +197,13 @@ function BulkTab() {
   const [scope, setScope] = useState<"published" | "tracked" | "out_of_stock">("published");
   const [reason, setReason] = useState("استلام شحنة");
   const [preview, setPreview] = useState<Awaited<ReturnType<typeof previewBulkAddStock>> | null>(null);
+  const [applyResult, setApplyResult] = useState<Awaited<ReturnType<typeof applyBulkAddStock>> | null>(null);
   const [busy, setBusy] = useState(false);
   const previewFn = useServerFn(previewBulkAddStock);
   const applyFn = useServerFn(applyBulkAddStock);
 
   async function runPreview() {
-    setBusy(true);
+    setBusy(true); setApplyResult(null);
     try { setPreview(await previewFn({ data: { delta, scope, reason } })); }
     catch (e: any) { toast.error(String(e?.message ?? e)); }
     finally { setBusy(false); }
@@ -215,13 +216,13 @@ function BulkTab() {
     setBusy(true);
     try {
       const res = await applyFn({ data: { delta, scope, reason: reason.trim(), confirm: true } });
-      toast.success(`تم تطبيق التعديل على ${res.applied}/${res.count} صنف`);
-      setPreview(null);
+      setApplyResult(res);
+      toast.success(`نجاح: ${res.applied} · فشل: ${res.failed} · تخطي: ${res.skipped}`);
     } catch (e: any) { toast.error(String(e?.message ?? e)); }
     finally { setBusy(false); }
   }
 
-  function exportCSV(stage: "preview" | "after") {
+  function exportPreviewCSV(stage: "preview" | "projected_after") {
     if (!preview) return;
     const csv = toCSV(preview.rows.map((r) => ({
       legacy_id: r.legacy_id ?? "",
@@ -234,6 +235,22 @@ function BulkTab() {
       stage,
     })));
     downloadCSV(`bulk-stock-${stage}-${Date.now()}.csv`, csv);
+  }
+
+  function exportFinalCSV() {
+    if (!applyResult) return;
+    const csv = toCSV(applyResult.results.map((r) => ({
+      legacy_id: r.legacy_id ?? "",
+      name: r.name,
+      supplier_name: r.supplier_name ?? "",
+      before_qty: r.before_qty,
+      after_qty: r.after_qty,
+      delta: r.after_qty - r.before_qty,
+      outcome: r.outcome, // applied | skipped | failed
+      error: r.error ?? "",
+      reason,
+    })));
+    downloadCSV(`bulk-stock-final-${Date.now()}.csv`, csv);
   }
 
   return (
@@ -262,15 +279,46 @@ function BulkTab() {
           <button onClick={runApply} disabled={busy || !preview} className="flex items-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-2 text-xs font-black text-white disabled:opacity-40"><Save className="size-4" /> تطبيق</button>
           {preview && (
             <>
-              <button onClick={() => exportCSV("preview")} className="flex items-center gap-1.5 rounded-xl bg-secondary px-4 py-2 text-xs font-black"><Download className="size-4" /> CSV قبل</button>
-              <button onClick={() => exportCSV("after")} disabled={busy} className="flex items-center gap-1.5 rounded-xl bg-secondary px-4 py-2 text-xs font-black disabled:opacity-40"><Download className="size-4" /> CSV بعد</button>
+              <button onClick={() => exportPreviewCSV("preview")} className="flex items-center gap-1.5 rounded-xl bg-secondary px-4 py-2 text-xs font-black"><Download className="size-4" /> CSV معاينة</button>
+              <button onClick={() => exportPreviewCSV("projected_after")} className="flex items-center gap-1.5 rounded-xl bg-secondary px-4 py-2 text-xs font-black"><Download className="size-4" /> CSV متوقع</button>
             </>
           )}
-          {!preview && <span className="text-[11px] text-muted-foreground flex items-center gap-1"><AlertTriangle className="size-3" /> يجب المعاينة أولاً</span>}
+          {applyResult && (
+            <button onClick={exportFinalCSV} className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-black text-white"><Download className="size-4" /> CSV نهائي (نتائج التطبيق)</button>
+          )}
+          {!preview && !applyResult && <span className="text-[11px] text-muted-foreground flex items-center gap-1"><AlertTriangle className="size-3" /> يجب المعاينة أولاً</span>}
         </div>
       </div>
 
-      {preview && (
+      {applyResult && (
+        <div className="rounded-2xl border border-emerald-500/40 bg-emerald-500/5 p-4">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <Stat label="نجاح" value={applyResult.applied} />
+            <Stat label="فشل" value={applyResult.failed} />
+            <Stat label="تخطي" value={applyResult.skipped} />
+            <Stat label="إجمالي" value={applyResult.count} />
+          </div>
+          <div className="mt-4 max-h-[480px] overflow-auto rounded-xl border border-border bg-card">
+            <table className="w-full min-w-[800px] text-xs">
+              <thead className="sticky top-0 bg-secondary/80 backdrop-blur"><tr><th className="px-2 py-1 text-right">#</th><th className="px-2 py-1 text-right">الصنف</th><th className="px-2 py-1">قبل</th><th className="px-2 py-1">بعد</th><th className="px-2 py-1">النتيجة</th><th className="px-2 py-1">خطأ</th></tr></thead>
+              <tbody>
+                {applyResult.results.map((r) => (
+                  <tr key={r.id} className="border-t border-border">
+                    <td className="px-2 py-1 text-center text-muted-foreground">{r.legacy_id ?? "—"}</td>
+                    <td className="px-2 py-1">{r.name}</td>
+                    <td className="px-2 py-1 text-center">{r.before_qty}</td>
+                    <td className="px-2 py-1 text-center font-bold">{r.after_qty}</td>
+                    <td className={`px-2 py-1 text-center font-black ${r.outcome === "applied" ? "text-emerald-600" : r.outcome === "failed" ? "text-rose-600" : "text-muted-foreground"}`}>{r.outcome}</td>
+                    <td className="px-2 py-1 text-rose-600">{r.error ?? ""}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {preview && !applyResult && (
         <div className="rounded-2xl border border-primary/40 bg-primary/5 p-4">
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <Stat label="عدد المنتجات" value={preview.count} />
@@ -300,6 +348,7 @@ function BulkTab() {
     </div>
   );
 }
+
 
 // ============== History Tab (supplier link rollback) ==============
 
