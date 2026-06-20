@@ -10,6 +10,7 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
   const { count } = useCart();
   const { lang, setLang, t } = useI18n();
   const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -78,12 +79,28 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
                 </span>
               )}
             </Link>
-            <button className="md:hidden grid size-11 place-items-center rounded-2xl bg-secondary" aria-label={t("nav.menu")}><Menu className="size-5" /></button>
+            <button
+              onClick={() => setMobileOpen((v) => !v)}
+              aria-expanded={mobileOpen}
+              aria-controls="site-mobile-nav"
+              className="md:hidden grid size-11 place-items-center rounded-2xl bg-secondary transition hover:bg-accent"
+              aria-label={t("nav.menu")}
+            >
+              <Menu className="size-5" />
+            </button>
           </div>
         </div>
 
-        <nav className={`border-t border-border bg-card transition-all duration-300 ${scrolled ? "max-h-0 overflow-hidden border-t-0" : "max-h-20"}`}>
-          <div className="mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-2 py-2 text-sm font-bold">
+        <nav
+          id="site-mobile-nav"
+          className={`border-t border-border bg-card transition-all duration-300 overflow-hidden ${
+            scrolled ? "max-h-0 border-t-0" : mobileOpen ? "max-h-[60vh]" : "max-h-0 md:max-h-20 md:border-t"
+          }`}
+        >
+          <div
+            className="mx-auto flex max-w-7xl flex-col items-stretch gap-1 px-2 py-2 text-sm font-bold md:flex-row md:items-center md:overflow-x-auto"
+            onClick={() => setMobileOpen(false)}
+          >
             <Link to="/" className="whitespace-nowrap rounded-xl px-4 py-2 text-muted-foreground transition hover:text-primary" activeProps={{ className: "brand-gradient text-primary-foreground shadow-card" }} activeOptions={{ exact: true }}>{t("nav.home")}</Link>
             <Link to="/insurance" className="whitespace-nowrap rounded-xl px-4 py-2 font-black text-primary hover:underline">🩺 التأمين الطبي</Link>
             <Link to="/products" className="whitespace-nowrap rounded-xl px-4 py-2 text-muted-foreground transition hover:text-primary" activeProps={{ className: "brand-gradient text-primary-foreground shadow-card" }}>{t("nav.products")}</Link>
