@@ -63,6 +63,14 @@ import { Route as ApiPublicHooksWeeklyAiEnrichRouteImport } from './routes/api/p
 import { Route as ApiPublicHooksNightlyIntelRouteImport } from './routes/api/public/hooks/nightly-intel'
 import { Route as ApiPublicHooksChronicRefillsRouteImport } from './routes/api/public/hooks/chronic-refills'
 import { Route as ApiPublicHooksAlertsWorkerRouteImport } from './routes/api/public/hooks/alerts-worker'
+import { Route as ApiPublicHooksAgentsSalesRouteImport } from './routes/api/public/hooks/agents/sales'
+import { Route as ApiPublicHooksAgentsOperationsRouteImport } from './routes/api/public/hooks/agents/operations'
+import { Route as ApiPublicHooksAgentsMarketingRouteImport } from './routes/api/public/hooks/agents/marketing'
+import { Route as ApiPublicHooksAgentsInventoryRouteImport } from './routes/api/public/hooks/agents/inventory'
+import { Route as ApiPublicHooksAgentsCxRouteImport } from './routes/api/public/hooks/agents/cx'
+import { Route as ApiPublicHooksAgentsCtoRouteImport } from './routes/api/public/hooks/agents/cto'
+import { Route as ApiPublicHooksAgentsCeoRouteImport } from './routes/api/public/hooks/agents/ceo'
+import { Route as ApiPublicHooksAgentsBiRouteImport } from './routes/api/public/hooks/agents/bi'
 
 const YemenDebugRoute = YemenDebugRouteImport.update({
   id: '/yemen-debug',
@@ -343,6 +351,50 @@ const ApiPublicHooksAlertsWorkerRoute =
     path: '/api/public/hooks/alerts-worker',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksAgentsSalesRoute =
+  ApiPublicHooksAgentsSalesRouteImport.update({
+    id: '/api/public/hooks/agents/sales',
+    path: '/api/public/hooks/agents/sales',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksAgentsOperationsRoute =
+  ApiPublicHooksAgentsOperationsRouteImport.update({
+    id: '/api/public/hooks/agents/operations',
+    path: '/api/public/hooks/agents/operations',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksAgentsMarketingRoute =
+  ApiPublicHooksAgentsMarketingRouteImport.update({
+    id: '/api/public/hooks/agents/marketing',
+    path: '/api/public/hooks/agents/marketing',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksAgentsInventoryRoute =
+  ApiPublicHooksAgentsInventoryRouteImport.update({
+    id: '/api/public/hooks/agents/inventory',
+    path: '/api/public/hooks/agents/inventory',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksAgentsCxRoute = ApiPublicHooksAgentsCxRouteImport.update({
+  id: '/api/public/hooks/agents/cx',
+  path: '/api/public/hooks/agents/cx',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicHooksAgentsCtoRoute = ApiPublicHooksAgentsCtoRouteImport.update({
+  id: '/api/public/hooks/agents/cto',
+  path: '/api/public/hooks/agents/cto',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicHooksAgentsCeoRoute = ApiPublicHooksAgentsCeoRouteImport.update({
+  id: '/api/public/hooks/agents/ceo',
+  path: '/api/public/hooks/agents/ceo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicHooksAgentsBiRoute = ApiPublicHooksAgentsBiRouteImport.update({
+  id: '/api/public/hooks/agents/bi',
+  path: '/api/public/hooks/agents/bi',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -399,6 +451,14 @@ export interface FileRoutesByFullPath {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/api/public/hooks/agents/bi': typeof ApiPublicHooksAgentsBiRoute
+  '/api/public/hooks/agents/ceo': typeof ApiPublicHooksAgentsCeoRoute
+  '/api/public/hooks/agents/cto': typeof ApiPublicHooksAgentsCtoRoute
+  '/api/public/hooks/agents/cx': typeof ApiPublicHooksAgentsCxRoute
+  '/api/public/hooks/agents/inventory': typeof ApiPublicHooksAgentsInventoryRoute
+  '/api/public/hooks/agents/marketing': typeof ApiPublicHooksAgentsMarketingRoute
+  '/api/public/hooks/agents/operations': typeof ApiPublicHooksAgentsOperationsRoute
+  '/api/public/hooks/agents/sales': typeof ApiPublicHooksAgentsSalesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -455,6 +515,14 @@ export interface FileRoutesByTo {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/api/public/hooks/agents/bi': typeof ApiPublicHooksAgentsBiRoute
+  '/api/public/hooks/agents/ceo': typeof ApiPublicHooksAgentsCeoRoute
+  '/api/public/hooks/agents/cto': typeof ApiPublicHooksAgentsCtoRoute
+  '/api/public/hooks/agents/cx': typeof ApiPublicHooksAgentsCxRoute
+  '/api/public/hooks/agents/inventory': typeof ApiPublicHooksAgentsInventoryRoute
+  '/api/public/hooks/agents/marketing': typeof ApiPublicHooksAgentsMarketingRoute
+  '/api/public/hooks/agents/operations': typeof ApiPublicHooksAgentsOperationsRoute
+  '/api/public/hooks/agents/sales': typeof ApiPublicHooksAgentsSalesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -512,6 +580,14 @@ export interface FileRoutesById {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/api/public/hooks/agents/bi': typeof ApiPublicHooksAgentsBiRoute
+  '/api/public/hooks/agents/ceo': typeof ApiPublicHooksAgentsCeoRoute
+  '/api/public/hooks/agents/cto': typeof ApiPublicHooksAgentsCtoRoute
+  '/api/public/hooks/agents/cx': typeof ApiPublicHooksAgentsCxRoute
+  '/api/public/hooks/agents/inventory': typeof ApiPublicHooksAgentsInventoryRoute
+  '/api/public/hooks/agents/marketing': typeof ApiPublicHooksAgentsMarketingRoute
+  '/api/public/hooks/agents/operations': typeof ApiPublicHooksAgentsOperationsRoute
+  '/api/public/hooks/agents/sales': typeof ApiPublicHooksAgentsSalesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -570,6 +646,14 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/api/public/hooks/agents/bi'
+    | '/api/public/hooks/agents/ceo'
+    | '/api/public/hooks/agents/cto'
+    | '/api/public/hooks/agents/cx'
+    | '/api/public/hooks/agents/inventory'
+    | '/api/public/hooks/agents/marketing'
+    | '/api/public/hooks/agents/operations'
+    | '/api/public/hooks/agents/sales'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -626,6 +710,14 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/api/public/hooks/agents/bi'
+    | '/api/public/hooks/agents/ceo'
+    | '/api/public/hooks/agents/cto'
+    | '/api/public/hooks/agents/cx'
+    | '/api/public/hooks/agents/inventory'
+    | '/api/public/hooks/agents/marketing'
+    | '/api/public/hooks/agents/operations'
+    | '/api/public/hooks/agents/sales'
   id:
     | '__root__'
     | '/'
@@ -682,6 +774,14 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/api/public/hooks/agents/bi'
+    | '/api/public/hooks/agents/ceo'
+    | '/api/public/hooks/agents/cto'
+    | '/api/public/hooks/agents/cx'
+    | '/api/public/hooks/agents/inventory'
+    | '/api/public/hooks/agents/marketing'
+    | '/api/public/hooks/agents/operations'
+    | '/api/public/hooks/agents/sales'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -738,6 +838,14 @@ export interface RootRouteChildren {
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
+  ApiPublicHooksAgentsBiRoute: typeof ApiPublicHooksAgentsBiRoute
+  ApiPublicHooksAgentsCeoRoute: typeof ApiPublicHooksAgentsCeoRoute
+  ApiPublicHooksAgentsCtoRoute: typeof ApiPublicHooksAgentsCtoRoute
+  ApiPublicHooksAgentsCxRoute: typeof ApiPublicHooksAgentsCxRoute
+  ApiPublicHooksAgentsInventoryRoute: typeof ApiPublicHooksAgentsInventoryRoute
+  ApiPublicHooksAgentsMarketingRoute: typeof ApiPublicHooksAgentsMarketingRoute
+  ApiPublicHooksAgentsOperationsRoute: typeof ApiPublicHooksAgentsOperationsRoute
+  ApiPublicHooksAgentsSalesRoute: typeof ApiPublicHooksAgentsSalesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1120,6 +1228,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksAlertsWorkerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/agents/sales': {
+      id: '/api/public/hooks/agents/sales'
+      path: '/api/public/hooks/agents/sales'
+      fullPath: '/api/public/hooks/agents/sales'
+      preLoaderRoute: typeof ApiPublicHooksAgentsSalesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/agents/operations': {
+      id: '/api/public/hooks/agents/operations'
+      path: '/api/public/hooks/agents/operations'
+      fullPath: '/api/public/hooks/agents/operations'
+      preLoaderRoute: typeof ApiPublicHooksAgentsOperationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/agents/marketing': {
+      id: '/api/public/hooks/agents/marketing'
+      path: '/api/public/hooks/agents/marketing'
+      fullPath: '/api/public/hooks/agents/marketing'
+      preLoaderRoute: typeof ApiPublicHooksAgentsMarketingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/agents/inventory': {
+      id: '/api/public/hooks/agents/inventory'
+      path: '/api/public/hooks/agents/inventory'
+      fullPath: '/api/public/hooks/agents/inventory'
+      preLoaderRoute: typeof ApiPublicHooksAgentsInventoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/agents/cx': {
+      id: '/api/public/hooks/agents/cx'
+      path: '/api/public/hooks/agents/cx'
+      fullPath: '/api/public/hooks/agents/cx'
+      preLoaderRoute: typeof ApiPublicHooksAgentsCxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/agents/cto': {
+      id: '/api/public/hooks/agents/cto'
+      path: '/api/public/hooks/agents/cto'
+      fullPath: '/api/public/hooks/agents/cto'
+      preLoaderRoute: typeof ApiPublicHooksAgentsCtoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/agents/ceo': {
+      id: '/api/public/hooks/agents/ceo'
+      path: '/api/public/hooks/agents/ceo'
+      fullPath: '/api/public/hooks/agents/ceo'
+      preLoaderRoute: typeof ApiPublicHooksAgentsCeoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/agents/bi': {
+      id: '/api/public/hooks/agents/bi'
+      path: '/api/public/hooks/agents/bi'
+      fullPath: '/api/public/hooks/agents/bi'
+      preLoaderRoute: typeof ApiPublicHooksAgentsBiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1189,6 +1353,14 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
+  ApiPublicHooksAgentsBiRoute: ApiPublicHooksAgentsBiRoute,
+  ApiPublicHooksAgentsCeoRoute: ApiPublicHooksAgentsCeoRoute,
+  ApiPublicHooksAgentsCtoRoute: ApiPublicHooksAgentsCtoRoute,
+  ApiPublicHooksAgentsCxRoute: ApiPublicHooksAgentsCxRoute,
+  ApiPublicHooksAgentsInventoryRoute: ApiPublicHooksAgentsInventoryRoute,
+  ApiPublicHooksAgentsMarketingRoute: ApiPublicHooksAgentsMarketingRoute,
+  ApiPublicHooksAgentsOperationsRoute: ApiPublicHooksAgentsOperationsRoute,
+  ApiPublicHooksAgentsSalesRoute: ApiPublicHooksAgentsSalesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
