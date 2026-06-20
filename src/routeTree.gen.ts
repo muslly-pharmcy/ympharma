@@ -26,6 +26,7 @@ import { Route as CartRouteImport } from './routes/cart'
 import { Route as BundlesRouteImport } from './routes/bundles'
 import { Route as AiSymptomsRouteImport } from './routes/ai-symptoms'
 import { Route as AiSupplementRouteImport } from './routes/ai-supplement'
+import { Route as AiPrescriptionRouteImport } from './routes/ai-prescription'
 import { Route as AiAssistantRouteImport } from './routes/ai-assistant'
 import { Route as AdminWorkforceRouteImport } from './routes/admin-workforce'
 import { Route as AdminSettingsRouteImport } from './routes/admin-settings'
@@ -156,6 +157,11 @@ const AiSymptomsRoute = AiSymptomsRouteImport.update({
 const AiSupplementRoute = AiSupplementRouteImport.update({
   id: '/ai-supplement',
   path: '/ai-supplement',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiPrescriptionRoute = AiPrescriptionRouteImport.update({
+  id: '/ai-prescription',
+  path: '/ai-prescription',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AiAssistantRoute = AiAssistantRouteImport.update({
@@ -423,6 +429,7 @@ export interface FileRoutesByFullPath {
   '/admin-settings': typeof AdminSettingsRoute
   '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
+  '/ai-prescription': typeof AiPrescriptionRoute
   '/ai-supplement': typeof AiSupplementRoute
   '/ai-symptoms': typeof AiSymptomsRoute
   '/bundles': typeof BundlesRoute
@@ -488,6 +495,7 @@ export interface FileRoutesByTo {
   '/admin-settings': typeof AdminSettingsRoute
   '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
+  '/ai-prescription': typeof AiPrescriptionRoute
   '/ai-supplement': typeof AiSupplementRoute
   '/ai-symptoms': typeof AiSymptomsRoute
   '/bundles': typeof BundlesRoute
@@ -554,6 +562,7 @@ export interface FileRoutesById {
   '/admin-settings': typeof AdminSettingsRoute
   '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
+  '/ai-prescription': typeof AiPrescriptionRoute
   '/ai-supplement': typeof AiSupplementRoute
   '/ai-symptoms': typeof AiSymptomsRoute
   '/bundles': typeof BundlesRoute
@@ -621,6 +630,7 @@ export interface FileRouteTypes {
     | '/admin-settings'
     | '/admin-workforce'
     | '/ai-assistant'
+    | '/ai-prescription'
     | '/ai-supplement'
     | '/ai-symptoms'
     | '/bundles'
@@ -686,6 +696,7 @@ export interface FileRouteTypes {
     | '/admin-settings'
     | '/admin-workforce'
     | '/ai-assistant'
+    | '/ai-prescription'
     | '/ai-supplement'
     | '/ai-symptoms'
     | '/bundles'
@@ -751,6 +762,7 @@ export interface FileRouteTypes {
     | '/admin-settings'
     | '/admin-workforce'
     | '/ai-assistant'
+    | '/ai-prescription'
     | '/ai-supplement'
     | '/ai-symptoms'
     | '/bundles'
@@ -817,6 +829,7 @@ export interface RootRouteChildren {
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminWorkforceRoute: typeof AdminWorkforceRoute
   AiAssistantRoute: typeof AiAssistantRoute
+  AiPrescriptionRoute: typeof AiPrescriptionRoute
   AiSupplementRoute: typeof AiSupplementRoute
   AiSymptomsRoute: typeof AiSymptomsRoute
   BundlesRoute: typeof BundlesRoute
@@ -980,6 +993,13 @@ declare module '@tanstack/react-router' {
       path: '/ai-supplement'
       fullPath: '/ai-supplement'
       preLoaderRoute: typeof AiSupplementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-prescription': {
+      id: '/ai-prescription'
+      path: '/ai-prescription'
+      fullPath: '/ai-prescription'
+      preLoaderRoute: typeof AiPrescriptionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ai-assistant': {
@@ -1340,6 +1360,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminSettingsRoute: AdminSettingsRoute,
   AdminWorkforceRoute: AdminWorkforceRoute,
   AiAssistantRoute: AiAssistantRoute,
+  AiPrescriptionRoute: AiPrescriptionRoute,
   AiSupplementRoute: AiSupplementRoute,
   AiSymptomsRoute: AiSymptomsRoute,
   BundlesRoute: BundlesRoute,
