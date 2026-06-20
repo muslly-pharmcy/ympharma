@@ -45,6 +45,7 @@ import { Route as AdminCampaignsRouteImport } from './routes/admin-campaigns'
 import { Route as AdminBundlesRouteImport } from './routes/admin-bundles'
 import { Route as AdminBannersRouteImport } from './routes/admin-banners'
 import { Route as AdminBackupsRouteImport } from './routes/admin-backups'
+import { Route as AdminAutomationHubRouteImport } from './routes/admin-automation-hub'
 import { Route as AdminAiWhatsappRouteImport } from './routes/admin-ai-whatsapp'
 import { Route as AdminAiSalesCxRouteImport } from './routes/admin-ai-sales-cx'
 import { Route as AdminAiProcurementRouteImport } from './routes/admin-ai-procurement'
@@ -267,6 +268,11 @@ const AdminBannersRoute = AdminBannersRouteImport.update({
 const AdminBackupsRoute = AdminBackupsRouteImport.update({
   id: '/admin-backups',
   path: '/admin-backups',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAutomationHubRoute = AdminAutomationHubRouteImport.update({
+  id: '/admin-automation-hub',
+  path: '/admin-automation-hub',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminAiWhatsappRoute = AdminAiWhatsappRouteImport.update({
@@ -516,6 +522,7 @@ export interface FileRoutesByFullPath {
   '/admin-ai-procurement': typeof AdminAiProcurementRoute
   '/admin-ai-sales-cx': typeof AdminAiSalesCxRoute
   '/admin-ai-whatsapp': typeof AdminAiWhatsappRoute
+  '/admin-automation-hub': typeof AdminAutomationHubRoute
   '/admin-backups': typeof AdminBackupsRoute
   '/admin-banners': typeof AdminBannersRoute
   '/admin-bundles': typeof AdminBundlesRoute
@@ -597,6 +604,7 @@ export interface FileRoutesByTo {
   '/admin-ai-procurement': typeof AdminAiProcurementRoute
   '/admin-ai-sales-cx': typeof AdminAiSalesCxRoute
   '/admin-ai-whatsapp': typeof AdminAiWhatsappRoute
+  '/admin-automation-hub': typeof AdminAutomationHubRoute
   '/admin-backups': typeof AdminBackupsRoute
   '/admin-banners': typeof AdminBannersRoute
   '/admin-bundles': typeof AdminBundlesRoute
@@ -679,6 +687,7 @@ export interface FileRoutesById {
   '/admin-ai-procurement': typeof AdminAiProcurementRoute
   '/admin-ai-sales-cx': typeof AdminAiSalesCxRoute
   '/admin-ai-whatsapp': typeof AdminAiWhatsappRoute
+  '/admin-automation-hub': typeof AdminAutomationHubRoute
   '/admin-backups': typeof AdminBackupsRoute
   '/admin-banners': typeof AdminBannersRoute
   '/admin-bundles': typeof AdminBundlesRoute
@@ -762,6 +771,7 @@ export interface FileRouteTypes {
     | '/admin-ai-procurement'
     | '/admin-ai-sales-cx'
     | '/admin-ai-whatsapp'
+    | '/admin-automation-hub'
     | '/admin-backups'
     | '/admin-banners'
     | '/admin-bundles'
@@ -843,6 +853,7 @@ export interface FileRouteTypes {
     | '/admin-ai-procurement'
     | '/admin-ai-sales-cx'
     | '/admin-ai-whatsapp'
+    | '/admin-automation-hub'
     | '/admin-backups'
     | '/admin-banners'
     | '/admin-bundles'
@@ -924,6 +935,7 @@ export interface FileRouteTypes {
     | '/admin-ai-procurement'
     | '/admin-ai-sales-cx'
     | '/admin-ai-whatsapp'
+    | '/admin-automation-hub'
     | '/admin-backups'
     | '/admin-banners'
     | '/admin-bundles'
@@ -1006,6 +1018,7 @@ export interface RootRouteChildren {
   AdminAiProcurementRoute: typeof AdminAiProcurementRoute
   AdminAiSalesCxRoute: typeof AdminAiSalesCxRoute
   AdminAiWhatsappRoute: typeof AdminAiWhatsappRoute
+  AdminAutomationHubRoute: typeof AdminAutomationHubRoute
   AdminBackupsRoute: typeof AdminBackupsRoute
   AdminBannersRoute: typeof AdminBannersRoute
   AdminBundlesRoute: typeof AdminBundlesRoute
@@ -1323,6 +1336,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-backups'
       fullPath: '/admin-backups'
       preLoaderRoute: typeof AdminBackupsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-automation-hub': {
+      id: '/admin-automation-hub'
+      path: '/admin-automation-hub'
+      fullPath: '/admin-automation-hub'
+      preLoaderRoute: typeof AdminAutomationHubRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-ai-whatsapp': {
@@ -1657,6 +1677,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminAiProcurementRoute: AdminAiProcurementRoute,
   AdminAiSalesCxRoute: AdminAiSalesCxRoute,
   AdminAiWhatsappRoute: AdminAiWhatsappRoute,
+  AdminAutomationHubRoute: AdminAutomationHubRoute,
   AdminBackupsRoute: AdminBackupsRoute,
   AdminBannersRoute: AdminBannersRoute,
   AdminBundlesRoute: AdminBundlesRoute,

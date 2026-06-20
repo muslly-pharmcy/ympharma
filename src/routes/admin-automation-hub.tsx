@@ -71,7 +71,7 @@ function AutomationHubPage() {
     try {
       const [r, s] = await Promise.all([
         list({ data: { execution_status: statusFilter, target_pipeline: pipelineFilter, limit: 100 } }),
-        stats({ data: {} }),
+        stats(),
       ]);
       setRows((r.rows as Row[]) ?? []);
       setCounts((s.counts as Record<string, number>) ?? {});
