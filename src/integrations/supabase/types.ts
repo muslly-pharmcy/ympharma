@@ -3185,6 +3185,7 @@ export type Database = {
           last_error: string | null
           max_attempts: number
           next_attempt_at: string
+          order_id: string | null
           prescription_id: string | null
           recipient_phone: string
           rendered_body: string | null
@@ -3205,6 +3206,7 @@ export type Database = {
           last_error?: string | null
           max_attempts?: number
           next_attempt_at?: string
+          order_id?: string | null
           prescription_id?: string | null
           recipient_phone: string
           rendered_body?: string | null
@@ -3225,6 +3227,7 @@ export type Database = {
           last_error?: string | null
           max_attempts?: number
           next_attempt_at?: string
+          order_id?: string | null
           prescription_id?: string | null
           recipient_phone?: string
           rendered_body?: string | null
@@ -3566,6 +3569,7 @@ export type Database = {
           last_error: string | null
           max_attempts: number
           next_attempt_at: string
+          order_id: string | null
           prescription_id: string | null
           recipient_phone: string
           rendered_body: string | null
@@ -3657,6 +3661,15 @@ export type Database = {
           _event_name: string
           _payload?: Json
           _source?: string
+        }
+        Returns: string
+      }
+      emit_order_event: {
+        Args: {
+          _correlation_id?: string
+          _event_name: string
+          _meta?: Json
+          _order_id: string
         }
         Returns: string
       }

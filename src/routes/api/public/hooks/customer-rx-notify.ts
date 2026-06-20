@@ -27,6 +27,7 @@ type DispatchRow = {
   event_name: string;
   correlation_id: string | null;
   prescription_id: string | null;
+  order_id: string | null;
   recipient_phone: string;
   template_id: string;
   attempts: number;
@@ -44,9 +45,12 @@ type Settings = {
   baseSeconds: number;
   pharmacyName: string;
   optOutBaseUrl: string;
+  trackingBaseUrl: string;
   masterOn: boolean;
   rxOn: boolean;
+  ordersOn: boolean;
 };
+
 
 function renderTemplate(tpl: string, vars: Record<string, string>): string {
   return tpl.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (_m, k) =>
@@ -115,9 +119,11 @@ export const Route = createFileRoute("/api/public/hooks/customer-rx-notify")({
               .in("key", [
                 "customer_whatsapp_enabled",
                 "prescription_notifications_enabled",
+                "order_notifications_enabled",
                 "whatsapp_retry_base_seconds",
                 "whatsapp_pharmacy_name",
                 "whatsapp_opt_out_base_url",
+                "whatsapp_tracking_base_url",
               ]),
             supabaseAdmin
               .from("whatsapp_notification_templates")
@@ -140,18 +146,24 @@ export const Route = createFileRoute("/api/public/hooks/customer-rx-notify")({
               typeof sMap.get("whatsapp_opt_out_base_url") === "string"
                 ? (sMap.get("whatsapp_opt_out_base_url") as string)
                 : "https://muslly.com/notifications",
+            trackingBaseUrl:
+              typeof sMap.get("whatsapp_tracking_base_url") === "string"
+                ? (sMap.get("whatsapp_tracking_base_url") as string)
+                : "https://muslly.com/track",
             masterOn: sMap.get("customer_whatsapp_enabled") === true,
             rxOn: sMap.get("prescription_notifications_enabled") === true,
+            ordersOn: sMap.get("order_notifications_enabled") === true,
           };
 
           // Master kill-switch (defense-in-depth — trigger also enforces).
-          if (!settings.masterOn || !settings.rxOn) {
+          if (!settings.masterOn || (!settings.rxOn && !settings.ordersOn)) {
             return Response.json({
               ok: true,
               skipped: "master_off",
               elapsed_ms: Date.now() - started,
             });
           }
+
 
           const templates = new Map<string, Template>(
             ((tplRows ?? []) as Template[]).map((t) => [t.id, t]),
@@ -207,24 +219,30 @@ export const Route = createFileRoute("/api/public/hooks/customer-rx-notify")({
               }
 
               // Resolve dynamic variables.
-              let pharmacyName = settings.pharmacyName;
+              const pharmacyName = settings.pharmacyName;
               let optOutToken = "";
-              if (row.prescription_id) {
-                const { data: pref } = await supabaseAdmin
-                  .from("customer_notification_preferences")
-                  .select("opt_out_token")
-                  .eq("phone", row.recipient_phone)
-                  .maybeSingle();
-                optOutToken = (pref as { opt_out_token?: string } | null)?.opt_out_token ?? "";
-              }
+              const { data: pref } = await supabaseAdmin
+                .from("customer_notification_preferences")
+                .select("opt_out_token")
+                .eq("phone", row.recipient_phone)
+                .maybeSingle();
+              optOutToken = (pref as { opt_out_token?: string } | null)?.opt_out_token ?? "";
               const optOutUrl = optOutToken
                 ? `${settings.optOutBaseUrl}?t=${optOutToken}`
                 : settings.optOutBaseUrl;
 
+              const isOrder = row.event_name.startsWith("ORDER_");
+              const refId = isOrder ? row.order_id : row.prescription_id;
+              const trackingUrl = isOrder && row.order_id
+                ? `${settings.trackingBaseUrl}?id=${encodeURIComponent(row.order_id)}`
+                : settings.trackingBaseUrl;
+
               const rendered = renderTemplate(tpl.body_template, {
-                order_number: row.prescription_id ?? "—",
+                order_number: refId ?? "—",
                 pharmacy_name: pharmacyName,
                 review_date: new Date().toLocaleDateString("ar-EG"),
+                event_date: new Date().toLocaleDateString("ar-EG"),
+                tracking_url: trackingUrl,
                 opt_out_url: optOutUrl,
               });
 
@@ -233,7 +251,7 @@ export const Route = createFileRoute("/api/public/hooks/customer-rx-notify")({
 
               // Mirror to whatsapp_delivery_logs for unified observability.
               await supabaseAdmin.from("whatsapp_delivery_logs").insert({
-                message_kind: "customer_rx_notification",
+                message_kind: isOrder ? "customer_order_notification" : "customer_rx_notification",
                 recipient_phone: row.recipient_phone,
                 template_name: row.template_id,
                 payload: {
@@ -245,10 +263,11 @@ export const Route = createFileRoute("/api/public/hooks/customer-rx-notify")({
                 wamid: result.wamid,
                 status: result.ok ? "sent" : "failed",
                 error_message: result.error ?? null,
-                ref_kind: "prescription",
-                ref_id: row.prescription_id,
+                ref_kind: isOrder ? "order" : "prescription",
+                ref_id: refId,
                 sent_at: result.ok ? new Date().toISOString() : null,
               });
+
 
               if (result.ok) {
                 await supabaseAdmin.rpc("mark_customer_rx_notification_sent" as never, {
