@@ -185,6 +185,11 @@ function CommandCenter() {
               <Kpi label="مخزون منخفض / نفد" value={`${dash.inventory_low_stock} / ${dash.inventory_oos}`} icon={<AlertTriangle className="size-4 text-amber-500" />} />
             </div>
 
+            {/* AI Executive Copilot + Alerts + Inventory/Sales/CTO/Report */}
+            <CopilotPanels />
+
+
+
             {/* Revenue forensics */}
             <div className="grid gap-3 md:grid-cols-2">
               <Card title="إيراد مفقود (30 يوم)" subtitle="طلبات ملغاة">
