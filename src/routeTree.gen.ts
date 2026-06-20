@@ -27,6 +27,7 @@ import { Route as BundlesRouteImport } from './routes/bundles'
 import { Route as AiSymptomsRouteImport } from './routes/ai-symptoms'
 import { Route as AiSupplementRouteImport } from './routes/ai-supplement'
 import { Route as AiPrescriptionRouteImport } from './routes/ai-prescription'
+import { Route as AiPharmacistRouteImport } from './routes/ai-pharmacist'
 import { Route as AiAssistantRouteImport } from './routes/ai-assistant'
 import { Route as AdminWorkforceRouteImport } from './routes/admin-workforce'
 import { Route as AdminSettingsRouteImport } from './routes/admin-settings'
@@ -169,6 +170,11 @@ const AiSupplementRoute = AiSupplementRouteImport.update({
 const AiPrescriptionRoute = AiPrescriptionRouteImport.update({
   id: '/ai-prescription',
   path: '/ai-prescription',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiPharmacistRoute = AiPharmacistRouteImport.update({
+  id: '/ai-pharmacist',
+  path: '/ai-pharmacist',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AiAssistantRoute = AiAssistantRouteImport.update({
@@ -478,6 +484,7 @@ export interface FileRoutesByFullPath {
   '/admin-settings': typeof AdminSettingsRoute
   '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
+  '/ai-pharmacist': typeof AiPharmacistRoute
   '/ai-prescription': typeof AiPrescriptionRoute
   '/ai-supplement': typeof AiSupplementRoute
   '/ai-symptoms': typeof AiSymptomsRoute
@@ -551,6 +558,7 @@ export interface FileRoutesByTo {
   '/admin-settings': typeof AdminSettingsRoute
   '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
+  '/ai-pharmacist': typeof AiPharmacistRoute
   '/ai-prescription': typeof AiPrescriptionRoute
   '/ai-supplement': typeof AiSupplementRoute
   '/ai-symptoms': typeof AiSymptomsRoute
@@ -625,6 +633,7 @@ export interface FileRoutesById {
   '/admin-settings': typeof AdminSettingsRoute
   '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
+  '/ai-pharmacist': typeof AiPharmacistRoute
   '/ai-prescription': typeof AiPrescriptionRoute
   '/ai-supplement': typeof AiSupplementRoute
   '/ai-symptoms': typeof AiSymptomsRoute
@@ -700,6 +709,7 @@ export interface FileRouteTypes {
     | '/admin-settings'
     | '/admin-workforce'
     | '/ai-assistant'
+    | '/ai-pharmacist'
     | '/ai-prescription'
     | '/ai-supplement'
     | '/ai-symptoms'
@@ -773,6 +783,7 @@ export interface FileRouteTypes {
     | '/admin-settings'
     | '/admin-workforce'
     | '/ai-assistant'
+    | '/ai-pharmacist'
     | '/ai-prescription'
     | '/ai-supplement'
     | '/ai-symptoms'
@@ -846,6 +857,7 @@ export interface FileRouteTypes {
     | '/admin-settings'
     | '/admin-workforce'
     | '/ai-assistant'
+    | '/ai-pharmacist'
     | '/ai-prescription'
     | '/ai-supplement'
     | '/ai-symptoms'
@@ -920,6 +932,7 @@ export interface RootRouteChildren {
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminWorkforceRoute: typeof AdminWorkforceRoute
   AiAssistantRoute: typeof AiAssistantRoute
+  AiPharmacistRoute: typeof AiPharmacistRoute
   AiPrescriptionRoute: typeof AiPrescriptionRoute
   AiSupplementRoute: typeof AiSupplementRoute
   AiSymptomsRoute: typeof AiSymptomsRoute
@@ -1092,6 +1105,13 @@ declare module '@tanstack/react-router' {
       path: '/ai-prescription'
       fullPath: '/ai-prescription'
       preLoaderRoute: typeof AiPrescriptionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-pharmacist': {
+      id: '/ai-pharmacist'
+      path: '/ai-pharmacist'
+      fullPath: '/ai-pharmacist'
+      preLoaderRoute: typeof AiPharmacistRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ai-assistant': {
@@ -1507,6 +1527,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminSettingsRoute: AdminSettingsRoute,
   AdminWorkforceRoute: AdminWorkforceRoute,
   AiAssistantRoute: AiAssistantRoute,
+  AiPharmacistRoute: AiPharmacistRoute,
   AiPrescriptionRoute: AiPrescriptionRoute,
   AiSupplementRoute: AiSupplementRoute,
   AiSymptomsRoute: AiSymptomsRoute,

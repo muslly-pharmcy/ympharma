@@ -132,10 +132,11 @@ const TOPIC_LABEL: Record<string, string> = {
   services: "استفسار عن الخدمات",
   prescription: "رفع روشتة طبية",
   marketing: "توصيات تسويقية (داخلي)",
+  pharmacist: "استشارة صيدلي ذكي",
 };
 
 export type AiHandoffInput = {
-  topic: "interactions" | "symptoms" | "supplement" | "services" | "prescription" | "marketing";
+  topic: "interactions" | "symptoms" | "supplement" | "services" | "prescription" | "marketing" | "pharmacist";
   messages: { role: "user" | "assistant"; content: string }[];
   recommendedProducts?: { name: string; price?: number }[];
 };

@@ -6,7 +6,7 @@ import { buildAiHandoffMessage, waLink } from "@/lib/whatsapp";
 import { useMergedProducts } from "@/lib/use-merged-products";
 
 type Msg = { role: "user" | "assistant"; content: string };
-type Mode = "interactions" | "services" | "supplement" | "symptoms" | "prescription" | "marketing";
+type Mode = "interactions" | "services" | "supplement" | "symptoms" | "prescription" | "marketing" | "pharmacist";
 
 export function AiChat({
   mode,
@@ -30,7 +30,7 @@ export function AiChat({
   // Real products from DB+catalog → fed to AI for supplement/symptoms recommendation modes
   const products = useMergedProducts();
   const productHints = useMemo(() => {
-    if (mode !== "supplement" && mode !== "symptoms") return undefined;
+    if (mode !== "supplement" && mode !== "symptoms" && mode !== "pharmacist") return undefined;
     // Keep payload small; prioritize relevant categories per mode
     const relevant = products.filter((p) => {
       if (mode === "supplement") return ["vitamins", "now", "herbal"].includes(p.cat);
