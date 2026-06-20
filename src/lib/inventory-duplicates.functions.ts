@@ -123,9 +123,51 @@ export const linkSuppliersBatch = createServerFn({ method: "POST" })
     return { applied, count: data.items.length, batch_id: batchId };
   });
 
-export const rollbackSupplierBatch = createServerFn({ method: "POST" })
+export const previewRollbackBatch = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ batch_id: z.string().min(8).max(64) }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { data: rows, error } = await context.supabase
+      .from("supplier_link_audit")
+      .select("id, product_id, before_supplier_name, before_supplier_cost, after_supplier_name, after_supplier_cost, rolled_back_at")
+      .eq("batch_id", data.batch_id);
+    if (error) throw new Error(error.message);
+    if (!rows || rows.length === 0) throw new Error("لا توجد عملية بهذا المعرف");
+
+    const ids = rows.map((r: any) => r.product_id);
+    const { data: prods } = await context.supabase
+      .from("products").select("id, name, legacy_id, supplier_name, supplier_cost").in("id", ids);
+    const pmap = new Map<string, any>((prods ?? []).map((p: any) => [p.id, p]));
+
+    const diffs = (rows as any[]).map((r) => {
+      const p = pmap.get(r.product_id) ?? {};
+      return {
+        product_id: r.product_id,
+        legacy_id: p.legacy_id ?? null,
+        name: p.name ?? "—",
+        current_supplier: p.supplier_name ?? null,
+        current_cost: p.supplier_cost ?? null,
+        restore_supplier: r.before_supplier_name,
+        restore_cost: r.before_supplier_cost,
+        will_change: (p.supplier_name ?? null) !== (r.before_supplier_name ?? null)
+                  || Number(p.supplier_cost ?? 0) !== Number(r.before_supplier_cost ?? 0),
+        already_rolled_back: !!r.rolled_back_at,
+      };
+    });
+
+    return {
+      batch_id: data.batch_id,
+      total: diffs.length,
+      will_change: diffs.filter((d) => d.will_change && !d.already_rolled_back).length,
+      already_rolled_back: diffs.filter((d) => d.already_rolled_back).length,
+      diffs,
+    };
+  });
+
+export const rollbackSupplierBatch = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ batch_id: z.string().min(8).max(64), confirm: z.literal(true) }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { data: rows, error } = await context.supabase
@@ -154,6 +196,7 @@ export const rollbackSupplierBatch = createServerFn({ method: "POST" })
     });
     return { restored, total: rows.length };
   });
+
 
 export const listSupplierBatches = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
