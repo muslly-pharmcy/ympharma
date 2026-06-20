@@ -210,6 +210,35 @@ export const listScheduleLog = createServerFn({ method: "POST" })
     }> };
   });
 
-
-
+// Batch 7+8 — surface throttling activity on /admin-event-bus.
+// rate_limit_buckets has no anon/authenticated grants, so we read it via
+// supabaseAdmin AFTER the admin check (assertAdmin) — same pattern as
+// installEventConsumerSchedule above.
+export const listThrottlingHits = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ limit: z.number().int().min(1).max(200).default(50) }).parse(d ?? {}))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await supabaseAdmin
+      .from("rate_limit_buckets" as never)
+      .select("key, count, window_start, updated_at")
+      .gte("count", 5)
+      .order("updated_at", { ascending: false })
+      .limit(data.limit);
+    if (error) throw new Error(error.message);
+    const parsed = ((rows ?? []) as Array<{ key: string; count: number; window_start: string; updated_at: string }>).map((r) => {
+      // key shape: 'place_order:phone:+9677...' or 'error_logs:ip:...' (future)
+      const parts = r.key.split(":");
+      const scope = parts[0] ?? "unknown";
+      const subject_kind = parts[1] ?? "—";
+      const subject = parts.slice(2).join(":") || "—";
+      return {
+        scope, subject_kind, subject,
+        count: r.count, window_start: r.window_start, updated_at: r.updated_at,
+        key: r.key,
+      };
+    });
+    return { ok: true as const, rows: parsed };
+  });
 
