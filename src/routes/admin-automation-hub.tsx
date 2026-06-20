@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { AdminGate } from "@/components/admin/AdminGate";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -13,7 +14,7 @@ export const Route = createFileRoute("/admin-automation-hub")({
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
-  component: AutomationHubPage,
+  component: () => (<AdminGate><AutomationHubPage /></AdminGate>),
 });
 
 type Row = {

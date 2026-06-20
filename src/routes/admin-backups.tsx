@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AdminGate } from "@/components/admin/AdminGate";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -7,7 +8,7 @@ import { createAndDownloadBackup, downloadJSON } from "@/lib/backup";
 
 export const Route = createFileRoute("/admin-backups")({
   head: () => ({ meta: [{ title: "النسخ الاحتياطية — لوحة التحكم" }, { name: "robots", content: "noindex, nofollow" }] }),
-  component: BackupsPage,
+  component: () => (<AdminGate><BackupsPage /></AdminGate>),
 });
 
 type Row = { id: string; created_at: string; kind: string; orders_count: number; rx_count: number };

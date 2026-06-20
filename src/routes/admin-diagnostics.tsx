@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AdminGate } from "@/components/admin/AdminGate";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle2, XCircle, Loader2, Database, HardDrive, ShieldCheck, Radio, RefreshCw } from "lucide-react";
@@ -11,7 +12,7 @@ export const Route = createFileRoute("/admin-diagnostics")({
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
-  component: DiagnosticsPage,
+  component: () => (<AdminGate><DiagnosticsPage /></AdminGate>),
 });
 
 type Status = "idle" | "checking" | "ok" | "fail";
