@@ -5,6 +5,7 @@ import { Loader2, RefreshCw, TrendingUp, Users, Heart, AlertTriangle, Package, A
 import { toast } from "sonner";
 import { fetchExecDashboard, listAgentRuns, runIntelNow } from "@/lib/pharmacy-intel-admin.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { CopilotPanels } from "@/components/admin/CopilotPanels";
 
 export const Route = createFileRoute("/admin-command")({
   head: () => ({
@@ -183,6 +184,11 @@ function CommandCenter() {
               <Kpi label="مرضى مزمنون" value={dash.chronic_patients.toString()} icon={<Heart className="size-4 text-rose-500" />} />
               <Kpi label="مخزون منخفض / نفد" value={`${dash.inventory_low_stock} / ${dash.inventory_oos}`} icon={<AlertTriangle className="size-4 text-amber-500" />} />
             </div>
+
+            {/* AI Executive Copilot + Alerts + Inventory/Sales/CTO/Report */}
+            <CopilotPanels />
+
+
 
             {/* Revenue forensics */}
             <div className="grid gap-3 md:grid-cols-2">

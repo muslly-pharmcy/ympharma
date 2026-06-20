@@ -1606,6 +1606,23 @@ export type Database = {
       }
       create_backup: { Args: { _kind?: string }; Returns: string }
       create_scheduled_backup: { Args: { _kind: string }; Returns: string }
+      cto_health: { Args: never; Returns: Json }
+      customers_for_enrichment: {
+        Args: { _limit?: number }
+        Returns: {
+          chronic_flags: Json
+          dominant_category: string
+          health_score: number
+          last_order_at: string
+          name: string
+          orders_count: number
+          phone: string
+          segment: string
+          top_categories: Json
+          total_spent: number
+          value_score: number
+        }[]
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -1615,6 +1632,7 @@ export type Database = {
         Returns: number
       }
       exec_dashboard: { Args: never; Returns: Json }
+      executive_alerts: { Args: never; Returns: Json }
       get_order_history_public: {
         Args: { _client_ip?: string; _id: string; _phone_last4: string }
         Returns: {
@@ -1645,7 +1663,9 @@ export type Database = {
         }
         Returns: boolean
       }
+      inventory_intel: { Args: never; Returns: Json }
       inventory_report: { Args: never; Returns: Json }
+      latest_executive_report: { Args: never; Returns: Json }
       list_approved_classifications_public: { Args: never; Returns: Json }
       list_bundles_public: { Args: never; Returns: Json }
       list_classifications_admin: {
@@ -1710,6 +1730,11 @@ export type Database = {
       rebuild_customer_intel: { Args: never; Returns: Json }
       reject_classification: { Args: { _id: string }; Returns: boolean }
       run_retention_policy: { Args: never; Returns: Json }
+      sales_opportunities: { Args: never; Returns: Json }
+      save_customer_ai_insight: {
+        Args: { _insight: string; _phone: string }
+        Returns: undefined
+      }
       submit_prescription: {
         Args: { _customer: Json; _id: string; _image_urls: string[] }
         Returns: Json
@@ -1724,6 +1749,7 @@ export type Database = {
         Returns: Json
       }
       verify_prescription_image_coverage: { Args: never; Returns: Json }
+      weekly_exec_report_build: { Args: never; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "user" | "owner"

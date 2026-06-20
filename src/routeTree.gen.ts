@@ -55,6 +55,8 @@ import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as ApiPublicHooksWeeklyExecReportRouteImport } from './routes/api/public/hooks/weekly-exec-report'
+import { Route as ApiPublicHooksWeeklyAiEnrichRouteImport } from './routes/api/public/hooks/weekly-ai-enrich'
 import { Route as ApiPublicHooksNightlyIntelRouteImport } from './routes/api/public/hooks/nightly-intel'
 import { Route as ApiPublicHooksAlertsWorkerRouteImport } from './routes/api/public/hooks/alerts-worker'
 
@@ -292,6 +294,18 @@ const LovableEmailQueueProcessRoute =
     path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksWeeklyExecReportRoute =
+  ApiPublicHooksWeeklyExecReportRouteImport.update({
+    id: '/api/public/hooks/weekly-exec-report',
+    path: '/api/public/hooks/weekly-exec-report',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksWeeklyAiEnrichRoute =
+  ApiPublicHooksWeeklyAiEnrichRouteImport.update({
+    id: '/api/public/hooks/weekly-ai-enrich',
+    path: '/api/public/hooks/weekly-ai-enrich',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksNightlyIntelRoute =
   ApiPublicHooksNightlyIntelRouteImport.update({
     id: '/api/public/hooks/nightly-intel',
@@ -351,6 +365,8 @@ export interface FileRoutesByFullPath {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
+  '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
+  '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -401,6 +417,8 @@ export interface FileRoutesByTo {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
+  '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
+  '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -452,6 +470,8 @@ export interface FileRoutesById {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
+  '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
+  '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -504,6 +524,8 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/api/public/hooks/alerts-worker'
     | '/api/public/hooks/nightly-intel'
+    | '/api/public/hooks/weekly-ai-enrich'
+    | '/api/public/hooks/weekly-exec-report'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -554,6 +576,8 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/api/public/hooks/alerts-worker'
     | '/api/public/hooks/nightly-intel'
+    | '/api/public/hooks/weekly-ai-enrich'
+    | '/api/public/hooks/weekly-exec-report'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -604,6 +628,8 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/api/public/hooks/alerts-worker'
     | '/api/public/hooks/nightly-intel'
+    | '/api/public/hooks/weekly-ai-enrich'
+    | '/api/public/hooks/weekly-exec-report'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -655,6 +681,8 @@ export interface RootRouteChildren {
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksAlertsWorkerRoute: typeof ApiPublicHooksAlertsWorkerRoute
   ApiPublicHooksNightlyIntelRoute: typeof ApiPublicHooksNightlyIntelRoute
+  ApiPublicHooksWeeklyAiEnrichRoute: typeof ApiPublicHooksWeeklyAiEnrichRoute
+  ApiPublicHooksWeeklyExecReportRoute: typeof ApiPublicHooksWeeklyExecReportRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
@@ -984,6 +1012,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/weekly-exec-report': {
+      id: '/api/public/hooks/weekly-exec-report'
+      path: '/api/public/hooks/weekly-exec-report'
+      fullPath: '/api/public/hooks/weekly-exec-report'
+      preLoaderRoute: typeof ApiPublicHooksWeeklyExecReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/weekly-ai-enrich': {
+      id: '/api/public/hooks/weekly-ai-enrich'
+      path: '/api/public/hooks/weekly-ai-enrich'
+      fullPath: '/api/public/hooks/weekly-ai-enrich'
+      preLoaderRoute: typeof ApiPublicHooksWeeklyAiEnrichRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/nightly-intel': {
       id: '/api/public/hooks/nightly-intel'
       path: '/api/public/hooks/nightly-intel'
@@ -1047,6 +1089,8 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksAlertsWorkerRoute: ApiPublicHooksAlertsWorkerRoute,
   ApiPublicHooksNightlyIntelRoute: ApiPublicHooksNightlyIntelRoute,
+  ApiPublicHooksWeeklyAiEnrichRoute: ApiPublicHooksWeeklyAiEnrichRoute,
+  ApiPublicHooksWeeklyExecReportRoute: ApiPublicHooksWeeklyExecReportRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
