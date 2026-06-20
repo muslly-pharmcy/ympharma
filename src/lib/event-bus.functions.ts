@@ -153,7 +153,7 @@ export const installEventConsumerSchedule = createServerFn({ method: "POST" })
       _cron_secret: secret,
     } as never);
     if (error) throw new Error(error.message);
-    return { ok: true as const, schedule: JSON.parse(JSON.stringify(data ?? {})) as Record<string, unknown> };
+    return { ok: true as const, schedule: (JSON.parse(JSON.stringify(data ?? {})) as { ok?: boolean; job_id?: number; job_name?: string; schedule?: string; url?: string; batch?: number; active?: boolean; installed?: boolean }) };
   });
 
 export const getEventConsumerSchedule = createServerFn({ method: "POST" })
@@ -162,7 +162,7 @@ export const getEventConsumerSchedule = createServerFn({ method: "POST" })
     await assertAdmin(context);
     const { data, error } = await context.supabase.rpc("get_event_consumer_schedule" as never);
     if (error) throw new Error(error.message);
-    return { ok: true as const, schedule: JSON.parse(JSON.stringify(data ?? {})) as Record<string, unknown> };
+    return { ok: true as const, schedule: (JSON.parse(JSON.stringify(data ?? {})) as { ok?: boolean; job_id?: number; job_name?: string; schedule?: string; url?: string; batch?: number; active?: boolean; installed?: boolean }) };
   });
 
 
