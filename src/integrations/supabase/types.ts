@@ -1965,6 +1965,42 @@ export type Database = {
       }
     }
     Views: {
+      pending_admin_notifications: {
+        Row: {
+          body: string | null
+          created_at: string | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string | null
+          kind: string | null
+          payload: Json | null
+          severity: string | null
+          title: string | null
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string | null
+          kind?: string | null
+          payload?: Json | null
+          severity?: string | null
+          title?: string | null
+        }
+        Update: {
+          body?: string | null
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string | null
+          kind?: string | null
+          payload?: Json | null
+          severity?: string | null
+          title?: string | null
+        }
+        Relationships: []
+      }
       unprocessed_agent_events: {
         Row: {
           entity_id: string | null
