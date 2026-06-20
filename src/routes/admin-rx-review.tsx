@@ -378,6 +378,8 @@ function ReviewDetail({ prescriptionId }: { prescriptionId: string }) {
         )}
       </section>
 
+      <ExtractionContext extraction={(d as any).extraction} prescriptionId={prescriptionId} />
+
       <section>
         <h3 className="mb-1 text-xs font-black text-muted-foreground">سجل التتبع</h3>
         <ol className="max-h-72 overflow-auto rounded-xl border border-border bg-secondary/40 p-2 text-[11px]">
@@ -499,5 +501,66 @@ function FileRow({ fileId, mime }: { fileId: string; mime: string | null }) {
         {busy ? "…" : url ? "فتح مجدداً" : "فتح"}
       </button>
     </li>
+  );
+}
+
+function ExtractionContext({ extraction, prescriptionId }: { extraction: any; prescriptionId: string }) {
+  if (!extraction) {
+    return (
+      <section className="rounded-xl border border-dashed border-border bg-secondary/30 p-3 text-[11px] text-muted-foreground">
+        لا يوجد استخراج AI بعد لهذه الروشتة.
+      </section>
+    );
+  }
+  const eff = (extraction.reviewer_edits ?? {}) as any;
+  const origMeds = (extraction.medications ?? []) as Array<{ name: string; dose?: string | null; duration?: string | null }>;
+  const editedMeds = eff.medications as typeof origMeds | undefined;
+  const confidence = Number(extraction.confidence ?? 0);
+  const lowConf = confidence < 80;
+  const hasDiff = !!editedMeds;
+  return (
+    <section className="rounded-xl border border-border bg-card p-3">
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-xs font-black text-muted-foreground">سياق استخراج AI</h3>
+        <Link
+          to="/admin-rx-extraction-edit"
+          search={{ prescriptionId }}
+          className="rounded-lg bg-indigo-600 px-2 py-1 text-[10px] font-black text-white"
+        >
+          فتح صفحة الاعتماد/التعديل
+        </Link>
+      </div>
+      <div className="mb-2 flex flex-wrap gap-1.5 text-[10px]">
+        <span className="rounded-full bg-secondary px-2 py-0.5">حالة: {extraction.status}</span>
+        <span className="rounded-full bg-secondary px-2 py-0.5">tier: {extraction.model_tier}</span>
+        <span className={`rounded-full px-2 py-0.5 font-bold ${lowConf ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"}`}>
+          ثقة: {confidence}%
+        </span>
+        {extraction.reviewer_approved_at && (
+          <span className="rounded-full bg-emerald-100 px-2 py-0.5 font-bold text-emerald-800">معتمد</span>
+        )}
+        {hasDiff && !extraction.reviewer_approved_at && (
+          <span className="rounded-full bg-amber-100 px-2 py-0.5 font-bold text-amber-800">يوجد تعديلات بشرية</span>
+        )}
+      </div>
+      <ul className="max-h-40 overflow-auto space-y-0.5 text-[11px]">
+        {(editedMeds ?? origMeds).slice(0, 8).map((m, i) => {
+          const orig = origMeds[i];
+          const changed = hasDiff && orig && (orig.name !== m.name || (orig.dose ?? "") !== (m.dose ?? "") || (orig.duration ?? "") !== (m.duration ?? ""));
+          return (
+            <li key={i} className={changed ? "rounded bg-amber-50 px-1" : ""}>
+              <b>{m.name}</b>{m.dose ? ` — ${m.dose}` : ""}{m.duration ? ` (${m.duration})` : ""}
+              {changed && orig && (
+                <span className="ml-2 text-[10px] text-muted-foreground line-through">
+                  {orig.name}{orig.dose ? ` — ${orig.dose}` : ""}{orig.duration ? ` (${orig.duration})` : ""}
+                </span>
+              )}
+            </li>
+          );
+        })}
+        {(editedMeds ?? origMeds).length === 0 && <li className="text-muted-foreground">لا توجد أدوية مستخرجة.</li>}
+      </ul>
+      {extraction.error && <p className="mt-2 text-[10px] text-rose-700">⚠ {extraction.error}</p>}
+    </section>
   );
 }

@@ -568,7 +568,7 @@ export const getPrescriptionReviewDetail = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const review = await loadReview(context.supabase, data.prescriptionId);
 
-    const [rxRes, escRes, evtRes, actRes, fileRes] = await Promise.all([
+    const [rxRes, escRes, evtRes, actRes, fileRes, extRes] = await Promise.all([
       context.supabase
         .from("prescriptions")
         .select("id, customer_name, customer_phone, customer_address, notes, created_at")
@@ -601,9 +601,16 @@ export const getPrescriptionReviewDetail = createServerFn({ method: "POST" })
         .eq("prescription_id", data.prescriptionId)
         .is("deleted_at", null)
         .order("created_at", { ascending: false }),
+      context.supabase
+        .from("prescription_extractions")
+        .select("id, status, model_tier, model_used, confidence, medications, doctor_name, prescription_date, diagnosis, allergies, interactions, reviewer_edits, reviewer_approved_at, error, created_at")
+        .eq("prescription_id", data.prescriptionId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
     ]);
 
-    for (const r of [rxRes, escRes, evtRes, actRes, fileRes] as any[]) {
+    for (const r of [rxRes, escRes, evtRes, actRes, fileRes, extRes] as any[]) {
       if (r.error) {
         if (/permission|rls/i.test(r.error.message)) throw new Error("forbidden");
         throw new Error(r.error.message);
@@ -656,6 +663,7 @@ export const getPrescriptionReviewDetail = createServerFn({ method: "POST" })
         resolved_at: string | null;
       }>,
       files: ((fileRes.data as any[]) ?? []) as PrescriptionFileLite[],
+      extraction: (extRes.data as any) ?? null,
       timeline,
       correlation_ref: correlationIdFor(data.prescriptionId),
     };
