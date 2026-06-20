@@ -2875,11 +2875,19 @@ export type Database = {
       }
       whatsapp_delivery_logs: {
         Row: {
+          attempts: number
+          correlation_id: string | null
           created_at: string
+          delivered_at: string | null
           error_message: string | null
+          failed_at: string | null
           id: string
+          idempotency_key: string | null
+          last_attempt_at: string | null
           message_kind: string
+          next_retry_at: string | null
           payload: Json
+          read_at: string | null
           recipient_phone: string
           ref_id: string | null
           ref_kind: string | null
@@ -2889,11 +2897,19 @@ export type Database = {
           wamid: string | null
         }
         Insert: {
+          attempts?: number
+          correlation_id?: string | null
           created_at?: string
+          delivered_at?: string | null
           error_message?: string | null
+          failed_at?: string | null
           id?: string
+          idempotency_key?: string | null
+          last_attempt_at?: string | null
           message_kind: string
+          next_retry_at?: string | null
           payload?: Json
+          read_at?: string | null
           recipient_phone: string
           ref_id?: string | null
           ref_kind?: string | null
@@ -2903,11 +2919,19 @@ export type Database = {
           wamid?: string | null
         }
         Update: {
+          attempts?: number
+          correlation_id?: string | null
           created_at?: string
+          delivered_at?: string | null
           error_message?: string | null
+          failed_at?: string | null
           id?: string
+          idempotency_key?: string | null
+          last_attempt_at?: string | null
           message_kind?: string
+          next_retry_at?: string | null
           payload?: Json
+          read_at?: string | null
           recipient_phone?: string
           ref_id?: string | null
           ref_kind?: string | null

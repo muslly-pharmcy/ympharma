@@ -31,6 +31,7 @@ import { Route as AiPrescriptionRouteImport } from './routes/ai-prescription'
 import { Route as AiPharmacistRouteImport } from './routes/ai-pharmacist'
 import { Route as AiAssistantRouteImport } from './routes/ai-assistant'
 import { Route as AdminWorkforceRouteImport } from './routes/admin-workforce'
+import { Route as AdminWhatsappDeliveryRouteImport } from './routes/admin-whatsapp-delivery'
 import { Route as AdminTriggerFailuresRouteImport } from './routes/admin-trigger-failures'
 import { Route as AdminTransfersRouteImport } from './routes/admin-transfers'
 import { Route as AdminSettingsRouteImport } from './routes/admin-settings'
@@ -82,6 +83,7 @@ import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as ApiPublicHooksWhatsappRetryRouteImport } from './routes/api/public/hooks/whatsapp-retry'
 import { Route as ApiPublicHooksWeeklyExecReportRouteImport } from './routes/api/public/hooks/weekly-exec-report'
 import { Route as ApiPublicHooksWeeklyAiEnrichRouteImport } from './routes/api/public/hooks/weekly-ai-enrich'
 import { Route as ApiPublicHooksRxNotifyRouteImport } from './routes/api/public/hooks/rx-notify'
@@ -209,6 +211,11 @@ const AiAssistantRoute = AiAssistantRouteImport.update({
 const AdminWorkforceRoute = AdminWorkforceRouteImport.update({
   id: '/admin-workforce',
   path: '/admin-workforce',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminWhatsappDeliveryRoute = AdminWhatsappDeliveryRouteImport.update({
+  id: '/admin-whatsapp-delivery',
+  path: '/admin-whatsapp-delivery',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminTriggerFailuresRoute = AdminTriggerFailuresRouteImport.update({
@@ -473,6 +480,12 @@ const LovableEmailQueueProcessRoute =
     path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksWhatsappRetryRoute =
+  ApiPublicHooksWhatsappRetryRouteImport.update({
+    id: '/api/public/hooks/whatsapp-retry',
+    path: '/api/public/hooks/whatsapp-retry',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksWeeklyExecReportRoute =
   ApiPublicHooksWeeklyExecReportRouteImport.update({
     id: '/api/public/hooks/weekly-exec-report',
@@ -615,6 +628,7 @@ export interface FileRoutesByFullPath {
   '/admin-settings': typeof AdminSettingsRoute
   '/admin-transfers': typeof AdminTransfersRoute
   '/admin-trigger-failures': typeof AdminTriggerFailuresRoute
+  '/admin-whatsapp-delivery': typeof AdminWhatsappDeliveryRoute
   '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
   '/ai-pharmacist': typeof AiPharmacistRoute
@@ -656,6 +670,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
+  '/api/public/hooks/whatsapp-retry': typeof ApiPublicHooksWhatsappRetryRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -708,6 +723,7 @@ export interface FileRoutesByTo {
   '/admin-settings': typeof AdminSettingsRoute
   '/admin-transfers': typeof AdminTransfersRoute
   '/admin-trigger-failures': typeof AdminTriggerFailuresRoute
+  '/admin-whatsapp-delivery': typeof AdminWhatsappDeliveryRoute
   '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
   '/ai-pharmacist': typeof AiPharmacistRoute
@@ -749,6 +765,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
+  '/api/public/hooks/whatsapp-retry': typeof ApiPublicHooksWhatsappRetryRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -802,6 +819,7 @@ export interface FileRoutesById {
   '/admin-settings': typeof AdminSettingsRoute
   '/admin-transfers': typeof AdminTransfersRoute
   '/admin-trigger-failures': typeof AdminTriggerFailuresRoute
+  '/admin-whatsapp-delivery': typeof AdminWhatsappDeliveryRoute
   '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
   '/ai-pharmacist': typeof AiPharmacistRoute
@@ -843,6 +861,7 @@ export interface FileRoutesById {
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
+  '/api/public/hooks/whatsapp-retry': typeof ApiPublicHooksWhatsappRetryRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -897,6 +916,7 @@ export interface FileRouteTypes {
     | '/admin-settings'
     | '/admin-transfers'
     | '/admin-trigger-failures'
+    | '/admin-whatsapp-delivery'
     | '/admin-workforce'
     | '/ai-assistant'
     | '/ai-pharmacist'
@@ -938,6 +958,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/rx-notify'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
+    | '/api/public/hooks/whatsapp-retry'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -990,6 +1011,7 @@ export interface FileRouteTypes {
     | '/admin-settings'
     | '/admin-transfers'
     | '/admin-trigger-failures'
+    | '/admin-whatsapp-delivery'
     | '/admin-workforce'
     | '/ai-assistant'
     | '/ai-pharmacist'
@@ -1031,6 +1053,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/rx-notify'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
+    | '/api/public/hooks/whatsapp-retry'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -1083,6 +1106,7 @@ export interface FileRouteTypes {
     | '/admin-settings'
     | '/admin-transfers'
     | '/admin-trigger-failures'
+    | '/admin-whatsapp-delivery'
     | '/admin-workforce'
     | '/ai-assistant'
     | '/ai-pharmacist'
@@ -1124,6 +1148,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/rx-notify'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
+    | '/api/public/hooks/whatsapp-retry'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -1177,6 +1202,7 @@ export interface RootRouteChildren {
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTransfersRoute: typeof AdminTransfersRoute
   AdminTriggerFailuresRoute: typeof AdminTriggerFailuresRoute
+  AdminWhatsappDeliveryRoute: typeof AdminWhatsappDeliveryRoute
   AdminWorkforceRoute: typeof AdminWorkforceRoute
   AiAssistantRoute: typeof AiAssistantRoute
   AiPharmacistRoute: typeof AiPharmacistRoute
@@ -1217,6 +1243,7 @@ export interface RootRouteChildren {
   ApiPublicHooksRxNotifyRoute: typeof ApiPublicHooksRxNotifyRoute
   ApiPublicHooksWeeklyAiEnrichRoute: typeof ApiPublicHooksWeeklyAiEnrichRoute
   ApiPublicHooksWeeklyExecReportRoute: typeof ApiPublicHooksWeeklyExecReportRoute
+  ApiPublicHooksWhatsappRetryRoute: typeof ApiPublicHooksWhatsappRetryRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
@@ -1385,6 +1412,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-workforce'
       fullPath: '/admin-workforce'
       preLoaderRoute: typeof AdminWorkforceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-whatsapp-delivery': {
+      id: '/admin-whatsapp-delivery'
+      path: '/admin-whatsapp-delivery'
+      fullPath: '/admin-whatsapp-delivery'
+      preLoaderRoute: typeof AdminWhatsappDeliveryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-trigger-failures': {
@@ -1744,6 +1778,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/whatsapp-retry': {
+      id: '/api/public/hooks/whatsapp-retry'
+      path: '/api/public/hooks/whatsapp-retry'
+      fullPath: '/api/public/hooks/whatsapp-retry'
+      preLoaderRoute: typeof ApiPublicHooksWhatsappRetryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/weekly-exec-report': {
       id: '/api/public/hooks/weekly-exec-report'
       path: '/api/public/hooks/weekly-exec-report'
@@ -1924,6 +1965,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTransfersRoute: AdminTransfersRoute,
   AdminTriggerFailuresRoute: AdminTriggerFailuresRoute,
+  AdminWhatsappDeliveryRoute: AdminWhatsappDeliveryRoute,
   AdminWorkforceRoute: AdminWorkforceRoute,
   AiAssistantRoute: AiAssistantRoute,
   AiPharmacistRoute: AiPharmacistRoute,
@@ -1964,6 +2006,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksRxNotifyRoute: ApiPublicHooksRxNotifyRoute,
   ApiPublicHooksWeeklyAiEnrichRoute: ApiPublicHooksWeeklyAiEnrichRoute,
   ApiPublicHooksWeeklyExecReportRoute: ApiPublicHooksWeeklyExecReportRoute,
+  ApiPublicHooksWhatsappRetryRoute: ApiPublicHooksWhatsappRetryRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,

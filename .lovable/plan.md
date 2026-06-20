@@ -1,66 +1,96 @@
-المراحل المتبقية ضخمة (3 إلى 10). لتجنّب تغييرات سطحية أو كسر النظام، سأنفّذها كـ **6 دفعات متتالية**، كل دفعة قابلة للمراجعة والتراجع. الواتساب سيبقى كما هو يعمل (بدون تطوير) كما طلبت.
+# خارطة طريق CTO — صيدلية المصلي
 
-## الوضع الحالي (مفحوص)
+تقسيم تنفيذي للمراحل من **6C** حتى **14** مع الحالة الحالية، الأولوية، والمكوّنات.
 
-موجود فعلياً في قاعدة البيانات والكود:
-- `agent_runs` + `agent_actions` (جدولا الرصد المركزي) ✓
-- Triggers: `intercept_new_prescription`, `intercept_new_order` تكتب في `agent_actions` تلقائياً ✓
-- `enqueue_chronic_refill_action()` RPC للاحتفاظ بالمرضى ✓
-- `marketing_queue`, `staff_alerts`, `operations_alerts`, `email_send_log`, `error_logs`, `system_incidents` ✓
-- 9 وكلاء AI (مسارات `/api/public/hooks/agents/*`) ✓
-- Cron hooks: `chronic-refills`, `nightly-intel`, `alerts-worker`, `weekly-*`, `rx-mirror` (جديد) ✓
-- `admin-ai-orchestrator.tsx` لوحة عرض ✓
+## الحالة الحالية (تم إنجازه فعلياً)
+- ✅ **Phase 6A/6B**: إدارة المخزون، الموردين، التكرارات، Audit Log، Trigger Monitoring، Bulk Operations مع CSV + Preview/Rollback.
+- ✅ **WhatsApp Cloud + Twilio**: قنوات الإرسال موجودة (`whatsapp-cloud.functions.ts`, `whatsapp.ts`).
+- ✅ **Customer Notification Preferences**: Opt-out token-based جاهز.
+- ✅ **Agent Hubs**: `agent_runs`, `agent_actions`, `marketing_queue`, `staff_alerts`.
+- ✅ رفع صور الروشتات/التأمين بصيغ موسّعة.
 
-ناقص أو غير مفعّل:
-- لا يوجد جدول `agent_events` (event bus قابل لإعادة التشغيل)
-- `agent_actions` يُكتب فيه من 2 trigger فقط — باقي الوكلاء لا يسجلون
-- لا توجد لوحة موحّدة لـ `agent_actions` (التنفيذ/الموافقة/إعادة المحاولة)
-- لا توجد حلقة `reserve_stock` فعلية على `orders` (الـ trigger يكتب action فقط، لا ينقص المخزون)
-- لا قياسات أداء (slow queries، latency)
-- لا تقرير production-readiness نهائي
+---
 
-## الدفعات
+## ترتيب التنفيذ المقترح (4 موجات)
 
-### الدفعة 1 — Phase 3 إكمال: Observability Wrapper موحّد
-- إضافة helper `logAgentAction()` في `src/lib/agent-actions.ts` يكتب كل دخول/خروج/خطأ.
-- تغليف الـ 9 endpoints في `api/public/hooks/agents/*` به (تعديل ميكانيكي، لا منطق جديد).
-- نتيجة: كل تشغيل وكيل يخلق صف في `agent_actions` تلقائياً.
+### الموجة 1 — إغلاق دورة العميل (أسبوع 1-2)
+**Phase 6C — WhatsApp Customer Notifications** (نصفه جاهز)
+- ربط 8 أحداث (`PRESCRIPTION_*`, `ORDER_*`) بـ `whatsapp_notification_dispatch`.
+- جدول `whatsapp_delivery_logs` موجود → نضيف `correlation_id` + `attempts` + idempotency key.
+- `sendWhatsAppTemplate()` + `retryFailedMessages()` cron كل 5 دقائق.
+- `trackDeliveryStatus()` webhook من Twilio/Meta لتحديث `delivered/read/failed`.
+- KPI: Delivery Rate ≥95%, لا تكرار.
 
-### الدفعة 2 — Phase 4 إكمال: لوحة Automation Hub التشغيلية
-- صفحة `/admin-automation-hub` تعرض `agent_actions` مع فلاتر (الحالة/الأولوية/الوكيل/الـ pipeline).
-- أزرار: موافقة (Execute) / تخطي (Skip) / إعادة محاولة.
-- اعتماد على RLS موجود + role check.
+**Phase 6D — WhatsApp AI Assistant** (الأساس موجود)
+- توسيع `whatsapp-ai-agent.server.ts` بأدوات AI SDK:
+  - `searchProducts`, `getOrderStatus`, `getPrescriptionStatus`, `getBranchAvailability`.
+- حواجز صارمة: ممنوع إنشاء طلب/الموافقة على روشتة/تعديل مخزون (`needsApproval`).
+- `stepCountIs(50)` + structured output.
+- KPI: 70% من الأسئلة بدون تدخل بشري.
 
-### الدفعة 3 — Phase 5: Event Bus
-- migration: جدول `agent_events` (event_name, entity_type, entity_id, payload, occurred_at, processed_at, retry_count).
-- دوال DB لإصدار حدث `emit_event()` + view `unprocessed_events`.
-- ربط 3 أحداث أساسية: `PrescriptionUploaded`, `OrderCreated`, `RefillDue` عبر triggers موجودة.
-- لا processor خلفي في هذه الدفعة (للحفاظ على البساطة) — العرض فقط.
+### الموجة 2 — ذكاء الروشتة والمخزون (أسبوع 3-5)
+**Phase 7 — AI Prescription Analyzer**
+- جدول `prescription_extractions` (medicine_name, dosage, quantity, confidence).
+- OCR: **Lovable AI Gateway** مع `google/gemini-3-flash-preview` (Vision) — لا حاجة لـ Google Vision/Azure.
+- `confidence < 80%` → ينتقل تلقائياً لـ `prescription_reviews`.
+- تكامل مع `admin-rx-review` الحالي.
+- KPI: 80% استخراج تلقائي.
 
-### الدفعة 4 — Phase 6: حلقة Inventory الفعلية
-- RPC `reserve_order_stock(order_id)` ينقص `products.stock` ذرّياً مع تسجيل في `agent_actions` (action_type=`RESERVE_STOCK`).
-- تحديث trigger `intercept_new_order` ليستدعي RPC ويضع الحالة `EXECUTED` أو `FAILED`.
-- تنبيه `staff_alerts` عند `stock < min_stock`.
+**Phase 8 — AI Inventory Supervisor**
+- Cron كل ساعة يحلل `branch_inventory + orders + transfers`.
+- جدول `inventory_ai_alerts` (alert_type: low_stock | dead_stock | fast_moving).
+- توصيات تحويل آلية (لا تنفّذ).
 
-### الدفعة 5 — Phase 7+8: Retention + Notifications Foundation
-- تفعيل cron `chronic-refills` (موجود لكن نتأكد من جدولته).
-- إضافة جدول `internal_notifications` + helper `notify_admins(title, body, severity)`.
-- ربط فشل `agent_actions` و`uptime_incidents` به (بديل WhatsApp).
+**Phase 9 — AI Transfer Optimizer**
+- جدول `transfer_recommendations`.
+- خوارزمية Demand Forecast (موفينج أفريج 7/30 يوم) + Current Stock.
+- يُقترح فقط، التنفيذ يدوي عبر `admin-transfers`.
 
-### الدفعة 6 — Phase 9+10: Performance Audit + Production Report
-- فحص slow queries عبر `pg_stat_statements`، إضافة indexes ناقصة.
-- توليد `docs/production-readiness-final-2026-06.md` يحوي: حالة كل معيار، الأدلة، المخاطر المتبقية، Mermaid diagrams (architecture/DB/agents/event flow).
-- لا تغييرات كود في هذه الدفعة، توثيق فقط.
+### الموجة 3 — التسويق الذكي (أسبوع 6-9) — الأعلى ROI
+ترتيب من المؤثرين فوراً:
 
-## التفاصيل التقنية
+**14A — Customer Segmentation**
+- جدول `customer_segments` (VIP, Dormant, New, Chronic).
+- Cron يومي يحدّث `customer_scores` + `customer_profiles.segment`.
 
-- كل migration تحترم قاعدة GRANT + RLS + service_role.
-- لا تعديل على ملفات `whatsapp.*` أو القنوات الخارجية.
-- كل دفعة تنتهي بتشغيل اختبار يدوي مختصر (psql counts، استدعاء endpoint).
-- زمن متوقع لكل دفعة: 1-3 ملفات + migration واحد كحد أقصى.
+**14B — WhatsApp Retention Bot**
+- `chronic_refill_predictor`: يحسب موعد نفاد الدواء المتكرر.
+- يرسل تذكير قبل 5 أيام + زر "إعادة الطلب" (deep link).
 
-## ما أحتاجه منك
+**14C — Social Media Automation**
+- Meta/Instagram عبر Graph API + Connector.
+- Content Creator AI: ينتج منشورات يومية مرتبطة بالمخزون البطيء/العروض.
+- جدول `social_posts` (platform, scheduled_at, status, asset_url).
 
-- موافقة على هذه البنية، **والبدء بالدفعة 1**.
-- إذا كنت تريد تخطي/دمج/تأجيل دفعة معينة، أخبرني الآن.
-- بعد كل دفعة، أتوقف للمراجعة قبل الانتقال للتالية (لا أُنفّذ الست دفعات دفعة واحدة).
+**14D — Campaign Optimizer**
+- يراقب `campaigns + discount_redemptions + orders`.
+- يقرر: استمر / أوقف / زد الميزانية (proposal فقط — Approval gate).
+
+**14E — AI Marketing Director (تجميعي)**
+- وكيل مشرف يولّد `Marketing Executive Report` يومياً في `executive_reports`.
+- لوحة `/admin-marketing-director`.
+
+### الموجة 4 — تشغيل المؤسسة (أسبوع 10-12)
+- **Phase 10**: Operations Director — `ai_daily_reports` (يجمع كل المؤشرات).
+- **Phase 11**: Smart Branch Routing — `routing_decisions` لكل طلب.
+- **Phase 12**: Voice AI Pharmacist (Twilio Voice + OpenAI Realtime) — اختياري.
+- **Phase 13**: Enterprise Command Center — لوحة موحّدة `/admin-command-center`.
+
+---
+
+## القرارات التقنية الموحّدة
+- **AI**: Lovable AI Gateway حصراً (`google/gemini-3-flash-preview` افتراضي، `gemini-3-pro` للمهام المعقدة).
+- **Backend**: TanStack `createServerFn` + `/api/public/hooks/*` للـ cron.
+- **Tools**: AI SDK `tool()` + `inputSchema` + `needsApproval` لكل عملية كتابة.
+- **Audit**: كل قرار AI يُسجَّل في `agent_runs` + `agent_actions`.
+- **Approval Gate**: لا وكيل يكتب في DB إنتاجياً دون موافقة الأدمن إلا للقراءة والإرسال.
+
+---
+
+## ما أقترح بدءه الآن
+ابدأ بـ **الموجة 1 كاملة** (6C + 6D) لأنها:
+1. تستفيد من البنية الجاهزة (Twilio + agent_actions + dispatch table).
+2. أعلى أثر مباشر على رضا العميل.
+3. تُغذّي بيانات لموجة التسويق (14B/14E).
+
+**هل أبدأ تنفيذياً بـ Phase 6C كاملة (الأحداث الـ8 + retry + tracking webhook + KPI dashboard)؟**
