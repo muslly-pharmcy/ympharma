@@ -48,6 +48,7 @@ import { Route as AdminBackupsRouteImport } from './routes/admin-backups'
 import { Route as AdminAiWhatsappRouteImport } from './routes/admin-ai-whatsapp'
 import { Route as AdminAiSalesCxRouteImport } from './routes/admin-ai-sales-cx'
 import { Route as AdminAiProcurementRouteImport } from './routes/admin-ai-procurement'
+import { Route as AdminAiOrchestratorRouteImport } from './routes/admin-ai-orchestrator'
 import { Route as AdminAiMarketingRouteImport } from './routes/admin-ai-marketing'
 import { Route as AdminAiLoyaltyRouteImport } from './routes/admin-ai-loyalty'
 import { Route as AdminAiInventoryRouteImport } from './routes/admin-ai-inventory'
@@ -282,6 +283,11 @@ const AdminAiProcurementRoute = AdminAiProcurementRouteImport.update({
   path: '/admin-ai-procurement',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAiOrchestratorRoute = AdminAiOrchestratorRouteImport.update({
+  id: '/admin-ai-orchestrator',
+  path: '/admin-ai-orchestrator',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAiMarketingRoute = AdminAiMarketingRouteImport.update({
   id: '/admin-ai-marketing',
   path: '/admin-ai-marketing',
@@ -500,6 +506,7 @@ export interface FileRoutesByFullPath {
   '/admin-ai-inventory': typeof AdminAiInventoryRoute
   '/admin-ai-loyalty': typeof AdminAiLoyaltyRoute
   '/admin-ai-marketing': typeof AdminAiMarketingRoute
+  '/admin-ai-orchestrator': typeof AdminAiOrchestratorRoute
   '/admin-ai-procurement': typeof AdminAiProcurementRoute
   '/admin-ai-sales-cx': typeof AdminAiSalesCxRoute
   '/admin-ai-whatsapp': typeof AdminAiWhatsappRoute
@@ -579,6 +586,7 @@ export interface FileRoutesByTo {
   '/admin-ai-inventory': typeof AdminAiInventoryRoute
   '/admin-ai-loyalty': typeof AdminAiLoyaltyRoute
   '/admin-ai-marketing': typeof AdminAiMarketingRoute
+  '/admin-ai-orchestrator': typeof AdminAiOrchestratorRoute
   '/admin-ai-procurement': typeof AdminAiProcurementRoute
   '/admin-ai-sales-cx': typeof AdminAiSalesCxRoute
   '/admin-ai-whatsapp': typeof AdminAiWhatsappRoute
@@ -659,6 +667,7 @@ export interface FileRoutesById {
   '/admin-ai-inventory': typeof AdminAiInventoryRoute
   '/admin-ai-loyalty': typeof AdminAiLoyaltyRoute
   '/admin-ai-marketing': typeof AdminAiMarketingRoute
+  '/admin-ai-orchestrator': typeof AdminAiOrchestratorRoute
   '/admin-ai-procurement': typeof AdminAiProcurementRoute
   '/admin-ai-sales-cx': typeof AdminAiSalesCxRoute
   '/admin-ai-whatsapp': typeof AdminAiWhatsappRoute
@@ -740,6 +749,7 @@ export interface FileRouteTypes {
     | '/admin-ai-inventory'
     | '/admin-ai-loyalty'
     | '/admin-ai-marketing'
+    | '/admin-ai-orchestrator'
     | '/admin-ai-procurement'
     | '/admin-ai-sales-cx'
     | '/admin-ai-whatsapp'
@@ -819,6 +829,7 @@ export interface FileRouteTypes {
     | '/admin-ai-inventory'
     | '/admin-ai-loyalty'
     | '/admin-ai-marketing'
+    | '/admin-ai-orchestrator'
     | '/admin-ai-procurement'
     | '/admin-ai-sales-cx'
     | '/admin-ai-whatsapp'
@@ -898,6 +909,7 @@ export interface FileRouteTypes {
     | '/admin-ai-inventory'
     | '/admin-ai-loyalty'
     | '/admin-ai-marketing'
+    | '/admin-ai-orchestrator'
     | '/admin-ai-procurement'
     | '/admin-ai-sales-cx'
     | '/admin-ai-whatsapp'
@@ -978,6 +990,7 @@ export interface RootRouteChildren {
   AdminAiInventoryRoute: typeof AdminAiInventoryRoute
   AdminAiLoyaltyRoute: typeof AdminAiLoyaltyRoute
   AdminAiMarketingRoute: typeof AdminAiMarketingRoute
+  AdminAiOrchestratorRoute: typeof AdminAiOrchestratorRoute
   AdminAiProcurementRoute: typeof AdminAiProcurementRoute
   AdminAiSalesCxRoute: typeof AdminAiSalesCxRoute
   AdminAiWhatsappRoute: typeof AdminAiWhatsappRoute
@@ -1320,6 +1333,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAiProcurementRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin-ai-orchestrator': {
+      id: '/admin-ai-orchestrator'
+      path: '/admin-ai-orchestrator'
+      fullPath: '/admin-ai-orchestrator'
+      preLoaderRoute: typeof AdminAiOrchestratorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin-ai-marketing': {
       id: '/admin-ai-marketing'
       path: '/admin-ai-marketing'
@@ -1613,6 +1633,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminAiInventoryRoute: AdminAiInventoryRoute,
   AdminAiLoyaltyRoute: AdminAiLoyaltyRoute,
   AdminAiMarketingRoute: AdminAiMarketingRoute,
+  AdminAiOrchestratorRoute: AdminAiOrchestratorRoute,
   AdminAiProcurementRoute: AdminAiProcurementRoute,
   AdminAiSalesCxRoute: AdminAiSalesCxRoute,
   AdminAiWhatsappRoute: AdminAiWhatsappRoute,
