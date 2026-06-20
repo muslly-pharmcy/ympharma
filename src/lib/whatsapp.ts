@@ -136,7 +136,7 @@ const TOPIC_LABEL: Record<string, string> = {
 };
 
 export type AiHandoffInput = {
-  topic: "interactions" | "symptoms" | "supplement" | "services" | "prescription" | "marketing";
+  topic: "interactions" | "symptoms" | "supplement" | "services" | "prescription" | "marketing" | "pharmacist";
   messages: { role: "user" | "assistant"; content: string }[];
   recommendedProducts?: { name: string; price?: number }[];
 };
