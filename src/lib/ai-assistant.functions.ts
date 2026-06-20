@@ -304,6 +304,7 @@ function pickSystem(mode: string) {
     case "executive": return SYSTEM_EXECUTIVE;
     case "whatsapp": return SYSTEM_WHATSAPP;
     case "catalog": return SYSTEM_CATALOG;
+    case "pharmacist": return SYSTEM_PHARMACIST;
     default: return SYSTEM_INTERACTIONS;
   }
 }
