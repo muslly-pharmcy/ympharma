@@ -50,13 +50,15 @@ function AdminInventory() {
     try {
       const [rep, list] = await Promise.all([
         loadReport({}),
-        loadRows({ data: { search: search || undefined, onlyLow, onlyTracked, limit: 300 } }),
+        loadRows({ data: { search: search || undefined, onlyLow: onlyLow || onlyOut, onlyTracked, limit: 300 } }),
       ]);
       setReport(rep);
-      setRows(list as Row[]);
+      let result = list as Row[];
+      if (onlyOut) result = result.filter((r) => (r.stock_qty ?? 0) <= 0);
+      setRows(result);
     } catch (e: any) { toast.error(String(e?.message ?? e)); }
     finally { setBusy(false); }
-  }, [loadReport, loadRows, search, onlyLow, onlyTracked]);
+  }, [loadReport, loadRows, search, onlyLow, onlyOut, onlyTracked]);
 
   useEffect(() => { if (ready) refresh(); }, [ready, refresh]);
 
