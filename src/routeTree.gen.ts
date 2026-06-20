@@ -48,6 +48,7 @@ import { Route as AdminInventoryRouteImport } from './routes/admin-inventory'
 import { Route as AdminEventBusRouteImport } from './routes/admin-event-bus'
 import { Route as AdminDiscountsRouteImport } from './routes/admin-discounts'
 import { Route as AdminDiagnosticsRouteImport } from './routes/admin-diagnostics'
+import { Route as AdminCronHealthRouteImport } from './routes/admin-cron-health'
 import { Route as AdminCommandRouteImport } from './routes/admin-command'
 import { Route as AdminClassificationsRouteImport } from './routes/admin-classifications'
 import { Route as AdminCampaignsRouteImport } from './routes/admin-campaigns'
@@ -64,6 +65,7 @@ import { Route as AdminAiMarketingRouteImport } from './routes/admin-ai-marketin
 import { Route as AdminAiLoyaltyRouteImport } from './routes/admin-ai-loyalty'
 import { Route as AdminAiInventoryRouteImport } from './routes/admin-ai-inventory'
 import { Route as AdminAiExtractionsRouteImport } from './routes/admin-ai-extractions'
+import { Route as AdminAiExtractionFailuresRouteImport } from './routes/admin-ai-extraction-failures'
 import { Route as AdminAiExecutiveDashboardRouteImport } from './routes/admin-ai-executive-dashboard'
 import { Route as AdminAiExecutiveRouteImport } from './routes/admin-ai-executive'
 import { Route as AdminAiExcelImportRouteImport } from './routes/admin-ai-excel-import'
@@ -304,6 +306,11 @@ const AdminDiagnosticsRoute = AdminDiagnosticsRouteImport.update({
   path: '/admin-diagnostics',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminCronHealthRoute = AdminCronHealthRouteImport.update({
+  id: '/admin-cron-health',
+  path: '/admin-cron-health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminCommandRoute = AdminCommandRouteImport.update({
   id: '/admin-command',
   path: '/admin-command',
@@ -384,6 +391,12 @@ const AdminAiExtractionsRoute = AdminAiExtractionsRouteImport.update({
   path: '/admin-ai-extractions',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAiExtractionFailuresRoute =
+  AdminAiExtractionFailuresRouteImport.update({
+    id: '/admin-ai-extraction-failures',
+    path: '/admin-ai-extraction-failures',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AdminAiExecutiveDashboardRoute =
   AdminAiExecutiveDashboardRouteImport.update({
     id: '/admin-ai-executive-dashboard',
@@ -624,6 +637,7 @@ export interface FileRoutesByFullPath {
   '/admin-ai-excel-import': typeof AdminAiExcelImportRoute
   '/admin-ai-executive': typeof AdminAiExecutiveRoute
   '/admin-ai-executive-dashboard': typeof AdminAiExecutiveDashboardRoute
+  '/admin-ai-extraction-failures': typeof AdminAiExtractionFailuresRoute
   '/admin-ai-extractions': typeof AdminAiExtractionsRoute
   '/admin-ai-inventory': typeof AdminAiInventoryRoute
   '/admin-ai-loyalty': typeof AdminAiLoyaltyRoute
@@ -640,6 +654,7 @@ export interface FileRoutesByFullPath {
   '/admin-campaigns': typeof AdminCampaignsRoute
   '/admin-classifications': typeof AdminClassificationsRoute
   '/admin-command': typeof AdminCommandRoute
+  '/admin-cron-health': typeof AdminCronHealthRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-event-bus': typeof AdminEventBusRoute
@@ -723,6 +738,7 @@ export interface FileRoutesByTo {
   '/admin-ai-excel-import': typeof AdminAiExcelImportRoute
   '/admin-ai-executive': typeof AdminAiExecutiveRoute
   '/admin-ai-executive-dashboard': typeof AdminAiExecutiveDashboardRoute
+  '/admin-ai-extraction-failures': typeof AdminAiExtractionFailuresRoute
   '/admin-ai-extractions': typeof AdminAiExtractionsRoute
   '/admin-ai-inventory': typeof AdminAiInventoryRoute
   '/admin-ai-loyalty': typeof AdminAiLoyaltyRoute
@@ -739,6 +755,7 @@ export interface FileRoutesByTo {
   '/admin-campaigns': typeof AdminCampaignsRoute
   '/admin-classifications': typeof AdminClassificationsRoute
   '/admin-command': typeof AdminCommandRoute
+  '/admin-cron-health': typeof AdminCronHealthRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-event-bus': typeof AdminEventBusRoute
@@ -823,6 +840,7 @@ export interface FileRoutesById {
   '/admin-ai-excel-import': typeof AdminAiExcelImportRoute
   '/admin-ai-executive': typeof AdminAiExecutiveRoute
   '/admin-ai-executive-dashboard': typeof AdminAiExecutiveDashboardRoute
+  '/admin-ai-extraction-failures': typeof AdminAiExtractionFailuresRoute
   '/admin-ai-extractions': typeof AdminAiExtractionsRoute
   '/admin-ai-inventory': typeof AdminAiInventoryRoute
   '/admin-ai-loyalty': typeof AdminAiLoyaltyRoute
@@ -839,6 +857,7 @@ export interface FileRoutesById {
   '/admin-campaigns': typeof AdminCampaignsRoute
   '/admin-classifications': typeof AdminClassificationsRoute
   '/admin-command': typeof AdminCommandRoute
+  '/admin-cron-health': typeof AdminCronHealthRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-event-bus': typeof AdminEventBusRoute
@@ -924,6 +943,7 @@ export interface FileRouteTypes {
     | '/admin-ai-excel-import'
     | '/admin-ai-executive'
     | '/admin-ai-executive-dashboard'
+    | '/admin-ai-extraction-failures'
     | '/admin-ai-extractions'
     | '/admin-ai-inventory'
     | '/admin-ai-loyalty'
@@ -940,6 +960,7 @@ export interface FileRouteTypes {
     | '/admin-campaigns'
     | '/admin-classifications'
     | '/admin-command'
+    | '/admin-cron-health'
     | '/admin-diagnostics'
     | '/admin-discounts'
     | '/admin-event-bus'
@@ -1023,6 +1044,7 @@ export interface FileRouteTypes {
     | '/admin-ai-excel-import'
     | '/admin-ai-executive'
     | '/admin-ai-executive-dashboard'
+    | '/admin-ai-extraction-failures'
     | '/admin-ai-extractions'
     | '/admin-ai-inventory'
     | '/admin-ai-loyalty'
@@ -1039,6 +1061,7 @@ export interface FileRouteTypes {
     | '/admin-campaigns'
     | '/admin-classifications'
     | '/admin-command'
+    | '/admin-cron-health'
     | '/admin-diagnostics'
     | '/admin-discounts'
     | '/admin-event-bus'
@@ -1122,6 +1145,7 @@ export interface FileRouteTypes {
     | '/admin-ai-excel-import'
     | '/admin-ai-executive'
     | '/admin-ai-executive-dashboard'
+    | '/admin-ai-extraction-failures'
     | '/admin-ai-extractions'
     | '/admin-ai-inventory'
     | '/admin-ai-loyalty'
@@ -1138,6 +1162,7 @@ export interface FileRouteTypes {
     | '/admin-campaigns'
     | '/admin-classifications'
     | '/admin-command'
+    | '/admin-cron-health'
     | '/admin-diagnostics'
     | '/admin-discounts'
     | '/admin-event-bus'
@@ -1222,6 +1247,7 @@ export interface RootRouteChildren {
   AdminAiExcelImportRoute: typeof AdminAiExcelImportRoute
   AdminAiExecutiveRoute: typeof AdminAiExecutiveRoute
   AdminAiExecutiveDashboardRoute: typeof AdminAiExecutiveDashboardRoute
+  AdminAiExtractionFailuresRoute: typeof AdminAiExtractionFailuresRoute
   AdminAiExtractionsRoute: typeof AdminAiExtractionsRoute
   AdminAiInventoryRoute: typeof AdminAiInventoryRoute
   AdminAiLoyaltyRoute: typeof AdminAiLoyaltyRoute
@@ -1238,6 +1264,7 @@ export interface RootRouteChildren {
   AdminCampaignsRoute: typeof AdminCampaignsRoute
   AdminClassificationsRoute: typeof AdminClassificationsRoute
   AdminCommandRoute: typeof AdminCommandRoute
+  AdminCronHealthRoute: typeof AdminCronHealthRoute
   AdminDiagnosticsRoute: typeof AdminDiagnosticsRoute
   AdminDiscountsRoute: typeof AdminDiscountsRoute
   AdminEventBusRoute: typeof AdminEventBusRoute
@@ -1586,6 +1613,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDiagnosticsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin-cron-health': {
+      id: '/admin-cron-health'
+      path: '/admin-cron-health'
+      fullPath: '/admin-cron-health'
+      preLoaderRoute: typeof AdminCronHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin-command': {
       id: '/admin-command'
       path: '/admin-command'
@@ -1696,6 +1730,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-ai-extractions'
       fullPath: '/admin-ai-extractions'
       preLoaderRoute: typeof AdminAiExtractionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-ai-extraction-failures': {
+      id: '/admin-ai-extraction-failures'
+      path: '/admin-ai-extraction-failures'
+      fullPath: '/admin-ai-extraction-failures'
+      preLoaderRoute: typeof AdminAiExtractionFailuresRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-ai-executive-dashboard': {
@@ -2017,6 +2058,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminAiExcelImportRoute: AdminAiExcelImportRoute,
   AdminAiExecutiveRoute: AdminAiExecutiveRoute,
   AdminAiExecutiveDashboardRoute: AdminAiExecutiveDashboardRoute,
+  AdminAiExtractionFailuresRoute: AdminAiExtractionFailuresRoute,
   AdminAiExtractionsRoute: AdminAiExtractionsRoute,
   AdminAiInventoryRoute: AdminAiInventoryRoute,
   AdminAiLoyaltyRoute: AdminAiLoyaltyRoute,
@@ -2033,6 +2075,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminCampaignsRoute: AdminCampaignsRoute,
   AdminClassificationsRoute: AdminClassificationsRoute,
   AdminCommandRoute: AdminCommandRoute,
+  AdminCronHealthRoute: AdminCronHealthRoute,
   AdminDiagnosticsRoute: AdminDiagnosticsRoute,
   AdminDiscountsRoute: AdminDiscountsRoute,
   AdminEventBusRoute: AdminEventBusRoute,

@@ -173,11 +173,50 @@ function Page() {
                 )}
                 {diff.length > 0 && (
                   <span className="rounded-full bg-amber-100 px-2 py-0.5 font-bold text-amber-800">
-                    تغييرات غير محفوظة: {diff.join(" · ")}
+                    تغييرات غير محفوظة: {diff.length}
                   </span>
                 )}
               </div>
             </header>
+
+            {diff.length > 0 && (
+              <section className="mb-3 rounded-2xl border border-amber-300 bg-amber-50 p-3 text-xs">
+                <h3 className="mb-2 text-sm font-black text-amber-900">ملخّص التغييرات (قبل / بعد)</h3>
+                <ul className="space-y-2">
+                  {diff.map((field) => {
+                    const before =
+                      field === "الأدوية" ? `${(extraction.medications ?? []).length} عنصر`
+                      : field === "اسم الطبيب" ? (extraction.doctor_name ?? "—")
+                      : field === "التاريخ" ? (extraction.prescription_date ?? "—")
+                      : field === "التشخيص" ? (extraction.diagnosis ?? "—")
+                      : field === "الحساسيات" ? ((extraction.allergies ?? []).join(", ") || "—")
+                      : field === "التفاعلات" ? ((extraction.interactions ?? []).join(", ") || "—")
+                      : "—";
+                    const after =
+                      field === "الأدوية" ? `${meds.length} عنصر`
+                      : field === "اسم الطبيب" ? (doctor || "—")
+                      : field === "التاريخ" ? (pdate || "—")
+                      : field === "التشخيص" ? (diagnosis || "—")
+                      : field === "الحساسيات" ? (allergies || "—")
+                      : field === "التفاعلات" ? (interactions || "—")
+                      : "—";
+                    return (
+                      <li key={field} className="rounded-lg border border-amber-200 bg-white p-2">
+                        <div className="mb-1 font-black text-amber-900">{field}</div>
+                        <div className="grid gap-1 sm:grid-cols-2">
+                          <div className="rounded bg-rose-50 p-1 text-rose-800 line-through decoration-rose-400">
+                            {String(before)}
+                          </div>
+                          <div className="rounded bg-emerald-50 p-1 font-bold text-emerald-800">
+                            {String(after)}
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            )}
 
             <section className="mb-3 rounded-2xl border border-border bg-card p-4">
               <div className="mb-2 flex items-center justify-between">
