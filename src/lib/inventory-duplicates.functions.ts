@@ -350,7 +350,7 @@ export const listTriggerFailures = createServerFn({ method: "POST" })
     return (rows ?? []) as Array<{
       id: string; trigger_name: string; status: string;
       duration_ms: number | null; error_message: string | null;
-      payload: Record<string, unknown>; created_at: string;
+      payload: any; created_at: string;
     }>;
   });
 
