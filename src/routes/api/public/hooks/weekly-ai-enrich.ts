@@ -1,16 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { generateText } from "ai";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { verifyCronSecret } from "@/lib/cron-auth.server";
 
 export const Route = createFileRoute("/api/public/hooks/weekly-ai-enrich")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const apikey = request.headers.get("apikey") ?? "";
-        const expected = process.env.SUPABASE_PUBLISHABLE_KEY ?? "";
-        if (!apikey || apikey !== expected) {
-          return jsonResp({ ok: false, error: "unauthorized" }, 401);
-        }
+        const denied = verifyCronSecret(request);
+        if (denied) return denied;
         const key = process.env.LOVABLE_API_KEY;
         if (!key) return jsonResp({ ok: false, error: "LOVABLE_API_KEY missing" }, 500);
 
@@ -58,7 +56,6 @@ export const Route = createFileRoute("/api/public/hooks/weekly-ai-enrich")({
         let processed = 0;
         let failed = 0;
 
-        // Process sequentially with a tiny delay to avoid rate limits.
         for (const c of list) {
           const profile = {
             name: c.name ?? "—",
@@ -103,7 +100,7 @@ export const Route = createFileRoute("/api/public/hooks/weekly-ai-enrich")({
         return jsonResp({ ok: true, processed, failed });
       },
       GET: async () =>
-        jsonResp({ ok: true, hint: "POST with apikey header to enrich top customers." }),
+        jsonResp({ ok: true, hint: "POST with x-cron-secret header to enrich top customers." }),
     },
   },
 });
