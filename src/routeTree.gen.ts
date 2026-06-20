@@ -19,6 +19,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as PrescriptionRouteImport } from './routes/prescription'
 import { Route as NetworkTestRouteImport } from './routes/network-test'
+import { Route as NetworkHealthRouteImport } from './routes/network-health'
 import { Route as InsuranceRouteImport } from './routes/insurance'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as BundlesRouteImport } from './routes/bundles'
@@ -108,6 +109,11 @@ const PrescriptionRoute = PrescriptionRouteImport.update({
 const NetworkTestRoute = NetworkTestRouteImport.update({
   id: '/network-test',
   path: '/network-test',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NetworkHealthRoute = NetworkHealthRouteImport.update({
+  id: '/network-health',
+  path: '/network-health',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InsuranceRoute = InsuranceRouteImport.update({
@@ -344,6 +350,7 @@ export interface FileRoutesByFullPath {
   '/bundles': typeof BundlesRoute
   '/cart': typeof CartRoute
   '/insurance': typeof InsuranceRoute
+  '/network-health': typeof NetworkHealthRoute
   '/network-test': typeof NetworkTestRoute
   '/prescription': typeof PrescriptionRoute
   '/products': typeof ProductsRoute
@@ -396,6 +403,7 @@ export interface FileRoutesByTo {
   '/bundles': typeof BundlesRoute
   '/cart': typeof CartRoute
   '/insurance': typeof InsuranceRoute
+  '/network-health': typeof NetworkHealthRoute
   '/network-test': typeof NetworkTestRoute
   '/prescription': typeof PrescriptionRoute
   '/products': typeof ProductsRoute
@@ -449,6 +457,7 @@ export interface FileRoutesById {
   '/bundles': typeof BundlesRoute
   '/cart': typeof CartRoute
   '/insurance': typeof InsuranceRoute
+  '/network-health': typeof NetworkHealthRoute
   '/network-test': typeof NetworkTestRoute
   '/prescription': typeof PrescriptionRoute
   '/products': typeof ProductsRoute
@@ -503,6 +512,7 @@ export interface FileRouteTypes {
     | '/bundles'
     | '/cart'
     | '/insurance'
+    | '/network-health'
     | '/network-test'
     | '/prescription'
     | '/products'
@@ -555,6 +565,7 @@ export interface FileRouteTypes {
     | '/bundles'
     | '/cart'
     | '/insurance'
+    | '/network-health'
     | '/network-test'
     | '/prescription'
     | '/products'
@@ -607,6 +618,7 @@ export interface FileRouteTypes {
     | '/bundles'
     | '/cart'
     | '/insurance'
+    | '/network-health'
     | '/network-test'
     | '/prescription'
     | '/products'
@@ -660,6 +672,7 @@ export interface RootRouteChildren {
   BundlesRoute: typeof BundlesRoute
   CartRoute: typeof CartRoute
   InsuranceRoute: typeof InsuranceRoute
+  NetworkHealthRoute: typeof NetworkHealthRoute
   NetworkTestRoute: typeof NetworkTestRoute
   PrescriptionRoute: typeof PrescriptionRoute
   ProductsRoute: typeof ProductsRoute
@@ -758,6 +771,13 @@ declare module '@tanstack/react-router' {
       path: '/network-test'
       fullPath: '/network-test'
       preLoaderRoute: typeof NetworkTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/network-health': {
+      id: '/network-health'
+      path: '/network-health'
+      fullPath: '/network-health'
+      preLoaderRoute: typeof NetworkHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/insurance': {
@@ -1068,6 +1088,7 @@ const rootRouteChildren: RootRouteChildren = {
   BundlesRoute: BundlesRoute,
   CartRoute: CartRoute,
   InsuranceRoute: InsuranceRoute,
+  NetworkHealthRoute: NetworkHealthRoute,
   NetworkTestRoute: NetworkTestRoute,
   PrescriptionRoute: PrescriptionRoute,
   ProductsRoute: ProductsRoute,
@@ -1098,13 +1119,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
