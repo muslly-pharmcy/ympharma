@@ -1810,6 +1810,50 @@ export type Database = {
           },
         ]
       }
+      prescription_escalations: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          prescription_id: string
+          reason: string
+          resolution_note: string | null
+          resolved_at: string | null
+          status: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          prescription_id: string
+          reason: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          status?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          prescription_id?: string
+          reason?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescription_escalations_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prescription_files: {
         Row: {
           bucket: string
@@ -1911,6 +1955,53 @@ export type Database = {
           storage_path?: string
         }
         Relationships: []
+      }
+      prescription_reviews: {
+        Row: {
+          assigned_at: string | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          prescription_id: string
+          review_notes: string | null
+          reviewer_id: string | null
+          started_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          prescription_id: string
+          review_notes?: string | null
+          reviewer_id?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          prescription_id?: string
+          review_notes?: string | null
+          reviewer_id?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescription_reviews_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: true
+            referencedRelation: "prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       prescriptions: {
         Row: {
