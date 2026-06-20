@@ -236,8 +236,9 @@ export async function runWhatsAppAgent(args: {
         const { data, error } = await supabaseAdmin.rpc("ai_get_branch_availability" as never, { _product_query: product_query } as never);
         toolCalls.push({ name: "get_branch_availability", ok: !error });
         if (error) { await audit("get_branch_availability", { product_query }, t0, { status: "error", error: error.message }); return { error: "lookup_failed" }; }
-        await audit("get_branch_availability", { product_query }, t0, { status: "ok", summary: { count: (data ?? []).length } });
-        return { availability: data ?? [] };
+        const rows = (data ?? []) as unknown[];
+        await audit("get_branch_availability", { product_query }, t0, { status: "ok", summary: { count: rows.length } });
+        return { availability: rows };
       },
     }),
 
