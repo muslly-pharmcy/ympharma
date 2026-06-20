@@ -213,6 +213,49 @@ function EventBusPage() {
           </table>
         </div>
       </section>
+
+      <section className="rounded-lg border p-3 space-y-2">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-sm font-semibold">سجل عمليات الجدولة</h2>
+          <button className="text-xs underline" onClick={() => logQ.refetch()}>تحديث</button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="text-muted-foreground">
+              <tr>
+                <th className="text-right p-2">الوقت</th>
+                <th className="text-right p-2">العملية</th>
+                <th className="text-right p-2">الحالة</th>
+                <th className="text-right p-2">job_id</th>
+                <th className="text-right p-2">الجدولة</th>
+                <th className="text-right p-2">correlation_id</th>
+                <th className="text-right p-2">المنفِّذ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(logQ.data?.rows ?? []).map((r) => (
+                <tr key={r.id} className="border-t align-top">
+                  <td className="p-2 text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleString("ar")}</td>
+                  <td className="p-2 text-xs font-mono">{r.action}</td>
+                  <td className="p-2 text-xs">
+                    {r.status === "ok"
+                      ? <span className="text-emerald-600">✓ ok</span>
+                      : <span className="text-destructive">✗ error</span>}
+                    {r.error && <div className="text-destructive text-[10px] mt-1">{r.error}</div>}
+                  </td>
+                  <td className="p-2 text-xs">{r.job_id ?? "—"}</td>
+                  <td className="p-2 text-xs font-mono">{r.schedule ?? "—"}</td>
+                  <td className="p-2 text-[10px] font-mono" title={r.correlation_id}>{r.correlation_id.slice(0, 8)}</td>
+                  <td className="p-2 text-[10px] font-mono" title={r.actor_user_id ?? ""}>{r.actor_user_id ? r.actor_user_id.slice(0, 8) : "—"}</td>
+                </tr>
+              ))}
+              {(logQ.data?.rows ?? []).length === 0 && (
+                <tr><td colSpan={7} className="p-3 text-center text-muted-foreground">لا عمليات تثبيت مسجَّلة بعد.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   );
 }
