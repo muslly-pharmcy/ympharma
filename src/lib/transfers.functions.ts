@@ -265,17 +265,21 @@ export const cancelTransfer = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const t = await loadTransfer(context.supabase, data.id);
     await assertCanActOn(context.supabase, context.userId, t);
-    if (["COMPLETED", "CANCELLED", "REJECTED"].includes(t.status)) {
-      throw new Error(`لا يمكن إلغاء تحويل بالحالة ${t.status}`);
-    }
-    if (["RESERVED", "PICKING", "PACKED"].includes(t.status)) {
-      const { error: relErr } = await context.supabase
-        .rpc("release_transfer_reservation" as never, {
-          _transfer_id: data.id, _reason: data.reason ?? "cancelled",
-        } as never);
-      if (relErr) throw new Error(relErr.message);
-    }
-    return setStatus(context.supabase, data.id, "CANCELLED", data.reason ?? "cancelled");
+    // Single atomic DB call: advisory-locks the transfer, releases any
+    // held reservation exactly once, sets status=CANCELLED, and returns
+    // 'SKIPPED_DUPLICATE' if the transfer was already cancelled.
+    const { data: result, error } = await context.supabase
+      .rpc("cancel_transfer" as never, {
+        _transfer_id: data.id,
+        _reason: data.reason ?? "cancelled",
+      } as never);
+    if (error) throw new Error(error.message);
+    return {
+      ok: true,
+      status: "CANCELLED" as const,
+      result: (result as string) ?? "OK_CANCELLED",
+      duplicate: result === "SKIPPED_DUPLICATE",
+    };
   });
 
 export const rejectTransfer = createServerFn({ method: "POST" })
