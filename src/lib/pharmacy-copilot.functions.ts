@@ -84,17 +84,43 @@ export const runWeeklyEnrichNow = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertOwnerOrAdmin(context);
     const limit = data.limit ?? 30;
-    const apikey = process.env.SUPABASE_PUBLISHABLE_KEY ?? "";
+    const cronSecret = process.env.CRON_SECRET ?? "";
+    if (!cronSecret) throw new Error("CRON_SECRET not configured");
     const origin = process.env.LOVABLE_PROJECT_URL ?? `https://ympharma.lovable.app`;
     const url = `${origin}/api/public/hooks/weekly-ai-enrich`;
     const res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json", apikey },
+      headers: { "Content-Type": "application/json", "x-cron-secret": cronSecret },
       body: JSON.stringify({ limit }),
     });
     const out = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(out?.error || `enrich ${res.status}`);
     return out;
+  });
+
+/**
+ * Owner/Admin: rotate the scheduled background jobs so they call internal
+ * endpoints with the current x-cron-secret header instead of the public anon key.
+ * Reads CRON_SECRET from server env and pushes it into cron.schedule via SQL.
+ */
+export const rotateCronSecretNow = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertOwnerOrAdmin(context);
+    const cronSecret = process.env.CRON_SECRET ?? "";
+    if (!cronSecret || cronSecret.length < 16) {
+      throw new Error("CRON_SECRET missing or too short (≥16 chars required)");
+    }
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const baseUrl =
+      process.env.LOVABLE_PROJECT_URL ??
+      `https://project--4d4aad01-9bf4-4d8b-acab-e51a06a17c63.lovable.app`;
+    const { data, error } = await supabaseAdmin.rpc("rotate_cron_secret", {
+      _secret: cronSecret,
+      _base_url: baseUrl,
+    });
+    if (error) throw new Error(error.message);
+    return data;
   });
 
 // ---------- AI Executive Copilot ----------

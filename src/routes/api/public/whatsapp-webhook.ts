@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { generateText } from "ai";
+import { createHmac, timingSafeEqual } from "crypto";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 
 /**
@@ -53,9 +54,23 @@ export const Route = createFileRoute("/api/public/whatsapp-webhook")({
         return new Response("Forbidden", { status: 403 });
       },
       POST: async ({ request }) => {
+        // Verify Meta HMAC signature when WHATSAPP_APP_SECRET is configured.
+        // If unset (dev), allow through but log; if set, fail closed on mismatch.
+        const appSecret = process.env.WHATSAPP_APP_SECRET;
+        const rawBody = await request.text();
+        if (appSecret) {
+          const sigHeader = request.headers.get("x-hub-signature-256") ?? "";
+          const provided = sigHeader.startsWith("sha256=") ? sigHeader.slice(7) : sigHeader;
+          const expected = createHmac("sha256", appSecret).update(rawBody).digest("hex");
+          const a = Buffer.from(provided);
+          const b = Buffer.from(expected);
+          if (a.length !== b.length || !timingSafeEqual(a, b)) {
+            return new Response("Invalid signature", { status: 401 });
+          }
+        }
         // ACK quickly; do work after. Meta retries if we don't 200 fast.
         let payload: any = null;
-        try { payload = await request.json(); } catch { /* ignore */ }
+        try { payload = rawBody ? JSON.parse(rawBody) : null; } catch { /* ignore */ }
 
         const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
         const apiToken = process.env.WHATSAPP_TOKEN;

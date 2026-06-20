@@ -1,18 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { verifyCronSecret } from "@/lib/cron-auth.server";
 
 export const Route = createFileRoute("/api/public/hooks/nightly-intel")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        // Light authn: require the project anon apikey header (matches the cron caller).
-        const apikey = request.headers.get("apikey") ?? "";
-        const expected = process.env.SUPABASE_PUBLISHABLE_KEY ?? "";
-        if (!apikey || !expected || apikey !== expected) {
-          return new Response(JSON.stringify({ ok: false, error: "unauthorized" }), {
-            status: 401,
-            headers: { "Content-Type": "application/json" },
-          });
-        }
+        const denied = verifyCronSecret(request);
+        if (denied) return denied;
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const { data, error } = await supabaseAdmin.rpc("rebuild_customer_intel");
@@ -34,7 +28,7 @@ export const Route = createFileRoute("/api/public/hooks/nightly-intel")({
         }
       },
       GET: async () =>
-        new Response(JSON.stringify({ ok: true, hint: "POST with apikey header to trigger" }), {
+        new Response(JSON.stringify({ ok: true, hint: "POST with x-cron-secret header to trigger" }), {
           headers: { "Content-Type": "application/json" },
         }),
     },

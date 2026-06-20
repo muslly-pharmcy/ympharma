@@ -1,17 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { verifyCronSecret } from "@/lib/cron-auth.server";
 
 export const Route = createFileRoute("/api/public/hooks/weekly-exec-report")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const apikey = request.headers.get("apikey") ?? "";
-        const expected = process.env.SUPABASE_PUBLISHABLE_KEY ?? "";
-        if (!apikey || apikey !== expected) {
-          return new Response(JSON.stringify({ ok: false, error: "unauthorized" }), {
-            status: 401,
-            headers: { "Content-Type": "application/json" },
-          });
-        }
+        const denied = verifyCronSecret(request);
+        if (denied) return denied;
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const { data, error } = await supabaseAdmin.rpc("weekly_exec_report_build");
@@ -32,7 +27,7 @@ export const Route = createFileRoute("/api/public/hooks/weekly-exec-report")({
         }
       },
       GET: async () =>
-        new Response(JSON.stringify({ ok: true, hint: "POST with apikey header to build report." }), {
+        new Response(JSON.stringify({ ok: true, hint: "POST with x-cron-secret header to build report." }), {
           headers: { "Content-Type": "application/json" },
         }),
     },

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Sparkles, AlertTriangle, Package, TrendingUp, Bug, FileText, PlayCircle, Wand2 } from "lucide-react";
+import { Loader2, Sparkles, AlertTriangle, Package, TrendingUp, Bug, FileText, PlayCircle, Wand2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import {
   askExecutiveCopilot,
@@ -9,6 +9,7 @@ import {
   fetchInventoryIntel,
   fetchLatestExecReport,
   fetchSalesOpportunities,
+  rotateCronSecretNow,
   runWeeklyEnrichNow,
   runWeeklyReportNow,
 } from "@/lib/pharmacy-copilot.functions";
@@ -73,6 +74,7 @@ export function CopilotPanels() {
   const getReport = useServerFn(fetchLatestExecReport);
   const triggerReport = useServerFn(runWeeklyReportNow);
   const triggerEnrich = useServerFn(runWeeklyEnrichNow);
+  const triggerRotate = useServerFn(rotateCronSecretNow);
 
   const [agent, setAgent] = useState<keyof typeof AGENT_LABELS>("ceo");
   const [question, setQuestion] = useState("");
@@ -142,6 +144,18 @@ export function CopilotPanels() {
       toast.success(`أُثري ${out.processed ?? 0} ملف عميل`);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "فشل الإثراء");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const onRotateCron = async () => {
+    setBusy("rotate");
+    try {
+      const out = (await triggerRotate()) as { rescheduled?: number };
+      toast.success(`تم تدوير سر الجدولة لـ ${out.rescheduled ?? 0} مهمة`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "فشل التدوير");
     } finally {
       setBusy(null);
     }
@@ -349,6 +363,15 @@ export function CopilotPanels() {
             >
               {busy === "enrich" ? <Loader2 className="size-3.5 animate-spin" /> : <Wand2 className="size-3.5" />}
               إثراء العملاء بالذكاء
+            </button>
+            <button
+              onClick={onRotateCron}
+              disabled={busy === "rotate"}
+              title="يُحدّث المهام المجدولة لتستخدم سر CRON_SECRET الحالي"
+              className="flex items-center gap-1.5 rounded-xl border border-border bg-background px-3 py-1.5 text-xs font-bold hover:bg-accent disabled:opacity-50"
+            >
+              {busy === "rotate" ? <Loader2 className="size-3.5 animate-spin" /> : <ShieldCheck className="size-3.5" />}
+              تدوير سر الجدولة
             </button>
           </div>
 
