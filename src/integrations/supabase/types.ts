@@ -190,6 +190,57 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_events_dlq: {
+        Row: {
+          entity_id: string | null
+          entity_type: string | null
+          event_name: string
+          failed_at: string
+          id: string
+          last_error: string | null
+          occurred_at: string
+          original_id: string
+          payload: Json
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          retry_count: number
+          source: string
+        }
+        Insert: {
+          entity_id?: string | null
+          entity_type?: string | null
+          event_name: string
+          failed_at?: string
+          id?: string
+          last_error?: string | null
+          occurred_at: string
+          original_id: string
+          payload?: Json
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          retry_count: number
+          source?: string
+        }
+        Update: {
+          entity_id?: string | null
+          entity_type?: string | null
+          event_name?: string
+          failed_at?: string
+          id?: string
+          last_error?: string | null
+          occurred_at?: string
+          original_id?: string
+          payload?: Json
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          retry_count?: number
+          source?: string
+        }
+        Relationships: []
+      }
       agent_kpis: {
         Row: {
           agent_name: string
@@ -2125,6 +2176,7 @@ export type Database = {
       admin_bundles_report: { Args: never; Returns: Json }
       admin_revenue_series: { Args: { _days?: number }; Returns: Json }
       admin_stats: { Args: never; Returns: Json }
+      agent_events_dlq_stats: { Args: never; Returns: Json }
       agent_runs_list: { Args: { _limit?: number }; Returns: Json }
       agent_workforce_summary: { Args: never; Returns: Json }
       approve_classification: {
@@ -2165,6 +2217,19 @@ export type Database = {
           name: string
           phone: string
           total_spent: number
+        }[]
+      }
+      claim_agent_events: {
+        Args: { _limit?: number; _worker?: string }
+        Returns: {
+          entity_id: string
+          entity_type: string
+          event_name: string
+          id: string
+          occurred_at: string
+          payload: Json
+          retry_count: number
+          source: string
         }[]
       }
       create_backup: { Args: { _kind?: string }; Returns: string }
@@ -2231,8 +2296,18 @@ export type Database = {
       }
       exec_dashboard: { Args: never; Returns: Json }
       executive_alerts: { Args: never; Returns: Json }
+      fail_agent_event: {
+        Args: {
+          _error: string
+          _event_id: string
+          _max_retries?: number
+          _processed_by: string
+        }
+        Returns: Json
+      }
       generate_agent_actions: { Args: never; Returns: number }
       generate_marketing_campaigns: { Args: never; Returns: Json }
+      get_event_consumer_schedule: { Args: never; Returns: Json }
       get_order_history_public: {
         Args: { _client_ip?: string; _id: string; _phone_last4: string }
         Returns: {
@@ -2359,6 +2434,15 @@ export type Database = {
       save_customer_ai_insight: {
         Args: { _insight: string; _phone: string }
         Returns: undefined
+      }
+      schedule_event_consumer: {
+        Args: {
+          _batch?: number
+          _cron_secret: string
+          _project_host?: string
+          _schedule?: string
+        }
+        Returns: Json
       }
       submit_prescription: {
         Args: { _customer: Json; _id: string; _image_urls: string[] }

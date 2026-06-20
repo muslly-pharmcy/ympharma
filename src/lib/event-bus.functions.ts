@@ -100,3 +100,70 @@ export const markAgentEventProcessed = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
+
+// Batch 5b — DLQ surface for the admin event-bus page.
+export const agentEventsDlqStats = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { data, error } = await context.supabase.rpc("agent_events_dlq_stats" as never);
+    if (error) throw new Error(error.message);
+    return { ok: true as const, stats: JSON.parse(JSON.stringify(data ?? {})) as Record<string, number | string | Record<string, number>> };
+  });
+
+const DlqListInput = z.object({
+  unresolved_only: z.boolean().default(true),
+  limit: z.number().int().min(1).max(200).default(50),
+});
+
+type DlqRow = {
+  id: string; original_id: string; event_name: string;
+  entity_type: string | null; entity_id: string | null;
+  retry_count: number; last_error: string | null;
+  failed_at: string; resolved_at: string | null; resolution_note: string | null;
+};
+
+export const listAgentEventsDlq = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => DlqListInput.parse(d ?? {}))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    let q = context.supabase
+      .from("agent_events_dlq" as never)
+      .select("id, original_id, event_name, entity_type, entity_id, retry_count, last_error, failed_at, resolved_at, resolution_note")
+      .order("failed_at", { ascending: false })
+      .limit(data.limit);
+    if (data.unresolved_only) q = q.is("resolved_at", null);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return { ok: true as const, rows: ((rows ?? []) as unknown as DlqRow[]) };
+  });
+
+// Batch 5b — install/refresh the pg_cron schedule that drives the consumer
+// every minute. Reads CRON_SECRET from the server env so the secret never
+// appears in a migration, client bundle, or admin UI.
+export const installEventConsumerSchedule = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const secret = process.env.CRON_SECRET;
+    if (!secret) throw new Error("CRON_SECRET not configured on the server");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin.rpc("schedule_event_consumer" as never, {
+      _cron_secret: secret,
+    } as never);
+    if (error) throw new Error(error.message);
+    return { ok: true as const, schedule: (JSON.parse(JSON.stringify(data ?? {})) as { ok?: boolean; job_id?: number; job_name?: string; schedule?: string; url?: string; batch?: number; active?: boolean; installed?: boolean }) };
+  });
+
+export const getEventConsumerSchedule = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { data, error } = await context.supabase.rpc("get_event_consumer_schedule" as never);
+    if (error) throw new Error(error.message);
+    return { ok: true as const, schedule: (JSON.parse(JSON.stringify(data ?? {})) as { ok?: boolean; job_id?: number; job_name?: string; schedule?: string; url?: string; batch?: number; active?: boolean; installed?: boolean }) };
+  });
+
+
+
