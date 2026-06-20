@@ -36,6 +36,7 @@ import { Route as AdminTriggerFailuresRouteImport } from './routes/admin-trigger
 import { Route as AdminTransfersRouteImport } from './routes/admin-transfers'
 import { Route as AdminSettingsRouteImport } from './routes/admin-settings'
 import { Route as AdminRxReviewRouteImport } from './routes/admin-rx-review'
+import { Route as AdminRxExtractionEditRouteImport } from './routes/admin-rx-extraction-edit'
 import { Route as AdminRxCheckRouteImport } from './routes/admin-rx-check'
 import { Route as AdminProductsRouteImport } from './routes/admin-products'
 import { Route as AdminOffersRouteImport } from './routes/admin-offers'
@@ -239,6 +240,11 @@ const AdminSettingsRoute = AdminSettingsRouteImport.update({
 const AdminRxReviewRoute = AdminRxReviewRouteImport.update({
   id: '/admin-rx-review',
   path: '/admin-rx-review',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRxExtractionEditRoute = AdminRxExtractionEditRouteImport.update({
+  id: '/admin-rx-extraction-edit',
+  path: '/admin-rx-extraction-edit',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRxCheckRoute = AdminRxCheckRouteImport.update({
@@ -645,6 +651,7 @@ export interface FileRoutesByFullPath {
   '/admin-offers': typeof AdminOffersRoute
   '/admin-products': typeof AdminProductsRoute
   '/admin-rx-check': typeof AdminRxCheckRoute
+  '/admin-rx-extraction-edit': typeof AdminRxExtractionEditRoute
   '/admin-rx-review': typeof AdminRxReviewRoute
   '/admin-settings': typeof AdminSettingsRoute
   '/admin-transfers': typeof AdminTransfersRoute
@@ -743,6 +750,7 @@ export interface FileRoutesByTo {
   '/admin-offers': typeof AdminOffersRoute
   '/admin-products': typeof AdminProductsRoute
   '/admin-rx-check': typeof AdminRxCheckRoute
+  '/admin-rx-extraction-edit': typeof AdminRxExtractionEditRoute
   '/admin-rx-review': typeof AdminRxReviewRoute
   '/admin-settings': typeof AdminSettingsRoute
   '/admin-transfers': typeof AdminTransfersRoute
@@ -842,6 +850,7 @@ export interface FileRoutesById {
   '/admin-offers': typeof AdminOffersRoute
   '/admin-products': typeof AdminProductsRoute
   '/admin-rx-check': typeof AdminRxCheckRoute
+  '/admin-rx-extraction-edit': typeof AdminRxExtractionEditRoute
   '/admin-rx-review': typeof AdminRxReviewRoute
   '/admin-settings': typeof AdminSettingsRoute
   '/admin-transfers': typeof AdminTransfersRoute
@@ -942,6 +951,7 @@ export interface FileRouteTypes {
     | '/admin-offers'
     | '/admin-products'
     | '/admin-rx-check'
+    | '/admin-rx-extraction-edit'
     | '/admin-rx-review'
     | '/admin-settings'
     | '/admin-transfers'
@@ -1040,6 +1050,7 @@ export interface FileRouteTypes {
     | '/admin-offers'
     | '/admin-products'
     | '/admin-rx-check'
+    | '/admin-rx-extraction-edit'
     | '/admin-rx-review'
     | '/admin-settings'
     | '/admin-transfers'
@@ -1138,6 +1149,7 @@ export interface FileRouteTypes {
     | '/admin-offers'
     | '/admin-products'
     | '/admin-rx-check'
+    | '/admin-rx-extraction-edit'
     | '/admin-rx-review'
     | '/admin-settings'
     | '/admin-transfers'
@@ -1237,6 +1249,7 @@ export interface RootRouteChildren {
   AdminOffersRoute: typeof AdminOffersRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminRxCheckRoute: typeof AdminRxCheckRoute
+  AdminRxExtractionEditRoute: typeof AdminRxExtractionEditRoute
   AdminRxReviewRoute: typeof AdminRxReviewRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTransfersRoute: typeof AdminTransfersRoute
@@ -1487,6 +1500,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-rx-review'
       fullPath: '/admin-rx-review'
       preLoaderRoute: typeof AdminRxReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-rx-extraction-edit': {
+      id: '/admin-rx-extraction-edit'
+      path: '/admin-rx-extraction-edit'
+      fullPath: '/admin-rx-extraction-edit'
+      preLoaderRoute: typeof AdminRxExtractionEditRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-rx-check': {
@@ -2024,6 +2044,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminOffersRoute: AdminOffersRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminRxCheckRoute: AdminRxCheckRoute,
+  AdminRxExtractionEditRoute: AdminRxExtractionEditRoute,
   AdminRxReviewRoute: AdminRxReviewRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTransfersRoute: AdminTransfersRoute,
