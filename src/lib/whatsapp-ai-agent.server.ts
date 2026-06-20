@@ -53,6 +53,30 @@ export async function runWhatsAppAgent(args: {
   let escalated = false;
   let intent: string | null = null;
 
+  // Append-only audit. Failure here must never break the agent loop.
+  async function audit(
+    toolName: string,
+    input: unknown,
+    started: number,
+    result: { status: "ok" | "error" | "denied"; summary?: unknown; error?: string },
+  ) {
+    try {
+      await supabaseAdmin.from("ai_tool_events").insert({
+        agent_id: "whatsapp-ai",
+        conversation_id: conversationId,
+        tool_name: toolName,
+        input: (input ?? {}) as any,
+        output_summary: (result.summary ?? {}) as any,
+        user_phone: phone,
+        status: result.status,
+        duration_ms: Date.now() - started,
+        error_message: result.error ?? null,
+      });
+    } catch (e) {
+      console.error("[wa-agent] audit insert failed", e);
+    }
+  }
+
   const tools = {
     search_products: tool({
       description:
@@ -62,14 +86,23 @@ export async function runWhatsAppAgent(args: {
         limit: z.number().int().min(1).max(15).optional(),
       }),
       execute: async ({ query, limit }) => {
+        const t0 = Date.now();
         intent = "product_search";
         const { data, error } = await supabaseAdmin.rpc("ai_search_products", {
           _query: query,
           _limit: limit ?? 8,
         });
         toolCalls.push({ name: "search_products", ok: !error });
-        if (error) return { error: "search_failed" };
-        return { results: data ?? [] };
+        if (error) {
+          await audit("search_products", { query, limit }, t0, { status: "error", error: error.message });
+          return { error: "search_failed" };
+        }
+        const rows = data ?? [];
+        await audit("search_products", { query, limit }, t0, {
+          status: "ok",
+          summary: { count: rows.length },
+        });
+        return { results: rows };
       },
     }),
 
@@ -80,14 +113,22 @@ export async function runWhatsAppAgent(args: {
         order_id: z.string().min(3).describe("رقم الطلب كما يظهر للعميل"),
       }),
       execute: async ({ order_id }) => {
+        const t0 = Date.now();
         intent = "order_status";
         const { data, error } = await supabaseAdmin.rpc("ai_get_order_status", {
           _order_id: order_id,
           _phone: phone,
         });
         toolCalls.push({ name: "get_order_status", ok: !error });
-        if (error) return { error: "lookup_failed" };
+        if (error) {
+          await audit("get_order_status", { order_id }, t0, { status: "error", error: error.message });
+          return { error: "lookup_failed" };
+        }
         const row = Array.isArray(data) ? data[0] : data;
+        await audit("get_order_status", { order_id }, t0, {
+          status: "ok",
+          summary: { found: !!row, status: row?.status ?? null },
+        });
         if (!row) return { found: false };
         return { found: true, order: row };
       },
@@ -97,27 +138,37 @@ export async function runWhatsAppAgent(args: {
       description: "أرجع قائمة بفروع الصيدلية النشطة وعناوينها.",
       inputSchema: z.object({}),
       execute: async () => {
+        const t0 = Date.now();
         intent = "branches";
         const { data, error } = await supabaseAdmin.rpc("ai_list_branches");
         toolCalls.push({ name: "list_branches", ok: !error });
-        if (error) return { error: "lookup_failed" };
+        if (error) {
+          await audit("list_branches", {}, t0, { status: "error", error: error.message });
+          return { error: "lookup_failed" };
+        }
+        await audit("list_branches", {}, t0, {
+          status: "ok",
+          summary: { count: (data ?? []).length },
+        });
         return { branches: data ?? [] };
       },
     }),
 
     escalate: tool({
       description:
-        "حوّل المحادثة لموظف بشري. استخدمها للشكاوى، حالات الطوارئ، الطلبات غير الواضحة، أو طلبات إنشاء/تعديل طلب — لأن الـ AI لا يملك صلاحية الكتابة.",
+        "حوّل المحادثة لموظف بشري. استخدمها للشكاوى، حالات الطوارئ، الطلبات غير الواضحة، أو طلبات إنشاء/تعديل/إلغاء طلب — لأن الـ AI لا يملك صلاحية الكتابة (read-only by policy).",
       inputSchema: z.object({
         reason: z.string().min(3).max(280).describe("سبب التصعيد بإيجاز"),
       }),
       execute: async ({ reason }) => {
+        const t0 = Date.now();
         intent = "escalation";
         const { error: escErr } = await supabaseAdmin
           .from("whatsapp_escalations")
           .insert({ conversation_id: conversationId, reason });
         if (escErr) {
           toolCalls.push({ name: "escalate", ok: false });
+          await audit("escalate", { reason }, t0, { status: "error", error: escErr.message });
           return { ok: false };
         }
         await supabaseAdmin
@@ -135,6 +186,7 @@ export async function runWhatsAppAgent(args: {
         });
         escalated = true;
         toolCalls.push({ name: "escalate", ok: true });
+        await audit("escalate", { reason }, t0, { status: "ok", summary: { escalated: true } });
         return { ok: true };
       },
     }),

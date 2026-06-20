@@ -376,6 +376,48 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_tool_events: {
+        Row: {
+          agent_id: string
+          conversation_id: string | null
+          created_at: string
+          duration_ms: number | null
+          error_message: string | null
+          id: string
+          input: Json
+          output_summary: Json
+          status: string
+          tool_name: string
+          user_phone: string | null
+        }
+        Insert: {
+          agent_id?: string
+          conversation_id?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          input?: Json
+          output_summary?: Json
+          status?: string
+          tool_name: string
+          user_phone?: string | null
+        }
+        Update: {
+          agent_id?: string
+          conversation_id?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          input?: Json
+          output_summary?: Json
+          status?: string
+          tool_name?: string
+          user_phone?: string | null
+        }
+        Relationships: []
+      }
       alert_dedupe: {
         Row: {
           alert_key: string
