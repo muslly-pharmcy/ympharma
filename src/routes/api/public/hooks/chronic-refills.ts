@@ -19,6 +19,14 @@ export const Route = createFileRoute("/api/public/hooks/chronic-refills")({
               status: 500, headers: { "Content-Type": "application/json" },
             });
           }
+          // Emit RefillDue event into the bus (3rd canonical event after PrescriptionUploaded / OrderCreated).
+          await supabaseAdmin.rpc("emit_agent_event" as never, {
+            _event_name: "RefillDue",
+            _entity_type: "chronic_refill_batch",
+            _entity_id: null,
+            _payload: (data ?? {}) as never,
+            _source: "cron:chronic-refills",
+          } as never).then(() => null, () => null);
           return new Response(JSON.stringify({ ok: true, result: data }), {
             headers: { "Content-Type": "application/json" },
           });
