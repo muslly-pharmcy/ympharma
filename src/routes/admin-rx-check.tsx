@@ -49,6 +49,20 @@ function RxCheckPage() {
   const [regenBusy, setRegenBusy] = useState<string | null>(null);
   const [expiryFilter, setExpiryFilter] = useState<ExpiryFilter>("all");
   const [userEmail, setUserEmail] = useState<string>("");
+  const [mirrorBusy, setMirrorBusy] = useState(false);
+  const mirrorFn = useServerFn(mirrorRxImagesFromStorage);
+
+  async function runMirror() {
+    setMirrorBusy(true);
+    try {
+      const res = await mirrorFn({ data: { limit: 100 } }) as {
+        ok: boolean; scanned: number; mirrored: number; skipped: number; failed: number;
+      };
+      toast.success(`المرآة: نسخ ${res.mirrored} / تم تخطي ${res.skipped} / فشل ${res.failed} (مسح ${res.scanned})`);
+    } catch (e: any) {
+      toast.error(e?.message || "فشل تشغيل مرآة الصور");
+    } finally { setMirrorBusy(false); }
+  }
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
