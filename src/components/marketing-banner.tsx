@@ -18,17 +18,29 @@ const THEMES: Record<string, string> = {
   "solid-card":       "bg-card text-foreground ring-1 ring-border",
 };
 
-export function MarketingBanner({ placement = "home", className = "" }: { placement?: string; className?: string }) {
-  const [banners, setBanners] = useState<Banner[]>([]);
+export function MarketingBanner({
+  placement = "home",
+  className = "",
+  banners: providedBanners,
+}: {
+  placement?: string;
+  className?: string;
+  /** When provided, skip the internal fetch — homepage passes pre-fetched bundle data. */
+  banners?: Banner[];
+}) {
+  const [fetchedBanners, setFetchedBanners] = useState<Banner[]>([]);
   const [idx, setIdx] = useState(0);
   const load = useServerFn(listActiveBanners);
   const track = useServerFn(trackBanner);
 
   useEffect(() => {
+    if (providedBanners !== undefined) return; // controlled mode — parent already fetched
     let alive = true;
-    load({ data: { placement } }).then((rows) => { if (alive) setBanners((rows as Banner[]) ?? []); }).catch(() => {});
+    load({ data: { placement } }).then((rows) => { if (alive) setFetchedBanners((rows as Banner[]) ?? []); }).catch(() => {});
     return () => { alive = false; };
-  }, [load, placement]);
+  }, [load, placement, providedBanners]);
+
+  const banners = providedBanners ?? fetchedBanners;
 
   useEffect(() => {
     if (banners.length <= 1) return;
