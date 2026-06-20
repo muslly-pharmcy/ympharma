@@ -211,7 +211,7 @@ function FileBox({ label, file, onChange }: { label: string; file: File | null; 
       }`}>
         <Upload className="size-5" />
         {file ? <span className="font-bold">{file.name}</span> : <span>اضغط لرفع صورة (PNG/JPG، حتى {MAX_MB}MB)</span>}
-        <input type="file" accept="image/*" className="hidden"
+        <input type="file" accept="image/*,application/pdf,.heic,.heif,.gif,.bmp,.tiff,.webp,.avif,.svg" className="hidden"
           onChange={(e) => onChange(e.target.files?.[0] ?? null)} />
       </div>
     </label>
