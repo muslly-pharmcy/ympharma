@@ -139,4 +139,31 @@ export const listAgentEventsDlq = createServerFn({ method: "POST" })
     return { ok: true as const, rows: ((rows ?? []) as unknown as DlqRow[]) };
   });
 
+// Batch 5b — install/refresh the pg_cron schedule that drives the consumer
+// every minute. Reads CRON_SECRET from the server env so the secret never
+// appears in a migration, client bundle, or admin UI.
+export const installEventConsumerSchedule = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const secret = process.env.CRON_SECRET;
+    if (!secret) throw new Error("CRON_SECRET not configured on the server");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin.rpc("schedule_event_consumer" as never, {
+      _cron_secret: secret,
+    } as never);
+    if (error) throw new Error(error.message);
+    return { ok: true as const, schedule: JSON.parse(JSON.stringify(data ?? {})) as Record<string, unknown> };
+  });
+
+export const getEventConsumerSchedule = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { data, error } = await context.supabase.rpc("get_event_consumer_schedule" as never);
+    if (error) throw new Error(error.message);
+    return { ok: true as const, schedule: JSON.parse(JSON.stringify(data ?? {})) as Record<string, unknown> };
+  });
+
+
 
