@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminGate } from "@/components/admin/AdminGate";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, lazy, Suspense } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteFooter } from "@/components/site-chrome";
@@ -10,7 +10,10 @@ import { toast } from "sonner";
 import { bootstrapOwner, getMyRole } from "@/lib/staff.functions";
 import { AdminStats } from "@/components/admin-stats";
 import { MarketingBanner } from "@/components/marketing-banner";
-import { DashboardCharts } from "@/components/dashboard-charts";
+// Lazy-loaded: recharts is ~95 KB gz and only needed on the default dashboard tab.
+const DashboardCharts = lazy(() =>
+  import("@/components/dashboard-charts").then((m) => ({ default: m.DashboardCharts })),
+);
 import { BundlePerformance } from "@/components/bundle-performance";
 import { playNotificationBeep } from "@/lib/notify-sound";
 import { downloadCSV } from "@/lib/csv-export";
@@ -517,7 +520,9 @@ function Dashboard({ email, userId }: { email: string; userId: string }) {
           <>
             <MarketingBanner placement="dashboard" />
             <AdminStats refreshKey={statsKey} />
-            <DashboardCharts />
+            <Suspense fallback={<div className="h-72 animate-pulse rounded-2xl bg-muted/40" />}>
+              <DashboardCharts />
+            </Suspense>
             <BundlePerformance />
           </>
         )}
