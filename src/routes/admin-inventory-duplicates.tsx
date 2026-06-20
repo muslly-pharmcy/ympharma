@@ -9,7 +9,7 @@ import {
   Download, History, Undo2, Activity,
 } from "lucide-react";
 import {
-  listDuplicateProducts, linkSuppliersBatch, rollbackSupplierBatch, listSupplierBatches,
+  listDuplicateProducts, linkSuppliersBatch, rollbackSupplierBatch, previewRollbackBatch, listSupplierBatches,
   previewBulkAddStock, applyBulkAddStock, triggerHealth,
   type DuplicateGroup,
 } from "@/lib/inventory-duplicates.functions";
