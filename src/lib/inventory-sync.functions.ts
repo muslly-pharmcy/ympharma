@@ -110,10 +110,10 @@ export const runInventorySync = createServerFn({ method: "POST" })
     // Best-effort audit log.
     try {
       await supabaseAdmin.from("activity_logs").insert({
-        user_id: context.userId,
+        actor_id: context.userId,
         action: "inventory_sync",
         entity_type: "products",
-        metadata: report as unknown as Record<string, unknown>,
+        details: report as unknown as Record<string, unknown>,
       } as never);
     } catch { /* logging optional */ }
 
