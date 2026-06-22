@@ -55,6 +55,7 @@ import { Route as AdminInventoryRouteImport } from './routes/admin-inventory'
 import { Route as AdminEventBusRouteImport } from './routes/admin-event-bus'
 import { Route as AdminDiscountsRouteImport } from './routes/admin-discounts'
 import { Route as AdminDiagnosticsRouteImport } from './routes/admin-diagnostics'
+import { Route as AdminCronJobsRouteImport } from './routes/admin-cron-jobs'
 import { Route as AdminCronHealthRouteImport } from './routes/admin-cron-health'
 import { Route as AdminCommandRouteImport } from './routes/admin-command'
 import { Route as AdminClassificationsRouteImport } from './routes/admin-classifications'
@@ -362,6 +363,11 @@ const AdminDiscountsRoute = AdminDiscountsRouteImport.update({
 const AdminDiagnosticsRoute = AdminDiagnosticsRouteImport.update({
   id: '/admin-diagnostics',
   path: '/admin-diagnostics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCronJobsRoute = AdminCronJobsRouteImport.update({
+  id: '/admin-cron-jobs',
+  path: '/admin-cron-jobs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminCronHealthRoute = AdminCronHealthRouteImport.update({
@@ -794,6 +800,7 @@ export interface FileRoutesByFullPath {
   '/admin-classifications': typeof AdminClassificationsRoute
   '/admin-command': typeof AdminCommandRoute
   '/admin-cron-health': typeof AdminCronHealthRoute
+  '/admin-cron-jobs': typeof AdminCronJobsRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-event-bus': typeof AdminEventBusRoute
@@ -915,6 +922,7 @@ export interface FileRoutesByTo {
   '/admin-classifications': typeof AdminClassificationsRoute
   '/admin-command': typeof AdminCommandRoute
   '/admin-cron-health': typeof AdminCronHealthRoute
+  '/admin-cron-jobs': typeof AdminCronJobsRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-event-bus': typeof AdminEventBusRoute
@@ -1038,6 +1046,7 @@ export interface FileRoutesById {
   '/admin-classifications': typeof AdminClassificationsRoute
   '/admin-command': typeof AdminCommandRoute
   '/admin-cron-health': typeof AdminCronHealthRoute
+  '/admin-cron-jobs': typeof AdminCronJobsRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-event-bus': typeof AdminEventBusRoute
@@ -1161,6 +1170,7 @@ export interface FileRouteTypes {
     | '/admin-classifications'
     | '/admin-command'
     | '/admin-cron-health'
+    | '/admin-cron-jobs'
     | '/admin-diagnostics'
     | '/admin-discounts'
     | '/admin-event-bus'
@@ -1282,6 +1292,7 @@ export interface FileRouteTypes {
     | '/admin-classifications'
     | '/admin-command'
     | '/admin-cron-health'
+    | '/admin-cron-jobs'
     | '/admin-diagnostics'
     | '/admin-discounts'
     | '/admin-event-bus'
@@ -1404,6 +1415,7 @@ export interface FileRouteTypes {
     | '/admin-classifications'
     | '/admin-command'
     | '/admin-cron-health'
+    | '/admin-cron-jobs'
     | '/admin-diagnostics'
     | '/admin-discounts'
     | '/admin-event-bus'
@@ -1527,6 +1539,7 @@ export interface RootRouteChildren {
   AdminClassificationsRoute: typeof AdminClassificationsRoute
   AdminCommandRoute: typeof AdminCommandRoute
   AdminCronHealthRoute: typeof AdminCronHealthRoute
+  AdminCronJobsRoute: typeof AdminCronJobsRoute
   AdminDiagnosticsRoute: typeof AdminDiagnosticsRoute
   AdminDiscountsRoute: typeof AdminDiscountsRoute
   AdminEventBusRoute: typeof AdminEventBusRoute
@@ -1934,6 +1947,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-diagnostics'
       fullPath: '/admin-diagnostics'
       preLoaderRoute: typeof AdminDiagnosticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-cron-jobs': {
+      id: '/admin-cron-jobs'
+      path: '/admin-cron-jobs'
+      fullPath: '/admin-cron-jobs'
+      preLoaderRoute: typeof AdminCronJobsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-cron-health': {
@@ -2536,6 +2556,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminClassificationsRoute: AdminClassificationsRoute,
   AdminCommandRoute: AdminCommandRoute,
   AdminCronHealthRoute: AdminCronHealthRoute,
+  AdminCronJobsRoute: AdminCronJobsRoute,
   AdminDiagnosticsRoute: AdminDiagnosticsRoute,
   AdminDiscountsRoute: AdminDiscountsRoute,
   AdminEventBusRoute: AdminEventBusRoute,
