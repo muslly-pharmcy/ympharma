@@ -88,6 +88,7 @@ import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
 import { Route as AuthenticatedUploadPrescriptionRouteImport } from './routes/_authenticated/upload-prescription'
+import { Route as AuthenticatedAdminUploadInventoryRouteImport } from './routes/_authenticated/admin-upload-inventory'
 import { Route as AuthenticatedAdminMarketingCampaignsRouteImport } from './routes/_authenticated/admin-marketing-campaigns'
 import { Route as AuthenticatedAdminHealthRouteImport } from './routes/_authenticated/admin-health'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin-dashboard'
@@ -529,6 +530,12 @@ const AuthenticatedUploadPrescriptionRoute =
     path: '/upload-prescription',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminUploadInventoryRoute =
+  AuthenticatedAdminUploadInventoryRouteImport.update({
+    id: '/admin-upload-inventory',
+    path: '/admin-upload-inventory',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminMarketingCampaignsRoute =
   AuthenticatedAdminMarketingCampaignsRouteImport.update({
     id: '/admin-marketing-campaigns',
@@ -829,6 +836,7 @@ export interface FileRoutesByFullPath {
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin-health': typeof AuthenticatedAdminHealthRoute
   '/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
+  '/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -948,6 +956,7 @@ export interface FileRoutesByTo {
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin-health': typeof AuthenticatedAdminHealthRoute
   '/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
+  '/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -1069,6 +1078,7 @@ export interface FileRoutesById {
   '/_authenticated/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/admin-health': typeof AuthenticatedAdminHealthRoute
   '/_authenticated/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
+  '/_authenticated/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
   '/_authenticated/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -1190,6 +1200,7 @@ export interface FileRouteTypes {
     | '/admin-dashboard'
     | '/admin-health'
     | '/admin-marketing-campaigns'
+    | '/admin-upload-inventory'
     | '/upload-prescription'
     | '/conditions/$slug'
     | '/email/unsubscribe'
@@ -1309,6 +1320,7 @@ export interface FileRouteTypes {
     | '/admin-dashboard'
     | '/admin-health'
     | '/admin-marketing-campaigns'
+    | '/admin-upload-inventory'
     | '/upload-prescription'
     | '/conditions/$slug'
     | '/email/unsubscribe'
@@ -1429,6 +1441,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin-dashboard'
     | '/_authenticated/admin-health'
     | '/_authenticated/admin-marketing-campaigns'
+    | '/_authenticated/admin-upload-inventory'
     | '/_authenticated/upload-prescription'
     | '/conditions/$slug'
     | '/email/unsubscribe'
@@ -2141,6 +2154,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUploadPrescriptionRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin-upload-inventory': {
+      id: '/_authenticated/admin-upload-inventory'
+      path: '/admin-upload-inventory'
+      fullPath: '/admin-upload-inventory'
+      preLoaderRoute: typeof AuthenticatedAdminUploadInventoryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin-marketing-campaigns': {
       id: '/_authenticated/admin-marketing-campaigns'
       path: '/admin-marketing-campaigns'
@@ -2421,6 +2441,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
   AuthenticatedAdminHealthRoute: typeof AuthenticatedAdminHealthRoute
   AuthenticatedAdminMarketingCampaignsRoute: typeof AuthenticatedAdminMarketingCampaignsRoute
+  AuthenticatedAdminUploadInventoryRoute: typeof AuthenticatedAdminUploadInventoryRoute
   AuthenticatedUploadPrescriptionRoute: typeof AuthenticatedUploadPrescriptionRoute
 }
 
@@ -2429,6 +2450,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminHealthRoute: AuthenticatedAdminHealthRoute,
   AuthenticatedAdminMarketingCampaignsRoute:
     AuthenticatedAdminMarketingCampaignsRoute,
+  AuthenticatedAdminUploadInventoryRoute:
+    AuthenticatedAdminUploadInventoryRoute,
   AuthenticatedUploadPrescriptionRoute: AuthenticatedUploadPrescriptionRoute,
 }
 
