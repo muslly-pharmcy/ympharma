@@ -1776,6 +1776,36 @@ export type Database = {
         }
         Relationships: []
       }
+      marketing_campaigns: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          metadata: Json
+          name: string
+          sent_to: number
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          metadata?: Json
+          name: string
+          sent_to?: number
+          type: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          metadata?: Json
+          name?: string
+          sent_to?: number
+          type?: string
+        }
+        Relationships: []
+      }
       marketing_queue: {
         Row: {
           approved_at: string | null
@@ -2707,6 +2737,41 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      stock_subscriptions: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          notified_at: string | null
+          phone_number: string
+          product_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          notified_at?: string | null
+          phone_number: string
+          product_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          notified_at?: string | null
+          phone_number?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_subscriptions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       supplier_link_audit: {
         Row: {
