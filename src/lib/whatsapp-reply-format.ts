@@ -21,8 +21,9 @@ export type ReplyFormatResult = {
 
 const NUMBERED_LIST_RE = /(^|\n)\s*1[\.\-\)]\s+\S/;
 const STOCK_EMOJI_RE = /[🟢🟡🔴]/u;
-const YER_RE = /ر\.?\s?ي/;
-const SAR_RE = /ر\.?\s?س/;
+// Require the dot so we don't match Arabic words like "أرسل" (ر-س).
+const YER_RE = /ر\.\s?ي/;
+const SAR_RE = /ر\.\s?س/;
 const CTA_RE = /💡\s*للطلب.*طلب/;
 
 export function validateProductListingReply(reply: string): ReplyFormatResult {
