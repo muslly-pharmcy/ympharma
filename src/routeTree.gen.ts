@@ -21,6 +21,7 @@ import { Route as PrescriptionRouteImport } from './routes/prescription'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as NetworkTestRouteImport } from './routes/network-test'
 import { Route as NetworkHealthRouteImport } from './routes/network-health'
+import { Route as MyNotificationsRouteImport } from './routes/my-notifications'
 import { Route as InsuranceRouteImport } from './routes/insurance'
 import { Route as ConditionsRouteImport } from './routes/conditions'
 import { Route as CartRouteImport } from './routes/cart'
@@ -172,6 +173,11 @@ const NetworkTestRoute = NetworkTestRouteImport.update({
 const NetworkHealthRoute = NetworkHealthRouteImport.update({
   id: '/network-health',
   path: '/network-health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyNotificationsRoute = MyNotificationsRouteImport.update({
+  id: '/my-notifications',
+  path: '/my-notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InsuranceRoute = InsuranceRouteImport.update({
@@ -717,6 +723,7 @@ export interface FileRoutesByFullPath {
   '/cart': typeof CartRoute
   '/conditions': typeof ConditionsRouteWithChildren
   '/insurance': typeof InsuranceRoute
+  '/my-notifications': typeof MyNotificationsRoute
   '/network-health': typeof NetworkHealthRoute
   '/network-test': typeof NetworkTestRoute
   '/notifications': typeof NotificationsRoute
@@ -823,6 +830,7 @@ export interface FileRoutesByTo {
   '/cart': typeof CartRoute
   '/conditions': typeof ConditionsRouteWithChildren
   '/insurance': typeof InsuranceRoute
+  '/my-notifications': typeof MyNotificationsRoute
   '/network-health': typeof NetworkHealthRoute
   '/network-test': typeof NetworkTestRoute
   '/notifications': typeof NotificationsRoute
@@ -930,6 +938,7 @@ export interface FileRoutesById {
   '/cart': typeof CartRoute
   '/conditions': typeof ConditionsRouteWithChildren
   '/insurance': typeof InsuranceRoute
+  '/my-notifications': typeof MyNotificationsRoute
   '/network-health': typeof NetworkHealthRoute
   '/network-test': typeof NetworkTestRoute
   '/notifications': typeof NotificationsRoute
@@ -1038,6 +1047,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/conditions'
     | '/insurance'
+    | '/my-notifications'
     | '/network-health'
     | '/network-test'
     | '/notifications'
@@ -1144,6 +1154,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/conditions'
     | '/insurance'
+    | '/my-notifications'
     | '/network-health'
     | '/network-test'
     | '/notifications'
@@ -1250,6 +1261,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/conditions'
     | '/insurance'
+    | '/my-notifications'
     | '/network-health'
     | '/network-test'
     | '/notifications'
@@ -1357,6 +1369,7 @@ export interface RootRouteChildren {
   CartRoute: typeof CartRoute
   ConditionsRoute: typeof ConditionsRouteWithChildren
   InsuranceRoute: typeof InsuranceRoute
+  MyNotificationsRoute: typeof MyNotificationsRoute
   NetworkHealthRoute: typeof NetworkHealthRoute
   NetworkTestRoute: typeof NetworkTestRoute
   NotificationsRoute: typeof NotificationsRoute
@@ -1489,6 +1502,13 @@ declare module '@tanstack/react-router' {
       path: '/network-health'
       fullPath: '/network-health'
       preLoaderRoute: typeof NetworkHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-notifications': {
+      id: '/my-notifications'
+      path: '/my-notifications'
+      fullPath: '/my-notifications'
+      preLoaderRoute: typeof MyNotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/insurance': {
@@ -2208,6 +2228,7 @@ const rootRouteChildren: RootRouteChildren = {
   CartRoute: CartRoute,
   ConditionsRoute: ConditionsRouteWithChildren,
   InsuranceRoute: InsuranceRoute,
+  MyNotificationsRoute: MyNotificationsRoute,
   NetworkHealthRoute: NetworkHealthRoute,
   NetworkTestRoute: NetworkTestRoute,
   NotificationsRoute: NotificationsRoute,
