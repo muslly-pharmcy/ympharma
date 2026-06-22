@@ -39,6 +39,8 @@ function UploadPrescriptionPage() {
   const [file, setFile] = useState<File | null>(null);
   const [note, setNote] = useState("");
   const [approvalId, setApprovalId] = useState<string | null>(null);
+  const [liveConnected, setLiveConnected] = useState(false);
+  const qc = useQueryClient();
   const submitFn = useServerFn(submitPrescriptionForReview);
   const statusFn = useServerFn(getMyPrescriptionRequest);
 
@@ -65,15 +67,39 @@ function UploadPrescriptionPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  // Initial fetch (one-shot) — Realtime handles subsequent updates.
   const status = useQuery({
     queryKey: ["my-prescription-request", approvalId],
     queryFn: () => statusFn({ data: { id: approvalId! } }),
     enabled: !!approvalId,
-    refetchInterval: (q) => {
-      const s = q.state.data?.request?.status;
-      return s && s !== "pending" ? false : 5000;
-    },
   });
+
+  // Realtime subscription on the user's specific approval row.
+  useEffect(() => {
+    if (!approvalId) return;
+    setLiveConnected(false);
+    const channel = supabase
+      .channel(`approval:${approvalId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "agent_approval_requests",
+          filter: `id=eq.${approvalId}`,
+        },
+        () => {
+          qc.invalidateQueries({ queryKey: ["my-prescription-request", approvalId] });
+        },
+      )
+      .subscribe((s) => {
+        if (s === "SUBSCRIBED") setLiveConnected(true);
+      });
+    return () => {
+      supabase.removeChannel(channel);
+      setLiveConnected(false);
+    };
+  }, [approvalId, qc]);
 
   const req = status.data?.request;
   const analysis = (req?.payload as { analysis?: { medicines?: Array<{ name: string; inStock: boolean; stockQty: number; priceYer: number | null }>; missingMedicines?: string[]; notes?: string } } | undefined)?.analysis;
