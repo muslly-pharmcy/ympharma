@@ -3855,6 +3855,32 @@ export type Database = {
         Returns: number
       }
       admin_bundles_report: { Args: never; Returns: Json }
+      admin_list_cron_jobs: {
+        Args: never
+        Returns: {
+          active: boolean
+          command: string
+          jobid: number
+          jobname: string
+          schedule: string
+        }[]
+      }
+      admin_list_cron_runs: {
+        Args: { _limit?: number }
+        Returns: {
+          command: string
+          database: string
+          end_time: string
+          job_pid: number
+          jobid: number
+          jobname: string
+          return_message: string
+          runid: number
+          start_time: string
+          status: string
+          username: string
+        }[]
+      }
       admin_revenue_series: { Args: { _days?: number }; Returns: Json }
       admin_stats: { Args: never; Returns: Json }
       agent_events_dlq_stats: { Args: never; Returns: Json }
@@ -4241,6 +4267,7 @@ export type Database = {
         Returns: boolean
       }
       marketing_queue_skip: { Args: { _id: string }; Returns: boolean }
+      monitor_cron_failures: { Args: never; Returns: Json }
       move_to_dlq: {
         Args: {
           dlq_name: string
