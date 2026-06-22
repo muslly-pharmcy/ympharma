@@ -19,6 +19,22 @@ const ExtractedSchema = z.object({
   notes: z.string().optional().nullable(),
 });
 
+export type ExtractedMedicine = {
+  name: string;
+  dosage?: string | null;
+  frequency?: string | null;
+  confidence?: number;
+};
+
+export type ProductLookupResult = {
+  id: string;
+  name: string;
+  stock_qty: number;
+  price: number | null;
+} | null;
+
+export type ProductLookupFn = (name: string) => Promise<ProductLookupResult>;
+
 export type PrescriptionMedicineMatch = {
   name: string;
   dosage: string | null;
@@ -50,6 +66,64 @@ function safeParseJson(raw: string): unknown {
   const trimmed = raw.trim().replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```$/i, "");
   return JSON.parse(trimmed);
 }
+
+/**
+ * Pure matcher — testable without DB or AI.
+ * Maps each extracted medicine through `lookup` and computes stock/missing.
+ */
+export async function matchExtractedMedicines(
+  extracted: { isValid: boolean; notes?: string | null; medicines: ExtractedMedicine[] },
+  lookup: ProductLookupFn,
+): Promise<PrescriptionAnalysisResult> {
+  if (!extracted.isValid || extracted.medicines.length === 0) {
+    return {
+      isValid: false,
+      notes: extracted.notes ?? "الوصفة غير صالحة أو غير مقروءة.",
+      medicines: [],
+      missingMedicines: [],
+    };
+  }
+
+  const matches: PrescriptionMedicineMatch[] = [];
+  const missing: string[] = [];
+
+  for (const m of extracted.medicines) {
+    const matched = await lookup(m.name);
+    const inStock = !!matched && (matched.stock_qty ?? 0) > 0;
+    if (!matched || !inStock) missing.push(m.name);
+
+    matches.push({
+      name: m.name,
+      dosage: m.dosage ?? null,
+      frequency: m.frequency ?? null,
+      confidence: m.confidence ?? 0.5,
+      matchedProductId: matched?.id ?? null,
+      matchedProductName: matched?.name ?? null,
+      inStock,
+      stockQty: matched?.stock_qty ?? 0,
+      priceYer: matched?.price ?? null,
+    });
+  }
+
+  return {
+    isValid: true,
+    notes: extracted.notes ?? "",
+    medicines: matches,
+    missingMedicines: missing,
+  };
+}
+
+/** Default lookup against the products table using ILIKE substring match. */
+export const defaultProductLookup: ProductLookupFn = async (name) => {
+  const { data } = await supabaseAdmin
+    .from("products")
+    .select("id, name, stock_qty, price")
+    .ilike("name", `%${name}%`)
+    .order("stock_qty", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return (data ?? null) as ProductLookupResult;
+};
 
 export async function analyzePrescriptionImage(
   imageUrl: string,
@@ -86,51 +160,5 @@ export async function analyzePrescriptionImage(
     };
   }
 
-  if (!extracted.isValid || extracted.medicines.length === 0) {
-    return {
-      isValid: false,
-      notes: extracted.notes ?? "الوصفة غير صالحة أو غير مقروءة.",
-      medicines: [],
-      missingMedicines: [],
-    };
-  }
-
-  // Match each medicine against products table (ILIKE substring match).
-  const matches: PrescriptionMedicineMatch[] = [];
-  const missing: string[] = [];
-
-  for (const m of extracted.medicines) {
-    const { data: prod } = await supabaseAdmin
-      .from("products")
-      .select("id, name, stock_qty, price")
-      .ilike("name", `%${m.name}%`)
-      .order("stock_qty", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    const matched = (prod ?? null) as
-      | { id: string; name: string; stock_qty: number; price: number | null }
-      | null;
-    const inStock = !!matched && (matched.stock_qty ?? 0) > 0;
-    if (!matched || !inStock) missing.push(m.name);
-
-    matches.push({
-      name: m.name,
-      dosage: m.dosage ?? null,
-      frequency: m.frequency ?? null,
-      confidence: m.confidence ?? 0.5,
-      matchedProductId: matched?.id ?? null,
-      matchedProductName: matched?.name ?? null,
-      inStock,
-      stockQty: matched?.stock_qty ?? 0,
-      priceYer: matched?.price ?? null,
-    });
-  }
-
-  return {
-    isValid: true,
-    notes: extracted.notes ?? "",
-    medicines: matches,
-    missingMedicines: missing,
-  };
+  return matchExtractedMedicines(extracted, defaultProductLookup);
 }

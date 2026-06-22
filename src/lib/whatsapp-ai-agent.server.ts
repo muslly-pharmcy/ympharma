@@ -269,7 +269,7 @@ export async function runWhatsAppAgent(args: {
         const t0 = Date.now(); intent = "check_stock";
         const { data, error } = await supabaseAdmin
           .from("products")
-          .select("id, name, stock_qty, price_yer")
+          .select("id, name, stock_qty, price")
           .ilike("name", `%${product_name}%`)
           .order("stock_qty", { ascending: false })
           .limit(3);
@@ -287,7 +287,7 @@ export async function runWhatsAppAgent(args: {
         const t0 = Date.now(); intent = "most_available";
         const { data, error } = await supabaseAdmin
           .from("products")
-          .select("id, name, stock_qty, price_yer")
+          .select("id, name, stock_qty, price")
           .order("stock_qty", { ascending: false })
           .limit(limit ?? 8);
         toolCalls.push({ name: "list_most_available", ok: !error });
