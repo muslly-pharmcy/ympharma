@@ -198,6 +198,8 @@ function ProductsPage() {
             <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}
               className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm">
               <option value="default">الافتراضي</option>
+              <option value="stock-desc">📦 الأكثر مخزوناً</option>
+              <option value="supplier-asc">🏢 المورد (أ-ي)</option>
               <option value="price-asc">السعر: من الأقل للأعلى</option>
               <option value="price-desc">السعر: من الأعلى للأقل</option>
               <option value="name">الاسم (أبجدياً)</option>
