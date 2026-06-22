@@ -81,7 +81,7 @@ async function checkAI(): Promise<CheckResult> {
     }
     const provider = createLovableAiGatewayProvider(key);
     const { text } = await generateText({
-      model: provider("google/gemini-2.5-flash-lite"),
+      model: provider("google/gemini-2.5-flash"),
       prompt: "ping",
     });
     return {
