@@ -27,6 +27,7 @@ import { I18nProvider } from "../lib/i18n";
 import { Toaster } from "../components/ui/sonner";
 import { AiChatWidget } from "../components/ai-chat-widget";
 import { SwUpdateBanner } from "../components/sw-update-banner";
+import { ErrorBoundary } from "../components/ErrorBoundary";
 
 function NotFoundComponent() {
   return (
@@ -174,7 +175,9 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
         <CartProvider>
-          <Outlet />
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
           <AiChatWidget />
           <SwUpdateBanner />
           <Toaster position="top-center" richColors />
