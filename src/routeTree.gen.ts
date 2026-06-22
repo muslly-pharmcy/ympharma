@@ -79,6 +79,7 @@ import { Route as AdminAiCatalogRouteImport } from './routes/admin-ai-catalog'
 import { Route as AdminAiApprovalsRouteImport } from './routes/admin-ai-approvals'
 import { Route as AdminAgentsRouteImport } from './routes/admin-agents'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TestFeaturesRouteImport } from './routes/test.features'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
@@ -472,6 +473,10 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -499,9 +504,9 @@ const ConditionsSlugRoute = ConditionsSlugRouteImport.update({
 } as any)
 const AuthenticatedUploadPrescriptionRoute =
   AuthenticatedUploadPrescriptionRouteImport.update({
-    id: '/_authenticated/upload-prescription',
+    id: '/upload-prescription',
     path: '/upload-prescription',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
@@ -899,6 +904,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/admin': typeof AdminRoute
   '/admin-agents': typeof AdminAgentsRoute
   '/admin-ai-approvals': typeof AdminAiApprovalsRoute
@@ -1228,6 +1234,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/admin'
     | '/admin-agents'
     | '/admin-ai-approvals'
@@ -1338,6 +1345,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AdminRoute: typeof AdminRoute
   AdminAgentsRoute: typeof AdminAgentsRoute
   AdminAiApprovalsRoute: typeof AdminAiApprovalsRoute
@@ -1408,7 +1416,6 @@ export interface RootRouteChildren {
   TrustRoute: typeof TrustRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   YemenDebugRoute: typeof YemenDebugRoute
-  AuthenticatedUploadPrescriptionRoute: typeof AuthenticatedUploadPrescriptionRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ProductIdRoute: typeof ProductIdRoute
   TestFeaturesRoute: typeof TestFeaturesRoute
@@ -1937,6 +1944,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -1977,7 +1991,7 @@ declare module '@tanstack/react-router' {
       path: '/upload-prescription'
       fullPath: '/upload-prescription'
       preLoaderRoute: typeof AuthenticatedUploadPrescriptionRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
@@ -2199,6 +2213,17 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedUploadPrescriptionRoute: typeof AuthenticatedUploadPrescriptionRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedUploadPrescriptionRoute: AuthenticatedUploadPrescriptionRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 interface ConditionsRouteChildren {
   ConditionsSlugRoute: typeof ConditionsSlugRoute
 }
@@ -2213,6 +2238,7 @@ const ConditionsRouteWithChildren = ConditionsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AdminRoute: AdminRoute,
   AdminAgentsRoute: AdminAgentsRoute,
   AdminAiApprovalsRoute: AdminAiApprovalsRoute,
@@ -2283,7 +2309,6 @@ const rootRouteChildren: RootRouteChildren = {
   TrustRoute: TrustRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   YemenDebugRoute: YemenDebugRoute,
-  AuthenticatedUploadPrescriptionRoute: AuthenticatedUploadPrescriptionRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ProductIdRoute: ProductIdRoute,
   TestFeaturesRoute: TestFeaturesRoute,
