@@ -216,7 +216,7 @@ export const listInventorySyncLogs = createServerFn({ method: "POST" })
     if (data.to) q = q.lte("created_at", data.to);
     const { data: rows, error } = await q;
     if (error) throw error;
-    let result = (rows ?? []) as InventorySyncLogRow[];
+    let result = (rows ?? []) as unknown as InventorySyncLogRow[];
     if (data.status === "success") {
       result = result.filter((r) => {
         const errs = (r.details as { errors?: unknown[] })?.errors;
