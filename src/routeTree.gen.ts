@@ -75,6 +75,7 @@ import { Route as AdminAiApprovalsRouteImport } from './routes/admin-ai-approval
 import { Route as AdminAgentsRouteImport } from './routes/admin-agents'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TestFeaturesRouteImport } from './routes/test.features'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
@@ -443,6 +444,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TestFeaturesRoute = TestFeaturesRouteImport.update({
+  id: '/test/features',
+  path: '/test/features',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProductIdRoute = ProductIdRouteImport.update({
   id: '/product/$id',
   path: '/product/$id',
@@ -697,6 +703,7 @@ export interface FileRoutesByFullPath {
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
+  '/test/features': typeof TestFeaturesRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/img': typeof ApiPublicImgRoute
   '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
@@ -798,6 +805,7 @@ export interface FileRoutesByTo {
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
+  '/test/features': typeof TestFeaturesRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/img': typeof ApiPublicImgRoute
   '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
@@ -900,6 +908,7 @@ export interface FileRoutesById {
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
+  '/test/features': typeof TestFeaturesRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/img': typeof ApiPublicImgRoute
   '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
@@ -1003,6 +1012,7 @@ export interface FileRouteTypes {
     | '/conditions/$slug'
     | '/email/unsubscribe'
     | '/product/$id'
+    | '/test/features'
     | '/api/public/health'
     | '/api/public/img'
     | '/api/public/incident-check'
@@ -1104,6 +1114,7 @@ export interface FileRouteTypes {
     | '/conditions/$slug'
     | '/email/unsubscribe'
     | '/product/$id'
+    | '/test/features'
     | '/api/public/health'
     | '/api/public/img'
     | '/api/public/incident-check'
@@ -1205,6 +1216,7 @@ export interface FileRouteTypes {
     | '/conditions/$slug'
     | '/email/unsubscribe'
     | '/product/$id'
+    | '/test/features'
     | '/api/public/health'
     | '/api/public/img'
     | '/api/public/incident-check'
@@ -1306,6 +1318,7 @@ export interface RootRouteChildren {
   YemenDebugRoute: typeof YemenDebugRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ProductIdRoute: typeof ProductIdRoute
+  TestFeaturesRoute: typeof TestFeaturesRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
   ApiPublicImgRoute: typeof ApiPublicImgRoute
   ApiPublicIncidentCheckRoute: typeof ApiPublicIncidentCheckRoute
@@ -1802,6 +1815,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/test/features': {
+      id: '/test/features'
+      path: '/test/features'
+      fullPath: '/test/features'
+      preLoaderRoute: typeof TestFeaturesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/product/$id': {
       id: '/product/$id'
       path: '/product/$id'
@@ -2117,6 +2137,7 @@ const rootRouteChildren: RootRouteChildren = {
   YemenDebugRoute: YemenDebugRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ProductIdRoute: ProductIdRoute,
+  TestFeaturesRoute: TestFeaturesRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
   ApiPublicImgRoute: ApiPublicImgRoute,
   ApiPublicIncidentCheckRoute: ApiPublicIncidentCheckRoute,
