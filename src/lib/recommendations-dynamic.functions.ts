@@ -70,7 +70,7 @@ export const getDynamicRecommendations = createServerFn({ method: "GET" })
             .gt("stock_qty", 0)
             .order("sort_order", { ascending: true, nullsFirst: false })
             .limit(limit);
-          const items = ((recs ?? []) as RecommendedProduct[]).map((p) => ({
+          const items: RecommendedProduct[] = ((recs ?? []) as Array<Omit<RecommendedProduct, "score" | "reason">>).map((p) => ({
             ...p,
             score: 5,
             reason: "بناءً على مشترياتك السابقة",
@@ -92,7 +92,7 @@ export const getDynamicRecommendations = createServerFn({ method: "GET" })
           .eq("is_published", true)
           .gt("stock_qty", 0)
           .limit(limit);
-        const items = ((seas ?? []) as RecommendedProduct[]).map((p) => ({
+        const items: RecommendedProduct[] = ((seas ?? []) as Array<Omit<RecommendedProduct, "score" | "reason">>).map((p) => ({
           ...p,
           score: 4,
           reason: "مناسب للموسم الحالي",
@@ -115,12 +115,10 @@ export const getDynamicRecommendations = createServerFn({ method: "GET" })
       .in("name", names)
       .eq("is_published", true)
       .limit(limit);
-    return {
-      source: "trending",
-      items: ((trending ?? []) as RecommendedProduct[]).map((p) => ({
-        ...p,
-        score: 3,
-        reason: "من المنتجات الأكثر مبيعاً مؤخراً",
-      })),
-    };
+    const items: RecommendedProduct[] = ((trending ?? []) as Array<Omit<RecommendedProduct, "score" | "reason">>).map((p) => ({
+      ...p,
+      score: 3,
+      reason: "من المنتجات الأكثر مبيعاً مؤخراً",
+    }));
+    return { source: "trending", items };
   });

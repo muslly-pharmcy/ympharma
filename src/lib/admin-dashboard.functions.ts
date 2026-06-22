@@ -24,13 +24,15 @@ export type WeeklySalesPoint = { day: string; sales: number; orders: number };
 
 export type LowStockProduct = { id: string; name: string; stock_qty: number; reorder_point: number | null };
 
+import type { Json } from "@/integrations/supabase/types";
+
 export type PendingApproval = {
   id: string;
   user_phone: string;
   action_type: string;
   customer_message: string | null;
   created_at: string;
-  payload: unknown;
+  payload: Json;
 };
 
 export type ExecutiveDashboard = {

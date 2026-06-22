@@ -14,12 +14,14 @@ async function assertAdmin(supabase: import("@supabase/supabase-js").SupabaseCli
   if (!isAdmin && !isOwner) throw new Error("forbidden");
 }
 
+import type { Json } from "@/integrations/supabase/types";
+
 type QueueRow = {
   campaign_kind: string;
   customer_phone: string;
   segment: string;
   reason: string;
-  payload: Record<string, unknown>;
+  payload: Json;
   message_text: string;
   status: "pending";
 };
