@@ -1,12 +1,30 @@
-import { Link } from "@tanstack/react-router";
-import { Search, ShoppingBag, MapPin, Menu, Phone, Truck, Clock3, Globe, Shield } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { Search, ShoppingBag, MapPin, Menu, Phone, Truck, Clock3, Globe, Shield, Mic, MicOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { useI18n } from "@/lib/i18n";
+import { useSpeech } from "@/hooks/use-speech";
 import logoUrl from "@/assets/almusalli-logo.webp";
 import { categories } from "@/lib/products";
 
 export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (v: string) => void }) {
+  const navigate = useNavigate();
+  const { isSupported, isListening, error: voiceError, start, stop } = useSpeech("ar-SA");
+
+  const handleVoiceResult = (text: string) => {
+    const t = text.trim();
+    if (!t) return;
+    if (onSearch) onSearch(t);
+    else navigate({ to: "/products", search: { q: t } });
+  };
+
+  const handleSubmitSearch = (e: React.FormEvent<HTMLInputElement>) => {
+    if ((e as any).key !== "Enter") return;
+    const v = (e.target as HTMLInputElement).value.trim();
+    if (!v) return;
+    if (!onSearch) navigate({ to: "/products", search: { q: v } });
+  };
+
   const { count } = useCart();
   const { lang, setLang, t } = useI18n();
   const [scrolled, setScrolled] = useState(false);
