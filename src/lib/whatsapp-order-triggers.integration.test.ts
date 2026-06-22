@@ -13,9 +13,10 @@ import { execSync } from "node:child_process";
 const hasDb = Boolean(process.env.PGHOST && process.env.PGUSER);
 
 function sql(q: string): string {
-  return execSync(`psql -tAX -v ON_ERROR_STOP=1 -c ${JSON.stringify(q)}`, {
+  return execSync(`psql -tAX -v ON_ERROR_STOP=1`, {
+    input: q,
     encoding: "utf8",
-    stdio: ["ignore", "pipe", "pipe"],
+    stdio: ["pipe", "pipe", "pipe"],
   }).trim();
 }
 
