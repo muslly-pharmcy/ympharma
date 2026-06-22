@@ -31,9 +31,10 @@ import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const SYSTEM_PROMPT = `أنت موظف خدمة عملاء صيدلية المصلي في عدن — تردّ عبر واتساب.
-- ساعد العميل في: البحث عن المنتجات، حالة الطلبات، حالة الروشتة، توفر المنتج في الفروع.
+- ساعد العميل في: البحث عن المنتجات، التحقق من المخزون، عرض الأكثر توفراً، حالة الطلبات، حالة الروشتة، توفر المنتج في الفروع.
 - استخدم العربية الفصحى البسيطة. ردود قصيرة (أقل من 5 أسطر).
 - لا تخترع أسعاراً أو منتجات أو حالات. استخدم الأدوات للحصول على بيانات فعلية فقط.
+- عند سؤال "هل يتوفر X؟" أو "كمية X" استخدم check_stock. عند سؤال "الأكثر توفراً" استخدم list_most_available.
 - لطلبات الإنشاء/التعديل/الإلغاء/الموافقة على روشتة/تعديل مخزون/تحويل بين فروع: استخدم أداة الموافقة المناسبة (request_*). هذه الأدوات لا تنفّذ مباشرة بل تطلب موافقة موظف بشري.
 - لأي شك أو شكوى أو حالة طارئة — استخدم escalate.
 - للتأمين: https://muslly.com/insurance — للروشتة: https://muslly.com/prescription — للتتبع: https://muslly.com/track
@@ -252,6 +253,41 @@ export async function runWhatsAppAgent(args: {
         if (error) { await audit("list_branches", {}, t0, { status: "error", error: error.message }); return { error: "lookup_failed" }; }
         await audit("list_branches", {}, t0, { status: "ok", summary: { count: (data ?? []).length } });
         return { branches: data ?? [] };
+      },
+    }),
+
+    check_stock: tool({
+      description: "تحقق من توفر منتج بالاسم. يُرجع أعلى 3 منتجات مطابقة مرتبة تنازلياً حسب الكمية المتوفرة.",
+      inputSchema: z.object({ product_name: z.string().min(1) }),
+      execute: async ({ product_name }) => {
+        const t0 = Date.now(); intent = "check_stock";
+        const { data, error } = await supabaseAdmin
+          .from("products")
+          .select("id, name, stock_qty, price_yer")
+          .ilike("name", `%${product_name}%`)
+          .order("stock_qty", { ascending: false })
+          .limit(3);
+        toolCalls.push({ name: "check_stock", ok: !error });
+        if (error) { await audit("check_stock", { product_name }, t0, { status: "error", error: error.message }); return { error: "lookup_failed" }; }
+        await audit("check_stock", { product_name }, t0, { status: "ok", summary: { count: (data ?? []).length } });
+        return { results: data ?? [] };
+      },
+    }),
+
+    list_most_available: tool({
+      description: "أرجع قائمة بأكثر المنتجات توفراً في المخزون (مرتبة تنازلياً حسب الكمية).",
+      inputSchema: z.object({ limit: z.number().int().min(1).max(15).optional() }),
+      execute: async ({ limit }) => {
+        const t0 = Date.now(); intent = "most_available";
+        const { data, error } = await supabaseAdmin
+          .from("products")
+          .select("id, name, stock_qty, price_yer")
+          .order("stock_qty", { ascending: false })
+          .limit(limit ?? 8);
+        toolCalls.push({ name: "list_most_available", ok: !error });
+        if (error) { await audit("list_most_available", { limit }, t0, { status: "error", error: error.message }); return { error: "lookup_failed" }; }
+        await audit("list_most_available", { limit }, t0, { status: "ok", summary: { count: (data ?? []).length } });
+        return { results: data ?? [] };
       },
     }),
 
