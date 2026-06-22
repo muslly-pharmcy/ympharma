@@ -40,6 +40,7 @@ import { Route as AdminRxReviewRouteImport } from './routes/admin-rx-review'
 import { Route as AdminRxExtractionEditRouteImport } from './routes/admin-rx-extraction-edit'
 import { Route as AdminRxCheckRouteImport } from './routes/admin-rx-check'
 import { Route as AdminProductsRouteImport } from './routes/admin-products'
+import { Route as AdminProductGalleryRouteImport } from './routes/admin-product-gallery'
 import { Route as AdminOffersRouteImport } from './routes/admin-offers'
 import { Route as AdminMarketingRouteImport } from './routes/admin-marketing'
 import { Route as AdminLogsRouteImport } from './routes/admin-logs'
@@ -264,6 +265,11 @@ const AdminRxCheckRoute = AdminRxCheckRouteImport.update({
 const AdminProductsRoute = AdminProductsRouteImport.update({
   id: '/admin-products',
   path: '/admin-products',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminProductGalleryRoute = AdminProductGalleryRouteImport.update({
+  id: '/admin-product-gallery',
+  path: '/admin-product-gallery',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminOffersRoute = AdminOffersRouteImport.update({
@@ -676,6 +682,7 @@ export interface FileRoutesByFullPath {
   '/admin-logs': typeof AdminLogsRoute
   '/admin-marketing': typeof AdminMarketingRoute
   '/admin-offers': typeof AdminOffersRoute
+  '/admin-product-gallery': typeof AdminProductGalleryRoute
   '/admin-products': typeof AdminProductsRoute
   '/admin-rx-check': typeof AdminRxCheckRoute
   '/admin-rx-extraction-edit': typeof AdminRxExtractionEditRoute
@@ -779,6 +786,7 @@ export interface FileRoutesByTo {
   '/admin-logs': typeof AdminLogsRoute
   '/admin-marketing': typeof AdminMarketingRoute
   '/admin-offers': typeof AdminOffersRoute
+  '/admin-product-gallery': typeof AdminProductGalleryRoute
   '/admin-products': typeof AdminProductsRoute
   '/admin-rx-check': typeof AdminRxCheckRoute
   '/admin-rx-extraction-edit': typeof AdminRxExtractionEditRoute
@@ -883,6 +891,7 @@ export interface FileRoutesById {
   '/admin-logs': typeof AdminLogsRoute
   '/admin-marketing': typeof AdminMarketingRoute
   '/admin-offers': typeof AdminOffersRoute
+  '/admin-product-gallery': typeof AdminProductGalleryRoute
   '/admin-products': typeof AdminProductsRoute
   '/admin-rx-check': typeof AdminRxCheckRoute
   '/admin-rx-extraction-edit': typeof AdminRxExtractionEditRoute
@@ -988,6 +997,7 @@ export interface FileRouteTypes {
     | '/admin-logs'
     | '/admin-marketing'
     | '/admin-offers'
+    | '/admin-product-gallery'
     | '/admin-products'
     | '/admin-rx-check'
     | '/admin-rx-extraction-edit'
@@ -1091,6 +1101,7 @@ export interface FileRouteTypes {
     | '/admin-logs'
     | '/admin-marketing'
     | '/admin-offers'
+    | '/admin-product-gallery'
     | '/admin-products'
     | '/admin-rx-check'
     | '/admin-rx-extraction-edit'
@@ -1194,6 +1205,7 @@ export interface FileRouteTypes {
     | '/admin-logs'
     | '/admin-marketing'
     | '/admin-offers'
+    | '/admin-product-gallery'
     | '/admin-products'
     | '/admin-rx-check'
     | '/admin-rx-extraction-edit'
@@ -1298,6 +1310,7 @@ export interface RootRouteChildren {
   AdminLogsRoute: typeof AdminLogsRoute
   AdminMarketingRoute: typeof AdminMarketingRoute
   AdminOffersRoute: typeof AdminOffersRoute
+  AdminProductGalleryRoute: typeof AdminProductGalleryRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminRxCheckRoute: typeof AdminRxCheckRoute
   AdminRxExtractionEditRoute: typeof AdminRxExtractionEditRoute
@@ -1581,6 +1594,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-products'
       fullPath: '/admin-products'
       preLoaderRoute: typeof AdminProductsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-product-gallery': {
+      id: '/admin-product-gallery'
+      path: '/admin-product-gallery'
+      fullPath: '/admin-product-gallery'
+      preLoaderRoute: typeof AdminProductGalleryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-offers': {
@@ -2125,6 +2145,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminLogsRoute: AdminLogsRoute,
   AdminMarketingRoute: AdminMarketingRoute,
   AdminOffersRoute: AdminOffersRoute,
+  AdminProductGalleryRoute: AdminProductGalleryRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminRxCheckRoute: AdminRxCheckRoute,
   AdminRxExtractionEditRoute: AdminRxExtractionEditRoute,

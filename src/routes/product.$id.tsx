@@ -8,8 +8,9 @@ import { ProductCard } from "@/components/product-card";
 import { categories, formatPrice, getProductById, products } from "@/lib/products";
 import { useMergedProducts } from "@/lib/use-merged-products";
 import { useLegacyMap, useRelatedProducts } from "@/lib/use-pharmacy-intel";
-import { proxifyImage } from "@/lib/img-proxy";
-import { handleImageError } from "@/lib/img-placeholder";
+
+import { ProductGallery } from "@/components/product-gallery";
+
 import { useCart } from "@/lib/cart";
 import { getVitaminInfo, type VitaminInfo } from "@/lib/vitamin-info.functions";
 import { readCache, writeCache, cacheKey } from "@/lib/vitamin-cache";
@@ -82,9 +83,7 @@ function ProductDetail() {
         </nav>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="overflow-hidden rounded-3xl border border-border bg-card">
-            <img src={proxifyImage(p.img)} alt={p.name} onError={handleImageError} className="aspect-square w-full object-cover" />
-          </div>
+          <ProductGallery productLegacyId={legacyId} fallbackImage={p.img} productName={p.name} />
           <div className="flex flex-col gap-4">
             <div>
               <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{p.brand}</p>
