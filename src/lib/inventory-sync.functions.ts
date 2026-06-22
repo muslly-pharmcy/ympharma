@@ -356,7 +356,7 @@ export type InventorySyncRun = {
   republished: number;
   hidden: number;
   errors: string[];
-  metadata: Record<string, unknown>;
+  metadata: unknown;
   started_at: string;
   completed_at: string | null;
 };
