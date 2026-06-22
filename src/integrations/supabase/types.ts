@@ -1656,6 +1656,69 @@ export type Database = {
           },
         ]
       }
+      loyalty_accounts: {
+        Row: {
+          created_at: string
+          id: string
+          phone_number: string
+          points: number
+          tier: string
+          total_spent_yer: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          phone_number: string
+          points?: number
+          tier?: string
+          total_spent_yer?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          phone_number?: string
+          points?: number
+          tier?: string
+          total_spent_yer?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      loyalty_transactions: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          order_id: string | null
+          phone_number: string
+          points: number
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          phone_number: string
+          points: number
+          type: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          phone_number?: string
+          points?: number
+          type?: string
+        }
+        Relationships: []
+      }
       marketing_banners: {
         Row: {
           clicks: number
@@ -1764,6 +1827,45 @@ export type Database = {
           sent_at?: string | null
           status?: string
           wamid?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          priority: string
+          read: boolean
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          priority?: string
+          read?: boolean
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          priority?: string
+          read?: boolean
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -3461,6 +3563,10 @@ export type Database = {
       _intel_can_manage: { Args: never; Returns: boolean }
       _therapeutic_label_ar: { Args: { _cat: string }; Returns: string }
       ack_staff_alert: { Args: { _id: string }; Returns: boolean }
+      add_loyalty_points: {
+        Args: { _order_id?: string; _phone: string; _spent_yer: number }
+        Returns: number
+      }
       admin_bundles_report: { Args: never; Returns: Json }
       admin_revenue_series: { Args: { _days?: number }; Returns: Json }
       admin_stats: { Args: never; Returns: Json }
@@ -3889,7 +3995,12 @@ export type Database = {
         }[]
       }
       rebuild_customer_intel: { Args: never; Returns: Json }
+      recompute_loyalty_tier: { Args: { _phone: string }; Returns: string }
       reconcile_inventory_mismatch: { Args: never; Returns: Json }
+      redeem_loyalty_points: {
+        Args: { _phone: string; _points: number }
+        Returns: number
+      }
       reject_classification: { Args: { _id: string }; Returns: boolean }
       release_order_stock: {
         Args: { _actor?: string; _order_id: string; _reason?: string }
