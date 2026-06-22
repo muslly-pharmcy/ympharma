@@ -166,7 +166,7 @@ export async function runWhatsAppAgent(args: {
       } as never);
       await supabaseAdmin
         .from("whatsapp_conversations")
-        .update({ status: "escalated", last_intent: `request_${action}` } as never)
+        .update({ status: "escalated", last_intent: `request_${action}`, last_message: incoming } as never)
         .eq("id", conversationId);
       await supabaseAdmin.from("staff_alerts").insert({
         kind: "ai_approval_required",
