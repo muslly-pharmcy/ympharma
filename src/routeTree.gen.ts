@@ -89,6 +89,7 @@ import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe
 import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
 import { Route as AuthenticatedUploadPrescriptionRouteImport } from './routes/_authenticated/upload-prescription'
 import { Route as AuthenticatedAdminMarketingCampaignsRouteImport } from './routes/_authenticated/admin-marketing-campaigns'
+import { Route as AuthenticatedAdminHealthRouteImport } from './routes/_authenticated/admin-health'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin-dashboard'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/public/whatsapp-webhook'
@@ -115,6 +116,8 @@ import { Route as ApiPublicHooksEventConsumerRouteImport } from './routes/api/pu
 import { Route as ApiPublicHooksCustomerRxNotifyRouteImport } from './routes/api/public/hooks/customer-rx-notify'
 import { Route as ApiPublicHooksChronicRefillsRouteImport } from './routes/api/public/hooks/chronic-refills'
 import { Route as ApiPublicHooksAlertsWorkerRouteImport } from './routes/api/public/hooks/alerts-worker'
+import { Route as ApiPublicHealthQuickCheckRouteImport } from './routes/api/public/health.quick-check'
+import { Route as ApiPublicHealthFullCheckRouteImport } from './routes/api/public/health.full-check'
 import { Route as ApiPublicHooksAgentsWhatsappRouteImport } from './routes/api/public/hooks/agents/whatsapp'
 import { Route as ApiPublicHooksAgentsSalesRouteImport } from './routes/api/public/hooks/agents/sales'
 import { Route as ApiPublicHooksAgentsOperationsRouteImport } from './routes/api/public/hooks/agents/operations'
@@ -532,6 +535,12 @@ const AuthenticatedAdminMarketingCampaignsRoute =
     path: '/admin-marketing-campaigns',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminHealthRoute =
+  AuthenticatedAdminHealthRouteImport.update({
+    id: '/admin-health',
+    path: '/admin-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminDashboardRoute =
   AuthenticatedAdminDashboardRouteImport.update({
     id: '/admin-dashboard',
@@ -680,6 +689,18 @@ const ApiPublicHooksAlertsWorkerRoute =
     path: '/api/public/hooks/alerts-worker',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHealthQuickCheckRoute =
+  ApiPublicHealthQuickCheckRouteImport.update({
+    id: '/quick-check',
+    path: '/quick-check',
+    getParentRoute: () => ApiPublicHealthRoute,
+  } as any)
+const ApiPublicHealthFullCheckRoute =
+  ApiPublicHealthFullCheckRouteImport.update({
+    id: '/full-check',
+    path: '/full-check',
+    getParentRoute: () => ApiPublicHealthRoute,
+  } as any)
 const ApiPublicHooksAgentsWhatsappRoute =
   ApiPublicHooksAgentsWhatsappRouteImport.update({
     id: '/api/public/hooks/agents/whatsapp',
@@ -806,19 +827,22 @@ export interface FileRoutesByFullPath {
   '/unsubscribe': typeof UnsubscribeRoute
   '/yemen-debug': typeof YemenDebugRoute
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/admin-health': typeof AuthenticatedAdminHealthRoute
   '/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
-  '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/img': typeof ApiPublicImgRoute
   '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
   '/api/public/log-error': typeof ApiPublicLogErrorRoute
   '/api/public/uptime-webhook': typeof ApiPublicUptimeWebhookRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
+  '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
   '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
   '/api/public/hooks/customer-rx-notify': typeof ApiPublicHooksCustomerRxNotifyRoute
@@ -922,19 +946,22 @@ export interface FileRoutesByTo {
   '/unsubscribe': typeof UnsubscribeRoute
   '/yemen-debug': typeof YemenDebugRoute
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/admin-health': typeof AuthenticatedAdminHealthRoute
   '/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
-  '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/img': typeof ApiPublicImgRoute
   '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
   '/api/public/log-error': typeof ApiPublicLogErrorRoute
   '/api/public/uptime-webhook': typeof ApiPublicUptimeWebhookRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
+  '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
   '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
   '/api/public/hooks/customer-rx-notify': typeof ApiPublicHooksCustomerRxNotifyRoute
@@ -1040,19 +1067,22 @@ export interface FileRoutesById {
   '/unsubscribe': typeof UnsubscribeRoute
   '/yemen-debug': typeof YemenDebugRoute
   '/_authenticated/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/_authenticated/admin-health': typeof AuthenticatedAdminHealthRoute
   '/_authenticated/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
   '/_authenticated/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
-  '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/img': typeof ApiPublicImgRoute
   '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
   '/api/public/log-error': typeof ApiPublicLogErrorRoute
   '/api/public/uptime-webhook': typeof ApiPublicUptimeWebhookRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
+  '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
   '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
   '/api/public/hooks/customer-rx-notify': typeof ApiPublicHooksCustomerRxNotifyRoute
@@ -1158,6 +1188,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/yemen-debug'
     | '/admin-dashboard'
+    | '/admin-health'
     | '/admin-marketing-campaigns'
     | '/upload-prescription'
     | '/conditions/$slug'
@@ -1171,6 +1202,8 @@ export interface FileRouteTypes {
     | '/api/public/uptime-webhook'
     | '/api/public/whatsapp-webhook'
     | '/lovable/email/suppression'
+    | '/api/public/health/full-check'
+    | '/api/public/health/quick-check'
     | '/api/public/hooks/alerts-worker'
     | '/api/public/hooks/chronic-refills'
     | '/api/public/hooks/customer-rx-notify'
@@ -1274,6 +1307,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/yemen-debug'
     | '/admin-dashboard'
+    | '/admin-health'
     | '/admin-marketing-campaigns'
     | '/upload-prescription'
     | '/conditions/$slug'
@@ -1287,6 +1321,8 @@ export interface FileRouteTypes {
     | '/api/public/uptime-webhook'
     | '/api/public/whatsapp-webhook'
     | '/lovable/email/suppression'
+    | '/api/public/health/full-check'
+    | '/api/public/health/quick-check'
     | '/api/public/hooks/alerts-worker'
     | '/api/public/hooks/chronic-refills'
     | '/api/public/hooks/customer-rx-notify'
@@ -1391,6 +1427,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/yemen-debug'
     | '/_authenticated/admin-dashboard'
+    | '/_authenticated/admin-health'
     | '/_authenticated/admin-marketing-campaigns'
     | '/_authenticated/upload-prescription'
     | '/conditions/$slug'
@@ -1404,6 +1441,8 @@ export interface FileRouteTypes {
     | '/api/public/uptime-webhook'
     | '/api/public/whatsapp-webhook'
     | '/lovable/email/suppression'
+    | '/api/public/health/full-check'
+    | '/api/public/health/quick-check'
     | '/api/public/hooks/alerts-worker'
     | '/api/public/hooks/chronic-refills'
     | '/api/public/hooks/customer-rx-notify'
@@ -1511,7 +1550,7 @@ export interface RootRouteChildren {
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ProductIdRoute: typeof ProductIdRoute
   TestFeaturesRoute: typeof TestFeaturesRoute
-  ApiPublicHealthRoute: typeof ApiPublicHealthRoute
+  ApiPublicHealthRoute: typeof ApiPublicHealthRouteWithChildren
   ApiPublicImgRoute: typeof ApiPublicImgRoute
   ApiPublicIncidentCheckRoute: typeof ApiPublicIncidentCheckRoute
   ApiPublicLogErrorRoute: typeof ApiPublicLogErrorRoute
@@ -2109,6 +2148,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMarketingCampaignsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin-health': {
+      id: '/_authenticated/admin-health'
+      path: '/admin-health'
+      fullPath: '/admin-health'
+      preLoaderRoute: typeof AuthenticatedAdminHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin-dashboard': {
       id: '/_authenticated/admin-dashboard'
       path: '/admin-dashboard'
@@ -2291,6 +2337,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksAlertsWorkerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/health/quick-check': {
+      id: '/api/public/health/quick-check'
+      path: '/quick-check'
+      fullPath: '/api/public/health/quick-check'
+      preLoaderRoute: typeof ApiPublicHealthQuickCheckRouteImport
+      parentRoute: typeof ApiPublicHealthRoute
+    }
+    '/api/public/health/full-check': {
+      id: '/api/public/health/full-check'
+      path: '/full-check'
+      fullPath: '/api/public/health/full-check'
+      preLoaderRoute: typeof ApiPublicHealthFullCheckRouteImport
+      parentRoute: typeof ApiPublicHealthRoute
+    }
     '/api/public/hooks/agents/whatsapp': {
       id: '/api/public/hooks/agents/whatsapp'
       path: '/api/public/hooks/agents/whatsapp'
@@ -2359,12 +2419,14 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
+  AuthenticatedAdminHealthRoute: typeof AuthenticatedAdminHealthRoute
   AuthenticatedAdminMarketingCampaignsRoute: typeof AuthenticatedAdminMarketingCampaignsRoute
   AuthenticatedUploadPrescriptionRoute: typeof AuthenticatedUploadPrescriptionRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
+  AuthenticatedAdminHealthRoute: AuthenticatedAdminHealthRoute,
   AuthenticatedAdminMarketingCampaignsRoute:
     AuthenticatedAdminMarketingCampaignsRoute,
   AuthenticatedUploadPrescriptionRoute: AuthenticatedUploadPrescriptionRoute,
@@ -2383,6 +2445,20 @@ const ConditionsRouteChildren: ConditionsRouteChildren = {
 
 const ConditionsRouteWithChildren = ConditionsRoute._addFileChildren(
   ConditionsRouteChildren,
+)
+
+interface ApiPublicHealthRouteChildren {
+  ApiPublicHealthFullCheckRoute: typeof ApiPublicHealthFullCheckRoute
+  ApiPublicHealthQuickCheckRoute: typeof ApiPublicHealthQuickCheckRoute
+}
+
+const ApiPublicHealthRouteChildren: ApiPublicHealthRouteChildren = {
+  ApiPublicHealthFullCheckRoute: ApiPublicHealthFullCheckRoute,
+  ApiPublicHealthQuickCheckRoute: ApiPublicHealthQuickCheckRoute,
+}
+
+const ApiPublicHealthRouteWithChildren = ApiPublicHealthRoute._addFileChildren(
+  ApiPublicHealthRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
@@ -2463,7 +2539,7 @@ const rootRouteChildren: RootRouteChildren = {
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ProductIdRoute: ProductIdRoute,
   TestFeaturesRoute: TestFeaturesRoute,
-  ApiPublicHealthRoute: ApiPublicHealthRoute,
+  ApiPublicHealthRoute: ApiPublicHealthRouteWithChildren,
   ApiPublicImgRoute: ApiPublicImgRoute,
   ApiPublicIncidentCheckRoute: ApiPublicIncidentCheckRoute,
   ApiPublicLogErrorRoute: ApiPublicLogErrorRoute,
