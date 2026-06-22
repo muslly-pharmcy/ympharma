@@ -352,7 +352,7 @@ export async function runWhatsAppAgent(args: {
           await audit("escalate", { reason }, t0, { status: "error", error: escErr.message });
           return { ok: false };
         }
-        await supabaseAdmin.from("whatsapp_conversations").update({ status: "escalated", last_intent: "escalation" } as never).eq("id", conversationId);
+        await supabaseAdmin.from("whatsapp_conversations").update({ status: "escalated", last_intent: "escalation", last_message: incoming } as never).eq("id", conversationId);
         await supabaseAdmin.from("staff_alerts").insert({
           kind: "whatsapp_escalation", severity: "warn",
           title: "تصعيد محادثة واتساب", body: `${phone}: ${reason}`,
