@@ -102,14 +102,14 @@ export async function analyzePrescriptionImage(
   for (const m of extracted.medicines) {
     const { data: prod } = await supabaseAdmin
       .from("products")
-      .select("id, name, stock_qty, price_yer")
+      .select("id, name, stock_qty, price")
       .ilike("name", `%${m.name}%`)
       .order("stock_qty", { ascending: false })
       .limit(1)
       .maybeSingle();
 
     const matched = (prod ?? null) as
-      | { id: string; name: string; stock_qty: number; price_yer: number | null }
+      | { id: string; name: string; stock_qty: number; price: number | null }
       | null;
     const inStock = !!matched && (matched.stock_qty ?? 0) > 0;
     if (!matched || !inStock) missing.push(m.name);
@@ -123,7 +123,7 @@ export async function analyzePrescriptionImage(
       matchedProductName: matched?.name ?? null,
       inStock,
       stockQty: matched?.stock_qty ?? 0,
-      priceYer: matched?.price_yer ?? null,
+      priceYer: matched?.price ?? null,
     });
   }
 

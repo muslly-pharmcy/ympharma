@@ -8,7 +8,7 @@ export class SupabaseProductRepository implements IProductRepository {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("products")
-      .select("id, name, stock_qty, price_yer")
+      .select("id, name, stock_qty, price")
       .ilike("name", `%${query}%`)
       .order("stock_qty", { ascending: false })
       .limit(limit);
@@ -17,7 +17,7 @@ export class SupabaseProductRepository implements IProductRepository {
       Product.create({
         id: p.id as string,
         name: p.name as string,
-        price: Number(p.price_yer ?? 0),
+        price: Number(p.price ?? 0),
         stock: Number(p.stock_qty ?? 0),
       }),
     );
@@ -27,7 +27,7 @@ export class SupabaseProductRepository implements IProductRepository {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("products")
-      .select("id, name, stock_qty, price_yer")
+      .select("id, name, stock_qty, price")
       .order("stock_qty", { ascending: false })
       .limit(limit);
     if (error) throw new ApplicationError("most_available_failed", "infra_error", error);
@@ -35,7 +35,7 @@ export class SupabaseProductRepository implements IProductRepository {
       Product.create({
         id: p.id as string,
         name: p.name as string,
-        price: Number(p.price_yer ?? 0),
+        price: Number(p.price ?? 0),
         stock: Number(p.stock_qty ?? 0),
       }),
     );
