@@ -32,6 +32,7 @@ import { Route as AiPharmacistRouteImport } from './routes/ai-pharmacist'
 import { Route as AiAssistantRouteImport } from './routes/ai-assistant'
 import { Route as AdminWorkforceRouteImport } from './routes/admin-workforce'
 import { Route as AdminWhatsappDeliveryRouteImport } from './routes/admin-whatsapp-delivery'
+import { Route as AdminWhatsappConversationsRouteImport } from './routes/admin-whatsapp-conversations'
 import { Route as AdminTriggerFailuresRouteImport } from './routes/admin-trigger-failures'
 import { Route as AdminTransfersRouteImport } from './routes/admin-transfers'
 import { Route as AdminStockAuditRouteImport } from './routes/admin-stock-audit'
@@ -228,6 +229,12 @@ const AdminWhatsappDeliveryRoute = AdminWhatsappDeliveryRouteImport.update({
   path: '/admin-whatsapp-delivery',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminWhatsappConversationsRoute =
+  AdminWhatsappConversationsRouteImport.update({
+    id: '/admin-whatsapp-conversations',
+    path: '/admin-whatsapp-conversations',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AdminTriggerFailuresRoute = AdminTriggerFailuresRouteImport.update({
   id: '/admin-trigger-failures',
   path: '/admin-trigger-failures',
@@ -698,6 +705,7 @@ export interface FileRoutesByFullPath {
   '/admin-stock-audit': typeof AdminStockAuditRoute
   '/admin-transfers': typeof AdminTransfersRoute
   '/admin-trigger-failures': typeof AdminTriggerFailuresRoute
+  '/admin-whatsapp-conversations': typeof AdminWhatsappConversationsRoute
   '/admin-whatsapp-delivery': typeof AdminWhatsappDeliveryRoute
   '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
@@ -803,6 +811,7 @@ export interface FileRoutesByTo {
   '/admin-stock-audit': typeof AdminStockAuditRoute
   '/admin-transfers': typeof AdminTransfersRoute
   '/admin-trigger-failures': typeof AdminTriggerFailuresRoute
+  '/admin-whatsapp-conversations': typeof AdminWhatsappConversationsRoute
   '/admin-whatsapp-delivery': typeof AdminWhatsappDeliveryRoute
   '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
@@ -909,6 +918,7 @@ export interface FileRoutesById {
   '/admin-stock-audit': typeof AdminStockAuditRoute
   '/admin-transfers': typeof AdminTransfersRoute
   '/admin-trigger-failures': typeof AdminTriggerFailuresRoute
+  '/admin-whatsapp-conversations': typeof AdminWhatsappConversationsRoute
   '/admin-whatsapp-delivery': typeof AdminWhatsappDeliveryRoute
   '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
@@ -1016,6 +1026,7 @@ export interface FileRouteTypes {
     | '/admin-stock-audit'
     | '/admin-transfers'
     | '/admin-trigger-failures'
+    | '/admin-whatsapp-conversations'
     | '/admin-whatsapp-delivery'
     | '/admin-workforce'
     | '/ai-assistant'
@@ -1121,6 +1132,7 @@ export interface FileRouteTypes {
     | '/admin-stock-audit'
     | '/admin-transfers'
     | '/admin-trigger-failures'
+    | '/admin-whatsapp-conversations'
     | '/admin-whatsapp-delivery'
     | '/admin-workforce'
     | '/ai-assistant'
@@ -1226,6 +1238,7 @@ export interface FileRouteTypes {
     | '/admin-stock-audit'
     | '/admin-transfers'
     | '/admin-trigger-failures'
+    | '/admin-whatsapp-conversations'
     | '/admin-whatsapp-delivery'
     | '/admin-workforce'
     | '/ai-assistant'
@@ -1332,6 +1345,7 @@ export interface RootRouteChildren {
   AdminStockAuditRoute: typeof AdminStockAuditRoute
   AdminTransfersRoute: typeof AdminTransfersRoute
   AdminTriggerFailuresRoute: typeof AdminTriggerFailuresRoute
+  AdminWhatsappConversationsRoute: typeof AdminWhatsappConversationsRoute
   AdminWhatsappDeliveryRoute: typeof AdminWhatsappDeliveryRoute
   AdminWorkforceRoute: typeof AdminWorkforceRoute
   AiAssistantRoute: typeof AiAssistantRoute
@@ -1552,6 +1566,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-whatsapp-delivery'
       fullPath: '/admin-whatsapp-delivery'
       preLoaderRoute: typeof AdminWhatsappDeliveryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-whatsapp-conversations': {
+      id: '/admin-whatsapp-conversations'
+      path: '/admin-whatsapp-conversations'
+      fullPath: '/admin-whatsapp-conversations'
+      preLoaderRoute: typeof AdminWhatsappConversationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-trigger-failures': {
@@ -2175,6 +2196,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminStockAuditRoute: AdminStockAuditRoute,
   AdminTransfersRoute: AdminTransfersRoute,
   AdminTriggerFailuresRoute: AdminTriggerFailuresRoute,
+  AdminWhatsappConversationsRoute: AdminWhatsappConversationsRoute,
   AdminWhatsappDeliveryRoute: AdminWhatsappDeliveryRoute,
   AdminWorkforceRoute: AdminWorkforceRoute,
   AiAssistantRoute: AiAssistantRoute,
