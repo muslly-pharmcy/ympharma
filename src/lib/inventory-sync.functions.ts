@@ -180,7 +180,17 @@ export type InventorySyncLogRow = {
   actor_id: string | null;
   actor_email: string | null;
   action: string;
-  details: unknown;
+  details: {
+    total?: number;
+    updated?: number;
+    inserted?: number;
+    republished?: number;
+    hidden?: number;
+    chunk?: boolean;
+    skipHide?: boolean;
+    errorCount?: number;
+    errors?: { legacyId: number; message: string }[];
+  } | null;
 };
 
 export const listInventorySyncLogs = createServerFn({ method: "POST" })
