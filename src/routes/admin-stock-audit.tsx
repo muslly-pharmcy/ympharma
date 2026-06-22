@@ -6,10 +6,11 @@
 // is not sensitive — gated only by the existing AdminGate wrapper.
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Loader2, PackageCheck, Search } from "lucide-react";
+import { Download, Loader2, PackageCheck, Search } from "lucide-react";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { AdminGate } from "@/components/admin/AdminGate";
 import { supabase } from "@/integrations/supabase/client";
+import { downloadCSV } from "@/lib/csv-export";
 
 export const Route = createFileRoute("/admin-stock-audit")({
   head: () => ({
