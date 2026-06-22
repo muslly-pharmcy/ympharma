@@ -195,7 +195,9 @@ function CartPage() {
             </form>
           </div>
         )}
+        <CartRecommendations phone={phone} />
       </main>
+
       <SiteFooter />
     </div>
   );
