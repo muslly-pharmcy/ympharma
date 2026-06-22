@@ -165,12 +165,19 @@ function UploadPrescriptionPage() {
               <p className="text-xs text-muted-foreground">رقم الطلب</p>
               <p className="font-mono text-sm">{approvalId.slice(0, 8).toUpperCase()}</p>
             </div>
-            {meta && (
-              <Badge variant="outline" className={meta.cls}>
-                <StatusIcon className="h-3 w-3 me-1" />
-                {meta.label}
-              </Badge>
-            )}
+            <div className="flex items-center gap-2">
+              {liveConnected && (
+                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-700 border-emerald-500/30 text-[10px]">
+                  <Radio className="h-3 w-3 me-1 animate-pulse" /> مباشر
+                </Badge>
+              )}
+              {meta && (
+                <Badge variant="outline" className={meta.cls}>
+                  <StatusIcon className="h-3 w-3 me-1" />
+                  {meta.label}
+                </Badge>
+              )}
+            </div>
           </div>
 
           {req?.decision_note && (
