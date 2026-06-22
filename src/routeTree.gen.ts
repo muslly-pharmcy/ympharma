@@ -34,6 +34,7 @@ import { Route as AdminWorkforceRouteImport } from './routes/admin-workforce'
 import { Route as AdminWhatsappDeliveryRouteImport } from './routes/admin-whatsapp-delivery'
 import { Route as AdminTriggerFailuresRouteImport } from './routes/admin-trigger-failures'
 import { Route as AdminTransfersRouteImport } from './routes/admin-transfers'
+import { Route as AdminStockAuditRouteImport } from './routes/admin-stock-audit'
 import { Route as AdminSettingsRouteImport } from './routes/admin-settings'
 import { Route as AdminRxReviewRouteImport } from './routes/admin-rx-review'
 import { Route as AdminRxExtractionEditRouteImport } from './routes/admin-rx-extraction-edit'
@@ -233,6 +234,11 @@ const AdminTriggerFailuresRoute = AdminTriggerFailuresRouteImport.update({
 const AdminTransfersRoute = AdminTransfersRouteImport.update({
   id: '/admin-transfers',
   path: '/admin-transfers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminStockAuditRoute = AdminStockAuditRouteImport.update({
+  id: '/admin-stock-audit',
+  path: '/admin-stock-audit',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
@@ -675,6 +681,7 @@ export interface FileRoutesByFullPath {
   '/admin-rx-extraction-edit': typeof AdminRxExtractionEditRoute
   '/admin-rx-review': typeof AdminRxReviewRoute
   '/admin-settings': typeof AdminSettingsRoute
+  '/admin-stock-audit': typeof AdminStockAuditRoute
   '/admin-transfers': typeof AdminTransfersRoute
   '/admin-trigger-failures': typeof AdminTriggerFailuresRoute
   '/admin-whatsapp-delivery': typeof AdminWhatsappDeliveryRoute
@@ -777,6 +784,7 @@ export interface FileRoutesByTo {
   '/admin-rx-extraction-edit': typeof AdminRxExtractionEditRoute
   '/admin-rx-review': typeof AdminRxReviewRoute
   '/admin-settings': typeof AdminSettingsRoute
+  '/admin-stock-audit': typeof AdminStockAuditRoute
   '/admin-transfers': typeof AdminTransfersRoute
   '/admin-trigger-failures': typeof AdminTriggerFailuresRoute
   '/admin-whatsapp-delivery': typeof AdminWhatsappDeliveryRoute
@@ -880,6 +888,7 @@ export interface FileRoutesById {
   '/admin-rx-extraction-edit': typeof AdminRxExtractionEditRoute
   '/admin-rx-review': typeof AdminRxReviewRoute
   '/admin-settings': typeof AdminSettingsRoute
+  '/admin-stock-audit': typeof AdminStockAuditRoute
   '/admin-transfers': typeof AdminTransfersRoute
   '/admin-trigger-failures': typeof AdminTriggerFailuresRoute
   '/admin-whatsapp-delivery': typeof AdminWhatsappDeliveryRoute
@@ -984,6 +993,7 @@ export interface FileRouteTypes {
     | '/admin-rx-extraction-edit'
     | '/admin-rx-review'
     | '/admin-settings'
+    | '/admin-stock-audit'
     | '/admin-transfers'
     | '/admin-trigger-failures'
     | '/admin-whatsapp-delivery'
@@ -1086,6 +1096,7 @@ export interface FileRouteTypes {
     | '/admin-rx-extraction-edit'
     | '/admin-rx-review'
     | '/admin-settings'
+    | '/admin-stock-audit'
     | '/admin-transfers'
     | '/admin-trigger-failures'
     | '/admin-whatsapp-delivery'
@@ -1188,6 +1199,7 @@ export interface FileRouteTypes {
     | '/admin-rx-extraction-edit'
     | '/admin-rx-review'
     | '/admin-settings'
+    | '/admin-stock-audit'
     | '/admin-transfers'
     | '/admin-trigger-failures'
     | '/admin-whatsapp-delivery'
@@ -1291,6 +1303,7 @@ export interface RootRouteChildren {
   AdminRxExtractionEditRoute: typeof AdminRxExtractionEditRoute
   AdminRxReviewRoute: typeof AdminRxReviewRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminStockAuditRoute: typeof AdminStockAuditRoute
   AdminTransfersRoute: typeof AdminTransfersRoute
   AdminTriggerFailuresRoute: typeof AdminTriggerFailuresRoute
   AdminWhatsappDeliveryRoute: typeof AdminWhatsappDeliveryRoute
@@ -1526,6 +1539,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-transfers'
       fullPath: '/admin-transfers'
       preLoaderRoute: typeof AdminTransfersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-stock-audit': {
+      id: '/admin-stock-audit'
+      path: '/admin-stock-audit'
+      fullPath: '/admin-stock-audit'
+      preLoaderRoute: typeof AdminStockAuditRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-settings': {
@@ -2110,6 +2130,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRxExtractionEditRoute: AdminRxExtractionEditRoute,
   AdminRxReviewRoute: AdminRxReviewRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminStockAuditRoute: AdminStockAuditRoute,
   AdminTransfersRoute: AdminTransfersRoute,
   AdminTriggerFailuresRoute: AdminTriggerFailuresRoute,
   AdminWhatsappDeliveryRoute: AdminWhatsappDeliveryRoute,
