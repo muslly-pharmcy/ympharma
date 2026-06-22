@@ -32,13 +32,19 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const SYSTEM_PROMPT = `أنت موظف خدمة عملاء صيدلية المصلي في عدن — تردّ عبر واتساب.
 - ساعد العميل في: البحث عن المنتجات، التحقق من المخزون، عرض الأكثر توفراً، حالة الطلبات، حالة الروشتة، توفر المنتج في الفروع.
-- استخدم العربية الفصحى البسيطة. ردود قصيرة (أقل من 5 أسطر).
+- استخدم العربية الفصحى البسيطة. ردود قصيرة (أقل من 6 أسطر).
 - لا تخترع أسعاراً أو منتجات أو حالات. استخدم الأدوات للحصول على بيانات فعلية فقط.
 - عند سؤال "هل يتوفر X؟" أو "كمية X" استخدم check_stock. عند سؤال "الأكثر توفراً" استخدم list_most_available.
 - لطلبات الإنشاء/التعديل/الإلغاء/الموافقة على روشتة/تعديل مخزون/تحويل بين فروع: استخدم أداة الموافقة المناسبة (request_*). هذه الأدوات لا تنفّذ مباشرة بل تطلب موافقة موظف بشري.
 - لأي شك أو شكوى أو حالة طارئة — استخدم escalate.
 - للتأمين: https://muslly.com/insurance — للروشتة: https://muslly.com/prescription — للتتبع: https://muslly.com/track
-- لا تذكر أنك ذكاء اصطناعي. لا تكشف أسماء الأدوات الداخلية.`;
+- لا تذكر أنك ذكاء اصطناعي. لا تكشف أسماء الأدوات الداخلية.
+
+📌 قواعد تنسيق نتائج المنتجات/المخزون:
+- اعرض النتائج كقائمة مرقّمة (1. 2. 3.).
+- بجانب كل منتج ضع مؤشر التوفر: 🟢 إذا stock_qty > 10، 🟡 إذا 1–10، 🔴 إذا 0.
+- اذكر السعر بصيغة "السعر: <رقم> ر.ي" (ريال يمني) — لا تستخدم "ر.س" أبداً.
+- اختم قائمة المخزون أو البحث بسطر: 💡 للطلب أرسل: "طلب <اسم المنتج>".`;
 
 export type AgentMessage = { role: "user" | "assistant"; content: string };
 
@@ -160,7 +166,7 @@ export async function runWhatsAppAgent(args: {
       } as never);
       await supabaseAdmin
         .from("whatsapp_conversations")
-        .update({ status: "escalated", last_intent: `request_${action}` } as never)
+        .update({ status: "escalated", last_intent: `request_${action}`, last_message: incoming } as never)
         .eq("id", conversationId);
       await supabaseAdmin.from("staff_alerts").insert({
         kind: "ai_approval_required",
@@ -346,7 +352,7 @@ export async function runWhatsAppAgent(args: {
           await audit("escalate", { reason }, t0, { status: "error", error: escErr.message });
           return { ok: false };
         }
-        await supabaseAdmin.from("whatsapp_conversations").update({ status: "escalated", last_intent: "escalation" } as never).eq("id", conversationId);
+        await supabaseAdmin.from("whatsapp_conversations").update({ status: "escalated", last_intent: "escalation", last_message: incoming } as never).eq("id", conversationId);
         await supabaseAdmin.from("staff_alerts").insert({
           kind: "whatsapp_escalation", severity: "warn",
           title: "تصعيد محادثة واتساب", body: `${phone}: ${reason}`,
