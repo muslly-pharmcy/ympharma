@@ -208,7 +208,7 @@ export const Route = createFileRoute("/api/public/whatsapp-webhook")({
           }
           await supabaseAdmin
             .from("whatsapp_conversations")
-            .update({ last_message_at: new Date().toISOString() })
+            .update({ last_message_at: new Date().toISOString(), last_message: textBody ?? null })
             .eq("id", conversationId);
         } catch (e) {
           console.error("[wa] persistence error", e);
