@@ -1,10 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
-import { getMyLoyalty, getMyLoyaltyTransactions } from "@/lib/loyalty.functions";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import {
+  getMyLoyalty,
+  getMyLoyaltyTransactions,
+  linkLoyaltyAccountByPhone,
+} from "@/lib/loyalty.functions";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Award, Coins, TrendingUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Award, Coins, TrendingUp, Link2, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/loyalty")({
   head: () => ({
@@ -76,9 +84,7 @@ function LoyaltyPage() {
       </h1>
 
       {!acct ? (
-        <Card className="p-6 text-center text-muted-foreground">
-          لا يوجد حساب ولاء مرتبط بحسابك بعد. سيتم إنشاؤه تلقائياً عند أول طلب.
-        </Card>
+        <LinkPhoneCard />
       ) : (
         <>
           <Card className="p-6 space-y-4">
@@ -156,5 +162,54 @@ function LoyaltyPage() {
         </>
       )}
     </div>
+  );
+}
+
+function LinkPhoneCard() {
+  const [phone, setPhone] = useState("");
+  const qc = useQueryClient();
+  const linkFn = useServerFn(linkLoyaltyAccountByPhone);
+  const link = useMutation({
+    mutationFn: (p: string) => linkFn({ data: { phone: p } }),
+    onSuccess: (res) => {
+      toast.success(res.created ? "تم إنشاء حساب ولاء جديد وربطه برقمك" : "تم ربط رقمك بحساب ولاء موجود");
+      qc.invalidateQueries({ queryKey: ["my-loyalty"] });
+    },
+    onError: (e: Error) => {
+      const m = e.message === "phone_already_linked_to_other_user"
+        ? "هذا الرقم مرتبط بحساب آخر"
+        : e.message === "invalid_phone"
+        ? "رقم الجوال غير صالح"
+        : "تعذر الربط";
+      toast.error(m);
+    },
+  });
+
+  return (
+    <Card className="p-6 space-y-4">
+      <div className="flex items-center gap-2">
+        <Link2 className="h-5 w-5 text-primary" />
+        <h2 className="font-semibold">اربط رقم جوالك بحسابك</h2>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        أدخل رقم جوالك الذي تستخدمه عند الطلب. سنربطه بحسابك ليتم احتساب نقاط الولاء تلقائياً.
+      </p>
+      <div className="flex gap-2" dir="ltr">
+        <Input
+          type="tel"
+          inputMode="tel"
+          placeholder="7XXXXXXXX"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          className="font-mono"
+        />
+        <Button
+          onClick={() => link.mutate(phone)}
+          disabled={!phone || link.isPending}
+        >
+          {link.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "ربط"}
+        </Button>
+      </div>
+    </Card>
   );
 }
