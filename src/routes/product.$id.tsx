@@ -10,7 +10,7 @@ import { useMergedProducts } from "@/lib/use-merged-products";
 import { useLegacyMap, useRelatedProducts } from "@/lib/use-pharmacy-intel";
 import { proxifyImage } from "@/lib/img-proxy";
 import { ProductGallery } from "@/components/product-gallery";
-import { handleImageError } from "@/lib/img-placeholder";
+
 import { useCart } from "@/lib/cart";
 import { getVitaminInfo, type VitaminInfo } from "@/lib/vitamin-info.functions";
 import { readCache, writeCache, cacheKey } from "@/lib/vitamin-cache";
