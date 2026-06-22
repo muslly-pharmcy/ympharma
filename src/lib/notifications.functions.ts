@@ -13,7 +13,7 @@ export type NotificationRow = {
   priority: "low" | "medium" | "high" | "urgent";
   read: boolean;
   read_at: string | null;
-  metadata: unknown;
+  metadata: Json;
   created_at: string;
 };
 
