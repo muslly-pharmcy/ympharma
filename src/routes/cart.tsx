@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Minus, Plus, Trash2, ShoppingBag, MessageCircle, CheckCircle2, Loader2, Tag, X, HeartPulse } from "lucide-react";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
+import { CartRecommendations } from "@/components/cart-recommendations";
+
 import { useCart } from "@/lib/cart";
 import { formatPrice } from "@/lib/products";
 import { useMergedProducts } from "@/lib/use-merged-products";
@@ -193,7 +195,9 @@ function CartPage() {
             </form>
           </div>
         )}
+        <CartRecommendations phone={phone} />
       </main>
+
       <SiteFooter />
     </div>
   );

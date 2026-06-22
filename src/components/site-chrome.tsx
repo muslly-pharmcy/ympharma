@@ -1,12 +1,30 @@
-import { Link } from "@tanstack/react-router";
-import { Search, ShoppingBag, MapPin, Menu, Phone, Truck, Clock3, Globe, Shield } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { Search, ShoppingBag, MapPin, Menu, Phone, Truck, Clock3, Globe, Shield, Mic, MicOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { useI18n } from "@/lib/i18n";
+import { useSpeech } from "@/hooks/use-speech";
 import logoUrl from "@/assets/almusalli-logo.webp";
 import { categories } from "@/lib/products";
 
 export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (v: string) => void }) {
+  const navigate = useNavigate();
+  const { isSupported, isListening, error: voiceError, start, stop } = useSpeech("ar-SA");
+
+  const handleVoiceResult = (text: string) => {
+    const t = text.trim();
+    if (!t) return;
+    if (onSearch) onSearch(t);
+    else navigate({ to: "/products", search: { q: t } });
+  };
+
+  const handleSubmitSearch = (e: React.FormEvent<HTMLInputElement>) => {
+    if ((e as any).key !== "Enter") return;
+    const v = (e.target as HTMLInputElement).value.trim();
+    if (!v) return;
+    if (!onSearch) navigate({ to: "/products", search: { q: v } });
+  };
+
   const { count } = useCart();
   const { lang, setLang, t } = useI18n();
   const [scrolled, setScrolled] = useState(false);
@@ -61,10 +79,25 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
             <input
               value={search ?? ""}
               onChange={(e) => onSearch?.(e.target.value)}
-              placeholder={t("search.placeholder")}
-              className={`w-full rounded-2xl border border-border bg-secondary/60 ps-4 pe-11 text-sm font-medium outline-none transition-all duration-300 focus:border-primary focus:bg-card focus:ring-4 focus:ring-primary/15 ${scrolled ? "py-2" : "py-3"}`}
+              onKeyDown={handleSubmitSearch}
+              placeholder={isListening ? "🎤 جارٍ الاستماع..." : t("search.placeholder")}
+              className={`w-full rounded-2xl border border-border bg-secondary/60 ps-4 pe-20 text-sm font-medium outline-none transition-all duration-300 focus:border-primary focus:bg-card focus:ring-4 focus:ring-primary/15 ${scrolled ? "py-2" : "py-3"} ${isListening ? "ring-2 ring-red-400/60" : ""}`}
+              aria-label={t("search.placeholder")}
             />
+            {isSupported && (
+              <button
+                type="button"
+                onClick={() => (isListening ? stop() : start(handleVoiceResult))}
+                aria-label={isListening ? "إيقاف البحث الصوتي" : "بدء البحث الصوتي"}
+                aria-pressed={isListening}
+                title={voiceError ? `خطأ: ${voiceError}` : isListening ? "إيقاف" : "بحث صوتي"}
+                className={`absolute end-10 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full transition ${isListening ? "bg-red-500 text-white animate-pulse" : "bg-secondary text-primary hover:bg-accent"}`}
+              >
+                {isListening ? <MicOff className="size-4" /> : <Mic className="size-4" />}
+              </button>
+            )}
           </div>
+
 
           <div className="flex items-center gap-2 shrink-0">
             <button className="hidden md:flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2.5 text-xs font-bold text-secondary-foreground transition hover:bg-accent">
