@@ -159,8 +159,12 @@ export type Database = {
           decided_at: string | null
           decided_by: string | null
           decision_note: string | null
+          extracted_medicines: Json | null
           id: string
+          is_valid: boolean | null
+          missing_medicines: string[] | null
           payload: Json
+          pharmacist_notes: string | null
           status: string
           updated_at: string
           user_phone: string | null
@@ -175,8 +179,12 @@ export type Database = {
           decided_at?: string | null
           decided_by?: string | null
           decision_note?: string | null
+          extracted_medicines?: Json | null
           id?: string
+          is_valid?: boolean | null
+          missing_medicines?: string[] | null
           payload?: Json
+          pharmacist_notes?: string | null
           status?: string
           updated_at?: string
           user_phone?: string | null
@@ -191,8 +199,12 @@ export type Database = {
           decided_at?: string | null
           decided_by?: string | null
           decision_note?: string | null
+          extracted_medicines?: Json | null
           id?: string
+          is_valid?: boolean | null
+          missing_medicines?: string[] | null
           payload?: Json
+          pharmacist_notes?: string | null
           status?: string
           updated_at?: string
           user_phone?: string | null
@@ -799,6 +811,42 @@ export type Database = {
           },
         ]
       }
+      customer_channels: {
+        Row: {
+          channel: string
+          created_at: string
+          customer_id: string
+          handle: string
+          id: string
+          phone_number: string | null
+          preferences: Json
+          updated_at: string
+          verified: boolean
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          customer_id: string
+          handle: string
+          id?: string
+          phone_number?: string | null
+          preferences?: Json
+          updated_at?: string
+          verified?: boolean
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          customer_id?: string
+          handle?: string
+          id?: string
+          phone_number?: string | null
+          preferences?: Json
+          updated_at?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
       customer_notification_preferences: {
         Row: {
           created_at: string
@@ -1289,6 +1337,42 @@ export type Database = {
         }
         Relationships: []
       }
+      health_checks: {
+        Row: {
+          created_at: string
+          details: Json
+          duration: number | null
+          failed: number
+          id: string
+          passed: number
+          status: string
+          total: number
+          warnings: number
+        }
+        Insert: {
+          created_at?: string
+          details?: Json
+          duration?: number | null
+          failed?: number
+          id?: string
+          passed?: number
+          status: string
+          total?: number
+          warnings?: number
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          duration?: number | null
+          failed?: number
+          id?: string
+          passed?: number
+          status?: string
+          total?: number
+          warnings?: number
+        }
+        Relationships: []
+      }
       img_proxy_logs: {
         Row: {
           created_at: string
@@ -1426,6 +1510,57 @@ export type Database = {
           validation_notes?: string | null
         }
         Relationships: []
+      }
+      inventory_alerts: {
+        Row: {
+          branch_id: string | null
+          created_at: string
+          id: string
+          message: string | null
+          product_id: string | null
+          resolved: boolean
+          resolved_at: string | null
+          severity: string
+          type: string
+        }
+        Insert: {
+          branch_id?: string | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          product_id?: string | null
+          resolved?: boolean
+          resolved_at?: string | null
+          severity?: string
+          type: string
+        }
+        Update: {
+          branch_id?: string | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          product_id?: string | null
+          resolved?: boolean
+          resolved_at?: string | null
+          severity?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_alerts_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_alerts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       inventory_audit_log: {
         Row: {
@@ -1590,6 +1725,51 @@ export type Database = {
           requested_qty?: number
           shortfall?: number | null
           would_succeed?: boolean
+        }
+        Relationships: []
+      }
+      inventory_sync_logs: {
+        Row: {
+          actor_id: string | null
+          completed_at: string | null
+          errors: string[]
+          hidden: number
+          id: string
+          inserted: number
+          metadata: Json
+          republished: number
+          started_at: string
+          status: string
+          total_products: number
+          updated: number
+        }
+        Insert: {
+          actor_id?: string | null
+          completed_at?: string | null
+          errors?: string[]
+          hidden?: number
+          id?: string
+          inserted?: number
+          metadata?: Json
+          republished?: number
+          started_at?: string
+          status: string
+          total_products?: number
+          updated?: number
+        }
+        Update: {
+          actor_id?: string | null
+          completed_at?: string | null
+          errors?: string[]
+          hidden?: number
+          id?: string
+          inserted?: number
+          metadata?: Json
+          republished?: number
+          started_at?: string
+          status?: string
+          total_products?: number
+          updated?: number
         }
         Relationships: []
       }
@@ -2305,6 +2485,48 @@ export type Database = {
           rx_id?: string
           sha256?: string
           storage_path?: string
+        }
+        Relationships: []
+      }
+      prescription_orders: {
+        Row: {
+          created_at: string
+          extracted_medicines: Json | null
+          extracted_text: string | null
+          id: string
+          image_url: string
+          is_valid: boolean | null
+          missing_medicines: string[] | null
+          pharmacist_notes: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          extracted_medicines?: Json | null
+          extracted_text?: string | null
+          id?: string
+          image_url: string
+          is_valid?: boolean | null
+          missing_medicines?: string[] | null
+          pharmacist_notes?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          extracted_medicines?: Json | null
+          extracted_text?: string | null
+          id?: string
+          image_url?: string
+          is_valid?: boolean | null
+          missing_medicines?: string[] | null
+          pharmacist_notes?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
