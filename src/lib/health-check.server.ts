@@ -23,16 +23,16 @@ export interface HealthReport {
   summary: { passed: number; failed: number; warnings: number; total: number };
 }
 
-async function timed(fn: () => Promise<CheckResult>): Promise<CheckResult> {
-  const t = Date.now();
+async function timed(fn: () => Promise<Omit<CheckResult, "duration">>): Promise<CheckResult> {
+  const start = Date.now();
   try {
     const r = await fn();
-    return { ...r, duration: r.duration ?? Date.now() - t };
+    return { ...r, duration: Date.now() - start };
   } catch (e) {
     return {
       status: "fail",
       message: e instanceof Error ? e.message : String(e),
-      duration: Date.now() - t,
+      duration: Date.now() - start,
     };
   }
 }
@@ -40,33 +40,37 @@ async function timed(fn: () => Promise<CheckResult>): Promise<CheckResult> {
 // 1) Database connectivity + core tables present
 async function checkDatabase(): Promise<CheckResult> {
   return timed(async () => {
-    const start = Date.now();
     const tables = [
       "products",
       "orders",
       "whatsapp_conversations",
+      "whatsapp_messages",
       "notifications",
       "loyalty_accounts",
+      "loyalty_transactions",
       "prescriptions",
+      "agent_approval_requests",
+      "branches",
+      "branch_inventory",
     ] as const;
     const missing: string[] = [];
+    const accessible: string[] = [];
     for (const t of tables) {
       const { error } = await supabaseAdmin.from(t).select("*", { head: true, count: "exact" }).limit(1);
       if (error && (error.code === "42P01" || /does not exist/i.test(error.message))) missing.push(t);
+      else if (!error) accessible.push(t);
     }
     if (missing.length) {
       return {
         status: "warn",
         message: `جداول مفقودة: ${missing.join(", ")}`,
-        details: { missing },
-        duration: Date.now() - start,
+        details: { missing, accessible: accessible.length },
       };
     }
     return {
       status: "pass",
-      message: "قاعدة البيانات تعمل بشكل طبيعي",
-      details: { tables: tables.length },
-      duration: Date.now() - start,
+      message: "✅ قاعدة البيانات تعمل بشكل طبيعي",
+      details: { totalTables: tables.length, accessible: accessible.length },
     };
   });
 }
@@ -74,127 +78,198 @@ async function checkDatabase(): Promise<CheckResult> {
 // 2) Lovable AI gateway reachable
 async function checkAI(): Promise<CheckResult> {
   return timed(async () => {
-    const start = Date.now();
     const key = process.env.LOVABLE_API_KEY;
     if (!key) {
-      return { status: "warn", message: "LOVABLE_API_KEY غير مضبوط", duration: Date.now() - start };
+      return { status: "warn", message: "⚠️ LOVABLE_API_KEY غير مضبوط" };
     }
     const provider = createLovableAiGatewayProvider(key);
     const { text } = await generateText({
       model: provider("google/gemini-2.5-flash"),
       prompt: "ping",
     });
+    return text?.trim()
+      ? {
+          status: "pass",
+          message: "✅ الذكاء الاصطناعي يعمل (Gemini)",
+          details: { sample: text.trim().slice(0, 40), model: "google/gemini-2.5-flash" },
+        }
+      : { status: "warn", message: "⚠️ استجابة الذكاء الاصطناعي فارغة" };
+  });
+}
+
+// 3) WhatsApp bot: conversations + recent messages + pending approvals
+async function checkWhatsApp(): Promise<CheckResult> {
+  return timed(async () => {
+    const { error: convError, count: conversations } = await supabaseAdmin
+      .from("whatsapp_conversations")
+      .select("id", { head: true, count: "exact" });
+    if (convError) {
+      return {
+        status: "fail",
+        message: `❌ فشل الوصول إلى محادثات واتساب: ${convError.message}`,
+      };
+    }
+    const since = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
+    const { count: messagesLast7d, error: msgError } = await supabaseAdmin
+      .from("whatsapp_messages")
+      .select("id", { head: true, count: "exact" })
+      .gt("created_at", since);
+    if (msgError) {
+      return {
+        status: "warn",
+        message: "⚠️ تعذّر جلب رسائل واتساب الأخيرة",
+        details: { error: msgError.message, conversations: conversations ?? 0 },
+      };
+    }
+    const { count: pendingApprovals } = await supabaseAdmin
+      .from("agent_approval_requests")
+      .select("id", { head: true, count: "exact" })
+      .eq("status", "pending");
     return {
-      status: text?.trim() ? "pass" : "warn",
-      message: text?.trim() ? "الذكاء الاصطناعي يعمل" : "استجابة فارغة",
-      details: { sample: (text || "").slice(0, 40) },
-      duration: Date.now() - start,
+      status: "pass",
+      message: "✅ بوت واتساب يعمل بشكل طبيعي",
+      details: {
+        conversations: conversations ?? 0,
+        messagesLast7d: messagesLast7d ?? 0,
+        pendingApprovals: pendingApprovals ?? 0,
+      },
     };
   });
 }
 
-// 3) Notifications table reachable
+// 4) Prescriptions system
+async function checkPrescription(): Promise<CheckResult> {
+  return timed(async () => {
+    const { error, count: total } = await supabaseAdmin
+      .from("prescriptions")
+      .select("id", { head: true, count: "exact" });
+    if (error) {
+      return {
+        status: "warn",
+        message: `⚠️ جدول الوصفات غير متاح: ${error.message}`,
+      };
+    }
+    const { count: pending } = await supabaseAdmin
+      .from("prescriptions")
+      .select("id", { head: true, count: "exact" })
+      .eq("status", "pending");
+    const { error: approvalError } = await supabaseAdmin
+      .from("agent_approval_requests")
+      .select("id")
+      .eq("action_type", "prescription")
+      .limit(1);
+    return {
+      status: "pass",
+      message: "✅ نظام الوصفات الطبية يعمل",
+      details: {
+        total: total ?? 0,
+        pending: pending ?? 0,
+        approvalSystem: !approvalError,
+      },
+    };
+  });
+}
+
+// 5) Notifications
 async function checkNotifications(): Promise<CheckResult> {
   return timed(async () => {
-    const start = Date.now();
-    const { error } = await supabaseAdmin.from("notifications").select("id").limit(1);
-    if (error) return { status: "fail", message: error.message, duration: Date.now() - start };
-    return { status: "pass", message: "نظام الإشعارات يعمل", duration: Date.now() - start };
+    const { error, count: total } = await supabaseAdmin
+      .from("notifications")
+      .select("id", { head: true, count: "exact" });
+    if (error) return { status: "fail", message: `❌ ${error.message}` };
+    const { count: unread } = await supabaseAdmin
+      .from("notifications")
+      .select("id", { head: true, count: "exact" })
+      .eq("read", false);
+    return {
+      status: "pass",
+      message: "✅ نظام الإشعارات يعمل",
+      details: { total: total ?? 0, unread: unread ?? 0 },
+    };
   });
 }
 
-// 4) Loyalty table reachable
+// 6) Loyalty
 async function checkLoyalty(): Promise<CheckResult> {
   return timed(async () => {
-    const start = Date.now();
-    const { error } = await supabaseAdmin.from("loyalty_accounts").select("id").limit(1);
-    if (error) return { status: "fail", message: error.message, duration: Date.now() - start };
-    return { status: "pass", message: "نظام الولاء يعمل", duration: Date.now() - start };
+    const { error: accError, count: accounts } = await supabaseAdmin
+      .from("loyalty_accounts")
+      .select("id", { head: true, count: "exact" });
+    if (accError) return { status: "fail", message: `❌ ${accError.message}` };
+    const { count: transactions } = await supabaseAdmin
+      .from("loyalty_transactions")
+      .select("id", { head: true, count: "exact" });
+    return {
+      status: "pass",
+      message: "✅ نظام الولاء يعمل",
+      details: { accounts: accounts ?? 0, transactions: transactions ?? 0 },
+    };
   });
 }
 
-// 5) In-memory cache round-trip
+// 7) In-memory cache round-trip
 async function checkCache(): Promise<CheckResult> {
   return timed(async () => {
-    const start = Date.now();
     const k = "__health_probe__";
     cacheSet(k, { ok: true }, 5);
     const got = cacheGet<{ ok: boolean }>(k);
     cacheDelete(k);
     return got?.ok
-      ? { status: "pass", message: "الكاش يعمل", duration: Date.now() - start }
-      : { status: "warn", message: "تعذّر استرجاع قيمة الكاش", duration: Date.now() - start };
+      ? { status: "pass", message: "✅ الكاش يعمل", details: { type: "Memory Cache", ttl: "5s" } }
+      : { status: "warn", message: "⚠️ تعذّر استرجاع قيمة الكاش" };
   });
 }
 
-// 6) WhatsApp tables reachable + recent activity
-async function checkWhatsApp(): Promise<CheckResult> {
+// 8) Inventory (products + branches + branch_inventory)
+async function checkInventory(): Promise<CheckResult> {
   return timed(async () => {
-    const start = Date.now();
-    const { error } = await supabaseAdmin.from("whatsapp_conversations").select("id").limit(1);
-    if (error) return { status: "fail", message: error.message, duration: Date.now() - start };
-    const since = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
-    const { count } = await supabaseAdmin
-      .from("whatsapp_messages")
-      .select("id", { head: true, count: "exact" })
-      .gt("created_at", since);
+    const { error: pe, count: products } = await supabaseAdmin
+      .from("products")
+      .select("id", { head: true, count: "exact" });
+    if (pe) return { status: "fail", message: `❌ ${pe.message}` };
+    const { error: be, count: branches } = await supabaseAdmin
+      .from("branches")
+      .select("id", { head: true, count: "exact" });
+    const { count: inventoryItems } = await supabaseAdmin
+      .from("branch_inventory")
+      .select("id", { head: true, count: "exact" });
     return {
       status: "pass",
-      message: "خدمة واتساب تعمل",
-      details: { messagesLast7d: count ?? 0 },
-      duration: Date.now() - start,
+      message: "✅ نظام المخزون يعمل",
+      details: {
+        products: products ?? 0,
+        branches: branches ?? 0,
+        inventoryItems: inventoryItems ?? 0,
+        multiBranch: !be,
+      },
     };
   });
 }
 
-// 7) Required env vars
+// 9) Required env vars
 async function checkEnv(): Promise<CheckResult> {
   return timed(async () => {
-    const start = Date.now();
     const required = ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_PUBLISHABLE_KEY", "LOVABLE_API_KEY"];
-    const optional = ["WHATSAPP_CLOUD_API_TOKEN", "RESEND_API_KEY", "SENTRY_DSN"];
+    const optional = [
+      "WHATSAPP_CLOUD_API_TOKEN",
+      "RESEND_API_KEY",
+      "SENTRY_DSN",
+      "CRON_SECRET",
+      "EXTRACT_WORKER_SECRET",
+    ];
     const missing = required.filter((k) => !process.env[k]);
     const presentOptional = optional.filter((k) => process.env[k]).length;
     return missing.length
       ? {
           status: "fail",
-          message: `متغيرات مطلوبة مفقودة: ${missing.join(", ")}`,
+          message: `❌ متغيرات مطلوبة مفقودة: ${missing.join(", ")}`,
           details: { missing },
-          duration: Date.now() - start,
         }
       : {
           status: "pass",
-          message: "متغيرات البيئة مضبوطة",
+          message: "✅ متغيرات البيئة مضبوطة",
           details: { optionalPresent: `${presentOptional}/${optional.length}` },
-          duration: Date.now() - start,
         };
-  });
-}
-
-// 8) Inventory (products + branches)
-async function checkInventory(): Promise<CheckResult> {
-  return timed(async () => {
-    const start = Date.now();
-    const { error: pe } = await supabaseAdmin.from("products").select("id").limit(1);
-    if (pe) return { status: "fail", message: pe.message, duration: Date.now() - start };
-    const { error: be } = await supabaseAdmin.from("branches").select("id").limit(1);
-    return {
-      status: "pass",
-      message: "نظام المخزون يعمل",
-      details: { multiBranch: !be },
-      duration: Date.now() - start,
-    };
-  });
-}
-
-// 9) Prescriptions
-async function checkPrescription(): Promise<CheckResult> {
-  return timed(async () => {
-    const start = Date.now();
-    const { error } = await supabaseAdmin.from("prescriptions").select("id").limit(1);
-    return error
-      ? { status: "warn", message: error.message, duration: Date.now() - start }
-      : { status: "pass", message: "نظام الوصفات يعمل", duration: Date.now() - start };
   });
 }
 
@@ -214,22 +289,37 @@ function summarize(checks: Record<string, CheckResult>, start: number): HealthRe
 
 export async function runFullHealthCheck(): Promise<HealthReport> {
   const start = Date.now();
-  const [database, ai, loyalty, notifications, cache, whatsapp, env, inventory, prescription] = await Promise.all([
+  const [database, ai, whatsapp, prescription, notifications, loyalty, cache, inventory, env] = await Promise.all([
     checkDatabase(),
     checkAI(),
-    checkLoyalty(),
-    checkNotifications(),
-    checkCache(),
     checkWhatsApp(),
-    checkEnv(),
-    checkInventory(),
     checkPrescription(),
+    checkNotifications(),
+    checkLoyalty(),
+    checkCache(),
+    checkInventory(),
+    checkEnv(),
   ]);
-  return summarize({ database, ai, loyalty, notifications, cache, whatsapp, env, inventory, prescription }, start);
+  return summarize(
+    { database, ai, whatsapp, prescription, notifications, loyalty, cache, inventory, env },
+    start,
+  );
 }
 
 export async function runQuickHealthCheck(): Promise<HealthReport> {
   const start = Date.now();
-  const [database, env, whatsapp] = await Promise.all([checkDatabase(), checkEnv(), checkWhatsApp()]);
-  return summarize({ database, env, whatsapp }, start);
+  const [database, whatsapp, prescription] = await Promise.all([
+    checkDatabase(),
+    checkWhatsApp(),
+    checkPrescription(),
+  ]);
+  return summarize({ database, whatsapp, prescription }, start);
+}
+
+export async function checkWhatsAppOnly(): Promise<CheckResult> {
+  return checkWhatsApp();
+}
+
+export async function checkPrescriptionOnly(): Promise<CheckResult> {
+  return checkPrescription();
 }
