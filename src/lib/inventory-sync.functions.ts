@@ -23,12 +23,40 @@ export type SyncReport = {
   republished: number;
   hidden: number;
   errors: { legacyId: number; message: string }[];
+  updatedIds?: number[];
+  insertedIds?: number[];
+  hiddenIds?: string[];
 };
 
 async function assertAdminOrOwner(context: { supabase: any; userId: string }) {
   const { data: isAdmin } = await context.supabase.rpc("has_role" as never, { _user_id: context.userId, _role: "admin" } as never);
   const { data: isOwner } = await context.supabase.rpc("has_role" as never, { _user_id: context.userId, _role: "owner" } as never);
   if (!isAdmin && !isOwner) throw new Error("Forbidden");
+}
+
+async function notifyAdmins(
+  supabaseAdmin: any,
+  payload: { title: string; body: string; priority: "high" | "urgent"; metadata: Record<string, unknown> },
+) {
+  try {
+    const { data: roleRows } = await supabaseAdmin
+      .from("user_roles")
+      .select("user_id, role")
+      .in("role", ["admin", "owner"]);
+    const userIds = Array.from(new Set((roleRows ?? []).map((r: { user_id: string }) => r.user_id)));
+    if (userIds.length === 0) return;
+    const inserts = userIds.map((uid) => ({
+      user_id: uid,
+      type: "inventory_sync_failure",
+      title: payload.title,
+      body: payload.body,
+      priority: payload.priority,
+      metadata: payload.metadata,
+    }));
+    await supabaseAdmin.from("notifications").insert(inserts as never);
+  } catch {
+    /* notifications optional */
+  }
 }
 
 export const runInventorySync = createServerFn({ method: "POST" })
@@ -56,7 +84,11 @@ export const runInventorySync = createServerFn({ method: "POST" })
       if (typeof p.legacy_id === "number") byLegacy.set(p.legacy_id, { id: p.id, is_published: !!p.is_published });
     }
 
-    const report: SyncReport = { total: data.rows.length, updated: 0, inserted: 0, republished: 0, hidden: 0, errors: [] };
+    const report: SyncReport = {
+      total: data.rows.length,
+      updated: 0, inserted: 0, republished: 0, hidden: 0,
+      errors: [], updatedIds: [], insertedIds: [], hiddenIds: [],
+    };
     const nowIso = new Date().toISOString();
 
     for (const row of data.rows) {
@@ -76,6 +108,7 @@ export const runInventorySync = createServerFn({ method: "POST" })
         const { error } = await supabaseAdmin.from("products").update(payload).eq("id", found.id);
         if (error) { report.errors.push({ legacyId: row.legacyId, message: error.message }); continue; }
         report.updated++;
+        report.updatedIds!.push(row.legacyId);
         if (shouldPublish && !found.is_published) report.republished++;
       } else {
         const { error } = await supabaseAdmin.from("products").insert({
@@ -86,6 +119,7 @@ export const runInventorySync = createServerFn({ method: "POST" })
         });
         if (error) { report.errors.push({ legacyId: row.legacyId, message: error.message }); continue; }
         report.inserted++;
+        report.insertedIds!.push(row.legacyId);
       }
     }
 
@@ -105,7 +139,10 @@ export const runInventorySync = createServerFn({ method: "POST" })
           .from("products")
           .update({ is_published: false, updated_at: nowIso })
           .in("id", slice);
-        if (!error) report.hidden += slice.length;
+        if (!error) {
+          report.hidden += slice.length;
+          report.hiddenIds!.push(...slice);
+        }
       }
     }
 
@@ -139,7 +176,7 @@ export const finalizeInventoryHide = createServerFn({ method: "POST" })
       }).optional(),
     }).parse(input),
   )
-  .handler(async ({ data, context }): Promise<{ hidden: number }> => {
+  .handler(async ({ data, context }): Promise<{ hidden: number; hiddenIds: string[] }> => {
     await assertAdminOrOwner(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const seen = new Set(data.seenLegacyIds);
@@ -154,26 +191,100 @@ export const finalizeInventoryHide = createServerFn({ method: "POST" })
       .filter((p) => typeof p.legacy_id === "number" && !seen.has(p.legacy_id))
       .map((p) => p.id);
     let hidden = 0;
+    const hiddenIds: string[] = [];
     for (let i = 0; i < toHide.length; i += 500) {
       const slice = toHide.slice(i, i + 500);
       const { error: e2 } = await supabaseAdmin
         .from("products")
         .update({ is_published: false, updated_at: nowIso })
         .in("id", slice);
-      if (!e2) hidden += slice.length;
+      if (!e2) { hidden += slice.length; hiddenIds.push(...slice); }
     }
     try {
       await supabaseAdmin.from("activity_logs").insert({
         actor_id: context.userId,
         action: "inventory_sync_finalize",
         entity_type: "products",
-        details: { hidden, ...(data.aggregateReport ?? {}) } as unknown as Record<string, unknown>,
+        details: { hidden, hiddenIds, ...(data.aggregateReport ?? {}) } as unknown as Record<string, unknown>,
       } as never);
     } catch { /* optional */ }
-    return { hidden };
+    return { hidden, hiddenIds };
   });
 
-// Owner-only audit listing for inventory sync activity.
+// Pre/post sync product counts for parity checking.
+export const getProductCounts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdminOrOwner(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [total, published, withStock] = await Promise.all([
+      supabaseAdmin.from("products").select("*", { count: "exact", head: true }),
+      supabaseAdmin.from("products").select("*", { count: "exact", head: true }).eq("is_published", true),
+      supabaseAdmin.from("products").select("*", { count: "exact", head: true }).gt("stock_qty", 0),
+    ]);
+    return {
+      total: total.count ?? 0,
+      published: published.count ?? 0,
+      withStock: withStock.count ?? 0,
+    };
+  });
+
+// Persist a full sync run to inventory_sync_logs (one row per upload).
+// On failure also notifies admins via notifications table.
+export const recordSyncRun = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({
+      status: z.enum(["completed", "failed", "cancelled"]),
+      total: z.number().int().min(0),
+      updated: z.number().int().min(0),
+      inserted: z.number().int().min(0),
+      republished: z.number().int().min(0),
+      hidden: z.number().int().min(0),
+      errors: z.array(z.string()).default([]),
+      failureReason: z.string().optional(),
+      metadata: z.record(z.string(), z.unknown()).default({}),
+      startedAt: z.string().optional(),
+    }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdminOrOwner(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const nowIso = new Date().toISOString();
+    const meta: Record<string, unknown> = { ...data.metadata };
+    if (data.failureReason) meta.failureReason = data.failureReason;
+
+    const { data: inserted, error } = await supabaseAdmin
+      .from("inventory_sync_logs")
+      .insert({
+        actor_id: context.userId,
+        status: data.status,
+        total_products: data.total,
+        updated: data.updated,
+        inserted: data.inserted,
+        republished: data.republished,
+        hidden: data.hidden,
+        errors: data.errors,
+        metadata: meta,
+        started_at: data.startedAt ?? nowIso,
+        completed_at: nowIso,
+      } as never)
+      .select("id")
+      .single();
+    if (error) throw error;
+
+    if (data.status !== "completed") {
+      await notifyAdmins(supabaseAdmin, {
+        title: data.status === "cancelled" ? "تم إلغاء مزامنة المخزون" : "فشل مزامنة المخزون",
+        body: data.failureReason ?? (data.errors[0] ?? "حدث خطأ أثناء مزامنة المخزون."),
+        priority: data.status === "failed" ? "urgent" : "high",
+        metadata: { syncLogId: (inserted as { id: string } | null)?.id, total: data.total, errors: data.errors.slice(0, 5) },
+      });
+    }
+    return { id: (inserted as { id: string } | null)?.id ?? null };
+  });
+
+// Owner-only audit listing for inventory sync activity (legacy: from activity_logs).
 export type InventorySyncLogRow = {
   id: string;
   created_at: string;
@@ -190,6 +301,9 @@ export type InventorySyncLogRow = {
     skipHide?: boolean;
     errorCount?: number;
     errors?: { legacyId: number; message: string }[];
+    updatedIds?: number[];
+    insertedIds?: number[];
+    hiddenIds?: string[];
   } | null;
 };
 
@@ -197,8 +311,8 @@ export const listInventorySyncLogs = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z.object({
-      from: z.string().optional(),       // ISO date inclusive
-      to: z.string().optional(),         // ISO date inclusive (end of day)
+      from: z.string().optional(),
+      to: z.string().optional(),
       status: z.enum(["all", "success", "errors"]).optional().default("all"),
       limit: z.number().int().min(1).max(500).optional().default(100),
     }).parse(input),
@@ -229,4 +343,76 @@ export const listInventorySyncLogs = createServerFn({ method: "POST" })
       });
     }
     return result;
+  });
+
+// New: structured per-run listing from inventory_sync_logs table.
+export type InventorySyncRun = {
+  id: string;
+  actor_id: string | null;
+  status: "running" | "completed" | "failed" | "cancelled";
+  total_products: number;
+  updated: number;
+  inserted: number;
+  republished: number;
+  hidden: number;
+  errors: string[];
+  metadata: Record<string, unknown>;
+  started_at: string;
+  completed_at: string | null;
+};
+
+export const listInventorySyncRuns = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({
+      from: z.string().optional(),
+      to: z.string().optional(),
+      status: z.enum(["all", "completed", "failed", "cancelled"]).optional().default("all"),
+      limit: z.number().int().min(1).max(500).optional().default(100),
+    }).parse(input),
+  )
+  .handler(async ({ data, context }): Promise<InventorySyncRun[]> => {
+    await assertAdminOrOwner(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let q = supabaseAdmin
+      .from("inventory_sync_logs")
+      .select("id, actor_id, status, total_products, updated, inserted, republished, hidden, errors, metadata, started_at, completed_at")
+      .order("started_at", { ascending: false })
+      .limit(data.limit);
+    if (data.from) q = q.gte("started_at", data.from);
+    if (data.to) q = q.lte("started_at", data.to);
+    if (data.status !== "all") q = q.eq("status", data.status);
+    const { data: rows, error } = await q;
+    if (error) throw error;
+    return (rows ?? []) as unknown as InventorySyncRun[];
+  });
+
+// Recent health_checks history (admin/owner only).
+export type HealthCheckRow = {
+  id: string;
+  status: "healthy" | "degraded" | "unhealthy";
+  duration: number | null;
+  passed: number;
+  failed: number;
+  warnings: number;
+  total: number;
+  details: Record<string, unknown>;
+  created_at: string;
+};
+
+export const listHealthChecks = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ limit: z.number().int().min(1).max(200).optional().default(50) }).parse(input ?? {}),
+  )
+  .handler(async ({ data, context }): Promise<HealthCheckRow[]> => {
+    await assertAdminOrOwner(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await supabaseAdmin
+      .from("health_checks")
+      .select("id, status, duration, passed, failed, warnings, total, details, created_at")
+      .order("created_at", { ascending: false })
+      .limit(data.limit);
+    if (error) throw error;
+    return (rows ?? []) as unknown as HealthCheckRow[];
   });
