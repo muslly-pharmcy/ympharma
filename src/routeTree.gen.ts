@@ -84,6 +84,7 @@ import { Route as TestFeaturesRouteImport } from './routes/test.features'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
+import { Route as AuthenticatedUploadPrescriptionRouteImport } from './routes/_authenticated/upload-prescription'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/public/whatsapp-webhook'
 import { Route as ApiPublicUptimeWebhookRouteImport } from './routes/api/public/uptime-webhook'
@@ -496,6 +497,12 @@ const ConditionsSlugRoute = ConditionsSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => ConditionsRoute,
 } as any)
+const AuthenticatedUploadPrescriptionRoute =
+  AuthenticatedUploadPrescriptionRouteImport.update({
+    id: '/_authenticated/upload-prescription',
+    path: '/upload-prescription',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -743,6 +750,7 @@ export interface FileRoutesByFullPath {
   '/trust': typeof TrustRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/yemen-debug': typeof YemenDebugRoute
+  '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
@@ -851,6 +859,7 @@ export interface FileRoutesByTo {
   '/trust': typeof TrustRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/yemen-debug': typeof YemenDebugRoute
+  '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
@@ -960,6 +969,7 @@ export interface FileRoutesById {
   '/trust': typeof TrustRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/yemen-debug': typeof YemenDebugRoute
+  '/_authenticated/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
@@ -1070,6 +1080,7 @@ export interface FileRouteTypes {
     | '/trust'
     | '/unsubscribe'
     | '/yemen-debug'
+    | '/upload-prescription'
     | '/conditions/$slug'
     | '/email/unsubscribe'
     | '/product/$id'
@@ -1178,6 +1189,7 @@ export interface FileRouteTypes {
     | '/trust'
     | '/unsubscribe'
     | '/yemen-debug'
+    | '/upload-prescription'
     | '/conditions/$slug'
     | '/email/unsubscribe'
     | '/product/$id'
@@ -1286,6 +1298,7 @@ export interface FileRouteTypes {
     | '/trust'
     | '/unsubscribe'
     | '/yemen-debug'
+    | '/_authenticated/upload-prescription'
     | '/conditions/$slug'
     | '/email/unsubscribe'
     | '/product/$id'
@@ -1395,6 +1408,7 @@ export interface RootRouteChildren {
   TrustRoute: typeof TrustRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   YemenDebugRoute: typeof YemenDebugRoute
+  AuthenticatedUploadPrescriptionRoute: typeof AuthenticatedUploadPrescriptionRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ProductIdRoute: typeof ProductIdRoute
   TestFeaturesRoute: typeof TestFeaturesRoute
@@ -1958,6 +1972,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConditionsSlugRouteImport
       parentRoute: typeof ConditionsRoute
     }
+    '/_authenticated/upload-prescription': {
+      id: '/_authenticated/upload-prescription'
+      path: '/upload-prescription'
+      fullPath: '/upload-prescription'
+      preLoaderRoute: typeof AuthenticatedUploadPrescriptionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
       path: '/lovable/email/suppression'
@@ -2262,6 +2283,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrustRoute: TrustRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   YemenDebugRoute: YemenDebugRoute,
+  AuthenticatedUploadPrescriptionRoute: AuthenticatedUploadPrescriptionRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ProductIdRoute: ProductIdRoute,
   TestFeaturesRoute: TestFeaturesRoute,
