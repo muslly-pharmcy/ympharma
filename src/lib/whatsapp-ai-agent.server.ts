@@ -255,6 +255,41 @@ export async function runWhatsAppAgent(args: {
       },
     }),
 
+    check_stock: tool({
+      description: "تحقق من توفر منتج بالاسم. يُرجع أعلى 3 منتجات مطابقة مرتبة تنازلياً حسب الكمية المتوفرة.",
+      inputSchema: z.object({ product_name: z.string().min(1) }),
+      execute: async ({ product_name }) => {
+        const t0 = Date.now(); intent = "check_stock";
+        const { data, error } = await supabaseAdmin
+          .from("products")
+          .select("id, name, stock_qty, price_yer")
+          .ilike("name", `%${product_name}%`)
+          .order("stock_qty", { ascending: false })
+          .limit(3);
+        toolCalls.push({ name: "check_stock", ok: !error });
+        if (error) { await audit("check_stock", { product_name }, t0, { status: "error", error: error.message }); return { error: "lookup_failed" }; }
+        await audit("check_stock", { product_name }, t0, { status: "ok", summary: { count: (data ?? []).length } });
+        return { results: data ?? [] };
+      },
+    }),
+
+    list_most_available: tool({
+      description: "أرجع قائمة بأكثر المنتجات توفراً في المخزون (مرتبة تنازلياً حسب الكمية).",
+      inputSchema: z.object({ limit: z.number().int().min(1).max(15).optional() }),
+      execute: async ({ limit }) => {
+        const t0 = Date.now(); intent = "most_available";
+        const { data, error } = await supabaseAdmin
+          .from("products")
+          .select("id, name, stock_qty, price_yer")
+          .order("stock_qty", { ascending: false })
+          .limit(limit ?? 8);
+        toolCalls.push({ name: "list_most_available", ok: !error });
+        if (error) { await audit("list_most_available", { limit }, t0, { status: "error", error: error.message }); return { error: "lookup_failed" }; }
+        await audit("list_most_available", { limit }, t0, { status: "ok", summary: { count: (data ?? []).length } });
+        return { results: data ?? [] };
+      },
+    }),
+
     // ===== GUARD TOOLS — never execute, only enqueue approval =====
     request_create_order: tool({
       description: "اطلب من موظف بشري إنشاء طلب جديد للعميل. لا يُنفِّذ مباشرة.",
