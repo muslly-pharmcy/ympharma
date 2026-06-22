@@ -85,14 +85,31 @@ function StockAuditPage() {
           <Stat label="المجموع بعد" value={stats.after} accent />
         </section>
 
-        <div className="relative">
-          <Search className="pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="ابحث باسم المنتج أو الفئة..."
-            className="w-full rounded-2xl border border-border bg-secondary/60 ps-4 pe-10 py-2.5 text-sm outline-none focus:border-primary"
-          />
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="ابحث باسم المنتج أو الفئة..."
+              className="w-full rounded-2xl border border-border bg-secondary/60 ps-4 pe-10 py-2.5 text-sm outline-none focus:border-primary"
+            />
+          </div>
+          <button
+            onClick={() => {
+              const headers = ["id", "name", "category", "before", "delta", "after", "track_stock"];
+              const data = filtered.map((r) => {
+                const after = r.stock_qty ?? 0;
+                return [r.id, r.name, r.category ?? "", after - BUMP, BUMP, after, r.track_stock ? "true" : "false"];
+              });
+              const date = new Date().toISOString().slice(0, 10);
+              downloadCSV(`stock-audit-${date}.csv`, headers, data);
+            }}
+            disabled={loading || filtered.length === 0}
+            className="brand-gradient inline-flex shrink-0 items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-black text-primary-foreground disabled:opacity-50"
+          >
+            <Download className="size-4" /> تصدير CSV
+          </button>
         </div>
 
         {loading ? (
