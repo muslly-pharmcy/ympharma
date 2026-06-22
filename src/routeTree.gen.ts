@@ -94,6 +94,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as ApiPublicHooksWhatsappRetryRouteImport } from './routes/api/public/hooks/whatsapp-retry'
 import { Route as ApiPublicHooksWeeklyExecReportRouteImport } from './routes/api/public/hooks/weekly-exec-report'
 import { Route as ApiPublicHooksWeeklyAiEnrichRouteImport } from './routes/api/public/hooks/weekly-ai-enrich'
+import { Route as ApiPublicHooksWaStaleConversationsRouteImport } from './routes/api/public/hooks/wa-stale-conversations'
 import { Route as ApiPublicHooksRxNotifyRouteImport } from './routes/api/public/hooks/rx-notify'
 import { Route as ApiPublicHooksRxMirrorRouteImport } from './routes/api/public/hooks/rx-mirror'
 import { Route as ApiPublicHooksPrescriptionExtractRouteImport } from './routes/api/public/hooks/prescription-extract'
@@ -548,6 +549,12 @@ const ApiPublicHooksWeeklyAiEnrichRoute =
     path: '/api/public/hooks/weekly-ai-enrich',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksWaStaleConversationsRoute =
+  ApiPublicHooksWaStaleConversationsRouteImport.update({
+    id: '/api/public/hooks/wa-stale-conversations',
+    path: '/api/public/hooks/wa-stale-conversations',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksRxNotifyRoute = ApiPublicHooksRxNotifyRouteImport.update({
   id: '/api/public/hooks/rx-notify',
   path: '/api/public/hooks/rx-notify',
@@ -733,6 +740,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
   '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
+  '/api/public/hooks/wa-stale-conversations': typeof ApiPublicHooksWaStaleConversationsRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
   '/api/public/hooks/whatsapp-retry': typeof ApiPublicHooksWhatsappRetryRoute
@@ -837,6 +845,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
   '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
+  '/api/public/hooks/wa-stale-conversations': typeof ApiPublicHooksWaStaleConversationsRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
   '/api/public/hooks/whatsapp-retry': typeof ApiPublicHooksWhatsappRetryRoute
@@ -942,6 +951,7 @@ export interface FileRoutesById {
   '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
   '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
+  '/api/public/hooks/wa-stale-conversations': typeof ApiPublicHooksWaStaleConversationsRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
   '/api/public/hooks/whatsapp-retry': typeof ApiPublicHooksWhatsappRetryRoute
@@ -1048,6 +1058,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/prescription-extract'
     | '/api/public/hooks/rx-mirror'
     | '/api/public/hooks/rx-notify'
+    | '/api/public/hooks/wa-stale-conversations'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
     | '/api/public/hooks/whatsapp-retry'
@@ -1152,6 +1163,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/prescription-extract'
     | '/api/public/hooks/rx-mirror'
     | '/api/public/hooks/rx-notify'
+    | '/api/public/hooks/wa-stale-conversations'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
     | '/api/public/hooks/whatsapp-retry'
@@ -1256,6 +1268,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/prescription-extract'
     | '/api/public/hooks/rx-mirror'
     | '/api/public/hooks/rx-notify'
+    | '/api/public/hooks/wa-stale-conversations'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
     | '/api/public/hooks/whatsapp-retry'
@@ -1360,6 +1373,7 @@ export interface RootRouteChildren {
   ApiPublicHooksPrescriptionExtractRoute: typeof ApiPublicHooksPrescriptionExtractRoute
   ApiPublicHooksRxMirrorRoute: typeof ApiPublicHooksRxMirrorRoute
   ApiPublicHooksRxNotifyRoute: typeof ApiPublicHooksRxNotifyRoute
+  ApiPublicHooksWaStaleConversationsRoute: typeof ApiPublicHooksWaStaleConversationsRoute
   ApiPublicHooksWeeklyAiEnrichRoute: typeof ApiPublicHooksWeeklyAiEnrichRoute
   ApiPublicHooksWeeklyExecReportRoute: typeof ApiPublicHooksWeeklyExecReportRoute
   ApiPublicHooksWhatsappRetryRoute: typeof ApiPublicHooksWhatsappRetryRoute
@@ -1974,6 +1988,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksWeeklyAiEnrichRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/wa-stale-conversations': {
+      id: '/api/public/hooks/wa-stale-conversations'
+      path: '/api/public/hooks/wa-stale-conversations'
+      fullPath: '/api/public/hooks/wa-stale-conversations'
+      preLoaderRoute: typeof ApiPublicHooksWaStaleConversationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/rx-notify': {
       id: '/api/public/hooks/rx-notify'
       path: '/api/public/hooks/rx-notify'
@@ -2196,6 +2217,8 @@ const rootRouteChildren: RootRouteChildren = {
     ApiPublicHooksPrescriptionExtractRoute,
   ApiPublicHooksRxMirrorRoute: ApiPublicHooksRxMirrorRoute,
   ApiPublicHooksRxNotifyRoute: ApiPublicHooksRxNotifyRoute,
+  ApiPublicHooksWaStaleConversationsRoute:
+    ApiPublicHooksWaStaleConversationsRoute,
   ApiPublicHooksWeeklyAiEnrichRoute: ApiPublicHooksWeeklyAiEnrichRoute,
   ApiPublicHooksWeeklyExecReportRoute: ApiPublicHooksWeeklyExecReportRoute,
   ApiPublicHooksWhatsappRetryRoute: ApiPublicHooksWhatsappRetryRoute,
