@@ -89,6 +89,19 @@ export const Route = createFileRoute("/api/public/log-error")({
             process.env.SUPABASE_SERVICE_ROLE_KEY!,
             { auth: { persistSession: false, autoRefreshToken: false } }
           );
+          // Clip `extra` JSON to match the RLS WITH CHECK constraint
+          // (length((extra)::text) <= 8000) so service-role inserts cannot
+          // bypass the size guard.
+          let extra: object = {};
+          try {
+            const rawExtra = (body.extra as object) ?? {};
+            const serialized = JSON.stringify(rawExtra);
+            if (serialized.length <= 8000) extra = rawExtra;
+            // else: drop oversize payloads silently
+          } catch {
+            /* non-serializable extra → drop */
+          }
+
           await admin.from("error_logs").insert({
             level: (body.level as string) === "warn" ? "warn" : "error",
             source: "client",
@@ -97,7 +110,7 @@ export const Route = createFileRoute("/api/public/log-error")({
             url: clip(body.url, 1000),
             user_agent: clip(request.headers.get("user-agent"), 500),
             country,
-            extra: (body.extra as object) ?? {},
+            extra,
           });
         } catch {
           /* swallow — never break the client */

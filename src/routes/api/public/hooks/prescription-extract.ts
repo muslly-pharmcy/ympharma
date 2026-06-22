@@ -8,10 +8,11 @@ export const Route = createFileRoute("/api/public/hooks/prescription-extract")({
     handlers: {
       POST: async ({ request }) => {
         const secret = process.env.EXTRACT_WORKER_SECRET;
-        if (secret) {
-          const header = request.headers.get("x-worker-secret");
-          if (header !== secret) return new Response("forbidden", { status: 403 });
+        if (!secret) {
+          return new Response("worker secret not configured", { status: 503 });
         }
+        const header = request.headers.get("x-worker-secret");
+        if (header !== secret) return new Response("forbidden", { status: 403 });
         const url = new URL(request.url);
         const limit = Math.min(20, Math.max(1, Number(url.searchParams.get("limit") ?? "5")));
         try {

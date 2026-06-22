@@ -126,19 +126,21 @@ export const Route = createFileRoute("/api/public/whatsapp-webhook")({
         const appSecret = process.env.WHATSAPP_APP_SECRET;
         const rawBody = await request.text();
 
-        if (appSecret) {
-          const sigHeader = request.headers.get("x-hub-signature-256") ?? "";
-          const provided = sigHeader.startsWith("sha256=")
-            ? sigHeader.slice(7)
-            : sigHeader;
-          const expected = createHmac("sha256", appSecret)
-            .update(rawBody)
-            .digest("hex");
-          const a = Buffer.from(provided);
-          const b = Buffer.from(expected);
-          if (a.length !== b.length || !timingSafeEqual(a, b)) {
-            return new Response("Invalid signature", { status: 401 });
-          }
+        // Webhook signature is MANDATORY. Missing secret = fail-closed.
+        if (!appSecret) {
+          return new Response("Webhook secret not configured", { status: 503 });
+        }
+        const sigHeader = request.headers.get("x-hub-signature-256") ?? "";
+        const provided = sigHeader.startsWith("sha256=")
+          ? sigHeader.slice(7)
+          : sigHeader;
+        const expected = createHmac("sha256", appSecret)
+          .update(rawBody)
+          .digest("hex");
+        const a = Buffer.from(provided);
+        const b = Buffer.from(expected);
+        if (a.length !== b.length || !timingSafeEqual(a, b)) {
+          return new Response("Invalid signature", { status: 401 });
         }
 
         const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
