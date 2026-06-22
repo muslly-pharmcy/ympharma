@@ -1,77 +1,53 @@
-# خطة تنفيذ الميزات الأربع (مرحلية وآمنة)
+# 🎯 الخطة المقترحة — تنفيذ الفجوات الفعلية فقط
 
-النطاق كبير جداً لتنفيذه دفعة واحدة دون كسر الكود القائم. سأنفذ على 4 مراحل، كل مرحلة قابلة للاختبار وحدها قبل الانتقال للتالية.
+## ✅ ما هو مُنفّذ بالفعل (سنتخطّاه)
 
-## المرحلة 1 — نظام الإشعارات الداخلي (الأسرع، الأقل مخاطرة)
+| البند | الملف الموجود | الحالة |
+|---|---|---|
+| المسار 3 — pg_cron + مراقبة الفشل + RPCs | migration `20260622230645_*` | منفّذ بالكامل |
+| صفحة مراقبة المهام | `src/routes/admin-cron-jobs.tsx` | منفّذة (موقعها الحالي يعمل عبر `AdminGate`) |
+| Hooks `run-reactivation` / `run-loyalty-reminder` / `run-restock-alerts` | موجودة في `src/routes/api/public/hooks/` | تعمل |
+| توصيات شخصية | `src/lib/recommendations.functions.ts` (+ `recommendations-dynamic`) | موجودة |
+| تحليل مشاعر عربي عبر Gemini | `src/lib/sentiment.functions.ts` | موجود |
+| Voice pharmacist hook | `src/hooks/use-voice-pharmacist.ts` | موجود ويغطّي معظم تحسينات البروميت |
 
-**قاعدة البيانات** (migration واحد):
-- جدول `notifications` (user_id, type, title, body, priority, read, read_at, metadata, created_at)
-- RLS: المستخدم يرى/يحدّث إشعاراته فقط؛ `service_role` يكتب
-- GRANTs قياسية
+**لن أُعيد إنشاء هذه الملفات أو أُنشئ بدائل مكرّرة** (مثل `sentiment-analysis.server.ts` أو `ai-recommendations.server.ts`)، لأن ذلك سيؤدي إلى تضارب وازدواجية. أيّ تحسين على هذه القطع يكون **تعديلًا داخل الملفات القائمة**.
 
-**الكود**:
-- `src/lib/notifications.functions.ts` — server fns: `listMyNotifications`, `markAsRead`, `markAllAsRead`, `getUnreadCount` (مع `requireSupabaseAuth`)
-- `src/components/notifications-bell.tsx` — أيقونة مع badge للعدد غير المقروء
-- `src/routes/_authenticated/notifications.tsx` — صفحة العرض
-- helper داخلي `createNotification()` يستخدم `supabaseAdmin` من server fns الأخرى
+## 🧩 الفجوات الفعلية التي سأُنفّذها
 
-## المرحلة 2 — نظام الولاء والنقاط
+### 1) `src/components/ErrorBoundary.tsx` (جديد)
+- Class component مع `getDerivedStateFromError` / `componentDidCatch`.
+- Fallback يستخدم `Alert` + `Button` من shadcn، نصّ عربي RTL، زر "تحديث الصفحة".
+- يسجّل الخطأ في `console.error` فقط (بدون Sentry — غير مُركّب في المشروع).
+- يُلفّ التطبيق داخل `src/routes/__root.tsx` حول `<Outlet />` (مع الإبقاء على بقية المحتوى كما هو).
 
-**قاعدة البيانات**:
-- `loyalty_accounts` (phone_number unique, points, tier, total_spent_yer)
-- `loyalty_transactions` (phone_number, points, type ∈ earned/redeemed/bonus/expired, description, order_id)
-- دوال PG: `add_loyalty_points(_phone, _points, _spent)`, `redeem_loyalty_points(_phone, _points)`, `recompute_loyalty_tier(_phone)` (SECURITY DEFINER)
-- العتبات: bronze < 10K، silver ≥ 10K، gold ≥ 25K، platinum ≥ 50K (ر.ي)
-- RLS + GRANTs
+### 2) `src/hooks/use-whatsapp-agent.ts` (جديد)
+- يدير `messages`, `isLoading`, `error`, `sendMessage`, `clearMessages`, `clearError`.
+- يستخدم `AbortController` لإلغاء الطلبات السابقة.
+- **سيستدعي server function موجودة** (`runWhatsAppAgent` عبر `useServerFn`) بدلاً من endpoint وهمي `/api/public/whatsapp-agent` غير الموجود في المشروع. سأتحقق من الاسم الفعلي قبل الربط.
 
-**الكود**:
-- `src/lib/loyalty.functions.ts` — `getMyLoyalty`, `getMyTransactions`, hooks للإكساب/الاسترداد (admin only)
-- `src/routes/_authenticated/loyalty.tsx` — لوحة العميل (الرصيد، المستوى، السجل)
-- ربط بسيط في `orders` عبر trigger يستدعي `add_loyalty_points` عند `status='delivered'`
+### 3) `src/lib/__tests__/whatsapp-ai-agent.test.ts` (جديد)
+- 7 اختبارات Vitest تغطّي: `search_product`, `check_stock`, `list_most_available`, `request_create_order`, `receive_location`, `help`, `blocked`.
+- Mock لـ `@/integrations/supabase/client.server`.
+- سأقرأ `src/lib/whatsapp-ai-agent.server.ts` أولًا لمطابقة التوقيع الفعلي للدالة وأسماء الـ intents حتى لا تفشل الاختبارات.
 
-## المرحلة 3 — نظام الوصفات الذكي (تحليل صورة بـ AI)
+## 🛠️ تفاصيل تقنية مهمة
 
-**ملاحظة**: الجداول الحالية موجودة (`prescriptions`, `prescription_extractions`, `prescription_files`, `agent_approval_requests`). نضيف فقط طبقة AI vision.
+- **التبعيات**: `vitest` و`date-fns` و`sonner` مُركّبة بالفعل (مستخدمة في `admin-cron-jobs.tsx`). لن أضيف شيئًا إلا إذا كشف الفحص نقصًا فعليًا (مثل `@testing-library/react`).
+- **مخالفات في البروميت المُلصق سأتجاهلها**:
+  - `notifications.message` غير موجود — العمود الصحيح `body` (مُستخدَم بالفعل في migration الحالية).
+  - `current_setting('app.project_domain')` غير مُهيّأ في المشروع — Hooks الحالية بالفعل تستدعي عبر URL ثابت.
+  - `process.env.SUPABASE_PUBLISHABLE_KEY` في كود متصفّح خطأ — الصحيح `import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY` (مستخدَم بالفعل في `admin-cron-jobs.tsx`).
+- **لا migrations جديدة** — كل ما يخصّ pg_cron مُنفّذ.
 
-**الكود**:
-- `src/lib/prescription-intelligence.server.ts` — دالة `analyzePrescriptionImage(imageUrl)` تستخدم AI Gateway مع `google/gemini-3-flash-preview` (multimodal vision) + Zod schema للنتيجة + تطابق المخزون
-- `src/lib/prescription-intelligence.functions.ts` — `analyzePrescription` server fn (admin only, requires role check via `has_role`)
-- تحديث `src/components/admin/PrescriptionsTab.tsx` — زر "تحليل بالذكاء الاصطناعي" يعرض الأدوية المستخرجة والمفقودة من المخزون
-- يُنشئ approval request تلقائياً عند موافقة المراجع
+## 📦 الملفات التي ستتغيّر
 
-## المرحلة 4 — إعادة هيكلة Clean Architecture لـ WhatsApp Agent
+| ملف | نوع |
+|---|---|
+| `src/components/ErrorBoundary.tsx` | جديد |
+| `src/hooks/use-whatsapp-agent.ts` | جديد |
+| `src/lib/__tests__/whatsapp-ai-agent.test.ts` | جديد |
+| `src/routes/__root.tsx` | تعديل بسيط (لفّ بـ ErrorBoundary) |
 
-**النطاق المحدود** (لا نلمس بقية المشروع):
-- `src/lib/whatsapp/domain/` — entities (Product, Conversation), value objects (PhoneNumber, Money, StockQuantity)
-- `src/lib/whatsapp/application/` — use cases منفصلة (SearchProductsUseCase, CheckStockUseCase, CreateApprovalUseCase) + interfaces (IProductRepo, IConversationRepo, IAiService)
-- `src/lib/whatsapp/infrastructure/` — تنفيذات Supabase + Lovable AI
-- `src/lib/whatsapp/shared/` — DomainError, ApplicationError, Logger
-- `src/lib/whatsapp/di.ts` — حاوية بسيطة
-- إعادة كتابة `src/lib/whatsapp-ai-agent.server.ts` ليصبح adapter رفيع يستدعي use cases
-- **الحفاظ على نفس التوقيع العام** (`runWhatsAppAgent` و `AgentResult`) كي لا تنكسر `whatsapp-webhook.ts`
-- اختبارات وحدة لكل use case بـ mock repositories
-
-## القرارات التقنية المهمة
-
-- لا أستخدم `process.env.LOVABLE_API_KEY` على مستوى الموديول في `.functions.ts` — أقرأه داخل `.handler()` فقط
-- لا أستورد `client.server` في `.functions.ts` على مستوى الموديول — `await import(...)` داخل الـ handler
-- جميع الجداول الجديدة تحتوي GRANTs قياسية + RLS
-- جميع الـ admin server fns تتحقق من `has_role(auth.uid(), 'admin')`
-- AI vision سيستخدم endpoint `chat/completions` مع `image_url` block (multimodal)
-- صفحات `_authenticated` فقط — لا حماية على routes عامة
-
-## التحقق بعد كل مرحلة
-
-- بناء المشروع ينجح (TypeScript strict)
-- الاختبارات الموجودة تستمر بالنجاح (`whatsapp-reply-format.test.ts` وغيرها)
-- لا تغيير في سلوك الـ webhook الحالي
-
-## ما هو خارج النطاق (لن أنفذه)
-
-- التوصيات متعددة المستويات (يفترض أعمدة `sales_count`, `popularity`, `category` غير موجودة)
-- البث المباشر للمخزون (`stock_subscriptions` جدول جديد كامل)
-- نظام التقييمات بالصور
-- تحليلات SEO الإضافية
-- لوحة تحكم Recharts الجديدة (الموجود `dashboard-charts.tsx` يكفي)
-
-هل أبدأ بالمرحلة 1 (الإشعارات)؟ أم تفضل ترتيباً مختلفاً؟
+## ❓ تأكيد قبل البناء
+هل توافق على هذا النطاق المُقلَّص (3 ملفات جديدة + تعديل `__root.tsx`)، مع تجاوز كل ما هو منفّذ مسبقًا؟ أم تريدني أيضًا أن أُحدّث ملفات موجودة (`sentiment.functions.ts`, `recommendations.functions.ts`, `use-voice-pharmacist.ts`) بتحسينات إضافية من البروميت؟
