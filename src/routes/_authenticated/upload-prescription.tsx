@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   submitPrescriptionForReview,
@@ -11,7 +11,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Upload, Loader2, CheckCircle2, XCircle, Clock, FileImage } from "lucide-react";
+import { Upload, Loader2, CheckCircle2, XCircle, Clock, FileImage, Radio } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/upload-prescription")({
@@ -39,6 +39,8 @@ function UploadPrescriptionPage() {
   const [file, setFile] = useState<File | null>(null);
   const [note, setNote] = useState("");
   const [approvalId, setApprovalId] = useState<string | null>(null);
+  const [liveConnected, setLiveConnected] = useState(false);
+  const qc = useQueryClient();
   const submitFn = useServerFn(submitPrescriptionForReview);
   const statusFn = useServerFn(getMyPrescriptionRequest);
 
@@ -65,15 +67,39 @@ function UploadPrescriptionPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  // Initial fetch (one-shot) — Realtime handles subsequent updates.
   const status = useQuery({
     queryKey: ["my-prescription-request", approvalId],
     queryFn: () => statusFn({ data: { id: approvalId! } }),
     enabled: !!approvalId,
-    refetchInterval: (q) => {
-      const s = q.state.data?.request?.status;
-      return s && s !== "pending" ? false : 5000;
-    },
   });
+
+  // Realtime subscription on the user's specific approval row.
+  useEffect(() => {
+    if (!approvalId) return;
+    setLiveConnected(false);
+    const channel = supabase
+      .channel(`approval:${approvalId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "agent_approval_requests",
+          filter: `id=eq.${approvalId}`,
+        },
+        () => {
+          qc.invalidateQueries({ queryKey: ["my-prescription-request", approvalId] });
+        },
+      )
+      .subscribe((s) => {
+        if (s === "SUBSCRIBED") setLiveConnected(true);
+      });
+    return () => {
+      supabase.removeChannel(channel);
+      setLiveConnected(false);
+    };
+  }, [approvalId, qc]);
 
   const req = status.data?.request;
   const analysis = (req?.payload as { analysis?: { medicines?: Array<{ name: string; inStock: boolean; stockQty: number; priceYer: number | null }>; missingMedicines?: string[]; notes?: string } } | undefined)?.analysis;
@@ -139,12 +165,19 @@ function UploadPrescriptionPage() {
               <p className="text-xs text-muted-foreground">رقم الطلب</p>
               <p className="font-mono text-sm">{approvalId.slice(0, 8).toUpperCase()}</p>
             </div>
-            {meta && (
-              <Badge variant="outline" className={meta.cls}>
-                <StatusIcon className="h-3 w-3 me-1" />
-                {meta.label}
-              </Badge>
-            )}
+            <div className="flex items-center gap-2">
+              {liveConnected && (
+                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-700 border-emerald-500/30 text-[10px]">
+                  <Radio className="h-3 w-3 me-1 animate-pulse" /> مباشر
+                </Badge>
+              )}
+              {meta && (
+                <Badge variant="outline" className={meta.cls}>
+                  <StatusIcon className="h-3 w-3 me-1" />
+                  {meta.label}
+                </Badge>
+              )}
+            </div>
           </div>
 
           {req?.decision_note && (

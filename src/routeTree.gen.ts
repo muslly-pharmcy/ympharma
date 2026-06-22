@@ -44,8 +44,10 @@ import { Route as AdminRxExtractionEditRouteImport } from './routes/admin-rx-ext
 import { Route as AdminRxCheckRouteImport } from './routes/admin-rx-check'
 import { Route as AdminProductsRouteImport } from './routes/admin-products'
 import { Route as AdminProductGalleryRouteImport } from './routes/admin-product-gallery'
+import { Route as AdminPharmacyRecommendationsRouteImport } from './routes/admin-pharmacy-recommendations'
 import { Route as AdminOffersRouteImport } from './routes/admin-offers'
 import { Route as AdminMarketingRouteImport } from './routes/admin-marketing'
+import { Route as AdminLoyaltyDashboardRouteImport } from './routes/admin-loyalty-dashboard'
 import { Route as AdminLogsRouteImport } from './routes/admin-logs'
 import { Route as AdminInventoryReservationsRouteImport } from './routes/admin-inventory-reservations'
 import { Route as AdminInventoryDuplicatesRouteImport } from './routes/admin-inventory-duplicates'
@@ -294,6 +296,12 @@ const AdminProductGalleryRoute = AdminProductGalleryRouteImport.update({
   path: '/admin-product-gallery',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPharmacyRecommendationsRoute =
+  AdminPharmacyRecommendationsRouteImport.update({
+    id: '/admin-pharmacy-recommendations',
+    path: '/admin-pharmacy-recommendations',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AdminOffersRoute = AdminOffersRouteImport.update({
   id: '/admin-offers',
   path: '/admin-offers',
@@ -302,6 +310,11 @@ const AdminOffersRoute = AdminOffersRouteImport.update({
 const AdminMarketingRoute = AdminMarketingRouteImport.update({
   id: '/admin-marketing',
   path: '/admin-marketing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoyaltyDashboardRoute = AdminLoyaltyDashboardRouteImport.update({
+  id: '/admin-loyalty-dashboard',
+  path: '/admin-loyalty-dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminLogsRoute = AdminLogsRouteImport.update({
@@ -718,8 +731,10 @@ export interface FileRoutesByFullPath {
   '/admin-inventory-duplicates': typeof AdminInventoryDuplicatesRoute
   '/admin-inventory-reservations': typeof AdminInventoryReservationsRoute
   '/admin-logs': typeof AdminLogsRoute
+  '/admin-loyalty-dashboard': typeof AdminLoyaltyDashboardRoute
   '/admin-marketing': typeof AdminMarketingRoute
   '/admin-offers': typeof AdminOffersRoute
+  '/admin-pharmacy-recommendations': typeof AdminPharmacyRecommendationsRoute
   '/admin-product-gallery': typeof AdminProductGalleryRoute
   '/admin-products': typeof AdminProductsRoute
   '/admin-rx-check': typeof AdminRxCheckRoute
@@ -827,8 +842,10 @@ export interface FileRoutesByTo {
   '/admin-inventory-duplicates': typeof AdminInventoryDuplicatesRoute
   '/admin-inventory-reservations': typeof AdminInventoryReservationsRoute
   '/admin-logs': typeof AdminLogsRoute
+  '/admin-loyalty-dashboard': typeof AdminLoyaltyDashboardRoute
   '/admin-marketing': typeof AdminMarketingRoute
   '/admin-offers': typeof AdminOffersRoute
+  '/admin-pharmacy-recommendations': typeof AdminPharmacyRecommendationsRoute
   '/admin-product-gallery': typeof AdminProductGalleryRoute
   '/admin-products': typeof AdminProductsRoute
   '/admin-rx-check': typeof AdminRxCheckRoute
@@ -938,8 +955,10 @@ export interface FileRoutesById {
   '/admin-inventory-duplicates': typeof AdminInventoryDuplicatesRoute
   '/admin-inventory-reservations': typeof AdminInventoryReservationsRoute
   '/admin-logs': typeof AdminLogsRoute
+  '/admin-loyalty-dashboard': typeof AdminLoyaltyDashboardRoute
   '/admin-marketing': typeof AdminMarketingRoute
   '/admin-offers': typeof AdminOffersRoute
+  '/admin-pharmacy-recommendations': typeof AdminPharmacyRecommendationsRoute
   '/admin-product-gallery': typeof AdminProductGalleryRoute
   '/admin-products': typeof AdminProductsRoute
   '/admin-rx-check': typeof AdminRxCheckRoute
@@ -1049,8 +1068,10 @@ export interface FileRouteTypes {
     | '/admin-inventory-duplicates'
     | '/admin-inventory-reservations'
     | '/admin-logs'
+    | '/admin-loyalty-dashboard'
     | '/admin-marketing'
     | '/admin-offers'
+    | '/admin-pharmacy-recommendations'
     | '/admin-product-gallery'
     | '/admin-products'
     | '/admin-rx-check'
@@ -1158,8 +1179,10 @@ export interface FileRouteTypes {
     | '/admin-inventory-duplicates'
     | '/admin-inventory-reservations'
     | '/admin-logs'
+    | '/admin-loyalty-dashboard'
     | '/admin-marketing'
     | '/admin-offers'
+    | '/admin-pharmacy-recommendations'
     | '/admin-product-gallery'
     | '/admin-products'
     | '/admin-rx-check'
@@ -1268,8 +1291,10 @@ export interface FileRouteTypes {
     | '/admin-inventory-duplicates'
     | '/admin-inventory-reservations'
     | '/admin-logs'
+    | '/admin-loyalty-dashboard'
     | '/admin-marketing'
     | '/admin-offers'
+    | '/admin-pharmacy-recommendations'
     | '/admin-product-gallery'
     | '/admin-products'
     | '/admin-rx-check'
@@ -1379,8 +1404,10 @@ export interface RootRouteChildren {
   AdminInventoryDuplicatesRoute: typeof AdminInventoryDuplicatesRoute
   AdminInventoryReservationsRoute: typeof AdminInventoryReservationsRoute
   AdminLogsRoute: typeof AdminLogsRoute
+  AdminLoyaltyDashboardRoute: typeof AdminLoyaltyDashboardRoute
   AdminMarketingRoute: typeof AdminMarketingRoute
   AdminOffersRoute: typeof AdminOffersRoute
+  AdminPharmacyRecommendationsRoute: typeof AdminPharmacyRecommendationsRoute
   AdminProductGalleryRoute: typeof AdminProductGalleryRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminRxCheckRoute: typeof AdminRxCheckRoute
@@ -1699,6 +1726,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminProductGalleryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin-pharmacy-recommendations': {
+      id: '/admin-pharmacy-recommendations'
+      path: '/admin-pharmacy-recommendations'
+      fullPath: '/admin-pharmacy-recommendations'
+      preLoaderRoute: typeof AdminPharmacyRecommendationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin-offers': {
       id: '/admin-offers'
       path: '/admin-offers'
@@ -1711,6 +1745,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-marketing'
       fullPath: '/admin-marketing'
       preLoaderRoute: typeof AdminMarketingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-loyalty-dashboard': {
+      id: '/admin-loyalty-dashboard'
+      path: '/admin-loyalty-dashboard'
+      fullPath: '/admin-loyalty-dashboard'
+      preLoaderRoute: typeof AdminLoyaltyDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-logs': {
@@ -2272,8 +2313,10 @@ const rootRouteChildren: RootRouteChildren = {
   AdminInventoryDuplicatesRoute: AdminInventoryDuplicatesRoute,
   AdminInventoryReservationsRoute: AdminInventoryReservationsRoute,
   AdminLogsRoute: AdminLogsRoute,
+  AdminLoyaltyDashboardRoute: AdminLoyaltyDashboardRoute,
   AdminMarketingRoute: AdminMarketingRoute,
   AdminOffersRoute: AdminOffersRoute,
+  AdminPharmacyRecommendationsRoute: AdminPharmacyRecommendationsRoute,
   AdminProductGalleryRoute: AdminProductGalleryRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminRxCheckRoute: AdminRxCheckRoute,

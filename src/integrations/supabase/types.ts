@@ -4054,6 +4054,17 @@ export type Database = {
         Args: { _customer: Json; _id: string; _image_urls: string[] }
         Returns: Json
       }
+      top_selling_products: {
+        Args: { _days?: number; _limit?: number }
+        Returns: {
+          current_price: number
+          current_stock: number
+          orders_count: number
+          product_name: string
+          revenue_yer: number
+          units_sold: number
+        }[]
+      }
       track_banner_event: {
         Args: { _banner_id: string; _event: string }
         Returns: boolean
