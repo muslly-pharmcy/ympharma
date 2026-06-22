@@ -32,6 +32,7 @@ import { Route as AiPharmacistRouteImport } from './routes/ai-pharmacist'
 import { Route as AiAssistantRouteImport } from './routes/ai-assistant'
 import { Route as AdminWorkforceRouteImport } from './routes/admin-workforce'
 import { Route as AdminWhatsappDeliveryRouteImport } from './routes/admin-whatsapp-delivery'
+import { Route as AdminWhatsappConversationsRouteImport } from './routes/admin-whatsapp-conversations'
 import { Route as AdminTriggerFailuresRouteImport } from './routes/admin-trigger-failures'
 import { Route as AdminTransfersRouteImport } from './routes/admin-transfers'
 import { Route as AdminStockAuditRouteImport } from './routes/admin-stock-audit'
@@ -94,6 +95,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as ApiPublicHooksWhatsappRetryRouteImport } from './routes/api/public/hooks/whatsapp-retry'
 import { Route as ApiPublicHooksWeeklyExecReportRouteImport } from './routes/api/public/hooks/weekly-exec-report'
 import { Route as ApiPublicHooksWeeklyAiEnrichRouteImport } from './routes/api/public/hooks/weekly-ai-enrich'
+import { Route as ApiPublicHooksWaStaleConversationsRouteImport } from './routes/api/public/hooks/wa-stale-conversations'
 import { Route as ApiPublicHooksRxNotifyRouteImport } from './routes/api/public/hooks/rx-notify'
 import { Route as ApiPublicHooksRxMirrorRouteImport } from './routes/api/public/hooks/rx-mirror'
 import { Route as ApiPublicHooksPrescriptionExtractRouteImport } from './routes/api/public/hooks/prescription-extract'
@@ -227,6 +229,12 @@ const AdminWhatsappDeliveryRoute = AdminWhatsappDeliveryRouteImport.update({
   path: '/admin-whatsapp-delivery',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminWhatsappConversationsRoute =
+  AdminWhatsappConversationsRouteImport.update({
+    id: '/admin-whatsapp-conversations',
+    path: '/admin-whatsapp-conversations',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AdminTriggerFailuresRoute = AdminTriggerFailuresRouteImport.update({
   id: '/admin-trigger-failures',
   path: '/admin-trigger-failures',
@@ -548,6 +556,12 @@ const ApiPublicHooksWeeklyAiEnrichRoute =
     path: '/api/public/hooks/weekly-ai-enrich',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksWaStaleConversationsRoute =
+  ApiPublicHooksWaStaleConversationsRouteImport.update({
+    id: '/api/public/hooks/wa-stale-conversations',
+    path: '/api/public/hooks/wa-stale-conversations',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksRxNotifyRoute = ApiPublicHooksRxNotifyRouteImport.update({
   id: '/api/public/hooks/rx-notify',
   path: '/api/public/hooks/rx-notify',
@@ -691,6 +705,7 @@ export interface FileRoutesByFullPath {
   '/admin-stock-audit': typeof AdminStockAuditRoute
   '/admin-transfers': typeof AdminTransfersRoute
   '/admin-trigger-failures': typeof AdminTriggerFailuresRoute
+  '/admin-whatsapp-conversations': typeof AdminWhatsappConversationsRoute
   '/admin-whatsapp-delivery': typeof AdminWhatsappDeliveryRoute
   '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
@@ -733,6 +748,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
   '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
+  '/api/public/hooks/wa-stale-conversations': typeof ApiPublicHooksWaStaleConversationsRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
   '/api/public/hooks/whatsapp-retry': typeof ApiPublicHooksWhatsappRetryRoute
@@ -795,6 +811,7 @@ export interface FileRoutesByTo {
   '/admin-stock-audit': typeof AdminStockAuditRoute
   '/admin-transfers': typeof AdminTransfersRoute
   '/admin-trigger-failures': typeof AdminTriggerFailuresRoute
+  '/admin-whatsapp-conversations': typeof AdminWhatsappConversationsRoute
   '/admin-whatsapp-delivery': typeof AdminWhatsappDeliveryRoute
   '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
@@ -837,6 +854,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
   '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
+  '/api/public/hooks/wa-stale-conversations': typeof ApiPublicHooksWaStaleConversationsRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
   '/api/public/hooks/whatsapp-retry': typeof ApiPublicHooksWhatsappRetryRoute
@@ -900,6 +918,7 @@ export interface FileRoutesById {
   '/admin-stock-audit': typeof AdminStockAuditRoute
   '/admin-transfers': typeof AdminTransfersRoute
   '/admin-trigger-failures': typeof AdminTriggerFailuresRoute
+  '/admin-whatsapp-conversations': typeof AdminWhatsappConversationsRoute
   '/admin-whatsapp-delivery': typeof AdminWhatsappDeliveryRoute
   '/admin-workforce': typeof AdminWorkforceRoute
   '/ai-assistant': typeof AiAssistantRoute
@@ -942,6 +961,7 @@ export interface FileRoutesById {
   '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
   '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
+  '/api/public/hooks/wa-stale-conversations': typeof ApiPublicHooksWaStaleConversationsRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
   '/api/public/hooks/whatsapp-retry': typeof ApiPublicHooksWhatsappRetryRoute
@@ -1006,6 +1026,7 @@ export interface FileRouteTypes {
     | '/admin-stock-audit'
     | '/admin-transfers'
     | '/admin-trigger-failures'
+    | '/admin-whatsapp-conversations'
     | '/admin-whatsapp-delivery'
     | '/admin-workforce'
     | '/ai-assistant'
@@ -1048,6 +1069,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/prescription-extract'
     | '/api/public/hooks/rx-mirror'
     | '/api/public/hooks/rx-notify'
+    | '/api/public/hooks/wa-stale-conversations'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
     | '/api/public/hooks/whatsapp-retry'
@@ -1110,6 +1132,7 @@ export interface FileRouteTypes {
     | '/admin-stock-audit'
     | '/admin-transfers'
     | '/admin-trigger-failures'
+    | '/admin-whatsapp-conversations'
     | '/admin-whatsapp-delivery'
     | '/admin-workforce'
     | '/ai-assistant'
@@ -1152,6 +1175,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/prescription-extract'
     | '/api/public/hooks/rx-mirror'
     | '/api/public/hooks/rx-notify'
+    | '/api/public/hooks/wa-stale-conversations'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
     | '/api/public/hooks/whatsapp-retry'
@@ -1214,6 +1238,7 @@ export interface FileRouteTypes {
     | '/admin-stock-audit'
     | '/admin-transfers'
     | '/admin-trigger-failures'
+    | '/admin-whatsapp-conversations'
     | '/admin-whatsapp-delivery'
     | '/admin-workforce'
     | '/ai-assistant'
@@ -1256,6 +1281,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/prescription-extract'
     | '/api/public/hooks/rx-mirror'
     | '/api/public/hooks/rx-notify'
+    | '/api/public/hooks/wa-stale-conversations'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
     | '/api/public/hooks/whatsapp-retry'
@@ -1319,6 +1345,7 @@ export interface RootRouteChildren {
   AdminStockAuditRoute: typeof AdminStockAuditRoute
   AdminTransfersRoute: typeof AdminTransfersRoute
   AdminTriggerFailuresRoute: typeof AdminTriggerFailuresRoute
+  AdminWhatsappConversationsRoute: typeof AdminWhatsappConversationsRoute
   AdminWhatsappDeliveryRoute: typeof AdminWhatsappDeliveryRoute
   AdminWorkforceRoute: typeof AdminWorkforceRoute
   AiAssistantRoute: typeof AiAssistantRoute
@@ -1360,6 +1387,7 @@ export interface RootRouteChildren {
   ApiPublicHooksPrescriptionExtractRoute: typeof ApiPublicHooksPrescriptionExtractRoute
   ApiPublicHooksRxMirrorRoute: typeof ApiPublicHooksRxMirrorRoute
   ApiPublicHooksRxNotifyRoute: typeof ApiPublicHooksRxNotifyRoute
+  ApiPublicHooksWaStaleConversationsRoute: typeof ApiPublicHooksWaStaleConversationsRoute
   ApiPublicHooksWeeklyAiEnrichRoute: typeof ApiPublicHooksWeeklyAiEnrichRoute
   ApiPublicHooksWeeklyExecReportRoute: typeof ApiPublicHooksWeeklyExecReportRoute
   ApiPublicHooksWhatsappRetryRoute: typeof ApiPublicHooksWhatsappRetryRoute
@@ -1538,6 +1566,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-whatsapp-delivery'
       fullPath: '/admin-whatsapp-delivery'
       preLoaderRoute: typeof AdminWhatsappDeliveryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-whatsapp-conversations': {
+      id: '/admin-whatsapp-conversations'
+      path: '/admin-whatsapp-conversations'
+      fullPath: '/admin-whatsapp-conversations'
+      preLoaderRoute: typeof AdminWhatsappConversationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-trigger-failures': {
@@ -1974,6 +2009,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksWeeklyAiEnrichRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/wa-stale-conversations': {
+      id: '/api/public/hooks/wa-stale-conversations'
+      path: '/api/public/hooks/wa-stale-conversations'
+      fullPath: '/api/public/hooks/wa-stale-conversations'
+      preLoaderRoute: typeof ApiPublicHooksWaStaleConversationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/rx-notify': {
       id: '/api/public/hooks/rx-notify'
       path: '/api/public/hooks/rx-notify'
@@ -2154,6 +2196,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminStockAuditRoute: AdminStockAuditRoute,
   AdminTransfersRoute: AdminTransfersRoute,
   AdminTriggerFailuresRoute: AdminTriggerFailuresRoute,
+  AdminWhatsappConversationsRoute: AdminWhatsappConversationsRoute,
   AdminWhatsappDeliveryRoute: AdminWhatsappDeliveryRoute,
   AdminWorkforceRoute: AdminWorkforceRoute,
   AiAssistantRoute: AiAssistantRoute,
@@ -2196,6 +2239,8 @@ const rootRouteChildren: RootRouteChildren = {
     ApiPublicHooksPrescriptionExtractRoute,
   ApiPublicHooksRxMirrorRoute: ApiPublicHooksRxMirrorRoute,
   ApiPublicHooksRxNotifyRoute: ApiPublicHooksRxNotifyRoute,
+  ApiPublicHooksWaStaleConversationsRoute:
+    ApiPublicHooksWaStaleConversationsRoute,
   ApiPublicHooksWeeklyAiEnrichRoute: ApiPublicHooksWeeklyAiEnrichRoute,
   ApiPublicHooksWeeklyExecReportRoute: ApiPublicHooksWeeklyExecReportRoute,
   ApiPublicHooksWhatsappRetryRoute: ApiPublicHooksWhatsappRetryRoute,
