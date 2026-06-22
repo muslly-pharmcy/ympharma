@@ -357,7 +357,7 @@ export type InventorySyncRun = {
   republished: number;
   hidden: number;
   errors: string[];
-  metadata: unknown;
+  metadata: Json;
   started_at: string;
   completed_at: string | null;
 };
