@@ -18,6 +18,8 @@ function mapRow(r: any, idx: number): Product {
     badge: r.badge ?? undefined,
     desc: r.description ?? undefined,
     legacyId: typeof r.legacy_id === "number" ? r.legacy_id : undefined,
+    supplierName: r.supplier_name ?? undefined,
+    stockQty: typeof r.stock_qty === "number" ? r.stock_qty : undefined,
   };
 }
 

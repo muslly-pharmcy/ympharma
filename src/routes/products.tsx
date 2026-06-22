@@ -93,6 +93,8 @@ function ProductsPage() {
     if (sortBy === "price-asc") arr = [...arr].sort((a, b) => a.price - b.price);
     else if (sortBy === "price-desc") arr = [...arr].sort((a, b) => b.price - a.price);
     else if (sortBy === "name") arr = [...arr].sort((a, b) => a.name.localeCompare(b.name, "ar"));
+    else if (sortBy === "stock-desc") arr = [...arr].sort((a, b) => (b.stockQty ?? -1) - (a.stockQty ?? -1));
+    else if (sortBy === "supplier-asc") arr = [...arr].sort((a, b) => (a.supplierName ?? "\uffff").localeCompare(b.supplierName ?? "\uffff", "ar"));
     else if (smartIds.size > 0) {
       // Default sort with smart matches first
       arr = [...arr].sort((a, b) => Number(smartIds.has(b.id)) - Number(smartIds.has(a.id)));
@@ -196,6 +198,8 @@ function ProductsPage() {
             <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}
               className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm">
               <option value="default">الافتراضي</option>
+              <option value="stock-desc">📦 الأكثر مخزوناً</option>
+              <option value="supplier-asc">🏢 المورد (أ-ي)</option>
               <option value="price-asc">السعر: من الأقل للأعلى</option>
               <option value="price-desc">السعر: من الأعلى للأقل</option>
               <option value="name">الاسم (أبجدياً)</option>
