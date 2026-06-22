@@ -93,6 +93,8 @@ function ProductsPage() {
     if (sortBy === "price-asc") arr = [...arr].sort((a, b) => a.price - b.price);
     else if (sortBy === "price-desc") arr = [...arr].sort((a, b) => b.price - a.price);
     else if (sortBy === "name") arr = [...arr].sort((a, b) => a.name.localeCompare(b.name, "ar"));
+    else if (sortBy === "stock-desc") arr = [...arr].sort((a, b) => (b.stockQty ?? -1) - (a.stockQty ?? -1));
+    else if (sortBy === "supplier-asc") arr = [...arr].sort((a, b) => (a.supplierName ?? "\uffff").localeCompare(b.supplierName ?? "\uffff", "ar"));
     else if (smartIds.size > 0) {
       // Default sort with smart matches first
       arr = [...arr].sort((a, b) => Number(smartIds.has(b.id)) - Number(smartIds.has(a.id)));
