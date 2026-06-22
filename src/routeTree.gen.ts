@@ -88,6 +88,7 @@ import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
 import { Route as AuthenticatedUploadPrescriptionRouteImport } from './routes/_authenticated/upload-prescription'
+import { Route as AuthenticatedAdminMarketingCampaignsRouteImport } from './routes/_authenticated/admin-marketing-campaigns'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin-dashboard'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/public/whatsapp-webhook'
@@ -105,6 +106,9 @@ import { Route as ApiPublicHooksWeeklyAiEnrichRouteImport } from './routes/api/p
 import { Route as ApiPublicHooksWaStaleConversationsRouteImport } from './routes/api/public/hooks/wa-stale-conversations'
 import { Route as ApiPublicHooksRxNotifyRouteImport } from './routes/api/public/hooks/rx-notify'
 import { Route as ApiPublicHooksRxMirrorRouteImport } from './routes/api/public/hooks/rx-mirror'
+import { Route as ApiPublicHooksRunRestockAlertsRouteImport } from './routes/api/public/hooks/run-restock-alerts'
+import { Route as ApiPublicHooksRunReactivationRouteImport } from './routes/api/public/hooks/run-reactivation'
+import { Route as ApiPublicHooksRunLoyaltyReminderRouteImport } from './routes/api/public/hooks/run-loyalty-reminder'
 import { Route as ApiPublicHooksPrescriptionExtractRouteImport } from './routes/api/public/hooks/prescription-extract'
 import { Route as ApiPublicHooksNightlyIntelRouteImport } from './routes/api/public/hooks/nightly-intel'
 import { Route as ApiPublicHooksEventConsumerRouteImport } from './routes/api/public/hooks/event-consumer'
@@ -522,6 +526,12 @@ const AuthenticatedUploadPrescriptionRoute =
     path: '/upload-prescription',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminMarketingCampaignsRoute =
+  AuthenticatedAdminMarketingCampaignsRouteImport.update({
+    id: '/admin-marketing-campaigns',
+    path: '/admin-marketing-campaigns',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminDashboardRoute =
   AuthenticatedAdminDashboardRouteImport.update({
     id: '/admin-dashboard',
@@ -616,6 +626,24 @@ const ApiPublicHooksRxMirrorRoute = ApiPublicHooksRxMirrorRouteImport.update({
   path: '/api/public/hooks/rx-mirror',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksRunRestockAlertsRoute =
+  ApiPublicHooksRunRestockAlertsRouteImport.update({
+    id: '/api/public/hooks/run-restock-alerts',
+    path: '/api/public/hooks/run-restock-alerts',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksRunReactivationRoute =
+  ApiPublicHooksRunReactivationRouteImport.update({
+    id: '/api/public/hooks/run-reactivation',
+    path: '/api/public/hooks/run-reactivation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksRunLoyaltyReminderRoute =
+  ApiPublicHooksRunLoyaltyReminderRouteImport.update({
+    id: '/api/public/hooks/run-loyalty-reminder',
+    path: '/api/public/hooks/run-loyalty-reminder',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksPrescriptionExtractRoute =
   ApiPublicHooksPrescriptionExtractRouteImport.update({
     id: '/api/public/hooks/prescription-extract',
@@ -778,6 +806,7 @@ export interface FileRoutesByFullPath {
   '/unsubscribe': typeof UnsubscribeRoute
   '/yemen-debug': typeof YemenDebugRoute
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -796,6 +825,9 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
+  '/api/public/hooks/run-loyalty-reminder': typeof ApiPublicHooksRunLoyaltyReminderRoute
+  '/api/public/hooks/run-reactivation': typeof ApiPublicHooksRunReactivationRoute
+  '/api/public/hooks/run-restock-alerts': typeof ApiPublicHooksRunRestockAlertsRoute
   '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
   '/api/public/hooks/wa-stale-conversations': typeof ApiPublicHooksWaStaleConversationsRoute
@@ -890,6 +922,7 @@ export interface FileRoutesByTo {
   '/unsubscribe': typeof UnsubscribeRoute
   '/yemen-debug': typeof YemenDebugRoute
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -908,6 +941,9 @@ export interface FileRoutesByTo {
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
+  '/api/public/hooks/run-loyalty-reminder': typeof ApiPublicHooksRunLoyaltyReminderRoute
+  '/api/public/hooks/run-reactivation': typeof ApiPublicHooksRunReactivationRoute
+  '/api/public/hooks/run-restock-alerts': typeof ApiPublicHooksRunRestockAlertsRoute
   '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
   '/api/public/hooks/wa-stale-conversations': typeof ApiPublicHooksWaStaleConversationsRoute
@@ -1004,6 +1040,7 @@ export interface FileRoutesById {
   '/unsubscribe': typeof UnsubscribeRoute
   '/yemen-debug': typeof YemenDebugRoute
   '/_authenticated/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/_authenticated/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
   '/_authenticated/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -1022,6 +1059,9 @@ export interface FileRoutesById {
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
+  '/api/public/hooks/run-loyalty-reminder': typeof ApiPublicHooksRunLoyaltyReminderRoute
+  '/api/public/hooks/run-reactivation': typeof ApiPublicHooksRunReactivationRoute
+  '/api/public/hooks/run-restock-alerts': typeof ApiPublicHooksRunRestockAlertsRoute
   '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
   '/api/public/hooks/wa-stale-conversations': typeof ApiPublicHooksWaStaleConversationsRoute
@@ -1118,6 +1158,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/yemen-debug'
     | '/admin-dashboard'
+    | '/admin-marketing-campaigns'
     | '/upload-prescription'
     | '/conditions/$slug'
     | '/email/unsubscribe'
@@ -1136,6 +1177,9 @@ export interface FileRouteTypes {
     | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/nightly-intel'
     | '/api/public/hooks/prescription-extract'
+    | '/api/public/hooks/run-loyalty-reminder'
+    | '/api/public/hooks/run-reactivation'
+    | '/api/public/hooks/run-restock-alerts'
     | '/api/public/hooks/rx-mirror'
     | '/api/public/hooks/rx-notify'
     | '/api/public/hooks/wa-stale-conversations'
@@ -1230,6 +1274,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/yemen-debug'
     | '/admin-dashboard'
+    | '/admin-marketing-campaigns'
     | '/upload-prescription'
     | '/conditions/$slug'
     | '/email/unsubscribe'
@@ -1248,6 +1293,9 @@ export interface FileRouteTypes {
     | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/nightly-intel'
     | '/api/public/hooks/prescription-extract'
+    | '/api/public/hooks/run-loyalty-reminder'
+    | '/api/public/hooks/run-reactivation'
+    | '/api/public/hooks/run-restock-alerts'
     | '/api/public/hooks/rx-mirror'
     | '/api/public/hooks/rx-notify'
     | '/api/public/hooks/wa-stale-conversations'
@@ -1343,6 +1391,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/yemen-debug'
     | '/_authenticated/admin-dashboard'
+    | '/_authenticated/admin-marketing-campaigns'
     | '/_authenticated/upload-prescription'
     | '/conditions/$slug'
     | '/email/unsubscribe'
@@ -1361,6 +1410,9 @@ export interface FileRouteTypes {
     | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/nightly-intel'
     | '/api/public/hooks/prescription-extract'
+    | '/api/public/hooks/run-loyalty-reminder'
+    | '/api/public/hooks/run-reactivation'
+    | '/api/public/hooks/run-restock-alerts'
     | '/api/public/hooks/rx-mirror'
     | '/api/public/hooks/rx-notify'
     | '/api/public/hooks/wa-stale-conversations'
@@ -1472,6 +1524,9 @@ export interface RootRouteChildren {
   ApiPublicHooksEventConsumerRoute: typeof ApiPublicHooksEventConsumerRoute
   ApiPublicHooksNightlyIntelRoute: typeof ApiPublicHooksNightlyIntelRoute
   ApiPublicHooksPrescriptionExtractRoute: typeof ApiPublicHooksPrescriptionExtractRoute
+  ApiPublicHooksRunLoyaltyReminderRoute: typeof ApiPublicHooksRunLoyaltyReminderRoute
+  ApiPublicHooksRunReactivationRoute: typeof ApiPublicHooksRunReactivationRoute
+  ApiPublicHooksRunRestockAlertsRoute: typeof ApiPublicHooksRunRestockAlertsRoute
   ApiPublicHooksRxMirrorRoute: typeof ApiPublicHooksRxMirrorRoute
   ApiPublicHooksRxNotifyRoute: typeof ApiPublicHooksRxNotifyRoute
   ApiPublicHooksWaStaleConversationsRoute: typeof ApiPublicHooksWaStaleConversationsRoute
@@ -2047,6 +2102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUploadPrescriptionRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin-marketing-campaigns': {
+      id: '/_authenticated/admin-marketing-campaigns'
+      path: '/admin-marketing-campaigns'
+      fullPath: '/admin-marketing-campaigns'
+      preLoaderRoute: typeof AuthenticatedAdminMarketingCampaignsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin-dashboard': {
       id: '/_authenticated/admin-dashboard'
       path: '/admin-dashboard'
@@ -2166,6 +2228,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksRxMirrorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/run-restock-alerts': {
+      id: '/api/public/hooks/run-restock-alerts'
+      path: '/api/public/hooks/run-restock-alerts'
+      fullPath: '/api/public/hooks/run-restock-alerts'
+      preLoaderRoute: typeof ApiPublicHooksRunRestockAlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/run-reactivation': {
+      id: '/api/public/hooks/run-reactivation'
+      path: '/api/public/hooks/run-reactivation'
+      fullPath: '/api/public/hooks/run-reactivation'
+      preLoaderRoute: typeof ApiPublicHooksRunReactivationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/run-loyalty-reminder': {
+      id: '/api/public/hooks/run-loyalty-reminder'
+      path: '/api/public/hooks/run-loyalty-reminder'
+      fullPath: '/api/public/hooks/run-loyalty-reminder'
+      preLoaderRoute: typeof ApiPublicHooksRunLoyaltyReminderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/prescription-extract': {
       id: '/api/public/hooks/prescription-extract'
       path: '/api/public/hooks/prescription-extract'
@@ -2276,11 +2359,14 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
+  AuthenticatedAdminMarketingCampaignsRoute: typeof AuthenticatedAdminMarketingCampaignsRoute
   AuthenticatedUploadPrescriptionRoute: typeof AuthenticatedUploadPrescriptionRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
+  AuthenticatedAdminMarketingCampaignsRoute:
+    AuthenticatedAdminMarketingCampaignsRoute,
   AuthenticatedUploadPrescriptionRoute: AuthenticatedUploadPrescriptionRoute,
 }
 
@@ -2391,6 +2477,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksNightlyIntelRoute: ApiPublicHooksNightlyIntelRoute,
   ApiPublicHooksPrescriptionExtractRoute:
     ApiPublicHooksPrescriptionExtractRoute,
+  ApiPublicHooksRunLoyaltyReminderRoute: ApiPublicHooksRunLoyaltyReminderRoute,
+  ApiPublicHooksRunReactivationRoute: ApiPublicHooksRunReactivationRoute,
+  ApiPublicHooksRunRestockAlertsRoute: ApiPublicHooksRunRestockAlertsRoute,
   ApiPublicHooksRxMirrorRoute: ApiPublicHooksRxMirrorRoute,
   ApiPublicHooksRxNotifyRoute: ApiPublicHooksRxNotifyRoute,
   ApiPublicHooksWaStaleConversationsRoute:
