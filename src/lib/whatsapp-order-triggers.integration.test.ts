@@ -10,7 +10,8 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { execSync } from "node:child_process";
 
-const hasDb = Boolean(process.env.PGHOST && process.env.PGUSER);
+// Requires a write-capable DB role; opt in via INTEGRATION_DB_WRITE=1 in CI.
+const hasDb = Boolean(process.env.PGHOST && process.env.PGUSER && process.env.INTEGRATION_DB_WRITE === "1");
 
 function sql(q: string): string {
   return execSync(`psql -tAX -v ON_ERROR_STOP=1`, {
