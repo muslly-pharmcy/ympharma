@@ -8,7 +8,7 @@ import { ProductCard } from "@/components/product-card";
 import { categories, formatPrice, getProductById, products } from "@/lib/products";
 import { useMergedProducts } from "@/lib/use-merged-products";
 import { useLegacyMap, useRelatedProducts } from "@/lib/use-pharmacy-intel";
-import { proxifyImage } from "@/lib/img-proxy";
+
 import { ProductGallery } from "@/components/product-gallery";
 
 import { useCart } from "@/lib/cart";
