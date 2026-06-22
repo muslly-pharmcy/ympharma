@@ -1,53 +1,41 @@
-# 🎯 الخطة المقترحة — تنفيذ الفجوات الفعلية فقط
+# مراجعة البروميت الشامل مقابل الوضع الحالي
 
-## ✅ ما هو مُنفّذ بالفعل (سنتخطّاه)
+بعد فحص المشروع، **معظم ما في البروميت منفّذ مسبقاً**. لا داعي لإعادة كتابة الملفات الموجودة. فيما يلي الفجوات الحقيقية فقط.
 
-| البند | الملف الموجود | الحالة |
-|---|---|---|
-| المسار 3 — pg_cron + مراقبة الفشل + RPCs | migration `20260622230645_*` | منفّذ بالكامل |
-| صفحة مراقبة المهام | `src/routes/admin-cron-jobs.tsx` | منفّذة (موقعها الحالي يعمل عبر `AdminGate`) |
-| Hooks `run-reactivation` / `run-loyalty-reminder` / `run-restock-alerts` | موجودة في `src/routes/api/public/hooks/` | تعمل |
-| توصيات شخصية | `src/lib/recommendations.functions.ts` (+ `recommendations-dynamic`) | موجودة |
-| تحليل مشاعر عربي عبر Gemini | `src/lib/sentiment.functions.ts` | موجود |
-| Voice pharmacist hook | `src/hooks/use-voice-pharmacist.ts` | موجود ويغطّي معظم تحسينات البروميت |
+## ما هو منفّذ بالفعل (تجاوز)
 
-**لن أُعيد إنشاء هذه الملفات أو أُنشئ بدائل مكرّرة** (مثل `sentiment-analysis.server.ts` أو `ai-recommendations.server.ts`)، لأن ذلك سيؤدي إلى تضارب وازدواجية. أيّ تحسين على هذه القطع يكون **تعديلًا داخل الملفات القائمة**.
-
-## 🧩 الفجوات الفعلية التي سأُنفّذها
-
-### 1) `src/components/ErrorBoundary.tsx` (جديد)
-- Class component مع `getDerivedStateFromError` / `componentDidCatch`.
-- Fallback يستخدم `Alert` + `Button` من shadcn، نصّ عربي RTL، زر "تحديث الصفحة".
-- يسجّل الخطأ في `console.error` فقط (بدون Sentry — غير مُركّب في المشروع).
-- يُلفّ التطبيق داخل `src/routes/__root.tsx` حول `<Outlet />` (مع الإبقاء على بقية المحتوى كما هو).
-
-### 2) `src/hooks/use-whatsapp-agent.ts` (جديد)
-- يدير `messages`, `isLoading`, `error`, `sendMessage`, `clearMessages`, `clearError`.
-- يستخدم `AbortController` لإلغاء الطلبات السابقة.
-- **سيستدعي server function موجودة** (`runWhatsAppAgent` عبر `useServerFn`) بدلاً من endpoint وهمي `/api/public/whatsapp-agent` غير الموجود في المشروع. سأتحقق من الاسم الفعلي قبل الربط.
-
-### 3) `src/lib/__tests__/whatsapp-ai-agent.test.ts` (جديد)
-- 7 اختبارات Vitest تغطّي: `search_product`, `check_stock`, `list_most_available`, `request_create_order`, `receive_location`, `help`, `blocked`.
-- Mock لـ `@/integrations/supabase/client.server`.
-- سأقرأ `src/lib/whatsapp-ai-agent.server.ts` أولًا لمطابقة التوقيع الفعلي للدالة وأسماء الـ intents حتى لا تفشل الاختبارات.
-
-## 🛠️ تفاصيل تقنية مهمة
-
-- **التبعيات**: `vitest` و`date-fns` و`sonner` مُركّبة بالفعل (مستخدمة في `admin-cron-jobs.tsx`). لن أضيف شيئًا إلا إذا كشف الفحص نقصًا فعليًا (مثل `@testing-library/react`).
-- **مخالفات في البروميت المُلصق سأتجاهلها**:
-  - `notifications.message` غير موجود — العمود الصحيح `body` (مُستخدَم بالفعل في migration الحالية).
-  - `current_setting('app.project_domain')` غير مُهيّأ في المشروع — Hooks الحالية بالفعل تستدعي عبر URL ثابت.
-  - `process.env.SUPABASE_PUBLISHABLE_KEY` في كود متصفّح خطأ — الصحيح `import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY` (مستخدَم بالفعل في `admin-cron-jobs.tsx`).
-- **لا migrations جديدة** — كل ما يخصّ pg_cron مُنفّذ.
-
-## 📦 الملفات التي ستتغيّر
-
-| ملف | نوع |
+| البند | الملف الموجود |
 |---|---|
-| `src/components/ErrorBoundary.tsx` | جديد |
-| `src/hooks/use-whatsapp-agent.ts` | جديد |
-| `src/lib/__tests__/whatsapp-ai-agent.test.ts` | جديد |
-| `src/routes/__root.tsx` | تعديل بسيط (لفّ بـ ErrorBoundary) |
+| ErrorBoundary | `src/components/ErrorBoundary.tsx` ✅ |
+| useWhatsAppAgent hook | `src/hooks/use-whatsapp-agent.ts` ✅ (يستخدم server fn مع `requireSupabaseAuth` — أفضل من fetch المباشر في البروميت) |
+| اختبارات بوت واتساب | `src/lib/__tests__/whatsapp-ai-agent.test.ts` ✅ (7 اختبارات) |
+| صفحة مراقبة Cron | `src/routes/admin-cron-jobs.tsx` ✅ + `admin-cron-health.tsx` |
+| RPCs (`admin_list_cron_jobs`, `admin_list_cron_runs`, `monitor_cron_failures`) | migration `20260622230645...` ✅ |
+| whatsapp-config + الأرقام المسموحة | `src/lib/whatsapp-config.ts` ✅ |
+| الصيدلي الصوتي / التوصيات / تحليل المشاعر | hooks و server fns موجودة ✅ |
+| social connectors | `src/lib/social-connectors/*` ✅ |
 
-## ❓ تأكيد قبل البناء
-هل توافق على هذا النطاق المُقلَّص (3 ملفات جديدة + تعديل `__root.tsx`)، مع تجاوز كل ما هو منفّذ مسبقًا؟ أم تريدني أيضًا أن أُحدّث ملفات موجودة (`sentiment.functions.ts`, `recommendations.functions.ts`, `use-voice-pharmacist.ts`) بتحسينات إضافية من البروميت؟
+## فجوات تستحق التنفيذ
+
+1. **نقطة `/api/public/whatsapp-agent`** — البروميت يفترض وجود endpoint يستدعيه hook خارجي، لكن hook الحالي يستخدم server function مباشرة. **لا حاجة لإضافتها** ما لم يطلب المستخدم نسخة قابلة للاستدعاء من خارج الموقع.
+
+2. **PageTransition + AnimatePresence في `__root.tsx`** — غير منفّذ. هذا تغيير UX اختياري.
+
+3. **اعتمادية `framer-motion`** — تحتاج تثبيت لو فُعّل PageTransition.
+
+## ملاحظات تقنية على البروميت (أخطاء فيه)
+
+- `process.env.SUPABASE_PUBLISHABLE_KEY` داخل المتصفح في كود البروميت لن يعمل — يجب `import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY` (الكود الحالي صحيح بالفعل).
+- جدول `notifications` يستخدم `body` وليس `message` (الـ migration الحالي يتعامل مع ذلك).
+- إعادة كتابة `__root.tsx` كما في البروميت ستحذف منطقاً موجوداً (head, providers, auth listener).
+- `LOVALBE_API_KEY` في قسم env البروميت خطأ إملائي.
+
+## اقتراح النطاق
+
+نظراً لأن **كل البنود الجوهرية مُنفّذة**، أقترح **عدم تنفيذ شيء** ما لم تختر أحد التالي:
+
+- **أ)** إضافة `PageTransition` + `framer-motion` لمؤثرات انتقال الصفحات فقط.
+- **ب)** إضافة endpoint عام `/api/public/whatsapp-agent` (مع تحقق توقيع/مفتاح) للسماح باستدعاء البوت من خارج الموقع.
+- **ج)** لا تغييرات — المشروع مكتمل ومطابق للبروميت فعلياً.
+
+أيّ خيار تريد؟
