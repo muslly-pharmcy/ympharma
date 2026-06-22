@@ -11,6 +11,10 @@ export type Product = {
   /** DB legacy id, set only for products sourced from the database. Used by
    * the pharmacy intelligence layer (search, related, chronic detection). */
   legacyId?: number;
+  /** DB-only: supplier name (for "sort by supplier"). */
+  supplierName?: string;
+  /** DB-only: current stock quantity (for "sort by most stocked"). */
+  stockQty?: number;
 };
 
 export type Category = { id: string; name: string };
