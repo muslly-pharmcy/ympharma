@@ -1,10 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
-import { getMyLoyalty, getMyLoyaltyTransactions } from "@/lib/loyalty.functions";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import {
+  getMyLoyalty,
+  getMyLoyaltyTransactions,
+  linkLoyaltyAccountByPhone,
+} from "@/lib/loyalty.functions";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Award, Coins, TrendingUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Award, Coins, TrendingUp, Link2, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/loyalty")({
   head: () => ({
