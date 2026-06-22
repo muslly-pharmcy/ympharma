@@ -397,7 +397,7 @@ export type HealthCheckRow = {
   failed: number;
   warnings: number;
   total: number;
-  details: Record<string, unknown>;
+  details: Json;
   created_at: string;
 };
 
