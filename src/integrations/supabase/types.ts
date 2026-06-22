@@ -3021,6 +3021,7 @@ export type Database = {
           customer_id: string | null
           id: string
           last_intent: string | null
+          last_message: string | null
           last_message_at: string
           metadata: Json
           phone_number: string
@@ -3032,6 +3033,7 @@ export type Database = {
           customer_id?: string | null
           id?: string
           last_intent?: string | null
+          last_message?: string | null
           last_message_at?: string
           metadata?: Json
           phone_number: string
@@ -3043,6 +3045,7 @@ export type Database = {
           customer_id?: string | null
           id?: string
           last_intent?: string | null
+          last_message?: string | null
           last_message_at?: string
           metadata?: Json
           phone_number?: string
