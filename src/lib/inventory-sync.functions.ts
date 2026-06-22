@@ -180,7 +180,7 @@ export type InventorySyncLogRow = {
   actor_id: string | null;
   actor_email: string | null;
   action: string;
-  details: Record<string, unknown>;
+  details: unknown;
 };
 
 export const listInventorySyncLogs = createServerFn({ method: "POST" })
