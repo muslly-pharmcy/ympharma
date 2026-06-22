@@ -83,9 +83,7 @@ function ProductDetail() {
         </nav>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="overflow-hidden rounded-3xl border border-border bg-card">
-            <img src={proxifyImage(p.img)} alt={p.name} onError={handleImageError} className="aspect-square w-full object-cover" />
-          </div>
+          <ProductGallery productLegacyId={legacyId} fallbackImage={p.img} productName={p.name} />
           <div className="flex flex-col gap-4">
             <div>
               <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{p.brand}</p>
