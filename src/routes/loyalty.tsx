@@ -84,9 +84,7 @@ function LoyaltyPage() {
       </h1>
 
       {!acct ? (
-        <Card className="p-6 text-center text-muted-foreground">
-          لا يوجد حساب ولاء مرتبط بحسابك بعد. سيتم إنشاؤه تلقائياً عند أول طلب.
-        </Card>
+        <LinkPhoneCard />
       ) : (
         <>
           <Card className="p-6 space-y-4">
