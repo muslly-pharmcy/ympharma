@@ -34,7 +34,7 @@ async function logAttempt(args: {
     error_message: args.error?.slice(0, 1000) ?? null,
     external_id: args.externalId ?? null,
     source: args.source,
-    request_payload: args.requestPayload ?? null,
+    request_payload: (args.requestPayload ?? null) as any,
     response_status: args.responseStatus ?? null,
     response_body: args.responseBody?.slice(0, 1000) ?? null,
     hmac_valid: args.hmacValid ?? null,
