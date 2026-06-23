@@ -53,6 +53,7 @@ import { Route as AdminLogsRouteImport } from './routes/admin-logs'
 import { Route as AdminInventoryReservationsRouteImport } from './routes/admin-inventory-reservations'
 import { Route as AdminInventoryDuplicatesRouteImport } from './routes/admin-inventory-duplicates'
 import { Route as AdminInventoryRouteImport } from './routes/admin-inventory'
+import { Route as AdminHmacPreflightRouteImport } from './routes/admin-hmac-preflight'
 import { Route as AdminEventBusRouteImport } from './routes/admin-event-bus'
 import { Route as AdminDiscountsRouteImport } from './routes/admin-discounts'
 import { Route as AdminDiagnosticsRouteImport } from './routes/admin-diagnostics'
@@ -362,6 +363,11 @@ const AdminInventoryDuplicatesRoute =
 const AdminInventoryRoute = AdminInventoryRouteImport.update({
   id: '/admin-inventory',
   path: '/admin-inventory',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminHmacPreflightRoute = AdminHmacPreflightRouteImport.update({
+  id: '/admin-hmac-preflight',
+  path: '/admin-hmac-preflight',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminEventBusRoute = AdminEventBusRouteImport.update({
@@ -866,6 +872,7 @@ export interface FileRoutesByFullPath {
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-event-bus': typeof AdminEventBusRoute
+  '/admin-hmac-preflight': typeof AdminHmacPreflightRoute
   '/admin-inventory': typeof AdminInventoryRoute
   '/admin-inventory-duplicates': typeof AdminInventoryDuplicatesRoute
   '/admin-inventory-reservations': typeof AdminInventoryReservationsRoute
@@ -997,6 +1004,7 @@ export interface FileRoutesByTo {
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-event-bus': typeof AdminEventBusRoute
+  '/admin-hmac-preflight': typeof AdminHmacPreflightRoute
   '/admin-inventory': typeof AdminInventoryRoute
   '/admin-inventory-duplicates': typeof AdminInventoryDuplicatesRoute
   '/admin-inventory-reservations': typeof AdminInventoryReservationsRoute
@@ -1130,6 +1138,7 @@ export interface FileRoutesById {
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
   '/admin-discounts': typeof AdminDiscountsRoute
   '/admin-event-bus': typeof AdminEventBusRoute
+  '/admin-hmac-preflight': typeof AdminHmacPreflightRoute
   '/admin-inventory': typeof AdminInventoryRoute
   '/admin-inventory-duplicates': typeof AdminInventoryDuplicatesRoute
   '/admin-inventory-reservations': typeof AdminInventoryReservationsRoute
@@ -1263,6 +1272,7 @@ export interface FileRouteTypes {
     | '/admin-diagnostics'
     | '/admin-discounts'
     | '/admin-event-bus'
+    | '/admin-hmac-preflight'
     | '/admin-inventory'
     | '/admin-inventory-duplicates'
     | '/admin-inventory-reservations'
@@ -1394,6 +1404,7 @@ export interface FileRouteTypes {
     | '/admin-diagnostics'
     | '/admin-discounts'
     | '/admin-event-bus'
+    | '/admin-hmac-preflight'
     | '/admin-inventory'
     | '/admin-inventory-duplicates'
     | '/admin-inventory-reservations'
@@ -1526,6 +1537,7 @@ export interface FileRouteTypes {
     | '/admin-diagnostics'
     | '/admin-discounts'
     | '/admin-event-bus'
+    | '/admin-hmac-preflight'
     | '/admin-inventory'
     | '/admin-inventory-duplicates'
     | '/admin-inventory-reservations'
@@ -1659,6 +1671,7 @@ export interface RootRouteChildren {
   AdminDiagnosticsRoute: typeof AdminDiagnosticsRoute
   AdminDiscountsRoute: typeof AdminDiscountsRoute
   AdminEventBusRoute: typeof AdminEventBusRoute
+  AdminHmacPreflightRoute: typeof AdminHmacPreflightRoute
   AdminInventoryRoute: typeof AdminInventoryRoute
   AdminInventoryDuplicatesRoute: typeof AdminInventoryDuplicatesRoute
   AdminInventoryReservationsRoute: typeof AdminInventoryReservationsRoute
@@ -2056,6 +2069,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-inventory'
       fullPath: '/admin-inventory'
       preLoaderRoute: typeof AdminInventoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-hmac-preflight': {
+      id: '/admin-hmac-preflight'
+      path: '/admin-hmac-preflight'
+      fullPath: '/admin-hmac-preflight'
+      preLoaderRoute: typeof AdminHmacPreflightRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-event-bus': {
@@ -2749,6 +2769,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminDiagnosticsRoute: AdminDiagnosticsRoute,
   AdminDiscountsRoute: AdminDiscountsRoute,
   AdminEventBusRoute: AdminEventBusRoute,
+  AdminHmacPreflightRoute: AdminHmacPreflightRoute,
   AdminInventoryRoute: AdminInventoryRoute,
   AdminInventoryDuplicatesRoute: AdminInventoryDuplicatesRoute,
   AdminInventoryReservationsRoute: AdminInventoryReservationsRoute,
@@ -2842,13 +2863,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
