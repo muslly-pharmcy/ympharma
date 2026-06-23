@@ -44,7 +44,7 @@ export const listPostAttempts = createServerFn({ method: "GET" })
     await assertAdmin(context.supabase, context.userId);
     const { data: rows, error } = await context.supabase
       .from("social_post_attempts")
-      .select("id,attempt_no,status,error_message,external_id,source,created_at")
+      .select("id,attempt_no,status,error_message,external_id,source,created_at,request_payload,response_status,response_body,hmac_valid,idempotent_skip")
       .eq("post_id", data.post_id)
       .order("created_at", { ascending: false })
       .limit(50);
@@ -100,26 +100,61 @@ export const deleteSocialPost = createServerFn({ method: "POST" })
   });
 
 // Smoke test: ping the configured n8n webhook with a no-op payload and report
-// the HTTP status + a short response snippet. Admin-only.
+// the HTTP status + response body + duration. Admin-only.
 export const pingN8nWebhook = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context.supabase, context.userId);
     const url = process.env.N8N_WEBHOOK_URL;
-    if (!url) return { ok: false, status: 0, url: null, body: "N8N_WEBHOOK_URL غير مضبوط" };
+    if (!url) {
+      return {
+        ok: false,
+        status: 0,
+        url: null as string | null,
+        body: "",
+        errorDetail: "N8N_WEBHOOK_URL غير مضبوط في الإعدادات",
+        durationMs: 0,
+      };
+    }
+    const payload = {
+      event: "ping",
+      post_id: "ping-test",
+      platform: "telegram",
+      caption: "ping من Lovable",
+    };
     const controller = new AbortController();
     const t = setTimeout(() => controller.abort(), 15_000);
+    const startedAt = Date.now();
     try {
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ event: "ping", post_id: "ping-test", platform: "telegram", caption: "ping من Lovable" }),
+        body: JSON.stringify(payload),
         signal: controller.signal,
       });
-      const text = (await res.text().catch(() => "")).slice(0, 400);
-      return { ok: res.ok, status: res.status, url: url.replace(/\/+$/, ""), body: text };
+      const text = (await res.text().catch(() => "")).slice(0, 1500);
+      const durationMs = Date.now() - startedAt;
+      return {
+        ok: res.ok,
+        status: res.status,
+        url,
+        body: text,
+        errorDetail: res.ok ? null : `n8n استجاب بـ HTTP ${res.status}`,
+        durationMs,
+        payload,
+      };
     } catch (e) {
-      return { ok: false, status: 0, url, body: (e as Error).message };
+      const durationMs = Date.now() - startedAt;
+      const err = e as Error;
+      return {
+        ok: false,
+        status: 0,
+        url,
+        body: "",
+        errorDetail: `${err.name}: ${err.message}`,
+        durationMs,
+        payload,
+      };
     } finally {
       clearTimeout(t);
     }

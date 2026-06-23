@@ -2991,8 +2991,13 @@ export type Database = {
           created_at: string
           error_message: string | null
           external_id: string | null
+          hmac_valid: boolean | null
           id: string
+          idempotent_skip: boolean
           post_id: string
+          request_payload: Json | null
+          response_body: string | null
+          response_status: number | null
           source: string
           status: string
         }
@@ -3001,8 +3006,13 @@ export type Database = {
           created_at?: string
           error_message?: string | null
           external_id?: string | null
+          hmac_valid?: boolean | null
           id?: string
+          idempotent_skip?: boolean
           post_id: string
+          request_payload?: Json | null
+          response_body?: string | null
+          response_status?: number | null
           source?: string
           status: string
         }
@@ -3011,8 +3021,13 @@ export type Database = {
           created_at?: string
           error_message?: string | null
           external_id?: string | null
+          hmac_valid?: boolean | null
           id?: string
+          idempotent_skip?: boolean
           post_id?: string
+          request_payload?: Json | null
+          response_body?: string | null
+          response_status?: number | null
           source?: string
           status?: string
         }

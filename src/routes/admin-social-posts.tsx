@@ -14,6 +14,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
   RefreshCw,
   Send,
   Trash2,
@@ -24,6 +29,10 @@ import {
   MessageCircle,
   Share2,
   Eye,
+  ShieldCheck,
+  ShieldAlert,
+  ChevronDown,
+  AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -62,6 +71,72 @@ function StatusBadge({ status }: { status: string }) {
   if (status === "pending") return <Badge variant="secondary">⏳ معلّق</Badge>;
   if (status === "failed") return <Badge variant="destructive">❌ فشل</Badge>;
   return <Badge variant="outline">{status}</Badge>;
+}
+
+function AttemptRow({ a }: { a: any }) {
+  const [open, setOpen] = useState(false);
+  const isSuccess = a.status === "success";
+  const isSkip = a.status === "skipped" || a.idempotent_skip;
+  const isFail = a.status === "failed";
+  const variant = isSuccess ? "default" : isSkip ? "secondary" : "destructive";
+  const label = isSuccess ? "نجاح" : isSkip ? "تخطي (تكرار)" : "فشل";
+
+  return (
+    <div className="rounded-md border p-2 text-xs space-y-1.5">
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge variant={variant as any}>#{a.attempt_no} • {label}</Badge>
+        <Badge variant="outline">{a.source}</Badge>
+        {a.source === "callback" && (
+          a.hmac_valid ? (
+            <Badge variant="outline" className="gap-1 text-emerald-600 border-emerald-600">
+              <ShieldCheck className="size-3" /> HMAC ✓
+            </Badge>
+          ) : a.hmac_valid === false ? (
+            <Badge variant="outline" className="gap-1 text-destructive border-destructive">
+              <ShieldAlert className="size-3" /> HMAC ✗
+            </Badge>
+          ) : null
+        )}
+        {a.response_status != null && (
+          <Badge variant="outline">HTTP {a.response_status}</Badge>
+        )}
+        <span className="text-muted-foreground ms-auto">
+          {new Date(a.created_at).toLocaleString("ar")}
+        </span>
+      </div>
+      {a.external_id ? <div>external_id: <code className="text-[10px]">{a.external_id}</code></div> : null}
+      {a.error_message ? <div className="text-destructive">{a.error_message}</div> : null}
+
+      {(a.request_payload || a.response_body) && (
+        <Collapsible open={open} onOpenChange={setOpen}>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-6 px-2 text-[11px]">
+              <ChevronDown className={`size-3 ms-1 transition-transform ${open ? "rotate-180" : ""}`} />
+              التفاصيل التقنية
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-2 pt-1">
+            {a.request_payload ? (
+              <div>
+                <div className="text-[10px] text-muted-foreground mb-0.5">Payload المرسل:</div>
+                <pre className="bg-muted/50 rounded p-2 text-[10px] overflow-auto max-h-40 leading-tight">
+                  {JSON.stringify(a.request_payload, null, 2)}
+                </pre>
+              </div>
+            ) : null}
+            {a.response_body ? (
+              <div>
+                <div className="text-[10px] text-muted-foreground mb-0.5">رد n8n:</div>
+                <pre className="bg-muted/50 rounded p-2 text-[10px] overflow-auto max-h-40 leading-tight">
+                  {a.response_body}
+                </pre>
+              </div>
+            ) : null}
+          </CollapsibleContent>
+        </Collapsible>
+      )}
+    </div>
+  );
 }
 
 function AttemptsDialog({
@@ -108,23 +183,75 @@ function AttemptsDialog({
           <p className="text-sm text-muted-foreground text-center py-4">لا توجد محاولات بعد.</p>
         ) : (
           <div className="space-y-2 max-h-[60vh] overflow-auto">
-            {(attempts.data ?? []).map((a: any) => (
-              <div key={a.id} className="rounded-md border p-2 text-xs space-y-1">
-                <div className="flex items-center gap-2">
-                  <Badge variant={a.status === "success" ? "default" : "destructive"}>
-                    #{a.attempt_no} • {a.status === "success" ? "نجاح" : "فشل"}
-                  </Badge>
-                  <Badge variant="outline">{a.source}</Badge>
-                  <span className="text-muted-foreground">
-                    {new Date(a.created_at).toLocaleString("ar")}
-                  </span>
-                </div>
-                {a.external_id ? <div>external_id: <code>{a.external_id}</code></div> : null}
-                {a.error_message ? <div className="text-destructive">{a.error_message}</div> : null}
-              </div>
-            ))}
+            {(attempts.data ?? []).map((a: any) => <AttemptRow key={a.id} a={a} />)}
           </div>
         )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function PingResultDialog({
+  result,
+  open,
+  onOpenChange,
+}: {
+  result: any | null;
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
+  if (!result) return null;
+  const ok = result.ok;
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent dir="rtl" className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            {ok ? "✅ نجح الاتصال بـ n8n" : <><AlertCircle className="size-5 text-destructive" /> فشل الاتصال بـ n8n</>}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3 text-sm">
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded border p-2">
+              <div className="text-[10px] text-muted-foreground">HTTP code</div>
+              <div className={`font-mono ${ok ? "text-emerald-600" : "text-destructive"}`}>{result.status || "—"}</div>
+            </div>
+            <div className="rounded border p-2">
+              <div className="text-[10px] text-muted-foreground">المدة</div>
+              <div className="font-mono">{result.durationMs} ms</div>
+            </div>
+          </div>
+          {result.url ? (
+            <div>
+              <div className="text-[10px] text-muted-foreground mb-0.5">URL</div>
+              <code className="block bg-muted/50 rounded p-2 text-[11px] break-all">{result.url}</code>
+            </div>
+          ) : null}
+          {result.errorDetail ? (
+            <div>
+              <div className="text-[10px] text-muted-foreground mb-0.5">سبب الفشل</div>
+              <pre className="bg-destructive/10 text-destructive rounded p-2 text-[11px] whitespace-pre-wrap">
+                {result.errorDetail}
+              </pre>
+            </div>
+          ) : null}
+          {result.body ? (
+            <div>
+              <div className="text-[10px] text-muted-foreground mb-0.5">رد n8n (raw)</div>
+              <pre className="bg-muted/50 rounded p-2 text-[10px] overflow-auto max-h-60 leading-tight">
+                {result.body}
+              </pre>
+            </div>
+          ) : null}
+          {result.payload ? (
+            <div>
+              <div className="text-[10px] text-muted-foreground mb-0.5">Payload المرسل</div>
+              <pre className="bg-muted/50 rounded p-2 text-[10px] overflow-auto max-h-40 leading-tight">
+                {JSON.stringify(result.payload, null, 2)}
+              </pre>
+            </div>
+          ) : null}
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -133,6 +260,7 @@ function AttemptsDialog({
 function AdminSocialPostsPage() {
   const qc = useQueryClient();
   const [attemptsForPost, setAttemptsForPost] = useState<string | null>(null);
+  const [pingResult, setPingResult] = useState<any | null>(null);
 
   const listFn = useServerFn(listSocialPosts);
   const regenFn = useServerFn(regenerateDailyPostsNow);
@@ -157,9 +285,11 @@ function AdminSocialPostsPage() {
   const publish = useMutation({
     mutationFn: (id: string) => publishFn({ data: { id } }),
     onSuccess: (r: any) => {
-      if (r?.ok) toast.success(`تم النشر (محاولة #${r.attempt_no ?? "?"})`);
+      if (r?.idempotent) toast.message("⏭️ تم تخطيه (سبق نشره)");
+      else if (r?.ok) toast.success(`تم النشر (محاولة #${r.attempt_no ?? "?"})`);
       else toast.error(r?.error ?? "فشل النشر");
       qc.invalidateQueries({ queryKey: ["admin-social-posts"] });
+      qc.invalidateQueries({ queryKey: ["social-post-attempts"] });
     },
     onError: (e: any) => toast.error(e?.message ?? "فشل النشر"),
   });
@@ -176,10 +306,14 @@ function AdminSocialPostsPage() {
   const ping = useMutation({
     mutationFn: () => pingFn(),
     onSuccess: (r: any) => {
-      if (r?.ok) toast.success(`n8n استجاب ✅ (HTTP ${r.status})`);
-      else toast.error(`فشل ping n8n (HTTP ${r?.status ?? "?"}): ${(r?.body ?? "").slice(0, 200)}`);
+      setPingResult(r);
+      if (r?.ok) toast.success(`n8n استجاب ✅ (HTTP ${r.status} • ${r.durationMs}ms)`);
+      else toast.error(`فشل ping n8n — اضغط للتفاصيل`);
     },
-    onError: (e: any) => toast.error(e?.message ?? "فشل الاتصال بـ n8n"),
+    onError: (e: any) => {
+      setPingResult({ ok: false, status: 0, errorDetail: e?.message, durationMs: 0, body: "" });
+      toast.error(e?.message ?? "فشل الاتصال بـ n8n");
+    },
   });
 
   return (
@@ -193,8 +327,8 @@ function AdminSocialPostsPage() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => ping.mutate()} disabled={ping.isPending}>
-            {ping.isPending ? <Loader2 className="size-4 ms-2 animate-spin" /> : null}
-            اختبار n8n
+            {ping.isPending ? <Loader2 className="size-4 ms-2 animate-spin" /> : <ShieldCheck className="size-4 ms-2" />}
+            تحقق من n8n
           </Button>
           <Button onClick={() => regen.mutate()} disabled={regen.isPending}>
             {regen.isPending ? (
@@ -226,18 +360,28 @@ function AdminSocialPostsPage() {
       ) : (
         <div className="space-y-3">
           {(posts.data ?? []).map((post: any) => (
-            <Card key={post.id}>
+            <Card key={post.id} className={post.status === "failed" ? "border-destructive/50" : undefined}>
               <CardContent className="p-4 space-y-3">
                 <div className="flex flex-wrap items-center gap-2 text-sm">
                   <Badge variant="outline">{PLATFORM_LABEL[post.platform] ?? post.platform}</Badge>
                   <StatusBadge status={post.status} />
                   {post.attempt_count > 0 && (
-                    <Badge variant="secondary">محاولات: {post.attempt_count}</Badge>
+                    <Badge variant="secondary">آخر محاولة: #{post.attempt_count}</Badge>
                   )}
                   <span className="text-xs text-muted-foreground">
                     {new Date(post.created_at).toLocaleString("ar")}
                   </span>
                 </div>
+
+                {post.error_message ? (
+                  <div className="rounded border border-destructive/30 bg-destructive/5 p-2 text-xs text-destructive flex gap-2">
+                    <AlertCircle className="size-4 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="font-semibold mb-0.5">آخر خطأ:</div>
+                      <div className="whitespace-pre-wrap break-words">{post.error_message}</div>
+                    </div>
+                  </div>
+                ) : null}
 
                 <p className="whitespace-pre-line text-sm leading-relaxed">{post.caption}</p>
 
@@ -255,24 +399,20 @@ function AdminSocialPostsPage() {
                   <p className="text-xs text-muted-foreground">💡 {post.cta}</p>
                 ) : null}
 
-                {post.error_message ? (
-                  <p className="text-xs text-destructive">{post.error_message}</p>
-                ) : null}
-
                 <div className="flex flex-wrap gap-2 pt-2">
-                  {post.status !== "published" && (
-                    <Button
-                      size="sm"
-                      variant="default"
-                      onClick={() => publish.mutate(post.id)}
-                      disabled={publish.isPending}
-                    >
-                      <Send className="size-3.5 ms-1.5" />
-                      {post.status === "failed"
-                        ? `إعادة المحاولة${post.attempt_count ? ` (#${post.attempt_count + 1})` : ""}`
+                  <Button
+                    size="sm"
+                    variant={post.status === "failed" ? "default" : post.status === "published" ? "outline" : "default"}
+                    onClick={() => publish.mutate(post.id)}
+                    disabled={publish.isPending}
+                  >
+                    <Send className="size-3.5 ms-1.5" />
+                    {post.status === "published"
+                      ? "إعادة النشر (idempotent)"
+                      : post.status === "failed"
+                        ? `إعادة المحاولة (#${(post.attempt_count ?? 0) + 1})`
                         : "نشر الآن"}
-                    </Button>
-                  )}
+                  </Button>
                   <Button
                     size="sm"
                     variant="outline"
@@ -312,6 +452,12 @@ function AdminSocialPostsPage() {
         postId={attemptsForPost}
         open={!!attemptsForPost}
         onOpenChange={(v) => !v && setAttemptsForPost(null)}
+      />
+
+      <PingResultDialog
+        result={pingResult}
+        open={!!pingResult}
+        onOpenChange={(v) => !v && setPingResult(null)}
       />
     </div>
   );
