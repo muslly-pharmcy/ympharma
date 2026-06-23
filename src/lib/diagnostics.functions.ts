@@ -12,7 +12,7 @@ interface Check {
   label: string;
   status: CheckStatus;
   message: string;
-  detail?: unknown;
+  detail?: string | null;
   durationMs?: number;
 }
 
