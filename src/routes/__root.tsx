@@ -28,6 +28,7 @@ import { Toaster } from "../components/ui/sonner";
 import { AiChatWidget } from "../components/ai-chat-widget";
 import { SwUpdateBanner } from "../components/sw-update-banner";
 import { ErrorBoundary } from "../components/ErrorBoundary";
+import { InstallPrompt } from "../components/InstallPrompt";
 
 function NotFoundComponent() {
   return (
@@ -180,6 +181,7 @@ function RootComponent() {
           </ErrorBoundary>
           <AiChatWidget />
           <SwUpdateBanner />
+          <InstallPrompt />
           <Toaster position="top-center" richColors />
         </CartProvider>
       </I18nProvider>
