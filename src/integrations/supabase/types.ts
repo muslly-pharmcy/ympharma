@@ -439,6 +439,36 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_weights: {
+        Row: {
+          created_at: string
+          criterion: string
+          description: string | null
+          id: number
+          updated_at: string
+          updated_by: string | null
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          criterion: string
+          description?: string | null
+          id?: number
+          updated_at?: string
+          updated_by?: string | null
+          weight: number
+        }
+        Update: {
+          created_at?: string
+          criterion?: string
+          description?: string | null
+          id?: number
+          updated_at?: string
+          updated_by?: string | null
+          weight?: number
+        }
+        Relationships: []
+      }
       ai_tool_events: {
         Row: {
           agent_id: string
