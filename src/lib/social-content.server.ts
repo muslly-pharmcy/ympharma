@@ -18,6 +18,9 @@ export interface DraftPost extends GeneratedPost {
   scheduled_for: string;
   variant_id?: string | null;
   confidence_score?: number | null;
+  generation_version?: string | null;
+  ranking_version?: string | null;
+  model_version?: string | null;
 }
 
 /** Phase 2 telemetry payload, written to `agent_decisions` after post insert. */
