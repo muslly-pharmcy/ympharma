@@ -98,3 +98,29 @@ export const deleteSocialPost = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// Smoke test: ping the configured n8n webhook with a no-op payload and report
+// the HTTP status + a short response snippet. Admin-only.
+export const pingN8nWebhook = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const url = process.env.N8N_WEBHOOK_URL;
+    if (!url) return { ok: false, status: 0, url: null, body: "N8N_WEBHOOK_URL غير مضبوط" };
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), 15_000);
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ event: "ping", post_id: "ping-test", platform: "telegram", caption: "ping من Lovable" }),
+        signal: controller.signal,
+      });
+      const text = (await res.text().catch(() => "")).slice(0, 400);
+      return { ok: res.ok, status: res.status, url: url.replace(/\/+$/, ""), body: text };
+    } catch (e) {
+      return { ok: false, status: 0, url, body: (e as Error).message };
+    } finally {
+      clearTimeout(t);
+    }
+  });
