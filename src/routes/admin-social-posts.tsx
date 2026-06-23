@@ -322,12 +322,14 @@ function AdminSocialPostsPage() {
   const qc = useQueryClient();
   const [attemptsForPost, setAttemptsForPost] = useState<string | null>(null);
   const [pingResult, setPingResult] = useState<any | null>(null);
+  const [diagResult, setDiagResult] = useState<any | null>(null);
 
   const listFn = useServerFn(listSocialPosts);
   const regenFn = useServerFn(regenerateDailyPostsNow);
   const publishFn = useServerFn(publishPostNow);
   const deleteFn = useServerFn(deleteSocialPost);
   const pingFn = useServerFn(pingN8nWebhook);
+  const diagFn = useServerFn(runFullDiagnostics);
 
   const posts = useQuery({
     queryKey: ["admin-social-posts"],
