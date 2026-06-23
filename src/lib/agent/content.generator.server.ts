@@ -47,6 +47,41 @@ const SYSTEM_PROMPT = `أنت خبير تسويق رقمي لصيدلية الم
   "decision_factors": { "main_angle": "...", "secondary_angle": "...", "audience_signal": "..." }
 }`;
 
+/**
+ * F-06 — Prompt-injection hardening.
+ * Strips control characters, role-impersonation markers, common jailbreak
+ * phrases, code fences, and excessive whitespace from untrusted product
+ * fields before splicing them into the user prompt. Output is also length-
+ * capped to defend against overflow / cost attacks.
+ */
+export function sanitizePromptInput(input: string | null | undefined, maxLen = 500): string {
+  if (!input) return "";
+  let s = String(input);
+  // Strip ASCII control chars (except \n, \t) and zero-width / bidi spoofs
+  s = s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, " ");
+  s = s.replace(/[\u200B-\u200F\u202A-\u202E\u2066-\u2069]/g, "");
+  // Neutralize role/system markers used by chat models
+  s = s.replace(/<\s*\/?\s*(system|assistant|user|tool)\s*>/gi, " ");
+  s = s.replace(/^\s*#{1,6}\s*(system|assistant|user|developer)\s*:?/gim, " ");
+  s = s.replace(/```[\s\S]*?```/g, " ");
+  // Neutralize common jailbreak phrases (AR + EN). Keep liberal but match safely.
+  const jailbreaks = [
+    /ignore (all|the|previous|above)[\s\S]{0,40}(instructions?|prompts?|rules?)/gi,
+    /disregard (all|the|previous|above)[\s\S]{0,40}(instructions?|prompts?|rules?)/gi,
+    /you are now [\s\S]{0,60}/gi,
+    /act as (an?|the) [\s\S]{0,60}/gi,
+    /تجاهل\s+(كل|جميع|التعليمات|الأوامر|ما\s+سبق)/g,
+    /انس\s+(التعليمات|الأوامر|ما\s+سبق)/g,
+    /تظاهر\s+أنك/g,
+    /تصرف\s+ك(ـ|ـ)?/g,
+  ];
+  for (const re of jailbreaks) s = s.replace(re, " ");
+  // Collapse whitespace and cap length
+  s = s.replace(/\s+/g, " ").trim();
+  if (s.length > maxLen) s = s.slice(0, maxLen) + "…";
+  return s;
+}
+
 export async function generateVariants(params: {
   platform: SocialPlatform;
   productName?: string | null;
@@ -54,7 +89,10 @@ export async function generateVariants(params: {
   productDescription?: string | null;
   context?: AgentContext | null;
 }): Promise<GenerationResult> {
-  const { platform, productName, productPrice, productDescription, context } = params;
+  const { platform, productPrice, context } = params;
+  // F-06: sanitize all untrusted fields before splicing into the prompt.
+  const productName = sanitizePromptInput(params.productName, 120);
+  const productDescription = sanitizePromptInput(params.productDescription, 500);
 
   const contextBlock = context ? `\n\nسياق فوري:\n${summarizeContextForPrompt(context)}` : "";
   const productBlock = productName
