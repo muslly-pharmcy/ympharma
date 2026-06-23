@@ -16,7 +16,7 @@ export const Route = createFileRoute("/api/public/hooks/run-social-posts")({
           const { publishPostById } = await import("@/lib/social-publisher.server");
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-          const drafts = await generateDailyDrafts();
+          const { drafts, decisions } = await generateDailyDrafts();
           if (drafts.length === 0) {
             return Response.json({ ok: true, generated: 0, published: 0, failed: 0 });
           }
@@ -26,6 +26,13 @@ export const Route = createFileRoute("/api/public/hooks/run-social-posts")({
             .insert(drafts)
             .select("id");
           if (error) throw new Error(error.message);
+
+          // Link agent_decisions telemetry rows to their inserted post IDs
+          if (inserted && decisions.length > 0) {
+            const rows = decisions.map((d, i) => ({ ...d, post_id: inserted[i]?.id ?? null })) as any;
+            const { error: telErr } = await supabaseAdmin.from("agent_decisions").insert(rows);
+            if (telErr) console.warn("[cron] telemetry insert failed:", telErr.message);
+          }
 
           let published = 0;
           let failed = 0;
