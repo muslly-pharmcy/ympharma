@@ -18,6 +18,9 @@ export interface DraftPost extends GeneratedPost {
   scheduled_for: string;
   variant_id?: string | null;
   confidence_score?: number | null;
+  generation_version?: string | null;
+  ranking_version?: string | null;
+  model_version?: string | null;
 }
 
 /** Phase 2 telemetry payload, written to `agent_decisions` after post insert. */
@@ -259,6 +262,8 @@ export async function generateDailyDrafts(): Promise<{
 
     const totalMs = Date.now() - totalStart;
 
+    const { GENERATION_VERSION, RANKING_VERSION, MODEL_VERSION } = await import("./agent/versions");
+
     drafts.push({
       platform,
       product_id: product?.id ?? null,
@@ -269,7 +274,11 @@ export async function generateDailyDrafts(): Promise<{
       scheduled_for: scheduledFor,
       variant_id: winnerVariantId,
       confidence_score: confidence,
-    });
+      // P3-GATE-04: full attribution fingerprint
+      generation_version: GENERATION_VERSION,
+      ranking_version: RANKING_VERSION,
+      model_version: MODEL_VERSION,
+    } as DraftPost);
 
     decisions.push({
       platform,

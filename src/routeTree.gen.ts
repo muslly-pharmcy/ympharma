@@ -82,6 +82,7 @@ import { Route as AdminAiChronicRefillRouteImport } from './routes/admin-ai-chro
 import { Route as AdminAiCatalogRouteImport } from './routes/admin-ai-catalog'
 import { Route as AdminAiApprovalsRouteImport } from './routes/admin-ai-approvals'
 import { Route as AdminAgentsRouteImport } from './routes/admin-agents'
+import { Route as AdminAgentInsightsRouteImport } from './routes/admin-agent-insights'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -103,6 +104,7 @@ import { Route as ApiPublicLogErrorRouteImport } from './routes/api/public/log-e
 import { Route as ApiPublicIncidentCheckRouteImport } from './routes/api/public/incident-check'
 import { Route as ApiPublicImgRouteImport } from './routes/api/public/img'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
+import { Route as ApiInternalCollectFeedbackRouteImport } from './routes/api/internal/collect-feedback'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -124,6 +126,7 @@ import { Route as ApiPublicHooksCustomerRxNotifyRouteImport } from './routes/api
 import { Route as ApiPublicHooksCollectSocialStatsRouteImport } from './routes/api/public/hooks/collect-social-stats'
 import { Route as ApiPublicHooksChronicRefillsRouteImport } from './routes/api/public/hooks/chronic-refills'
 import { Route as ApiPublicHooksAlertsWorkerRouteImport } from './routes/api/public/hooks/alerts-worker'
+import { Route as ApiPublicHooksAgentMaintenanceRouteImport } from './routes/api/public/hooks/agent-maintenance'
 import { Route as ApiPublicHealthQuickCheckRouteImport } from './routes/api/public/health.quick-check'
 import { Route as ApiPublicHealthFullCheckRouteImport } from './routes/api/public/health.full-check'
 import { Route as ApiPublicHooksAgentsWhatsappRouteImport } from './routes/api/public/hooks/agents/whatsapp'
@@ -507,6 +510,11 @@ const AdminAgentsRoute = AdminAgentsRouteImport.update({
   path: '/admin-agents',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAgentInsightsRoute = AdminAgentInsightsRouteImport.update({
+  id: '/admin-agent-insights',
+  path: '/admin-agent-insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -619,6 +627,12 @@ const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
   path: '/api/public/health',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiInternalCollectFeedbackRoute =
+  ApiInternalCollectFeedbackRouteImport.update({
+    id: '/api/internal/collect-feedback',
+    path: '/api/internal/collect-feedback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -743,6 +757,12 @@ const ApiPublicHooksAlertsWorkerRoute =
     path: '/api/public/hooks/alerts-worker',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksAgentMaintenanceRoute =
+  ApiPublicHooksAgentMaintenanceRouteImport.update({
+    id: '/api/public/hooks/agent-maintenance',
+    path: '/api/public/hooks/agent-maintenance',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHealthQuickCheckRoute =
   ApiPublicHealthQuickCheckRouteImport.update({
     id: '/quick-check',
@@ -809,6 +829,7 @@ const ApiPublicHooksAgentsBiRoute = ApiPublicHooksAgentsBiRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/admin-agent-insights': typeof AdminAgentInsightsRoute
   '/admin-agents': typeof AdminAgentsRoute
   '/admin-ai-approvals': typeof AdminAiApprovalsRoute
   '/admin-ai-catalog': typeof AdminAiCatalogRoute
@@ -893,6 +914,7 @@ export interface FileRoutesByFullPath {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
+  '/api/internal/collect-feedback': typeof ApiInternalCollectFeedbackRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/img': typeof ApiPublicImgRoute
   '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
@@ -902,6 +924,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
   '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
+  '/api/public/hooks/agent-maintenance': typeof ApiPublicHooksAgentMaintenanceRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
   '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
   '/api/public/hooks/collect-social-stats': typeof ApiPublicHooksCollectSocialStatsRoute
@@ -936,6 +959,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/admin-agent-insights': typeof AdminAgentInsightsRoute
   '/admin-agents': typeof AdminAgentsRoute
   '/admin-ai-approvals': typeof AdminAiApprovalsRoute
   '/admin-ai-catalog': typeof AdminAiCatalogRoute
@@ -1020,6 +1044,7 @@ export interface FileRoutesByTo {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
+  '/api/internal/collect-feedback': typeof ApiInternalCollectFeedbackRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/img': typeof ApiPublicImgRoute
   '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
@@ -1029,6 +1054,7 @@ export interface FileRoutesByTo {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
   '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
+  '/api/public/hooks/agent-maintenance': typeof ApiPublicHooksAgentMaintenanceRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
   '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
   '/api/public/hooks/collect-social-stats': typeof ApiPublicHooksCollectSocialStatsRoute
@@ -1065,6 +1091,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/admin': typeof AdminRoute
+  '/admin-agent-insights': typeof AdminAgentInsightsRoute
   '/admin-agents': typeof AdminAgentsRoute
   '/admin-ai-approvals': typeof AdminAiApprovalsRoute
   '/admin-ai-catalog': typeof AdminAiCatalogRoute
@@ -1149,6 +1176,7 @@ export interface FileRoutesById {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
+  '/api/internal/collect-feedback': typeof ApiInternalCollectFeedbackRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/img': typeof ApiPublicImgRoute
   '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
@@ -1158,6 +1186,7 @@ export interface FileRoutesById {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
   '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
+  '/api/public/hooks/agent-maintenance': typeof ApiPublicHooksAgentMaintenanceRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
   '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
   '/api/public/hooks/collect-social-stats': typeof ApiPublicHooksCollectSocialStatsRoute
@@ -1194,6 +1223,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/admin-agent-insights'
     | '/admin-agents'
     | '/admin-ai-approvals'
     | '/admin-ai-catalog'
@@ -1278,6 +1308,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/product/$id'
     | '/test/features'
+    | '/api/internal/collect-feedback'
     | '/api/public/health'
     | '/api/public/img'
     | '/api/public/incident-check'
@@ -1287,6 +1318,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/api/public/health/full-check'
     | '/api/public/health/quick-check'
+    | '/api/public/hooks/agent-maintenance'
     | '/api/public/hooks/alerts-worker'
     | '/api/public/hooks/chronic-refills'
     | '/api/public/hooks/collect-social-stats'
@@ -1321,6 +1353,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/admin-agent-insights'
     | '/admin-agents'
     | '/admin-ai-approvals'
     | '/admin-ai-catalog'
@@ -1405,6 +1438,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/product/$id'
     | '/test/features'
+    | '/api/internal/collect-feedback'
     | '/api/public/health'
     | '/api/public/img'
     | '/api/public/incident-check'
@@ -1414,6 +1448,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/api/public/health/full-check'
     | '/api/public/health/quick-check'
+    | '/api/public/hooks/agent-maintenance'
     | '/api/public/hooks/alerts-worker'
     | '/api/public/hooks/chronic-refills'
     | '/api/public/hooks/collect-social-stats'
@@ -1449,6 +1484,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/admin'
+    | '/admin-agent-insights'
     | '/admin-agents'
     | '/admin-ai-approvals'
     | '/admin-ai-catalog'
@@ -1533,6 +1569,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/product/$id'
     | '/test/features'
+    | '/api/internal/collect-feedback'
     | '/api/public/health'
     | '/api/public/img'
     | '/api/public/incident-check'
@@ -1542,6 +1579,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/api/public/health/full-check'
     | '/api/public/health/quick-check'
+    | '/api/public/hooks/agent-maintenance'
     | '/api/public/hooks/alerts-worker'
     | '/api/public/hooks/chronic-refills'
     | '/api/public/hooks/collect-social-stats'
@@ -1578,6 +1616,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AdminRoute: typeof AdminRoute
+  AdminAgentInsightsRoute: typeof AdminAgentInsightsRoute
   AdminAgentsRoute: typeof AdminAgentsRoute
   AdminAiApprovalsRoute: typeof AdminAiApprovalsRoute
   AdminAiCatalogRoute: typeof AdminAiCatalogRoute
@@ -1654,6 +1693,7 @@ export interface RootRouteChildren {
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ProductIdRoute: typeof ProductIdRoute
   TestFeaturesRoute: typeof TestFeaturesRoute
+  ApiInternalCollectFeedbackRoute: typeof ApiInternalCollectFeedbackRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRouteWithChildren
   ApiPublicImgRoute: typeof ApiPublicImgRoute
   ApiPublicIncidentCheckRoute: typeof ApiPublicIncidentCheckRoute
@@ -1661,6 +1701,7 @@ export interface RootRouteChildren {
   ApiPublicUptimeWebhookRoute: typeof ApiPublicUptimeWebhookRoute
   ApiPublicWhatsappWebhookRoute: typeof ApiPublicWhatsappWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicHooksAgentMaintenanceRoute: typeof ApiPublicHooksAgentMaintenanceRoute
   ApiPublicHooksAlertsWorkerRoute: typeof ApiPublicHooksAlertsWorkerRoute
   ApiPublicHooksChronicRefillsRoute: typeof ApiPublicHooksChronicRefillsRoute
   ApiPublicHooksCollectSocialStatsRoute: typeof ApiPublicHooksCollectSocialStatsRoute
@@ -2206,6 +2247,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAgentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin-agent-insights': {
+      id: '/admin-agent-insights'
+      path: '/admin-agent-insights'
+      fullPath: '/admin-agent-insights'
+      preLoaderRoute: typeof AdminAgentInsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -2351,6 +2399,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/health'
       fullPath: '/api/public/health'
       preLoaderRoute: typeof ApiPublicHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/internal/collect-feedback': {
+      id: '/api/internal/collect-feedback'
+      path: '/api/internal/collect-feedback'
+      fullPath: '/api/internal/collect-feedback'
+      preLoaderRoute: typeof ApiInternalCollectFeedbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lovable/email/transactional/send': {
@@ -2500,6 +2555,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksAlertsWorkerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/agent-maintenance': {
+      id: '/api/public/hooks/agent-maintenance'
+      path: '/api/public/hooks/agent-maintenance'
+      fullPath: '/api/public/hooks/agent-maintenance'
+      preLoaderRoute: typeof ApiPublicHooksAgentMaintenanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/health/quick-check': {
       id: '/api/public/health/quick-check'
       path: '/quick-check'
@@ -2636,6 +2698,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AdminRoute: AdminRoute,
+  AdminAgentInsightsRoute: AdminAgentInsightsRoute,
   AdminAgentsRoute: AdminAgentsRoute,
   AdminAiApprovalsRoute: AdminAiApprovalsRoute,
   AdminAiCatalogRoute: AdminAiCatalogRoute,
@@ -2712,6 +2775,7 @@ const rootRouteChildren: RootRouteChildren = {
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ProductIdRoute: ProductIdRoute,
   TestFeaturesRoute: TestFeaturesRoute,
+  ApiInternalCollectFeedbackRoute: ApiInternalCollectFeedbackRoute,
   ApiPublicHealthRoute: ApiPublicHealthRouteWithChildren,
   ApiPublicImgRoute: ApiPublicImgRoute,
   ApiPublicIncidentCheckRoute: ApiPublicIncidentCheckRoute,
@@ -2719,6 +2783,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicUptimeWebhookRoute: ApiPublicUptimeWebhookRoute,
   ApiPublicWhatsappWebhookRoute: ApiPublicWhatsappWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicHooksAgentMaintenanceRoute: ApiPublicHooksAgentMaintenanceRoute,
   ApiPublicHooksAlertsWorkerRoute: ApiPublicHooksAlertsWorkerRoute,
   ApiPublicHooksChronicRefillsRoute: ApiPublicHooksChronicRefillsRoute,
   ApiPublicHooksCollectSocialStatsRoute: ApiPublicHooksCollectSocialStatsRoute,
