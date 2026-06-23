@@ -33,6 +33,10 @@ import {
   ShieldAlert,
   ChevronDown,
   AlertCircle,
+  Stethoscope,
+  CheckCircle2,
+  XCircle,
+  MinusCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
