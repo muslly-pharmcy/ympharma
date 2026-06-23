@@ -1,8 +1,36 @@
 // Daily cron endpoint: generates posts via DeepSeek, inserts them, then
 // forwards each one to the n8n webhook. Protected by the project's shared
 // CRON_SECRET (x-cron-secret header) — `/api/public/*` bypasses platform auth.
+//
+// F-02: bounded concurrency (max 3) for publish — avoids 30s Worker wall-time.
+// F-07: drafts inserted one-by-one to guarantee correct decision↔post linkage
+//       (no positional-array assumption).
 import { createFileRoute } from "@tanstack/react-router";
 import { verifyCronSecret } from "@/lib/cron-auth.server";
+
+const PUBLISH_CONCURRENCY = 3;
+
+async function runWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  worker: (item: T) => Promise<R>,
+): Promise<Array<{ status: "fulfilled" | "rejected"; value?: R; reason?: unknown }>> {
+  const results: Array<{ status: "fulfilled" | "rejected"; value?: R; reason?: unknown }> = new Array(items.length);
+  let cursor = 0;
+  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (true) {
+      const i = cursor++;
+      if (i >= items.length) return;
+      try {
+        results[i] = { status: "fulfilled", value: await worker(items[i]) };
+      } catch (e) {
+        results[i] = { status: "rejected", reason: e };
+      }
+    }
+  });
+  await Promise.all(runners);
+  return results;
+}
 
 export const Route = createFileRoute("/api/public/hooks/run-social-posts")({
   server: {
@@ -21,30 +49,45 @@ export const Route = createFileRoute("/api/public/hooks/run-social-posts")({
             return Response.json({ ok: true, generated: 0, published: 0, failed: 0 });
           }
 
-          const { data: inserted, error } = await supabaseAdmin
-            .from("social_posts")
-            .insert(drafts)
-            .select("id");
-          if (error) throw new Error(error.message);
-
-          // Link agent_decisions telemetry rows to their inserted post IDs
-          if (inserted && decisions.length > 0) {
-            const rows = decisions.map((d, i) => ({ ...d, post_id: inserted[i]?.id ?? null })) as any;
-            const { error: telErr } = await supabaseAdmin.from("agent_decisions").insert(rows);
-            if (telErr) console.warn("[cron] telemetry insert failed:", telErr.message);
+          // F-07: insert per-draft so the returned id can be paired with its
+          // exact decision record, with no reliance on RETURNING ordering.
+          const insertedIds: string[] = [];
+          for (let i = 0; i < drafts.length; i++) {
+            const { data, error } = await supabaseAdmin
+              .from("social_posts")
+              .insert(drafts[i])
+              .select("id")
+              .single();
+            if (error || !data) {
+              console.error("[cron] draft insert failed:", error?.message, drafts[i].platform);
+              continue;
+            }
+            insertedIds.push(data.id);
+            const decision = decisions[i];
+            if (decision) {
+              const { error: telErr } = await supabaseAdmin
+                .from("agent_decisions")
+                .insert({ ...decision, post_id: data.id } as any);
+              if (telErr) console.warn("[cron] telemetry insert failed:", telErr.message);
+            }
           }
+
+          // F-02: bounded concurrency keeps total wall-time under Worker limits.
+          const results = await runWithConcurrency(insertedIds, PUBLISH_CONCURRENCY, (id) =>
+            publishPostById(id, "cron"),
+          );
 
           let published = 0;
           let failed = 0;
-          for (const row of inserted ?? []) {
-            const r = await publishPostById(row.id);
-            if (r.ok) published += 1;
+          for (const r of results) {
+            if (r.status === "fulfilled" && r.value?.ok) published += 1;
             else failed += 1;
           }
 
           return Response.json({
             ok: true,
             generated: drafts.length,
+            inserted: insertedIds.length,
             published,
             failed,
           });
