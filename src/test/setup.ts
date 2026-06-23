@@ -1,5 +1,7 @@
 import "@testing-library/jest-dom/vitest";
-import { vi } from "vitest";
+import { afterAll, afterEach, beforeAll, vi } from "vitest";
+import { cleanup } from "@testing-library/react";
+import { server } from "./mocks/server";
 
 // jsdom doesn't implement these — virtualizer & image cache use them.
 if (typeof window !== "undefined") {
@@ -18,3 +20,12 @@ if (!globalThis.fetch || (globalThis.fetch as any).__mocked !== true) {
   (f as any).__mocked = true;
   globalThis.fetch = f as any;
 }
+
+// MSW lifecycle. `onUnhandledRequest: "bypass"` keeps legacy tests working —
+// only requests with explicit handlers are intercepted.
+beforeAll(() => server.listen({ onUnhandledRequest: "bypass" }));
+afterEach(() => {
+  server.resetHandlers();
+  cleanup();
+});
+afterAll(() => server.close());
