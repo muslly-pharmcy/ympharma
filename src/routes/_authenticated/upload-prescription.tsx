@@ -35,11 +35,55 @@ const STATUS_META: Record<
   expired: { label: "منتهية", cls: "bg-muted text-muted-foreground border-muted", icon: XCircle },
 };
 
+type StepKey = "uploaded" | "analyzed" | "review" | "decided";
+type StepState = "done" | "active" | "pending";
+
+const STEP_ORDER: { key: StepKey; label: string }[] = [
+  { key: "uploaded", label: "تم رفع الصورة" },
+  { key: "analyzed", label: "تم تحليل الوصفة" },
+  { key: "review", label: "تحت مراجعة الصيدلي" },
+  { key: "decided", label: "تم القرار" },
+];
+
+function Stepper({ steps }: { steps: { key: StepKey; label: string; state: StepState; note?: string }[] }) {
+  return (
+    <ol className="space-y-3" aria-label="حالة الطلب">
+      {steps.map((s, i) => {
+        const Icon = s.state === "done" ? CheckCircle2 : s.state === "active" ? Loader2 : Clock;
+        const ring =
+          s.state === "done"
+            ? "bg-emerald-500 text-white border-emerald-500"
+            : s.state === "active"
+              ? "bg-primary text-primary-foreground border-primary"
+              : "bg-muted text-muted-foreground border-border";
+        return (
+          <li key={s.key} className="flex items-start gap-3">
+            <div className={`relative grid size-8 shrink-0 place-items-center rounded-full border ${ring}`}>
+              <Icon className={`size-4 ${s.state === "active" ? "animate-spin" : ""}`} />
+              {i < steps.length - 1 && (
+                <span className="absolute top-8 h-6 w-px bg-border" aria-hidden />
+              )}
+            </div>
+            <div className="pt-1">
+              <p className={`text-sm font-medium ${s.state === "pending" ? "text-muted-foreground" : ""}`}>
+                {s.label}
+              </p>
+              {s.note && <p className="text-xs text-muted-foreground mt-0.5">{s.note}</p>}
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
 function UploadPrescriptionPage() {
   const [file, setFile] = useState<File | null>(null);
   const [note, setNote] = useState("");
   const [approvalId, setApprovalId] = useState<string | null>(null);
   const [liveConnected, setLiveConnected] = useState(false);
+  const [uploadPct, setUploadPct] = useState(0);
+  const [uploadPhase, setUploadPhase] = useState<"idle" | "uploading" | "analyzing">("idle");
   const qc = useQueryClient();
   const submitFn = useServerFn(submitPrescriptionForReview);
   const statusFn = useServerFn(getMyPrescriptionRequest);
@@ -52,19 +96,39 @@ function UploadPrescriptionPage() {
 
       const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
       const path = `uploads/${crypto.randomUUID()}.${ext}`;
-      const { error: upErr } = await supabase.storage
-        .from("prescriptions")
-        .upload(path, file, { contentType: file.type, upsert: false });
-      if (upErr) throw new Error(upErr.message);
 
+      // Simulated progress (Supabase JS upload doesn't expose XHR progress).
+      setUploadPhase("uploading");
+      setUploadPct(5);
+      const tick = setInterval(() => {
+        setUploadPct((p) => (p < 85 ? p + Math.max(1, Math.round((90 - p) / 10)) : p));
+      }, 200);
+
+      try {
+        const { error: upErr } = await supabase.storage
+          .from("prescriptions")
+          .upload(path, file, { contentType: file.type, upsert: false });
+        if (upErr) throw new Error(upErr.message);
+        setUploadPct(95);
+      } finally {
+        clearInterval(tick);
+      }
+
+      setUploadPhase("analyzing");
+      setUploadPct(100);
       const res = await submitFn({ data: { storagePath: path, customerNote: note || undefined } });
       return res;
     },
     onSuccess: (res) => {
       setApprovalId(res.approvalId);
+      setUploadPhase("idle");
       toast.success("تم استلام وصفتك — جارٍ المراجعة");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => {
+      setUploadPhase("idle");
+      setUploadPct(0);
+      toast.error(e.message);
+    },
   });
 
   // Initial fetch (one-shot) — Realtime handles subsequent updates.
@@ -144,6 +208,23 @@ function UploadPrescriptionPage() {
             />
           </label>
 
+          {(uploadPhase !== "idle" || submit.isPending) && (
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-xs">
+                <span>
+                  {uploadPhase === "analyzing" ? "تحليل الوصفة بالذكاء الاصطناعي…" : "جارٍ رفع الصورة…"}
+                </span>
+                <span className="font-mono">{uploadPct}%</span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-muted">
+                <div
+                  className={`h-full transition-all ${uploadPhase === "analyzing" ? "bg-primary animate-pulse" : "bg-primary"}`}
+                  style={{ width: `${uploadPct}%` }}
+                />
+              </div>
+            </div>
+          )}
+
           <Button
             onClick={() => submit.mutate()}
             disabled={!file || submit.isPending}
@@ -179,6 +260,37 @@ function UploadPrescriptionPage() {
               )}
             </div>
           </div>
+
+          {(() => {
+            const decided = req?.status === "approved" || req?.status === "rejected";
+            const medicines = analysis?.medicines ?? [];
+            const hasAnalysis = medicines.length > 0;
+            const stepStates: Record<StepKey, StepState> = {
+              uploaded: "done",
+              analyzed: hasAnalysis || decided ? "done" : "active",
+              review: decided ? "done" : hasAnalysis ? "active" : "pending",
+              decided: decided ? "done" : "pending",
+            };
+            const stepNotes: Partial<Record<StepKey, string>> = {
+              analyzed: hasAnalysis
+                ? `${medicines.length} دواء تم استخراجه`
+                : "بانتظار نتيجة الذكاء الاصطناعي",
+              review: decided
+                ? `${req?.status === "approved" ? "تمت الموافقة" : "تم الرفض"} بتاريخ ${req?.decided_at ? new Date(req.decided_at as string).toLocaleString("ar") : ""}`
+                : "الصيدلي سيراجع الطلب قريباً",
+              decided: decided && req?.decision_note ? req.decision_note : undefined,
+            };
+            const steps = STEP_ORDER.map((s) => ({
+              ...s,
+              state: stepStates[s.key],
+              note: stepNotes[s.key],
+            }));
+            return (
+              <div className="rounded-lg border bg-card/60 p-4">
+                <Stepper steps={steps} />
+              </div>
+            );
+          })()}
 
           {req?.decision_note && (
             <div className="rounded-md bg-muted p-3 text-sm">

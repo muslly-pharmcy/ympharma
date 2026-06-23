@@ -33,6 +33,10 @@ export type RxPending = {
   createdAt: number;
   lastError?: string;
   attempts: number;
+  /** Number of times the user has been handed off to WhatsApp. */
+  waAttempts?: number;
+  /** Timestamp (ms) of the most recent WhatsApp open. */
+  waLastSentAt?: number;
 };
 
 function safeGet<T>(key: string): T | null {

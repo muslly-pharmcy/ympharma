@@ -125,36 +125,75 @@ export const defaultProductLookup: ProductLookupFn = async (name) => {
   return (data ?? null) as ProductLookupResult;
 };
 
+/** Best-effort error log so failures surface in admin tools without crashing. */
+async function logExtractionFailure(imageUrl: string, attempts: number, err: unknown) {
+  try {
+    const message =
+      err instanceof Error ? err.message : typeof err === "string" ? err : "unknown";
+    const stack = err instanceof Error ? (err.stack ?? null) : null;
+    await supabaseAdmin.from("error_logs").insert({
+      level: "error",
+      source: "prescription-intelligence",
+      message: `Gemini extraction failed after ${attempts} attempt(s): ${message.slice(0, 500)}`,
+      stack: stack ? stack.slice(0, 4000) : null,
+      extra: { imageUrl: imageUrl.slice(0, 500), attempts } as never,
+    } as never);
+  } catch {
+    /* swallow — logging must never break the caller */
+  }
+}
+
 export async function analyzePrescriptionImage(
   imageUrl: string,
+  opts: { maxAttempts?: number } = {},
 ): Promise<PrescriptionAnalysisResult> {
   const apiKey = process.env.LOVABLE_API_KEY;
   if (!apiKey) throw new Error("LOVABLE_API_KEY missing");
 
   const gateway = createLovableAiGatewayProvider(apiKey);
   const model = gateway("google/gemini-3-flash-preview");
+  const maxAttempts = Math.max(1, Math.min(opts.maxAttempts ?? 3, 5));
 
-  let extracted: z.infer<typeof ExtractedSchema>;
-  try {
-    const { text } = await generateText({
-      model,
-      system: SYSTEM,
-      messages: [
-        {
-          role: "user",
-          content: [
-            { type: "text", text: "حلّل هذه الوصفة الطبية واستخرج الأدوية بصيغة JSON المحددة." },
-            { type: "image", image: new URL(imageUrl) },
-          ],
-        },
-      ],
-    });
-    extracted = ExtractedSchema.parse(safeParseJson(text));
-  } catch (err) {
-    console.error("[prescription-intel] AI extraction failed", err);
+  let extracted: z.infer<typeof ExtractedSchema> | null = null;
+  let lastErr: unknown = null;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const { text } = await generateText({
+        model,
+        system: SYSTEM,
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: "حلّل هذه الوصفة الطبية واستخرج الأدوية بصيغة JSON المحددة." },
+              { type: "image", image: new URL(imageUrl) },
+            ],
+          },
+        ],
+      });
+      extracted = ExtractedSchema.parse(safeParseJson(text));
+      lastErr = null;
+      break;
+    } catch (err) {
+      lastErr = err;
+      console.error(
+        `[prescription-intel] AI extraction attempt ${attempt}/${maxAttempts} failed`,
+        err,
+      );
+      if (attempt < maxAttempts) {
+        // Exponential backoff with jitter: 500ms, 1.2s, 2.4s ...
+        const delay = 500 * 2 ** (attempt - 1) + Math.floor(Math.random() * 250);
+        await new Promise((r) => setTimeout(r, delay));
+      }
+    }
+  }
+
+  if (!extracted) {
+    await logExtractionFailure(imageUrl, maxAttempts, lastErr);
     return {
       isValid: false,
-      notes: "فشل تحليل الصورة آلياً. ستتم المراجعة يدوياً.",
+      notes: "فشل تحليل الصورة آلياً بعد عدة محاولات. ستتم المراجعة يدوياً.",
       medicines: [],
       missingMedicines: [],
     };
