@@ -125,6 +125,7 @@ import { Route as ApiPublicHooksCustomerRxNotifyRouteImport } from './routes/api
 import { Route as ApiPublicHooksCollectSocialStatsRouteImport } from './routes/api/public/hooks/collect-social-stats'
 import { Route as ApiPublicHooksChronicRefillsRouteImport } from './routes/api/public/hooks/chronic-refills'
 import { Route as ApiPublicHooksAlertsWorkerRouteImport } from './routes/api/public/hooks/alerts-worker'
+import { Route as ApiPublicHooksAgentMaintenanceRouteImport } from './routes/api/public/hooks/agent-maintenance'
 import { Route as ApiPublicHealthQuickCheckRouteImport } from './routes/api/public/health.quick-check'
 import { Route as ApiPublicHealthFullCheckRouteImport } from './routes/api/public/health.full-check'
 import { Route as ApiPublicHooksAgentsWhatsappRouteImport } from './routes/api/public/hooks/agents/whatsapp'
@@ -750,6 +751,12 @@ const ApiPublicHooksAlertsWorkerRoute =
     path: '/api/public/hooks/alerts-worker',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksAgentMaintenanceRoute =
+  ApiPublicHooksAgentMaintenanceRouteImport.update({
+    id: '/api/public/hooks/agent-maintenance',
+    path: '/api/public/hooks/agent-maintenance',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHealthQuickCheckRoute =
   ApiPublicHealthQuickCheckRouteImport.update({
     id: '/quick-check',
@@ -910,6 +917,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
   '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
+  '/api/public/hooks/agent-maintenance': typeof ApiPublicHooksAgentMaintenanceRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
   '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
   '/api/public/hooks/collect-social-stats': typeof ApiPublicHooksCollectSocialStatsRoute
@@ -1038,6 +1046,7 @@ export interface FileRoutesByTo {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
   '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
+  '/api/public/hooks/agent-maintenance': typeof ApiPublicHooksAgentMaintenanceRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
   '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
   '/api/public/hooks/collect-social-stats': typeof ApiPublicHooksCollectSocialStatsRoute
@@ -1168,6 +1177,7 @@ export interface FileRoutesById {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
   '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
+  '/api/public/hooks/agent-maintenance': typeof ApiPublicHooksAgentMaintenanceRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
   '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
   '/api/public/hooks/collect-social-stats': typeof ApiPublicHooksCollectSocialStatsRoute
@@ -1298,6 +1308,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/api/public/health/full-check'
     | '/api/public/health/quick-check'
+    | '/api/public/hooks/agent-maintenance'
     | '/api/public/hooks/alerts-worker'
     | '/api/public/hooks/chronic-refills'
     | '/api/public/hooks/collect-social-stats'
@@ -1426,6 +1437,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/api/public/health/full-check'
     | '/api/public/health/quick-check'
+    | '/api/public/hooks/agent-maintenance'
     | '/api/public/hooks/alerts-worker'
     | '/api/public/hooks/chronic-refills'
     | '/api/public/hooks/collect-social-stats'
@@ -1555,6 +1567,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/api/public/health/full-check'
     | '/api/public/health/quick-check'
+    | '/api/public/hooks/agent-maintenance'
     | '/api/public/hooks/alerts-worker'
     | '/api/public/hooks/chronic-refills'
     | '/api/public/hooks/collect-social-stats'
@@ -1675,6 +1688,7 @@ export interface RootRouteChildren {
   ApiPublicUptimeWebhookRoute: typeof ApiPublicUptimeWebhookRoute
   ApiPublicWhatsappWebhookRoute: typeof ApiPublicWhatsappWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicHooksAgentMaintenanceRoute: typeof ApiPublicHooksAgentMaintenanceRoute
   ApiPublicHooksAlertsWorkerRoute: typeof ApiPublicHooksAlertsWorkerRoute
   ApiPublicHooksChronicRefillsRoute: typeof ApiPublicHooksChronicRefillsRoute
   ApiPublicHooksCollectSocialStatsRoute: typeof ApiPublicHooksCollectSocialStatsRoute
@@ -2521,6 +2535,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksAlertsWorkerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/agent-maintenance': {
+      id: '/api/public/hooks/agent-maintenance'
+      path: '/api/public/hooks/agent-maintenance'
+      fullPath: '/api/public/hooks/agent-maintenance'
+      preLoaderRoute: typeof ApiPublicHooksAgentMaintenanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/health/quick-check': {
       id: '/api/public/health/quick-check'
       path: '/quick-check'
@@ -2741,6 +2762,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicUptimeWebhookRoute: ApiPublicUptimeWebhookRoute,
   ApiPublicWhatsappWebhookRoute: ApiPublicWhatsappWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicHooksAgentMaintenanceRoute: ApiPublicHooksAgentMaintenanceRoute,
   ApiPublicHooksAlertsWorkerRoute: ApiPublicHooksAlertsWorkerRoute,
   ApiPublicHooksChronicRefillsRoute: ApiPublicHooksChronicRefillsRoute,
   ApiPublicHooksCollectSocialStatsRoute: ApiPublicHooksCollectSocialStatsRoute,
