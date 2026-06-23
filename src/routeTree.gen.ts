@@ -119,6 +119,7 @@ import { Route as ApiPublicHooksRunSocialPostsRouteImport } from './routes/api/p
 import { Route as ApiPublicHooksRunRestockAlertsRouteImport } from './routes/api/public/hooks/run-restock-alerts'
 import { Route as ApiPublicHooksRunReactivationRouteImport } from './routes/api/public/hooks/run-reactivation'
 import { Route as ApiPublicHooksRunLoyaltyReminderRouteImport } from './routes/api/public/hooks/run-loyalty-reminder'
+import { Route as ApiPublicHooksRetryFailedPostsRouteImport } from './routes/api/public/hooks/retry-failed-posts'
 import { Route as ApiPublicHooksPrescriptionExtractRouteImport } from './routes/api/public/hooks/prescription-extract'
 import { Route as ApiPublicHooksNightlyIntelRouteImport } from './routes/api/public/hooks/nightly-intel'
 import { Route as ApiPublicHooksEventConsumerRouteImport } from './routes/api/public/hooks/event-consumer'
@@ -715,6 +716,12 @@ const ApiPublicHooksRunLoyaltyReminderRoute =
     path: '/api/public/hooks/run-loyalty-reminder',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksRetryFailedPostsRoute =
+  ApiPublicHooksRetryFailedPostsRouteImport.update({
+    id: '/api/public/hooks/retry-failed-posts',
+    path: '/api/public/hooks/retry-failed-posts',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksPrescriptionExtractRoute =
   ApiPublicHooksPrescriptionExtractRouteImport.update({
     id: '/api/public/hooks/prescription-extract',
@@ -932,6 +939,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
+  '/api/public/hooks/retry-failed-posts': typeof ApiPublicHooksRetryFailedPostsRoute
   '/api/public/hooks/run-loyalty-reminder': typeof ApiPublicHooksRunLoyaltyReminderRoute
   '/api/public/hooks/run-reactivation': typeof ApiPublicHooksRunReactivationRoute
   '/api/public/hooks/run-restock-alerts': typeof ApiPublicHooksRunRestockAlertsRoute
@@ -1062,6 +1070,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
+  '/api/public/hooks/retry-failed-posts': typeof ApiPublicHooksRetryFailedPostsRoute
   '/api/public/hooks/run-loyalty-reminder': typeof ApiPublicHooksRunLoyaltyReminderRoute
   '/api/public/hooks/run-reactivation': typeof ApiPublicHooksRunReactivationRoute
   '/api/public/hooks/run-restock-alerts': typeof ApiPublicHooksRunRestockAlertsRoute
@@ -1194,6 +1203,7 @@ export interface FileRoutesById {
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
+  '/api/public/hooks/retry-failed-posts': typeof ApiPublicHooksRetryFailedPostsRoute
   '/api/public/hooks/run-loyalty-reminder': typeof ApiPublicHooksRunLoyaltyReminderRoute
   '/api/public/hooks/run-reactivation': typeof ApiPublicHooksRunReactivationRoute
   '/api/public/hooks/run-restock-alerts': typeof ApiPublicHooksRunRestockAlertsRoute
@@ -1326,6 +1336,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/nightly-intel'
     | '/api/public/hooks/prescription-extract'
+    | '/api/public/hooks/retry-failed-posts'
     | '/api/public/hooks/run-loyalty-reminder'
     | '/api/public/hooks/run-reactivation'
     | '/api/public/hooks/run-restock-alerts'
@@ -1456,6 +1467,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/nightly-intel'
     | '/api/public/hooks/prescription-extract'
+    | '/api/public/hooks/retry-failed-posts'
     | '/api/public/hooks/run-loyalty-reminder'
     | '/api/public/hooks/run-reactivation'
     | '/api/public/hooks/run-restock-alerts'
@@ -1587,6 +1599,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/nightly-intel'
     | '/api/public/hooks/prescription-extract'
+    | '/api/public/hooks/retry-failed-posts'
     | '/api/public/hooks/run-loyalty-reminder'
     | '/api/public/hooks/run-reactivation'
     | '/api/public/hooks/run-restock-alerts'
@@ -1709,6 +1722,7 @@ export interface RootRouteChildren {
   ApiPublicHooksEventConsumerRoute: typeof ApiPublicHooksEventConsumerRoute
   ApiPublicHooksNightlyIntelRoute: typeof ApiPublicHooksNightlyIntelRoute
   ApiPublicHooksPrescriptionExtractRoute: typeof ApiPublicHooksPrescriptionExtractRoute
+  ApiPublicHooksRetryFailedPostsRoute: typeof ApiPublicHooksRetryFailedPostsRoute
   ApiPublicHooksRunLoyaltyReminderRoute: typeof ApiPublicHooksRunLoyaltyReminderRoute
   ApiPublicHooksRunReactivationRoute: typeof ApiPublicHooksRunReactivationRoute
   ApiPublicHooksRunRestockAlertsRoute: typeof ApiPublicHooksRunRestockAlertsRoute
@@ -2506,6 +2520,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksRunLoyaltyReminderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/retry-failed-posts': {
+      id: '/api/public/hooks/retry-failed-posts'
+      path: '/api/public/hooks/retry-failed-posts'
+      fullPath: '/api/public/hooks/retry-failed-posts'
+      preLoaderRoute: typeof ApiPublicHooksRetryFailedPostsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/prescription-extract': {
       id: '/api/public/hooks/prescription-extract'
       path: '/api/public/hooks/prescription-extract'
@@ -2792,6 +2813,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksNightlyIntelRoute: ApiPublicHooksNightlyIntelRoute,
   ApiPublicHooksPrescriptionExtractRoute:
     ApiPublicHooksPrescriptionExtractRoute,
+  ApiPublicHooksRetryFailedPostsRoute: ApiPublicHooksRetryFailedPostsRoute,
   ApiPublicHooksRunLoyaltyReminderRoute: ApiPublicHooksRunLoyaltyReminderRoute,
   ApiPublicHooksRunReactivationRoute: ApiPublicHooksRunReactivationRoute,
   ApiPublicHooksRunRestockAlertsRoute: ApiPublicHooksRunRestockAlertsRoute,
