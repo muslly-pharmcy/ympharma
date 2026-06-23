@@ -28,6 +28,7 @@ import { Toaster } from "../components/ui/sonner";
 import { AiChatWidget } from "../components/ai-chat-widget";
 import { SwUpdateBanner } from "../components/sw-update-banner";
 import { ErrorBoundary } from "../components/ErrorBoundary";
+import { InstallPrompt } from "../components/InstallPrompt";
 
 function NotFoundComponent() {
   return (
