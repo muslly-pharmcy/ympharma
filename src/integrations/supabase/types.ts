@@ -220,6 +220,7 @@ export type Database = {
           decision_factors: Json | null
           decision_ms: number | null
           decision_summary: string | null
+          expires_at: string
           fallback_reason: string | null
           fallback_used: boolean
           generation_ms: number | null
@@ -242,6 +243,7 @@ export type Database = {
           decision_factors?: Json | null
           decision_ms?: number | null
           decision_summary?: string | null
+          expires_at?: string
           fallback_reason?: string | null
           fallback_used?: boolean
           generation_ms?: number | null
@@ -264,6 +266,7 @@ export type Database = {
           decision_factors?: Json | null
           decision_ms?: number | null
           decision_summary?: string | null
+          expires_at?: string
           fallback_reason?: string | null
           fallback_used?: boolean
           generation_ms?: number | null
@@ -394,6 +397,56 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_feedback_events: {
+        Row: {
+          comments: number
+          expires_at: string
+          external_id: string | null
+          id: number
+          likes: number
+          platform: string
+          post_id: string | null
+          raw_payload: Json | null
+          received_at: string
+          shares: number
+          views: number
+        }
+        Insert: {
+          comments?: number
+          expires_at?: string
+          external_id?: string | null
+          id?: number
+          likes?: number
+          platform: string
+          post_id?: string | null
+          raw_payload?: Json | null
+          received_at?: string
+          shares?: number
+          views?: number
+        }
+        Update: {
+          comments?: number
+          expires_at?: string
+          external_id?: string | null
+          id?: number
+          likes?: number
+          platform?: string
+          post_id?: string | null
+          raw_payload?: Json | null
+          received_at?: string
+          shares?: number
+          views?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_feedback_events_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "social_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_kpis: {
         Row: {
           agent_name: string
@@ -421,6 +474,45 @@ export type Database = {
           id?: string
           metric?: string
           score?: number | null
+        }
+        Relationships: []
+      }
+      agent_performance_insights: {
+        Row: {
+          avg_engagement: number | null
+          computed_at: string
+          id: number
+          notes: string | null
+          platform: string | null
+          recommendations: Json
+          sample_size: number
+          top_tone: string | null
+          top_variant_id: string | null
+          window_days: number
+        }
+        Insert: {
+          avg_engagement?: number | null
+          computed_at?: string
+          id?: number
+          notes?: string | null
+          platform?: string | null
+          recommendations?: Json
+          sample_size: number
+          top_tone?: string | null
+          top_variant_id?: string | null
+          window_days?: number
+        }
+        Update: {
+          avg_engagement?: number | null
+          computed_at?: string
+          id?: number
+          notes?: string | null
+          platform?: string | null
+          recommendations?: Json
+          sample_size?: number
+          top_tone?: string | null
+          top_variant_id?: string | null
+          window_days?: number
         }
         Relationships: []
       }
@@ -924,6 +1016,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      confidence_calibration_log: {
+        Row: {
+          computed_at: string
+          correlation: number | null
+          drift: number | null
+          id: number
+          mean_confidence: number | null
+          mean_engagement: number | null
+          notes: string | null
+          sample_size: number
+          severity: string
+          window_days: number
+        }
+        Insert: {
+          computed_at?: string
+          correlation?: number | null
+          drift?: number | null
+          id?: number
+          mean_confidence?: number | null
+          mean_engagement?: number | null
+          notes?: string | null
+          sample_size: number
+          severity?: string
+          window_days?: number
+        }
+        Update: {
+          computed_at?: string
+          correlation?: number | null
+          drift?: number | null
+          id?: number
+          mean_confidence?: number | null
+          mean_engagement?: number | null
+          notes?: string | null
+          sample_size?: number
+          severity?: string
+          window_days?: number
+        }
+        Relationships: []
       }
       customer_channels: {
         Row: {
@@ -3202,12 +3333,15 @@ export type Database = {
           cta: string | null
           error_message: string | null
           external_id: string | null
+          generation_version: string | null
           hashtags: string[]
           id: string
           last_attempt_at: string | null
+          model_version: string | null
           platform: string
           product_id: string | null
           published_at: string | null
+          ranking_version: string | null
           scheduled_for: string | null
           status: string
           updated_at: string
@@ -3221,12 +3355,15 @@ export type Database = {
           cta?: string | null
           error_message?: string | null
           external_id?: string | null
+          generation_version?: string | null
           hashtags?: string[]
           id?: string
           last_attempt_at?: string | null
+          model_version?: string | null
           platform: string
           product_id?: string | null
           published_at?: string | null
+          ranking_version?: string | null
           scheduled_for?: string | null
           status?: string
           updated_at?: string
@@ -3240,12 +3377,15 @@ export type Database = {
           cta?: string | null
           error_message?: string | null
           external_id?: string | null
+          generation_version?: string | null
           hashtags?: string[]
           id?: string
           last_attempt_at?: string | null
+          model_version?: string | null
           platform?: string
           product_id?: string | null
           published_at?: string | null
+          ranking_version?: string | null
           scheduled_for?: string | null
           status?: string
           updated_at?: string
@@ -4424,6 +4564,13 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      clean_old_telemetry: {
+        Args: never
+        Returns: {
+          deleted_decisions: number
+          deleted_feedback: number
+        }[]
       }
       commit_transfer_receipt: {
         Args: { _transfer_id: string }
