@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getExecutiveDashboard } from "@/lib/admin-dashboard.functions";
+import { RefreshAdminSession } from "@/components/admin/RefreshAdminSession";
 import {
   runReactivationCampaign,
   runLoyaltyReminderCampaign,
