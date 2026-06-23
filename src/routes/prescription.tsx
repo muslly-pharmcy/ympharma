@@ -293,7 +293,12 @@ function PrescriptionPage() {
       }
 
       // Mark as awaiting-whatsapp so the recovery banner can re-open WA if needed.
-      const wa: RxPending = { ...pendingEntry, stage: "awaiting-whatsapp" };
+      const wa: RxPending = {
+        ...pendingEntry,
+        stage: "awaiting-whatsapp",
+        waAttempts: 1,
+        waLastSentAt: Date.now(),
+      };
       savePending(wa);
       setPending(wa);
 
