@@ -1,39 +1,135 @@
 import { useRef, Suspense, useEffect, useState, useMemo } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Float, useTexture, Stars, Sparkles } from "@react-three/drei";
-import { EffectComposer, Bloom } from "@react-three/postprocessing";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import {
+  OrbitControls,
+  Float,
+  useTexture,
+  Stars,
+  Sparkles,
+  MeshReflectorMaterial,
+} from "@react-three/drei";
+import { EffectComposer, Bloom, ChromaticAberration, Vignette } from "@react-three/postprocessing";
+import { BlendFunction } from "postprocessing";
 import * as THREE from "three";
 import { Pause, Play } from "lucide-react";
 import logoAsset from "@/assets/almosly-logo.png.asset.json";
 
-function LogoMesh({ logoUrl, animate }: { logoUrl: string; animate: boolean }) {
+// ============================================================
+// Logo plane with light-sweep + parallax + micro-bounce
+// ============================================================
+function LogoMesh({
+  logoUrl,
+  animate,
+  isLow,
+}: {
+  logoUrl: string;
+  animate: boolean;
+  isLow: boolean;
+}) {
+  const groupRef = useRef<THREE.Group>(null);
   const meshRef = useRef<THREE.Mesh>(null);
+  const sweepRef = useRef<THREE.Mesh>(null);
   const texture = useTexture(logoUrl);
+  const { mouse, viewport } = useThree();
 
-  useFrame((state) => {
-    if (!meshRef.current || !animate) return;
-    meshRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.6) * 0.12;
+  useFrame((state, delta) => {
+    const t = state.clock.elapsedTime;
+
+    if (groupRef.current) {
+      // Parallax follow mouse
+      const targetX = (mouse.x * viewport.width) / 40;
+      const targetY = (mouse.y * viewport.height) / 40;
+      groupRef.current.position.x += (targetX - groupRef.current.position.x) * 0.05;
+      groupRef.current.position.y += (targetY - groupRef.current.position.y) * 0.05;
+    }
+
+    if (meshRef.current && animate) {
+      // Floating + micro-bounce
+      meshRef.current.position.y = Math.sin(t * 0.6) * 0.12;
+      meshRef.current.rotation.z = Math.sin(t * 0.4) * 0.02;
+    }
+
+    if (sweepRef.current && animate) {
+      // Light sweep crosses left → right and loops
+      const period = 4;
+      const phase = (t % period) / period; // 0..1
+      sweepRef.current.position.x = -2.4 + phase * 4.8;
+      const mat = sweepRef.current.material as THREE.MeshBasicMaterial;
+      mat.opacity = Math.sin(phase * Math.PI) * 0.55;
+    }
   });
 
   return (
-    <Float speed={animate ? 1.2 : 0} rotationIntensity={animate ? 0.25 : 0} floatIntensity={animate ? 0.6 : 0}>
-      <mesh ref={meshRef} castShadow>
-        <planeGeometry args={[3.2, 3.2]} />
-        <meshStandardMaterial
-          map={texture}
-          transparent
-          side={THREE.DoubleSide}
-          emissive={new THREE.Color("#14b8a6")}
-          emissiveIntensity={0.35}
-          emissiveMap={texture}
-          metalness={0.4}
-          roughness={0.25}
-        />
-      </mesh>
-    </Float>
+    <group ref={groupRef}>
+      <Float speed={animate ? 1.2 : 0} rotationIntensity={animate ? 0.2 : 0} floatIntensity={animate ? 0.5 : 0}>
+        <mesh ref={meshRef} castShadow>
+          <planeGeometry args={[3.2, 3.2]} />
+          <meshStandardMaterial
+            map={texture}
+            transparent
+            side={THREE.DoubleSide}
+            emissive={new THREE.Color("#14b8a6")}
+            emissiveIntensity={0.55}
+            emissiveMap={texture}
+            metalness={0.5}
+            roughness={0.2}
+          />
+        </mesh>
+
+        {/* Light sweep — a soft white bar crossing the logo */}
+        {!isLow && (
+          <mesh ref={sweepRef} position={[0, 0, 0.02]}>
+            <planeGeometry args={[0.45, 3.6]} />
+            <meshBasicMaterial
+              color="#ffffff"
+              transparent
+              opacity={0}
+              blending={THREE.AdditiveBlending}
+              depthWrite={false}
+            />
+          </mesh>
+        )}
+
+        {/* Backlight glow disc behind the logo */}
+        <mesh position={[0, 0, -0.3]}>
+          <circleGeometry args={[2.2, 64]} />
+          <meshBasicMaterial
+            color="#0ea5a4"
+            transparent
+            opacity={0.35}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+      </Float>
+    </group>
   );
 }
 
+// ============================================================
+// Glass reflective floor (skipped on low-tier devices)
+// ============================================================
+function GlassFloor() {
+  return (
+    <mesh position={[0, -2.1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <planeGeometry args={[14, 14]} />
+      <MeshReflectorMaterial
+        resolution={512}
+        mirror={0.45}
+        mixBlur={8}
+        mixStrength={1.2}
+        blur={[300, 100]}
+        color="#0f172a"
+        metalness={0.85}
+        roughness={0.6}
+      />
+    </mesh>
+  );
+}
+
+// ============================================================
+// Helpers
+// ============================================================
 function detectPerformance(): "low" | "high" {
   if (typeof navigator === "undefined") return "high";
   const mem = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
@@ -95,10 +191,7 @@ export function Logo3D({ logoUrl = logoAsset.url, className = "" }: Logo3DProps)
     </div>
   );
 
-  // SSR / pre-hydration: render static logo (good for SEO & first paint)
   if (!mounted) return staticFallback;
-
-  // WebGL unavailable: keep static fallback
   if (!webglOk) return staticFallback;
 
   return (
@@ -106,12 +199,23 @@ export function Logo3D({ logoUrl = logoAsset.url, className = "" }: Logo3DProps)
       dir="ltr"
       className={`relative mx-auto w-full max-w-3xl overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-teal-950 to-slate-900 shadow-elevated ring-1 ring-white/10 ${className}`}
     >
-      <div className="aspect-[16/10] sm:aspect-[16/8] w-full touch-none">
+      {/* CSS atmospheric fog layer behind the canvas */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-70"
+        style={{
+          background:
+            "radial-gradient(ellipse at 30% 20%, rgba(45,212,191,0.25), transparent 55%), radial-gradient(ellipse at 70% 80%, rgba(250,204,21,0.12), transparent 60%)",
+        }}
+      />
+
+      <div className="relative aspect-[16/10] sm:aspect-[16/8] w-full touch-none">
         <Canvas
-          camera={{ position: [0, 0, 5], fov: 45 }}
+          camera={{ position: [0, 0.4, 5], fov: 45 }}
           dpr={isLow ? [1, 1.25] : [1, 2]}
           gl={{ antialias: !isLow, alpha: true, powerPreference: "high-performance" }}
-          onCreated={({ gl }) => {
+          onCreated={({ gl, scene }) => {
+            scene.fog = new THREE.FogExp2(0x0b1220, 0.08);
             gl.domElement.addEventListener("webglcontextlost", (e) => {
               e.preventDefault();
               setWebglOk(false);
@@ -119,36 +223,53 @@ export function Logo3D({ logoUrl = logoAsset.url, className = "" }: Logo3DProps)
           }}
         >
           <Suspense fallback={null}>
-            <ambientLight intensity={0.6} />
-            <directionalLight position={[5, 5, 5]} intensity={1.2} />
-            <pointLight position={[-4, -2, -3]} intensity={0.8} color="#14b8a6" />
-            <pointLight position={[4, 3, 2]} intensity={0.6} color="#22d3ee" />
+            {/* Advanced lighting */}
+            <ambientLight intensity={0.55} />
+            <directionalLight position={[5, 5, 5]} intensity={1.2} castShadow />
+            <pointLight position={[-4, -2, -3]} intensity={1.0} color="#14b8a6" />
+            <pointLight position={[4, 3, 2]} intensity={0.8} color="#22d3ee" />
+            <pointLight position={[0, -3, 2]} intensity={0.6} color="#facc15" />
+            <spotLight position={[0, 6, 4]} angle={0.5} penumbra={1} intensity={0.8} color="#ffffff" />
 
-            <LogoMesh logoUrl={logoUrl} animate={animate} />
+            <LogoMesh logoUrl={logoUrl} animate={animate} isLow={isLow} />
+
+            {/* Golden sparkles around the logo */}
+            <Sparkles
+              count={isLow ? 15 : 50}
+              scale={[6, 4, 4]}
+              size={isLow ? 3 : 5}
+              speed={animate ? 0.5 : 0}
+              color="#facc15"
+              opacity={0.9}
+            />
+
+            {/* Cool teal sparkles for depth */}
+            <Sparkles
+              count={isLow ? 15 : 40}
+              scale={[8, 6, 6]}
+              size={2}
+              speed={animate ? 0.3 : 0}
+              color="#5eead4"
+            />
 
             <Stars
               radius={50}
               depth={50}
-              count={isLow ? 350 : 1200}
+              count={isLow ? 300 : 1000}
               factor={3}
               saturation={0}
               fade
               speed={animate ? 1 : 0}
             />
-            <Sparkles
-              count={isLow ? 20 : 60}
-              scale={8}
-              size={3}
-              speed={animate ? 0.4 : 0}
-              color="#5eead4"
-            />
+
+            {!isLow && <GlassFloor />}
 
             <OrbitControls
               enableZoom={false}
               enablePan={false}
               enableRotate
               autoRotate={animate}
-              autoRotateSpeed={0.8}
+              autoRotateSpeed={0.6}
               maxPolarAngle={Math.PI / 1.8}
               minPolarAngle={Math.PI / 2.6}
               rotateSpeed={0.8}
@@ -156,11 +277,18 @@ export function Logo3D({ logoUrl = logoAsset.url, className = "" }: Logo3DProps)
 
             <EffectComposer enabled={!isLow}>
               <Bloom
-                intensity={isLow ? 0.3 : 0.9}
-                luminanceThreshold={0.15}
+                intensity={1.1}
+                luminanceThreshold={0.12}
                 luminanceSmoothing={0.9}
                 mipmapBlur
               />
+              <ChromaticAberration
+                offset={new THREE.Vector2(0.0008, 0.0008)}
+                radialModulation={false}
+                modulationOffset={0}
+                blendFunction={BlendFunction.NORMAL}
+              />
+              <Vignette eskil={false} offset={0.2} darkness={0.6} />
             </EffectComposer>
           </Suspense>
         </Canvas>
@@ -171,14 +299,14 @@ export function Logo3D({ logoUrl = logoAsset.url, className = "" }: Logo3DProps)
         onClick={() => setAnimate((v) => !v)}
         aria-label={animate ? "إيقاف الحركة" : "تشغيل الحركة"}
         aria-pressed={!animate}
-        className="absolute end-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-bold text-white ring-1 ring-white/20 backdrop-blur transition hover:bg-white/20"
+        className="absolute end-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-bold text-white ring-1 ring-white/20 backdrop-blur transition hover:bg-white/20"
       >
         {animate ? <Pause className="size-3.5" /> : <Play className="size-3.5" />}
         {animate ? "إيقاف الحركة" : "تشغيل الحركة"}
       </button>
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-3 text-center text-[10px] font-bold tracking-[0.3em] text-white/60">
-        ALMOSLY PHARMACY • 3D INTERACTIVE
+      <div className="pointer-events-none absolute inset-x-0 bottom-3 text-center text-[10px] font-bold tracking-[0.4em] text-white/70">
+        ✦ ALMOSLY PHARMACY • PREMIUM 3D ✦
       </div>
 
       {prefersReduced && (
