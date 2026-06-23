@@ -400,7 +400,11 @@ function AdminSocialPostsPage() {
             تُولَّد تلقائياً يومياً 8 صباحاً وتُرسَل إلى n8n للنشر، والإحصائيات تُجمَع كل ساعة.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <Button variant="outline" onClick={() => diag.mutate()} disabled={diag.isPending}>
+            {diag.isPending ? <Loader2 className="size-4 ms-2 animate-spin" /> : <Stethoscope className="size-4 ms-2" />}
+            تشخيص شامل
+          </Button>
           <Button variant="outline" onClick={() => ping.mutate()} disabled={ping.isPending}>
             {ping.isPending ? <Loader2 className="size-4 ms-2 animate-spin" /> : <ShieldCheck className="size-4 ms-2" />}
             تحقق من n8n
