@@ -261,6 +261,36 @@ function UploadPrescriptionPage() {
             </div>
           </div>
 
+          {(() => {
+            const decided = req?.status === "approved" || req?.status === "rejected";
+            const hasAnalysis = !!analysis && (analysis.medicines?.length ?? 0) > 0;
+            const stepStates: Record<StepKey, StepState> = {
+              uploaded: "done",
+              analyzed: hasAnalysis || req?.status === "approved" || req?.status === "rejected" ? "done" : "active",
+              review: decided ? "done" : hasAnalysis ? "active" : "pending",
+              decided: decided ? "done" : "pending",
+            };
+            const stepNotes: Partial<Record<StepKey, string>> = {
+              analyzed: hasAnalysis
+                ? `${analysis!.medicines.length} دواء تم استخراجه`
+                : "بانتظار نتيجة الذكاء الاصطناعي",
+              review: decided
+                ? `${req!.status === "approved" ? "تمت الموافقة" : "تم الرفض"} بتاريخ ${req!.decided_at ? new Date(req!.decided_at as string).toLocaleString("ar") : ""}`
+                : "الصيدلي سيراجع الطلب قريباً",
+              decided: decided && req?.decision_note ? req.decision_note : undefined,
+            };
+            const steps = STEP_ORDER.map((s) => ({
+              ...s,
+              state: stepStates[s.key],
+              note: stepNotes[s.key],
+            }));
+            return (
+              <div className="rounded-lg border bg-card/60 p-4">
+                <Stepper steps={steps} />
+              </div>
+            );
+          })()}
+
           {req?.decision_note && (
             <div className="rounded-md bg-muted p-3 text-sm">
               <p className="font-medium mb-1">ملاحظة الصيدلي:</p>
