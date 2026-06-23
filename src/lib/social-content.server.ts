@@ -136,28 +136,161 @@ export async function pickRandomProduct(): Promise<{
 
 export const PLATFORMS: SocialPlatform[] = ["facebook", "instagram", "twitter", "telegram"];
 
-export async function generateDailyDrafts(): Promise<DraftPost[]> {
-  const product = await pickRandomProduct();
-  const scheduledFor = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
+/**
+ * Phase 2 Orchestrator.
+ * Pipeline: Context → Decision Engine → Generate 3 Variants → Rank → Winner → Telemetry.
+ * Behind two feature flags (`agent.context_provider.enabled`, `agent.multi_variant.enabled`).
+ * On any failure, falls back to the Phase-1 single-shot generator and records `fallback_used=true`.
+ */
+export async function generateDailyDrafts(): Promise<{
+  drafts: DraftPost[];
+  decisions: AgentDecisionRecord[];
+}> {
+  const { isFlagEnabled } = await import("./agent/feature-flags.server");
+  const contextEnabled = await isFlagEnabled("agent.context_provider.enabled", true);
+  const multiVariantEnabled = await isFlagEnabled("agent.multi_variant.enabled", true);
 
-  const drafts: DraftPost[] = [];
-  for (const platform of PLATFORMS) {
+  // Decision Engine (Phase 1) — pick + breakdown
+  const t0 = Date.now();
+  let productScore: number | null = null;
+  let productBreakdown: Record<string, number> | null = null;
+  let product: { id: string; name: string; price: number | null; description: string | null } | null = null;
+  try {
+    const { pickProductByScore } = await import("./agent/decision.engine.server");
+    const scored = await pickProductByScore();
+    if (scored) {
+      product = { id: scored.id, name: scored.name, price: scored.price, description: scored.description };
+      productScore = scored.score;
+      productBreakdown = scored.breakdown;
+    }
+  } catch (e) {
+    console.warn("[orchestrator] decision engine failed:", (e as Error).message);
+  }
+  if (!product) product = await pickRandomProduct();
+  const decisionMs = Date.now() - t0;
+
+  // Context Layer
+  const tCtx = Date.now();
+  let context: Awaited<ReturnType<typeof import("./agent/context.provider.server").buildAgentContext>> | null = null;
+  if (contextEnabled) {
     try {
-      const post = product
-        ? await generateProductPost(product.name, product.price, product.description, platform)
-        : await generateGeneralPost(platform);
-      drafts.push({
-        platform,
-        product_id: product?.id ?? null,
-        caption: String(post.caption ?? "").slice(0, 4000),
-        hashtags: Array.isArray(post.hashtags) ? post.hashtags.slice(0, 12).map(String) : [],
-        cta: String(post.cta ?? "").slice(0, 300),
-        status: "pending",
-        scheduled_for: scheduledFor,
-      });
+      const { buildAgentContext } = await import("./agent/context.provider.server");
+      context = await buildAgentContext();
     } catch (e) {
-      console.error("[social-content] generation failed", platform, e);
+      console.warn("[orchestrator] context provider failed:", (e as Error).message);
     }
   }
-  return drafts;
+  const contextMs = Date.now() - tCtx;
+
+  const scheduledFor = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
+  const drafts: DraftPost[] = [];
+  const decisions: AgentDecisionRecord[] = [];
+
+  for (const platform of PLATFORMS) {
+    const totalStart = Date.now();
+    let fallbackUsed = false;
+    let fallbackReason: string | null = null;
+    let winnerVariantId: string | null = null;
+    let confidence: number | null = null;
+    let decisionSummary: string | null = null;
+    let decisionFactors: Record<string, unknown> | null = null;
+    let variantsForLog: AgentDecisionRecord["variants"] = [];
+    let caption = "";
+    let hashtags: string[] = [];
+    let cta = "";
+    let generationMs = 0;
+    let rankingMs = 0;
+
+    try {
+      if (multiVariantEnabled) {
+        const tGen = Date.now();
+        const { generateVariants } = await import("./agent/content.generator.server");
+        const { rankVariants } = await import("./agent/variant.ranker.server");
+        const gen = await generateVariants({
+          platform,
+          productName: product?.name,
+          productPrice: product?.price,
+          productDescription: product?.description,
+          context,
+        });
+        generationMs = Date.now() - tGen;
+
+        if (gen.variants.length === 0) throw new Error("no variants produced");
+
+        const tRank = Date.now();
+        const outcome = rankVariants(gen.variants, platform);
+        rankingMs = Date.now() - tRank;
+
+        caption = outcome.winner.caption;
+        hashtags = outcome.winner.hashtags;
+        cta = outcome.winner.cta;
+        winnerVariantId = outcome.winner_id;
+        confidence = outcome.confidence_score;
+        decisionSummary = gen.decision_summary;
+        decisionFactors = { ...gen.decision_factors, ranking: outcome.ranked };
+        variantsForLog = gen.variants;
+      } else {
+        // Flag off: single-shot Phase-1 generator
+        const tGen = Date.now();
+        const post = product
+          ? await generateProductPost(product.name, product.price, product.description, platform)
+          : await generateGeneralPost(platform);
+        generationMs = Date.now() - tGen;
+        caption = String(post.caption ?? "").slice(0, 4000);
+        hashtags = Array.isArray(post.hashtags) ? post.hashtags.slice(0, 12).map(String) : [];
+        cta = String(post.cta ?? "").slice(0, 300);
+      }
+    } catch (e) {
+      fallbackUsed = true;
+      fallbackReason = (e as Error).message;
+      console.error("[orchestrator] generation failed → fallback", platform, fallbackReason);
+      try {
+        const post = product
+          ? await generateProductPost(product.name, product.price, product.description, platform)
+          : await generateGeneralPost(platform);
+        caption = String(post.caption ?? "").slice(0, 4000);
+        hashtags = Array.isArray(post.hashtags) ? post.hashtags.slice(0, 12).map(String) : [];
+        cta = String(post.cta ?? "").slice(0, 300);
+      } catch (e2) {
+        console.error("[orchestrator] fallback also failed", platform, (e2 as Error).message);
+        continue; // skip this platform entirely
+      }
+    }
+
+    const totalMs = Date.now() - totalStart;
+
+    drafts.push({
+      platform,
+      product_id: product?.id ?? null,
+      caption,
+      hashtags,
+      cta,
+      status: "pending",
+      scheduled_for: scheduledFor,
+      variant_id: winnerVariantId,
+      confidence_score: confidence,
+    });
+
+    decisions.push({
+      platform,
+      product_id: product?.id ?? null,
+      product_score: productScore,
+      product_breakdown: productBreakdown,
+      variants: variantsForLog,
+      winner_variant_id: winnerVariantId,
+      confidence_score: confidence,
+      decision_summary: decisionSummary,
+      decision_factors: decisionFactors,
+      context_snapshot: context as unknown as Record<string, unknown> | null,
+      context_ms: contextMs,
+      decision_ms: decisionMs,
+      generation_ms: generationMs,
+      ranking_ms: rankingMs,
+      total_ms: totalMs,
+      fallback_used: fallbackUsed,
+      fallback_reason: fallbackReason,
+    });
+  }
+
+  return { drafts, decisions };
 }
