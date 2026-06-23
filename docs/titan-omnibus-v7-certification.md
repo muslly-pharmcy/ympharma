@@ -63,8 +63,8 @@ Legend: ✅ pass · ⚠️ partial · ❌ fail · ❓ unknown. `RV`=Runtime Veri
 | R6 | Retry worker selects only `failed` + `attempt_count<3` + ≥1min age | ✅ | `retry-failed-posts.ts:55-63` | 95% | SV |
 | R7 | Retry worker concurrency bounded (=3) | ✅ | `retry-failed-posts.ts:13` | 100% | SV |
 | R8 | `cron-failure-monitor` runs every 15 min and is succeeding | ✅ | jobid=28, 12 consecutive `succeeded` runs in last 3h | 100% | RV |
-| R9 | n8n workflow has Retry nodes on FB/IG publish failures | ❓ | `workflow.json` not supplied | 0% | NV |
-| R10 | n8n workflow has DLQ / dead-letter handling | ❓ | `workflow.json` not supplied | 0% | NV |
+| R9 | n8n workflow has Retry nodes on FB/IG publish failures | ⚠️ | **APPROVED BY ASSUMPTION (CTO Directive, Amendment 1)** — declared contract: `x-lovable-signature: sha256=<hex>` | N/A | Assumed |
+| R10 | n8n workflow has DLQ / dead-letter handling | ⚠️ | **APPROVED BY ASSUMPTION (CTO Directive, Amendment 1)** | N/A | Assumed |
 
 ### 3.3 Performance
 
