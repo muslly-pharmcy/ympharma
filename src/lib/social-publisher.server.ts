@@ -1,6 +1,9 @@
 // Publish a saved social_posts row by forwarding it to the configured n8n webhook.
 // Every attempt is recorded in `social_post_attempts` with full diagnostics
 // (request payload, response status, response body) for debugging.
+// Outbound requests are signed with HMAC-SHA256 over the raw JSON body using
+// N8N_CALLBACK_SECRET, sent in the `x-lovable-signature` header so n8n can verify.
+import { createHmac } from "crypto";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 interface PostRow {
