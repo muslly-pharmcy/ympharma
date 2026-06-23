@@ -1,74 +1,74 @@
-# خطة الميزات المتقدمة الأربع — مع تحفظات مهمة
+# خطة الخيار الأول – تحسين واجهة المستخدم (UI/UX)
 
-## ⚠️ تحفظات على البروميت قبل التنفيذ
+تركيز على الواجهة فقط، بدون تغيير منطق الأعمال أو الـ backend.
 
-البروميت كُتب بافتراضات لا تطابق منصة Lovable والمشروع الحالي. يجب تعديلها:
+## 1. الوضع المظلم (Dark Mode)
 
-### 1) نظام الفواتير
-- **مشكلة**: البروميت يستخدم `Resend` كحزمة npm مباشرة. على Lovable، البريد يُرسل عبر **Lovable Emails / connector gateway** (لا تحتاج مفتاح من المستخدم).
-- **مشكلة**: جدول `invoices` غير موجود. يحتاج migration كامل (مع `GRANT` + RLS).
-- **مشكلة**: البروميت يقرأ من جدول `settings` و`orders.items` و`orders.user_phone`/`user_email` — لا شيء من ذلك موجود في schema الحالي. جدول `orders` لديه 14 عمود فقط ولا يوجد `settings`. يجب التحقق من الأعمدة الفعلية أولاً.
-- **مشكلة**: استخدام `prompt()`/`alert()` للـ UX — يُستبدل بـ shadcn Dialog + `sonner`.
-- **الحل المقترح**: إنشاء جدول `invoices`، توليد HTML من بيانات الطلب الحقيقية، طباعة عبر `window.print()`، إرسال عبر Lovable Emails (لا Resend SDK).
+ملاحظة هامة: `src/styles.css` يحتوي بالفعل على متغيرات `.dark` كاملة (oklch tokens)، ويُستخدم `@custom-variant dark` على نمط Tailwind v4. الأساس جاهز — نحتاج فقط Provider وزر تبديل.
 
-### 2) بوابة دفع PayTabs
-- **مشكلة كبيرة**: Lovable لديها **مدفوعات مدمجة (Paddle / Stripe)** بدون مفاتيح. PayTabs غير مدعومة كـ connector وتحتاج 3 أسرار يدوية + webhook حقيقي + تحقق توقيع.
-- **اليمن**: PayTabs لا تعمل في اليمن (دول الخليج فقط). Stripe كذلك لا يدعم اليمن كحساب بائع.
-- **بديل واقعي**: 
-  - (أ) **الدفع عند الاستلام (COD)** — الأنسب لليمن، بدون تكامل خارجي.
-  - (ب) **تحويل بنكي / محفظة محلية يدوي** (رفع إيصال) + تأكيد إداري.
-  - (ج) إذا أصر على بوابة، يحتاج تزويدي بمفاتيح PayTabs/MyFatoorah/Telr عبر `add_secret`.
+- **جديد** `src/lib/theme-provider.tsx`
+  - Context للوضع: `light | dark | system`
+  - يحفظ في `localStorage` بمفتاح `pharmacy-ui-theme`
+  - يضيف/يزيل class `dark` على `document.documentElement`
+  - SSR-safe: قراءة localStorage داخل `useEffect` فقط (TanStack Start يعمل بـ SSR)
+  - script صغير في `__root.tsx` head لمنع وميض الشاشة (FOUC) قبل hydrate
+- **جديد** `src/components/theme-toggle.tsx`
+  - زر `DropdownMenu` (shadcn موجود) بخيارات: فاتح / مظلم / النظام
+  - أيقونات Sun/Moon/Monitor من lucide
+- **تعديل** `src/routes/__root.tsx`
+  - تغليف الـ Outlet بـ `<ThemeProvider>` داخل `RootComponent`
+  - إضافة script حقن class الوضع مبكراً في `shellComponent`
+  - الزر يُضاف داخل `site-chrome.tsx` (الهيدر الموجود) — وليس عائماً فوق المحتوى
 
-### 3) تقارير متقدمة
-- **مشكلة**: البروميت يفترض `orders.items` JSON. التحقق مطلوب. لو الطلبات في جدول `order_items` منفصل، الكود يتغير.
-- **مشكلة**: `orders.total` و`status='delivered'` — يجب التحقق من قيم status الموجودة.
-- **الحل المقترح**: قراءة schema فعلياً، بناء server fn `getSalesReport` + تصدير CSV (يعمل في المتصفح بـ Blob)، صفحة `/admin-sales-reports` مع Recharts.
+## 2. أنيميشن Framer Motion
 
-### 4) تطبيق موبايل Hybrid (Capacitor)
-- **مشكلة جوهرية**: المشروع **TanStack Start بـ SSR على Cloudflare Workers** — لا يبني إلى `dist/` ساكن يمكن تغليفه بـ Capacitor مباشرة. Capacitor يتوقع SPA static.
-- **مشكلة**: الـ Service Worker اليدوي ممنوع في Lovable preview (يكسر المعاينة). يجب اتباع `vite-plugin-pwa` مع حراسات.
-- **موجود مسبقاً**: `public/sw.js`, `public/manifest.webmanifest`, `ANDROID.md`, `twa-manifest.json`، `public/.well-known/assetlinks.json` — المشروع يستخدم **TWA (Trusted Web Activity)** وليس Capacitor، وهو الخيار الصحيح لـ TanStack Start.
-- **التوصية**: عدم إدخال Capacitor. الإبقاء على TWA الموجود. لو يريد PWA فقط، تحسين الـ manifest والـ install prompt.
+- تثبيت `framer-motion` عبر `bun add`
+- **جديد** `src/components/page-transition.tsx` — fade + slide خفيف عند تغيير المسار
+- **جديد** `src/components/animated-section.tsx` — `whileInView` للظهور عند التمرير
+- تطبيق `PageTransition` حول `<Outlet />` في `__root.tsx` باستخدام `AnimatePresence` مع `useLocation().pathname` كمفتاح
+- احترام `prefers-reduced-motion` (تعطيل الحركة)
 
----
+## 3. التجاوب (Responsiveness)
 
-## 📋 الخطة المقترحة (نطاق واقعي)
+مراجعة مستهدفة فقط للصفحات/المكونات الرئيسية الأعلى استخداماً:
+- `src/components/site-chrome.tsx` (الهيدر + التنقل)
+- `src/routes/index.tsx` (الصفحة الرئيسية)
+- `src/routes/products.tsx`, `src/routes/cart.tsx`
+- `src/components/product-card.tsx`
 
-سأنفذ ما هو **متوافق مع المنصة وقاعدة البيانات الحالية**:
+تطبيق نمط `grid grid-cols-[minmax(0,1fr)_auto] sm:flex` + `min-w-0` + `shrink-0` + `truncate` للصفوف التي تجمع نصاً وأدوات (وفق responsive-layout-patterns). لن أعدّل كل صفحة admin — فقط الصفحات التي يراها الزائر.
 
-### المرحلة 1 — الفواتير (واقعية)
-1. **Migration**: جدول `invoices` (id, order_id FK, html_content, total, status enum: draft/sent/paid, sent_at, created_at, updated_at) + GRANT + RLS (admin يقرأ/يكتب، المستخدم يقرأ فاتورته فقط).
-2. `src/lib/invoices.functions.ts`:
-   - `createInvoice({orderId})` — يقرأ من `orders` بالأعمدة الفعلية (سأتحقق منها أولاً)، يولد HTML RTL، يحفظ.
-   - `sendInvoiceEmail({invoiceId, email})` — يستخدم Lovable Emails عبر connector gateway. سأتأكد أن connector `resend` أو email موصول، وإلا أوجه المستخدم.
-3. `src/components/InvoiceViewer.tsx`: shadcn Dialog + زر طباعة (`window.print` في iframe) + زر إرسال (Dialog إدخال بريد).
-4. زر "إنشاء فاتورة" في `admin-orders` (أو `OrdersTab`).
+## 4. RTL
 
-### المرحلة 2 — الدفع (واقعية لليمن)
-1. **Migration**: جدول `payment_transactions` (id, order_id, method enum: cod/bank_transfer/wallet, amount, currency, status, receipt_url, notes, created_at) + GRANT + RLS.
-2. صفحة في checkout: اختيار طريقة دفع (COD / تحويل بنكي مع رفع إيصال إلى Supabase Storage).
-3. `admin-payments.tsx`: مراجعة وتأكيد المدفوعات اليدوية.
-4. **لن أربط PayTabs** ما لم يطلب صراحة ويزود مفاتيحه.
+- `<html dir="rtl">` موجود بالفعل في `__root.tsx`
+- مراجعة استخدامات `ml-*`/`mr-*`/`left-*`/`right-*` في المكونات المعدّلة وتحويلها إلى `ms-*`/`me-*`/`start-*`/`end-*` حيث يلزم
+- التأكد من اتجاه الأيقونات (Chevron) في القوائم
 
-### المرحلة 3 — تقارير المبيعات
-1. أتحقق من schema `orders` و`order_items` الفعلي.
-2. `src/lib/sales-reports.functions.ts`: `getSalesReport({startDate, endDate, groupBy})`، `getTopProducts`، `exportSalesCSV` (يُرجع نص CSV، التحميل يتم في المتصفح).
-3. صفحة `/admin-sales-reports` مع: KPI cards + Recharts (Line للإيرادات، Bar لأكثر المنتجات) + DateRangePicker + زر تصدير CSV.
+## الملفات
 
-### المرحلة 4 — تطبيق الموبايل
-- **لا Capacitor**. سأكتفي بـ:
-  - مراجعة `public/manifest.webmanifest` وتأكيد جودته للتثبيت على الشاشة الرئيسية.
-  - `src/components/InstallPrompt.tsx`: بانر تثبيت PWA (beforeinstallprompt) مع حراسة preview Lovable حسب `skill/pwa`.
-  - **TWA موجود مسبقاً** عبر `twa-manifest.json` و`assetlinks.json` — لن أكسره.
-- لو المستخدم يصر على Capacitor، يجب نقل التطبيق إلى SPA كلياً (تغيير معماري كبير) — سأطلب موافقة منفصلة.
+**جديدة:**
+- `src/lib/theme-provider.tsx`
+- `src/components/theme-toggle.tsx`
+- `src/components/page-transition.tsx`
+- `src/components/animated-section.tsx`
 
----
+**معدّلة:**
+- `src/routes/__root.tsx` — ThemeProvider + anti-FOUC script + PageTransition/AnimatePresence
+- `src/components/site-chrome.tsx` — إدراج `ThemeToggle` + تحسينات تجاوب الهيدر
+- `package.json` — `framer-motion`
 
-## ❓ أحتاج قراراتك قبل البدء
+**لن تُمسّ:**
+- أي ملف backend / server function / migration
+- ملفات `src/integrations/supabase/*` التلقائية
+- منطق السلة / الطلبات / الفواتير
 
-1. **البريد**: هل أستخدم Lovable Emails المدمج (موصى به)، أم لديك حساب Resend خاص تريد ربطه عبر connector؟
-2. **الدفع**: هل توافق على **COD + تحويل بنكي يدوي** (الأنسب لليمن)، أم تريد PayTabs/MyFatoorah فعلاً (وستزودني بالمفاتيح)؟
-3. **النطاق**: هل أنفذ **المراحل الأربع كلها** الآن، أم نبدأ بمرحلة واحدة (مثلاً الفواتير) ونكمل البقية لاحقاً؟ نطاق الأربع كبير ويحتاج 3–4 migrations و~12 ملف جديد.
-4. **التطبيق**: هل تقبل الإبقاء على **TWA الحالي + PWA install prompt**، أم تصر على Capacitor (يتطلب إعادة هيكلة)؟
+## خارج النطاق
 
-أجبني على هذه النقاط وسأقدّم خطة نهائية مفصلة للتنفيذ في build mode.
+- لا تغييرات على نظام الفواتير، الدفع، أو التقارير (مؤجل للمرحلة التالية)
+- لا إعادة تصميم شامل لصفحات الإدارة (`/admin-*`)
+
+## ملاحظات تقنية
+
+- Tailwind v4 على هذا المشروع — لا يوجد `tailwind.config.js`، التوكنز في `@theme` داخل `src/styles.css` (موجودة). لن أضيف `@tailwind base/...` (نمط v3).
+- `ThemeProvider` يقرأ `window`/`localStorage` داخل `useEffect` فقط لتجنّب SSR crash.
+- script منع الوميض يُكتب inline في `<head>` ويقرأ `localStorage` ويضيف class قبل أول رسم.
