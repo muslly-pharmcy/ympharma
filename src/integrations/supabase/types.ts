@@ -4859,6 +4859,14 @@ export type Database = {
         Args: { _transfer_id: string }
         Returns: string
       }
+      revenue_by_condition: {
+        Args: { _days?: number }
+        Returns: {
+          condition: string
+          orders_count: number
+          revenue: number
+        }[]
+      }
       rotate_cron_secret: {
         Args: { _base_url?: string; _secret: string }
         Returns: Json
