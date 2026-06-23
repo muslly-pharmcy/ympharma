@@ -82,7 +82,7 @@ export const regenerateDailyPostsNow = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     // Link telemetry rows to their inserted post IDs (positional)
     if (inserted && decisions.length > 0) {
-      const rows = decisions.map((d, i) => ({ ...d, post_id: inserted[i]?.id ?? null }));
+      const rows = decisions.map((d, i) => ({ ...d, post_id: inserted[i]?.id ?? null })) as any;
       await supabaseAdmin.from("agent_decisions").insert(rows);
     }
     return { ok: true, inserted: drafts.length };
