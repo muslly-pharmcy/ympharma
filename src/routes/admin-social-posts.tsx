@@ -379,6 +379,18 @@ function AdminSocialPostsPage() {
     },
   });
 
+  const diag = useMutation({
+    mutationFn: () => diagFn(),
+    onSuccess: (r: any) => {
+      setDiagResult(r);
+      const s = r?.summary;
+      if (s?.fail > 0) toast.error(`التشخيص: ${s.fail} فشل، ${s.pass} نجح`);
+      else if (s?.warn > 0) toast.message(`التشخيص: ${s.warn} تحذير، ${s.pass} نجح`);
+      else toast.success(`التشخيص ✅ كل ${s?.pass ?? 0} اختبار نجح`);
+    },
+    onError: (e: any) => toast.error(e?.message ?? "فشل التشخيص"),
+  });
+
   return (
     <div dir="rtl" className="container mx-auto max-w-5xl px-4 py-6 space-y-6">
       <div className="flex items-center justify-between gap-2 flex-wrap">
