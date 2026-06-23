@@ -33,6 +33,10 @@ import {
   ShieldAlert,
   ChevronDown,
   AlertCircle,
+  Stethoscope,
+  CheckCircle2,
+  XCircle,
+  MinusCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -44,6 +48,7 @@ import {
   getPostStats,
   pingN8nWebhook,
 } from "@/lib/social.functions";
+import { runFullDiagnostics } from "@/lib/diagnostics.functions";
 
 export const Route = createFileRoute("/admin-social-posts")({
   head: () => ({
@@ -257,16 +262,74 @@ function PingResultDialog({
   );
 }
 
+function DiagnosticsDialog({
+  result,
+  open,
+  onOpenChange,
+}: {
+  result: any | null;
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
+  if (!result) return null;
+  const s = result.summary ?? { pass: 0, fail: 0, warn: 0, skip: 0 };
+  const icon = (st: string) =>
+    st === "pass" ? <CheckCircle2 className="size-4 text-emerald-600" /> :
+    st === "fail" ? <XCircle className="size-4 text-destructive" /> :
+    st === "warn" ? <AlertCircle className="size-4 text-amber-500" /> :
+    <MinusCircle className="size-4 text-muted-foreground" />;
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent dir="rtl" className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Stethoscope className="size-5" /> تقرير التشخيص الشامل
+          </DialogTitle>
+        </DialogHeader>
+        <div className="flex gap-2 flex-wrap text-xs">
+          <Badge className="bg-emerald-600">نجح {s.pass}</Badge>
+          {s.fail > 0 && <Badge variant="destructive">فشل {s.fail}</Badge>}
+          {s.warn > 0 && <Badge className="bg-amber-500">تحذير {s.warn}</Badge>}
+          {s.skip > 0 && <Badge variant="outline">تخطّى {s.skip}</Badge>}
+        </div>
+        <div className="space-y-1.5 max-h-[60vh] overflow-auto">
+          {(result.checks ?? []).map((c: any) => (
+            <div key={c.id} className="rounded border p-2 text-xs flex gap-2">
+              <div className="mt-0.5">{icon(c.status)}</div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold">{c.label}</span>
+                  {c.durationMs != null && <span className="text-[10px] text-muted-foreground">{c.durationMs}ms</span>}
+                </div>
+                <div className={`break-words ${c.status === "fail" ? "text-destructive" : "text-muted-foreground"}`}>
+                  {c.message}
+                </div>
+                {c.detail ? (
+                  <pre className="bg-muted/50 rounded p-1.5 mt-1 text-[10px] overflow-auto max-h-32 leading-tight">
+                    {c.detail}
+                  </pre>
+                ) : null}
+              </div>
+            </div>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function AdminSocialPostsPage() {
   const qc = useQueryClient();
   const [attemptsForPost, setAttemptsForPost] = useState<string | null>(null);
   const [pingResult, setPingResult] = useState<any | null>(null);
+  const [diagResult, setDiagResult] = useState<any | null>(null);
 
   const listFn = useServerFn(listSocialPosts);
   const regenFn = useServerFn(regenerateDailyPostsNow);
   const publishFn = useServerFn(publishPostNow);
   const deleteFn = useServerFn(deleteSocialPost);
   const pingFn = useServerFn(pingN8nWebhook);
+  const diagFn = useServerFn(runFullDiagnostics);
 
   const posts = useQuery({
     queryKey: ["admin-social-posts"],
@@ -316,6 +379,18 @@ function AdminSocialPostsPage() {
     },
   });
 
+  const diag = useMutation({
+    mutationFn: () => diagFn(),
+    onSuccess: (r: any) => {
+      setDiagResult(r);
+      const s = r?.summary;
+      if (s?.fail > 0) toast.error(`التشخيص: ${s.fail} فشل، ${s.pass} نجح`);
+      else if (s?.warn > 0) toast.message(`التشخيص: ${s.warn} تحذير، ${s.pass} نجح`);
+      else toast.success(`التشخيص ✅ كل ${s?.pass ?? 0} اختبار نجح`);
+    },
+    onError: (e: any) => toast.error(e?.message ?? "فشل التشخيص"),
+  });
+
   return (
     <div dir="rtl" className="container mx-auto max-w-5xl px-4 py-6 space-y-6">
       <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -325,7 +400,11 @@ function AdminSocialPostsPage() {
             تُولَّد تلقائياً يومياً 8 صباحاً وتُرسَل إلى n8n للنشر، والإحصائيات تُجمَع كل ساعة.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <Button variant="outline" onClick={() => diag.mutate()} disabled={diag.isPending}>
+            {diag.isPending ? <Loader2 className="size-4 ms-2 animate-spin" /> : <Stethoscope className="size-4 ms-2" />}
+            تشخيص شامل
+          </Button>
           <Button variant="outline" onClick={() => ping.mutate()} disabled={ping.isPending}>
             {ping.isPending ? <Loader2 className="size-4 ms-2 animate-spin" /> : <ShieldCheck className="size-4 ms-2" />}
             تحقق من n8n
@@ -458,6 +537,12 @@ function AdminSocialPostsPage() {
         result={pingResult}
         open={!!pingResult}
         onOpenChange={(v) => !v && setPingResult(null)}
+      />
+
+      <DiagnosticsDialog
+        result={diagResult}
+        open={!!diagResult}
+        onOpenChange={(v) => !v && setDiagResult(null)}
       />
     </div>
   );

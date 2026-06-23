@@ -1,6 +1,9 @@
 // Publish a saved social_posts row by forwarding it to the configured n8n webhook.
 // Every attempt is recorded in `social_post_attempts` with full diagnostics
 // (request payload, response status, response body) for debugging.
+// Outbound requests are signed with HMAC-SHA256 over the raw JSON body using
+// N8N_CALLBACK_SECRET, sent in the `x-lovable-signature` header so n8n can verify.
+import { createHmac } from "crypto";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 interface PostRow {
@@ -88,13 +91,21 @@ export async function publishToN8n(post: PostRow): Promise<PublishResult> {
     product_id: post.product_id,
   };
 
+  const rawBody = JSON.stringify(payload);
+  const secret = process.env.N8N_CALLBACK_SECRET;
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (secret) {
+    const sig = createHmac("sha256", secret).update(rawBody).digest("hex");
+    headers["x-lovable-signature"] = `sha256=${sig}`;
+  }
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 20_000);
   try {
     const res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      headers,
+      body: rawBody,
       signal: controller.signal,
     });
     const text = await res.text().catch(() => "");
