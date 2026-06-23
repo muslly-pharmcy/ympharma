@@ -56,7 +56,8 @@ function AdminDashboard() {
     <div className="p-6 space-y-6" dir="rtl">
       <header className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="text-2xl font-bold">📊 لوحة التحكم التنفيذية</h1>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <RefreshAdminSession />
           <Button
             variant="secondary"
             onClick={() => reactivateMut.mutate()}
