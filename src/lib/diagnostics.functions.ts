@@ -163,7 +163,7 @@ export const runFullDiagnostics = createServerFn({ method: "POST" })
     const requiredTables = ["social_posts", "social_post_attempts", "social_post_stats", "user_roles"];
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     for (const t of requiredTables) {
-      const { error } = await supabaseAdmin.from(t).select("*", { head: true, count: "exact" }).limit(1);
+      const { error } = await (supabaseAdmin as any).from(t).select("*", { head: true, count: "exact" }).limit(1);
       checks.push({
         id: `supabase.table.${t}`,
         label: `جدول ${t}`,
