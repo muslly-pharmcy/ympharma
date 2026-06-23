@@ -110,6 +110,7 @@ import { Route as ApiPublicHooksWhatsappRetryRouteImport } from './routes/api/pu
 import { Route as ApiPublicHooksWeeklyExecReportRouteImport } from './routes/api/public/hooks/weekly-exec-report'
 import { Route as ApiPublicHooksWeeklyAiEnrichRouteImport } from './routes/api/public/hooks/weekly-ai-enrich'
 import { Route as ApiPublicHooksWaStaleConversationsRouteImport } from './routes/api/public/hooks/wa-stale-conversations'
+import { Route as ApiPublicHooksSocialCallbackRouteImport } from './routes/api/public/hooks/social-callback'
 import { Route as ApiPublicHooksRxNotifyRouteImport } from './routes/api/public/hooks/rx-notify'
 import { Route as ApiPublicHooksRxMirrorRouteImport } from './routes/api/public/hooks/rx-mirror'
 import { Route as ApiPublicHooksRunSocialPostsRouteImport } from './routes/api/public/hooks/run-social-posts'
@@ -120,6 +121,7 @@ import { Route as ApiPublicHooksPrescriptionExtractRouteImport } from './routes/
 import { Route as ApiPublicHooksNightlyIntelRouteImport } from './routes/api/public/hooks/nightly-intel'
 import { Route as ApiPublicHooksEventConsumerRouteImport } from './routes/api/public/hooks/event-consumer'
 import { Route as ApiPublicHooksCustomerRxNotifyRouteImport } from './routes/api/public/hooks/customer-rx-notify'
+import { Route as ApiPublicHooksCollectSocialStatsRouteImport } from './routes/api/public/hooks/collect-social-stats'
 import { Route as ApiPublicHooksChronicRefillsRouteImport } from './routes/api/public/hooks/chronic-refills'
 import { Route as ApiPublicHooksAlertsWorkerRouteImport } from './routes/api/public/hooks/alerts-worker'
 import { Route as ApiPublicHealthQuickCheckRouteImport } from './routes/api/public/health.quick-check'
@@ -659,6 +661,12 @@ const ApiPublicHooksWaStaleConversationsRoute =
     path: '/api/public/hooks/wa-stale-conversations',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksSocialCallbackRoute =
+  ApiPublicHooksSocialCallbackRouteImport.update({
+    id: '/api/public/hooks/social-callback',
+    path: '/api/public/hooks/social-callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksRxNotifyRoute = ApiPublicHooksRxNotifyRouteImport.update({
   id: '/api/public/hooks/rx-notify',
   path: '/api/public/hooks/rx-notify',
@@ -715,6 +723,12 @@ const ApiPublicHooksCustomerRxNotifyRoute =
   ApiPublicHooksCustomerRxNotifyRouteImport.update({
     id: '/api/public/hooks/customer-rx-notify',
     path: '/api/public/hooks/customer-rx-notify',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksCollectSocialStatsRoute =
+  ApiPublicHooksCollectSocialStatsRouteImport.update({
+    id: '/api/public/hooks/collect-social-stats',
+    path: '/api/public/hooks/collect-social-stats',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicHooksChronicRefillsRoute =
@@ -890,6 +904,7 @@ export interface FileRoutesByFullPath {
   '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
   '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
+  '/api/public/hooks/collect-social-stats': typeof ApiPublicHooksCollectSocialStatsRoute
   '/api/public/hooks/customer-rx-notify': typeof ApiPublicHooksCustomerRxNotifyRoute
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
@@ -900,6 +915,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/run-social-posts': typeof ApiPublicHooksRunSocialPostsRoute
   '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
+  '/api/public/hooks/social-callback': typeof ApiPublicHooksSocialCallbackRoute
   '/api/public/hooks/wa-stale-conversations': typeof ApiPublicHooksWaStaleConversationsRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
@@ -1015,6 +1031,7 @@ export interface FileRoutesByTo {
   '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
   '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
+  '/api/public/hooks/collect-social-stats': typeof ApiPublicHooksCollectSocialStatsRoute
   '/api/public/hooks/customer-rx-notify': typeof ApiPublicHooksCustomerRxNotifyRoute
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
@@ -1025,6 +1042,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/run-social-posts': typeof ApiPublicHooksRunSocialPostsRoute
   '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
+  '/api/public/hooks/social-callback': typeof ApiPublicHooksSocialCallbackRoute
   '/api/public/hooks/wa-stale-conversations': typeof ApiPublicHooksWaStaleConversationsRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
@@ -1142,6 +1160,7 @@ export interface FileRoutesById {
   '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
   '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
+  '/api/public/hooks/collect-social-stats': typeof ApiPublicHooksCollectSocialStatsRoute
   '/api/public/hooks/customer-rx-notify': typeof ApiPublicHooksCustomerRxNotifyRoute
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
@@ -1152,6 +1171,7 @@ export interface FileRoutesById {
   '/api/public/hooks/run-social-posts': typeof ApiPublicHooksRunSocialPostsRoute
   '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
+  '/api/public/hooks/social-callback': typeof ApiPublicHooksSocialCallbackRoute
   '/api/public/hooks/wa-stale-conversations': typeof ApiPublicHooksWaStaleConversationsRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
@@ -1269,6 +1289,7 @@ export interface FileRouteTypes {
     | '/api/public/health/quick-check'
     | '/api/public/hooks/alerts-worker'
     | '/api/public/hooks/chronic-refills'
+    | '/api/public/hooks/collect-social-stats'
     | '/api/public/hooks/customer-rx-notify'
     | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/nightly-intel'
@@ -1279,6 +1300,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/run-social-posts'
     | '/api/public/hooks/rx-mirror'
     | '/api/public/hooks/rx-notify'
+    | '/api/public/hooks/social-callback'
     | '/api/public/hooks/wa-stale-conversations'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
@@ -1394,6 +1416,7 @@ export interface FileRouteTypes {
     | '/api/public/health/quick-check'
     | '/api/public/hooks/alerts-worker'
     | '/api/public/hooks/chronic-refills'
+    | '/api/public/hooks/collect-social-stats'
     | '/api/public/hooks/customer-rx-notify'
     | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/nightly-intel'
@@ -1404,6 +1427,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/run-social-posts'
     | '/api/public/hooks/rx-mirror'
     | '/api/public/hooks/rx-notify'
+    | '/api/public/hooks/social-callback'
     | '/api/public/hooks/wa-stale-conversations'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
@@ -1520,6 +1544,7 @@ export interface FileRouteTypes {
     | '/api/public/health/quick-check'
     | '/api/public/hooks/alerts-worker'
     | '/api/public/hooks/chronic-refills'
+    | '/api/public/hooks/collect-social-stats'
     | '/api/public/hooks/customer-rx-notify'
     | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/nightly-intel'
@@ -1530,6 +1555,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/run-social-posts'
     | '/api/public/hooks/rx-mirror'
     | '/api/public/hooks/rx-notify'
+    | '/api/public/hooks/social-callback'
     | '/api/public/hooks/wa-stale-conversations'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
@@ -1637,6 +1663,7 @@ export interface RootRouteChildren {
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksAlertsWorkerRoute: typeof ApiPublicHooksAlertsWorkerRoute
   ApiPublicHooksChronicRefillsRoute: typeof ApiPublicHooksChronicRefillsRoute
+  ApiPublicHooksCollectSocialStatsRoute: typeof ApiPublicHooksCollectSocialStatsRoute
   ApiPublicHooksCustomerRxNotifyRoute: typeof ApiPublicHooksCustomerRxNotifyRoute
   ApiPublicHooksEventConsumerRoute: typeof ApiPublicHooksEventConsumerRoute
   ApiPublicHooksNightlyIntelRoute: typeof ApiPublicHooksNightlyIntelRoute
@@ -1647,6 +1674,7 @@ export interface RootRouteChildren {
   ApiPublicHooksRunSocialPostsRoute: typeof ApiPublicHooksRunSocialPostsRoute
   ApiPublicHooksRxMirrorRoute: typeof ApiPublicHooksRxMirrorRoute
   ApiPublicHooksRxNotifyRoute: typeof ApiPublicHooksRxNotifyRoute
+  ApiPublicHooksSocialCallbackRoute: typeof ApiPublicHooksSocialCallbackRoute
   ApiPublicHooksWaStaleConversationsRoute: typeof ApiPublicHooksWaStaleConversationsRoute
   ApiPublicHooksWeeklyAiEnrichRoute: typeof ApiPublicHooksWeeklyAiEnrichRoute
   ApiPublicHooksWeeklyExecReportRoute: typeof ApiPublicHooksWeeklyExecReportRoute
@@ -2374,6 +2402,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksWaStaleConversationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/social-callback': {
+      id: '/api/public/hooks/social-callback'
+      path: '/api/public/hooks/social-callback'
+      fullPath: '/api/public/hooks/social-callback'
+      preLoaderRoute: typeof ApiPublicHooksSocialCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/rx-notify': {
       id: '/api/public/hooks/rx-notify'
       path: '/api/public/hooks/rx-notify'
@@ -2442,6 +2477,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/hooks/customer-rx-notify'
       fullPath: '/api/public/hooks/customer-rx-notify'
       preLoaderRoute: typeof ApiPublicHooksCustomerRxNotifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/collect-social-stats': {
+      id: '/api/public/hooks/collect-social-stats'
+      path: '/api/public/hooks/collect-social-stats'
+      fullPath: '/api/public/hooks/collect-social-stats'
+      preLoaderRoute: typeof ApiPublicHooksCollectSocialStatsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/chronic-refills': {
@@ -2679,6 +2721,7 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksAlertsWorkerRoute: ApiPublicHooksAlertsWorkerRoute,
   ApiPublicHooksChronicRefillsRoute: ApiPublicHooksChronicRefillsRoute,
+  ApiPublicHooksCollectSocialStatsRoute: ApiPublicHooksCollectSocialStatsRoute,
   ApiPublicHooksCustomerRxNotifyRoute: ApiPublicHooksCustomerRxNotifyRoute,
   ApiPublicHooksEventConsumerRoute: ApiPublicHooksEventConsumerRoute,
   ApiPublicHooksNightlyIntelRoute: ApiPublicHooksNightlyIntelRoute,
@@ -2690,6 +2733,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksRunSocialPostsRoute: ApiPublicHooksRunSocialPostsRoute,
   ApiPublicHooksRxMirrorRoute: ApiPublicHooksRxMirrorRoute,
   ApiPublicHooksRxNotifyRoute: ApiPublicHooksRxNotifyRoute,
+  ApiPublicHooksSocialCallbackRoute: ApiPublicHooksSocialCallbackRoute,
   ApiPublicHooksWaStaleConversationsRoute:
     ApiPublicHooksWaStaleConversationsRoute,
   ApiPublicHooksWeeklyAiEnrichRoute: ApiPublicHooksWeeklyAiEnrichRoute,
@@ -2711,13 +2755,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
