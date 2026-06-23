@@ -232,6 +232,7 @@ function Page() {
                 <span className="ml-auto text-muted-foreground">{new Date(r.created_at).toLocaleString("ar")}</span>
               </div>
               {r.customer_message && <p className="mb-2 text-sm">{r.customer_message}</p>}
+              {r.action_type === "approve_prescription" && <PrescriptionPreview payload={r.payload} />}
               <details className="rounded-xl bg-secondary/40 p-2 text-xs">
                 <summary className="cursor-pointer font-bold">تفاصيل الطلب (payload)</summary>
                 <pre className="mt-2 max-h-60 overflow-auto whitespace-pre-wrap text-[11px]">{JSON.stringify(r.payload, null, 2)}</pre>
