@@ -16,6 +16,29 @@ export interface DraftPost extends GeneratedPost {
   product_id: string | null;
   status: "pending";
   scheduled_for: string;
+  variant_id?: string | null;
+  confidence_score?: number | null;
+}
+
+/** Phase 2 telemetry payload, written to `agent_decisions` after post insert. */
+export interface AgentDecisionRecord {
+  platform: SocialPlatform;
+  product_id: string | null;
+  product_score: number | null;
+  product_breakdown: Record<string, number> | null;
+  variants: Array<{ variant_id: string; tone?: string; caption: string; hashtags: string[]; cta: string }>;
+  winner_variant_id: string | null;
+  confidence_score: number | null;
+  decision_summary: string | null;
+  decision_factors: Record<string, unknown> | null;
+  context_snapshot: Record<string, unknown> | null;
+  context_ms: number;
+  decision_ms: number;
+  generation_ms: number;
+  ranking_ms: number;
+  total_ms: number;
+  fallback_used: boolean;
+  fallback_reason: string | null;
 }
 
 const PLATFORM_STYLES: Record<SocialPlatform, string> = {
