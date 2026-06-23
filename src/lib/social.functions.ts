@@ -28,13 +28,41 @@ export const listSocialPosts = createServerFn({ method: "GET" })
     await assertAdmin(context.supabase, context.userId);
     let q = context.supabase
       .from("social_posts")
-      .select("id,platform,product_id,caption,hashtags,cta,status,external_id,error_message,scheduled_for,published_at,created_at")
+      .select("id,platform,product_id,caption,hashtags,cta,status,external_id,error_message,scheduled_for,published_at,created_at,attempt_count,last_attempt_at")
       .order("created_at", { ascending: false })
       .limit(data.limit);
     if (data.status) q = q.eq("status", data.status);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
     return rows ?? [];
+  });
+
+export const listPostAttempts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ post_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { data: rows, error } = await context.supabase
+      .from("social_post_attempts")
+      .select("id,attempt_no,status,error_message,external_id,source,created_at")
+      .eq("post_id", data.post_id)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+export const getPostStats = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ post_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { data: row } = await context.supabase
+      .from("social_post_stats")
+      .select("likes,comments,shares,views,collected_at")
+      .eq("post_id", data.post_id)
+      .maybeSingle();
+    return row;
   });
 
 export const regenerateDailyPostsNow = createServerFn({ method: "POST" })
