@@ -13,7 +13,7 @@ const FeedbackSchema = z.object({
   comments: z.number().int().min(0).max(10_000_000).default(0),
   shares: z.number().int().min(0).max(10_000_000).default(0),
   views: z.number().int().min(0).max(1_000_000_000).default(0),
-  raw_payload: z.record(z.unknown()).optional().nullable(),
+  raw_payload: z.unknown().optional().nullable(),
 });
 
 export type FeedbackInput = z.infer<typeof FeedbackSchema>;
