@@ -61,6 +61,75 @@ function toCSV(rows: Row[]): string {
   return "\uFEFF" + lines.join("\n");
 }
 
+type RxAnalysis = {
+  medicines?: Array<{ name: string; inStock?: boolean; stockQty?: number; priceYer?: number | null }>;
+  missingMedicines?: string[];
+  notes?: string;
+};
+
+function PrescriptionPreview({ payload }: { payload: Record<string, unknown> }) {
+  const storagePath = typeof payload.storagePath === "string" ? payload.storagePath : null;
+  const analysis = (payload.analysis as RxAnalysis | undefined) ?? undefined;
+  const [imgUrl, setImgUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!storagePath) return;
+    (async () => {
+      const { data, error } = await supabase.storage
+        .from("prescriptions")
+        .createSignedUrl(storagePath, 600);
+      if (!cancelled && !error && data?.signedUrl) setImgUrl(data.signedUrl);
+    })();
+    return () => { cancelled = true; };
+  }, [storagePath]);
+
+  const meds = analysis?.medicines ?? [];
+  const missing = analysis?.missingMedicines ?? [];
+
+  return (
+    <div className="mb-3 grid gap-3 rounded-xl border border-border bg-background p-3 sm:grid-cols-[160px,1fr]">
+      <div className="overflow-hidden rounded-lg border bg-muted">
+        {imgUrl ? (
+          <a href={imgUrl} target="_blank" rel="noreferrer">
+            <img src={imgUrl} alt="صورة الوصفة" className="h-40 w-full object-cover sm:h-full" loading="lazy" />
+          </a>
+        ) : (
+          <div className="grid h-40 place-items-center text-[10px] text-muted-foreground">لا توجد صورة</div>
+        )}
+      </div>
+      <div className="space-y-2 text-xs">
+        <div className="flex flex-wrap items-center gap-1">
+          <span className="font-bold">الأدوية ({meds.length}):</span>
+          {meds.length === 0 && <span className="text-muted-foreground">لم يتم استخراج أدوية</span>}
+        </div>
+        {meds.length > 0 && (
+          <ul className="divide-y rounded-md border">
+            {meds.map((m, i) => (
+              <li key={i} className="flex items-center justify-between px-2 py-1.5">
+                <span>{m.name}</span>
+                {m.inStock ? (
+                  <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] text-emerald-800">
+                    متوفر ({m.stockQty ?? 0})
+                  </span>
+                ) : (
+                  <span className="rounded-full bg-rose-100 px-1.5 py-0.5 text-[10px] text-rose-800">غير متوفر</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+        {missing.length > 0 && (
+          <p className="text-[11px] text-rose-700">
+            {missing.length} دواء غير متوفر: {missing.join("، ")}
+          </p>
+        )}
+        {analysis?.notes && <p className="text-[11px] text-muted-foreground">{analysis.notes}</p>}
+      </div>
+    </div>
+  );
+}
+
 function Page() {
   const [rows, setRows] = useState<Row[]>([]);
   const [busy, setBusy] = useState(false);
