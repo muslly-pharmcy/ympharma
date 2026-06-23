@@ -208,6 +208,23 @@ function UploadPrescriptionPage() {
             />
           </label>
 
+          {(uploadPhase !== "idle" || submit.isPending) && (
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-xs">
+                <span>
+                  {uploadPhase === "analyzing" ? "تحليل الوصفة بالذكاء الاصطناعي…" : "جارٍ رفع الصورة…"}
+                </span>
+                <span className="font-mono">{uploadPct}%</span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-muted">
+                <div
+                  className={`h-full transition-all ${uploadPhase === "analyzing" ? "bg-primary animate-pulse" : "bg-primary"}`}
+                  style={{ width: `${uploadPct}%` }}
+                />
+              </div>
+            </div>
+          )}
+
           <Button
             onClick={() => submit.mutate()}
             disabled={!file || submit.isPending}
