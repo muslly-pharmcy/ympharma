@@ -6,7 +6,7 @@ import {
   useTexture,
   Stars,
   Sparkles,
-  Reflector,
+  MeshReflectorMaterial,
 } from "@react-three/drei";
 import { EffectComposer, Bloom, ChromaticAberration, Vignette } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
@@ -111,20 +111,19 @@ function LogoMesh({
 // ============================================================
 function GlassFloor() {
   return (
-    <Reflector
-      resolution={512}
-      args={[10, 10]}
-      mirror={0.45}
-      mixBlur={8}
-      mixStrength={1.2}
-      blur={[300, 100]}
-      position={[0, -2.1, 0]}
-      rotation={[-Math.PI / 2, 0, 0]}
-    >
-      {(Material, props) => (
-        <Material color="#0f172a" metalness={0.85} roughness={0.6} {...props} />
-      )}
-    </Reflector>
+    <mesh position={[0, -2.1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <planeGeometry args={[14, 14]} />
+      <MeshReflectorMaterial
+        resolution={512}
+        mirror={0.45}
+        mixBlur={8}
+        mixStrength={1.2}
+        blur={[300, 100]}
+        color="#0f172a"
+        metalness={0.85}
+        roughness={0.6}
+      />
+    </mesh>
   );
 }
 
