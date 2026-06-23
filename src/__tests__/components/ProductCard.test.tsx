@@ -47,13 +47,13 @@ describe("ProductCard", () => {
 
   test("renders formatted price", async () => {
     renderWithRouter(<ProductCard product={product} />);
-    expect(await screen.findByText(/250/)).toBeInTheDocument();
+    expect(await screen.findByText(new RegExp(fmt(250)))).toBeInTheDocument();
     expect(screen.getByText(/ر\.ي/)).toBeInTheDocument();
   });
 
   test("renders old price when present", async () => {
     renderWithRouter(<ProductCard product={{ ...product, oldPrice: 300 }} />);
-    expect(await screen.findByText(/300/)).toBeInTheDocument();
+    expect(await screen.findByText(new RegExp(fmt(300)))).toBeInTheDocument();
   });
 
   test("add-to-cart button is accessible and clickable", async () => {
