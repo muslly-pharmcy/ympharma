@@ -4,10 +4,14 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useLocation,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { AnimatePresence } from "framer-motion";
+import { ThemeProvider, THEME_INIT_SCRIPT } from "../lib/theme-provider";
+import { PageTransition } from "../components/page-transition";
 
 import appCss from "../styles.css?url";
 // Self-hosted Tajawal — Google Fonts CDN is throttled/blocked on YemenNet,
@@ -145,6 +149,8 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="ar" dir="rtl">
       <head>
+        {/* Apply theme before paint to prevent FOUC */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <HeadContent />
       </head>
       <body>
@@ -157,6 +163,7 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const location = useLocation();
 
   useEffect(() => {
     // Install the client-side error logger once on mount (browser only).
@@ -174,17 +181,23 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <I18nProvider>
-        <CartProvider>
-          <ErrorBoundary>
-            <Outlet />
-          </ErrorBoundary>
-          <AiChatWidget />
-          <SwUpdateBanner />
-          <InstallPrompt />
-          <Toaster position="top-center" richColors />
-        </CartProvider>
-      </I18nProvider>
+      <ThemeProvider defaultTheme="system">
+        <I18nProvider>
+          <CartProvider>
+            <ErrorBoundary>
+              <AnimatePresence mode="wait" initial={false}>
+                <PageTransition routeKey={location.pathname}>
+                  <Outlet />
+                </PageTransition>
+              </AnimatePresence>
+            </ErrorBoundary>
+            <AiChatWidget />
+            <SwUpdateBanner />
+            <InstallPrompt />
+            <Toaster position="top-center" richColors />
+          </CartProvider>
+        </I18nProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
