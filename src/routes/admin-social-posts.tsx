@@ -262,6 +262,62 @@ function PingResultDialog({
   );
 }
 
+function DiagnosticsDialog({
+  result,
+  open,
+  onOpenChange,
+}: {
+  result: any | null;
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
+  if (!result) return null;
+  const s = result.summary ?? { pass: 0, fail: 0, warn: 0, skip: 0 };
+  const icon = (st: string) =>
+    st === "pass" ? <CheckCircle2 className="size-4 text-emerald-600" /> :
+    st === "fail" ? <XCircle className="size-4 text-destructive" /> :
+    st === "warn" ? <AlertCircle className="size-4 text-amber-500" /> :
+    <MinusCircle className="size-4 text-muted-foreground" />;
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent dir="rtl" className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Stethoscope className="size-5" /> تقرير التشخيص الشامل
+          </DialogTitle>
+        </DialogHeader>
+        <div className="flex gap-2 flex-wrap text-xs">
+          <Badge className="bg-emerald-600">نجح {s.pass}</Badge>
+          {s.fail > 0 && <Badge variant="destructive">فشل {s.fail}</Badge>}
+          {s.warn > 0 && <Badge className="bg-amber-500">تحذير {s.warn}</Badge>}
+          {s.skip > 0 && <Badge variant="outline">تخطّى {s.skip}</Badge>}
+        </div>
+        <div className="space-y-1.5 max-h-[60vh] overflow-auto">
+          {(result.checks ?? []).map((c: any) => (
+            <div key={c.id} className="rounded border p-2 text-xs flex gap-2">
+              <div className="mt-0.5">{icon(c.status)}</div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold">{c.label}</span>
+                  {c.durationMs != null && <span className="text-[10px] text-muted-foreground">{c.durationMs}ms</span>}
+                </div>
+                <div className={`break-words ${c.status === "fail" ? "text-destructive" : "text-muted-foreground"}`}>
+                  {c.message}
+                </div>
+                {c.detail ? (
+                  <pre className="bg-muted/50 rounded p-1.5 mt-1 text-[10px] overflow-auto max-h-32 leading-tight">
+                    {c.detail}
+                  </pre>
+                ) : null}
+              </div>
+            </div>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function AdminSocialPostsPage() {
   const qc = useQueryClient();
   const [attemptsForPost, setAttemptsForPost] = useState<string | null>(null);
