@@ -44,6 +44,7 @@ import {
   getPostStats,
   pingN8nWebhook,
 } from "@/lib/social.functions";
+import { runFullDiagnostics } from "@/lib/diagnostics.functions";
 
 export const Route = createFileRoute("/admin-social-posts")({
   head: () => ({
