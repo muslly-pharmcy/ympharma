@@ -138,6 +138,7 @@ function AdminSocialPostsPage() {
   const regenFn = useServerFn(regenerateDailyPostsNow);
   const publishFn = useServerFn(publishPostNow);
   const deleteFn = useServerFn(deleteSocialPost);
+  const pingFn = useServerFn(pingN8nWebhook);
 
   const posts = useQuery({
     queryKey: ["admin-social-posts"],
@@ -170,8 +171,10 @@ function AdminSocialPostsPage() {
       qc.invalidateQueries({ queryKey: ["admin-social-posts"] });
     },
     onError: (e: any) => toast.error(e?.message ?? "فشل الحذف"),
+  });
+
   const ping = useMutation({
-    mutationFn: () => useServerFnPing(),
+    mutationFn: () => pingFn(),
     onSuccess: (r: any) => {
       if (r?.ok) toast.success(`n8n استجاب ✅ (HTTP ${r.status})`);
       else toast.error(`فشل ping n8n (HTTP ${r?.status ?? "?"}): ${(r?.body ?? "").slice(0, 200)}`);
