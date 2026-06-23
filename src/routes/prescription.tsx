@@ -126,6 +126,15 @@ function PrescriptionPage() {
   function reopenWhatsApp(p: RxPending) {
     const msg = buildPrescriptionMessage({ refId: p.refId, imageUrls: p.imageUrls, customer: p.customer });
     openWhatsApp(msg);
+    const next: RxPending = {
+      ...p,
+      waAttempts: (p.waAttempts ?? 0) + 1,
+      waLastSentAt: Date.now(),
+      stage: "awaiting-whatsapp",
+    };
+    savePending(next);
+    setPending(next);
+    toast.success(`أُعيد فتح واتساب (محاولة #${next.waAttempts})`);
   }
 
   function dismissPending() {
