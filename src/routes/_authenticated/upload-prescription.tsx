@@ -263,19 +263,20 @@ function UploadPrescriptionPage() {
 
           {(() => {
             const decided = req?.status === "approved" || req?.status === "rejected";
-            const hasAnalysis = !!analysis && (analysis.medicines?.length ?? 0) > 0;
+            const medicines = analysis?.medicines ?? [];
+            const hasAnalysis = medicines.length > 0;
             const stepStates: Record<StepKey, StepState> = {
               uploaded: "done",
-              analyzed: hasAnalysis || req?.status === "approved" || req?.status === "rejected" ? "done" : "active",
+              analyzed: hasAnalysis || decided ? "done" : "active",
               review: decided ? "done" : hasAnalysis ? "active" : "pending",
               decided: decided ? "done" : "pending",
             };
             const stepNotes: Partial<Record<StepKey, string>> = {
               analyzed: hasAnalysis
-                ? `${analysis!.medicines.length} دواء تم استخراجه`
+                ? `${medicines.length} دواء تم استخراجه`
                 : "بانتظار نتيجة الذكاء الاصطناعي",
               review: decided
-                ? `${req!.status === "approved" ? "تمت الموافقة" : "تم الرفض"} بتاريخ ${req!.decided_at ? new Date(req!.decided_at as string).toLocaleString("ar") : ""}`
+                ? `${req?.status === "approved" ? "تمت الموافقة" : "تم الرفض"} بتاريخ ${req?.decided_at ? new Date(req.decided_at as string).toLocaleString("ar") : ""}`
                 : "الصيدلي سيراجع الطلب قريباً",
               decided: decided && req?.decision_note ? req.decision_note : undefined,
             };
