@@ -1,74 +1,49 @@
-# خطة الخيار الأول – تحسين واجهة المستخدم (UI/UX)
+## الهدف
+إصلاح تحذيرات `SECURITY DEFINER` الأمنية بإلغاء صلاحية `EXECUTE` عن دور `anon` فقط من الدوال الإدارية/الداخلية، مع الحفاظ على كل الوظائف العامة المقصودة (البحث، الطلبات المجهولة، رفع الوصفة، مساعدات RLS).
 
-تركيز على الواجهة فقط، بدون تغيير منطق الأعمال أو الـ backend.
+## النطاق
+الدوال المستهدفة (5 فقط من أصل 30 تمنح anon حالياً):
+- `admin_list_cron_jobs()` — لوحة الكرون الإدارية
+- `admin_list_cron_runs(integer)` — سجل تشغيلات الكرون الإدارية
+- `monitor_cron_failures()` — مراقبة فشل الكرون
+- `generate_invoice_number()` — مساعد داخلي لتوليد رقم فاتورة
+- `prescription_file_count(text)` — عدّاد ملفات وصفة (يخدم الإدارة فقط)
 
-## 1. الوضع المظلم (Dark Mode)
+## الدوال التي **لن** تُمسّ (عامة عن قصد)
+- متجر/كتالوج: `pharmacy_search`, `pharmacy_related_products`, `pharmacy_homepage_sections`, `pharmacy_taxonomy_stats`, `pharmacy_chronic_legacy_ids`, `list_bundles_public`, `list_approved_classifications_public`, `conditions_catalog`
+- طلبات مجهولة: `place_order` (نسختان), `submit_prescription`, `get_order_public`, `get_order_history_public`
+- معدّلات/تتبع: `check_img_rate_limit`, `check_tracking_rate_limit`, `consume_rate_limit`, `track_banner_event`, `validate_discount`
+- إشعارات العميل بـtoken: `customer_notification_get_status`, `customer_notification_set_optout`
+- مساعدات RLS (تُستدعى داخل السياسات): `has_role`, `has_permission`, `has_branch_access`, `is_owner_or_admin`, `is_branch_manager_of`
 
-ملاحظة هامة: `src/styles.css` يحتوي بالفعل على متغيرات `.dark` كاملة (oklch tokens)، ويُستخدم `@custom-variant dark` على نمط Tailwind v4. الأساس جاهز — نحتاج فقط Provider وزر تبديل.
+## التنفيذ
+Migration واحد يحتوي فقط على:
+```sql
+REVOKE EXECUTE ON FUNCTION public.admin_list_cron_jobs() FROM anon, PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.admin_list_cron_runs(integer) FROM anon, PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.monitor_cron_failures() FROM anon, PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.generate_invoice_number() FROM anon, PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.prescription_file_count(text) FROM anon, PUBLIC;
+-- التأكيد على الصلاحيات للأدوار المخوّلة
+GRANT EXECUTE ON FUNCTION public.admin_list_cron_jobs() TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.admin_list_cron_runs(integer) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.monitor_cron_failures() TO service_role;
+GRANT EXECUTE ON FUNCTION public.generate_invoice_number() TO service_role;
+GRANT EXECUTE ON FUNCTION public.prescription_file_count(text) TO authenticated, service_role;
+```
 
-- **جديد** `src/lib/theme-provider.tsx`
-  - Context للوضع: `light | dark | system`
-  - يحفظ في `localStorage` بمفتاح `pharmacy-ui-theme`
-  - يضيف/يزيل class `dark` على `document.documentElement`
-  - SSR-safe: قراءة localStorage داخل `useEffect` فقط (TanStack Start يعمل بـ SSR)
-  - script صغير في `__root.tsx` head لمنع وميض الشاشة (FOUC) قبل hydrate
-- **جديد** `src/components/theme-toggle.tsx`
-  - زر `DropdownMenu` (shadcn موجود) بخيارات: فاتح / مظلم / النظام
-  - أيقونات Sun/Moon/Monitor من lucide
-- **تعديل** `src/routes/__root.tsx`
-  - تغليف الـ Outlet بـ `<ThemeProvider>` داخل `RootComponent`
-  - إضافة script حقن class الوضع مبكراً في `shellComponent`
-  - الزر يُضاف داخل `site-chrome.tsx` (الهيدر الموجود) — وليس عائماً فوق المحتوى
+ملاحظة: `monitor_cron_failures` و`generate_invoice_number` يُستدعيان من جانب الخادم فقط (cron / triggers)، لذلك `service_role` يكفي بدون `authenticated`.
 
-## 2. أنيميشن Framer Motion
+## التحقق بعد التطبيق
+استعلام بسيط للتأكد من اختفاء `anon=X` من ACL هذه الدوال:
+```sql
+SELECT proname, array_to_string(proacl, ', ')
+FROM pg_proc WHERE proname IN
+  ('admin_list_cron_jobs','admin_list_cron_runs','monitor_cron_failures',
+   'generate_invoice_number','prescription_file_count');
+```
 
-- تثبيت `framer-motion` عبر `bun add`
-- **جديد** `src/components/page-transition.tsx` — fade + slide خفيف عند تغيير المسار
-- **جديد** `src/components/animated-section.tsx` — `whileInView` للظهور عند التمرير
-- تطبيق `PageTransition` حول `<Outlet />` في `__root.tsx` باستخدام `AnimatePresence` مع `useLocation().pathname` كمفتاح
-- احترام `prefers-reduced-motion` (تعطيل الحركة)
-
-## 3. التجاوب (Responsiveness)
-
-مراجعة مستهدفة فقط للصفحات/المكونات الرئيسية الأعلى استخداماً:
-- `src/components/site-chrome.tsx` (الهيدر + التنقل)
-- `src/routes/index.tsx` (الصفحة الرئيسية)
-- `src/routes/products.tsx`, `src/routes/cart.tsx`
-- `src/components/product-card.tsx`
-
-تطبيق نمط `grid grid-cols-[minmax(0,1fr)_auto] sm:flex` + `min-w-0` + `shrink-0` + `truncate` للصفوف التي تجمع نصاً وأدوات (وفق responsive-layout-patterns). لن أعدّل كل صفحة admin — فقط الصفحات التي يراها الزائر.
-
-## 4. RTL
-
-- `<html dir="rtl">` موجود بالفعل في `__root.tsx`
-- مراجعة استخدامات `ml-*`/`mr-*`/`left-*`/`right-*` في المكونات المعدّلة وتحويلها إلى `ms-*`/`me-*`/`start-*`/`end-*` حيث يلزم
-- التأكد من اتجاه الأيقونات (Chevron) في القوائم
-
-## الملفات
-
-**جديدة:**
-- `src/lib/theme-provider.tsx`
-- `src/components/theme-toggle.tsx`
-- `src/components/page-transition.tsx`
-- `src/components/animated-section.tsx`
-
-**معدّلة:**
-- `src/routes/__root.tsx` — ThemeProvider + anti-FOUC script + PageTransition/AnimatePresence
-- `src/components/site-chrome.tsx` — إدراج `ThemeToggle` + تحسينات تجاوب الهيدر
-- `package.json` — `framer-motion`
-
-**لن تُمسّ:**
-- أي ملف backend / server function / migration
-- ملفات `src/integrations/supabase/*` التلقائية
-- منطق السلة / الطلبات / الفواتير
-
-## خارج النطاق
-
-- لا تغييرات على نظام الفواتير، الدفع، أو التقارير (مؤجل للمرحلة التالية)
-- لا إعادة تصميم شامل لصفحات الإدارة (`/admin-*`)
-
-## ملاحظات تقنية
-
-- Tailwind v4 على هذا المشروع — لا يوجد `tailwind.config.js`، التوكنز في `@theme` داخل `src/styles.css` (موجودة). لن أضيف `@tailwind base/...` (نمط v3).
-- `ThemeProvider` يقرأ `window`/`localStorage` داخل `useEffect` فقط لتجنّب SSR crash.
-- script منع الوميض يُكتب inline في `<head>` ويقرأ `localStorage` ويضيف class قبل أول رسم.
+## ما لن يحدث
+- لا تعديل لأي كود تطبيق (الكود الحالي يستدعي هذه الدوال من خادم بصلاحية موثّقة).
+- لا تغيير على باقي 25 دالة `SECURITY DEFINER` العامة (مقصودة وموثّقة هنا).
+- التحذيرات في Linter ستنخفض بمقدار 5؛ الباقي مقصود ويمكن لاحقاً إضافة ملاحظة مرجعية لكل واحدة في security-memory.
