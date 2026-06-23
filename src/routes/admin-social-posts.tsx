@@ -33,6 +33,7 @@ import {
   deleteSocialPost,
   listPostAttempts,
   getPostStats,
+  pingN8nWebhook,
 } from "@/lib/social.functions";
 
 export const Route = createFileRoute("/admin-social-posts")({
@@ -137,6 +138,7 @@ function AdminSocialPostsPage() {
   const regenFn = useServerFn(regenerateDailyPostsNow);
   const publishFn = useServerFn(publishPostNow);
   const deleteFn = useServerFn(deleteSocialPost);
+  const pingFn = useServerFn(pingN8nWebhook);
 
   const posts = useQuery({
     queryKey: ["admin-social-posts"],
@@ -171,23 +173,38 @@ function AdminSocialPostsPage() {
     onError: (e: any) => toast.error(e?.message ?? "فشل الحذف"),
   });
 
+  const ping = useMutation({
+    mutationFn: () => pingFn(),
+    onSuccess: (r: any) => {
+      if (r?.ok) toast.success(`n8n استجاب ✅ (HTTP ${r.status})`);
+      else toast.error(`فشل ping n8n (HTTP ${r?.status ?? "?"}): ${(r?.body ?? "").slice(0, 200)}`);
+    },
+    onError: (e: any) => toast.error(e?.message ?? "فشل الاتصال بـ n8n"),
+  });
+
   return (
     <div dir="rtl" className="container mx-auto max-w-5xl px-4 py-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold">📢 المنشورات اليومية</h1>
           <p className="text-sm text-muted-foreground">
             تُولَّد تلقائياً يومياً 8 صباحاً وتُرسَل إلى n8n للنشر، والإحصائيات تُجمَع كل ساعة.
           </p>
         </div>
-        <Button onClick={() => regen.mutate()} disabled={regen.isPending}>
-          {regen.isPending ? (
-            <Loader2 className="size-4 ms-2 animate-spin" />
-          ) : (
-            <RefreshCw className="size-4 ms-2" />
-          )}
-          توليد الآن
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => ping.mutate()} disabled={ping.isPending}>
+            {ping.isPending ? <Loader2 className="size-4 ms-2 animate-spin" /> : null}
+            اختبار n8n
+          </Button>
+          <Button onClick={() => regen.mutate()} disabled={regen.isPending}>
+            {regen.isPending ? (
+              <Loader2 className="size-4 ms-2 animate-spin" />
+            ) : (
+              <RefreshCw className="size-4 ms-2" />
+            )}
+            توليد الآن
+          </Button>
+        </div>
       </div>
 
       {posts.isLoading ? (
