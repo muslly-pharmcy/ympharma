@@ -8,6 +8,7 @@ import {
 
 
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
+import { Logo3D } from "@/components/Logo3D";
 import { ConditionsStrip } from "@/components/conditions-strip";
 import { MarketingBanner } from "@/components/marketing-banner";
 import { NunDivider } from "@/components/nun-divider";
@@ -122,6 +123,7 @@ function Home() {
       <SiteHeader search={query} onSearch={setQuery} />
 
       <main className="mx-auto max-w-7xl px-4 py-6 space-y-10">
+        <Logo3D height={380} className="w-full" />
         <MarketingBanner placement="home" banners={banners} />
         <section className="grid gap-6 lg:grid-cols-[1.05fr_.95fr] items-center overflow-hidden rounded-2xl brand-gradient p-6 text-primary-foreground shadow-elevated sm:p-10">
           <div className="relative">
