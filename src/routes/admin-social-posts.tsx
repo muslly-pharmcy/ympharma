@@ -56,7 +56,7 @@ function AdminSocialPostsPage() {
   });
 
   const regen = useMutation({
-    mutationFn: () => regenFn({ data: {} }),
+    mutationFn: () => regenFn(),
     onSuccess: (r: any) => {
       toast.success(`تم توليد ${r?.inserted ?? 0} منشور`);
       qc.invalidateQueries({ queryKey: ["admin-social-posts"] });

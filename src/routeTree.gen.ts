@@ -38,6 +38,7 @@ import { Route as AdminWhatsappConversationsRouteImport } from './routes/admin-w
 import { Route as AdminTriggerFailuresRouteImport } from './routes/admin-trigger-failures'
 import { Route as AdminTransfersRouteImport } from './routes/admin-transfers'
 import { Route as AdminStockAuditRouteImport } from './routes/admin-stock-audit'
+import { Route as AdminSocialPostsRouteImport } from './routes/admin-social-posts'
 import { Route as AdminSettingsRouteImport } from './routes/admin-settings'
 import { Route as AdminRxReviewRouteImport } from './routes/admin-rx-review'
 import { Route as AdminRxExtractionEditRouteImport } from './routes/admin-rx-extraction-edit'
@@ -111,6 +112,7 @@ import { Route as ApiPublicHooksWeeklyAiEnrichRouteImport } from './routes/api/p
 import { Route as ApiPublicHooksWaStaleConversationsRouteImport } from './routes/api/public/hooks/wa-stale-conversations'
 import { Route as ApiPublicHooksRxNotifyRouteImport } from './routes/api/public/hooks/rx-notify'
 import { Route as ApiPublicHooksRxMirrorRouteImport } from './routes/api/public/hooks/rx-mirror'
+import { Route as ApiPublicHooksRunSocialPostsRouteImport } from './routes/api/public/hooks/run-social-posts'
 import { Route as ApiPublicHooksRunRestockAlertsRouteImport } from './routes/api/public/hooks/run-restock-alerts'
 import { Route as ApiPublicHooksRunReactivationRouteImport } from './routes/api/public/hooks/run-reactivation'
 import { Route as ApiPublicHooksRunLoyaltyReminderRouteImport } from './routes/api/public/hooks/run-loyalty-reminder'
@@ -276,6 +278,11 @@ const AdminTransfersRoute = AdminTransfersRouteImport.update({
 const AdminStockAuditRoute = AdminStockAuditRouteImport.update({
   id: '/admin-stock-audit',
   path: '/admin-stock-audit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSocialPostsRoute = AdminSocialPostsRouteImport.update({
+  id: '/admin-social-posts',
+  path: '/admin-social-posts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
@@ -662,6 +669,12 @@ const ApiPublicHooksRxMirrorRoute = ApiPublicHooksRxMirrorRouteImport.update({
   path: '/api/public/hooks/rx-mirror',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksRunSocialPostsRoute =
+  ApiPublicHooksRunSocialPostsRouteImport.update({
+    id: '/api/public/hooks/run-social-posts',
+    path: '/api/public/hooks/run-social-posts',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksRunRestockAlertsRoute =
   ApiPublicHooksRunRestockAlertsRouteImport.update({
     id: '/api/public/hooks/run-restock-alerts',
@@ -825,6 +838,7 @@ export interface FileRoutesByFullPath {
   '/admin-rx-extraction-edit': typeof AdminRxExtractionEditRoute
   '/admin-rx-review': typeof AdminRxReviewRoute
   '/admin-settings': typeof AdminSettingsRoute
+  '/admin-social-posts': typeof AdminSocialPostsRoute
   '/admin-stock-audit': typeof AdminStockAuditRoute
   '/admin-transfers': typeof AdminTransfersRoute
   '/admin-trigger-failures': typeof AdminTriggerFailuresRoute
@@ -883,6 +897,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/run-loyalty-reminder': typeof ApiPublicHooksRunLoyaltyReminderRoute
   '/api/public/hooks/run-reactivation': typeof ApiPublicHooksRunReactivationRoute
   '/api/public/hooks/run-restock-alerts': typeof ApiPublicHooksRunRestockAlertsRoute
+  '/api/public/hooks/run-social-posts': typeof ApiPublicHooksRunSocialPostsRoute
   '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
   '/api/public/hooks/wa-stale-conversations': typeof ApiPublicHooksWaStaleConversationsRoute
@@ -948,6 +963,7 @@ export interface FileRoutesByTo {
   '/admin-rx-extraction-edit': typeof AdminRxExtractionEditRoute
   '/admin-rx-review': typeof AdminRxReviewRoute
   '/admin-settings': typeof AdminSettingsRoute
+  '/admin-social-posts': typeof AdminSocialPostsRoute
   '/admin-stock-audit': typeof AdminStockAuditRoute
   '/admin-transfers': typeof AdminTransfersRoute
   '/admin-trigger-failures': typeof AdminTriggerFailuresRoute
@@ -1006,6 +1022,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/run-loyalty-reminder': typeof ApiPublicHooksRunLoyaltyReminderRoute
   '/api/public/hooks/run-reactivation': typeof ApiPublicHooksRunReactivationRoute
   '/api/public/hooks/run-restock-alerts': typeof ApiPublicHooksRunRestockAlertsRoute
+  '/api/public/hooks/run-social-posts': typeof ApiPublicHooksRunSocialPostsRoute
   '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
   '/api/public/hooks/wa-stale-conversations': typeof ApiPublicHooksWaStaleConversationsRoute
@@ -1073,6 +1090,7 @@ export interface FileRoutesById {
   '/admin-rx-extraction-edit': typeof AdminRxExtractionEditRoute
   '/admin-rx-review': typeof AdminRxReviewRoute
   '/admin-settings': typeof AdminSettingsRoute
+  '/admin-social-posts': typeof AdminSocialPostsRoute
   '/admin-stock-audit': typeof AdminStockAuditRoute
   '/admin-transfers': typeof AdminTransfersRoute
   '/admin-trigger-failures': typeof AdminTriggerFailuresRoute
@@ -1131,6 +1149,7 @@ export interface FileRoutesById {
   '/api/public/hooks/run-loyalty-reminder': typeof ApiPublicHooksRunLoyaltyReminderRoute
   '/api/public/hooks/run-reactivation': typeof ApiPublicHooksRunReactivationRoute
   '/api/public/hooks/run-restock-alerts': typeof ApiPublicHooksRunRestockAlertsRoute
+  '/api/public/hooks/run-social-posts': typeof ApiPublicHooksRunSocialPostsRoute
   '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
   '/api/public/hooks/wa-stale-conversations': typeof ApiPublicHooksWaStaleConversationsRoute
@@ -1198,6 +1217,7 @@ export interface FileRouteTypes {
     | '/admin-rx-extraction-edit'
     | '/admin-rx-review'
     | '/admin-settings'
+    | '/admin-social-posts'
     | '/admin-stock-audit'
     | '/admin-transfers'
     | '/admin-trigger-failures'
@@ -1256,6 +1276,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/run-loyalty-reminder'
     | '/api/public/hooks/run-reactivation'
     | '/api/public/hooks/run-restock-alerts'
+    | '/api/public/hooks/run-social-posts'
     | '/api/public/hooks/rx-mirror'
     | '/api/public/hooks/rx-notify'
     | '/api/public/hooks/wa-stale-conversations'
@@ -1321,6 +1342,7 @@ export interface FileRouteTypes {
     | '/admin-rx-extraction-edit'
     | '/admin-rx-review'
     | '/admin-settings'
+    | '/admin-social-posts'
     | '/admin-stock-audit'
     | '/admin-transfers'
     | '/admin-trigger-failures'
@@ -1379,6 +1401,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/run-loyalty-reminder'
     | '/api/public/hooks/run-reactivation'
     | '/api/public/hooks/run-restock-alerts'
+    | '/api/public/hooks/run-social-posts'
     | '/api/public/hooks/rx-mirror'
     | '/api/public/hooks/rx-notify'
     | '/api/public/hooks/wa-stale-conversations'
@@ -1445,6 +1468,7 @@ export interface FileRouteTypes {
     | '/admin-rx-extraction-edit'
     | '/admin-rx-review'
     | '/admin-settings'
+    | '/admin-social-posts'
     | '/admin-stock-audit'
     | '/admin-transfers'
     | '/admin-trigger-failures'
@@ -1503,6 +1527,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/run-loyalty-reminder'
     | '/api/public/hooks/run-reactivation'
     | '/api/public/hooks/run-restock-alerts'
+    | '/api/public/hooks/run-social-posts'
     | '/api/public/hooks/rx-mirror'
     | '/api/public/hooks/rx-notify'
     | '/api/public/hooks/wa-stale-conversations'
@@ -1570,6 +1595,7 @@ export interface RootRouteChildren {
   AdminRxExtractionEditRoute: typeof AdminRxExtractionEditRoute
   AdminRxReviewRoute: typeof AdminRxReviewRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminSocialPostsRoute: typeof AdminSocialPostsRoute
   AdminStockAuditRoute: typeof AdminStockAuditRoute
   AdminTransfersRoute: typeof AdminTransfersRoute
   AdminTriggerFailuresRoute: typeof AdminTriggerFailuresRoute
@@ -1618,6 +1644,7 @@ export interface RootRouteChildren {
   ApiPublicHooksRunLoyaltyReminderRoute: typeof ApiPublicHooksRunLoyaltyReminderRoute
   ApiPublicHooksRunReactivationRoute: typeof ApiPublicHooksRunReactivationRoute
   ApiPublicHooksRunRestockAlertsRoute: typeof ApiPublicHooksRunRestockAlertsRoute
+  ApiPublicHooksRunSocialPostsRoute: typeof ApiPublicHooksRunSocialPostsRoute
   ApiPublicHooksRxMirrorRoute: typeof ApiPublicHooksRxMirrorRoute
   ApiPublicHooksRxNotifyRoute: typeof ApiPublicHooksRxNotifyRoute
   ApiPublicHooksWaStaleConversationsRoute: typeof ApiPublicHooksWaStaleConversationsRoute
@@ -1841,6 +1868,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-stock-audit'
       fullPath: '/admin-stock-audit'
       preLoaderRoute: typeof AdminStockAuditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-social-posts': {
+      id: '/admin-social-posts'
+      path: '/admin-social-posts'
+      fullPath: '/admin-social-posts'
+      preLoaderRoute: typeof AdminSocialPostsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-settings': {
@@ -2354,6 +2388,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksRxMirrorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/run-social-posts': {
+      id: '/api/public/hooks/run-social-posts'
+      path: '/api/public/hooks/run-social-posts'
+      fullPath: '/api/public/hooks/run-social-posts'
+      preLoaderRoute: typeof ApiPublicHooksRunSocialPostsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/run-restock-alerts': {
       id: '/api/public/hooks/run-restock-alerts'
       path: '/api/public/hooks/run-restock-alerts'
@@ -2596,6 +2637,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRxExtractionEditRoute: AdminRxExtractionEditRoute,
   AdminRxReviewRoute: AdminRxReviewRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminSocialPostsRoute: AdminSocialPostsRoute,
   AdminStockAuditRoute: AdminStockAuditRoute,
   AdminTransfersRoute: AdminTransfersRoute,
   AdminTriggerFailuresRoute: AdminTriggerFailuresRoute,
@@ -2645,6 +2687,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksRunLoyaltyReminderRoute: ApiPublicHooksRunLoyaltyReminderRoute,
   ApiPublicHooksRunReactivationRoute: ApiPublicHooksRunReactivationRoute,
   ApiPublicHooksRunRestockAlertsRoute: ApiPublicHooksRunRestockAlertsRoute,
+  ApiPublicHooksRunSocialPostsRoute: ApiPublicHooksRunSocialPostsRoute,
   ApiPublicHooksRxMirrorRoute: ApiPublicHooksRxMirrorRoute,
   ApiPublicHooksRxNotifyRoute: ApiPublicHooksRxNotifyRoute,
   ApiPublicHooksWaStaleConversationsRoute:
