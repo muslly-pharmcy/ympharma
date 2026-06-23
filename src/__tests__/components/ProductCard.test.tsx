@@ -34,6 +34,8 @@ const product: Product = {
   img: "/test.jpg",
 };
 
+const fmt = (n: number) => n.toLocaleString("ar-EG");
+
 describe("ProductCard", () => {
   beforeEach(() => vi.clearAllMocks());
 
