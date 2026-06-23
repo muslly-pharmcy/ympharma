@@ -3,8 +3,9 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
-function Boom(): JSX.Element {
+function Boom() {
   throw new Error("boom");
+  return null;
 }
 
 describe("ErrorBoundary", () => {
