@@ -33,6 +33,7 @@ import {
   deleteSocialPost,
   listPostAttempts,
   getPostStats,
+  pingN8nWebhook,
 } from "@/lib/social.functions";
 
 export const Route = createFileRoute("/admin-social-posts")({
