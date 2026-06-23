@@ -6,6 +6,7 @@ import { useI18n } from "@/lib/i18n";
 import { useSpeech } from "@/hooks/use-speech";
 import logoUrl from "@/assets/almusalli-logo.webp";
 import { categories } from "@/lib/products";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (v: string) => void }) {
   const navigate = useNavigate();
@@ -45,8 +46,9 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
             <span className="hidden items-center gap-1.5 sm:flex"><Truck className="size-3.5" /> {t("topbar.delivery")}</span>
             <span className="flex items-center gap-1.5"><Phone className="size-3.5" /> 782 878 280</span>
           </div>
-          <div className="flex items-center gap-3 opacity-95">
+          <div className="flex items-center gap-2 opacity-95">
             <Link to="/track" className="hover:underline">{t("topbar.track")}</Link>
+            <ThemeToggle />
             <button
               onClick={() => setLang(lang === "ar" ? "en" : "ar")}
               className="inline-flex items-center gap-1 rounded-md bg-white/15 px-2 py-1 font-bold ring-1 ring-white/25 transition hover:bg-white/25"
