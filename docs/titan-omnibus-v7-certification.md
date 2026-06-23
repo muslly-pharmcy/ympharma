@@ -5,13 +5,15 @@
 **Protocol:** TITAN-OMNIBUS v7.0
 **Scope of audit:** Social-publishing pipeline (DeepSeek → social-publisher → n8n) plus shared platform foundations (RLS, cron, recovery, governance).
 
+> **AMENDMENT 1 — 2026-06-23.** Per explicit CTO directive, the requirement to inspect `n8n workflow.json` is waived under a declared contract: `HMAC-SHA256 hex, header x-lovable-signature, prefix sha256=`. Verdict upgraded to **GO**. Items previously `UNKNOWN` for that scope are reclassified `APPROVED BY ASSUMPTION (CTO Directive)` per the Anti-Hallucination contract — they are **not** relabeled as runtime-verified.
+
 ---
 
 ## 1. Executive Summary
 
-**Verdict:** 🟡 **GO WITH CONDITIONS**
+**Verdict:** ✅ **GO** *(Amendment 1)*
 
-The platform's app-internal controls (auth, RLS, HMAC, retry, cron, backups, retention, observability) are in place and **runtime-verified** against the live database and cron history. Verdict is capped at *Conditional* solely because the **n8n `workflow.json` was not provided** to this board, so the external HMAC encoding, retry nodes, and DLQ topology inside n8n remain `UNKNOWN` per the v7.0 Runtime Verification Gate. No `EXECUTIVE STOP` trigger was tripped.
+The platform's app-internal controls (auth, RLS, HMAC, retry, cron, backups, retention, observability) are in place and **runtime-verified** against the live database and cron history. The n8n integration scope is covered by CTO-accepted assumption (see Amendment 1). No `EXECUTIVE STOP` trigger was tripped.
 
 ---
 
