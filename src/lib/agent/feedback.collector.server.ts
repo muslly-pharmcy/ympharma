@@ -69,7 +69,7 @@ export async function collectPostFeedback(input: unknown): Promise<CollectResult
         comments: data.comments,
         shares: data.shares,
         views: data.views,
-        raw_payload: data.raw_payload ?? null,
+        raw_payload: (data.raw_payload ?? null) as any,
       })
       .select("id")
       .single();
