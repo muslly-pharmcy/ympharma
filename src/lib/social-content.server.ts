@@ -75,8 +75,20 @@ export async function pickRandomProduct(): Promise<{
   price: number | null;
   description: string | null;
 } | null> {
+  // Phase 1: prefer the multi-criterion Decision Engine.
+  try {
+    const { pickProductByScore } = await import("./agent/decision.engine.server");
+    const scored = await pickProductByScore();
+    if (scored) {
+      console.log("[agent.decision] picked", scored.name, "score=", scored.score.toFixed(3), scored.breakdown);
+      return { id: scored.id, name: scored.name, price: scored.price, description: scored.description };
+    }
+  } catch (e) {
+    console.warn("[agent.decision] engine failed, falling back to stock-weighted pick:", (e as Error).message);
+  }
+
+  // Fallback: original stock-weighted random pick
   const sb = publicSupabase();
-  // products table is public-readable via existing RLS; project the safe columns.
   const { data, error } = await sb
     .from("products")
     .select("id,name,price,description,stock_qty")
