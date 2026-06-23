@@ -82,6 +82,7 @@ import { Route as AdminAiChronicRefillRouteImport } from './routes/admin-ai-chro
 import { Route as AdminAiCatalogRouteImport } from './routes/admin-ai-catalog'
 import { Route as AdminAiApprovalsRouteImport } from './routes/admin-ai-approvals'
 import { Route as AdminAgentsRouteImport } from './routes/admin-agents'
+import { Route as AdminAgentInsightsRouteImport } from './routes/admin-agent-insights'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -509,6 +510,11 @@ const AdminAgentsRoute = AdminAgentsRouteImport.update({
   path: '/admin-agents',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAgentInsightsRoute = AdminAgentInsightsRouteImport.update({
+  id: '/admin-agent-insights',
+  path: '/admin-agent-insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -823,6 +829,7 @@ const ApiPublicHooksAgentsBiRoute = ApiPublicHooksAgentsBiRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/admin-agent-insights': typeof AdminAgentInsightsRoute
   '/admin-agents': typeof AdminAgentsRoute
   '/admin-ai-approvals': typeof AdminAiApprovalsRoute
   '/admin-ai-catalog': typeof AdminAiCatalogRoute
@@ -952,6 +959,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/admin-agent-insights': typeof AdminAgentInsightsRoute
   '/admin-agents': typeof AdminAgentsRoute
   '/admin-ai-approvals': typeof AdminAiApprovalsRoute
   '/admin-ai-catalog': typeof AdminAiCatalogRoute
@@ -1083,6 +1091,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/admin': typeof AdminRoute
+  '/admin-agent-insights': typeof AdminAgentInsightsRoute
   '/admin-agents': typeof AdminAgentsRoute
   '/admin-ai-approvals': typeof AdminAiApprovalsRoute
   '/admin-ai-catalog': typeof AdminAiCatalogRoute
@@ -1214,6 +1223,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/admin-agent-insights'
     | '/admin-agents'
     | '/admin-ai-approvals'
     | '/admin-ai-catalog'
@@ -1343,6 +1353,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/admin-agent-insights'
     | '/admin-agents'
     | '/admin-ai-approvals'
     | '/admin-ai-catalog'
@@ -1473,6 +1484,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/admin'
+    | '/admin-agent-insights'
     | '/admin-agents'
     | '/admin-ai-approvals'
     | '/admin-ai-catalog'
@@ -1604,6 +1616,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AdminRoute: typeof AdminRoute
+  AdminAgentInsightsRoute: typeof AdminAgentInsightsRoute
   AdminAgentsRoute: typeof AdminAgentsRoute
   AdminAiApprovalsRoute: typeof AdminAiApprovalsRoute
   AdminAiCatalogRoute: typeof AdminAiCatalogRoute
@@ -2234,6 +2247,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAgentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin-agent-insights': {
+      id: '/admin-agent-insights'
+      path: '/admin-agent-insights'
+      fullPath: '/admin-agent-insights'
+      preLoaderRoute: typeof AdminAgentInsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -2678,6 +2698,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AdminRoute: AdminRoute,
+  AdminAgentInsightsRoute: AdminAgentInsightsRoute,
   AdminAgentsRoute: AdminAgentsRoute,
   AdminAiApprovalsRoute: AdminAiApprovalsRoute,
   AdminAiCatalogRoute: AdminAiCatalogRoute,
