@@ -2985,6 +2985,100 @@ export type Database = {
         }
         Relationships: []
       }
+      social_post_stats: {
+        Row: {
+          collected_at: string
+          comments: number
+          id: string
+          likes: number
+          post_id: string
+          shares: number
+          views: number
+        }
+        Insert: {
+          collected_at?: string
+          comments?: number
+          id?: string
+          likes?: number
+          post_id: string
+          shares?: number
+          views?: number
+        }
+        Update: {
+          collected_at?: string
+          comments?: number
+          id?: string
+          likes?: number
+          post_id?: string
+          shares?: number
+          views?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_post_stats_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "social_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_posts: {
+        Row: {
+          caption: string
+          created_at: string
+          cta: string | null
+          error_message: string | null
+          external_id: string | null
+          hashtags: string[]
+          id: string
+          platform: string
+          product_id: string | null
+          published_at: string | null
+          scheduled_for: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          caption: string
+          created_at?: string
+          cta?: string | null
+          error_message?: string | null
+          external_id?: string | null
+          hashtags?: string[]
+          id?: string
+          platform: string
+          product_id?: string | null
+          published_at?: string | null
+          scheduled_for?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          caption?: string
+          created_at?: string
+          cta?: string | null
+          error_message?: string | null
+          external_id?: string | null
+          hashtags?: string[]
+          id?: string
+          platform?: string
+          product_id?: string | null
+          published_at?: string | null
+          scheduled_for?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_posts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff_alerts: {
         Row: {
           acknowledged_at: string | null
