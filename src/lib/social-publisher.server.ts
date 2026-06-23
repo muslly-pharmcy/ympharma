@@ -1,6 +1,6 @@
 // Publish a saved social_posts row by forwarding it to the configured n8n webhook.
-// Every attempt is recorded in `social_post_attempts` and the `attempt_count` /
-// `last_attempt_at` columns on `social_posts` are kept in sync.
+// Every attempt is recorded in `social_post_attempts` with full diagnostics
+// (request payload, response status, response body) for debugging.
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 interface PostRow {
@@ -17,10 +17,15 @@ type AttemptSource = "server" | "callback" | "manual" | "cron";
 async function logAttempt(args: {
   postId: string;
   attemptNo: number;
-  status: "success" | "failed";
+  status: "success" | "failed" | "skipped";
   error?: string | null;
   externalId?: string | null;
   source: AttemptSource;
+  requestPayload?: unknown;
+  responseStatus?: number | null;
+  responseBody?: string | null;
+  hmacValid?: boolean | null;
+  idempotentSkip?: boolean;
 }) {
   await supabaseAdmin.from("social_post_attempts").insert({
     post_id: args.postId,
@@ -29,11 +34,15 @@ async function logAttempt(args: {
     error_message: args.error?.slice(0, 1000) ?? null,
     external_id: args.externalId ?? null,
     source: args.source,
+    request_payload: args.requestPayload ?? null,
+    response_status: args.responseStatus ?? null,
+    response_body: args.responseBody?.slice(0, 1000) ?? null,
+    hmac_valid: args.hmacValid ?? null,
+    idempotent_skip: args.idempotentSkip ?? false,
   });
 }
 
 async function bumpAttempt(postId: string): Promise<number> {
-  // Read-then-write; safe enough for our low-volume cron + manual triggers.
   const { data } = await supabaseAdmin
     .from("social_posts")
     .select("attempt_count")
@@ -47,7 +56,21 @@ async function bumpAttempt(postId: string): Promise<number> {
   return next;
 }
 
-export async function publishToN8n(post: PostRow): Promise<{ ok: true; external_id?: string }> {
+interface PublishResult {
+  ok: true;
+  external_id?: string;
+  payload: Record<string, unknown>;
+  responseStatus: number;
+  responseBody: string;
+}
+
+interface PublishError extends Error {
+  payload?: Record<string, unknown>;
+  responseStatus?: number;
+  responseBody?: string;
+}
+
+export async function publishToN8n(post: PostRow): Promise<PublishResult> {
   const url = process.env.N8N_WEBHOOK_URL;
   if (!url) throw new Error("N8N_WEBHOOK_URL غير مضبوط");
 
@@ -56,28 +79,50 @@ export async function publishToN8n(post: PostRow): Promise<{ ok: true; external_
     ? `${post.caption}\n\n${hashtags.join(" ")}`
     : post.caption;
 
+  const payload: Record<string, unknown> = {
+    event: "publish",
+    post_id: post.id,
+    platform: post.platform,
+    caption: fullCaption,
+    cta: post.cta,
+    product_id: post.product_id,
+  };
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 20_000);
   try {
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        event: "publish",
-        post_id: post.id,
-        platform: post.platform,
-        caption: fullCaption,
-        cta: post.cta,
-        product_id: post.product_id,
-      }),
+      body: JSON.stringify(payload),
       signal: controller.signal,
     });
+    const text = await res.text().catch(() => "");
     if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(`n8n HTTP ${res.status}: ${text.slice(0, 300)}`);
+      const err: PublishError = new Error(`n8n HTTP ${res.status}: ${text.slice(0, 300)}`);
+      err.payload = payload;
+      err.responseStatus = res.status;
+      err.responseBody = text;
+      throw err;
     }
-    const body = (await res.json().catch(() => ({}))) as { external_id?: string; id?: string };
-    return { ok: true, external_id: body.external_id ?? body.id };
+    let parsed: { external_id?: string; id?: string } = {};
+    try {
+      parsed = JSON.parse(text) as { external_id?: string; id?: string };
+    } catch {
+      // not JSON — that's fine
+    }
+    return {
+      ok: true,
+      external_id: parsed.external_id ?? parsed.id,
+      payload,
+      responseStatus: res.status,
+      responseBody: text,
+    };
+  } catch (e) {
+    if ((e as PublishError).payload) throw e;
+    const err: PublishError = new Error((e as Error).message);
+    err.payload = payload;
+    throw err;
   } finally {
     clearTimeout(timeout);
   }
@@ -108,15 +153,31 @@ export async function markFailed(postId: string, error: string) {
 export async function publishPostById(
   postId: string,
   source: AttemptSource = "server",
-): Promise<{ ok: boolean; error?: string; attempt_no?: number }> {
+): Promise<{ ok: boolean; error?: string; attempt_no?: number; idempotent?: boolean }> {
   const { data, error } = await supabaseAdmin
     .from("social_posts")
-    .select("id,platform,caption,hashtags,cta,product_id")
+    .select("id,platform,caption,hashtags,cta,product_id,status,external_id")
     .eq("id", postId)
     .maybeSingle();
   if (error || !data) {
     return { ok: false, error: error?.message ?? "post not found" };
   }
+
+  // Idempotency: if already published with an external_id, skip re-sending.
+  if (data.status === "published" && data.external_id) {
+    const attemptNo = await bumpAttempt(postId);
+    await logAttempt({
+      postId,
+      attemptNo,
+      status: "skipped",
+      source,
+      idempotentSkip: true,
+      error: `سبق نشره external_id=${data.external_id}`,
+      externalId: data.external_id,
+    });
+    return { ok: true, idempotent: true, attempt_no: attemptNo };
+  }
+
   const attemptNo = await bumpAttempt(postId);
   try {
     const r = await publishToN8n(data as PostRow);
@@ -127,12 +188,25 @@ export async function publishPostById(
       status: "success",
       externalId: r.external_id ?? null,
       source,
+      requestPayload: r.payload,
+      responseStatus: r.responseStatus,
+      responseBody: r.responseBody,
     });
     return { ok: true, attempt_no: attemptNo };
   } catch (e) {
-    const msg = (e as Error).message;
+    const err = e as PublishError;
+    const msg = err.message;
     await markFailed(postId, msg);
-    await logAttempt({ postId, attemptNo, status: "failed", error: msg, source });
+    await logAttempt({
+      postId,
+      attemptNo,
+      status: "failed",
+      error: msg,
+      source,
+      requestPayload: err.payload,
+      responseStatus: err.responseStatus ?? null,
+      responseBody: err.responseBody ?? null,
+    });
     return { ok: false, error: msg, attempt_no: attemptNo };
   }
 }
