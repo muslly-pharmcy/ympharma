@@ -2985,6 +2985,47 @@ export type Database = {
         }
         Relationships: []
       }
+      social_post_attempts: {
+        Row: {
+          attempt_no: number
+          created_at: string
+          error_message: string | null
+          external_id: string | null
+          id: string
+          post_id: string
+          source: string
+          status: string
+        }
+        Insert: {
+          attempt_no: number
+          created_at?: string
+          error_message?: string | null
+          external_id?: string | null
+          id?: string
+          post_id: string
+          source?: string
+          status: string
+        }
+        Update: {
+          attempt_no?: number
+          created_at?: string
+          error_message?: string | null
+          external_id?: string | null
+          id?: string
+          post_id?: string
+          source?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_post_attempts_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "social_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_post_stats: {
         Row: {
           collected_at: string
@@ -3025,6 +3066,7 @@ export type Database = {
       }
       social_posts: {
         Row: {
+          attempt_count: number
           caption: string
           created_at: string
           cta: string | null
@@ -3032,6 +3074,7 @@ export type Database = {
           external_id: string | null
           hashtags: string[]
           id: string
+          last_attempt_at: string | null
           platform: string
           product_id: string | null
           published_at: string | null
@@ -3040,6 +3083,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          attempt_count?: number
           caption: string
           created_at?: string
           cta?: string | null
@@ -3047,6 +3091,7 @@ export type Database = {
           external_id?: string | null
           hashtags?: string[]
           id?: string
+          last_attempt_at?: string | null
           platform: string
           product_id?: string | null
           published_at?: string | null
@@ -3055,6 +3100,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          attempt_count?: number
           caption?: string
           created_at?: string
           cta?: string | null
@@ -3062,6 +3108,7 @@ export type Database = {
           external_id?: string | null
           hashtags?: string[]
           id?: string
+          last_attempt_at?: string | null
           platform?: string
           product_id?: string | null
           published_at?: string | null
