@@ -211,6 +211,90 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_decisions: {
+        Row: {
+          confidence_score: number | null
+          context_ms: number | null
+          context_snapshot: Json | null
+          created_at: string
+          decision_factors: Json | null
+          decision_ms: number | null
+          decision_summary: string | null
+          fallback_reason: string | null
+          fallback_used: boolean
+          generation_ms: number | null
+          id: number
+          platform: string
+          post_id: string | null
+          product_breakdown: Json | null
+          product_id: string | null
+          product_score: number | null
+          ranking_ms: number | null
+          total_ms: number | null
+          variants: Json
+          winner_variant_id: string | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          context_ms?: number | null
+          context_snapshot?: Json | null
+          created_at?: string
+          decision_factors?: Json | null
+          decision_ms?: number | null
+          decision_summary?: string | null
+          fallback_reason?: string | null
+          fallback_used?: boolean
+          generation_ms?: number | null
+          id?: number
+          platform: string
+          post_id?: string | null
+          product_breakdown?: Json | null
+          product_id?: string | null
+          product_score?: number | null
+          ranking_ms?: number | null
+          total_ms?: number | null
+          variants?: Json
+          winner_variant_id?: string | null
+        }
+        Update: {
+          confidence_score?: number | null
+          context_ms?: number | null
+          context_snapshot?: Json | null
+          created_at?: string
+          decision_factors?: Json | null
+          decision_ms?: number | null
+          decision_summary?: string | null
+          fallback_reason?: string | null
+          fallback_used?: boolean
+          generation_ms?: number | null
+          id?: number
+          platform?: string
+          post_id?: string | null
+          product_breakdown?: Json | null
+          product_id?: string | null
+          product_score?: number | null
+          ranking_ms?: number | null
+          total_ms?: number | null
+          variants?: Json
+          winner_variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_decisions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "social_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_decisions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_events: {
         Row: {
           correlation_id: string | null
@@ -3113,6 +3197,7 @@ export type Database = {
         Row: {
           attempt_count: number
           caption: string
+          confidence_score: number | null
           created_at: string
           cta: string | null
           error_message: string | null
@@ -3126,10 +3211,12 @@ export type Database = {
           scheduled_for: string | null
           status: string
           updated_at: string
+          variant_id: string | null
         }
         Insert: {
           attempt_count?: number
           caption: string
+          confidence_score?: number | null
           created_at?: string
           cta?: string | null
           error_message?: string | null
@@ -3143,10 +3230,12 @@ export type Database = {
           scheduled_for?: string | null
           status?: string
           updated_at?: string
+          variant_id?: string | null
         }
         Update: {
           attempt_count?: number
           caption?: string
+          confidence_score?: number | null
           created_at?: string
           cta?: string | null
           error_message?: string | null
@@ -3160,6 +3249,7 @@ export type Database = {
           scheduled_for?: string | null
           status?: string
           updated_at?: string
+          variant_id?: string | null
         }
         Relationships: [
           {
