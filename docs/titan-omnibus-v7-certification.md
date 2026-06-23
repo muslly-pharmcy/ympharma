@@ -43,7 +43,8 @@ Legend: ✅ pass · ⚠️ partial · ❌ fail · ❓ unknown. `RV`=Runtime Veri
 | # | Check | Status | Evidence | Conf | Verif |
 |---|---|---|---|---:|---|
 | S1 | Cron secret enforced (header-only, timing-safe, no query-string fallback) | ✅ | `src/lib/cron-auth.server.ts:1-33` | 98% | SV |
-| S2 | n8n callback HMAC-SHA256 verification (raw body, constant-time) | ✅ | `src/lib/n8n-callback-auth.server.ts:1-22` | 95% | SV |
+| S2 | n8n callback HMAC-SHA256 verification — receiver side (raw body, constant-time) | ✅ | `src/lib/n8n-callback-auth.server.ts:1-22` | 95% | SV |
+| S2b | n8n callback HMAC encoding — sender side inside n8n (`x-lovable-signature: sha256=<hex>`) | ⚠️ | **APPROVED BY ASSUMPTION (CTO Directive, Amendment 1)** | N/A | Assumed |
 | S3 | RLS enabled on every audited public table | ✅ | `pg_class.relrowsecurity=true` for 12/12 sampled tables | 100% | RV |
 | S4 | `user_roles` separated from profile + `has_role()` SECURITY DEFINER | ✅ | RLS policy count=1 on `user_roles`; pattern enforced project-wide | 90% | RV |
 | S5 | Service-role key not imported at module scope of `*.functions.ts` | ✅ | `retry-failed-posts.ts:55` uses `await import(...)` inside handler | 95% | SV |
