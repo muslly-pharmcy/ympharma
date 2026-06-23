@@ -181,6 +181,7 @@ function RootComponent() {
           </ErrorBoundary>
           <AiChatWidget />
           <SwUpdateBanner />
+          <InstallPrompt />
           <Toaster position="top-center" richColors />
         </CartProvider>
       </I18nProvider>
