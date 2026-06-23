@@ -44,7 +44,7 @@ export const listPostAttempts = createServerFn({ method: "GET" })
     await assertAdmin(context.supabase, context.userId);
     const { data: rows, error } = await context.supabase
       .from("social_post_attempts")
-      .select("id,attempt_no,status,error_message,external_id,source,created_at")
+      .select("id,attempt_no,status,error_message,external_id,source,created_at,request_payload,response_status,response_body,hmac_valid,idempotent_skip")
       .eq("post_id", data.post_id)
       .order("created_at", { ascending: false })
       .limit(50);
