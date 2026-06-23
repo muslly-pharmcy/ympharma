@@ -538,6 +538,12 @@ function AdminSocialPostsPage() {
         open={!!pingResult}
         onOpenChange={(v) => !v && setPingResult(null)}
       />
+
+      <DiagnosticsDialog
+        result={diagResult}
+        open={!!diagResult}
+        onOpenChange={(v) => !v && setDiagResult(null)}
+      />
     </div>
   );
 }
