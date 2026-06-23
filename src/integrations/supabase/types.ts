@@ -1836,6 +1836,53 @@ export type Database = {
           },
         ]
       }
+      invoices: {
+        Row: {
+          created_at: string
+          html_content: string
+          id: string
+          invoice_number: string
+          order_id: string | null
+          paid_at: string | null
+          sent_at: string | null
+          status: string
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          html_content: string
+          id?: string
+          invoice_number: string
+          order_id?: string | null
+          paid_at?: string | null
+          sent_at?: string | null
+          status?: string
+          total: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          html_content?: string
+          id?: string
+          invoice_number?: string
+          order_id?: string | null
+          paid_at?: string | null
+          sent_at?: string | null
+          status?: string
+          total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       loyalty_accounts: {
         Row: {
           created_at: string
@@ -2252,6 +2299,62 @@ export type Database = {
             columns: ["branch_id"]
             isOneToOne: false
             referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_transactions: {
+        Row: {
+          amount: number
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string
+          currency: string
+          id: string
+          method: string
+          order_id: string | null
+          payment_details: Json
+          receipt_url: string | null
+          status: string
+          transaction_ref: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          method: string
+          order_id?: string | null
+          payment_details?: Json
+          receipt_url?: string | null
+          status?: string
+          transaction_ref?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          method?: string
+          order_id?: string | null
+          payment_details?: Json
+          receipt_url?: string | null
+          status?: string
+          transaction_ref?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
         ]
@@ -4174,6 +4277,7 @@ export type Database = {
         Returns: Json
       }
       generate_agent_actions: { Args: never; Returns: number }
+      generate_invoice_number: { Args: never; Returns: string }
       generate_marketing_campaigns: { Args: never; Returns: Json }
       get_backup_schedule: { Args: never; Returns: Json }
       get_event_consumer_schedule: { Args: never; Returns: Json }
