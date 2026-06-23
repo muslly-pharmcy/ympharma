@@ -91,13 +91,21 @@ export async function publishToN8n(post: PostRow): Promise<PublishResult> {
     product_id: post.product_id,
   };
 
+  const rawBody = JSON.stringify(payload);
+  const secret = process.env.N8N_CALLBACK_SECRET;
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (secret) {
+    const sig = createHmac("sha256", secret).update(rawBody).digest("hex");
+    headers["x-lovable-signature"] = `sha256=${sig}`;
+  }
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 20_000);
   try {
     const res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      headers,
+      body: rawBody,
       signal: controller.signal,
     });
     const text = await res.text().catch(() => "");
