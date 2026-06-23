@@ -24,11 +24,13 @@ The platform's app-internal controls (auth, RLS, HMAC, retry, cron, backups, ret
 | Total checks | 32 |
 | `RUNTIME VERIFIED` | 17 |
 | `STATIC VERIFIED` | 11 |
-| `NOT VERIFIED` (UNKNOWN) | 4 |
+| `APPROVED BY ASSUMPTION (CTO)` | 3 |
+| `NOT VERIFIED` (UNKNOWN, remaining) | 1 |
 | `FAIL` | 0 |
-| **Verified (Runtime+Static) / Total** | **28 / 32 = 87.5%** |
+| **Verified-only / Total** | **28 / 32 = 87.5%** |
+| **Verified + Assumed / Total** | **31 / 32 = 96.9%** |
 
-**Coverage gate:** 87.5% ≥ 80% → passes. Verdict is permitted (not locked to `INSUFFICIENT EVIDENCE`).
+**Coverage gate:** 87.5% verified ≥ 80% threshold → passes on hard evidence alone. The CTO assumption is recorded transparently; it is not laundered into "verified".
 
 ---
 
