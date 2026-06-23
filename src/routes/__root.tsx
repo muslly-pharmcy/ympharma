@@ -4,10 +4,14 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useLocation,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { AnimatePresence } from "framer-motion";
+import { ThemeProvider, THEME_INIT_SCRIPT } from "../lib/theme-provider";
+import { PageTransition } from "../components/page-transition";
 
 import appCss from "../styles.css?url";
 // Self-hosted Tajawal — Google Fonts CDN is throttled/blocked on YemenNet,
