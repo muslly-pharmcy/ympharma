@@ -481,9 +481,31 @@ function PrescriptionPage() {
           </button>
 
           {sent && (
-            <div className="flex items-start gap-2 rounded-2xl bg-emerald-50 p-3 text-xs text-emerald-700 animate-in fade-in">
-              <CheckCircle2 className="size-4 shrink-0" />
-              <p>تم رفع الروشتة وإرسال الرسالة على الرقم <strong dir="ltr">+{WHATSAPP_NUMBER}</strong>. سيتواصل معك فريقنا قريباً.</p>
+            <div className="space-y-2 rounded-2xl bg-emerald-50 p-3 text-xs text-emerald-700 animate-in fade-in">
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="size-4 shrink-0" />
+                <p>
+                  تم رفع الروشتة وإرسال الرسالة على الرقم{" "}
+                  <strong dir="ltr">+{WHATSAPP_NUMBER}</strong>. سيتواصل معك فريقنا قريباً.
+                  {pending?.waAttempts ? (
+                    <span className="block mt-1 text-emerald-800/80">
+                      عدد محاولات الإرسال: {pending.waAttempts}
+                      {pending.waLastSentAt && (
+                        <> — آخر محاولة: {new Date(pending.waLastSentAt).toLocaleTimeString("ar")}</>
+                      )}
+                    </span>
+                  ) : null}
+                </p>
+              </div>
+              {pending && (
+                <button
+                  type="button"
+                  onClick={() => reopenWhatsApp(pending)}
+                  className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-black text-white"
+                >
+                  <MessageCircle className="size-3.5" /> إعادة إرسال عبر واتساب
+                </button>
+              )}
             </div>
           )}
 
