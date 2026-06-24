@@ -28,11 +28,16 @@ const WORKER = "event-consumer";
 const MAX_RETRIES = 5;
 const DEFAULT_BATCH = 25;
 
-async function handleEvent(
+export type HandlerResult =
+  | { ok: true; note: string }
+  | { ok: false; error: string; dlqNow?: boolean };
+
+export async function handleEvent(
   ev: ClaimedEvent,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabaseAdmin: any,
-): Promise<{ ok: true; note: string } | { ok: false; error: string }> {
+): Promise<HandlerResult> {
+
   switch (ev.event_name) {
     case "TestEvent":
       return { ok: true, note: "test-acknowledged" };
