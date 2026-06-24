@@ -259,14 +259,16 @@ export const Route = createFileRoute("/api/public/hooks/event-consumer")({
                   outcomes.push({ id: ev.id, event_name: ev.event_name, ok: true, note: res.note });
                 }
               } else {
+                const maxRetries = res.dlqNow ? 1 : MAX_RETRIES;
                 const { data: failRes } = await supabaseAdmin.rpc(
                   "fail_agent_event" as never,
-                  { _event_id: ev.id, _processed_by: WORKER, _error: res.error, _max_retries: MAX_RETRIES } as never,
+                  { _event_id: ev.id, _processed_by: WORKER, _error: res.error, _max_retries: maxRetries } as never,
                 );
                 failed += 1;
                 if ((failRes as { moved_to_dlq?: boolean } | null)?.moved_to_dlq) dlqMoved += 1;
                 outcomes.push({ id: ev.id, event_name: ev.event_name, ok: false, note: res.error });
               }
+
             } catch (e) {
               const errMsg = e instanceof Error ? e.message : String(e);
               await supabaseAdmin.rpc(
