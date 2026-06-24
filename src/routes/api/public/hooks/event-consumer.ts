@@ -38,9 +38,114 @@ async function handleEvent(
       return { ok: true, note: "test-acknowledged" };
 
     case "PrescriptionUploaded": {
-      // Hand-off: prescription review UI polls prescriptions table directly.
-      // Mark processed so the queue stays healthy.
-      return { ok: true, note: "prescription-acknowledged" };
+      // Real handler: run AI vision analysis on the uploaded prescription
+      // and create an admin approval request (idempotent per prescription).
+      const prescriptionId = ev.entity_id;
+      if (!prescriptionId) {
+        return { ok: true, note: "prescription-skipped:no-entity-id" };
+      }
+
+      // Idempotency: skip if an approval request already exists for this rx.
+      const { data: existing } = await supabaseAdmin
+        .from("agent_approval_requests")
+        .select("id")
+        .eq("action_type", "approve_prescription")
+        .contains("payload", { prescriptionId } as never)
+        .limit(1)
+        .maybeSingle();
+      if (existing) {
+        return { ok: true, note: `prescription-already-queued:${existing.id}` };
+      }
+
+      // Resolve a signed URL from the file registry (fallback to legacy image_urls).
+      const [{ data: files }, { data: rx }] = await Promise.all([
+        supabaseAdmin
+          .from("prescription_files")
+          .select("bucket, object_path")
+          .eq("prescription_id", prescriptionId)
+          .is("deleted_at", null)
+          .limit(1),
+        supabaseAdmin
+          .from("prescriptions")
+          .select("image_urls, customer_name")
+          .eq("id", prescriptionId)
+          .maybeSingle(),
+      ]);
+
+      let signedUrl: string | null = null;
+      const file = (files ?? [])[0] as { bucket: string; object_path: string } | undefined;
+      if (file) {
+        const { data: signed } = await supabaseAdmin.storage
+          .from(file.bucket)
+          .createSignedUrl(file.object_path, 600);
+        signedUrl = signed?.signedUrl ?? null;
+      }
+      if (!signedUrl) {
+        const legacy = (rx as { image_urls?: string[] } | null)?.image_urls;
+        if (Array.isArray(legacy) && legacy.length > 0 && typeof legacy[0] === "string") {
+          signedUrl = legacy[0];
+        }
+      }
+      if (!signedUrl) {
+        return { ok: false, error: "no_image_for_prescription" };
+      }
+
+      // Run AI vision analysis.
+      const { analyzePrescriptionImage } = await import(
+        "@/lib/prescription-intelligence.server"
+      );
+      const analysis = await analyzePrescriptionImage(signedUrl);
+
+      const summary =
+        analysis.medicines.length > 0
+          ? `${analysis.medicines.length} دواء — ناقص: ${analysis.missingMedicines.length}`
+          : "وصفة بحاجة لمراجعة يدوية";
+
+      // Create the approval request.
+      const correlationId = crypto.randomUUID();
+      const { data: created, error: insErr } = await supabaseAdmin
+        .from("agent_approval_requests")
+        .insert({
+          agent_id: "event_consumer",
+          correlation_id: correlationId,
+          user_phone: null,
+          action_type: "approve_prescription",
+          payload: { prescriptionId, analysis, source: "event_consumer" } as never,
+          customer_message: summary,
+          status: "pending",
+        } as never)
+        .select("id")
+        .single();
+      if (insErr || !created) {
+        return { ok: false, error: insErr?.message ?? "approval_insert_failed" };
+      }
+
+      // Best-effort: notify admins/owners.
+      try {
+        const { data: roles } = await supabaseAdmin
+          .from("user_roles")
+          .select("user_id")
+          .in("role", ["admin", "owner"] as never);
+        const ids = Array.from(
+          new Set((roles ?? []).map((r: { user_id: string }) => r.user_id)),
+        );
+        if (ids.length > 0) {
+          await supabaseAdmin.from("notifications").insert(
+            ids.map((uid) => ({
+              user_id: uid,
+              type: "prescription_review",
+              title: "وصفة جديدة بحاجة لمراجعة",
+              body: summary,
+              priority: analysis.missingMedicines.length > 0 ? "high" : "medium",
+              metadata: { approvalId: (created as { id: string }).id, correlationId } as never,
+            })) as never,
+          );
+        }
+      } catch (err) {
+        console.error("[event-consumer] notify admins failed", err);
+      }
+
+      return { ok: true, note: `prescription-queued:${(created as { id: string }).id}` };
     }
 
     case "OrderCreated": {
