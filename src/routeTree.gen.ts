@@ -94,6 +94,7 @@ import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe
 import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
 import { Route as AuthenticatedUploadPrescriptionRouteImport } from './routes/_authenticated/upload-prescription'
 import { Route as AuthenticatedAdminUploadInventoryRouteImport } from './routes/_authenticated/admin-upload-inventory'
+import { Route as AuthenticatedAdminSystemHealthRouteImport } from './routes/_authenticated/admin-system-health'
 import { Route as AuthenticatedAdminSalesReportsRouteImport } from './routes/_authenticated/admin-sales-reports'
 import { Route as AuthenticatedAdminMarketingCampaignsRouteImport } from './routes/_authenticated/admin-marketing-campaigns'
 import { Route as AuthenticatedAdminInventorySyncLogsRouteImport } from './routes/_authenticated/admin-inventory-sync-logs'
@@ -110,6 +111,7 @@ import { Route as ApiInternalCollectFeedbackRouteImport } from './routes/api/int
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as ApiPublicMonitoringHealthRouteImport } from './routes/api/public/monitoring/health'
 import { Route as ApiPublicHooksWhatsappRetryRouteImport } from './routes/api/public/hooks/whatsapp-retry'
 import { Route as ApiPublicHooksWeeklyExecReportRouteImport } from './routes/api/public/hooks/weekly-exec-report'
 import { Route as ApiPublicHooksWeeklyAiEnrichRouteImport } from './routes/api/public/hooks/weekly-ai-enrich'
@@ -574,6 +576,12 @@ const AuthenticatedAdminUploadInventoryRoute =
     path: '/admin-upload-inventory',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminSystemHealthRoute =
+  AuthenticatedAdminSystemHealthRouteImport.update({
+    id: '/admin-system-health',
+    path: '/admin-system-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminSalesReportsRoute =
   AuthenticatedAdminSalesReportsRouteImport.update({
     id: '/admin-sales-reports',
@@ -662,6 +670,12 @@ const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
     path: '/lovable/email/queue/process',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicMonitoringHealthRoute =
+  ApiPublicMonitoringHealthRouteImport.update({
+    id: '/api/public/monitoring/health',
+    path: '/api/public/monitoring/health',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicHooksWhatsappRetryRoute =
@@ -929,6 +943,7 @@ export interface FileRoutesByFullPath {
   '/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
   '/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
   '/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
+  '/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
   '/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
@@ -965,6 +980,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
   '/api/public/hooks/whatsapp-retry': typeof ApiPublicHooksWhatsappRetryRoute
+  '/api/public/monitoring/health': typeof ApiPublicMonitoringHealthRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -1062,6 +1078,7 @@ export interface FileRoutesByTo {
   '/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
   '/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
   '/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
+  '/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
   '/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
@@ -1098,6 +1115,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
   '/api/public/hooks/whatsapp-retry': typeof ApiPublicHooksWhatsappRetryRoute
+  '/api/public/monitoring/health': typeof ApiPublicMonitoringHealthRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -1197,6 +1215,7 @@ export interface FileRoutesById {
   '/_authenticated/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
   '/_authenticated/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
   '/_authenticated/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
+  '/_authenticated/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
   '/_authenticated/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
   '/_authenticated/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
@@ -1233,6 +1252,7 @@ export interface FileRoutesById {
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
   '/api/public/hooks/whatsapp-retry': typeof ApiPublicHooksWhatsappRetryRoute
+  '/api/public/monitoring/health': typeof ApiPublicMonitoringHealthRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -1332,6 +1352,7 @@ export interface FileRouteTypes {
     | '/admin-inventory-sync-logs'
     | '/admin-marketing-campaigns'
     | '/admin-sales-reports'
+    | '/admin-system-health'
     | '/admin-upload-inventory'
     | '/upload-prescription'
     | '/conditions/$slug'
@@ -1368,6 +1389,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
     | '/api/public/hooks/whatsapp-retry'
+    | '/api/public/monitoring/health'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -1465,6 +1487,7 @@ export interface FileRouteTypes {
     | '/admin-inventory-sync-logs'
     | '/admin-marketing-campaigns'
     | '/admin-sales-reports'
+    | '/admin-system-health'
     | '/admin-upload-inventory'
     | '/upload-prescription'
     | '/conditions/$slug'
@@ -1501,6 +1524,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
     | '/api/public/hooks/whatsapp-retry'
+    | '/api/public/monitoring/health'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -1599,6 +1623,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin-inventory-sync-logs'
     | '/_authenticated/admin-marketing-campaigns'
     | '/_authenticated/admin-sales-reports'
+    | '/_authenticated/admin-system-health'
     | '/_authenticated/admin-upload-inventory'
     | '/_authenticated/upload-prescription'
     | '/conditions/$slug'
@@ -1635,6 +1660,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
     | '/api/public/hooks/whatsapp-retry'
+    | '/api/public/monitoring/health'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -1760,6 +1786,7 @@ export interface RootRouteChildren {
   ApiPublicHooksWeeklyAiEnrichRoute: typeof ApiPublicHooksWeeklyAiEnrichRoute
   ApiPublicHooksWeeklyExecReportRoute: typeof ApiPublicHooksWeeklyExecReportRoute
   ApiPublicHooksWhatsappRetryRoute: typeof ApiPublicHooksWhatsappRetryRoute
+  ApiPublicMonitoringHealthRoute: typeof ApiPublicMonitoringHealthRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
@@ -2371,6 +2398,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUploadInventoryRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin-system-health': {
+      id: '/_authenticated/admin-system-health'
+      path: '/admin-system-health'
+      fullPath: '/admin-system-health'
+      preLoaderRoute: typeof AuthenticatedAdminSystemHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin-sales-reports': {
       id: '/_authenticated/admin-sales-reports'
       path: '/admin-sales-reports'
@@ -2481,6 +2515,13 @@ declare module '@tanstack/react-router' {
       path: '/lovable/email/queue/process'
       fullPath: '/lovable/email/queue/process'
       preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/monitoring/health': {
+      id: '/api/public/monitoring/health'
+      path: '/api/public/monitoring/health'
+      fullPath: '/api/public/monitoring/health'
+      preLoaderRoute: typeof ApiPublicMonitoringHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/whatsapp-retry': {
@@ -2709,6 +2750,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminInventorySyncLogsRoute: typeof AuthenticatedAdminInventorySyncLogsRoute
   AuthenticatedAdminMarketingCampaignsRoute: typeof AuthenticatedAdminMarketingCampaignsRoute
   AuthenticatedAdminSalesReportsRoute: typeof AuthenticatedAdminSalesReportsRoute
+  AuthenticatedAdminSystemHealthRoute: typeof AuthenticatedAdminSystemHealthRoute
   AuthenticatedAdminUploadInventoryRoute: typeof AuthenticatedAdminUploadInventoryRoute
   AuthenticatedUploadPrescriptionRoute: typeof AuthenticatedUploadPrescriptionRoute
 }
@@ -2721,6 +2763,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminMarketingCampaignsRoute:
     AuthenticatedAdminMarketingCampaignsRoute,
   AuthenticatedAdminSalesReportsRoute: AuthenticatedAdminSalesReportsRoute,
+  AuthenticatedAdminSystemHealthRoute: AuthenticatedAdminSystemHealthRoute,
   AuthenticatedAdminUploadInventoryRoute:
     AuthenticatedAdminUploadInventoryRoute,
   AuthenticatedUploadPrescriptionRoute: AuthenticatedUploadPrescriptionRoute,
@@ -2868,6 +2911,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksWeeklyAiEnrichRoute: ApiPublicHooksWeeklyAiEnrichRoute,
   ApiPublicHooksWeeklyExecReportRoute: ApiPublicHooksWeeklyExecReportRoute,
   ApiPublicHooksWhatsappRetryRoute: ApiPublicHooksWhatsappRetryRoute,
+  ApiPublicMonitoringHealthRoute: ApiPublicMonitoringHealthRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
@@ -2884,13 +2928,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
