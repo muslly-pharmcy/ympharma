@@ -140,6 +140,10 @@ import { Route as ApiPublicHooksRetryFailedPostsRouteImport } from './routes/api
 import { Route as ApiPublicHooksRecordHealthRouteImport } from './routes/api/public/hooks/record-health'
 import { Route as ApiPublicHooksPrescriptionExtractRouteImport } from './routes/api/public/hooks/prescription-extract'
 import { Route as ApiPublicHooksNightlyIntelRouteImport } from './routes/api/public/hooks/nightly-intel'
+import { Route as ApiPublicHooksHourlyValidationAuditRouteImport } from './routes/api/public/hooks/hourly-validation-audit'
+import { Route as ApiPublicHooksHourlySelfHealRouteImport } from './routes/api/public/hooks/hourly-self-heal'
+import { Route as ApiPublicHooksHourlyHealthScanRouteImport } from './routes/api/public/hooks/hourly-health-scan'
+import { Route as ApiPublicHooksHourlyErrorTriageRouteImport } from './routes/api/public/hooks/hourly-error-triage'
 import { Route as ApiPublicHooksEventConsumerRouteImport } from './routes/api/public/hooks/event-consumer'
 import { Route as ApiPublicHooksDlqAlertsRouteImport } from './routes/api/public/hooks/dlq-alerts'
 import { Route as ApiPublicHooksCustomerRxNotifyRouteImport } from './routes/api/public/hooks/customer-rx-notify'
@@ -853,6 +857,30 @@ const ApiPublicHooksNightlyIntelRoute =
     path: '/api/public/hooks/nightly-intel',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksHourlyValidationAuditRoute =
+  ApiPublicHooksHourlyValidationAuditRouteImport.update({
+    id: '/api/public/hooks/hourly-validation-audit',
+    path: '/api/public/hooks/hourly-validation-audit',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksHourlySelfHealRoute =
+  ApiPublicHooksHourlySelfHealRouteImport.update({
+    id: '/api/public/hooks/hourly-self-heal',
+    path: '/api/public/hooks/hourly-self-heal',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksHourlyHealthScanRoute =
+  ApiPublicHooksHourlyHealthScanRouteImport.update({
+    id: '/api/public/hooks/hourly-health-scan',
+    path: '/api/public/hooks/hourly-health-scan',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksHourlyErrorTriageRoute =
+  ApiPublicHooksHourlyErrorTriageRouteImport.update({
+    id: '/api/public/hooks/hourly-error-triage',
+    path: '/api/public/hooks/hourly-error-triage',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksEventConsumerRoute =
   ApiPublicHooksEventConsumerRouteImport.update({
     id: '/api/public/hooks/event-consumer',
@@ -1081,6 +1109,10 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/customer-rx-notify': typeof ApiPublicHooksCustomerRxNotifyRoute
   '/api/public/hooks/dlq-alerts': typeof ApiPublicHooksDlqAlertsRoute
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
+  '/api/public/hooks/hourly-error-triage': typeof ApiPublicHooksHourlyErrorTriageRoute
+  '/api/public/hooks/hourly-health-scan': typeof ApiPublicHooksHourlyHealthScanRoute
+  '/api/public/hooks/hourly-self-heal': typeof ApiPublicHooksHourlySelfHealRoute
+  '/api/public/hooks/hourly-validation-audit': typeof ApiPublicHooksHourlyValidationAuditRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
   '/api/public/hooks/record-health': typeof ApiPublicHooksRecordHealthRoute
@@ -1232,6 +1264,10 @@ export interface FileRoutesByTo {
   '/api/public/hooks/customer-rx-notify': typeof ApiPublicHooksCustomerRxNotifyRoute
   '/api/public/hooks/dlq-alerts': typeof ApiPublicHooksDlqAlertsRoute
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
+  '/api/public/hooks/hourly-error-triage': typeof ApiPublicHooksHourlyErrorTriageRoute
+  '/api/public/hooks/hourly-health-scan': typeof ApiPublicHooksHourlyHealthScanRoute
+  '/api/public/hooks/hourly-self-heal': typeof ApiPublicHooksHourlySelfHealRoute
+  '/api/public/hooks/hourly-validation-audit': typeof ApiPublicHooksHourlyValidationAuditRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
   '/api/public/hooks/record-health': typeof ApiPublicHooksRecordHealthRoute
@@ -1385,6 +1421,10 @@ export interface FileRoutesById {
   '/api/public/hooks/customer-rx-notify': typeof ApiPublicHooksCustomerRxNotifyRoute
   '/api/public/hooks/dlq-alerts': typeof ApiPublicHooksDlqAlertsRoute
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
+  '/api/public/hooks/hourly-error-triage': typeof ApiPublicHooksHourlyErrorTriageRoute
+  '/api/public/hooks/hourly-health-scan': typeof ApiPublicHooksHourlyHealthScanRoute
+  '/api/public/hooks/hourly-self-heal': typeof ApiPublicHooksHourlySelfHealRoute
+  '/api/public/hooks/hourly-validation-audit': typeof ApiPublicHooksHourlyValidationAuditRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
   '/api/public/hooks/record-health': typeof ApiPublicHooksRecordHealthRoute
@@ -1538,6 +1578,10 @@ export interface FileRouteTypes {
     | '/api/public/hooks/customer-rx-notify'
     | '/api/public/hooks/dlq-alerts'
     | '/api/public/hooks/event-consumer'
+    | '/api/public/hooks/hourly-error-triage'
+    | '/api/public/hooks/hourly-health-scan'
+    | '/api/public/hooks/hourly-self-heal'
+    | '/api/public/hooks/hourly-validation-audit'
     | '/api/public/hooks/nightly-intel'
     | '/api/public/hooks/prescription-extract'
     | '/api/public/hooks/record-health'
@@ -1689,6 +1733,10 @@ export interface FileRouteTypes {
     | '/api/public/hooks/customer-rx-notify'
     | '/api/public/hooks/dlq-alerts'
     | '/api/public/hooks/event-consumer'
+    | '/api/public/hooks/hourly-error-triage'
+    | '/api/public/hooks/hourly-health-scan'
+    | '/api/public/hooks/hourly-self-heal'
+    | '/api/public/hooks/hourly-validation-audit'
     | '/api/public/hooks/nightly-intel'
     | '/api/public/hooks/prescription-extract'
     | '/api/public/hooks/record-health'
@@ -1841,6 +1889,10 @@ export interface FileRouteTypes {
     | '/api/public/hooks/customer-rx-notify'
     | '/api/public/hooks/dlq-alerts'
     | '/api/public/hooks/event-consumer'
+    | '/api/public/hooks/hourly-error-triage'
+    | '/api/public/hooks/hourly-health-scan'
+    | '/api/public/hooks/hourly-self-heal'
+    | '/api/public/hooks/hourly-validation-audit'
     | '/api/public/hooks/nightly-intel'
     | '/api/public/hooks/prescription-extract'
     | '/api/public/hooks/record-health'
@@ -1977,6 +2029,10 @@ export interface RootRouteChildren {
   ApiPublicHooksCustomerRxNotifyRoute: typeof ApiPublicHooksCustomerRxNotifyRoute
   ApiPublicHooksDlqAlertsRoute: typeof ApiPublicHooksDlqAlertsRoute
   ApiPublicHooksEventConsumerRoute: typeof ApiPublicHooksEventConsumerRoute
+  ApiPublicHooksHourlyErrorTriageRoute: typeof ApiPublicHooksHourlyErrorTriageRoute
+  ApiPublicHooksHourlyHealthScanRoute: typeof ApiPublicHooksHourlyHealthScanRoute
+  ApiPublicHooksHourlySelfHealRoute: typeof ApiPublicHooksHourlySelfHealRoute
+  ApiPublicHooksHourlyValidationAuditRoute: typeof ApiPublicHooksHourlyValidationAuditRoute
   ApiPublicHooksNightlyIntelRoute: typeof ApiPublicHooksNightlyIntelRoute
   ApiPublicHooksPrescriptionExtractRoute: typeof ApiPublicHooksPrescriptionExtractRoute
   ApiPublicHooksRecordHealthRoute: typeof ApiPublicHooksRecordHealthRoute
@@ -2930,6 +2986,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksNightlyIntelRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/hourly-validation-audit': {
+      id: '/api/public/hooks/hourly-validation-audit'
+      path: '/api/public/hooks/hourly-validation-audit'
+      fullPath: '/api/public/hooks/hourly-validation-audit'
+      preLoaderRoute: typeof ApiPublicHooksHourlyValidationAuditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/hourly-self-heal': {
+      id: '/api/public/hooks/hourly-self-heal'
+      path: '/api/public/hooks/hourly-self-heal'
+      fullPath: '/api/public/hooks/hourly-self-heal'
+      preLoaderRoute: typeof ApiPublicHooksHourlySelfHealRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/hourly-health-scan': {
+      id: '/api/public/hooks/hourly-health-scan'
+      path: '/api/public/hooks/hourly-health-scan'
+      fullPath: '/api/public/hooks/hourly-health-scan'
+      preLoaderRoute: typeof ApiPublicHooksHourlyHealthScanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/hourly-error-triage': {
+      id: '/api/public/hooks/hourly-error-triage'
+      path: '/api/public/hooks/hourly-error-triage'
+      fullPath: '/api/public/hooks/hourly-error-triage'
+      preLoaderRoute: typeof ApiPublicHooksHourlyErrorTriageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/event-consumer': {
       id: '/api/public/hooks/event-consumer'
       path: '/api/public/hooks/event-consumer'
@@ -3234,6 +3318,11 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksCustomerRxNotifyRoute: ApiPublicHooksCustomerRxNotifyRoute,
   ApiPublicHooksDlqAlertsRoute: ApiPublicHooksDlqAlertsRoute,
   ApiPublicHooksEventConsumerRoute: ApiPublicHooksEventConsumerRoute,
+  ApiPublicHooksHourlyErrorTriageRoute: ApiPublicHooksHourlyErrorTriageRoute,
+  ApiPublicHooksHourlyHealthScanRoute: ApiPublicHooksHourlyHealthScanRoute,
+  ApiPublicHooksHourlySelfHealRoute: ApiPublicHooksHourlySelfHealRoute,
+  ApiPublicHooksHourlyValidationAuditRoute:
+    ApiPublicHooksHourlyValidationAuditRoute,
   ApiPublicHooksNightlyIntelRoute: ApiPublicHooksNightlyIntelRoute,
   ApiPublicHooksPrescriptionExtractRoute:
     ApiPublicHooksPrescriptionExtractRoute,
