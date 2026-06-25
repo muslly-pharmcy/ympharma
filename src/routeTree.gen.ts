@@ -109,6 +109,7 @@ import { Route as ApiPublicLogErrorRouteImport } from './routes/api/public/log-e
 import { Route as ApiPublicIncidentCheckRouteImport } from './routes/api/public/incident-check'
 import { Route as ApiPublicImgRouteImport } from './routes/api/public/img'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
+import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
 import { Route as ApiInternalCollectFeedbackRouteImport } from './routes/api/internal/collect-feedback'
 import { Route as AuthenticatedPharmacistDashboardRouteImport } from './routes/_authenticated/pharmacist/dashboard'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
@@ -664,6 +665,11 @@ const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
   path: '/api/public/health',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
+  id: '/api/public/contact',
+  path: '/api/public/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiInternalCollectFeedbackRoute =
   ApiInternalCollectFeedbackRouteImport.update({
     id: '/api/internal/collect-feedback',
@@ -991,6 +997,7 @@ export interface FileRoutesByFullPath {
   '/test/features': typeof TestFeaturesRoute
   '/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/api/internal/collect-feedback': typeof ApiInternalCollectFeedbackRoute
+  '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/img': typeof ApiPublicImgRoute
   '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
@@ -1132,6 +1139,7 @@ export interface FileRoutesByTo {
   '/test/features': typeof TestFeaturesRoute
   '/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/api/internal/collect-feedback': typeof ApiInternalCollectFeedbackRoute
+  '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/img': typeof ApiPublicImgRoute
   '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
@@ -1275,6 +1283,7 @@ export interface FileRoutesById {
   '/test/features': typeof TestFeaturesRoute
   '/_authenticated/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/api/internal/collect-feedback': typeof ApiInternalCollectFeedbackRoute
+  '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/img': typeof ApiPublicImgRoute
   '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
@@ -1418,6 +1427,7 @@ export interface FileRouteTypes {
     | '/test/features'
     | '/pharmacist/dashboard'
     | '/api/internal/collect-feedback'
+    | '/api/public/contact'
     | '/api/public/health'
     | '/api/public/img'
     | '/api/public/incident-check'
@@ -1559,6 +1569,7 @@ export interface FileRouteTypes {
     | '/test/features'
     | '/pharmacist/dashboard'
     | '/api/internal/collect-feedback'
+    | '/api/public/contact'
     | '/api/public/health'
     | '/api/public/img'
     | '/api/public/incident-check'
@@ -1701,6 +1712,7 @@ export interface FileRouteTypes {
     | '/test/features'
     | '/_authenticated/pharmacist/dashboard'
     | '/api/internal/collect-feedback'
+    | '/api/public/contact'
     | '/api/public/health'
     | '/api/public/img'
     | '/api/public/incident-check'
@@ -1834,6 +1846,7 @@ export interface RootRouteChildren {
   ProductIdRoute: typeof ProductIdRoute
   TestFeaturesRoute: typeof TestFeaturesRoute
   ApiInternalCollectFeedbackRoute: typeof ApiInternalCollectFeedbackRoute
+  ApiPublicContactRoute: typeof ApiPublicContactRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRouteWithChildren
   ApiPublicImgRoute: typeof ApiPublicImgRoute
   ApiPublicIncidentCheckRoute: typeof ApiPublicIncidentCheckRoute
@@ -2581,6 +2594,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/contact': {
+      id: '/api/public/contact'
+      path: '/api/public/contact'
+      fullPath: '/api/public/contact'
+      preLoaderRoute: typeof ApiPublicContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/internal/collect-feedback': {
       id: '/api/internal/collect-feedback'
       path: '/api/internal/collect-feedback'
@@ -3006,6 +3026,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProductIdRoute: ProductIdRoute,
   TestFeaturesRoute: TestFeaturesRoute,
   ApiInternalCollectFeedbackRoute: ApiInternalCollectFeedbackRoute,
+  ApiPublicContactRoute: ApiPublicContactRoute,
   ApiPublicHealthRoute: ApiPublicHealthRouteWithChildren,
   ApiPublicImgRoute: ApiPublicImgRoute,
   ApiPublicIncidentCheckRoute: ApiPublicIncidentCheckRoute,
