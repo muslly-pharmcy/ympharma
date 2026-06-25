@@ -8,10 +8,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { verifyCronSecret } from "@/lib/cron-auth.server";
 
-const MAX_ATTEMPTS = 3;
+const MAX_ATTEMPTS = 5;
 const BATCH_LIMIT = 25;
 const CONCURRENCY = 3;
-const MIN_AGE_MS = 60_000; // wait ≥1min after last attempt before retrying
+// Exponential backoff in minutes per attempt index (1..5).
+// 5min, 15min, 45min, 2h, 6h. Capped at 6h.
+function backoffMinutes(attempt: number): number {
+  const ladder = [5, 15, 45, 120, 360];
+  return ladder[Math.min(attempt, ladder.length - 1)] ?? 360;
+}
+
 
 async function runWithConcurrency<T, R>(
   items: T[],
@@ -46,15 +52,16 @@ export const Route = createFileRoute("/api/public/hooks/retry-failed-posts")({
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const { publishPostById } = await import("@/lib/social-publisher.server");
 
-          const cutoff = new Date(Date.now() - MIN_AGE_MS).toISOString();
+          const nowIso = new Date().toISOString();
           const { data: rows, error } = await supabaseAdmin
             .from("social_posts")
-            .select("id,attempt_count,last_attempt_at")
+            .select("id,attempt_count,last_attempt_at,next_retry_at")
             .eq("status", "failed")
             .lt("attempt_count", MAX_ATTEMPTS)
-            .or(`last_attempt_at.is.null,last_attempt_at.lt.${cutoff}`)
-            .order("last_attempt_at", { ascending: true, nullsFirst: true })
+            .or(`next_retry_at.is.null,next_retry_at.lt.${nowIso}`)
+            .order("next_retry_at", { ascending: true, nullsFirst: true })
             .limit(BATCH_LIMIT);
+
 
           if (error) {
             return new Response(
@@ -66,12 +73,32 @@ export const Route = createFileRoute("/api/public/hooks/retry-failed-posts")({
             return Response.json({ ok: true, picked: 0, retried: 0, succeeded: 0, failed: 0 });
           }
 
-          const results = await runWithConcurrency(rows, CONCURRENCY, (row) =>
-            publishPostById(row.id, "cron"),
-          );
+          const results = await runWithConcurrency(rows, CONCURRENCY, async (row) => {
+            const out = await publishPostById(row.id, "cron");
+            // schedule next retry with exponential backoff when still failing
+            if (!out?.ok) {
+              const nextAttempt = (row.attempt_count ?? 0) + 1;
+              const nextRetryAt = new Date(Date.now() + backoffMinutes(nextAttempt) * 60_000).toISOString();
+              const reason = (out as { error?: string })?.error ?? "unknown";
+              await supabaseAdmin
+                .from("social_posts")
+                .update({
+                  next_retry_at: nextAttempt >= MAX_ATTEMPTS ? null : nextRetryAt,
+                  last_error: reason.slice(0, 500),
+                })
+                .eq("id", row.id);
+            } else {
+              await supabaseAdmin
+                .from("social_posts")
+                .update({ next_retry_at: null, last_error: null })
+                .eq("id", row.id);
+            }
+            return out;
+          });
 
           let succeeded = 0;
           let failed = 0;
+
           for (const r of results) {
             if (r?.ok && !r.idempotent) succeeded += 1;
             else if (!r?.ok) failed += 1;

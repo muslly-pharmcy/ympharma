@@ -3400,7 +3400,9 @@ export type Database = {
           hashtags: string[]
           id: string
           last_attempt_at: string | null
+          last_error: string | null
           model_version: string | null
+          next_retry_at: string | null
           platform: string
           product_id: string | null
           published_at: string | null
@@ -3422,7 +3424,9 @@ export type Database = {
           hashtags?: string[]
           id?: string
           last_attempt_at?: string | null
+          last_error?: string | null
           model_version?: string | null
+          next_retry_at?: string | null
           platform: string
           product_id?: string | null
           published_at?: string | null
@@ -3444,7 +3448,9 @@ export type Database = {
           hashtags?: string[]
           id?: string
           last_attempt_at?: string | null
+          last_error?: string | null
           model_version?: string | null
+          next_retry_at?: string | null
           platform?: string
           product_id?: string | null
           published_at?: string | null
@@ -4765,6 +4771,16 @@ export type Database = {
       generate_agent_actions: { Args: never; Returns: number }
       generate_invoice_number: { Args: never; Returns: string }
       generate_marketing_campaigns: { Args: never; Returns: Json }
+      get_agent_alerts: {
+        Args: never
+        Returns: {
+          agent: string
+          alert_key: string
+          message: string
+          payload: Json
+          severity: string
+        }[]
+      }
       get_backup_schedule: { Args: never; Returns: Json }
       get_event_consumer_schedule: { Args: never; Returns: Json }
       get_order_history_public: {
