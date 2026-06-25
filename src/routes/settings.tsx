@@ -223,8 +223,9 @@ function SettingsPage() {
 }
 
 function LogoPreview({
-  src, label, active, onClick, dark,
-}: { src: string; label: string; active: boolean; onClick: () => void; dark?: boolean }) {
+  src, label, active, onClick, dark, size = "md",
+}: { src: string; label: string; active: boolean; onClick: () => void; dark?: boolean; size?: "sm" | "md" | "lg" }) {
+  const dims = size === "sm" ? { box: "size-12", px: 48 } : size === "lg" ? { box: "size-32", px: 128 } : { box: "size-20", px: 80 };
   return (
     <button
       type="button"
@@ -234,12 +235,24 @@ function LogoPreview({
       } ${dark ? "bg-[#0a0a0b]" : "bg-white"}`}
       aria-pressed={active}
     >
-      <div className="grid size-20 place-items-center">
-        <img src={src} alt={label} className="size-full object-contain" />
+      <div className={`grid ${dims.box} place-items-center transition-all`}>
+        <img
+          src={src}
+          alt={label}
+          width={dims.px}
+          height={dims.px}
+          className="size-full object-contain"
+          style={{ imageRendering: "auto" }}
+        />
       </div>
-      <span className={`text-sm font-semibold ${dark ? "text-[color:var(--titans-gold,#d4af37)]" : "text-foreground"}`}>
-        {label}
-      </span>
+      <div className="flex flex-col items-center gap-0.5">
+        <span className={`text-sm font-semibold ${dark ? "text-[color:var(--titans-gold,#d4af37)]" : "text-foreground"}`}>
+          {label}
+        </span>
+        <span className={`text-[10px] ${dark ? "text-white/50" : "text-muted-foreground"}`}>
+          {dims.px}×{dims.px}px
+        </span>
+      </div>
       {active && (
         <span className="absolute end-2 top-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">
           مُفعَّل
