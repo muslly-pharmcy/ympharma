@@ -31,7 +31,9 @@ export function useSpeech(lang: string = "ar-SA") {
   const ref = useRef<SpeechRecognitionLike | null>(null);
   const onFinalRef = useRef<((text: string) => void) | null>(null);
 
-  const isSupported = typeof window !== "undefined" && !!getSpeechCtor();
+  // Avoid SSR/CSR hydration mismatch by deferring detection to after mount.
+  const [isSupported, setIsSupported] = useState(false);
+  useEffect(() => { setIsSupported(!!getSpeechCtor()); }, []);
 
   const stop = useCallback(() => {
     try { ref.current?.stop(); } catch { /* noop */ }
