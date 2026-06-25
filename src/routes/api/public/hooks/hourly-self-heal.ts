@@ -36,7 +36,7 @@ export const Route = createFileRoute("/api/public/hooks/hourly-self-heal")({
               .or(`next_retry_at.is.null,next_retry_at.lt.${nowIso}`)
               .limit(SOCIAL_BATCH);
             for (const p of posts ?? []) {
-              try { await publishPostById(p.id, "hourly-self-heal"); summary.social_retried += 1; }
+              try { await publishPostById(p.id, "cron"); summary.social_retried += 1; }
               catch (e) { summary.errors.push(`social ${p.id}: ${(e as Error).message}`); }
             }
           } catch (e) { summary.errors.push(`social-block: ${(e as Error).message}`); }
