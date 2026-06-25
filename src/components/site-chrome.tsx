@@ -167,6 +167,7 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
 
 export function SiteFooter() {
   const { t } = useI18n();
+  const { url: footerLogo } = useLogoVariant();
   return (
     <footer id="site-footer" className="mt-12 border-t border-border bg-card">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
