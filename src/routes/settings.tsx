@@ -2,9 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n";
-import { Bell, Globe, Trash2, Download, Smartphone, Shield, Info, ArrowRight, Sparkles } from "lucide-react";
-import classicLogo from "@/assets/almusalli-logo.webp";
-import goldenLogoAsset from "@/assets/almusalli-golden-mark.png.asset.json";
+import { Bell, Globe, Trash2, Download, Smartphone, Shield, Info, ArrowRight, Sparkles, RotateCcw } from "lucide-react";
+import { useLogoVariant, LOGO_VARIANT_DEFAULT, type LogoVariant } from "@/hooks/use-logo-variant";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
