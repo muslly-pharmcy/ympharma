@@ -3259,12 +3259,15 @@ export type Database = {
           id: string
           image_url: string | null
           inventory_migration_group: string | null
+          is_active: boolean
           is_published: boolean
+          last_restocked_at: string | null
           legacy_id: number | null
           name: string
           old_price: number | null
           price: number
           reorder_point: number
+          reorder_threshold: number
           sort_order: number
           stock_qty: number
           supplier_cost: number | null
@@ -3282,12 +3285,15 @@ export type Database = {
           id?: string
           image_url?: string | null
           inventory_migration_group?: string | null
+          is_active?: boolean
           is_published?: boolean
+          last_restocked_at?: string | null
           legacy_id?: number | null
           name: string
           old_price?: number | null
           price?: number
           reorder_point?: number
+          reorder_threshold?: number
           sort_order?: number
           stock_qty?: number
           supplier_cost?: number | null
@@ -3305,12 +3311,15 @@ export type Database = {
           id?: string
           image_url?: string | null
           inventory_migration_group?: string | null
+          is_active?: boolean
           is_published?: boolean
+          last_restocked_at?: string | null
           legacy_id?: number | null
           name?: string
           old_price?: number | null
           price?: number
           reorder_point?: number
+          reorder_threshold?: number
           sort_order?: number
           stock_qty?: number
           supplier_cost?: number | null
@@ -3382,6 +3391,57 @@ export type Database = {
           uptime_checks_days?: number
         }
         Relationships: []
+      }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          is_approved: boolean
+          order_id: string | null
+          product_id: string
+          rating: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          is_approved?: boolean
+          order_id?: string | null
+          product_id: string
+          rating: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          is_approved?: boolean
+          order_id?: string | null
+          product_id?: string
+          rating?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       social_post_attempts: {
         Row: {
@@ -4061,6 +4121,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_devices: {
+        Row: {
+          active: boolean
+          created_at: string
+          device_name: string | null
+          fcm_token: string
+          id: string
+          platform: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          device_name?: string | null
+          fcm_token: string
+          id?: string
+          platform?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          device_name?: string | null
+          fcm_token?: string
+          id?: string
+          platform?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -4385,6 +4478,15 @@ export type Database = {
       }
     }
     Views: {
+      audit_logs_unified: {
+        Row: {
+          details: Json | null
+          occurred_at: string | null
+          source: string | null
+          source_id: string | null
+        }
+        Relationships: []
+      }
       pending_admin_notifications: {
         Row: {
           body: string | null
