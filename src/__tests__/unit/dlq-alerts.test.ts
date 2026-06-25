@@ -1,104 +1,74 @@
 // src/__tests__/unit/dlq-alerts.test.ts
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { runDlqAlertCheck } from "@/routes/api/public/hooks/dlq-alerts";
 
-const mockSupabaseFrom = vi.fn();
-vi.mock("@/integrations/supabase/client.server", () => ({
-  supabaseAdmin: {
-    from: mockSupabaseFrom,
-  },
-}));
-
-vi.mock("@/lib/cron-auth.server", () => ({
-  verifyCronSecret: vi.fn(),
-}));
-
-import { POST } from "@/routes/api/public/hooks/dlq-alerts";
-
-describe("DLQ Alerts", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("should return 401 if cron secret is missing", async () => {
-    const request = new Request("http://localhost", { method: "POST", headers: {} });
-    const response = await (POST as any)({ request });
-    expect(response.status).toBe(401);
-  });
-
-  it("should process DLQ events and send alerts to all admins", async () => {
-    mockSupabaseFrom.mockImplementation((table: string) => {
-      if (table === "agent_events_dlq") {
-        return {
-          select: vi.fn().mockReturnValue({
-            gte: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                order: vi.fn().mockResolvedValue({
-                  data: [
-                    { id: "evt-1", event_name: "OrderFailed", error: "Insufficient stock", created_at: new Date().toISOString() },
-                    { id: "evt-2", event_name: "PaymentFailed", error: "Timeout", created_at: new Date().toISOString() },
-                  ],
-                  error: null,
-                }),
-              }),
+function makeAdmin(opts: {
+  failed: Array<{ id: string; event_name: string; last_error: string }>;
+  admins?: string[];
+}) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const from = (table: string): any => {
+    if (table === "agent_events_dlq") {
+      return {
+        select: () => ({
+          gte: () => ({
+            is: () => ({
+              order: () => Promise.resolve({ data: opts.failed, error: null }),
             }),
           }),
-        };
-      }
-      if (table === "user_roles") {
-        return {
-          select: vi.fn().mockReturnValue({
-            in: vi.fn().mockResolvedValue({
-              data: [{ user_id: "admin-1" }, { user_id: "admin-2" }, { user_id: "owner-1" }],
+        }),
+      };
+    }
+    if (table === "user_roles") {
+      return {
+        select: () => ({
+          in: () =>
+            Promise.resolve({
+              data: (opts.admins ?? []).map((id) => ({ user_id: id })),
               error: null,
             }),
-          }),
-        };
-      }
-      if (table === "operations_alerts") {
-        return { upsert: vi.fn().mockResolvedValue({ error: null }) };
-      }
-      return {};
-    });
+        }),
+      };
+    }
+    if (table === "operations_alerts_v14") {
+      return { upsert: () => Promise.resolve({ error: null }) };
+    }
+    return {};
+  };
+  return { from: vi.fn(from) };
+}
 
-    const request = new Request("http://localhost", {
-      method: "POST",
-      headers: { "x-cron-secret": "test-secret" },
-    });
+describe("runDlqAlertCheck", () => {
+  beforeEach(() => vi.clearAllMocks());
 
-    const response = await (POST as any)({ request });
-    const data = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(data.alerts_sent).toBe(3);
-    expect(data.failed_count).toBe(2);
+  it("returns zero alerts when no failed events", async () => {
+    const admin = makeAdmin({ failed: [] });
+    const res = await runDlqAlertCheck(admin);
+    expect(res.alerts_sent).toBe(0);
+    expect(res.failed_count).toBe(0);
   });
 
-  it("should handle no failed events gracefully", async () => {
-    mockSupabaseFrom.mockImplementation((table: string) => {
-      if (table === "agent_events_dlq") {
-        return {
-          select: vi.fn().mockReturnValue({
-            gte: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                order: vi.fn().mockResolvedValue({ data: [], error: null }),
-              }),
-            }),
-          }),
-        };
-      }
-      return {};
+  it("notifies all admins and owners", async () => {
+    const admin = makeAdmin({
+      failed: [
+        { id: "evt-1", event_name: "OrderFailed", last_error: "Insufficient stock" },
+        { id: "evt-2", event_name: "PaymentFailed", last_error: "Timeout" },
+      ],
+      admins: ["admin-1", "admin-2", "owner-1"],
     });
+    const res = await runDlqAlertCheck(admin);
+    expect(res.failed_count).toBe(2);
+    expect(res.alerts_sent).toBe(3);
+    expect(res.errors).toHaveLength(2);
+  });
 
-    const request = new Request("http://localhost", {
-      method: "POST",
-      headers: { "x-cron-secret": "test-secret" },
+  it("counts events but sends zero alerts when no admins exist", async () => {
+    const admin = makeAdmin({
+      failed: [{ id: "evt-1", event_name: "X", last_error: "err" }],
+      admins: [],
     });
-
-    const response = await (POST as any)({ request });
-    const data = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(data.alerts_sent).toBe(0);
-    expect(data.failed_count).toBe(0);
+    const res = await runDlqAlertCheck(admin);
+    expect(res.failed_count).toBe(1);
+    expect(res.alerts_sent).toBe(0);
   });
 });

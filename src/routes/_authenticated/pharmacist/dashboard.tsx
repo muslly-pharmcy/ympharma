@@ -1,16 +1,18 @@
 // src/routes/_authenticated/pharmacist/dashboard.tsx
-// PHARMACIST DASHBOARD — Realtime Prescription Management (literal v14 transcription)
-
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/Button";
-import { GlassCard } from "@/components/ui/GlassCard";
-import { GradientText } from "@/components/ui/GradientText";
-import { Reveal } from "@/components/motion/Reveal";
+import { Button } from "@/components/ui/button";
+import { GlassCard } from "@/components/titans/ui/GlassCard";
+import { GradientText } from "@/components/titans/ui/GradientText";
+import { Reveal } from "@/components/titans/motion/Reveal";
 import { toast } from "sonner";
-import { approvePrescription, rejectPrescription } from "@/lib/pharmacist-approvals.functions";
+import {
+  approvePrescription,
+  rejectPrescription,
+} from "@/lib/pharmacist-approvals.functions";
 
 export const Route = createFileRoute("/_authenticated/pharmacist/dashboard")({
   component: PharmacistDashboard,
@@ -19,25 +21,29 @@ export const Route = createFileRoute("/_authenticated/pharmacist/dashboard")({
 type PrescriptionRequest = {
   id: string;
   status: string;
-  payload: any;
+  payload: Record<string, unknown> | null;
   created_at: string;
-  customer_id: string;
+  customer_id?: string | null;
+  extracted_medicines?: unknown;
+  missing_medicines?: string[] | null;
 };
 
 function PharmacistDashboard() {
-  const [realtimeStatus, setRealtimeStatus] = useState<Record<string, string>>({});
+  const [, setRealtimeStatus] = useState<Record<string, string>>({});
+  const approveFn = useServerFn(approvePrescription);
+  const rejectFn = useServerFn(rejectPrescription);
 
   const { data: pendingRequests, isLoading, refetch } = useQuery({
     queryKey: ["prescriptions", "pending"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("agent_approval_requests")
-        .select("id, status, payload, created_at, customer_id")
-        .in("status", ["pending", "review", "manual_review"])
+        .select("id, status, payload, created_at, extracted_medicines, missing_medicines")
+        .eq("action_type", "approve_prescription")
+        .in("status", ["pending"])
         .order("created_at", { ascending: false });
-
       if (error) throw error;
-      return data as unknown as PrescriptionRequest[];
+      return (data ?? []) as unknown as PrescriptionRequest[];
     },
   });
 
@@ -46,14 +52,15 @@ function PharmacistDashboard() {
       .channel("pharmacist-dashboard")
       .on(
         "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "agent_approval_requests" },
-        (payload: any) => {
-          setRealtimeStatus((prev) => ({ ...prev, [payload.new.id]: payload.new.status }));
+        { event: "*", schema: "public", table: "agent_approval_requests" },
+        (payload: { new?: { id?: string; status?: string } }) => {
+          if (payload.new?.id && payload.new.status) {
+            setRealtimeStatus((prev) => ({ ...prev, [payload.new!.id!]: payload.new!.status! }));
+          }
           refetch();
-        }
+        },
       )
       .subscribe();
-
     return () => {
       supabase.removeChannel(channel);
     };
@@ -61,7 +68,7 @@ function PharmacistDashboard() {
 
   const handleApprove = async (id: string) => {
     try {
-      await (approvePrescription as any)({ approvalId: id });
+      await approveFn({ data: { approvalId: id } });
       toast.success("✅ تمت الموافقة على الروشتة");
       refetch();
     } catch (err) {
@@ -71,7 +78,7 @@ function PharmacistDashboard() {
 
   const handleReject = async (id: string) => {
     try {
-      await (rejectPrescription as any)({ approvalId: id });
+      await rejectFn({ data: { approvalId: id } });
       toast.warning("❌ تم رفض الروشتة");
       refetch();
     } catch (err) {
@@ -79,14 +86,7 @@ function PharmacistDashboard() {
     }
   };
 
-  const getAnalysis = (payload: any) => {
-    return payload?.analysis || { matched: [], unmatched: [], confidence: 0 };
-  };
-
-  if (isLoading) {
-    return <div className="p-8 text-center">جاري التحميل...</div>;
-  }
-
+  if (isLoading) return <div className="p-8 text-center">جاري التحميل...</div>;
   const activeRequests = pendingRequests || [];
 
   return (
@@ -99,20 +99,8 @@ function PharmacistDashboard() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <GlassCard>
-            <div className="text-2xl font-bold">{activeRequests.filter(r => r.status === "pending").length}</div>
+            <div className="text-2xl font-bold">{activeRequests.length}</div>
             <div className="text-sm text-muted-foreground">قيد الانتظار</div>
-          </GlassCard>
-          <GlassCard>
-            <div className="text-2xl font-bold">{activeRequests.filter(r => r.status === "review").length}</div>
-            <div className="text-sm text-muted-foreground">قيد المراجعة</div>
-          </GlassCard>
-          <GlassCard>
-            <div className="text-2xl font-bold">{activeRequests.filter(r => r.status === "manual_review").length}</div>
-            <div className="text-sm text-muted-foreground">مراجعة يدوية</div>
-          </GlassCard>
-          <GlassCard>
-            <div className="text-2xl font-bold">{activeRequests.filter(r => r.status === "approved").length}</div>
-            <div className="text-sm text-muted-foreground">تمت الموافقة</div>
           </GlassCard>
         </div>
 
@@ -120,21 +108,19 @@ function PharmacistDashboard() {
           {activeRequests.length === 0 ? (
             <GlassCard>
               <p className="text-center text-lg">🎉 لا توجد روشتات معلقة</p>
-              <p className="text-center text-sm text-muted-foreground">جميع الروشتات تمت معالجتها</p>
             </GlassCard>
           ) : (
             activeRequests.map((request) => {
-              const analysis = getAnalysis(request.payload);
-              const matched = analysis.matched || [];
-              const unmatched = analysis.unmatched || [];
-              const isManual = request.status === "manual_review";
-
+              const matched = Array.isArray(request.extracted_medicines)
+                ? (request.extracted_medicines as Array<{ name?: string; dosage?: string }>)
+                : [];
+              const unmatched = request.missing_medicines ?? [];
               return (
                 <GlassCard key={request.id}>
                   <div className="flex items-center justify-between mb-3">
                     <div className="font-mono text-sm">#{request.id.slice(-6)}</div>
                     <span className="text-xs px-2 py-1 rounded bg-muted">
-                      {isManual ? "مراجعة يدوية" : request.status === "review" ? "قيد المراجعة" : "قيد الانتظار"}
+                      {new Date(request.created_at).toLocaleString("ar")}
                     </span>
                   </div>
                   <div className="grid md:grid-cols-2 gap-4 mb-4">
@@ -144,8 +130,10 @@ function PharmacistDashboard() {
                         <p className="text-sm text-muted-foreground">لا توجد</p>
                       ) : (
                         <ul className="space-y-1 text-sm">
-                          {matched.map((med: any, i: number) => (
-                            <li key={i}>• {med.name} {med.dosage && `— ${med.dosage}`}</li>
+                          {matched.map((med, i) => (
+                            <li key={i}>
+                              • {med.name} {med.dosage && `— ${med.dosage}`}
+                            </li>
                           ))}
                         </ul>
                       )}
@@ -156,15 +144,17 @@ function PharmacistDashboard() {
                         <p className="text-sm text-muted-foreground">لا يوجد</p>
                       ) : (
                         <ul className="space-y-1 text-sm">
-                          {unmatched.map((med: any, i: number) => (
-                            <li key={i}>• {med.name}</li>
+                          {unmatched.map((name, i) => (
+                            <li key={i}>• {name}</li>
                           ))}
                         </ul>
                       )}
                     </div>
                   </div>
                   <div className="flex gap-2 justify-end">
-                    <Button variant="outline" onClick={() => handleReject(request.id)}>✖ رفض</Button>
+                    <Button variant="outline" onClick={() => handleReject(request.id)}>
+                      ✖ رفض
+                    </Button>
                     <Button onClick={() => handleApprove(request.id)}>✔ موافقة</Button>
                   </div>
                 </GlassCard>
