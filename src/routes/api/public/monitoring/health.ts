@@ -26,6 +26,8 @@ export const Route = createFileRoute("/api/public/monitoring/health")({
             dlqRecent,
             recentErrors,
             lowStock,
+            healthRecent,
+            agentRunsRecent,
           ] = await Promise.all([
             supabaseAdmin.from("products").select("id", { head: true, count: "exact" }).limit(1),
             supabaseAdmin
@@ -44,6 +46,16 @@ export const Route = createFileRoute("/api/public/monitoring/health")({
               .from("products")
               .select("id", { head: true, count: "exact" })
               .lt("stock_qty", 5),
+            supabaseAdmin
+              .from("health_checks")
+              .select("created_at")
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle(),
+            supabaseAdmin
+              .from("agent_runs")
+              .select("id", { head: true, count: "exact" })
+              .gt("started_at", oneHourAgo),
           ]);
 
           checks.database = dbPing.error
@@ -72,6 +84,26 @@ export const Route = createFileRoute("/api/public/monitoring/health")({
           checks.low_stock = {
             status: low > 50 ? "warning" : "ok",
             count_below_5: low,
+          };
+          const lastHealth = healthRecent.data?.created_at as string | undefined;
+          const ageMin = lastHealth
+            ? (Date.now() - new Date(lastHealth).getTime()) / 60_000
+            : null;
+          checks.cron_heartbeat = {
+            status: ageMin === null
+              ? "warning"
+              : ageMin > 30
+                ? "critical"
+                : ageMin > 15
+                  ? "warning"
+                  : "ok",
+            last_recorded_at: lastHealth ?? null,
+            age_minutes: ageMin === null ? null : Math.round(ageMin),
+          };
+
+          checks.agent_activity_1h = {
+            status: (agentRunsRecent.count ?? 0) === 0 ? "warning" : "ok",
+            runs: agentRunsRecent.count ?? 0,
           };
         } catch (e) {
           checks.snapshot = {
