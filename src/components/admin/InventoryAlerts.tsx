@@ -20,7 +20,7 @@ export function InventoryAlerts() {
     );
   }
 
-  const items = data?.products ?? [];
+  const items = data?.lowStock ?? [];
 
   if (items.length === 0) {
     return (
