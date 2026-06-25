@@ -63,17 +63,27 @@ function ContactPage() {
     }
     setErrors({});
     setSubmitting(true);
-    // Simple mailto fallback — no backend write
-    const subject = encodeURIComponent(`رسالة من ${parsed.data.name}`);
-    const body = encodeURIComponent(
-      `${parsed.data.message}\n\n— ${parsed.data.name} (${parsed.data.email})`,
-    );
-    window.location.href = `mailto:hello@muslly.com?subject=${subject}&body=${body}`;
-    setTimeout(() => {
-      setSubmitting(false);
-      toast.success("تم فتح بريدك لإرسال الرسالة ✉️");
+    try {
+      const res = await fetch("/api/public/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(parsed.data),
+      });
+      if (!res.ok) throw new Error(`status_${res.status}`);
+      toast.success("تم استلام رسالتك ✅ سنرد عليك قريباً.");
       setForm({ name: "", email: "", message: "" });
-    }, 600);
+    } catch (err) {
+      console.error("[contact] submit failed", err);
+      // Mailto fallback so the user can still reach us.
+      const subject = encodeURIComponent(`رسالة من ${parsed.data.name}`);
+      const body = encodeURIComponent(
+        `${parsed.data.message}\n\n— ${parsed.data.name} (${parsed.data.email})`,
+      );
+      window.location.href = `mailto:hello@muslly.com?subject=${subject}&body=${body}`;
+      toast.message("تعذّر الإرسال المباشر — فتحنا بريدك كحل بديل.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (

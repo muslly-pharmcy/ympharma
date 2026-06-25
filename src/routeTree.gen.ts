@@ -8,2803 +8,2937 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as YemenDebugRouteImport } from "./routes/yemen-debug";
-import { Route as UnsubscribeRouteImport } from "./routes/unsubscribe";
-import { Route as TrustRouteImport } from "./routes/trust";
-import { Route as TrackRouteImport } from "./routes/track";
-import { Route as TitansRouteImport } from "./routes/titans";
-import { Route as StatusRouteImport } from "./routes/status";
-import { Route as SitemapDotxmlRouteImport } from "./routes/sitemap[.]xml";
-import { Route as SettingsRouteImport } from "./routes/settings";
-import { Route as ProductsRouteImport } from "./routes/products";
-import { Route as PrescriptionRouteImport } from "./routes/prescription";
-import { Route as NotificationsRouteImport } from "./routes/notifications";
-import { Route as NetworkTestRouteImport } from "./routes/network-test";
-import { Route as NetworkHealthRouteImport } from "./routes/network-health";
-import { Route as MyNotificationsRouteImport } from "./routes/my-notifications";
-import { Route as LoyaltyRouteImport } from "./routes/loyalty";
-import { Route as InsuranceRouteImport } from "./routes/insurance";
-import { Route as ConditionsRouteImport } from "./routes/conditions";
-import { Route as CartRouteImport } from "./routes/cart";
-import { Route as BundlesRouteImport } from "./routes/bundles";
-import { Route as AiSymptomsRouteImport } from "./routes/ai-symptoms";
-import { Route as AiSupplementRouteImport } from "./routes/ai-supplement";
-import { Route as AiPrescriptionRouteImport } from "./routes/ai-prescription";
-import { Route as AiPharmacistRouteImport } from "./routes/ai-pharmacist";
-import { Route as AiAssistantRouteImport } from "./routes/ai-assistant";
-import { Route as AdminWorkforceRouteImport } from "./routes/admin-workforce";
-import { Route as AdminWhatsappDeliveryRouteImport } from "./routes/admin-whatsapp-delivery";
-import { Route as AdminWhatsappConversationsRouteImport } from "./routes/admin-whatsapp-conversations";
-import { Route as AdminTriggerFailuresRouteImport } from "./routes/admin-trigger-failures";
-import { Route as AdminTransfersRouteImport } from "./routes/admin-transfers";
-import { Route as AdminStockAuditRouteImport } from "./routes/admin-stock-audit";
-import { Route as AdminSocialPostsRouteImport } from "./routes/admin-social-posts";
-import { Route as AdminSettingsRouteImport } from "./routes/admin-settings";
-import { Route as AdminRxReviewRouteImport } from "./routes/admin-rx-review";
-import { Route as AdminRxExtractionEditRouteImport } from "./routes/admin-rx-extraction-edit";
-import { Route as AdminRxCheckRouteImport } from "./routes/admin-rx-check";
-import { Route as AdminProductsRouteImport } from "./routes/admin-products";
-import { Route as AdminProductGalleryRouteImport } from "./routes/admin-product-gallery";
-import { Route as AdminPharmacyRecommendationsRouteImport } from "./routes/admin-pharmacy-recommendations";
-import { Route as AdminOffersRouteImport } from "./routes/admin-offers";
-import { Route as AdminMarketingRouteImport } from "./routes/admin-marketing";
-import { Route as AdminLoyaltyDashboardRouteImport } from "./routes/admin-loyalty-dashboard";
-import { Route as AdminLogsRouteImport } from "./routes/admin-logs";
-import { Route as AdminInventoryReservationsRouteImport } from "./routes/admin-inventory-reservations";
-import { Route as AdminInventoryDuplicatesRouteImport } from "./routes/admin-inventory-duplicates";
-import { Route as AdminInventoryRouteImport } from "./routes/admin-inventory";
-import { Route as AdminHubRouteImport } from "./routes/admin-hub";
-import { Route as AdminHmacPreflightRouteImport } from "./routes/admin-hmac-preflight";
-import { Route as AdminEventBusRouteImport } from "./routes/admin-event-bus";
-import { Route as AdminDiscountsRouteImport } from "./routes/admin-discounts";
-import { Route as AdminDiagnosticsRouteImport } from "./routes/admin-diagnostics";
-import { Route as AdminCronJobsRouteImport } from "./routes/admin-cron-jobs";
-import { Route as AdminCronHealthRouteImport } from "./routes/admin-cron-health";
-import { Route as AdminCommandRouteImport } from "./routes/admin-command";
-import { Route as AdminClassificationsRouteImport } from "./routes/admin-classifications";
-import { Route as AdminCampaignsRouteImport } from "./routes/admin-campaigns";
-import { Route as AdminBundlesRouteImport } from "./routes/admin-bundles";
-import { Route as AdminBranchesRouteImport } from "./routes/admin-branches";
-import { Route as AdminBannersRouteImport } from "./routes/admin-banners";
-import { Route as AdminBackupsRouteImport } from "./routes/admin-backups";
-import { Route as AdminAutomationHubRouteImport } from "./routes/admin-automation-hub";
-import { Route as AdminAiWhatsappRouteImport } from "./routes/admin-ai-whatsapp";
-import { Route as AdminAiSalesCxRouteImport } from "./routes/admin-ai-sales-cx";
-import { Route as AdminAiProcurementRouteImport } from "./routes/admin-ai-procurement";
-import { Route as AdminAiOrchestratorRouteImport } from "./routes/admin-ai-orchestrator";
-import { Route as AdminAiMarketingRouteImport } from "./routes/admin-ai-marketing";
-import { Route as AdminAiLoyaltyRouteImport } from "./routes/admin-ai-loyalty";
-import { Route as AdminAiInventoryRouteImport } from "./routes/admin-ai-inventory";
-import { Route as AdminAiExtractionsRouteImport } from "./routes/admin-ai-extractions";
-import { Route as AdminAiExtractionFailuresRouteImport } from "./routes/admin-ai-extraction-failures";
-import { Route as AdminAiExecutiveDashboardRouteImport } from "./routes/admin-ai-executive-dashboard";
-import { Route as AdminAiExecutiveRouteImport } from "./routes/admin-ai-executive";
-import { Route as AdminAiExcelImportRouteImport } from "./routes/admin-ai-excel-import";
-import { Route as AdminAiChronicRefillRouteImport } from "./routes/admin-ai-chronic-refill";
-import { Route as AdminAiCatalogRouteImport } from "./routes/admin-ai-catalog";
-import { Route as AdminAiApprovalsRouteImport } from "./routes/admin-ai-approvals";
-import { Route as AdminAgentsRouteImport } from "./routes/admin-agents";
-import { Route as AdminAgentInsightsRouteImport } from "./routes/admin-agent-insights";
-import { Route as AdminRouteImport } from "./routes/admin";
-import { Route as AuthenticatedRouteRouteImport } from "./routes/_authenticated/route";
-import { Route as IndexRouteImport } from "./routes/index";
-import { Route as TestFeaturesRouteImport } from "./routes/test.features";
-import { Route as ProductIdRouteImport } from "./routes/product.$id";
-import { Route as EmailUnsubscribeRouteImport } from "./routes/email/unsubscribe";
-import { Route as ConditionsSlugRouteImport } from "./routes/conditions.$slug";
-import { Route as AuthenticatedUploadPrescriptionRouteImport } from "./routes/_authenticated/upload-prescription";
-import { Route as AuthenticatedPharmacistDashboardRouteImport } from "./routes/_authenticated/pharmacist-dashboard";
-import { Route as AuthenticatedAdminUploadInventoryRouteImport } from "./routes/_authenticated/admin-upload-inventory";
-import { Route as AuthenticatedAdminSystemHealthRouteImport } from "./routes/_authenticated/admin-system-health";
-import { Route as AuthenticatedAdminSalesReportsRouteImport } from "./routes/_authenticated/admin-sales-reports";
-import { Route as AuthenticatedAdminMarketingCampaignsRouteImport } from "./routes/_authenticated/admin-marketing-campaigns";
-import { Route as AuthenticatedAdminInventorySyncLogsRouteImport } from "./routes/_authenticated/admin-inventory-sync-logs";
-import { Route as AuthenticatedAdminHealthRouteImport } from "./routes/_authenticated/admin-health";
-import { Route as AuthenticatedAdminDashboardRouteImport } from "./routes/_authenticated/admin-dashboard";
-import { Route as LovableEmailSuppressionRouteImport } from "./routes/lovable/email/suppression";
-import { Route as ApiPublicWhatsappWebhookRouteImport } from "./routes/api/public/whatsapp-webhook";
-import { Route as ApiPublicUptimeWebhookRouteImport } from "./routes/api/public/uptime-webhook";
-import { Route as ApiPublicLogErrorRouteImport } from "./routes/api/public/log-error";
-import { Route as ApiPublicIncidentCheckRouteImport } from "./routes/api/public/incident-check";
-import { Route as ApiPublicImgRouteImport } from "./routes/api/public/img";
-import { Route as ApiPublicHealthRouteImport } from "./routes/api/public/health";
-import { Route as ApiInternalCollectFeedbackRouteImport } from "./routes/api/internal/collect-feedback";
-import { Route as LovableEmailTransactionalSendRouteImport } from "./routes/lovable/email/transactional/send";
-import { Route as LovableEmailTransactionalPreviewRouteImport } from "./routes/lovable/email/transactional/preview";
-import { Route as LovableEmailQueueProcessRouteImport } from "./routes/lovable/email/queue/process";
-import { Route as ApiPublicMonitoringHealthRouteImport } from "./routes/api/public/monitoring/health";
-import { Route as ApiPublicHooksWhatsappRetryRouteImport } from "./routes/api/public/hooks/whatsapp-retry";
-import { Route as ApiPublicHooksWeeklyExecReportRouteImport } from "./routes/api/public/hooks/weekly-exec-report";
-import { Route as ApiPublicHooksWeeklyAiEnrichRouteImport } from "./routes/api/public/hooks/weekly-ai-enrich";
-import { Route as ApiPublicHooksWaStaleConversationsRouteImport } from "./routes/api/public/hooks/wa-stale-conversations";
-import { Route as ApiPublicHooksSocialCallbackRouteImport } from "./routes/api/public/hooks/social-callback";
-import { Route as ApiPublicHooksRxNotifyRouteImport } from "./routes/api/public/hooks/rx-notify";
-import { Route as ApiPublicHooksRxMirrorRouteImport } from "./routes/api/public/hooks/rx-mirror";
-import { Route as ApiPublicHooksRunSocialPostsRouteImport } from "./routes/api/public/hooks/run-social-posts";
-import { Route as ApiPublicHooksRunRestockAlertsRouteImport } from "./routes/api/public/hooks/run-restock-alerts";
-import { Route as ApiPublicHooksRunReactivationRouteImport } from "./routes/api/public/hooks/run-reactivation";
-import { Route as ApiPublicHooksRunLoyaltyReminderRouteImport } from "./routes/api/public/hooks/run-loyalty-reminder";
-import { Route as ApiPublicHooksRetryFailedPostsRouteImport } from "./routes/api/public/hooks/retry-failed-posts";
-import { Route as ApiPublicHooksPrescriptionExtractRouteImport } from "./routes/api/public/hooks/prescription-extract";
-import { Route as ApiPublicHooksNightlyIntelRouteImport } from "./routes/api/public/hooks/nightly-intel";
-import { Route as ApiPublicHooksEventConsumerRouteImport } from "./routes/api/public/hooks/event-consumer";
-import { Route as ApiPublicHooksDlqAlertsRouteImport } from "./routes/api/public/hooks/dlq-alerts";
-import { Route as ApiPublicHooksCustomerRxNotifyRouteImport } from "./routes/api/public/hooks/customer-rx-notify";
-import { Route as ApiPublicHooksCollectSocialStatsRouteImport } from "./routes/api/public/hooks/collect-social-stats";
-import { Route as ApiPublicHooksChronicRefillsRouteImport } from "./routes/api/public/hooks/chronic-refills";
-import { Route as ApiPublicHooksAlertsWorkerRouteImport } from "./routes/api/public/hooks/alerts-worker";
-import { Route as ApiPublicHooksAgentMaintenanceRouteImport } from "./routes/api/public/hooks/agent-maintenance";
-import { Route as ApiPublicHealthQuickCheckRouteImport } from "./routes/api/public/health.quick-check";
-import { Route as ApiPublicHealthFullCheckRouteImport } from "./routes/api/public/health.full-check";
-import { Route as ApiPublicHooksAgentsWhatsappRouteImport } from "./routes/api/public/hooks/agents/whatsapp";
-import { Route as ApiPublicHooksAgentsSalesRouteImport } from "./routes/api/public/hooks/agents/sales";
-import { Route as ApiPublicHooksAgentsOperationsRouteImport } from "./routes/api/public/hooks/agents/operations";
-import { Route as ApiPublicHooksAgentsMarketingRouteImport } from "./routes/api/public/hooks/agents/marketing";
-import { Route as ApiPublicHooksAgentsInventoryRouteImport } from "./routes/api/public/hooks/agents/inventory";
-import { Route as ApiPublicHooksAgentsCxRouteImport } from "./routes/api/public/hooks/agents/cx";
-import { Route as ApiPublicHooksAgentsCtoRouteImport } from "./routes/api/public/hooks/agents/cto";
-import { Route as ApiPublicHooksAgentsCeoRouteImport } from "./routes/api/public/hooks/agents/ceo";
-import { Route as ApiPublicHooksAgentsBiRouteImport } from "./routes/api/public/hooks/agents/bi";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as YemenDebugRouteImport } from './routes/yemen-debug'
+import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
+import { Route as TrustRouteImport } from './routes/trust'
+import { Route as TrackRouteImport } from './routes/track'
+import { Route as TitansRouteImport } from './routes/titans'
+import { Route as StatusRouteImport } from './routes/status'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ProductsRouteImport } from './routes/products'
+import { Route as PrescriptionRouteImport } from './routes/prescription'
+import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as NetworkTestRouteImport } from './routes/network-test'
+import { Route as NetworkHealthRouteImport } from './routes/network-health'
+import { Route as MyNotificationsRouteImport } from './routes/my-notifications'
+import { Route as LoyaltyRouteImport } from './routes/loyalty'
+import { Route as InsuranceRouteImport } from './routes/insurance'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as ConditionsRouteImport } from './routes/conditions'
+import { Route as CartRouteImport } from './routes/cart'
+import { Route as BundlesRouteImport } from './routes/bundles'
+import { Route as AiSymptomsRouteImport } from './routes/ai-symptoms'
+import { Route as AiSupplementRouteImport } from './routes/ai-supplement'
+import { Route as AiPrescriptionRouteImport } from './routes/ai-prescription'
+import { Route as AiPharmacistRouteImport } from './routes/ai-pharmacist'
+import { Route as AiAssistantRouteImport } from './routes/ai-assistant'
+import { Route as AdminWorkforceRouteImport } from './routes/admin-workforce'
+import { Route as AdminWhatsappDeliveryRouteImport } from './routes/admin-whatsapp-delivery'
+import { Route as AdminWhatsappConversationsRouteImport } from './routes/admin-whatsapp-conversations'
+import { Route as AdminTriggerFailuresRouteImport } from './routes/admin-trigger-failures'
+import { Route as AdminTransfersRouteImport } from './routes/admin-transfers'
+import { Route as AdminStockAuditRouteImport } from './routes/admin-stock-audit'
+import { Route as AdminSocialPostsRouteImport } from './routes/admin-social-posts'
+import { Route as AdminSettingsRouteImport } from './routes/admin-settings'
+import { Route as AdminRxReviewRouteImport } from './routes/admin-rx-review'
+import { Route as AdminRxExtractionEditRouteImport } from './routes/admin-rx-extraction-edit'
+import { Route as AdminRxCheckRouteImport } from './routes/admin-rx-check'
+import { Route as AdminProductsRouteImport } from './routes/admin-products'
+import { Route as AdminProductGalleryRouteImport } from './routes/admin-product-gallery'
+import { Route as AdminPharmacyRecommendationsRouteImport } from './routes/admin-pharmacy-recommendations'
+import { Route as AdminOffersRouteImport } from './routes/admin-offers'
+import { Route as AdminMarketingRouteImport } from './routes/admin-marketing'
+import { Route as AdminLoyaltyDashboardRouteImport } from './routes/admin-loyalty-dashboard'
+import { Route as AdminLogsRouteImport } from './routes/admin-logs'
+import { Route as AdminInventoryReservationsRouteImport } from './routes/admin-inventory-reservations'
+import { Route as AdminInventoryDuplicatesRouteImport } from './routes/admin-inventory-duplicates'
+import { Route as AdminInventoryRouteImport } from './routes/admin-inventory'
+import { Route as AdminHubRouteImport } from './routes/admin-hub'
+import { Route as AdminHmacPreflightRouteImport } from './routes/admin-hmac-preflight'
+import { Route as AdminEventBusRouteImport } from './routes/admin-event-bus'
+import { Route as AdminDiscountsRouteImport } from './routes/admin-discounts'
+import { Route as AdminDiagnosticsRouteImport } from './routes/admin-diagnostics'
+import { Route as AdminCronJobsRouteImport } from './routes/admin-cron-jobs'
+import { Route as AdminCronHealthRouteImport } from './routes/admin-cron-health'
+import { Route as AdminCommandRouteImport } from './routes/admin-command'
+import { Route as AdminClassificationsRouteImport } from './routes/admin-classifications'
+import { Route as AdminCampaignsRouteImport } from './routes/admin-campaigns'
+import { Route as AdminBundlesRouteImport } from './routes/admin-bundles'
+import { Route as AdminBranchesRouteImport } from './routes/admin-branches'
+import { Route as AdminBannersRouteImport } from './routes/admin-banners'
+import { Route as AdminBackupsRouteImport } from './routes/admin-backups'
+import { Route as AdminAutomationHubRouteImport } from './routes/admin-automation-hub'
+import { Route as AdminAiWhatsappRouteImport } from './routes/admin-ai-whatsapp'
+import { Route as AdminAiSalesCxRouteImport } from './routes/admin-ai-sales-cx'
+import { Route as AdminAiProcurementRouteImport } from './routes/admin-ai-procurement'
+import { Route as AdminAiOrchestratorRouteImport } from './routes/admin-ai-orchestrator'
+import { Route as AdminAiMarketingRouteImport } from './routes/admin-ai-marketing'
+import { Route as AdminAiLoyaltyRouteImport } from './routes/admin-ai-loyalty'
+import { Route as AdminAiInventoryRouteImport } from './routes/admin-ai-inventory'
+import { Route as AdminAiExtractionsRouteImport } from './routes/admin-ai-extractions'
+import { Route as AdminAiExtractionFailuresRouteImport } from './routes/admin-ai-extraction-failures'
+import { Route as AdminAiExecutiveDashboardRouteImport } from './routes/admin-ai-executive-dashboard'
+import { Route as AdminAiExecutiveRouteImport } from './routes/admin-ai-executive'
+import { Route as AdminAiExcelImportRouteImport } from './routes/admin-ai-excel-import'
+import { Route as AdminAiChronicRefillRouteImport } from './routes/admin-ai-chronic-refill'
+import { Route as AdminAiCatalogRouteImport } from './routes/admin-ai-catalog'
+import { Route as AdminAiApprovalsRouteImport } from './routes/admin-ai-approvals'
+import { Route as AdminAgentsRouteImport } from './routes/admin-agents'
+import { Route as AdminAgentInsightsRouteImport } from './routes/admin-agent-insights'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as TestFeaturesRouteImport } from './routes/test.features'
+import { Route as ProductIdRouteImport } from './routes/product.$id'
+import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
+import { Route as AuthenticatedUploadPrescriptionRouteImport } from './routes/_authenticated/upload-prescription'
+import { Route as AuthenticatedAdminUploadInventoryRouteImport } from './routes/_authenticated/admin-upload-inventory'
+import { Route as AuthenticatedAdminSystemHealthRouteImport } from './routes/_authenticated/admin-system-health'
+import { Route as AuthenticatedAdminSalesReportsRouteImport } from './routes/_authenticated/admin-sales-reports'
+import { Route as AuthenticatedAdminMarketingCampaignsRouteImport } from './routes/_authenticated/admin-marketing-campaigns'
+import { Route as AuthenticatedAdminInventorySyncLogsRouteImport } from './routes/_authenticated/admin-inventory-sync-logs'
+import { Route as AuthenticatedAdminHealthRouteImport } from './routes/_authenticated/admin-health'
+import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin-dashboard'
+import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/public/whatsapp-webhook'
+import { Route as ApiPublicUptimeWebhookRouteImport } from './routes/api/public/uptime-webhook'
+import { Route as ApiPublicLogErrorRouteImport } from './routes/api/public/log-error'
+import { Route as ApiPublicIncidentCheckRouteImport } from './routes/api/public/incident-check'
+import { Route as ApiPublicImgRouteImport } from './routes/api/public/img'
+import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
+import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
+import { Route as ApiInternalCollectFeedbackRouteImport } from './routes/api/internal/collect-feedback'
+import { Route as AuthenticatedPharmacistDashboardRouteImport } from './routes/_authenticated/pharmacist/dashboard'
+import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
+import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as ApiPublicMonitoringHealthRouteImport } from './routes/api/public/monitoring/health'
+import { Route as ApiPublicHooksWhatsappRetryRouteImport } from './routes/api/public/hooks/whatsapp-retry'
+import { Route as ApiPublicHooksWeeklyExecReportRouteImport } from './routes/api/public/hooks/weekly-exec-report'
+import { Route as ApiPublicHooksWeeklyAiEnrichRouteImport } from './routes/api/public/hooks/weekly-ai-enrich'
+import { Route as ApiPublicHooksWaStaleConversationsRouteImport } from './routes/api/public/hooks/wa-stale-conversations'
+import { Route as ApiPublicHooksSocialCallbackRouteImport } from './routes/api/public/hooks/social-callback'
+import { Route as ApiPublicHooksRxNotifyRouteImport } from './routes/api/public/hooks/rx-notify'
+import { Route as ApiPublicHooksRxMirrorRouteImport } from './routes/api/public/hooks/rx-mirror'
+import { Route as ApiPublicHooksRunSocialPostsRouteImport } from './routes/api/public/hooks/run-social-posts'
+import { Route as ApiPublicHooksRunRestockAlertsRouteImport } from './routes/api/public/hooks/run-restock-alerts'
+import { Route as ApiPublicHooksRunReactivationRouteImport } from './routes/api/public/hooks/run-reactivation'
+import { Route as ApiPublicHooksRunLoyaltyReminderRouteImport } from './routes/api/public/hooks/run-loyalty-reminder'
+import { Route as ApiPublicHooksRetryFailedPostsRouteImport } from './routes/api/public/hooks/retry-failed-posts'
+import { Route as ApiPublicHooksPrescriptionExtractRouteImport } from './routes/api/public/hooks/prescription-extract'
+import { Route as ApiPublicHooksNightlyIntelRouteImport } from './routes/api/public/hooks/nightly-intel'
+import { Route as ApiPublicHooksEventConsumerRouteImport } from './routes/api/public/hooks/event-consumer'
+import { Route as ApiPublicHooksDlqAlertsRouteImport } from './routes/api/public/hooks/dlq-alerts'
+import { Route as ApiPublicHooksCustomerRxNotifyRouteImport } from './routes/api/public/hooks/customer-rx-notify'
+import { Route as ApiPublicHooksCollectSocialStatsRouteImport } from './routes/api/public/hooks/collect-social-stats'
+import { Route as ApiPublicHooksChronicRefillsRouteImport } from './routes/api/public/hooks/chronic-refills'
+import { Route as ApiPublicHooksAlertsWorkerRouteImport } from './routes/api/public/hooks/alerts-worker'
+import { Route as ApiPublicHooksAgentMaintenanceRouteImport } from './routes/api/public/hooks/agent-maintenance'
+import { Route as ApiPublicHealthQuickCheckRouteImport } from './routes/api/public/health.quick-check'
+import { Route as ApiPublicHealthFullCheckRouteImport } from './routes/api/public/health.full-check'
+import { Route as ApiPublicHooksAgentsWhatsappRouteImport } from './routes/api/public/hooks/agents/whatsapp'
+import { Route as ApiPublicHooksAgentsSalesRouteImport } from './routes/api/public/hooks/agents/sales'
+import { Route as ApiPublicHooksAgentsOperationsRouteImport } from './routes/api/public/hooks/agents/operations'
+import { Route as ApiPublicHooksAgentsMarketingRouteImport } from './routes/api/public/hooks/agents/marketing'
+import { Route as ApiPublicHooksAgentsInventoryRouteImport } from './routes/api/public/hooks/agents/inventory'
+import { Route as ApiPublicHooksAgentsCxRouteImport } from './routes/api/public/hooks/agents/cx'
+import { Route as ApiPublicHooksAgentsCtoRouteImport } from './routes/api/public/hooks/agents/cto'
+import { Route as ApiPublicHooksAgentsCeoRouteImport } from './routes/api/public/hooks/agents/ceo'
+import { Route as ApiPublicHooksAgentsBiRouteImport } from './routes/api/public/hooks/agents/bi'
 
 const YemenDebugRoute = YemenDebugRouteImport.update({
-  id: "/yemen-debug",
-  path: "/yemen-debug",
+  id: '/yemen-debug',
+  path: '/yemen-debug',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
-  id: "/unsubscribe",
-  path: "/unsubscribe",
+  id: '/unsubscribe',
+  path: '/unsubscribe',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const TrustRoute = TrustRouteImport.update({
-  id: "/trust",
-  path: "/trust",
+  id: '/trust',
+  path: '/trust',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const TrackRoute = TrackRouteImport.update({
-  id: "/track",
-  path: "/track",
+  id: '/track',
+  path: '/track',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const TitansRoute = TitansRouteImport.update({
-  id: "/titans",
-  path: "/titans",
+  id: '/titans',
+  path: '/titans',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const StatusRoute = StatusRouteImport.update({
-  id: "/status",
-  path: "/status",
+  id: '/status',
+  path: '/status',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: "/sitemap.xml",
-  path: "/sitemap.xml",
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
-  id: "/settings",
-  path: "/settings",
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ProductsRoute = ProductsRouteImport.update({
-  id: "/products",
-  path: "/products",
+  id: '/products',
+  path: '/products',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const PrescriptionRoute = PrescriptionRouteImport.update({
-  id: "/prescription",
-  path: "/prescription",
+  id: '/prescription',
+  path: '/prescription',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const NotificationsRoute = NotificationsRouteImport.update({
-  id: "/notifications",
-  path: "/notifications",
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const NetworkTestRoute = NetworkTestRouteImport.update({
-  id: "/network-test",
-  path: "/network-test",
+  id: '/network-test',
+  path: '/network-test',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const NetworkHealthRoute = NetworkHealthRouteImport.update({
-  id: "/network-health",
-  path: "/network-health",
+  id: '/network-health',
+  path: '/network-health',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const MyNotificationsRoute = MyNotificationsRouteImport.update({
-  id: "/my-notifications",
-  path: "/my-notifications",
+  id: '/my-notifications',
+  path: '/my-notifications',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const LoyaltyRoute = LoyaltyRouteImport.update({
-  id: "/loyalty",
-  path: "/loyalty",
+  id: '/loyalty',
+  path: '/loyalty',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const InsuranceRoute = InsuranceRouteImport.update({
-  id: "/insurance",
-  path: "/insurance",
+  id: '/insurance',
+  path: '/insurance',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConditionsRoute = ConditionsRouteImport.update({
-  id: "/conditions",
-  path: "/conditions",
+  id: '/conditions',
+  path: '/conditions',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const CartRoute = CartRouteImport.update({
-  id: "/cart",
-  path: "/cart",
+  id: '/cart',
+  path: '/cart',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const BundlesRoute = BundlesRouteImport.update({
-  id: "/bundles",
-  path: "/bundles",
+  id: '/bundles',
+  path: '/bundles',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AiSymptomsRoute = AiSymptomsRouteImport.update({
-  id: "/ai-symptoms",
-  path: "/ai-symptoms",
+  id: '/ai-symptoms',
+  path: '/ai-symptoms',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AiSupplementRoute = AiSupplementRouteImport.update({
-  id: "/ai-supplement",
-  path: "/ai-supplement",
+  id: '/ai-supplement',
+  path: '/ai-supplement',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AiPrescriptionRoute = AiPrescriptionRouteImport.update({
-  id: "/ai-prescription",
-  path: "/ai-prescription",
+  id: '/ai-prescription',
+  path: '/ai-prescription',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AiPharmacistRoute = AiPharmacistRouteImport.update({
-  id: "/ai-pharmacist",
-  path: "/ai-pharmacist",
+  id: '/ai-pharmacist',
+  path: '/ai-pharmacist',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AiAssistantRoute = AiAssistantRouteImport.update({
-  id: "/ai-assistant",
-  path: "/ai-assistant",
+  id: '/ai-assistant',
+  path: '/ai-assistant',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminWorkforceRoute = AdminWorkforceRouteImport.update({
-  id: "/admin-workforce",
-  path: "/admin-workforce",
+  id: '/admin-workforce',
+  path: '/admin-workforce',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminWhatsappDeliveryRoute = AdminWhatsappDeliveryRouteImport.update({
-  id: "/admin-whatsapp-delivery",
-  path: "/admin-whatsapp-delivery",
+  id: '/admin-whatsapp-delivery',
+  path: '/admin-whatsapp-delivery',
   getParentRoute: () => rootRouteImport,
-} as any);
-const AdminWhatsappConversationsRoute = AdminWhatsappConversationsRouteImport.update({
-  id: "/admin-whatsapp-conversations",
-  path: "/admin-whatsapp-conversations",
-  getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
+const AdminWhatsappConversationsRoute =
+  AdminWhatsappConversationsRouteImport.update({
+    id: '/admin-whatsapp-conversations',
+    path: '/admin-whatsapp-conversations',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AdminTriggerFailuresRoute = AdminTriggerFailuresRouteImport.update({
-  id: "/admin-trigger-failures",
-  path: "/admin-trigger-failures",
+  id: '/admin-trigger-failures',
+  path: '/admin-trigger-failures',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminTransfersRoute = AdminTransfersRouteImport.update({
-  id: "/admin-transfers",
-  path: "/admin-transfers",
+  id: '/admin-transfers',
+  path: '/admin-transfers',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminStockAuditRoute = AdminStockAuditRouteImport.update({
-  id: "/admin-stock-audit",
-  path: "/admin-stock-audit",
+  id: '/admin-stock-audit',
+  path: '/admin-stock-audit',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminSocialPostsRoute = AdminSocialPostsRouteImport.update({
-  id: "/admin-social-posts",
-  path: "/admin-social-posts",
+  id: '/admin-social-posts',
+  path: '/admin-social-posts',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
-  id: "/admin-settings",
-  path: "/admin-settings",
+  id: '/admin-settings',
+  path: '/admin-settings',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminRxReviewRoute = AdminRxReviewRouteImport.update({
-  id: "/admin-rx-review",
-  path: "/admin-rx-review",
+  id: '/admin-rx-review',
+  path: '/admin-rx-review',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminRxExtractionEditRoute = AdminRxExtractionEditRouteImport.update({
-  id: "/admin-rx-extraction-edit",
-  path: "/admin-rx-extraction-edit",
+  id: '/admin-rx-extraction-edit',
+  path: '/admin-rx-extraction-edit',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminRxCheckRoute = AdminRxCheckRouteImport.update({
-  id: "/admin-rx-check",
-  path: "/admin-rx-check",
+  id: '/admin-rx-check',
+  path: '/admin-rx-check',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminProductsRoute = AdminProductsRouteImport.update({
-  id: "/admin-products",
-  path: "/admin-products",
+  id: '/admin-products',
+  path: '/admin-products',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminProductGalleryRoute = AdminProductGalleryRouteImport.update({
-  id: "/admin-product-gallery",
-  path: "/admin-product-gallery",
+  id: '/admin-product-gallery',
+  path: '/admin-product-gallery',
   getParentRoute: () => rootRouteImport,
-} as any);
-const AdminPharmacyRecommendationsRoute = AdminPharmacyRecommendationsRouteImport.update({
-  id: "/admin-pharmacy-recommendations",
-  path: "/admin-pharmacy-recommendations",
-  getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
+const AdminPharmacyRecommendationsRoute =
+  AdminPharmacyRecommendationsRouteImport.update({
+    id: '/admin-pharmacy-recommendations',
+    path: '/admin-pharmacy-recommendations',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AdminOffersRoute = AdminOffersRouteImport.update({
-  id: "/admin-offers",
-  path: "/admin-offers",
+  id: '/admin-offers',
+  path: '/admin-offers',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminMarketingRoute = AdminMarketingRouteImport.update({
-  id: "/admin-marketing",
-  path: "/admin-marketing",
+  id: '/admin-marketing',
+  path: '/admin-marketing',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminLoyaltyDashboardRoute = AdminLoyaltyDashboardRouteImport.update({
-  id: "/admin-loyalty-dashboard",
-  path: "/admin-loyalty-dashboard",
+  id: '/admin-loyalty-dashboard',
+  path: '/admin-loyalty-dashboard',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminLogsRoute = AdminLogsRouteImport.update({
-  id: "/admin-logs",
-  path: "/admin-logs",
+  id: '/admin-logs',
+  path: '/admin-logs',
   getParentRoute: () => rootRouteImport,
-} as any);
-const AdminInventoryReservationsRoute = AdminInventoryReservationsRouteImport.update({
-  id: "/admin-inventory-reservations",
-  path: "/admin-inventory-reservations",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const AdminInventoryDuplicatesRoute = AdminInventoryDuplicatesRouteImport.update({
-  id: "/admin-inventory-duplicates",
-  path: "/admin-inventory-duplicates",
-  getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
+const AdminInventoryReservationsRoute =
+  AdminInventoryReservationsRouteImport.update({
+    id: '/admin-inventory-reservations',
+    path: '/admin-inventory-reservations',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AdminInventoryDuplicatesRoute =
+  AdminInventoryDuplicatesRouteImport.update({
+    id: '/admin-inventory-duplicates',
+    path: '/admin-inventory-duplicates',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AdminInventoryRoute = AdminInventoryRouteImport.update({
-  id: "/admin-inventory",
-  path: "/admin-inventory",
+  id: '/admin-inventory',
+  path: '/admin-inventory',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminHubRoute = AdminHubRouteImport.update({
-  id: "/admin-hub",
-  path: "/admin-hub",
+  id: '/admin-hub',
+  path: '/admin-hub',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminHmacPreflightRoute = AdminHmacPreflightRouteImport.update({
-  id: "/admin-hmac-preflight",
-  path: "/admin-hmac-preflight",
+  id: '/admin-hmac-preflight',
+  path: '/admin-hmac-preflight',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminEventBusRoute = AdminEventBusRouteImport.update({
-  id: "/admin-event-bus",
-  path: "/admin-event-bus",
+  id: '/admin-event-bus',
+  path: '/admin-event-bus',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminDiscountsRoute = AdminDiscountsRouteImport.update({
-  id: "/admin-discounts",
-  path: "/admin-discounts",
+  id: '/admin-discounts',
+  path: '/admin-discounts',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminDiagnosticsRoute = AdminDiagnosticsRouteImport.update({
-  id: "/admin-diagnostics",
-  path: "/admin-diagnostics",
+  id: '/admin-diagnostics',
+  path: '/admin-diagnostics',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminCronJobsRoute = AdminCronJobsRouteImport.update({
-  id: "/admin-cron-jobs",
-  path: "/admin-cron-jobs",
+  id: '/admin-cron-jobs',
+  path: '/admin-cron-jobs',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminCronHealthRoute = AdminCronHealthRouteImport.update({
-  id: "/admin-cron-health",
-  path: "/admin-cron-health",
+  id: '/admin-cron-health',
+  path: '/admin-cron-health',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminCommandRoute = AdminCommandRouteImport.update({
-  id: "/admin-command",
-  path: "/admin-command",
+  id: '/admin-command',
+  path: '/admin-command',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminClassificationsRoute = AdminClassificationsRouteImport.update({
-  id: "/admin-classifications",
-  path: "/admin-classifications",
+  id: '/admin-classifications',
+  path: '/admin-classifications',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminCampaignsRoute = AdminCampaignsRouteImport.update({
-  id: "/admin-campaigns",
-  path: "/admin-campaigns",
+  id: '/admin-campaigns',
+  path: '/admin-campaigns',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminBundlesRoute = AdminBundlesRouteImport.update({
-  id: "/admin-bundles",
-  path: "/admin-bundles",
+  id: '/admin-bundles',
+  path: '/admin-bundles',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminBranchesRoute = AdminBranchesRouteImport.update({
-  id: "/admin-branches",
-  path: "/admin-branches",
+  id: '/admin-branches',
+  path: '/admin-branches',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminBannersRoute = AdminBannersRouteImport.update({
-  id: "/admin-banners",
-  path: "/admin-banners",
+  id: '/admin-banners',
+  path: '/admin-banners',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminBackupsRoute = AdminBackupsRouteImport.update({
-  id: "/admin-backups",
-  path: "/admin-backups",
+  id: '/admin-backups',
+  path: '/admin-backups',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminAutomationHubRoute = AdminAutomationHubRouteImport.update({
-  id: "/admin-automation-hub",
-  path: "/admin-automation-hub",
+  id: '/admin-automation-hub',
+  path: '/admin-automation-hub',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminAiWhatsappRoute = AdminAiWhatsappRouteImport.update({
-  id: "/admin-ai-whatsapp",
-  path: "/admin-ai-whatsapp",
+  id: '/admin-ai-whatsapp',
+  path: '/admin-ai-whatsapp',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminAiSalesCxRoute = AdminAiSalesCxRouteImport.update({
-  id: "/admin-ai-sales-cx",
-  path: "/admin-ai-sales-cx",
+  id: '/admin-ai-sales-cx',
+  path: '/admin-ai-sales-cx',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminAiProcurementRoute = AdminAiProcurementRouteImport.update({
-  id: "/admin-ai-procurement",
-  path: "/admin-ai-procurement",
+  id: '/admin-ai-procurement',
+  path: '/admin-ai-procurement',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminAiOrchestratorRoute = AdminAiOrchestratorRouteImport.update({
-  id: "/admin-ai-orchestrator",
-  path: "/admin-ai-orchestrator",
+  id: '/admin-ai-orchestrator',
+  path: '/admin-ai-orchestrator',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminAiMarketingRoute = AdminAiMarketingRouteImport.update({
-  id: "/admin-ai-marketing",
-  path: "/admin-ai-marketing",
+  id: '/admin-ai-marketing',
+  path: '/admin-ai-marketing',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminAiLoyaltyRoute = AdminAiLoyaltyRouteImport.update({
-  id: "/admin-ai-loyalty",
-  path: "/admin-ai-loyalty",
+  id: '/admin-ai-loyalty',
+  path: '/admin-ai-loyalty',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminAiInventoryRoute = AdminAiInventoryRouteImport.update({
-  id: "/admin-ai-inventory",
-  path: "/admin-ai-inventory",
+  id: '/admin-ai-inventory',
+  path: '/admin-ai-inventory',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminAiExtractionsRoute = AdminAiExtractionsRouteImport.update({
-  id: "/admin-ai-extractions",
-  path: "/admin-ai-extractions",
+  id: '/admin-ai-extractions',
+  path: '/admin-ai-extractions',
   getParentRoute: () => rootRouteImport,
-} as any);
-const AdminAiExtractionFailuresRoute = AdminAiExtractionFailuresRouteImport.update({
-  id: "/admin-ai-extraction-failures",
-  path: "/admin-ai-extraction-failures",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const AdminAiExecutiveDashboardRoute = AdminAiExecutiveDashboardRouteImport.update({
-  id: "/admin-ai-executive-dashboard",
-  path: "/admin-ai-executive-dashboard",
-  getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
+const AdminAiExtractionFailuresRoute =
+  AdminAiExtractionFailuresRouteImport.update({
+    id: '/admin-ai-extraction-failures',
+    path: '/admin-ai-extraction-failures',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AdminAiExecutiveDashboardRoute =
+  AdminAiExecutiveDashboardRouteImport.update({
+    id: '/admin-ai-executive-dashboard',
+    path: '/admin-ai-executive-dashboard',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AdminAiExecutiveRoute = AdminAiExecutiveRouteImport.update({
-  id: "/admin-ai-executive",
-  path: "/admin-ai-executive",
+  id: '/admin-ai-executive',
+  path: '/admin-ai-executive',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminAiExcelImportRoute = AdminAiExcelImportRouteImport.update({
-  id: "/admin-ai-excel-import",
-  path: "/admin-ai-excel-import",
+  id: '/admin-ai-excel-import',
+  path: '/admin-ai-excel-import',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminAiChronicRefillRoute = AdminAiChronicRefillRouteImport.update({
-  id: "/admin-ai-chronic-refill",
-  path: "/admin-ai-chronic-refill",
+  id: '/admin-ai-chronic-refill',
+  path: '/admin-ai-chronic-refill',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminAiCatalogRoute = AdminAiCatalogRouteImport.update({
-  id: "/admin-ai-catalog",
-  path: "/admin-ai-catalog",
+  id: '/admin-ai-catalog',
+  path: '/admin-ai-catalog',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminAiApprovalsRoute = AdminAiApprovalsRouteImport.update({
-  id: "/admin-ai-approvals",
-  path: "/admin-ai-approvals",
+  id: '/admin-ai-approvals',
+  path: '/admin-ai-approvals',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminAgentsRoute = AdminAgentsRouteImport.update({
-  id: "/admin-agents",
-  path: "/admin-agents",
+  id: '/admin-agents',
+  path: '/admin-agents',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminAgentInsightsRoute = AdminAgentInsightsRouteImport.update({
-  id: "/admin-agent-insights",
-  path: "/admin-agent-insights",
+  id: '/admin-agent-insights',
+  path: '/admin-agent-insights',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminRoute = AdminRouteImport.update({
-  id: "/admin",
-  path: "/admin",
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: "/_authenticated",
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const IndexRoute = IndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const TestFeaturesRoute = TestFeaturesRouteImport.update({
-  id: "/test/features",
-  path: "/test/features",
+  id: '/test/features',
+  path: '/test/features',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ProductIdRoute = ProductIdRouteImport.update({
-  id: "/product/$id",
-  path: "/product/$id",
+  id: '/product/$id',
+  path: '/product/$id',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
-  id: "/email/unsubscribe",
-  path: "/email/unsubscribe",
+  id: '/email/unsubscribe',
+  path: '/email/unsubscribe',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ConditionsSlugRoute = ConditionsSlugRouteImport.update({
-  id: "/$slug",
-  path: "/$slug",
+  id: '/$slug',
+  path: '/$slug',
   getParentRoute: () => ConditionsRoute,
-} as any);
-const AuthenticatedUploadPrescriptionRoute = AuthenticatedUploadPrescriptionRouteImport.update({
-  id: "/upload-prescription",
-  path: "/upload-prescription",
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any);
-const AuthenticatedPharmacistDashboardRoute = AuthenticatedPharmacistDashboardRouteImport.update({
-  id: "/pharmacist-dashboard",
-  path: "/pharmacist-dashboard",
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any);
-const AuthenticatedAdminUploadInventoryRoute = AuthenticatedAdminUploadInventoryRouteImport.update({
-  id: "/admin-upload-inventory",
-  path: "/admin-upload-inventory",
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any);
-const AuthenticatedAdminSystemHealthRoute = AuthenticatedAdminSystemHealthRouteImport.update({
-  id: "/admin-system-health",
-  path: "/admin-system-health",
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any);
-const AuthenticatedAdminSalesReportsRoute = AuthenticatedAdminSalesReportsRouteImport.update({
-  id: "/admin-sales-reports",
-  path: "/admin-sales-reports",
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any);
-const AuthenticatedAdminMarketingCampaignsRoute = AuthenticatedAdminMarketingCampaignsRouteImport.update({
-  id: "/admin-marketing-campaigns",
-  path: "/admin-marketing-campaigns",
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any);
-const AuthenticatedAdminInventorySyncLogsRoute = AuthenticatedAdminInventorySyncLogsRouteImport.update({
-  id: "/admin-inventory-sync-logs",
-  path: "/admin-inventory-sync-logs",
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any);
-const AuthenticatedAdminHealthRoute = AuthenticatedAdminHealthRouteImport.update({
-  id: "/admin-health",
-  path: "/admin-health",
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any);
-const AuthenticatedAdminDashboardRoute = AuthenticatedAdminDashboardRouteImport.update({
-  id: "/admin-dashboard",
-  path: "/admin-dashboard",
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any);
+} as any)
+const AuthenticatedUploadPrescriptionRoute =
+  AuthenticatedUploadPrescriptionRouteImport.update({
+    id: '/upload-prescription',
+    path: '/upload-prescription',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminUploadInventoryRoute =
+  AuthenticatedAdminUploadInventoryRouteImport.update({
+    id: '/admin-upload-inventory',
+    path: '/admin-upload-inventory',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminSystemHealthRoute =
+  AuthenticatedAdminSystemHealthRouteImport.update({
+    id: '/admin-system-health',
+    path: '/admin-system-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminSalesReportsRoute =
+  AuthenticatedAdminSalesReportsRouteImport.update({
+    id: '/admin-sales-reports',
+    path: '/admin-sales-reports',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminMarketingCampaignsRoute =
+  AuthenticatedAdminMarketingCampaignsRouteImport.update({
+    id: '/admin-marketing-campaigns',
+    path: '/admin-marketing-campaigns',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminInventorySyncLogsRoute =
+  AuthenticatedAdminInventorySyncLogsRouteImport.update({
+    id: '/admin-inventory-sync-logs',
+    path: '/admin-inventory-sync-logs',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminHealthRoute =
+  AuthenticatedAdminHealthRouteImport.update({
+    id: '/admin-health',
+    path: '/admin-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminDashboardRoute =
+  AuthenticatedAdminDashboardRouteImport.update({
+    id: '/admin-dashboard',
+    path: '/admin-dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
-  id: "/lovable/email/suppression",
-  path: "/lovable/email/suppression",
+  id: '/lovable/email/suppression',
+  path: '/lovable/email/suppression',
   getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicWhatsappWebhookRoute = ApiPublicWhatsappWebhookRouteImport.update({
-  id: "/api/public/whatsapp-webhook",
-  path: "/api/public/whatsapp-webhook",
-  getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
+const ApiPublicWhatsappWebhookRoute =
+  ApiPublicWhatsappWebhookRouteImport.update({
+    id: '/api/public/whatsapp-webhook',
+    path: '/api/public/whatsapp-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicUptimeWebhookRoute = ApiPublicUptimeWebhookRouteImport.update({
-  id: "/api/public/uptime-webhook",
-  path: "/api/public/uptime-webhook",
+  id: '/api/public/uptime-webhook',
+  path: '/api/public/uptime-webhook',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ApiPublicLogErrorRoute = ApiPublicLogErrorRouteImport.update({
-  id: "/api/public/log-error",
-  path: "/api/public/log-error",
+  id: '/api/public/log-error',
+  path: '/api/public/log-error',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ApiPublicIncidentCheckRoute = ApiPublicIncidentCheckRouteImport.update({
-  id: "/api/public/incident-check",
-  path: "/api/public/incident-check",
+  id: '/api/public/incident-check',
+  path: '/api/public/incident-check',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ApiPublicImgRoute = ApiPublicImgRouteImport.update({
-  id: "/api/public/img",
-  path: "/api/public/img",
+  id: '/api/public/img',
+  path: '/api/public/img',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
-  id: "/api/public/health",
-  path: "/api/public/health",
+  id: '/api/public/health',
+  path: '/api/public/health',
   getParentRoute: () => rootRouteImport,
-} as any);
-const ApiInternalCollectFeedbackRoute = ApiInternalCollectFeedbackRouteImport.update({
-  id: "/api/internal/collect-feedback",
-  path: "/api/internal/collect-feedback",
+} as any)
+const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
+  id: '/api/public/contact',
+  path: '/api/public/contact',
   getParentRoute: () => rootRouteImport,
-} as any);
-const LovableEmailTransactionalSendRoute = LovableEmailTransactionalSendRouteImport.update({
-  id: "/lovable/email/transactional/send",
-  path: "/lovable/email/transactional/send",
+} as any)
+const ApiInternalCollectFeedbackRoute =
+  ApiInternalCollectFeedbackRouteImport.update({
+    id: '/api/internal/collect-feedback',
+    path: '/api/internal/collect-feedback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AuthenticatedPharmacistDashboardRoute =
+  AuthenticatedPharmacistDashboardRouteImport.update({
+    id: '/pharmacist/dashboard',
+    path: '/pharmacist/dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const LovableEmailTransactionalSendRoute =
+  LovableEmailTransactionalSendRouteImport.update({
+    id: '/lovable/email/transactional/send',
+    path: '/lovable/email/transactional/send',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
+  id: '/lovable/email/auth/webhook',
+  path: '/lovable/email/auth/webhook',
   getParentRoute: () => rootRouteImport,
-} as any);
-const LovableEmailTransactionalPreviewRoute = LovableEmailTransactionalPreviewRouteImport.update({
-  id: "/lovable/email/transactional/preview",
-  path: "/lovable/email/transactional/preview",
+} as any)
+const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
+  id: '/lovable/email/auth/preview',
+  path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
-} as any);
-const LovableEmailQueueProcessRoute = LovableEmailQueueProcessRouteImport.update({
-  id: "/lovable/email/queue/process",
-  path: "/lovable/email/queue/process",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicMonitoringHealthRoute = ApiPublicMonitoringHealthRouteImport.update({
-  id: "/api/public/monitoring/health",
-  path: "/api/public/monitoring/health",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicHooksWhatsappRetryRoute = ApiPublicHooksWhatsappRetryRouteImport.update({
-  id: "/api/public/hooks/whatsapp-retry",
-  path: "/api/public/hooks/whatsapp-retry",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicHooksWeeklyExecReportRoute = ApiPublicHooksWeeklyExecReportRouteImport.update({
-  id: "/api/public/hooks/weekly-exec-report",
-  path: "/api/public/hooks/weekly-exec-report",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicHooksWeeklyAiEnrichRoute = ApiPublicHooksWeeklyAiEnrichRouteImport.update({
-  id: "/api/public/hooks/weekly-ai-enrich",
-  path: "/api/public/hooks/weekly-ai-enrich",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicHooksWaStaleConversationsRoute = ApiPublicHooksWaStaleConversationsRouteImport.update({
-  id: "/api/public/hooks/wa-stale-conversations",
-  path: "/api/public/hooks/wa-stale-conversations",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicHooksSocialCallbackRoute = ApiPublicHooksSocialCallbackRouteImport.update({
-  id: "/api/public/hooks/social-callback",
-  path: "/api/public/hooks/social-callback",
-  getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
+const ApiPublicMonitoringHealthRoute =
+  ApiPublicMonitoringHealthRouteImport.update({
+    id: '/api/public/monitoring/health',
+    path: '/api/public/monitoring/health',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksWhatsappRetryRoute =
+  ApiPublicHooksWhatsappRetryRouteImport.update({
+    id: '/api/public/hooks/whatsapp-retry',
+    path: '/api/public/hooks/whatsapp-retry',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksWeeklyExecReportRoute =
+  ApiPublicHooksWeeklyExecReportRouteImport.update({
+    id: '/api/public/hooks/weekly-exec-report',
+    path: '/api/public/hooks/weekly-exec-report',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksWeeklyAiEnrichRoute =
+  ApiPublicHooksWeeklyAiEnrichRouteImport.update({
+    id: '/api/public/hooks/weekly-ai-enrich',
+    path: '/api/public/hooks/weekly-ai-enrich',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksWaStaleConversationsRoute =
+  ApiPublicHooksWaStaleConversationsRouteImport.update({
+    id: '/api/public/hooks/wa-stale-conversations',
+    path: '/api/public/hooks/wa-stale-conversations',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksSocialCallbackRoute =
+  ApiPublicHooksSocialCallbackRouteImport.update({
+    id: '/api/public/hooks/social-callback',
+    path: '/api/public/hooks/social-callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksRxNotifyRoute = ApiPublicHooksRxNotifyRouteImport.update({
-  id: "/api/public/hooks/rx-notify",
-  path: "/api/public/hooks/rx-notify",
+  id: '/api/public/hooks/rx-notify',
+  path: '/api/public/hooks/rx-notify',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ApiPublicHooksRxMirrorRoute = ApiPublicHooksRxMirrorRouteImport.update({
-  id: "/api/public/hooks/rx-mirror",
-  path: "/api/public/hooks/rx-mirror",
+  id: '/api/public/hooks/rx-mirror',
+  path: '/api/public/hooks/rx-mirror',
   getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicHooksRunSocialPostsRoute = ApiPublicHooksRunSocialPostsRouteImport.update({
-  id: "/api/public/hooks/run-social-posts",
-  path: "/api/public/hooks/run-social-posts",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicHooksRunRestockAlertsRoute = ApiPublicHooksRunRestockAlertsRouteImport.update({
-  id: "/api/public/hooks/run-restock-alerts",
-  path: "/api/public/hooks/run-restock-alerts",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicHooksRunReactivationRoute = ApiPublicHooksRunReactivationRouteImport.update({
-  id: "/api/public/hooks/run-reactivation",
-  path: "/api/public/hooks/run-reactivation",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicHooksRunLoyaltyReminderRoute = ApiPublicHooksRunLoyaltyReminderRouteImport.update({
-  id: "/api/public/hooks/run-loyalty-reminder",
-  path: "/api/public/hooks/run-loyalty-reminder",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicHooksRetryFailedPostsRoute = ApiPublicHooksRetryFailedPostsRouteImport.update({
-  id: "/api/public/hooks/retry-failed-posts",
-  path: "/api/public/hooks/retry-failed-posts",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicHooksPrescriptionExtractRoute = ApiPublicHooksPrescriptionExtractRouteImport.update({
-  id: "/api/public/hooks/prescription-extract",
-  path: "/api/public/hooks/prescription-extract",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicHooksNightlyIntelRoute = ApiPublicHooksNightlyIntelRouteImport.update({
-  id: "/api/public/hooks/nightly-intel",
-  path: "/api/public/hooks/nightly-intel",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicHooksEventConsumerRoute = ApiPublicHooksEventConsumerRouteImport.update({
-  id: "/api/public/hooks/event-consumer",
-  path: "/api/public/hooks/event-consumer",
-  getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
+const ApiPublicHooksRunSocialPostsRoute =
+  ApiPublicHooksRunSocialPostsRouteImport.update({
+    id: '/api/public/hooks/run-social-posts',
+    path: '/api/public/hooks/run-social-posts',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksRunRestockAlertsRoute =
+  ApiPublicHooksRunRestockAlertsRouteImport.update({
+    id: '/api/public/hooks/run-restock-alerts',
+    path: '/api/public/hooks/run-restock-alerts',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksRunReactivationRoute =
+  ApiPublicHooksRunReactivationRouteImport.update({
+    id: '/api/public/hooks/run-reactivation',
+    path: '/api/public/hooks/run-reactivation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksRunLoyaltyReminderRoute =
+  ApiPublicHooksRunLoyaltyReminderRouteImport.update({
+    id: '/api/public/hooks/run-loyalty-reminder',
+    path: '/api/public/hooks/run-loyalty-reminder',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksRetryFailedPostsRoute =
+  ApiPublicHooksRetryFailedPostsRouteImport.update({
+    id: '/api/public/hooks/retry-failed-posts',
+    path: '/api/public/hooks/retry-failed-posts',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksPrescriptionExtractRoute =
+  ApiPublicHooksPrescriptionExtractRouteImport.update({
+    id: '/api/public/hooks/prescription-extract',
+    path: '/api/public/hooks/prescription-extract',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksNightlyIntelRoute =
+  ApiPublicHooksNightlyIntelRouteImport.update({
+    id: '/api/public/hooks/nightly-intel',
+    path: '/api/public/hooks/nightly-intel',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksEventConsumerRoute =
+  ApiPublicHooksEventConsumerRouteImport.update({
+    id: '/api/public/hooks/event-consumer',
+    path: '/api/public/hooks/event-consumer',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksDlqAlertsRoute = ApiPublicHooksDlqAlertsRouteImport.update({
-  id: "/api/public/hooks/dlq-alerts",
-  path: "/api/public/hooks/dlq-alerts",
+  id: '/api/public/hooks/dlq-alerts',
+  path: '/api/public/hooks/dlq-alerts',
   getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicHooksCustomerRxNotifyRoute = ApiPublicHooksCustomerRxNotifyRouteImport.update({
-  id: "/api/public/hooks/customer-rx-notify",
-  path: "/api/public/hooks/customer-rx-notify",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicHooksCollectSocialStatsRoute = ApiPublicHooksCollectSocialStatsRouteImport.update({
-  id: "/api/public/hooks/collect-social-stats",
-  path: "/api/public/hooks/collect-social-stats",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicHooksChronicRefillsRoute = ApiPublicHooksChronicRefillsRouteImport.update({
-  id: "/api/public/hooks/chronic-refills",
-  path: "/api/public/hooks/chronic-refills",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicHooksAlertsWorkerRoute = ApiPublicHooksAlertsWorkerRouteImport.update({
-  id: "/api/public/hooks/alerts-worker",
-  path: "/api/public/hooks/alerts-worker",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicHooksAgentMaintenanceRoute = ApiPublicHooksAgentMaintenanceRouteImport.update({
-  id: "/api/public/hooks/agent-maintenance",
-  path: "/api/public/hooks/agent-maintenance",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicHealthQuickCheckRoute = ApiPublicHealthQuickCheckRouteImport.update({
-  id: "/quick-check",
-  path: "/quick-check",
-  getParentRoute: () => ApiPublicHealthRoute,
-} as any);
-const ApiPublicHealthFullCheckRoute = ApiPublicHealthFullCheckRouteImport.update({
-  id: "/full-check",
-  path: "/full-check",
-  getParentRoute: () => ApiPublicHealthRoute,
-} as any);
-const ApiPublicHooksAgentsWhatsappRoute = ApiPublicHooksAgentsWhatsappRouteImport.update({
-  id: "/api/public/hooks/agents/whatsapp",
-  path: "/api/public/hooks/agents/whatsapp",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicHooksAgentsSalesRoute = ApiPublicHooksAgentsSalesRouteImport.update({
-  id: "/api/public/hooks/agents/sales",
-  path: "/api/public/hooks/agents/sales",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicHooksAgentsOperationsRoute = ApiPublicHooksAgentsOperationsRouteImport.update({
-  id: "/api/public/hooks/agents/operations",
-  path: "/api/public/hooks/agents/operations",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicHooksAgentsMarketingRoute = ApiPublicHooksAgentsMarketingRouteImport.update({
-  id: "/api/public/hooks/agents/marketing",
-  path: "/api/public/hooks/agents/marketing",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ApiPublicHooksAgentsInventoryRoute = ApiPublicHooksAgentsInventoryRouteImport.update({
-  id: "/api/public/hooks/agents/inventory",
-  path: "/api/public/hooks/agents/inventory",
-  getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
+const ApiPublicHooksCustomerRxNotifyRoute =
+  ApiPublicHooksCustomerRxNotifyRouteImport.update({
+    id: '/api/public/hooks/customer-rx-notify',
+    path: '/api/public/hooks/customer-rx-notify',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksCollectSocialStatsRoute =
+  ApiPublicHooksCollectSocialStatsRouteImport.update({
+    id: '/api/public/hooks/collect-social-stats',
+    path: '/api/public/hooks/collect-social-stats',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksChronicRefillsRoute =
+  ApiPublicHooksChronicRefillsRouteImport.update({
+    id: '/api/public/hooks/chronic-refills',
+    path: '/api/public/hooks/chronic-refills',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksAlertsWorkerRoute =
+  ApiPublicHooksAlertsWorkerRouteImport.update({
+    id: '/api/public/hooks/alerts-worker',
+    path: '/api/public/hooks/alerts-worker',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksAgentMaintenanceRoute =
+  ApiPublicHooksAgentMaintenanceRouteImport.update({
+    id: '/api/public/hooks/agent-maintenance',
+    path: '/api/public/hooks/agent-maintenance',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHealthQuickCheckRoute =
+  ApiPublicHealthQuickCheckRouteImport.update({
+    id: '/quick-check',
+    path: '/quick-check',
+    getParentRoute: () => ApiPublicHealthRoute,
+  } as any)
+const ApiPublicHealthFullCheckRoute =
+  ApiPublicHealthFullCheckRouteImport.update({
+    id: '/full-check',
+    path: '/full-check',
+    getParentRoute: () => ApiPublicHealthRoute,
+  } as any)
+const ApiPublicHooksAgentsWhatsappRoute =
+  ApiPublicHooksAgentsWhatsappRouteImport.update({
+    id: '/api/public/hooks/agents/whatsapp',
+    path: '/api/public/hooks/agents/whatsapp',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksAgentsSalesRoute =
+  ApiPublicHooksAgentsSalesRouteImport.update({
+    id: '/api/public/hooks/agents/sales',
+    path: '/api/public/hooks/agents/sales',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksAgentsOperationsRoute =
+  ApiPublicHooksAgentsOperationsRouteImport.update({
+    id: '/api/public/hooks/agents/operations',
+    path: '/api/public/hooks/agents/operations',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksAgentsMarketingRoute =
+  ApiPublicHooksAgentsMarketingRouteImport.update({
+    id: '/api/public/hooks/agents/marketing',
+    path: '/api/public/hooks/agents/marketing',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksAgentsInventoryRoute =
+  ApiPublicHooksAgentsInventoryRouteImport.update({
+    id: '/api/public/hooks/agents/inventory',
+    path: '/api/public/hooks/agents/inventory',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksAgentsCxRoute = ApiPublicHooksAgentsCxRouteImport.update({
-  id: "/api/public/hooks/agents/cx",
-  path: "/api/public/hooks/agents/cx",
+  id: '/api/public/hooks/agents/cx',
+  path: '/api/public/hooks/agents/cx',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ApiPublicHooksAgentsCtoRoute = ApiPublicHooksAgentsCtoRouteImport.update({
-  id: "/api/public/hooks/agents/cto",
-  path: "/api/public/hooks/agents/cto",
+  id: '/api/public/hooks/agents/cto',
+  path: '/api/public/hooks/agents/cto',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ApiPublicHooksAgentsCeoRoute = ApiPublicHooksAgentsCeoRouteImport.update({
-  id: "/api/public/hooks/agents/ceo",
-  path: "/api/public/hooks/agents/ceo",
+  id: '/api/public/hooks/agents/ceo',
+  path: '/api/public/hooks/agents/ceo',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ApiPublicHooksAgentsBiRoute = ApiPublicHooksAgentsBiRouteImport.update({
-  id: "/api/public/hooks/agents/bi",
-  path: "/api/public/hooks/agents/bi",
+  id: '/api/public/hooks/agents/bi',
+  path: '/api/public/hooks/agents/bi',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute;
-  "/admin": typeof AdminRoute;
-  "/admin-agent-insights": typeof AdminAgentInsightsRoute;
-  "/admin-agents": typeof AdminAgentsRoute;
-  "/admin-ai-approvals": typeof AdminAiApprovalsRoute;
-  "/admin-ai-catalog": typeof AdminAiCatalogRoute;
-  "/admin-ai-chronic-refill": typeof AdminAiChronicRefillRoute;
-  "/admin-ai-excel-import": typeof AdminAiExcelImportRoute;
-  "/admin-ai-executive": typeof AdminAiExecutiveRoute;
-  "/admin-ai-executive-dashboard": typeof AdminAiExecutiveDashboardRoute;
-  "/admin-ai-extraction-failures": typeof AdminAiExtractionFailuresRoute;
-  "/admin-ai-extractions": typeof AdminAiExtractionsRoute;
-  "/admin-ai-inventory": typeof AdminAiInventoryRoute;
-  "/admin-ai-loyalty": typeof AdminAiLoyaltyRoute;
-  "/admin-ai-marketing": typeof AdminAiMarketingRoute;
-  "/admin-ai-orchestrator": typeof AdminAiOrchestratorRoute;
-  "/admin-ai-procurement": typeof AdminAiProcurementRoute;
-  "/admin-ai-sales-cx": typeof AdminAiSalesCxRoute;
-  "/admin-ai-whatsapp": typeof AdminAiWhatsappRoute;
-  "/admin-automation-hub": typeof AdminAutomationHubRoute;
-  "/admin-backups": typeof AdminBackupsRoute;
-  "/admin-banners": typeof AdminBannersRoute;
-  "/admin-branches": typeof AdminBranchesRoute;
-  "/admin-bundles": typeof AdminBundlesRoute;
-  "/admin-campaigns": typeof AdminCampaignsRoute;
-  "/admin-classifications": typeof AdminClassificationsRoute;
-  "/admin-command": typeof AdminCommandRoute;
-  "/admin-cron-health": typeof AdminCronHealthRoute;
-  "/admin-cron-jobs": typeof AdminCronJobsRoute;
-  "/admin-diagnostics": typeof AdminDiagnosticsRoute;
-  "/admin-discounts": typeof AdminDiscountsRoute;
-  "/admin-event-bus": typeof AdminEventBusRoute;
-  "/admin-hmac-preflight": typeof AdminHmacPreflightRoute;
-  "/admin-hub": typeof AdminHubRoute;
-  "/admin-inventory": typeof AdminInventoryRoute;
-  "/admin-inventory-duplicates": typeof AdminInventoryDuplicatesRoute;
-  "/admin-inventory-reservations": typeof AdminInventoryReservationsRoute;
-  "/admin-logs": typeof AdminLogsRoute;
-  "/admin-loyalty-dashboard": typeof AdminLoyaltyDashboardRoute;
-  "/admin-marketing": typeof AdminMarketingRoute;
-  "/admin-offers": typeof AdminOffersRoute;
-  "/admin-pharmacy-recommendations": typeof AdminPharmacyRecommendationsRoute;
-  "/admin-product-gallery": typeof AdminProductGalleryRoute;
-  "/admin-products": typeof AdminProductsRoute;
-  "/admin-rx-check": typeof AdminRxCheckRoute;
-  "/admin-rx-extraction-edit": typeof AdminRxExtractionEditRoute;
-  "/admin-rx-review": typeof AdminRxReviewRoute;
-  "/admin-settings": typeof AdminSettingsRoute;
-  "/admin-social-posts": typeof AdminSocialPostsRoute;
-  "/admin-stock-audit": typeof AdminStockAuditRoute;
-  "/admin-transfers": typeof AdminTransfersRoute;
-  "/admin-trigger-failures": typeof AdminTriggerFailuresRoute;
-  "/admin-whatsapp-conversations": typeof AdminWhatsappConversationsRoute;
-  "/admin-whatsapp-delivery": typeof AdminWhatsappDeliveryRoute;
-  "/admin-workforce": typeof AdminWorkforceRoute;
-  "/ai-assistant": typeof AiAssistantRoute;
-  "/ai-pharmacist": typeof AiPharmacistRoute;
-  "/ai-prescription": typeof AiPrescriptionRoute;
-  "/ai-supplement": typeof AiSupplementRoute;
-  "/ai-symptoms": typeof AiSymptomsRoute;
-  "/bundles": typeof BundlesRoute;
-  "/cart": typeof CartRoute;
-  "/conditions": typeof ConditionsRouteWithChildren;
-  "/insurance": typeof InsuranceRoute;
-  "/loyalty": typeof LoyaltyRoute;
-  "/my-notifications": typeof MyNotificationsRoute;
-  "/network-health": typeof NetworkHealthRoute;
-  "/network-test": typeof NetworkTestRoute;
-  "/notifications": typeof NotificationsRoute;
-  "/prescription": typeof PrescriptionRoute;
-  "/products": typeof ProductsRoute;
-  "/settings": typeof SettingsRoute;
-  "/sitemap.xml": typeof SitemapDotxmlRoute;
-  "/status": typeof StatusRoute;
-  "/titans": typeof TitansRoute;
-  "/track": typeof TrackRoute;
-  "/trust": typeof TrustRoute;
-  "/unsubscribe": typeof UnsubscribeRoute;
-  "/yemen-debug": typeof YemenDebugRoute;
-  "/admin-dashboard": typeof AuthenticatedAdminDashboardRoute;
-  "/admin-health": typeof AuthenticatedAdminHealthRoute;
-  "/admin-inventory-sync-logs": typeof AuthenticatedAdminInventorySyncLogsRoute;
-  "/admin-marketing-campaigns": typeof AuthenticatedAdminMarketingCampaignsRoute;
-  "/admin-sales-reports": typeof AuthenticatedAdminSalesReportsRoute;
-  "/admin-system-health": typeof AuthenticatedAdminSystemHealthRoute;
-  "/admin-upload-inventory": typeof AuthenticatedAdminUploadInventoryRoute;
-  "/pharmacist-dashboard": typeof AuthenticatedPharmacistDashboardRoute;
-  "/upload-prescription": typeof AuthenticatedUploadPrescriptionRoute;
-  "/conditions/$slug": typeof ConditionsSlugRoute;
-  "/email/unsubscribe": typeof EmailUnsubscribeRoute;
-  "/product/$id": typeof ProductIdRoute;
-  "/test/features": typeof TestFeaturesRoute;
-  "/api/internal/collect-feedback": typeof ApiInternalCollectFeedbackRoute;
-  "/api/public/health": typeof ApiPublicHealthRouteWithChildren;
-  "/api/public/img": typeof ApiPublicImgRoute;
-  "/api/public/incident-check": typeof ApiPublicIncidentCheckRoute;
-  "/api/public/log-error": typeof ApiPublicLogErrorRoute;
-  "/api/public/uptime-webhook": typeof ApiPublicUptimeWebhookRoute;
-  "/api/public/whatsapp-webhook": typeof ApiPublicWhatsappWebhookRoute;
-  "/lovable/email/suppression": typeof LovableEmailSuppressionRoute;
-  "/api/public/health/full-check": typeof ApiPublicHealthFullCheckRoute;
-  "/api/public/health/quick-check": typeof ApiPublicHealthQuickCheckRoute;
-  "/api/public/hooks/agent-maintenance": typeof ApiPublicHooksAgentMaintenanceRoute;
-  "/api/public/hooks/alerts-worker": typeof ApiPublicHooksAlertsWorkerRoute;
-  "/api/public/hooks/chronic-refills": typeof ApiPublicHooksChronicRefillsRoute;
-  "/api/public/hooks/collect-social-stats": typeof ApiPublicHooksCollectSocialStatsRoute;
-  "/api/public/hooks/customer-rx-notify": typeof ApiPublicHooksCustomerRxNotifyRoute;
-  "/api/public/hooks/dlq-alerts": typeof ApiPublicHooksDlqAlertsRoute;
-  "/api/public/hooks/event-consumer": typeof ApiPublicHooksEventConsumerRoute;
-  "/api/public/hooks/nightly-intel": typeof ApiPublicHooksNightlyIntelRoute;
-  "/api/public/hooks/prescription-extract": typeof ApiPublicHooksPrescriptionExtractRoute;
-  "/api/public/hooks/retry-failed-posts": typeof ApiPublicHooksRetryFailedPostsRoute;
-  "/api/public/hooks/run-loyalty-reminder": typeof ApiPublicHooksRunLoyaltyReminderRoute;
-  "/api/public/hooks/run-reactivation": typeof ApiPublicHooksRunReactivationRoute;
-  "/api/public/hooks/run-restock-alerts": typeof ApiPublicHooksRunRestockAlertsRoute;
-  "/api/public/hooks/run-social-posts": typeof ApiPublicHooksRunSocialPostsRoute;
-  "/api/public/hooks/rx-mirror": typeof ApiPublicHooksRxMirrorRoute;
-  "/api/public/hooks/rx-notify": typeof ApiPublicHooksRxNotifyRoute;
-  "/api/public/hooks/social-callback": typeof ApiPublicHooksSocialCallbackRoute;
-  "/api/public/hooks/wa-stale-conversations": typeof ApiPublicHooksWaStaleConversationsRoute;
-  "/api/public/hooks/weekly-ai-enrich": typeof ApiPublicHooksWeeklyAiEnrichRoute;
-  "/api/public/hooks/weekly-exec-report": typeof ApiPublicHooksWeeklyExecReportRoute;
-  "/api/public/hooks/whatsapp-retry": typeof ApiPublicHooksWhatsappRetryRoute;
-  "/api/public/monitoring/health": typeof ApiPublicMonitoringHealthRoute;
-  "/lovable/email/queue/process": typeof LovableEmailQueueProcessRoute;
-  "/lovable/email/transactional/preview": typeof LovableEmailTransactionalPreviewRoute;
-  "/lovable/email/transactional/send": typeof LovableEmailTransactionalSendRoute;
-  "/api/public/hooks/agents/bi": typeof ApiPublicHooksAgentsBiRoute;
-  "/api/public/hooks/agents/ceo": typeof ApiPublicHooksAgentsCeoRoute;
-  "/api/public/hooks/agents/cto": typeof ApiPublicHooksAgentsCtoRoute;
-  "/api/public/hooks/agents/cx": typeof ApiPublicHooksAgentsCxRoute;
-  "/api/public/hooks/agents/inventory": typeof ApiPublicHooksAgentsInventoryRoute;
-  "/api/public/hooks/agents/marketing": typeof ApiPublicHooksAgentsMarketingRoute;
-  "/api/public/hooks/agents/operations": typeof ApiPublicHooksAgentsOperationsRoute;
-  "/api/public/hooks/agents/sales": typeof ApiPublicHooksAgentsSalesRoute;
-  "/api/public/hooks/agents/whatsapp": typeof ApiPublicHooksAgentsWhatsappRoute;
+  '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/admin-agent-insights': typeof AdminAgentInsightsRoute
+  '/admin-agents': typeof AdminAgentsRoute
+  '/admin-ai-approvals': typeof AdminAiApprovalsRoute
+  '/admin-ai-catalog': typeof AdminAiCatalogRoute
+  '/admin-ai-chronic-refill': typeof AdminAiChronicRefillRoute
+  '/admin-ai-excel-import': typeof AdminAiExcelImportRoute
+  '/admin-ai-executive': typeof AdminAiExecutiveRoute
+  '/admin-ai-executive-dashboard': typeof AdminAiExecutiveDashboardRoute
+  '/admin-ai-extraction-failures': typeof AdminAiExtractionFailuresRoute
+  '/admin-ai-extractions': typeof AdminAiExtractionsRoute
+  '/admin-ai-inventory': typeof AdminAiInventoryRoute
+  '/admin-ai-loyalty': typeof AdminAiLoyaltyRoute
+  '/admin-ai-marketing': typeof AdminAiMarketingRoute
+  '/admin-ai-orchestrator': typeof AdminAiOrchestratorRoute
+  '/admin-ai-procurement': typeof AdminAiProcurementRoute
+  '/admin-ai-sales-cx': typeof AdminAiSalesCxRoute
+  '/admin-ai-whatsapp': typeof AdminAiWhatsappRoute
+  '/admin-automation-hub': typeof AdminAutomationHubRoute
+  '/admin-backups': typeof AdminBackupsRoute
+  '/admin-banners': typeof AdminBannersRoute
+  '/admin-branches': typeof AdminBranchesRoute
+  '/admin-bundles': typeof AdminBundlesRoute
+  '/admin-campaigns': typeof AdminCampaignsRoute
+  '/admin-classifications': typeof AdminClassificationsRoute
+  '/admin-command': typeof AdminCommandRoute
+  '/admin-cron-health': typeof AdminCronHealthRoute
+  '/admin-cron-jobs': typeof AdminCronJobsRoute
+  '/admin-diagnostics': typeof AdminDiagnosticsRoute
+  '/admin-discounts': typeof AdminDiscountsRoute
+  '/admin-event-bus': typeof AdminEventBusRoute
+  '/admin-hmac-preflight': typeof AdminHmacPreflightRoute
+  '/admin-hub': typeof AdminHubRoute
+  '/admin-inventory': typeof AdminInventoryRoute
+  '/admin-inventory-duplicates': typeof AdminInventoryDuplicatesRoute
+  '/admin-inventory-reservations': typeof AdminInventoryReservationsRoute
+  '/admin-logs': typeof AdminLogsRoute
+  '/admin-loyalty-dashboard': typeof AdminLoyaltyDashboardRoute
+  '/admin-marketing': typeof AdminMarketingRoute
+  '/admin-offers': typeof AdminOffersRoute
+  '/admin-pharmacy-recommendations': typeof AdminPharmacyRecommendationsRoute
+  '/admin-product-gallery': typeof AdminProductGalleryRoute
+  '/admin-products': typeof AdminProductsRoute
+  '/admin-rx-check': typeof AdminRxCheckRoute
+  '/admin-rx-extraction-edit': typeof AdminRxExtractionEditRoute
+  '/admin-rx-review': typeof AdminRxReviewRoute
+  '/admin-settings': typeof AdminSettingsRoute
+  '/admin-social-posts': typeof AdminSocialPostsRoute
+  '/admin-stock-audit': typeof AdminStockAuditRoute
+  '/admin-transfers': typeof AdminTransfersRoute
+  '/admin-trigger-failures': typeof AdminTriggerFailuresRoute
+  '/admin-whatsapp-conversations': typeof AdminWhatsappConversationsRoute
+  '/admin-whatsapp-delivery': typeof AdminWhatsappDeliveryRoute
+  '/admin-workforce': typeof AdminWorkforceRoute
+  '/ai-assistant': typeof AiAssistantRoute
+  '/ai-pharmacist': typeof AiPharmacistRoute
+  '/ai-prescription': typeof AiPrescriptionRoute
+  '/ai-supplement': typeof AiSupplementRoute
+  '/ai-symptoms': typeof AiSymptomsRoute
+  '/bundles': typeof BundlesRoute
+  '/cart': typeof CartRoute
+  '/conditions': typeof ConditionsRouteWithChildren
+  '/contact': typeof ContactRoute
+  '/insurance': typeof InsuranceRoute
+  '/loyalty': typeof LoyaltyRoute
+  '/my-notifications': typeof MyNotificationsRoute
+  '/network-health': typeof NetworkHealthRoute
+  '/network-test': typeof NetworkTestRoute
+  '/notifications': typeof NotificationsRoute
+  '/prescription': typeof PrescriptionRoute
+  '/products': typeof ProductsRoute
+  '/settings': typeof SettingsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/status': typeof StatusRoute
+  '/titans': typeof TitansRoute
+  '/track': typeof TrackRoute
+  '/trust': typeof TrustRoute
+  '/unsubscribe': typeof UnsubscribeRoute
+  '/yemen-debug': typeof YemenDebugRoute
+  '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/admin-health': typeof AuthenticatedAdminHealthRoute
+  '/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
+  '/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
+  '/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
+  '/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
+  '/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
+  '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
+  '/conditions/$slug': typeof ConditionsSlugRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/product/$id': typeof ProductIdRoute
+  '/test/features': typeof TestFeaturesRoute
+  '/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
+  '/api/internal/collect-feedback': typeof ApiInternalCollectFeedbackRoute
+  '/api/public/contact': typeof ApiPublicContactRoute
+  '/api/public/health': typeof ApiPublicHealthRouteWithChildren
+  '/api/public/img': typeof ApiPublicImgRoute
+  '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
+  '/api/public/log-error': typeof ApiPublicLogErrorRoute
+  '/api/public/uptime-webhook': typeof ApiPublicUptimeWebhookRoute
+  '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
+  '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
+  '/api/public/hooks/agent-maintenance': typeof ApiPublicHooksAgentMaintenanceRoute
+  '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
+  '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
+  '/api/public/hooks/collect-social-stats': typeof ApiPublicHooksCollectSocialStatsRoute
+  '/api/public/hooks/customer-rx-notify': typeof ApiPublicHooksCustomerRxNotifyRoute
+  '/api/public/hooks/dlq-alerts': typeof ApiPublicHooksDlqAlertsRoute
+  '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
+  '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
+  '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
+  '/api/public/hooks/retry-failed-posts': typeof ApiPublicHooksRetryFailedPostsRoute
+  '/api/public/hooks/run-loyalty-reminder': typeof ApiPublicHooksRunLoyaltyReminderRoute
+  '/api/public/hooks/run-reactivation': typeof ApiPublicHooksRunReactivationRoute
+  '/api/public/hooks/run-restock-alerts': typeof ApiPublicHooksRunRestockAlertsRoute
+  '/api/public/hooks/run-social-posts': typeof ApiPublicHooksRunSocialPostsRoute
+  '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
+  '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
+  '/api/public/hooks/social-callback': typeof ApiPublicHooksSocialCallbackRoute
+  '/api/public/hooks/wa-stale-conversations': typeof ApiPublicHooksWaStaleConversationsRoute
+  '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
+  '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
+  '/api/public/hooks/whatsapp-retry': typeof ApiPublicHooksWhatsappRetryRoute
+  '/api/public/monitoring/health': typeof ApiPublicMonitoringHealthRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/api/public/hooks/agents/bi': typeof ApiPublicHooksAgentsBiRoute
+  '/api/public/hooks/agents/ceo': typeof ApiPublicHooksAgentsCeoRoute
+  '/api/public/hooks/agents/cto': typeof ApiPublicHooksAgentsCtoRoute
+  '/api/public/hooks/agents/cx': typeof ApiPublicHooksAgentsCxRoute
+  '/api/public/hooks/agents/inventory': typeof ApiPublicHooksAgentsInventoryRoute
+  '/api/public/hooks/agents/marketing': typeof ApiPublicHooksAgentsMarketingRoute
+  '/api/public/hooks/agents/operations': typeof ApiPublicHooksAgentsOperationsRoute
+  '/api/public/hooks/agents/sales': typeof ApiPublicHooksAgentsSalesRoute
+  '/api/public/hooks/agents/whatsapp': typeof ApiPublicHooksAgentsWhatsappRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute;
-  "/admin": typeof AdminRoute;
-  "/admin-agent-insights": typeof AdminAgentInsightsRoute;
-  "/admin-agents": typeof AdminAgentsRoute;
-  "/admin-ai-approvals": typeof AdminAiApprovalsRoute;
-  "/admin-ai-catalog": typeof AdminAiCatalogRoute;
-  "/admin-ai-chronic-refill": typeof AdminAiChronicRefillRoute;
-  "/admin-ai-excel-import": typeof AdminAiExcelImportRoute;
-  "/admin-ai-executive": typeof AdminAiExecutiveRoute;
-  "/admin-ai-executive-dashboard": typeof AdminAiExecutiveDashboardRoute;
-  "/admin-ai-extraction-failures": typeof AdminAiExtractionFailuresRoute;
-  "/admin-ai-extractions": typeof AdminAiExtractionsRoute;
-  "/admin-ai-inventory": typeof AdminAiInventoryRoute;
-  "/admin-ai-loyalty": typeof AdminAiLoyaltyRoute;
-  "/admin-ai-marketing": typeof AdminAiMarketingRoute;
-  "/admin-ai-orchestrator": typeof AdminAiOrchestratorRoute;
-  "/admin-ai-procurement": typeof AdminAiProcurementRoute;
-  "/admin-ai-sales-cx": typeof AdminAiSalesCxRoute;
-  "/admin-ai-whatsapp": typeof AdminAiWhatsappRoute;
-  "/admin-automation-hub": typeof AdminAutomationHubRoute;
-  "/admin-backups": typeof AdminBackupsRoute;
-  "/admin-banners": typeof AdminBannersRoute;
-  "/admin-branches": typeof AdminBranchesRoute;
-  "/admin-bundles": typeof AdminBundlesRoute;
-  "/admin-campaigns": typeof AdminCampaignsRoute;
-  "/admin-classifications": typeof AdminClassificationsRoute;
-  "/admin-command": typeof AdminCommandRoute;
-  "/admin-cron-health": typeof AdminCronHealthRoute;
-  "/admin-cron-jobs": typeof AdminCronJobsRoute;
-  "/admin-diagnostics": typeof AdminDiagnosticsRoute;
-  "/admin-discounts": typeof AdminDiscountsRoute;
-  "/admin-event-bus": typeof AdminEventBusRoute;
-  "/admin-hmac-preflight": typeof AdminHmacPreflightRoute;
-  "/admin-hub": typeof AdminHubRoute;
-  "/admin-inventory": typeof AdminInventoryRoute;
-  "/admin-inventory-duplicates": typeof AdminInventoryDuplicatesRoute;
-  "/admin-inventory-reservations": typeof AdminInventoryReservationsRoute;
-  "/admin-logs": typeof AdminLogsRoute;
-  "/admin-loyalty-dashboard": typeof AdminLoyaltyDashboardRoute;
-  "/admin-marketing": typeof AdminMarketingRoute;
-  "/admin-offers": typeof AdminOffersRoute;
-  "/admin-pharmacy-recommendations": typeof AdminPharmacyRecommendationsRoute;
-  "/admin-product-gallery": typeof AdminProductGalleryRoute;
-  "/admin-products": typeof AdminProductsRoute;
-  "/admin-rx-check": typeof AdminRxCheckRoute;
-  "/admin-rx-extraction-edit": typeof AdminRxExtractionEditRoute;
-  "/admin-rx-review": typeof AdminRxReviewRoute;
-  "/admin-settings": typeof AdminSettingsRoute;
-  "/admin-social-posts": typeof AdminSocialPostsRoute;
-  "/admin-stock-audit": typeof AdminStockAuditRoute;
-  "/admin-transfers": typeof AdminTransfersRoute;
-  "/admin-trigger-failures": typeof AdminTriggerFailuresRoute;
-  "/admin-whatsapp-conversations": typeof AdminWhatsappConversationsRoute;
-  "/admin-whatsapp-delivery": typeof AdminWhatsappDeliveryRoute;
-  "/admin-workforce": typeof AdminWorkforceRoute;
-  "/ai-assistant": typeof AiAssistantRoute;
-  "/ai-pharmacist": typeof AiPharmacistRoute;
-  "/ai-prescription": typeof AiPrescriptionRoute;
-  "/ai-supplement": typeof AiSupplementRoute;
-  "/ai-symptoms": typeof AiSymptomsRoute;
-  "/bundles": typeof BundlesRoute;
-  "/cart": typeof CartRoute;
-  "/conditions": typeof ConditionsRouteWithChildren;
-  "/insurance": typeof InsuranceRoute;
-  "/loyalty": typeof LoyaltyRoute;
-  "/my-notifications": typeof MyNotificationsRoute;
-  "/network-health": typeof NetworkHealthRoute;
-  "/network-test": typeof NetworkTestRoute;
-  "/notifications": typeof NotificationsRoute;
-  "/prescription": typeof PrescriptionRoute;
-  "/products": typeof ProductsRoute;
-  "/settings": typeof SettingsRoute;
-  "/sitemap.xml": typeof SitemapDotxmlRoute;
-  "/status": typeof StatusRoute;
-  "/titans": typeof TitansRoute;
-  "/track": typeof TrackRoute;
-  "/trust": typeof TrustRoute;
-  "/unsubscribe": typeof UnsubscribeRoute;
-  "/yemen-debug": typeof YemenDebugRoute;
-  "/admin-dashboard": typeof AuthenticatedAdminDashboardRoute;
-  "/admin-health": typeof AuthenticatedAdminHealthRoute;
-  "/admin-inventory-sync-logs": typeof AuthenticatedAdminInventorySyncLogsRoute;
-  "/admin-marketing-campaigns": typeof AuthenticatedAdminMarketingCampaignsRoute;
-  "/admin-sales-reports": typeof AuthenticatedAdminSalesReportsRoute;
-  "/admin-system-health": typeof AuthenticatedAdminSystemHealthRoute;
-  "/admin-upload-inventory": typeof AuthenticatedAdminUploadInventoryRoute;
-  "/pharmacist-dashboard": typeof AuthenticatedPharmacistDashboardRoute;
-  "/upload-prescription": typeof AuthenticatedUploadPrescriptionRoute;
-  "/conditions/$slug": typeof ConditionsSlugRoute;
-  "/email/unsubscribe": typeof EmailUnsubscribeRoute;
-  "/product/$id": typeof ProductIdRoute;
-  "/test/features": typeof TestFeaturesRoute;
-  "/api/internal/collect-feedback": typeof ApiInternalCollectFeedbackRoute;
-  "/api/public/health": typeof ApiPublicHealthRouteWithChildren;
-  "/api/public/img": typeof ApiPublicImgRoute;
-  "/api/public/incident-check": typeof ApiPublicIncidentCheckRoute;
-  "/api/public/log-error": typeof ApiPublicLogErrorRoute;
-  "/api/public/uptime-webhook": typeof ApiPublicUptimeWebhookRoute;
-  "/api/public/whatsapp-webhook": typeof ApiPublicWhatsappWebhookRoute;
-  "/lovable/email/suppression": typeof LovableEmailSuppressionRoute;
-  "/api/public/health/full-check": typeof ApiPublicHealthFullCheckRoute;
-  "/api/public/health/quick-check": typeof ApiPublicHealthQuickCheckRoute;
-  "/api/public/hooks/agent-maintenance": typeof ApiPublicHooksAgentMaintenanceRoute;
-  "/api/public/hooks/alerts-worker": typeof ApiPublicHooksAlertsWorkerRoute;
-  "/api/public/hooks/chronic-refills": typeof ApiPublicHooksChronicRefillsRoute;
-  "/api/public/hooks/collect-social-stats": typeof ApiPublicHooksCollectSocialStatsRoute;
-  "/api/public/hooks/customer-rx-notify": typeof ApiPublicHooksCustomerRxNotifyRoute;
-  "/api/public/hooks/dlq-alerts": typeof ApiPublicHooksDlqAlertsRoute;
-  "/api/public/hooks/event-consumer": typeof ApiPublicHooksEventConsumerRoute;
-  "/api/public/hooks/nightly-intel": typeof ApiPublicHooksNightlyIntelRoute;
-  "/api/public/hooks/prescription-extract": typeof ApiPublicHooksPrescriptionExtractRoute;
-  "/api/public/hooks/retry-failed-posts": typeof ApiPublicHooksRetryFailedPostsRoute;
-  "/api/public/hooks/run-loyalty-reminder": typeof ApiPublicHooksRunLoyaltyReminderRoute;
-  "/api/public/hooks/run-reactivation": typeof ApiPublicHooksRunReactivationRoute;
-  "/api/public/hooks/run-restock-alerts": typeof ApiPublicHooksRunRestockAlertsRoute;
-  "/api/public/hooks/run-social-posts": typeof ApiPublicHooksRunSocialPostsRoute;
-  "/api/public/hooks/rx-mirror": typeof ApiPublicHooksRxMirrorRoute;
-  "/api/public/hooks/rx-notify": typeof ApiPublicHooksRxNotifyRoute;
-  "/api/public/hooks/social-callback": typeof ApiPublicHooksSocialCallbackRoute;
-  "/api/public/hooks/wa-stale-conversations": typeof ApiPublicHooksWaStaleConversationsRoute;
-  "/api/public/hooks/weekly-ai-enrich": typeof ApiPublicHooksWeeklyAiEnrichRoute;
-  "/api/public/hooks/weekly-exec-report": typeof ApiPublicHooksWeeklyExecReportRoute;
-  "/api/public/hooks/whatsapp-retry": typeof ApiPublicHooksWhatsappRetryRoute;
-  "/api/public/monitoring/health": typeof ApiPublicMonitoringHealthRoute;
-  "/lovable/email/queue/process": typeof LovableEmailQueueProcessRoute;
-  "/lovable/email/transactional/preview": typeof LovableEmailTransactionalPreviewRoute;
-  "/lovable/email/transactional/send": typeof LovableEmailTransactionalSendRoute;
-  "/api/public/hooks/agents/bi": typeof ApiPublicHooksAgentsBiRoute;
-  "/api/public/hooks/agents/ceo": typeof ApiPublicHooksAgentsCeoRoute;
-  "/api/public/hooks/agents/cto": typeof ApiPublicHooksAgentsCtoRoute;
-  "/api/public/hooks/agents/cx": typeof ApiPublicHooksAgentsCxRoute;
-  "/api/public/hooks/agents/inventory": typeof ApiPublicHooksAgentsInventoryRoute;
-  "/api/public/hooks/agents/marketing": typeof ApiPublicHooksAgentsMarketingRoute;
-  "/api/public/hooks/agents/operations": typeof ApiPublicHooksAgentsOperationsRoute;
-  "/api/public/hooks/agents/sales": typeof ApiPublicHooksAgentsSalesRoute;
-  "/api/public/hooks/agents/whatsapp": typeof ApiPublicHooksAgentsWhatsappRoute;
+  '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/admin-agent-insights': typeof AdminAgentInsightsRoute
+  '/admin-agents': typeof AdminAgentsRoute
+  '/admin-ai-approvals': typeof AdminAiApprovalsRoute
+  '/admin-ai-catalog': typeof AdminAiCatalogRoute
+  '/admin-ai-chronic-refill': typeof AdminAiChronicRefillRoute
+  '/admin-ai-excel-import': typeof AdminAiExcelImportRoute
+  '/admin-ai-executive': typeof AdminAiExecutiveRoute
+  '/admin-ai-executive-dashboard': typeof AdminAiExecutiveDashboardRoute
+  '/admin-ai-extraction-failures': typeof AdminAiExtractionFailuresRoute
+  '/admin-ai-extractions': typeof AdminAiExtractionsRoute
+  '/admin-ai-inventory': typeof AdminAiInventoryRoute
+  '/admin-ai-loyalty': typeof AdminAiLoyaltyRoute
+  '/admin-ai-marketing': typeof AdminAiMarketingRoute
+  '/admin-ai-orchestrator': typeof AdminAiOrchestratorRoute
+  '/admin-ai-procurement': typeof AdminAiProcurementRoute
+  '/admin-ai-sales-cx': typeof AdminAiSalesCxRoute
+  '/admin-ai-whatsapp': typeof AdminAiWhatsappRoute
+  '/admin-automation-hub': typeof AdminAutomationHubRoute
+  '/admin-backups': typeof AdminBackupsRoute
+  '/admin-banners': typeof AdminBannersRoute
+  '/admin-branches': typeof AdminBranchesRoute
+  '/admin-bundles': typeof AdminBundlesRoute
+  '/admin-campaigns': typeof AdminCampaignsRoute
+  '/admin-classifications': typeof AdminClassificationsRoute
+  '/admin-command': typeof AdminCommandRoute
+  '/admin-cron-health': typeof AdminCronHealthRoute
+  '/admin-cron-jobs': typeof AdminCronJobsRoute
+  '/admin-diagnostics': typeof AdminDiagnosticsRoute
+  '/admin-discounts': typeof AdminDiscountsRoute
+  '/admin-event-bus': typeof AdminEventBusRoute
+  '/admin-hmac-preflight': typeof AdminHmacPreflightRoute
+  '/admin-hub': typeof AdminHubRoute
+  '/admin-inventory': typeof AdminInventoryRoute
+  '/admin-inventory-duplicates': typeof AdminInventoryDuplicatesRoute
+  '/admin-inventory-reservations': typeof AdminInventoryReservationsRoute
+  '/admin-logs': typeof AdminLogsRoute
+  '/admin-loyalty-dashboard': typeof AdminLoyaltyDashboardRoute
+  '/admin-marketing': typeof AdminMarketingRoute
+  '/admin-offers': typeof AdminOffersRoute
+  '/admin-pharmacy-recommendations': typeof AdminPharmacyRecommendationsRoute
+  '/admin-product-gallery': typeof AdminProductGalleryRoute
+  '/admin-products': typeof AdminProductsRoute
+  '/admin-rx-check': typeof AdminRxCheckRoute
+  '/admin-rx-extraction-edit': typeof AdminRxExtractionEditRoute
+  '/admin-rx-review': typeof AdminRxReviewRoute
+  '/admin-settings': typeof AdminSettingsRoute
+  '/admin-social-posts': typeof AdminSocialPostsRoute
+  '/admin-stock-audit': typeof AdminStockAuditRoute
+  '/admin-transfers': typeof AdminTransfersRoute
+  '/admin-trigger-failures': typeof AdminTriggerFailuresRoute
+  '/admin-whatsapp-conversations': typeof AdminWhatsappConversationsRoute
+  '/admin-whatsapp-delivery': typeof AdminWhatsappDeliveryRoute
+  '/admin-workforce': typeof AdminWorkforceRoute
+  '/ai-assistant': typeof AiAssistantRoute
+  '/ai-pharmacist': typeof AiPharmacistRoute
+  '/ai-prescription': typeof AiPrescriptionRoute
+  '/ai-supplement': typeof AiSupplementRoute
+  '/ai-symptoms': typeof AiSymptomsRoute
+  '/bundles': typeof BundlesRoute
+  '/cart': typeof CartRoute
+  '/conditions': typeof ConditionsRouteWithChildren
+  '/contact': typeof ContactRoute
+  '/insurance': typeof InsuranceRoute
+  '/loyalty': typeof LoyaltyRoute
+  '/my-notifications': typeof MyNotificationsRoute
+  '/network-health': typeof NetworkHealthRoute
+  '/network-test': typeof NetworkTestRoute
+  '/notifications': typeof NotificationsRoute
+  '/prescription': typeof PrescriptionRoute
+  '/products': typeof ProductsRoute
+  '/settings': typeof SettingsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/status': typeof StatusRoute
+  '/titans': typeof TitansRoute
+  '/track': typeof TrackRoute
+  '/trust': typeof TrustRoute
+  '/unsubscribe': typeof UnsubscribeRoute
+  '/yemen-debug': typeof YemenDebugRoute
+  '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/admin-health': typeof AuthenticatedAdminHealthRoute
+  '/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
+  '/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
+  '/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
+  '/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
+  '/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
+  '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
+  '/conditions/$slug': typeof ConditionsSlugRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/product/$id': typeof ProductIdRoute
+  '/test/features': typeof TestFeaturesRoute
+  '/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
+  '/api/internal/collect-feedback': typeof ApiInternalCollectFeedbackRoute
+  '/api/public/contact': typeof ApiPublicContactRoute
+  '/api/public/health': typeof ApiPublicHealthRouteWithChildren
+  '/api/public/img': typeof ApiPublicImgRoute
+  '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
+  '/api/public/log-error': typeof ApiPublicLogErrorRoute
+  '/api/public/uptime-webhook': typeof ApiPublicUptimeWebhookRoute
+  '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
+  '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
+  '/api/public/hooks/agent-maintenance': typeof ApiPublicHooksAgentMaintenanceRoute
+  '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
+  '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
+  '/api/public/hooks/collect-social-stats': typeof ApiPublicHooksCollectSocialStatsRoute
+  '/api/public/hooks/customer-rx-notify': typeof ApiPublicHooksCustomerRxNotifyRoute
+  '/api/public/hooks/dlq-alerts': typeof ApiPublicHooksDlqAlertsRoute
+  '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
+  '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
+  '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
+  '/api/public/hooks/retry-failed-posts': typeof ApiPublicHooksRetryFailedPostsRoute
+  '/api/public/hooks/run-loyalty-reminder': typeof ApiPublicHooksRunLoyaltyReminderRoute
+  '/api/public/hooks/run-reactivation': typeof ApiPublicHooksRunReactivationRoute
+  '/api/public/hooks/run-restock-alerts': typeof ApiPublicHooksRunRestockAlertsRoute
+  '/api/public/hooks/run-social-posts': typeof ApiPublicHooksRunSocialPostsRoute
+  '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
+  '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
+  '/api/public/hooks/social-callback': typeof ApiPublicHooksSocialCallbackRoute
+  '/api/public/hooks/wa-stale-conversations': typeof ApiPublicHooksWaStaleConversationsRoute
+  '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
+  '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
+  '/api/public/hooks/whatsapp-retry': typeof ApiPublicHooksWhatsappRetryRoute
+  '/api/public/monitoring/health': typeof ApiPublicMonitoringHealthRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/api/public/hooks/agents/bi': typeof ApiPublicHooksAgentsBiRoute
+  '/api/public/hooks/agents/ceo': typeof ApiPublicHooksAgentsCeoRoute
+  '/api/public/hooks/agents/cto': typeof ApiPublicHooksAgentsCtoRoute
+  '/api/public/hooks/agents/cx': typeof ApiPublicHooksAgentsCxRoute
+  '/api/public/hooks/agents/inventory': typeof ApiPublicHooksAgentsInventoryRoute
+  '/api/public/hooks/agents/marketing': typeof ApiPublicHooksAgentsMarketingRoute
+  '/api/public/hooks/agents/operations': typeof ApiPublicHooksAgentsOperationsRoute
+  '/api/public/hooks/agents/sales': typeof ApiPublicHooksAgentsSalesRoute
+  '/api/public/hooks/agents/whatsapp': typeof ApiPublicHooksAgentsWhatsappRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/": typeof IndexRoute;
-  "/_authenticated": typeof AuthenticatedRouteRouteWithChildren;
-  "/admin": typeof AdminRoute;
-  "/admin-agent-insights": typeof AdminAgentInsightsRoute;
-  "/admin-agents": typeof AdminAgentsRoute;
-  "/admin-ai-approvals": typeof AdminAiApprovalsRoute;
-  "/admin-ai-catalog": typeof AdminAiCatalogRoute;
-  "/admin-ai-chronic-refill": typeof AdminAiChronicRefillRoute;
-  "/admin-ai-excel-import": typeof AdminAiExcelImportRoute;
-  "/admin-ai-executive": typeof AdminAiExecutiveRoute;
-  "/admin-ai-executive-dashboard": typeof AdminAiExecutiveDashboardRoute;
-  "/admin-ai-extraction-failures": typeof AdminAiExtractionFailuresRoute;
-  "/admin-ai-extractions": typeof AdminAiExtractionsRoute;
-  "/admin-ai-inventory": typeof AdminAiInventoryRoute;
-  "/admin-ai-loyalty": typeof AdminAiLoyaltyRoute;
-  "/admin-ai-marketing": typeof AdminAiMarketingRoute;
-  "/admin-ai-orchestrator": typeof AdminAiOrchestratorRoute;
-  "/admin-ai-procurement": typeof AdminAiProcurementRoute;
-  "/admin-ai-sales-cx": typeof AdminAiSalesCxRoute;
-  "/admin-ai-whatsapp": typeof AdminAiWhatsappRoute;
-  "/admin-automation-hub": typeof AdminAutomationHubRoute;
-  "/admin-backups": typeof AdminBackupsRoute;
-  "/admin-banners": typeof AdminBannersRoute;
-  "/admin-branches": typeof AdminBranchesRoute;
-  "/admin-bundles": typeof AdminBundlesRoute;
-  "/admin-campaigns": typeof AdminCampaignsRoute;
-  "/admin-classifications": typeof AdminClassificationsRoute;
-  "/admin-command": typeof AdminCommandRoute;
-  "/admin-cron-health": typeof AdminCronHealthRoute;
-  "/admin-cron-jobs": typeof AdminCronJobsRoute;
-  "/admin-diagnostics": typeof AdminDiagnosticsRoute;
-  "/admin-discounts": typeof AdminDiscountsRoute;
-  "/admin-event-bus": typeof AdminEventBusRoute;
-  "/admin-hmac-preflight": typeof AdminHmacPreflightRoute;
-  "/admin-hub": typeof AdminHubRoute;
-  "/admin-inventory": typeof AdminInventoryRoute;
-  "/admin-inventory-duplicates": typeof AdminInventoryDuplicatesRoute;
-  "/admin-inventory-reservations": typeof AdminInventoryReservationsRoute;
-  "/admin-logs": typeof AdminLogsRoute;
-  "/admin-loyalty-dashboard": typeof AdminLoyaltyDashboardRoute;
-  "/admin-marketing": typeof AdminMarketingRoute;
-  "/admin-offers": typeof AdminOffersRoute;
-  "/admin-pharmacy-recommendations": typeof AdminPharmacyRecommendationsRoute;
-  "/admin-product-gallery": typeof AdminProductGalleryRoute;
-  "/admin-products": typeof AdminProductsRoute;
-  "/admin-rx-check": typeof AdminRxCheckRoute;
-  "/admin-rx-extraction-edit": typeof AdminRxExtractionEditRoute;
-  "/admin-rx-review": typeof AdminRxReviewRoute;
-  "/admin-settings": typeof AdminSettingsRoute;
-  "/admin-social-posts": typeof AdminSocialPostsRoute;
-  "/admin-stock-audit": typeof AdminStockAuditRoute;
-  "/admin-transfers": typeof AdminTransfersRoute;
-  "/admin-trigger-failures": typeof AdminTriggerFailuresRoute;
-  "/admin-whatsapp-conversations": typeof AdminWhatsappConversationsRoute;
-  "/admin-whatsapp-delivery": typeof AdminWhatsappDeliveryRoute;
-  "/admin-workforce": typeof AdminWorkforceRoute;
-  "/ai-assistant": typeof AiAssistantRoute;
-  "/ai-pharmacist": typeof AiPharmacistRoute;
-  "/ai-prescription": typeof AiPrescriptionRoute;
-  "/ai-supplement": typeof AiSupplementRoute;
-  "/ai-symptoms": typeof AiSymptomsRoute;
-  "/bundles": typeof BundlesRoute;
-  "/cart": typeof CartRoute;
-  "/conditions": typeof ConditionsRouteWithChildren;
-  "/insurance": typeof InsuranceRoute;
-  "/loyalty": typeof LoyaltyRoute;
-  "/my-notifications": typeof MyNotificationsRoute;
-  "/network-health": typeof NetworkHealthRoute;
-  "/network-test": typeof NetworkTestRoute;
-  "/notifications": typeof NotificationsRoute;
-  "/prescription": typeof PrescriptionRoute;
-  "/products": typeof ProductsRoute;
-  "/settings": typeof SettingsRoute;
-  "/sitemap.xml": typeof SitemapDotxmlRoute;
-  "/status": typeof StatusRoute;
-  "/titans": typeof TitansRoute;
-  "/track": typeof TrackRoute;
-  "/trust": typeof TrustRoute;
-  "/unsubscribe": typeof UnsubscribeRoute;
-  "/yemen-debug": typeof YemenDebugRoute;
-  "/_authenticated/admin-dashboard": typeof AuthenticatedAdminDashboardRoute;
-  "/_authenticated/admin-health": typeof AuthenticatedAdminHealthRoute;
-  "/_authenticated/admin-inventory-sync-logs": typeof AuthenticatedAdminInventorySyncLogsRoute;
-  "/_authenticated/admin-marketing-campaigns": typeof AuthenticatedAdminMarketingCampaignsRoute;
-  "/_authenticated/admin-sales-reports": typeof AuthenticatedAdminSalesReportsRoute;
-  "/_authenticated/admin-system-health": typeof AuthenticatedAdminSystemHealthRoute;
-  "/_authenticated/admin-upload-inventory": typeof AuthenticatedAdminUploadInventoryRoute;
-  "/_authenticated/pharmacist-dashboard": typeof AuthenticatedPharmacistDashboardRoute;
-  "/_authenticated/upload-prescription": typeof AuthenticatedUploadPrescriptionRoute;
-  "/conditions/$slug": typeof ConditionsSlugRoute;
-  "/email/unsubscribe": typeof EmailUnsubscribeRoute;
-  "/product/$id": typeof ProductIdRoute;
-  "/test/features": typeof TestFeaturesRoute;
-  "/api/internal/collect-feedback": typeof ApiInternalCollectFeedbackRoute;
-  "/api/public/health": typeof ApiPublicHealthRouteWithChildren;
-  "/api/public/img": typeof ApiPublicImgRoute;
-  "/api/public/incident-check": typeof ApiPublicIncidentCheckRoute;
-  "/api/public/log-error": typeof ApiPublicLogErrorRoute;
-  "/api/public/uptime-webhook": typeof ApiPublicUptimeWebhookRoute;
-  "/api/public/whatsapp-webhook": typeof ApiPublicWhatsappWebhookRoute;
-  "/lovable/email/suppression": typeof LovableEmailSuppressionRoute;
-  "/api/public/health/full-check": typeof ApiPublicHealthFullCheckRoute;
-  "/api/public/health/quick-check": typeof ApiPublicHealthQuickCheckRoute;
-  "/api/public/hooks/agent-maintenance": typeof ApiPublicHooksAgentMaintenanceRoute;
-  "/api/public/hooks/alerts-worker": typeof ApiPublicHooksAlertsWorkerRoute;
-  "/api/public/hooks/chronic-refills": typeof ApiPublicHooksChronicRefillsRoute;
-  "/api/public/hooks/collect-social-stats": typeof ApiPublicHooksCollectSocialStatsRoute;
-  "/api/public/hooks/customer-rx-notify": typeof ApiPublicHooksCustomerRxNotifyRoute;
-  "/api/public/hooks/dlq-alerts": typeof ApiPublicHooksDlqAlertsRoute;
-  "/api/public/hooks/event-consumer": typeof ApiPublicHooksEventConsumerRoute;
-  "/api/public/hooks/nightly-intel": typeof ApiPublicHooksNightlyIntelRoute;
-  "/api/public/hooks/prescription-extract": typeof ApiPublicHooksPrescriptionExtractRoute;
-  "/api/public/hooks/retry-failed-posts": typeof ApiPublicHooksRetryFailedPostsRoute;
-  "/api/public/hooks/run-loyalty-reminder": typeof ApiPublicHooksRunLoyaltyReminderRoute;
-  "/api/public/hooks/run-reactivation": typeof ApiPublicHooksRunReactivationRoute;
-  "/api/public/hooks/run-restock-alerts": typeof ApiPublicHooksRunRestockAlertsRoute;
-  "/api/public/hooks/run-social-posts": typeof ApiPublicHooksRunSocialPostsRoute;
-  "/api/public/hooks/rx-mirror": typeof ApiPublicHooksRxMirrorRoute;
-  "/api/public/hooks/rx-notify": typeof ApiPublicHooksRxNotifyRoute;
-  "/api/public/hooks/social-callback": typeof ApiPublicHooksSocialCallbackRoute;
-  "/api/public/hooks/wa-stale-conversations": typeof ApiPublicHooksWaStaleConversationsRoute;
-  "/api/public/hooks/weekly-ai-enrich": typeof ApiPublicHooksWeeklyAiEnrichRoute;
-  "/api/public/hooks/weekly-exec-report": typeof ApiPublicHooksWeeklyExecReportRoute;
-  "/api/public/hooks/whatsapp-retry": typeof ApiPublicHooksWhatsappRetryRoute;
-  "/api/public/monitoring/health": typeof ApiPublicMonitoringHealthRoute;
-  "/lovable/email/queue/process": typeof LovableEmailQueueProcessRoute;
-  "/lovable/email/transactional/preview": typeof LovableEmailTransactionalPreviewRoute;
-  "/lovable/email/transactional/send": typeof LovableEmailTransactionalSendRoute;
-  "/api/public/hooks/agents/bi": typeof ApiPublicHooksAgentsBiRoute;
-  "/api/public/hooks/agents/ceo": typeof ApiPublicHooksAgentsCeoRoute;
-  "/api/public/hooks/agents/cto": typeof ApiPublicHooksAgentsCtoRoute;
-  "/api/public/hooks/agents/cx": typeof ApiPublicHooksAgentsCxRoute;
-  "/api/public/hooks/agents/inventory": typeof ApiPublicHooksAgentsInventoryRoute;
-  "/api/public/hooks/agents/marketing": typeof ApiPublicHooksAgentsMarketingRoute;
-  "/api/public/hooks/agents/operations": typeof ApiPublicHooksAgentsOperationsRoute;
-  "/api/public/hooks/agents/sales": typeof ApiPublicHooksAgentsSalesRoute;
-  "/api/public/hooks/agents/whatsapp": typeof ApiPublicHooksAgentsWhatsappRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/admin': typeof AdminRoute
+  '/admin-agent-insights': typeof AdminAgentInsightsRoute
+  '/admin-agents': typeof AdminAgentsRoute
+  '/admin-ai-approvals': typeof AdminAiApprovalsRoute
+  '/admin-ai-catalog': typeof AdminAiCatalogRoute
+  '/admin-ai-chronic-refill': typeof AdminAiChronicRefillRoute
+  '/admin-ai-excel-import': typeof AdminAiExcelImportRoute
+  '/admin-ai-executive': typeof AdminAiExecutiveRoute
+  '/admin-ai-executive-dashboard': typeof AdminAiExecutiveDashboardRoute
+  '/admin-ai-extraction-failures': typeof AdminAiExtractionFailuresRoute
+  '/admin-ai-extractions': typeof AdminAiExtractionsRoute
+  '/admin-ai-inventory': typeof AdminAiInventoryRoute
+  '/admin-ai-loyalty': typeof AdminAiLoyaltyRoute
+  '/admin-ai-marketing': typeof AdminAiMarketingRoute
+  '/admin-ai-orchestrator': typeof AdminAiOrchestratorRoute
+  '/admin-ai-procurement': typeof AdminAiProcurementRoute
+  '/admin-ai-sales-cx': typeof AdminAiSalesCxRoute
+  '/admin-ai-whatsapp': typeof AdminAiWhatsappRoute
+  '/admin-automation-hub': typeof AdminAutomationHubRoute
+  '/admin-backups': typeof AdminBackupsRoute
+  '/admin-banners': typeof AdminBannersRoute
+  '/admin-branches': typeof AdminBranchesRoute
+  '/admin-bundles': typeof AdminBundlesRoute
+  '/admin-campaigns': typeof AdminCampaignsRoute
+  '/admin-classifications': typeof AdminClassificationsRoute
+  '/admin-command': typeof AdminCommandRoute
+  '/admin-cron-health': typeof AdminCronHealthRoute
+  '/admin-cron-jobs': typeof AdminCronJobsRoute
+  '/admin-diagnostics': typeof AdminDiagnosticsRoute
+  '/admin-discounts': typeof AdminDiscountsRoute
+  '/admin-event-bus': typeof AdminEventBusRoute
+  '/admin-hmac-preflight': typeof AdminHmacPreflightRoute
+  '/admin-hub': typeof AdminHubRoute
+  '/admin-inventory': typeof AdminInventoryRoute
+  '/admin-inventory-duplicates': typeof AdminInventoryDuplicatesRoute
+  '/admin-inventory-reservations': typeof AdminInventoryReservationsRoute
+  '/admin-logs': typeof AdminLogsRoute
+  '/admin-loyalty-dashboard': typeof AdminLoyaltyDashboardRoute
+  '/admin-marketing': typeof AdminMarketingRoute
+  '/admin-offers': typeof AdminOffersRoute
+  '/admin-pharmacy-recommendations': typeof AdminPharmacyRecommendationsRoute
+  '/admin-product-gallery': typeof AdminProductGalleryRoute
+  '/admin-products': typeof AdminProductsRoute
+  '/admin-rx-check': typeof AdminRxCheckRoute
+  '/admin-rx-extraction-edit': typeof AdminRxExtractionEditRoute
+  '/admin-rx-review': typeof AdminRxReviewRoute
+  '/admin-settings': typeof AdminSettingsRoute
+  '/admin-social-posts': typeof AdminSocialPostsRoute
+  '/admin-stock-audit': typeof AdminStockAuditRoute
+  '/admin-transfers': typeof AdminTransfersRoute
+  '/admin-trigger-failures': typeof AdminTriggerFailuresRoute
+  '/admin-whatsapp-conversations': typeof AdminWhatsappConversationsRoute
+  '/admin-whatsapp-delivery': typeof AdminWhatsappDeliveryRoute
+  '/admin-workforce': typeof AdminWorkforceRoute
+  '/ai-assistant': typeof AiAssistantRoute
+  '/ai-pharmacist': typeof AiPharmacistRoute
+  '/ai-prescription': typeof AiPrescriptionRoute
+  '/ai-supplement': typeof AiSupplementRoute
+  '/ai-symptoms': typeof AiSymptomsRoute
+  '/bundles': typeof BundlesRoute
+  '/cart': typeof CartRoute
+  '/conditions': typeof ConditionsRouteWithChildren
+  '/contact': typeof ContactRoute
+  '/insurance': typeof InsuranceRoute
+  '/loyalty': typeof LoyaltyRoute
+  '/my-notifications': typeof MyNotificationsRoute
+  '/network-health': typeof NetworkHealthRoute
+  '/network-test': typeof NetworkTestRoute
+  '/notifications': typeof NotificationsRoute
+  '/prescription': typeof PrescriptionRoute
+  '/products': typeof ProductsRoute
+  '/settings': typeof SettingsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/status': typeof StatusRoute
+  '/titans': typeof TitansRoute
+  '/track': typeof TrackRoute
+  '/trust': typeof TrustRoute
+  '/unsubscribe': typeof UnsubscribeRoute
+  '/yemen-debug': typeof YemenDebugRoute
+  '/_authenticated/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/_authenticated/admin-health': typeof AuthenticatedAdminHealthRoute
+  '/_authenticated/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
+  '/_authenticated/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
+  '/_authenticated/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
+  '/_authenticated/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
+  '/_authenticated/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
+  '/_authenticated/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
+  '/conditions/$slug': typeof ConditionsSlugRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/product/$id': typeof ProductIdRoute
+  '/test/features': typeof TestFeaturesRoute
+  '/_authenticated/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
+  '/api/internal/collect-feedback': typeof ApiInternalCollectFeedbackRoute
+  '/api/public/contact': typeof ApiPublicContactRoute
+  '/api/public/health': typeof ApiPublicHealthRouteWithChildren
+  '/api/public/img': typeof ApiPublicImgRoute
+  '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
+  '/api/public/log-error': typeof ApiPublicLogErrorRoute
+  '/api/public/uptime-webhook': typeof ApiPublicUptimeWebhookRoute
+  '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
+  '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
+  '/api/public/hooks/agent-maintenance': typeof ApiPublicHooksAgentMaintenanceRoute
+  '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
+  '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
+  '/api/public/hooks/collect-social-stats': typeof ApiPublicHooksCollectSocialStatsRoute
+  '/api/public/hooks/customer-rx-notify': typeof ApiPublicHooksCustomerRxNotifyRoute
+  '/api/public/hooks/dlq-alerts': typeof ApiPublicHooksDlqAlertsRoute
+  '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
+  '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
+  '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
+  '/api/public/hooks/retry-failed-posts': typeof ApiPublicHooksRetryFailedPostsRoute
+  '/api/public/hooks/run-loyalty-reminder': typeof ApiPublicHooksRunLoyaltyReminderRoute
+  '/api/public/hooks/run-reactivation': typeof ApiPublicHooksRunReactivationRoute
+  '/api/public/hooks/run-restock-alerts': typeof ApiPublicHooksRunRestockAlertsRoute
+  '/api/public/hooks/run-social-posts': typeof ApiPublicHooksRunSocialPostsRoute
+  '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
+  '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
+  '/api/public/hooks/social-callback': typeof ApiPublicHooksSocialCallbackRoute
+  '/api/public/hooks/wa-stale-conversations': typeof ApiPublicHooksWaStaleConversationsRoute
+  '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
+  '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
+  '/api/public/hooks/whatsapp-retry': typeof ApiPublicHooksWhatsappRetryRoute
+  '/api/public/monitoring/health': typeof ApiPublicMonitoringHealthRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/api/public/hooks/agents/bi': typeof ApiPublicHooksAgentsBiRoute
+  '/api/public/hooks/agents/ceo': typeof ApiPublicHooksAgentsCeoRoute
+  '/api/public/hooks/agents/cto': typeof ApiPublicHooksAgentsCtoRoute
+  '/api/public/hooks/agents/cx': typeof ApiPublicHooksAgentsCxRoute
+  '/api/public/hooks/agents/inventory': typeof ApiPublicHooksAgentsInventoryRoute
+  '/api/public/hooks/agents/marketing': typeof ApiPublicHooksAgentsMarketingRoute
+  '/api/public/hooks/agents/operations': typeof ApiPublicHooksAgentsOperationsRoute
+  '/api/public/hooks/agents/sales': typeof ApiPublicHooksAgentsSalesRoute
+  '/api/public/hooks/agents/whatsapp': typeof ApiPublicHooksAgentsWhatsappRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/admin"
-    | "/admin-agent-insights"
-    | "/admin-agents"
-    | "/admin-ai-approvals"
-    | "/admin-ai-catalog"
-    | "/admin-ai-chronic-refill"
-    | "/admin-ai-excel-import"
-    | "/admin-ai-executive"
-    | "/admin-ai-executive-dashboard"
-    | "/admin-ai-extraction-failures"
-    | "/admin-ai-extractions"
-    | "/admin-ai-inventory"
-    | "/admin-ai-loyalty"
-    | "/admin-ai-marketing"
-    | "/admin-ai-orchestrator"
-    | "/admin-ai-procurement"
-    | "/admin-ai-sales-cx"
-    | "/admin-ai-whatsapp"
-    | "/admin-automation-hub"
-    | "/admin-backups"
-    | "/admin-banners"
-    | "/admin-branches"
-    | "/admin-bundles"
-    | "/admin-campaigns"
-    | "/admin-classifications"
-    | "/admin-command"
-    | "/admin-cron-health"
-    | "/admin-cron-jobs"
-    | "/admin-diagnostics"
-    | "/admin-discounts"
-    | "/admin-event-bus"
-    | "/admin-hmac-preflight"
-    | "/admin-hub"
-    | "/admin-inventory"
-    | "/admin-inventory-duplicates"
-    | "/admin-inventory-reservations"
-    | "/admin-logs"
-    | "/admin-loyalty-dashboard"
-    | "/admin-marketing"
-    | "/admin-offers"
-    | "/admin-pharmacy-recommendations"
-    | "/admin-product-gallery"
-    | "/admin-products"
-    | "/admin-rx-check"
-    | "/admin-rx-extraction-edit"
-    | "/admin-rx-review"
-    | "/admin-settings"
-    | "/admin-social-posts"
-    | "/admin-stock-audit"
-    | "/admin-transfers"
-    | "/admin-trigger-failures"
-    | "/admin-whatsapp-conversations"
-    | "/admin-whatsapp-delivery"
-    | "/admin-workforce"
-    | "/ai-assistant"
-    | "/ai-pharmacist"
-    | "/ai-prescription"
-    | "/ai-supplement"
-    | "/ai-symptoms"
-    | "/bundles"
-    | "/cart"
-    | "/conditions"
-    | "/insurance"
-    | "/loyalty"
-    | "/my-notifications"
-    | "/network-health"
-    | "/network-test"
-    | "/notifications"
-    | "/prescription"
-    | "/products"
-    | "/settings"
-    | "/sitemap.xml"
-    | "/status"
-    | "/titans"
-    | "/track"
-    | "/trust"
-    | "/unsubscribe"
-    | "/yemen-debug"
-    | "/admin-dashboard"
-    | "/admin-health"
-    | "/admin-inventory-sync-logs"
-    | "/admin-marketing-campaigns"
-    | "/admin-sales-reports"
-    | "/admin-system-health"
-    | "/admin-upload-inventory"
-    | "/pharmacist-dashboard"
-    | "/upload-prescription"
-    | "/conditions/$slug"
-    | "/email/unsubscribe"
-    | "/product/$id"
-    | "/test/features"
-    | "/api/internal/collect-feedback"
-    | "/api/public/health"
-    | "/api/public/img"
-    | "/api/public/incident-check"
-    | "/api/public/log-error"
-    | "/api/public/uptime-webhook"
-    | "/api/public/whatsapp-webhook"
-    | "/lovable/email/suppression"
-    | "/api/public/health/full-check"
-    | "/api/public/health/quick-check"
-    | "/api/public/hooks/agent-maintenance"
-    | "/api/public/hooks/alerts-worker"
-    | "/api/public/hooks/chronic-refills"
-    | "/api/public/hooks/collect-social-stats"
-    | "/api/public/hooks/customer-rx-notify"
-    | "/api/public/hooks/dlq-alerts"
-    | "/api/public/hooks/event-consumer"
-    | "/api/public/hooks/nightly-intel"
-    | "/api/public/hooks/prescription-extract"
-    | "/api/public/hooks/retry-failed-posts"
-    | "/api/public/hooks/run-loyalty-reminder"
-    | "/api/public/hooks/run-reactivation"
-    | "/api/public/hooks/run-restock-alerts"
-    | "/api/public/hooks/run-social-posts"
-    | "/api/public/hooks/rx-mirror"
-    | "/api/public/hooks/rx-notify"
-    | "/api/public/hooks/social-callback"
-    | "/api/public/hooks/wa-stale-conversations"
-    | "/api/public/hooks/weekly-ai-enrich"
-    | "/api/public/hooks/weekly-exec-report"
-    | "/api/public/hooks/whatsapp-retry"
-    | "/api/public/monitoring/health"
-    | "/lovable/email/queue/process"
-    | "/lovable/email/transactional/preview"
-    | "/lovable/email/transactional/send"
-    | "/api/public/hooks/agents/bi"
-    | "/api/public/hooks/agents/ceo"
-    | "/api/public/hooks/agents/cto"
-    | "/api/public/hooks/agents/cx"
-    | "/api/public/hooks/agents/inventory"
-    | "/api/public/hooks/agents/marketing"
-    | "/api/public/hooks/agents/operations"
-    | "/api/public/hooks/agents/sales"
-    | "/api/public/hooks/agents/whatsapp";
-  fileRoutesByTo: FileRoutesByTo;
+    | '/'
+    | '/admin'
+    | '/admin-agent-insights'
+    | '/admin-agents'
+    | '/admin-ai-approvals'
+    | '/admin-ai-catalog'
+    | '/admin-ai-chronic-refill'
+    | '/admin-ai-excel-import'
+    | '/admin-ai-executive'
+    | '/admin-ai-executive-dashboard'
+    | '/admin-ai-extraction-failures'
+    | '/admin-ai-extractions'
+    | '/admin-ai-inventory'
+    | '/admin-ai-loyalty'
+    | '/admin-ai-marketing'
+    | '/admin-ai-orchestrator'
+    | '/admin-ai-procurement'
+    | '/admin-ai-sales-cx'
+    | '/admin-ai-whatsapp'
+    | '/admin-automation-hub'
+    | '/admin-backups'
+    | '/admin-banners'
+    | '/admin-branches'
+    | '/admin-bundles'
+    | '/admin-campaigns'
+    | '/admin-classifications'
+    | '/admin-command'
+    | '/admin-cron-health'
+    | '/admin-cron-jobs'
+    | '/admin-diagnostics'
+    | '/admin-discounts'
+    | '/admin-event-bus'
+    | '/admin-hmac-preflight'
+    | '/admin-hub'
+    | '/admin-inventory'
+    | '/admin-inventory-duplicates'
+    | '/admin-inventory-reservations'
+    | '/admin-logs'
+    | '/admin-loyalty-dashboard'
+    | '/admin-marketing'
+    | '/admin-offers'
+    | '/admin-pharmacy-recommendations'
+    | '/admin-product-gallery'
+    | '/admin-products'
+    | '/admin-rx-check'
+    | '/admin-rx-extraction-edit'
+    | '/admin-rx-review'
+    | '/admin-settings'
+    | '/admin-social-posts'
+    | '/admin-stock-audit'
+    | '/admin-transfers'
+    | '/admin-trigger-failures'
+    | '/admin-whatsapp-conversations'
+    | '/admin-whatsapp-delivery'
+    | '/admin-workforce'
+    | '/ai-assistant'
+    | '/ai-pharmacist'
+    | '/ai-prescription'
+    | '/ai-supplement'
+    | '/ai-symptoms'
+    | '/bundles'
+    | '/cart'
+    | '/conditions'
+    | '/contact'
+    | '/insurance'
+    | '/loyalty'
+    | '/my-notifications'
+    | '/network-health'
+    | '/network-test'
+    | '/notifications'
+    | '/prescription'
+    | '/products'
+    | '/settings'
+    | '/sitemap.xml'
+    | '/status'
+    | '/titans'
+    | '/track'
+    | '/trust'
+    | '/unsubscribe'
+    | '/yemen-debug'
+    | '/admin-dashboard'
+    | '/admin-health'
+    | '/admin-inventory-sync-logs'
+    | '/admin-marketing-campaigns'
+    | '/admin-sales-reports'
+    | '/admin-system-health'
+    | '/admin-upload-inventory'
+    | '/upload-prescription'
+    | '/conditions/$slug'
+    | '/email/unsubscribe'
+    | '/product/$id'
+    | '/test/features'
+    | '/pharmacist/dashboard'
+    | '/api/internal/collect-feedback'
+    | '/api/public/contact'
+    | '/api/public/health'
+    | '/api/public/img'
+    | '/api/public/incident-check'
+    | '/api/public/log-error'
+    | '/api/public/uptime-webhook'
+    | '/api/public/whatsapp-webhook'
+    | '/lovable/email/suppression'
+    | '/api/public/health/full-check'
+    | '/api/public/health/quick-check'
+    | '/api/public/hooks/agent-maintenance'
+    | '/api/public/hooks/alerts-worker'
+    | '/api/public/hooks/chronic-refills'
+    | '/api/public/hooks/collect-social-stats'
+    | '/api/public/hooks/customer-rx-notify'
+    | '/api/public/hooks/dlq-alerts'
+    | '/api/public/hooks/event-consumer'
+    | '/api/public/hooks/nightly-intel'
+    | '/api/public/hooks/prescription-extract'
+    | '/api/public/hooks/retry-failed-posts'
+    | '/api/public/hooks/run-loyalty-reminder'
+    | '/api/public/hooks/run-reactivation'
+    | '/api/public/hooks/run-restock-alerts'
+    | '/api/public/hooks/run-social-posts'
+    | '/api/public/hooks/rx-mirror'
+    | '/api/public/hooks/rx-notify'
+    | '/api/public/hooks/social-callback'
+    | '/api/public/hooks/wa-stale-conversations'
+    | '/api/public/hooks/weekly-ai-enrich'
+    | '/api/public/hooks/weekly-exec-report'
+    | '/api/public/hooks/whatsapp-retry'
+    | '/api/public/monitoring/health'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
+    | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
+    | '/api/public/hooks/agents/bi'
+    | '/api/public/hooks/agents/ceo'
+    | '/api/public/hooks/agents/cto'
+    | '/api/public/hooks/agents/cx'
+    | '/api/public/hooks/agents/inventory'
+    | '/api/public/hooks/agents/marketing'
+    | '/api/public/hooks/agents/operations'
+    | '/api/public/hooks/agents/sales'
+    | '/api/public/hooks/agents/whatsapp'
+  fileRoutesByTo: FileRoutesByTo
   to:
-    | "/"
-    | "/admin"
-    | "/admin-agent-insights"
-    | "/admin-agents"
-    | "/admin-ai-approvals"
-    | "/admin-ai-catalog"
-    | "/admin-ai-chronic-refill"
-    | "/admin-ai-excel-import"
-    | "/admin-ai-executive"
-    | "/admin-ai-executive-dashboard"
-    | "/admin-ai-extraction-failures"
-    | "/admin-ai-extractions"
-    | "/admin-ai-inventory"
-    | "/admin-ai-loyalty"
-    | "/admin-ai-marketing"
-    | "/admin-ai-orchestrator"
-    | "/admin-ai-procurement"
-    | "/admin-ai-sales-cx"
-    | "/admin-ai-whatsapp"
-    | "/admin-automation-hub"
-    | "/admin-backups"
-    | "/admin-banners"
-    | "/admin-branches"
-    | "/admin-bundles"
-    | "/admin-campaigns"
-    | "/admin-classifications"
-    | "/admin-command"
-    | "/admin-cron-health"
-    | "/admin-cron-jobs"
-    | "/admin-diagnostics"
-    | "/admin-discounts"
-    | "/admin-event-bus"
-    | "/admin-hmac-preflight"
-    | "/admin-hub"
-    | "/admin-inventory"
-    | "/admin-inventory-duplicates"
-    | "/admin-inventory-reservations"
-    | "/admin-logs"
-    | "/admin-loyalty-dashboard"
-    | "/admin-marketing"
-    | "/admin-offers"
-    | "/admin-pharmacy-recommendations"
-    | "/admin-product-gallery"
-    | "/admin-products"
-    | "/admin-rx-check"
-    | "/admin-rx-extraction-edit"
-    | "/admin-rx-review"
-    | "/admin-settings"
-    | "/admin-social-posts"
-    | "/admin-stock-audit"
-    | "/admin-transfers"
-    | "/admin-trigger-failures"
-    | "/admin-whatsapp-conversations"
-    | "/admin-whatsapp-delivery"
-    | "/admin-workforce"
-    | "/ai-assistant"
-    | "/ai-pharmacist"
-    | "/ai-prescription"
-    | "/ai-supplement"
-    | "/ai-symptoms"
-    | "/bundles"
-    | "/cart"
-    | "/conditions"
-    | "/insurance"
-    | "/loyalty"
-    | "/my-notifications"
-    | "/network-health"
-    | "/network-test"
-    | "/notifications"
-    | "/prescription"
-    | "/products"
-    | "/settings"
-    | "/sitemap.xml"
-    | "/status"
-    | "/titans"
-    | "/track"
-    | "/trust"
-    | "/unsubscribe"
-    | "/yemen-debug"
-    | "/admin-dashboard"
-    | "/admin-health"
-    | "/admin-inventory-sync-logs"
-    | "/admin-marketing-campaigns"
-    | "/admin-sales-reports"
-    | "/admin-system-health"
-    | "/admin-upload-inventory"
-    | "/pharmacist-dashboard"
-    | "/upload-prescription"
-    | "/conditions/$slug"
-    | "/email/unsubscribe"
-    | "/product/$id"
-    | "/test/features"
-    | "/api/internal/collect-feedback"
-    | "/api/public/health"
-    | "/api/public/img"
-    | "/api/public/incident-check"
-    | "/api/public/log-error"
-    | "/api/public/uptime-webhook"
-    | "/api/public/whatsapp-webhook"
-    | "/lovable/email/suppression"
-    | "/api/public/health/full-check"
-    | "/api/public/health/quick-check"
-    | "/api/public/hooks/agent-maintenance"
-    | "/api/public/hooks/alerts-worker"
-    | "/api/public/hooks/chronic-refills"
-    | "/api/public/hooks/collect-social-stats"
-    | "/api/public/hooks/customer-rx-notify"
-    | "/api/public/hooks/dlq-alerts"
-    | "/api/public/hooks/event-consumer"
-    | "/api/public/hooks/nightly-intel"
-    | "/api/public/hooks/prescription-extract"
-    | "/api/public/hooks/retry-failed-posts"
-    | "/api/public/hooks/run-loyalty-reminder"
-    | "/api/public/hooks/run-reactivation"
-    | "/api/public/hooks/run-restock-alerts"
-    | "/api/public/hooks/run-social-posts"
-    | "/api/public/hooks/rx-mirror"
-    | "/api/public/hooks/rx-notify"
-    | "/api/public/hooks/social-callback"
-    | "/api/public/hooks/wa-stale-conversations"
-    | "/api/public/hooks/weekly-ai-enrich"
-    | "/api/public/hooks/weekly-exec-report"
-    | "/api/public/hooks/whatsapp-retry"
-    | "/api/public/monitoring/health"
-    | "/lovable/email/queue/process"
-    | "/lovable/email/transactional/preview"
-    | "/lovable/email/transactional/send"
-    | "/api/public/hooks/agents/bi"
-    | "/api/public/hooks/agents/ceo"
-    | "/api/public/hooks/agents/cto"
-    | "/api/public/hooks/agents/cx"
-    | "/api/public/hooks/agents/inventory"
-    | "/api/public/hooks/agents/marketing"
-    | "/api/public/hooks/agents/operations"
-    | "/api/public/hooks/agents/sales"
-    | "/api/public/hooks/agents/whatsapp";
+    | '/'
+    | '/admin'
+    | '/admin-agent-insights'
+    | '/admin-agents'
+    | '/admin-ai-approvals'
+    | '/admin-ai-catalog'
+    | '/admin-ai-chronic-refill'
+    | '/admin-ai-excel-import'
+    | '/admin-ai-executive'
+    | '/admin-ai-executive-dashboard'
+    | '/admin-ai-extraction-failures'
+    | '/admin-ai-extractions'
+    | '/admin-ai-inventory'
+    | '/admin-ai-loyalty'
+    | '/admin-ai-marketing'
+    | '/admin-ai-orchestrator'
+    | '/admin-ai-procurement'
+    | '/admin-ai-sales-cx'
+    | '/admin-ai-whatsapp'
+    | '/admin-automation-hub'
+    | '/admin-backups'
+    | '/admin-banners'
+    | '/admin-branches'
+    | '/admin-bundles'
+    | '/admin-campaigns'
+    | '/admin-classifications'
+    | '/admin-command'
+    | '/admin-cron-health'
+    | '/admin-cron-jobs'
+    | '/admin-diagnostics'
+    | '/admin-discounts'
+    | '/admin-event-bus'
+    | '/admin-hmac-preflight'
+    | '/admin-hub'
+    | '/admin-inventory'
+    | '/admin-inventory-duplicates'
+    | '/admin-inventory-reservations'
+    | '/admin-logs'
+    | '/admin-loyalty-dashboard'
+    | '/admin-marketing'
+    | '/admin-offers'
+    | '/admin-pharmacy-recommendations'
+    | '/admin-product-gallery'
+    | '/admin-products'
+    | '/admin-rx-check'
+    | '/admin-rx-extraction-edit'
+    | '/admin-rx-review'
+    | '/admin-settings'
+    | '/admin-social-posts'
+    | '/admin-stock-audit'
+    | '/admin-transfers'
+    | '/admin-trigger-failures'
+    | '/admin-whatsapp-conversations'
+    | '/admin-whatsapp-delivery'
+    | '/admin-workforce'
+    | '/ai-assistant'
+    | '/ai-pharmacist'
+    | '/ai-prescription'
+    | '/ai-supplement'
+    | '/ai-symptoms'
+    | '/bundles'
+    | '/cart'
+    | '/conditions'
+    | '/contact'
+    | '/insurance'
+    | '/loyalty'
+    | '/my-notifications'
+    | '/network-health'
+    | '/network-test'
+    | '/notifications'
+    | '/prescription'
+    | '/products'
+    | '/settings'
+    | '/sitemap.xml'
+    | '/status'
+    | '/titans'
+    | '/track'
+    | '/trust'
+    | '/unsubscribe'
+    | '/yemen-debug'
+    | '/admin-dashboard'
+    | '/admin-health'
+    | '/admin-inventory-sync-logs'
+    | '/admin-marketing-campaigns'
+    | '/admin-sales-reports'
+    | '/admin-system-health'
+    | '/admin-upload-inventory'
+    | '/upload-prescription'
+    | '/conditions/$slug'
+    | '/email/unsubscribe'
+    | '/product/$id'
+    | '/test/features'
+    | '/pharmacist/dashboard'
+    | '/api/internal/collect-feedback'
+    | '/api/public/contact'
+    | '/api/public/health'
+    | '/api/public/img'
+    | '/api/public/incident-check'
+    | '/api/public/log-error'
+    | '/api/public/uptime-webhook'
+    | '/api/public/whatsapp-webhook'
+    | '/lovable/email/suppression'
+    | '/api/public/health/full-check'
+    | '/api/public/health/quick-check'
+    | '/api/public/hooks/agent-maintenance'
+    | '/api/public/hooks/alerts-worker'
+    | '/api/public/hooks/chronic-refills'
+    | '/api/public/hooks/collect-social-stats'
+    | '/api/public/hooks/customer-rx-notify'
+    | '/api/public/hooks/dlq-alerts'
+    | '/api/public/hooks/event-consumer'
+    | '/api/public/hooks/nightly-intel'
+    | '/api/public/hooks/prescription-extract'
+    | '/api/public/hooks/retry-failed-posts'
+    | '/api/public/hooks/run-loyalty-reminder'
+    | '/api/public/hooks/run-reactivation'
+    | '/api/public/hooks/run-restock-alerts'
+    | '/api/public/hooks/run-social-posts'
+    | '/api/public/hooks/rx-mirror'
+    | '/api/public/hooks/rx-notify'
+    | '/api/public/hooks/social-callback'
+    | '/api/public/hooks/wa-stale-conversations'
+    | '/api/public/hooks/weekly-ai-enrich'
+    | '/api/public/hooks/weekly-exec-report'
+    | '/api/public/hooks/whatsapp-retry'
+    | '/api/public/monitoring/health'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
+    | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
+    | '/api/public/hooks/agents/bi'
+    | '/api/public/hooks/agents/ceo'
+    | '/api/public/hooks/agents/cto'
+    | '/api/public/hooks/agents/cx'
+    | '/api/public/hooks/agents/inventory'
+    | '/api/public/hooks/agents/marketing'
+    | '/api/public/hooks/agents/operations'
+    | '/api/public/hooks/agents/sales'
+    | '/api/public/hooks/agents/whatsapp'
   id:
-    | "__root__"
-    | "/"
-    | "/_authenticated"
-    | "/admin"
-    | "/admin-agent-insights"
-    | "/admin-agents"
-    | "/admin-ai-approvals"
-    | "/admin-ai-catalog"
-    | "/admin-ai-chronic-refill"
-    | "/admin-ai-excel-import"
-    | "/admin-ai-executive"
-    | "/admin-ai-executive-dashboard"
-    | "/admin-ai-extraction-failures"
-    | "/admin-ai-extractions"
-    | "/admin-ai-inventory"
-    | "/admin-ai-loyalty"
-    | "/admin-ai-marketing"
-    | "/admin-ai-orchestrator"
-    | "/admin-ai-procurement"
-    | "/admin-ai-sales-cx"
-    | "/admin-ai-whatsapp"
-    | "/admin-automation-hub"
-    | "/admin-backups"
-    | "/admin-banners"
-    | "/admin-branches"
-    | "/admin-bundles"
-    | "/admin-campaigns"
-    | "/admin-classifications"
-    | "/admin-command"
-    | "/admin-cron-health"
-    | "/admin-cron-jobs"
-    | "/admin-diagnostics"
-    | "/admin-discounts"
-    | "/admin-event-bus"
-    | "/admin-hmac-preflight"
-    | "/admin-hub"
-    | "/admin-inventory"
-    | "/admin-inventory-duplicates"
-    | "/admin-inventory-reservations"
-    | "/admin-logs"
-    | "/admin-loyalty-dashboard"
-    | "/admin-marketing"
-    | "/admin-offers"
-    | "/admin-pharmacy-recommendations"
-    | "/admin-product-gallery"
-    | "/admin-products"
-    | "/admin-rx-check"
-    | "/admin-rx-extraction-edit"
-    | "/admin-rx-review"
-    | "/admin-settings"
-    | "/admin-social-posts"
-    | "/admin-stock-audit"
-    | "/admin-transfers"
-    | "/admin-trigger-failures"
-    | "/admin-whatsapp-conversations"
-    | "/admin-whatsapp-delivery"
-    | "/admin-workforce"
-    | "/ai-assistant"
-    | "/ai-pharmacist"
-    | "/ai-prescription"
-    | "/ai-supplement"
-    | "/ai-symptoms"
-    | "/bundles"
-    | "/cart"
-    | "/conditions"
-    | "/insurance"
-    | "/loyalty"
-    | "/my-notifications"
-    | "/network-health"
-    | "/network-test"
-    | "/notifications"
-    | "/prescription"
-    | "/products"
-    | "/settings"
-    | "/sitemap.xml"
-    | "/status"
-    | "/titans"
-    | "/track"
-    | "/trust"
-    | "/unsubscribe"
-    | "/yemen-debug"
-    | "/_authenticated/admin-dashboard"
-    | "/_authenticated/admin-health"
-    | "/_authenticated/admin-inventory-sync-logs"
-    | "/_authenticated/admin-marketing-campaigns"
-    | "/_authenticated/admin-sales-reports"
-    | "/_authenticated/admin-system-health"
-    | "/_authenticated/admin-upload-inventory"
-    | "/_authenticated/pharmacist-dashboard"
-    | "/_authenticated/upload-prescription"
-    | "/conditions/$slug"
-    | "/email/unsubscribe"
-    | "/product/$id"
-    | "/test/features"
-    | "/api/internal/collect-feedback"
-    | "/api/public/health"
-    | "/api/public/img"
-    | "/api/public/incident-check"
-    | "/api/public/log-error"
-    | "/api/public/uptime-webhook"
-    | "/api/public/whatsapp-webhook"
-    | "/lovable/email/suppression"
-    | "/api/public/health/full-check"
-    | "/api/public/health/quick-check"
-    | "/api/public/hooks/agent-maintenance"
-    | "/api/public/hooks/alerts-worker"
-    | "/api/public/hooks/chronic-refills"
-    | "/api/public/hooks/collect-social-stats"
-    | "/api/public/hooks/customer-rx-notify"
-    | "/api/public/hooks/dlq-alerts"
-    | "/api/public/hooks/event-consumer"
-    | "/api/public/hooks/nightly-intel"
-    | "/api/public/hooks/prescription-extract"
-    | "/api/public/hooks/retry-failed-posts"
-    | "/api/public/hooks/run-loyalty-reminder"
-    | "/api/public/hooks/run-reactivation"
-    | "/api/public/hooks/run-restock-alerts"
-    | "/api/public/hooks/run-social-posts"
-    | "/api/public/hooks/rx-mirror"
-    | "/api/public/hooks/rx-notify"
-    | "/api/public/hooks/social-callback"
-    | "/api/public/hooks/wa-stale-conversations"
-    | "/api/public/hooks/weekly-ai-enrich"
-    | "/api/public/hooks/weekly-exec-report"
-    | "/api/public/hooks/whatsapp-retry"
-    | "/api/public/monitoring/health"
-    | "/lovable/email/queue/process"
-    | "/lovable/email/transactional/preview"
-    | "/lovable/email/transactional/send"
-    | "/api/public/hooks/agents/bi"
-    | "/api/public/hooks/agents/ceo"
-    | "/api/public/hooks/agents/cto"
-    | "/api/public/hooks/agents/cx"
-    | "/api/public/hooks/agents/inventory"
-    | "/api/public/hooks/agents/marketing"
-    | "/api/public/hooks/agents/operations"
-    | "/api/public/hooks/agents/sales"
-    | "/api/public/hooks/agents/whatsapp";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/admin'
+    | '/admin-agent-insights'
+    | '/admin-agents'
+    | '/admin-ai-approvals'
+    | '/admin-ai-catalog'
+    | '/admin-ai-chronic-refill'
+    | '/admin-ai-excel-import'
+    | '/admin-ai-executive'
+    | '/admin-ai-executive-dashboard'
+    | '/admin-ai-extraction-failures'
+    | '/admin-ai-extractions'
+    | '/admin-ai-inventory'
+    | '/admin-ai-loyalty'
+    | '/admin-ai-marketing'
+    | '/admin-ai-orchestrator'
+    | '/admin-ai-procurement'
+    | '/admin-ai-sales-cx'
+    | '/admin-ai-whatsapp'
+    | '/admin-automation-hub'
+    | '/admin-backups'
+    | '/admin-banners'
+    | '/admin-branches'
+    | '/admin-bundles'
+    | '/admin-campaigns'
+    | '/admin-classifications'
+    | '/admin-command'
+    | '/admin-cron-health'
+    | '/admin-cron-jobs'
+    | '/admin-diagnostics'
+    | '/admin-discounts'
+    | '/admin-event-bus'
+    | '/admin-hmac-preflight'
+    | '/admin-hub'
+    | '/admin-inventory'
+    | '/admin-inventory-duplicates'
+    | '/admin-inventory-reservations'
+    | '/admin-logs'
+    | '/admin-loyalty-dashboard'
+    | '/admin-marketing'
+    | '/admin-offers'
+    | '/admin-pharmacy-recommendations'
+    | '/admin-product-gallery'
+    | '/admin-products'
+    | '/admin-rx-check'
+    | '/admin-rx-extraction-edit'
+    | '/admin-rx-review'
+    | '/admin-settings'
+    | '/admin-social-posts'
+    | '/admin-stock-audit'
+    | '/admin-transfers'
+    | '/admin-trigger-failures'
+    | '/admin-whatsapp-conversations'
+    | '/admin-whatsapp-delivery'
+    | '/admin-workforce'
+    | '/ai-assistant'
+    | '/ai-pharmacist'
+    | '/ai-prescription'
+    | '/ai-supplement'
+    | '/ai-symptoms'
+    | '/bundles'
+    | '/cart'
+    | '/conditions'
+    | '/contact'
+    | '/insurance'
+    | '/loyalty'
+    | '/my-notifications'
+    | '/network-health'
+    | '/network-test'
+    | '/notifications'
+    | '/prescription'
+    | '/products'
+    | '/settings'
+    | '/sitemap.xml'
+    | '/status'
+    | '/titans'
+    | '/track'
+    | '/trust'
+    | '/unsubscribe'
+    | '/yemen-debug'
+    | '/_authenticated/admin-dashboard'
+    | '/_authenticated/admin-health'
+    | '/_authenticated/admin-inventory-sync-logs'
+    | '/_authenticated/admin-marketing-campaigns'
+    | '/_authenticated/admin-sales-reports'
+    | '/_authenticated/admin-system-health'
+    | '/_authenticated/admin-upload-inventory'
+    | '/_authenticated/upload-prescription'
+    | '/conditions/$slug'
+    | '/email/unsubscribe'
+    | '/product/$id'
+    | '/test/features'
+    | '/_authenticated/pharmacist/dashboard'
+    | '/api/internal/collect-feedback'
+    | '/api/public/contact'
+    | '/api/public/health'
+    | '/api/public/img'
+    | '/api/public/incident-check'
+    | '/api/public/log-error'
+    | '/api/public/uptime-webhook'
+    | '/api/public/whatsapp-webhook'
+    | '/lovable/email/suppression'
+    | '/api/public/health/full-check'
+    | '/api/public/health/quick-check'
+    | '/api/public/hooks/agent-maintenance'
+    | '/api/public/hooks/alerts-worker'
+    | '/api/public/hooks/chronic-refills'
+    | '/api/public/hooks/collect-social-stats'
+    | '/api/public/hooks/customer-rx-notify'
+    | '/api/public/hooks/dlq-alerts'
+    | '/api/public/hooks/event-consumer'
+    | '/api/public/hooks/nightly-intel'
+    | '/api/public/hooks/prescription-extract'
+    | '/api/public/hooks/retry-failed-posts'
+    | '/api/public/hooks/run-loyalty-reminder'
+    | '/api/public/hooks/run-reactivation'
+    | '/api/public/hooks/run-restock-alerts'
+    | '/api/public/hooks/run-social-posts'
+    | '/api/public/hooks/rx-mirror'
+    | '/api/public/hooks/rx-notify'
+    | '/api/public/hooks/social-callback'
+    | '/api/public/hooks/wa-stale-conversations'
+    | '/api/public/hooks/weekly-ai-enrich'
+    | '/api/public/hooks/weekly-exec-report'
+    | '/api/public/hooks/whatsapp-retry'
+    | '/api/public/monitoring/health'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
+    | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
+    | '/api/public/hooks/agents/bi'
+    | '/api/public/hooks/agents/ceo'
+    | '/api/public/hooks/agents/cto'
+    | '/api/public/hooks/agents/cx'
+    | '/api/public/hooks/agents/inventory'
+    | '/api/public/hooks/agents/marketing'
+    | '/api/public/hooks/agents/operations'
+    | '/api/public/hooks/agents/sales'
+    | '/api/public/hooks/agents/whatsapp'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren;
-  AdminRoute: typeof AdminRoute;
-  AdminAgentInsightsRoute: typeof AdminAgentInsightsRoute;
-  AdminAgentsRoute: typeof AdminAgentsRoute;
-  AdminAiApprovalsRoute: typeof AdminAiApprovalsRoute;
-  AdminAiCatalogRoute: typeof AdminAiCatalogRoute;
-  AdminAiChronicRefillRoute: typeof AdminAiChronicRefillRoute;
-  AdminAiExcelImportRoute: typeof AdminAiExcelImportRoute;
-  AdminAiExecutiveRoute: typeof AdminAiExecutiveRoute;
-  AdminAiExecutiveDashboardRoute: typeof AdminAiExecutiveDashboardRoute;
-  AdminAiExtractionFailuresRoute: typeof AdminAiExtractionFailuresRoute;
-  AdminAiExtractionsRoute: typeof AdminAiExtractionsRoute;
-  AdminAiInventoryRoute: typeof AdminAiInventoryRoute;
-  AdminAiLoyaltyRoute: typeof AdminAiLoyaltyRoute;
-  AdminAiMarketingRoute: typeof AdminAiMarketingRoute;
-  AdminAiOrchestratorRoute: typeof AdminAiOrchestratorRoute;
-  AdminAiProcurementRoute: typeof AdminAiProcurementRoute;
-  AdminAiSalesCxRoute: typeof AdminAiSalesCxRoute;
-  AdminAiWhatsappRoute: typeof AdminAiWhatsappRoute;
-  AdminAutomationHubRoute: typeof AdminAutomationHubRoute;
-  AdminBackupsRoute: typeof AdminBackupsRoute;
-  AdminBannersRoute: typeof AdminBannersRoute;
-  AdminBranchesRoute: typeof AdminBranchesRoute;
-  AdminBundlesRoute: typeof AdminBundlesRoute;
-  AdminCampaignsRoute: typeof AdminCampaignsRoute;
-  AdminClassificationsRoute: typeof AdminClassificationsRoute;
-  AdminCommandRoute: typeof AdminCommandRoute;
-  AdminCronHealthRoute: typeof AdminCronHealthRoute;
-  AdminCronJobsRoute: typeof AdminCronJobsRoute;
-  AdminDiagnosticsRoute: typeof AdminDiagnosticsRoute;
-  AdminDiscountsRoute: typeof AdminDiscountsRoute;
-  AdminEventBusRoute: typeof AdminEventBusRoute;
-  AdminHmacPreflightRoute: typeof AdminHmacPreflightRoute;
-  AdminHubRoute: typeof AdminHubRoute;
-  AdminInventoryRoute: typeof AdminInventoryRoute;
-  AdminInventoryDuplicatesRoute: typeof AdminInventoryDuplicatesRoute;
-  AdminInventoryReservationsRoute: typeof AdminInventoryReservationsRoute;
-  AdminLogsRoute: typeof AdminLogsRoute;
-  AdminLoyaltyDashboardRoute: typeof AdminLoyaltyDashboardRoute;
-  AdminMarketingRoute: typeof AdminMarketingRoute;
-  AdminOffersRoute: typeof AdminOffersRoute;
-  AdminPharmacyRecommendationsRoute: typeof AdminPharmacyRecommendationsRoute;
-  AdminProductGalleryRoute: typeof AdminProductGalleryRoute;
-  AdminProductsRoute: typeof AdminProductsRoute;
-  AdminRxCheckRoute: typeof AdminRxCheckRoute;
-  AdminRxExtractionEditRoute: typeof AdminRxExtractionEditRoute;
-  AdminRxReviewRoute: typeof AdminRxReviewRoute;
-  AdminSettingsRoute: typeof AdminSettingsRoute;
-  AdminSocialPostsRoute: typeof AdminSocialPostsRoute;
-  AdminStockAuditRoute: typeof AdminStockAuditRoute;
-  AdminTransfersRoute: typeof AdminTransfersRoute;
-  AdminTriggerFailuresRoute: typeof AdminTriggerFailuresRoute;
-  AdminWhatsappConversationsRoute: typeof AdminWhatsappConversationsRoute;
-  AdminWhatsappDeliveryRoute: typeof AdminWhatsappDeliveryRoute;
-  AdminWorkforceRoute: typeof AdminWorkforceRoute;
-  AiAssistantRoute: typeof AiAssistantRoute;
-  AiPharmacistRoute: typeof AiPharmacistRoute;
-  AiPrescriptionRoute: typeof AiPrescriptionRoute;
-  AiSupplementRoute: typeof AiSupplementRoute;
-  AiSymptomsRoute: typeof AiSymptomsRoute;
-  BundlesRoute: typeof BundlesRoute;
-  CartRoute: typeof CartRoute;
-  ConditionsRoute: typeof ConditionsRouteWithChildren;
-  InsuranceRoute: typeof InsuranceRoute;
-  LoyaltyRoute: typeof LoyaltyRoute;
-  MyNotificationsRoute: typeof MyNotificationsRoute;
-  NetworkHealthRoute: typeof NetworkHealthRoute;
-  NetworkTestRoute: typeof NetworkTestRoute;
-  NotificationsRoute: typeof NotificationsRoute;
-  PrescriptionRoute: typeof PrescriptionRoute;
-  ProductsRoute: typeof ProductsRoute;
-  SettingsRoute: typeof SettingsRoute;
-  SitemapDotxmlRoute: typeof SitemapDotxmlRoute;
-  StatusRoute: typeof StatusRoute;
-  TitansRoute: typeof TitansRoute;
-  TrackRoute: typeof TrackRoute;
-  TrustRoute: typeof TrustRoute;
-  UnsubscribeRoute: typeof UnsubscribeRoute;
-  YemenDebugRoute: typeof YemenDebugRoute;
-  EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute;
-  ProductIdRoute: typeof ProductIdRoute;
-  TestFeaturesRoute: typeof TestFeaturesRoute;
-  ApiInternalCollectFeedbackRoute: typeof ApiInternalCollectFeedbackRoute;
-  ApiPublicHealthRoute: typeof ApiPublicHealthRouteWithChildren;
-  ApiPublicImgRoute: typeof ApiPublicImgRoute;
-  ApiPublicIncidentCheckRoute: typeof ApiPublicIncidentCheckRoute;
-  ApiPublicLogErrorRoute: typeof ApiPublicLogErrorRoute;
-  ApiPublicUptimeWebhookRoute: typeof ApiPublicUptimeWebhookRoute;
-  ApiPublicWhatsappWebhookRoute: typeof ApiPublicWhatsappWebhookRoute;
-  LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute;
-  ApiPublicHooksAgentMaintenanceRoute: typeof ApiPublicHooksAgentMaintenanceRoute;
-  ApiPublicHooksAlertsWorkerRoute: typeof ApiPublicHooksAlertsWorkerRoute;
-  ApiPublicHooksChronicRefillsRoute: typeof ApiPublicHooksChronicRefillsRoute;
-  ApiPublicHooksCollectSocialStatsRoute: typeof ApiPublicHooksCollectSocialStatsRoute;
-  ApiPublicHooksCustomerRxNotifyRoute: typeof ApiPublicHooksCustomerRxNotifyRoute;
-  ApiPublicHooksDlqAlertsRoute: typeof ApiPublicHooksDlqAlertsRoute;
-  ApiPublicHooksEventConsumerRoute: typeof ApiPublicHooksEventConsumerRoute;
-  ApiPublicHooksNightlyIntelRoute: typeof ApiPublicHooksNightlyIntelRoute;
-  ApiPublicHooksPrescriptionExtractRoute: typeof ApiPublicHooksPrescriptionExtractRoute;
-  ApiPublicHooksRetryFailedPostsRoute: typeof ApiPublicHooksRetryFailedPostsRoute;
-  ApiPublicHooksRunLoyaltyReminderRoute: typeof ApiPublicHooksRunLoyaltyReminderRoute;
-  ApiPublicHooksRunReactivationRoute: typeof ApiPublicHooksRunReactivationRoute;
-  ApiPublicHooksRunRestockAlertsRoute: typeof ApiPublicHooksRunRestockAlertsRoute;
-  ApiPublicHooksRunSocialPostsRoute: typeof ApiPublicHooksRunSocialPostsRoute;
-  ApiPublicHooksRxMirrorRoute: typeof ApiPublicHooksRxMirrorRoute;
-  ApiPublicHooksRxNotifyRoute: typeof ApiPublicHooksRxNotifyRoute;
-  ApiPublicHooksSocialCallbackRoute: typeof ApiPublicHooksSocialCallbackRoute;
-  ApiPublicHooksWaStaleConversationsRoute: typeof ApiPublicHooksWaStaleConversationsRoute;
-  ApiPublicHooksWeeklyAiEnrichRoute: typeof ApiPublicHooksWeeklyAiEnrichRoute;
-  ApiPublicHooksWeeklyExecReportRoute: typeof ApiPublicHooksWeeklyExecReportRoute;
-  ApiPublicHooksWhatsappRetryRoute: typeof ApiPublicHooksWhatsappRetryRoute;
-  ApiPublicMonitoringHealthRoute: typeof ApiPublicMonitoringHealthRoute;
-  LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute;
-  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute;
-  LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute;
-  ApiPublicHooksAgentsBiRoute: typeof ApiPublicHooksAgentsBiRoute;
-  ApiPublicHooksAgentsCeoRoute: typeof ApiPublicHooksAgentsCeoRoute;
-  ApiPublicHooksAgentsCtoRoute: typeof ApiPublicHooksAgentsCtoRoute;
-  ApiPublicHooksAgentsCxRoute: typeof ApiPublicHooksAgentsCxRoute;
-  ApiPublicHooksAgentsInventoryRoute: typeof ApiPublicHooksAgentsInventoryRoute;
-  ApiPublicHooksAgentsMarketingRoute: typeof ApiPublicHooksAgentsMarketingRoute;
-  ApiPublicHooksAgentsOperationsRoute: typeof ApiPublicHooksAgentsOperationsRoute;
-  ApiPublicHooksAgentsSalesRoute: typeof ApiPublicHooksAgentsSalesRoute;
-  ApiPublicHooksAgentsWhatsappRoute: typeof ApiPublicHooksAgentsWhatsappRoute;
+  IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AdminRoute: typeof AdminRoute
+  AdminAgentInsightsRoute: typeof AdminAgentInsightsRoute
+  AdminAgentsRoute: typeof AdminAgentsRoute
+  AdminAiApprovalsRoute: typeof AdminAiApprovalsRoute
+  AdminAiCatalogRoute: typeof AdminAiCatalogRoute
+  AdminAiChronicRefillRoute: typeof AdminAiChronicRefillRoute
+  AdminAiExcelImportRoute: typeof AdminAiExcelImportRoute
+  AdminAiExecutiveRoute: typeof AdminAiExecutiveRoute
+  AdminAiExecutiveDashboardRoute: typeof AdminAiExecutiveDashboardRoute
+  AdminAiExtractionFailuresRoute: typeof AdminAiExtractionFailuresRoute
+  AdminAiExtractionsRoute: typeof AdminAiExtractionsRoute
+  AdminAiInventoryRoute: typeof AdminAiInventoryRoute
+  AdminAiLoyaltyRoute: typeof AdminAiLoyaltyRoute
+  AdminAiMarketingRoute: typeof AdminAiMarketingRoute
+  AdminAiOrchestratorRoute: typeof AdminAiOrchestratorRoute
+  AdminAiProcurementRoute: typeof AdminAiProcurementRoute
+  AdminAiSalesCxRoute: typeof AdminAiSalesCxRoute
+  AdminAiWhatsappRoute: typeof AdminAiWhatsappRoute
+  AdminAutomationHubRoute: typeof AdminAutomationHubRoute
+  AdminBackupsRoute: typeof AdminBackupsRoute
+  AdminBannersRoute: typeof AdminBannersRoute
+  AdminBranchesRoute: typeof AdminBranchesRoute
+  AdminBundlesRoute: typeof AdminBundlesRoute
+  AdminCampaignsRoute: typeof AdminCampaignsRoute
+  AdminClassificationsRoute: typeof AdminClassificationsRoute
+  AdminCommandRoute: typeof AdminCommandRoute
+  AdminCronHealthRoute: typeof AdminCronHealthRoute
+  AdminCronJobsRoute: typeof AdminCronJobsRoute
+  AdminDiagnosticsRoute: typeof AdminDiagnosticsRoute
+  AdminDiscountsRoute: typeof AdminDiscountsRoute
+  AdminEventBusRoute: typeof AdminEventBusRoute
+  AdminHmacPreflightRoute: typeof AdminHmacPreflightRoute
+  AdminHubRoute: typeof AdminHubRoute
+  AdminInventoryRoute: typeof AdminInventoryRoute
+  AdminInventoryDuplicatesRoute: typeof AdminInventoryDuplicatesRoute
+  AdminInventoryReservationsRoute: typeof AdminInventoryReservationsRoute
+  AdminLogsRoute: typeof AdminLogsRoute
+  AdminLoyaltyDashboardRoute: typeof AdminLoyaltyDashboardRoute
+  AdminMarketingRoute: typeof AdminMarketingRoute
+  AdminOffersRoute: typeof AdminOffersRoute
+  AdminPharmacyRecommendationsRoute: typeof AdminPharmacyRecommendationsRoute
+  AdminProductGalleryRoute: typeof AdminProductGalleryRoute
+  AdminProductsRoute: typeof AdminProductsRoute
+  AdminRxCheckRoute: typeof AdminRxCheckRoute
+  AdminRxExtractionEditRoute: typeof AdminRxExtractionEditRoute
+  AdminRxReviewRoute: typeof AdminRxReviewRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminSocialPostsRoute: typeof AdminSocialPostsRoute
+  AdminStockAuditRoute: typeof AdminStockAuditRoute
+  AdminTransfersRoute: typeof AdminTransfersRoute
+  AdminTriggerFailuresRoute: typeof AdminTriggerFailuresRoute
+  AdminWhatsappConversationsRoute: typeof AdminWhatsappConversationsRoute
+  AdminWhatsappDeliveryRoute: typeof AdminWhatsappDeliveryRoute
+  AdminWorkforceRoute: typeof AdminWorkforceRoute
+  AiAssistantRoute: typeof AiAssistantRoute
+  AiPharmacistRoute: typeof AiPharmacistRoute
+  AiPrescriptionRoute: typeof AiPrescriptionRoute
+  AiSupplementRoute: typeof AiSupplementRoute
+  AiSymptomsRoute: typeof AiSymptomsRoute
+  BundlesRoute: typeof BundlesRoute
+  CartRoute: typeof CartRoute
+  ConditionsRoute: typeof ConditionsRouteWithChildren
+  ContactRoute: typeof ContactRoute
+  InsuranceRoute: typeof InsuranceRoute
+  LoyaltyRoute: typeof LoyaltyRoute
+  MyNotificationsRoute: typeof MyNotificationsRoute
+  NetworkHealthRoute: typeof NetworkHealthRoute
+  NetworkTestRoute: typeof NetworkTestRoute
+  NotificationsRoute: typeof NotificationsRoute
+  PrescriptionRoute: typeof PrescriptionRoute
+  ProductsRoute: typeof ProductsRoute
+  SettingsRoute: typeof SettingsRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  StatusRoute: typeof StatusRoute
+  TitansRoute: typeof TitansRoute
+  TrackRoute: typeof TrackRoute
+  TrustRoute: typeof TrustRoute
+  UnsubscribeRoute: typeof UnsubscribeRoute
+  YemenDebugRoute: typeof YemenDebugRoute
+  EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  ProductIdRoute: typeof ProductIdRoute
+  TestFeaturesRoute: typeof TestFeaturesRoute
+  ApiInternalCollectFeedbackRoute: typeof ApiInternalCollectFeedbackRoute
+  ApiPublicContactRoute: typeof ApiPublicContactRoute
+  ApiPublicHealthRoute: typeof ApiPublicHealthRouteWithChildren
+  ApiPublicImgRoute: typeof ApiPublicImgRoute
+  ApiPublicIncidentCheckRoute: typeof ApiPublicIncidentCheckRoute
+  ApiPublicLogErrorRoute: typeof ApiPublicLogErrorRoute
+  ApiPublicUptimeWebhookRoute: typeof ApiPublicUptimeWebhookRoute
+  ApiPublicWhatsappWebhookRoute: typeof ApiPublicWhatsappWebhookRoute
+  LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicHooksAgentMaintenanceRoute: typeof ApiPublicHooksAgentMaintenanceRoute
+  ApiPublicHooksAlertsWorkerRoute: typeof ApiPublicHooksAlertsWorkerRoute
+  ApiPublicHooksChronicRefillsRoute: typeof ApiPublicHooksChronicRefillsRoute
+  ApiPublicHooksCollectSocialStatsRoute: typeof ApiPublicHooksCollectSocialStatsRoute
+  ApiPublicHooksCustomerRxNotifyRoute: typeof ApiPublicHooksCustomerRxNotifyRoute
+  ApiPublicHooksDlqAlertsRoute: typeof ApiPublicHooksDlqAlertsRoute
+  ApiPublicHooksEventConsumerRoute: typeof ApiPublicHooksEventConsumerRoute
+  ApiPublicHooksNightlyIntelRoute: typeof ApiPublicHooksNightlyIntelRoute
+  ApiPublicHooksPrescriptionExtractRoute: typeof ApiPublicHooksPrescriptionExtractRoute
+  ApiPublicHooksRetryFailedPostsRoute: typeof ApiPublicHooksRetryFailedPostsRoute
+  ApiPublicHooksRunLoyaltyReminderRoute: typeof ApiPublicHooksRunLoyaltyReminderRoute
+  ApiPublicHooksRunReactivationRoute: typeof ApiPublicHooksRunReactivationRoute
+  ApiPublicHooksRunRestockAlertsRoute: typeof ApiPublicHooksRunRestockAlertsRoute
+  ApiPublicHooksRunSocialPostsRoute: typeof ApiPublicHooksRunSocialPostsRoute
+  ApiPublicHooksRxMirrorRoute: typeof ApiPublicHooksRxMirrorRoute
+  ApiPublicHooksRxNotifyRoute: typeof ApiPublicHooksRxNotifyRoute
+  ApiPublicHooksSocialCallbackRoute: typeof ApiPublicHooksSocialCallbackRoute
+  ApiPublicHooksWaStaleConversationsRoute: typeof ApiPublicHooksWaStaleConversationsRoute
+  ApiPublicHooksWeeklyAiEnrichRoute: typeof ApiPublicHooksWeeklyAiEnrichRoute
+  ApiPublicHooksWeeklyExecReportRoute: typeof ApiPublicHooksWeeklyExecReportRoute
+  ApiPublicHooksWhatsappRetryRoute: typeof ApiPublicHooksWhatsappRetryRoute
+  ApiPublicMonitoringHealthRoute: typeof ApiPublicMonitoringHealthRoute
+  LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
+  LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
+  LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
+  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
+  LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
+  ApiPublicHooksAgentsBiRoute: typeof ApiPublicHooksAgentsBiRoute
+  ApiPublicHooksAgentsCeoRoute: typeof ApiPublicHooksAgentsCeoRoute
+  ApiPublicHooksAgentsCtoRoute: typeof ApiPublicHooksAgentsCtoRoute
+  ApiPublicHooksAgentsCxRoute: typeof ApiPublicHooksAgentsCxRoute
+  ApiPublicHooksAgentsInventoryRoute: typeof ApiPublicHooksAgentsInventoryRoute
+  ApiPublicHooksAgentsMarketingRoute: typeof ApiPublicHooksAgentsMarketingRoute
+  ApiPublicHooksAgentsOperationsRoute: typeof ApiPublicHooksAgentsOperationsRoute
+  ApiPublicHooksAgentsSalesRoute: typeof ApiPublicHooksAgentsSalesRoute
+  ApiPublicHooksAgentsWhatsappRoute: typeof ApiPublicHooksAgentsWhatsappRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/yemen-debug": {
-      id: "/yemen-debug";
-      path: "/yemen-debug";
-      fullPath: "/yemen-debug";
-      preLoaderRoute: typeof YemenDebugRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/unsubscribe": {
-      id: "/unsubscribe";
-      path: "/unsubscribe";
-      fullPath: "/unsubscribe";
-      preLoaderRoute: typeof UnsubscribeRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/trust": {
-      id: "/trust";
-      path: "/trust";
-      fullPath: "/trust";
-      preLoaderRoute: typeof TrustRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/track": {
-      id: "/track";
-      path: "/track";
-      fullPath: "/track";
-      preLoaderRoute: typeof TrackRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/titans": {
-      id: "/titans";
-      path: "/titans";
-      fullPath: "/titans";
-      preLoaderRoute: typeof TitansRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/status": {
-      id: "/status";
-      path: "/status";
-      fullPath: "/status";
-      preLoaderRoute: typeof StatusRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/sitemap.xml": {
-      id: "/sitemap.xml";
-      path: "/sitemap.xml";
-      fullPath: "/sitemap.xml";
-      preLoaderRoute: typeof SitemapDotxmlRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/settings": {
-      id: "/settings";
-      path: "/settings";
-      fullPath: "/settings";
-      preLoaderRoute: typeof SettingsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/products": {
-      id: "/products";
-      path: "/products";
-      fullPath: "/products";
-      preLoaderRoute: typeof ProductsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/prescription": {
-      id: "/prescription";
-      path: "/prescription";
-      fullPath: "/prescription";
-      preLoaderRoute: typeof PrescriptionRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/notifications": {
-      id: "/notifications";
-      path: "/notifications";
-      fullPath: "/notifications";
-      preLoaderRoute: typeof NotificationsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/network-test": {
-      id: "/network-test";
-      path: "/network-test";
-      fullPath: "/network-test";
-      preLoaderRoute: typeof NetworkTestRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/network-health": {
-      id: "/network-health";
-      path: "/network-health";
-      fullPath: "/network-health";
-      preLoaderRoute: typeof NetworkHealthRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/my-notifications": {
-      id: "/my-notifications";
-      path: "/my-notifications";
-      fullPath: "/my-notifications";
-      preLoaderRoute: typeof MyNotificationsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/loyalty": {
-      id: "/loyalty";
-      path: "/loyalty";
-      fullPath: "/loyalty";
-      preLoaderRoute: typeof LoyaltyRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/insurance": {
-      id: "/insurance";
-      path: "/insurance";
-      fullPath: "/insurance";
-      preLoaderRoute: typeof InsuranceRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/conditions": {
-      id: "/conditions";
-      path: "/conditions";
-      fullPath: "/conditions";
-      preLoaderRoute: typeof ConditionsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/cart": {
-      id: "/cart";
-      path: "/cart";
-      fullPath: "/cart";
-      preLoaderRoute: typeof CartRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/bundles": {
-      id: "/bundles";
-      path: "/bundles";
-      fullPath: "/bundles";
-      preLoaderRoute: typeof BundlesRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/ai-symptoms": {
-      id: "/ai-symptoms";
-      path: "/ai-symptoms";
-      fullPath: "/ai-symptoms";
-      preLoaderRoute: typeof AiSymptomsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/ai-supplement": {
-      id: "/ai-supplement";
-      path: "/ai-supplement";
-      fullPath: "/ai-supplement";
-      preLoaderRoute: typeof AiSupplementRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/ai-prescription": {
-      id: "/ai-prescription";
-      path: "/ai-prescription";
-      fullPath: "/ai-prescription";
-      preLoaderRoute: typeof AiPrescriptionRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/ai-pharmacist": {
-      id: "/ai-pharmacist";
-      path: "/ai-pharmacist";
-      fullPath: "/ai-pharmacist";
-      preLoaderRoute: typeof AiPharmacistRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/ai-assistant": {
-      id: "/ai-assistant";
-      path: "/ai-assistant";
-      fullPath: "/ai-assistant";
-      preLoaderRoute: typeof AiAssistantRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-workforce": {
-      id: "/admin-workforce";
-      path: "/admin-workforce";
-      fullPath: "/admin-workforce";
-      preLoaderRoute: typeof AdminWorkforceRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-whatsapp-delivery": {
-      id: "/admin-whatsapp-delivery";
-      path: "/admin-whatsapp-delivery";
-      fullPath: "/admin-whatsapp-delivery";
-      preLoaderRoute: typeof AdminWhatsappDeliveryRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-whatsapp-conversations": {
-      id: "/admin-whatsapp-conversations";
-      path: "/admin-whatsapp-conversations";
-      fullPath: "/admin-whatsapp-conversations";
-      preLoaderRoute: typeof AdminWhatsappConversationsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-trigger-failures": {
-      id: "/admin-trigger-failures";
-      path: "/admin-trigger-failures";
-      fullPath: "/admin-trigger-failures";
-      preLoaderRoute: typeof AdminTriggerFailuresRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-transfers": {
-      id: "/admin-transfers";
-      path: "/admin-transfers";
-      fullPath: "/admin-transfers";
-      preLoaderRoute: typeof AdminTransfersRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-stock-audit": {
-      id: "/admin-stock-audit";
-      path: "/admin-stock-audit";
-      fullPath: "/admin-stock-audit";
-      preLoaderRoute: typeof AdminStockAuditRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-social-posts": {
-      id: "/admin-social-posts";
-      path: "/admin-social-posts";
-      fullPath: "/admin-social-posts";
-      preLoaderRoute: typeof AdminSocialPostsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-settings": {
-      id: "/admin-settings";
-      path: "/admin-settings";
-      fullPath: "/admin-settings";
-      preLoaderRoute: typeof AdminSettingsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-rx-review": {
-      id: "/admin-rx-review";
-      path: "/admin-rx-review";
-      fullPath: "/admin-rx-review";
-      preLoaderRoute: typeof AdminRxReviewRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-rx-extraction-edit": {
-      id: "/admin-rx-extraction-edit";
-      path: "/admin-rx-extraction-edit";
-      fullPath: "/admin-rx-extraction-edit";
-      preLoaderRoute: typeof AdminRxExtractionEditRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-rx-check": {
-      id: "/admin-rx-check";
-      path: "/admin-rx-check";
-      fullPath: "/admin-rx-check";
-      preLoaderRoute: typeof AdminRxCheckRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-products": {
-      id: "/admin-products";
-      path: "/admin-products";
-      fullPath: "/admin-products";
-      preLoaderRoute: typeof AdminProductsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-product-gallery": {
-      id: "/admin-product-gallery";
-      path: "/admin-product-gallery";
-      fullPath: "/admin-product-gallery";
-      preLoaderRoute: typeof AdminProductGalleryRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-pharmacy-recommendations": {
-      id: "/admin-pharmacy-recommendations";
-      path: "/admin-pharmacy-recommendations";
-      fullPath: "/admin-pharmacy-recommendations";
-      preLoaderRoute: typeof AdminPharmacyRecommendationsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-offers": {
-      id: "/admin-offers";
-      path: "/admin-offers";
-      fullPath: "/admin-offers";
-      preLoaderRoute: typeof AdminOffersRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-marketing": {
-      id: "/admin-marketing";
-      path: "/admin-marketing";
-      fullPath: "/admin-marketing";
-      preLoaderRoute: typeof AdminMarketingRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-loyalty-dashboard": {
-      id: "/admin-loyalty-dashboard";
-      path: "/admin-loyalty-dashboard";
-      fullPath: "/admin-loyalty-dashboard";
-      preLoaderRoute: typeof AdminLoyaltyDashboardRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-logs": {
-      id: "/admin-logs";
-      path: "/admin-logs";
-      fullPath: "/admin-logs";
-      preLoaderRoute: typeof AdminLogsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-inventory-reservations": {
-      id: "/admin-inventory-reservations";
-      path: "/admin-inventory-reservations";
-      fullPath: "/admin-inventory-reservations";
-      preLoaderRoute: typeof AdminInventoryReservationsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-inventory-duplicates": {
-      id: "/admin-inventory-duplicates";
-      path: "/admin-inventory-duplicates";
-      fullPath: "/admin-inventory-duplicates";
-      preLoaderRoute: typeof AdminInventoryDuplicatesRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-inventory": {
-      id: "/admin-inventory";
-      path: "/admin-inventory";
-      fullPath: "/admin-inventory";
-      preLoaderRoute: typeof AdminInventoryRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-hub": {
-      id: "/admin-hub";
-      path: "/admin-hub";
-      fullPath: "/admin-hub";
-      preLoaderRoute: typeof AdminHubRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-hmac-preflight": {
-      id: "/admin-hmac-preflight";
-      path: "/admin-hmac-preflight";
-      fullPath: "/admin-hmac-preflight";
-      preLoaderRoute: typeof AdminHmacPreflightRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-event-bus": {
-      id: "/admin-event-bus";
-      path: "/admin-event-bus";
-      fullPath: "/admin-event-bus";
-      preLoaderRoute: typeof AdminEventBusRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-discounts": {
-      id: "/admin-discounts";
-      path: "/admin-discounts";
-      fullPath: "/admin-discounts";
-      preLoaderRoute: typeof AdminDiscountsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-diagnostics": {
-      id: "/admin-diagnostics";
-      path: "/admin-diagnostics";
-      fullPath: "/admin-diagnostics";
-      preLoaderRoute: typeof AdminDiagnosticsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-cron-jobs": {
-      id: "/admin-cron-jobs";
-      path: "/admin-cron-jobs";
-      fullPath: "/admin-cron-jobs";
-      preLoaderRoute: typeof AdminCronJobsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-cron-health": {
-      id: "/admin-cron-health";
-      path: "/admin-cron-health";
-      fullPath: "/admin-cron-health";
-      preLoaderRoute: typeof AdminCronHealthRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-command": {
-      id: "/admin-command";
-      path: "/admin-command";
-      fullPath: "/admin-command";
-      preLoaderRoute: typeof AdminCommandRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-classifications": {
-      id: "/admin-classifications";
-      path: "/admin-classifications";
-      fullPath: "/admin-classifications";
-      preLoaderRoute: typeof AdminClassificationsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-campaigns": {
-      id: "/admin-campaigns";
-      path: "/admin-campaigns";
-      fullPath: "/admin-campaigns";
-      preLoaderRoute: typeof AdminCampaignsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-bundles": {
-      id: "/admin-bundles";
-      path: "/admin-bundles";
-      fullPath: "/admin-bundles";
-      preLoaderRoute: typeof AdminBundlesRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-branches": {
-      id: "/admin-branches";
-      path: "/admin-branches";
-      fullPath: "/admin-branches";
-      preLoaderRoute: typeof AdminBranchesRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-banners": {
-      id: "/admin-banners";
-      path: "/admin-banners";
-      fullPath: "/admin-banners";
-      preLoaderRoute: typeof AdminBannersRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-backups": {
-      id: "/admin-backups";
-      path: "/admin-backups";
-      fullPath: "/admin-backups";
-      preLoaderRoute: typeof AdminBackupsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-automation-hub": {
-      id: "/admin-automation-hub";
-      path: "/admin-automation-hub";
-      fullPath: "/admin-automation-hub";
-      preLoaderRoute: typeof AdminAutomationHubRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-ai-whatsapp": {
-      id: "/admin-ai-whatsapp";
-      path: "/admin-ai-whatsapp";
-      fullPath: "/admin-ai-whatsapp";
-      preLoaderRoute: typeof AdminAiWhatsappRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-ai-sales-cx": {
-      id: "/admin-ai-sales-cx";
-      path: "/admin-ai-sales-cx";
-      fullPath: "/admin-ai-sales-cx";
-      preLoaderRoute: typeof AdminAiSalesCxRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-ai-procurement": {
-      id: "/admin-ai-procurement";
-      path: "/admin-ai-procurement";
-      fullPath: "/admin-ai-procurement";
-      preLoaderRoute: typeof AdminAiProcurementRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-ai-orchestrator": {
-      id: "/admin-ai-orchestrator";
-      path: "/admin-ai-orchestrator";
-      fullPath: "/admin-ai-orchestrator";
-      preLoaderRoute: typeof AdminAiOrchestratorRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-ai-marketing": {
-      id: "/admin-ai-marketing";
-      path: "/admin-ai-marketing";
-      fullPath: "/admin-ai-marketing";
-      preLoaderRoute: typeof AdminAiMarketingRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-ai-loyalty": {
-      id: "/admin-ai-loyalty";
-      path: "/admin-ai-loyalty";
-      fullPath: "/admin-ai-loyalty";
-      preLoaderRoute: typeof AdminAiLoyaltyRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-ai-inventory": {
-      id: "/admin-ai-inventory";
-      path: "/admin-ai-inventory";
-      fullPath: "/admin-ai-inventory";
-      preLoaderRoute: typeof AdminAiInventoryRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-ai-extractions": {
-      id: "/admin-ai-extractions";
-      path: "/admin-ai-extractions";
-      fullPath: "/admin-ai-extractions";
-      preLoaderRoute: typeof AdminAiExtractionsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-ai-extraction-failures": {
-      id: "/admin-ai-extraction-failures";
-      path: "/admin-ai-extraction-failures";
-      fullPath: "/admin-ai-extraction-failures";
-      preLoaderRoute: typeof AdminAiExtractionFailuresRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-ai-executive-dashboard": {
-      id: "/admin-ai-executive-dashboard";
-      path: "/admin-ai-executive-dashboard";
-      fullPath: "/admin-ai-executive-dashboard";
-      preLoaderRoute: typeof AdminAiExecutiveDashboardRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-ai-executive": {
-      id: "/admin-ai-executive";
-      path: "/admin-ai-executive";
-      fullPath: "/admin-ai-executive";
-      preLoaderRoute: typeof AdminAiExecutiveRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-ai-excel-import": {
-      id: "/admin-ai-excel-import";
-      path: "/admin-ai-excel-import";
-      fullPath: "/admin-ai-excel-import";
-      preLoaderRoute: typeof AdminAiExcelImportRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-ai-chronic-refill": {
-      id: "/admin-ai-chronic-refill";
-      path: "/admin-ai-chronic-refill";
-      fullPath: "/admin-ai-chronic-refill";
-      preLoaderRoute: typeof AdminAiChronicRefillRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-ai-catalog": {
-      id: "/admin-ai-catalog";
-      path: "/admin-ai-catalog";
-      fullPath: "/admin-ai-catalog";
-      preLoaderRoute: typeof AdminAiCatalogRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-ai-approvals": {
-      id: "/admin-ai-approvals";
-      path: "/admin-ai-approvals";
-      fullPath: "/admin-ai-approvals";
-      preLoaderRoute: typeof AdminAiApprovalsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-agents": {
-      id: "/admin-agents";
-      path: "/admin-agents";
-      fullPath: "/admin-agents";
-      preLoaderRoute: typeof AdminAgentsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin-agent-insights": {
-      id: "/admin-agent-insights";
-      path: "/admin-agent-insights";
-      fullPath: "/admin-agent-insights";
-      preLoaderRoute: typeof AdminAgentInsightsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/admin": {
-      id: "/admin";
-      path: "/admin";
-      fullPath: "/admin";
-      preLoaderRoute: typeof AdminRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/_authenticated": {
-      id: "/_authenticated";
-      path: "";
-      fullPath: "/";
-      preLoaderRoute: typeof AuthenticatedRouteRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/test/features": {
-      id: "/test/features";
-      path: "/test/features";
-      fullPath: "/test/features";
-      preLoaderRoute: typeof TestFeaturesRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/product/$id": {
-      id: "/product/$id";
-      path: "/product/$id";
-      fullPath: "/product/$id";
-      preLoaderRoute: typeof ProductIdRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/email/unsubscribe": {
-      id: "/email/unsubscribe";
-      path: "/email/unsubscribe";
-      fullPath: "/email/unsubscribe";
-      preLoaderRoute: typeof EmailUnsubscribeRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/conditions/$slug": {
-      id: "/conditions/$slug";
-      path: "/$slug";
-      fullPath: "/conditions/$slug";
-      preLoaderRoute: typeof ConditionsSlugRouteImport;
-      parentRoute: typeof ConditionsRoute;
-    };
-    "/_authenticated/upload-prescription": {
-      id: "/_authenticated/upload-prescription";
-      path: "/upload-prescription";
-      fullPath: "/upload-prescription";
-      preLoaderRoute: typeof AuthenticatedUploadPrescriptionRouteImport;
-      parentRoute: typeof AuthenticatedRouteRoute;
-    };
-    "/_authenticated/pharmacist-dashboard": {
-      id: "/_authenticated/pharmacist-dashboard";
-      path: "/pharmacist-dashboard";
-      fullPath: "/pharmacist-dashboard";
-      preLoaderRoute: typeof AuthenticatedPharmacistDashboardRouteImport;
-      parentRoute: typeof AuthenticatedRouteRoute;
-    };
-    "/_authenticated/admin-upload-inventory": {
-      id: "/_authenticated/admin-upload-inventory";
-      path: "/admin-upload-inventory";
-      fullPath: "/admin-upload-inventory";
-      preLoaderRoute: typeof AuthenticatedAdminUploadInventoryRouteImport;
-      parentRoute: typeof AuthenticatedRouteRoute;
-    };
-    "/_authenticated/admin-system-health": {
-      id: "/_authenticated/admin-system-health";
-      path: "/admin-system-health";
-      fullPath: "/admin-system-health";
-      preLoaderRoute: typeof AuthenticatedAdminSystemHealthRouteImport;
-      parentRoute: typeof AuthenticatedRouteRoute;
-    };
-    "/_authenticated/admin-sales-reports": {
-      id: "/_authenticated/admin-sales-reports";
-      path: "/admin-sales-reports";
-      fullPath: "/admin-sales-reports";
-      preLoaderRoute: typeof AuthenticatedAdminSalesReportsRouteImport;
-      parentRoute: typeof AuthenticatedRouteRoute;
-    };
-    "/_authenticated/admin-marketing-campaigns": {
-      id: "/_authenticated/admin-marketing-campaigns";
-      path: "/admin-marketing-campaigns";
-      fullPath: "/admin-marketing-campaigns";
-      preLoaderRoute: typeof AuthenticatedAdminMarketingCampaignsRouteImport;
-      parentRoute: typeof AuthenticatedRouteRoute;
-    };
-    "/_authenticated/admin-inventory-sync-logs": {
-      id: "/_authenticated/admin-inventory-sync-logs";
-      path: "/admin-inventory-sync-logs";
-      fullPath: "/admin-inventory-sync-logs";
-      preLoaderRoute: typeof AuthenticatedAdminInventorySyncLogsRouteImport;
-      parentRoute: typeof AuthenticatedRouteRoute;
-    };
-    "/_authenticated/admin-health": {
-      id: "/_authenticated/admin-health";
-      path: "/admin-health";
-      fullPath: "/admin-health";
-      preLoaderRoute: typeof AuthenticatedAdminHealthRouteImport;
-      parentRoute: typeof AuthenticatedRouteRoute;
-    };
-    "/_authenticated/admin-dashboard": {
-      id: "/_authenticated/admin-dashboard";
-      path: "/admin-dashboard";
-      fullPath: "/admin-dashboard";
-      preLoaderRoute: typeof AuthenticatedAdminDashboardRouteImport;
-      parentRoute: typeof AuthenticatedRouteRoute;
-    };
-    "/lovable/email/suppression": {
-      id: "/lovable/email/suppression";
-      path: "/lovable/email/suppression";
-      fullPath: "/lovable/email/suppression";
-      preLoaderRoute: typeof LovableEmailSuppressionRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/whatsapp-webhook": {
-      id: "/api/public/whatsapp-webhook";
-      path: "/api/public/whatsapp-webhook";
-      fullPath: "/api/public/whatsapp-webhook";
-      preLoaderRoute: typeof ApiPublicWhatsappWebhookRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/uptime-webhook": {
-      id: "/api/public/uptime-webhook";
-      path: "/api/public/uptime-webhook";
-      fullPath: "/api/public/uptime-webhook";
-      preLoaderRoute: typeof ApiPublicUptimeWebhookRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/log-error": {
-      id: "/api/public/log-error";
-      path: "/api/public/log-error";
-      fullPath: "/api/public/log-error";
-      preLoaderRoute: typeof ApiPublicLogErrorRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/incident-check": {
-      id: "/api/public/incident-check";
-      path: "/api/public/incident-check";
-      fullPath: "/api/public/incident-check";
-      preLoaderRoute: typeof ApiPublicIncidentCheckRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/img": {
-      id: "/api/public/img";
-      path: "/api/public/img";
-      fullPath: "/api/public/img";
-      preLoaderRoute: typeof ApiPublicImgRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/health": {
-      id: "/api/public/health";
-      path: "/api/public/health";
-      fullPath: "/api/public/health";
-      preLoaderRoute: typeof ApiPublicHealthRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/internal/collect-feedback": {
-      id: "/api/internal/collect-feedback";
-      path: "/api/internal/collect-feedback";
-      fullPath: "/api/internal/collect-feedback";
-      preLoaderRoute: typeof ApiInternalCollectFeedbackRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/lovable/email/transactional/send": {
-      id: "/lovable/email/transactional/send";
-      path: "/lovable/email/transactional/send";
-      fullPath: "/lovable/email/transactional/send";
-      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/lovable/email/transactional/preview": {
-      id: "/lovable/email/transactional/preview";
-      path: "/lovable/email/transactional/preview";
-      fullPath: "/lovable/email/transactional/preview";
-      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/lovable/email/queue/process": {
-      id: "/lovable/email/queue/process";
-      path: "/lovable/email/queue/process";
-      fullPath: "/lovable/email/queue/process";
-      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/monitoring/health": {
-      id: "/api/public/monitoring/health";
-      path: "/api/public/monitoring/health";
-      fullPath: "/api/public/monitoring/health";
-      preLoaderRoute: typeof ApiPublicMonitoringHealthRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/whatsapp-retry": {
-      id: "/api/public/hooks/whatsapp-retry";
-      path: "/api/public/hooks/whatsapp-retry";
-      fullPath: "/api/public/hooks/whatsapp-retry";
-      preLoaderRoute: typeof ApiPublicHooksWhatsappRetryRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/weekly-exec-report": {
-      id: "/api/public/hooks/weekly-exec-report";
-      path: "/api/public/hooks/weekly-exec-report";
-      fullPath: "/api/public/hooks/weekly-exec-report";
-      preLoaderRoute: typeof ApiPublicHooksWeeklyExecReportRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/weekly-ai-enrich": {
-      id: "/api/public/hooks/weekly-ai-enrich";
-      path: "/api/public/hooks/weekly-ai-enrich";
-      fullPath: "/api/public/hooks/weekly-ai-enrich";
-      preLoaderRoute: typeof ApiPublicHooksWeeklyAiEnrichRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/wa-stale-conversations": {
-      id: "/api/public/hooks/wa-stale-conversations";
-      path: "/api/public/hooks/wa-stale-conversations";
-      fullPath: "/api/public/hooks/wa-stale-conversations";
-      preLoaderRoute: typeof ApiPublicHooksWaStaleConversationsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/social-callback": {
-      id: "/api/public/hooks/social-callback";
-      path: "/api/public/hooks/social-callback";
-      fullPath: "/api/public/hooks/social-callback";
-      preLoaderRoute: typeof ApiPublicHooksSocialCallbackRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/rx-notify": {
-      id: "/api/public/hooks/rx-notify";
-      path: "/api/public/hooks/rx-notify";
-      fullPath: "/api/public/hooks/rx-notify";
-      preLoaderRoute: typeof ApiPublicHooksRxNotifyRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/rx-mirror": {
-      id: "/api/public/hooks/rx-mirror";
-      path: "/api/public/hooks/rx-mirror";
-      fullPath: "/api/public/hooks/rx-mirror";
-      preLoaderRoute: typeof ApiPublicHooksRxMirrorRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/run-social-posts": {
-      id: "/api/public/hooks/run-social-posts";
-      path: "/api/public/hooks/run-social-posts";
-      fullPath: "/api/public/hooks/run-social-posts";
-      preLoaderRoute: typeof ApiPublicHooksRunSocialPostsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/run-restock-alerts": {
-      id: "/api/public/hooks/run-restock-alerts";
-      path: "/api/public/hooks/run-restock-alerts";
-      fullPath: "/api/public/hooks/run-restock-alerts";
-      preLoaderRoute: typeof ApiPublicHooksRunRestockAlertsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/run-reactivation": {
-      id: "/api/public/hooks/run-reactivation";
-      path: "/api/public/hooks/run-reactivation";
-      fullPath: "/api/public/hooks/run-reactivation";
-      preLoaderRoute: typeof ApiPublicHooksRunReactivationRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/run-loyalty-reminder": {
-      id: "/api/public/hooks/run-loyalty-reminder";
-      path: "/api/public/hooks/run-loyalty-reminder";
-      fullPath: "/api/public/hooks/run-loyalty-reminder";
-      preLoaderRoute: typeof ApiPublicHooksRunLoyaltyReminderRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/retry-failed-posts": {
-      id: "/api/public/hooks/retry-failed-posts";
-      path: "/api/public/hooks/retry-failed-posts";
-      fullPath: "/api/public/hooks/retry-failed-posts";
-      preLoaderRoute: typeof ApiPublicHooksRetryFailedPostsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/prescription-extract": {
-      id: "/api/public/hooks/prescription-extract";
-      path: "/api/public/hooks/prescription-extract";
-      fullPath: "/api/public/hooks/prescription-extract";
-      preLoaderRoute: typeof ApiPublicHooksPrescriptionExtractRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/nightly-intel": {
-      id: "/api/public/hooks/nightly-intel";
-      path: "/api/public/hooks/nightly-intel";
-      fullPath: "/api/public/hooks/nightly-intel";
-      preLoaderRoute: typeof ApiPublicHooksNightlyIntelRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/event-consumer": {
-      id: "/api/public/hooks/event-consumer";
-      path: "/api/public/hooks/event-consumer";
-      fullPath: "/api/public/hooks/event-consumer";
-      preLoaderRoute: typeof ApiPublicHooksEventConsumerRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/dlq-alerts": {
-      id: "/api/public/hooks/dlq-alerts";
-      path: "/api/public/hooks/dlq-alerts";
-      fullPath: "/api/public/hooks/dlq-alerts";
-      preLoaderRoute: typeof ApiPublicHooksDlqAlertsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/customer-rx-notify": {
-      id: "/api/public/hooks/customer-rx-notify";
-      path: "/api/public/hooks/customer-rx-notify";
-      fullPath: "/api/public/hooks/customer-rx-notify";
-      preLoaderRoute: typeof ApiPublicHooksCustomerRxNotifyRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/collect-social-stats": {
-      id: "/api/public/hooks/collect-social-stats";
-      path: "/api/public/hooks/collect-social-stats";
-      fullPath: "/api/public/hooks/collect-social-stats";
-      preLoaderRoute: typeof ApiPublicHooksCollectSocialStatsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/chronic-refills": {
-      id: "/api/public/hooks/chronic-refills";
-      path: "/api/public/hooks/chronic-refills";
-      fullPath: "/api/public/hooks/chronic-refills";
-      preLoaderRoute: typeof ApiPublicHooksChronicRefillsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/alerts-worker": {
-      id: "/api/public/hooks/alerts-worker";
-      path: "/api/public/hooks/alerts-worker";
-      fullPath: "/api/public/hooks/alerts-worker";
-      preLoaderRoute: typeof ApiPublicHooksAlertsWorkerRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/agent-maintenance": {
-      id: "/api/public/hooks/agent-maintenance";
-      path: "/api/public/hooks/agent-maintenance";
-      fullPath: "/api/public/hooks/agent-maintenance";
-      preLoaderRoute: typeof ApiPublicHooksAgentMaintenanceRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/health/quick-check": {
-      id: "/api/public/health/quick-check";
-      path: "/quick-check";
-      fullPath: "/api/public/health/quick-check";
-      preLoaderRoute: typeof ApiPublicHealthQuickCheckRouteImport;
-      parentRoute: typeof ApiPublicHealthRoute;
-    };
-    "/api/public/health/full-check": {
-      id: "/api/public/health/full-check";
-      path: "/full-check";
-      fullPath: "/api/public/health/full-check";
-      preLoaderRoute: typeof ApiPublicHealthFullCheckRouteImport;
-      parentRoute: typeof ApiPublicHealthRoute;
-    };
-    "/api/public/hooks/agents/whatsapp": {
-      id: "/api/public/hooks/agents/whatsapp";
-      path: "/api/public/hooks/agents/whatsapp";
-      fullPath: "/api/public/hooks/agents/whatsapp";
-      preLoaderRoute: typeof ApiPublicHooksAgentsWhatsappRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/agents/sales": {
-      id: "/api/public/hooks/agents/sales";
-      path: "/api/public/hooks/agents/sales";
-      fullPath: "/api/public/hooks/agents/sales";
-      preLoaderRoute: typeof ApiPublicHooksAgentsSalesRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/agents/operations": {
-      id: "/api/public/hooks/agents/operations";
-      path: "/api/public/hooks/agents/operations";
-      fullPath: "/api/public/hooks/agents/operations";
-      preLoaderRoute: typeof ApiPublicHooksAgentsOperationsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/agents/marketing": {
-      id: "/api/public/hooks/agents/marketing";
-      path: "/api/public/hooks/agents/marketing";
-      fullPath: "/api/public/hooks/agents/marketing";
-      preLoaderRoute: typeof ApiPublicHooksAgentsMarketingRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/agents/inventory": {
-      id: "/api/public/hooks/agents/inventory";
-      path: "/api/public/hooks/agents/inventory";
-      fullPath: "/api/public/hooks/agents/inventory";
-      preLoaderRoute: typeof ApiPublicHooksAgentsInventoryRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/agents/cx": {
-      id: "/api/public/hooks/agents/cx";
-      path: "/api/public/hooks/agents/cx";
-      fullPath: "/api/public/hooks/agents/cx";
-      preLoaderRoute: typeof ApiPublicHooksAgentsCxRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/agents/cto": {
-      id: "/api/public/hooks/agents/cto";
-      path: "/api/public/hooks/agents/cto";
-      fullPath: "/api/public/hooks/agents/cto";
-      preLoaderRoute: typeof ApiPublicHooksAgentsCtoRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/agents/ceo": {
-      id: "/api/public/hooks/agents/ceo";
-      path: "/api/public/hooks/agents/ceo";
-      fullPath: "/api/public/hooks/agents/ceo";
-      preLoaderRoute: typeof ApiPublicHooksAgentsCeoRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/public/hooks/agents/bi": {
-      id: "/api/public/hooks/agents/bi";
-      path: "/api/public/hooks/agents/bi";
-      fullPath: "/api/public/hooks/agents/bi";
-      preLoaderRoute: typeof ApiPublicHooksAgentsBiRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+    '/yemen-debug': {
+      id: '/yemen-debug'
+      path: '/yemen-debug'
+      fullPath: '/yemen-debug'
+      preLoaderRoute: typeof YemenDebugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/unsubscribe': {
+      id: '/unsubscribe'
+      path: '/unsubscribe'
+      fullPath: '/unsubscribe'
+      preLoaderRoute: typeof UnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trust': {
+      id: '/trust'
+      path: '/trust'
+      fullPath: '/trust'
+      preLoaderRoute: typeof TrustRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/track': {
+      id: '/track'
+      path: '/track'
+      fullPath: '/track'
+      preLoaderRoute: typeof TrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/titans': {
+      id: '/titans'
+      path: '/titans'
+      fullPath: '/titans'
+      preLoaderRoute: typeof TitansRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/status': {
+      id: '/status'
+      path: '/status'
+      fullPath: '/status'
+      preLoaderRoute: typeof StatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/products': {
+      id: '/products'
+      path: '/products'
+      fullPath: '/products'
+      preLoaderRoute: typeof ProductsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/prescription': {
+      id: '/prescription'
+      path: '/prescription'
+      fullPath: '/prescription'
+      preLoaderRoute: typeof PrescriptionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/network-test': {
+      id: '/network-test'
+      path: '/network-test'
+      fullPath: '/network-test'
+      preLoaderRoute: typeof NetworkTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/network-health': {
+      id: '/network-health'
+      path: '/network-health'
+      fullPath: '/network-health'
+      preLoaderRoute: typeof NetworkHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-notifications': {
+      id: '/my-notifications'
+      path: '/my-notifications'
+      fullPath: '/my-notifications'
+      preLoaderRoute: typeof MyNotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/loyalty': {
+      id: '/loyalty'
+      path: '/loyalty'
+      fullPath: '/loyalty'
+      preLoaderRoute: typeof LoyaltyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/insurance': {
+      id: '/insurance'
+      path: '/insurance'
+      fullPath: '/insurance'
+      preLoaderRoute: typeof InsuranceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conditions': {
+      id: '/conditions'
+      path: '/conditions'
+      fullPath: '/conditions'
+      preLoaderRoute: typeof ConditionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cart': {
+      id: '/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof CartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bundles': {
+      id: '/bundles'
+      path: '/bundles'
+      fullPath: '/bundles'
+      preLoaderRoute: typeof BundlesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-symptoms': {
+      id: '/ai-symptoms'
+      path: '/ai-symptoms'
+      fullPath: '/ai-symptoms'
+      preLoaderRoute: typeof AiSymptomsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-supplement': {
+      id: '/ai-supplement'
+      path: '/ai-supplement'
+      fullPath: '/ai-supplement'
+      preLoaderRoute: typeof AiSupplementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-prescription': {
+      id: '/ai-prescription'
+      path: '/ai-prescription'
+      fullPath: '/ai-prescription'
+      preLoaderRoute: typeof AiPrescriptionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-pharmacist': {
+      id: '/ai-pharmacist'
+      path: '/ai-pharmacist'
+      fullPath: '/ai-pharmacist'
+      preLoaderRoute: typeof AiPharmacistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-assistant': {
+      id: '/ai-assistant'
+      path: '/ai-assistant'
+      fullPath: '/ai-assistant'
+      preLoaderRoute: typeof AiAssistantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-workforce': {
+      id: '/admin-workforce'
+      path: '/admin-workforce'
+      fullPath: '/admin-workforce'
+      preLoaderRoute: typeof AdminWorkforceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-whatsapp-delivery': {
+      id: '/admin-whatsapp-delivery'
+      path: '/admin-whatsapp-delivery'
+      fullPath: '/admin-whatsapp-delivery'
+      preLoaderRoute: typeof AdminWhatsappDeliveryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-whatsapp-conversations': {
+      id: '/admin-whatsapp-conversations'
+      path: '/admin-whatsapp-conversations'
+      fullPath: '/admin-whatsapp-conversations'
+      preLoaderRoute: typeof AdminWhatsappConversationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-trigger-failures': {
+      id: '/admin-trigger-failures'
+      path: '/admin-trigger-failures'
+      fullPath: '/admin-trigger-failures'
+      preLoaderRoute: typeof AdminTriggerFailuresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-transfers': {
+      id: '/admin-transfers'
+      path: '/admin-transfers'
+      fullPath: '/admin-transfers'
+      preLoaderRoute: typeof AdminTransfersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-stock-audit': {
+      id: '/admin-stock-audit'
+      path: '/admin-stock-audit'
+      fullPath: '/admin-stock-audit'
+      preLoaderRoute: typeof AdminStockAuditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-social-posts': {
+      id: '/admin-social-posts'
+      path: '/admin-social-posts'
+      fullPath: '/admin-social-posts'
+      preLoaderRoute: typeof AdminSocialPostsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-settings': {
+      id: '/admin-settings'
+      path: '/admin-settings'
+      fullPath: '/admin-settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-rx-review': {
+      id: '/admin-rx-review'
+      path: '/admin-rx-review'
+      fullPath: '/admin-rx-review'
+      preLoaderRoute: typeof AdminRxReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-rx-extraction-edit': {
+      id: '/admin-rx-extraction-edit'
+      path: '/admin-rx-extraction-edit'
+      fullPath: '/admin-rx-extraction-edit'
+      preLoaderRoute: typeof AdminRxExtractionEditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-rx-check': {
+      id: '/admin-rx-check'
+      path: '/admin-rx-check'
+      fullPath: '/admin-rx-check'
+      preLoaderRoute: typeof AdminRxCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-products': {
+      id: '/admin-products'
+      path: '/admin-products'
+      fullPath: '/admin-products'
+      preLoaderRoute: typeof AdminProductsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-product-gallery': {
+      id: '/admin-product-gallery'
+      path: '/admin-product-gallery'
+      fullPath: '/admin-product-gallery'
+      preLoaderRoute: typeof AdminProductGalleryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-pharmacy-recommendations': {
+      id: '/admin-pharmacy-recommendations'
+      path: '/admin-pharmacy-recommendations'
+      fullPath: '/admin-pharmacy-recommendations'
+      preLoaderRoute: typeof AdminPharmacyRecommendationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-offers': {
+      id: '/admin-offers'
+      path: '/admin-offers'
+      fullPath: '/admin-offers'
+      preLoaderRoute: typeof AdminOffersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-marketing': {
+      id: '/admin-marketing'
+      path: '/admin-marketing'
+      fullPath: '/admin-marketing'
+      preLoaderRoute: typeof AdminMarketingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-loyalty-dashboard': {
+      id: '/admin-loyalty-dashboard'
+      path: '/admin-loyalty-dashboard'
+      fullPath: '/admin-loyalty-dashboard'
+      preLoaderRoute: typeof AdminLoyaltyDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-logs': {
+      id: '/admin-logs'
+      path: '/admin-logs'
+      fullPath: '/admin-logs'
+      preLoaderRoute: typeof AdminLogsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-inventory-reservations': {
+      id: '/admin-inventory-reservations'
+      path: '/admin-inventory-reservations'
+      fullPath: '/admin-inventory-reservations'
+      preLoaderRoute: typeof AdminInventoryReservationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-inventory-duplicates': {
+      id: '/admin-inventory-duplicates'
+      path: '/admin-inventory-duplicates'
+      fullPath: '/admin-inventory-duplicates'
+      preLoaderRoute: typeof AdminInventoryDuplicatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-inventory': {
+      id: '/admin-inventory'
+      path: '/admin-inventory'
+      fullPath: '/admin-inventory'
+      preLoaderRoute: typeof AdminInventoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-hub': {
+      id: '/admin-hub'
+      path: '/admin-hub'
+      fullPath: '/admin-hub'
+      preLoaderRoute: typeof AdminHubRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-hmac-preflight': {
+      id: '/admin-hmac-preflight'
+      path: '/admin-hmac-preflight'
+      fullPath: '/admin-hmac-preflight'
+      preLoaderRoute: typeof AdminHmacPreflightRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-event-bus': {
+      id: '/admin-event-bus'
+      path: '/admin-event-bus'
+      fullPath: '/admin-event-bus'
+      preLoaderRoute: typeof AdminEventBusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-discounts': {
+      id: '/admin-discounts'
+      path: '/admin-discounts'
+      fullPath: '/admin-discounts'
+      preLoaderRoute: typeof AdminDiscountsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-diagnostics': {
+      id: '/admin-diagnostics'
+      path: '/admin-diagnostics'
+      fullPath: '/admin-diagnostics'
+      preLoaderRoute: typeof AdminDiagnosticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-cron-jobs': {
+      id: '/admin-cron-jobs'
+      path: '/admin-cron-jobs'
+      fullPath: '/admin-cron-jobs'
+      preLoaderRoute: typeof AdminCronJobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-cron-health': {
+      id: '/admin-cron-health'
+      path: '/admin-cron-health'
+      fullPath: '/admin-cron-health'
+      preLoaderRoute: typeof AdminCronHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-command': {
+      id: '/admin-command'
+      path: '/admin-command'
+      fullPath: '/admin-command'
+      preLoaderRoute: typeof AdminCommandRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-classifications': {
+      id: '/admin-classifications'
+      path: '/admin-classifications'
+      fullPath: '/admin-classifications'
+      preLoaderRoute: typeof AdminClassificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-campaigns': {
+      id: '/admin-campaigns'
+      path: '/admin-campaigns'
+      fullPath: '/admin-campaigns'
+      preLoaderRoute: typeof AdminCampaignsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-bundles': {
+      id: '/admin-bundles'
+      path: '/admin-bundles'
+      fullPath: '/admin-bundles'
+      preLoaderRoute: typeof AdminBundlesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-branches': {
+      id: '/admin-branches'
+      path: '/admin-branches'
+      fullPath: '/admin-branches'
+      preLoaderRoute: typeof AdminBranchesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-banners': {
+      id: '/admin-banners'
+      path: '/admin-banners'
+      fullPath: '/admin-banners'
+      preLoaderRoute: typeof AdminBannersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-backups': {
+      id: '/admin-backups'
+      path: '/admin-backups'
+      fullPath: '/admin-backups'
+      preLoaderRoute: typeof AdminBackupsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-automation-hub': {
+      id: '/admin-automation-hub'
+      path: '/admin-automation-hub'
+      fullPath: '/admin-automation-hub'
+      preLoaderRoute: typeof AdminAutomationHubRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-ai-whatsapp': {
+      id: '/admin-ai-whatsapp'
+      path: '/admin-ai-whatsapp'
+      fullPath: '/admin-ai-whatsapp'
+      preLoaderRoute: typeof AdminAiWhatsappRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-ai-sales-cx': {
+      id: '/admin-ai-sales-cx'
+      path: '/admin-ai-sales-cx'
+      fullPath: '/admin-ai-sales-cx'
+      preLoaderRoute: typeof AdminAiSalesCxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-ai-procurement': {
+      id: '/admin-ai-procurement'
+      path: '/admin-ai-procurement'
+      fullPath: '/admin-ai-procurement'
+      preLoaderRoute: typeof AdminAiProcurementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-ai-orchestrator': {
+      id: '/admin-ai-orchestrator'
+      path: '/admin-ai-orchestrator'
+      fullPath: '/admin-ai-orchestrator'
+      preLoaderRoute: typeof AdminAiOrchestratorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-ai-marketing': {
+      id: '/admin-ai-marketing'
+      path: '/admin-ai-marketing'
+      fullPath: '/admin-ai-marketing'
+      preLoaderRoute: typeof AdminAiMarketingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-ai-loyalty': {
+      id: '/admin-ai-loyalty'
+      path: '/admin-ai-loyalty'
+      fullPath: '/admin-ai-loyalty'
+      preLoaderRoute: typeof AdminAiLoyaltyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-ai-inventory': {
+      id: '/admin-ai-inventory'
+      path: '/admin-ai-inventory'
+      fullPath: '/admin-ai-inventory'
+      preLoaderRoute: typeof AdminAiInventoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-ai-extractions': {
+      id: '/admin-ai-extractions'
+      path: '/admin-ai-extractions'
+      fullPath: '/admin-ai-extractions'
+      preLoaderRoute: typeof AdminAiExtractionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-ai-extraction-failures': {
+      id: '/admin-ai-extraction-failures'
+      path: '/admin-ai-extraction-failures'
+      fullPath: '/admin-ai-extraction-failures'
+      preLoaderRoute: typeof AdminAiExtractionFailuresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-ai-executive-dashboard': {
+      id: '/admin-ai-executive-dashboard'
+      path: '/admin-ai-executive-dashboard'
+      fullPath: '/admin-ai-executive-dashboard'
+      preLoaderRoute: typeof AdminAiExecutiveDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-ai-executive': {
+      id: '/admin-ai-executive'
+      path: '/admin-ai-executive'
+      fullPath: '/admin-ai-executive'
+      preLoaderRoute: typeof AdminAiExecutiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-ai-excel-import': {
+      id: '/admin-ai-excel-import'
+      path: '/admin-ai-excel-import'
+      fullPath: '/admin-ai-excel-import'
+      preLoaderRoute: typeof AdminAiExcelImportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-ai-chronic-refill': {
+      id: '/admin-ai-chronic-refill'
+      path: '/admin-ai-chronic-refill'
+      fullPath: '/admin-ai-chronic-refill'
+      preLoaderRoute: typeof AdminAiChronicRefillRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-ai-catalog': {
+      id: '/admin-ai-catalog'
+      path: '/admin-ai-catalog'
+      fullPath: '/admin-ai-catalog'
+      preLoaderRoute: typeof AdminAiCatalogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-ai-approvals': {
+      id: '/admin-ai-approvals'
+      path: '/admin-ai-approvals'
+      fullPath: '/admin-ai-approvals'
+      preLoaderRoute: typeof AdminAiApprovalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-agents': {
+      id: '/admin-agents'
+      path: '/admin-agents'
+      fullPath: '/admin-agents'
+      preLoaderRoute: typeof AdminAgentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-agent-insights': {
+      id: '/admin-agent-insights'
+      path: '/admin-agent-insights'
+      fullPath: '/admin-agent-insights'
+      preLoaderRoute: typeof AdminAgentInsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test/features': {
+      id: '/test/features'
+      path: '/test/features'
+      fullPath: '/test/features'
+      preLoaderRoute: typeof TestFeaturesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/product/$id': {
+      id: '/product/$id'
+      path: '/product/$id'
+      fullPath: '/product/$id'
+      preLoaderRoute: typeof ProductIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/email/unsubscribe': {
+      id: '/email/unsubscribe'
+      path: '/email/unsubscribe'
+      fullPath: '/email/unsubscribe'
+      preLoaderRoute: typeof EmailUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conditions/$slug': {
+      id: '/conditions/$slug'
+      path: '/$slug'
+      fullPath: '/conditions/$slug'
+      preLoaderRoute: typeof ConditionsSlugRouteImport
+      parentRoute: typeof ConditionsRoute
+    }
+    '/_authenticated/upload-prescription': {
+      id: '/_authenticated/upload-prescription'
+      path: '/upload-prescription'
+      fullPath: '/upload-prescription'
+      preLoaderRoute: typeof AuthenticatedUploadPrescriptionRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin-upload-inventory': {
+      id: '/_authenticated/admin-upload-inventory'
+      path: '/admin-upload-inventory'
+      fullPath: '/admin-upload-inventory'
+      preLoaderRoute: typeof AuthenticatedAdminUploadInventoryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin-system-health': {
+      id: '/_authenticated/admin-system-health'
+      path: '/admin-system-health'
+      fullPath: '/admin-system-health'
+      preLoaderRoute: typeof AuthenticatedAdminSystemHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin-sales-reports': {
+      id: '/_authenticated/admin-sales-reports'
+      path: '/admin-sales-reports'
+      fullPath: '/admin-sales-reports'
+      preLoaderRoute: typeof AuthenticatedAdminSalesReportsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin-marketing-campaigns': {
+      id: '/_authenticated/admin-marketing-campaigns'
+      path: '/admin-marketing-campaigns'
+      fullPath: '/admin-marketing-campaigns'
+      preLoaderRoute: typeof AuthenticatedAdminMarketingCampaignsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin-inventory-sync-logs': {
+      id: '/_authenticated/admin-inventory-sync-logs'
+      path: '/admin-inventory-sync-logs'
+      fullPath: '/admin-inventory-sync-logs'
+      preLoaderRoute: typeof AuthenticatedAdminInventorySyncLogsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin-health': {
+      id: '/_authenticated/admin-health'
+      path: '/admin-health'
+      fullPath: '/admin-health'
+      preLoaderRoute: typeof AuthenticatedAdminHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin-dashboard': {
+      id: '/_authenticated/admin-dashboard'
+      path: '/admin-dashboard'
+      fullPath: '/admin-dashboard'
+      preLoaderRoute: typeof AuthenticatedAdminDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/lovable/email/suppression': {
+      id: '/lovable/email/suppression'
+      path: '/lovable/email/suppression'
+      fullPath: '/lovable/email/suppression'
+      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/whatsapp-webhook': {
+      id: '/api/public/whatsapp-webhook'
+      path: '/api/public/whatsapp-webhook'
+      fullPath: '/api/public/whatsapp-webhook'
+      preLoaderRoute: typeof ApiPublicWhatsappWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/uptime-webhook': {
+      id: '/api/public/uptime-webhook'
+      path: '/api/public/uptime-webhook'
+      fullPath: '/api/public/uptime-webhook'
+      preLoaderRoute: typeof ApiPublicUptimeWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/log-error': {
+      id: '/api/public/log-error'
+      path: '/api/public/log-error'
+      fullPath: '/api/public/log-error'
+      preLoaderRoute: typeof ApiPublicLogErrorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/incident-check': {
+      id: '/api/public/incident-check'
+      path: '/api/public/incident-check'
+      fullPath: '/api/public/incident-check'
+      preLoaderRoute: typeof ApiPublicIncidentCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/img': {
+      id: '/api/public/img'
+      path: '/api/public/img'
+      fullPath: '/api/public/img'
+      preLoaderRoute: typeof ApiPublicImgRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/health': {
+      id: '/api/public/health'
+      path: '/api/public/health'
+      fullPath: '/api/public/health'
+      preLoaderRoute: typeof ApiPublicHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/contact': {
+      id: '/api/public/contact'
+      path: '/api/public/contact'
+      fullPath: '/api/public/contact'
+      preLoaderRoute: typeof ApiPublicContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/internal/collect-feedback': {
+      id: '/api/internal/collect-feedback'
+      path: '/api/internal/collect-feedback'
+      fullPath: '/api/internal/collect-feedback'
+      preLoaderRoute: typeof ApiInternalCollectFeedbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/pharmacist/dashboard': {
+      id: '/_authenticated/pharmacist/dashboard'
+      path: '/pharmacist/dashboard'
+      fullPath: '/pharmacist/dashboard'
+      preLoaderRoute: typeof AuthenticatedPharmacistDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/lovable/email/transactional/send': {
+      id: '/lovable/email/transactional/send'
+      path: '/lovable/email/transactional/send'
+      fullPath: '/lovable/email/transactional/send'
+      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/webhook': {
+      id: '/lovable/email/auth/webhook'
+      path: '/lovable/email/auth/webhook'
+      fullPath: '/lovable/email/auth/webhook'
+      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/preview': {
+      id: '/lovable/email/auth/preview'
+      path: '/lovable/email/auth/preview'
+      fullPath: '/lovable/email/auth/preview'
+      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/monitoring/health': {
+      id: '/api/public/monitoring/health'
+      path: '/api/public/monitoring/health'
+      fullPath: '/api/public/monitoring/health'
+      preLoaderRoute: typeof ApiPublicMonitoringHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/whatsapp-retry': {
+      id: '/api/public/hooks/whatsapp-retry'
+      path: '/api/public/hooks/whatsapp-retry'
+      fullPath: '/api/public/hooks/whatsapp-retry'
+      preLoaderRoute: typeof ApiPublicHooksWhatsappRetryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/weekly-exec-report': {
+      id: '/api/public/hooks/weekly-exec-report'
+      path: '/api/public/hooks/weekly-exec-report'
+      fullPath: '/api/public/hooks/weekly-exec-report'
+      preLoaderRoute: typeof ApiPublicHooksWeeklyExecReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/weekly-ai-enrich': {
+      id: '/api/public/hooks/weekly-ai-enrich'
+      path: '/api/public/hooks/weekly-ai-enrich'
+      fullPath: '/api/public/hooks/weekly-ai-enrich'
+      preLoaderRoute: typeof ApiPublicHooksWeeklyAiEnrichRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/wa-stale-conversations': {
+      id: '/api/public/hooks/wa-stale-conversations'
+      path: '/api/public/hooks/wa-stale-conversations'
+      fullPath: '/api/public/hooks/wa-stale-conversations'
+      preLoaderRoute: typeof ApiPublicHooksWaStaleConversationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/social-callback': {
+      id: '/api/public/hooks/social-callback'
+      path: '/api/public/hooks/social-callback'
+      fullPath: '/api/public/hooks/social-callback'
+      preLoaderRoute: typeof ApiPublicHooksSocialCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/rx-notify': {
+      id: '/api/public/hooks/rx-notify'
+      path: '/api/public/hooks/rx-notify'
+      fullPath: '/api/public/hooks/rx-notify'
+      preLoaderRoute: typeof ApiPublicHooksRxNotifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/rx-mirror': {
+      id: '/api/public/hooks/rx-mirror'
+      path: '/api/public/hooks/rx-mirror'
+      fullPath: '/api/public/hooks/rx-mirror'
+      preLoaderRoute: typeof ApiPublicHooksRxMirrorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/run-social-posts': {
+      id: '/api/public/hooks/run-social-posts'
+      path: '/api/public/hooks/run-social-posts'
+      fullPath: '/api/public/hooks/run-social-posts'
+      preLoaderRoute: typeof ApiPublicHooksRunSocialPostsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/run-restock-alerts': {
+      id: '/api/public/hooks/run-restock-alerts'
+      path: '/api/public/hooks/run-restock-alerts'
+      fullPath: '/api/public/hooks/run-restock-alerts'
+      preLoaderRoute: typeof ApiPublicHooksRunRestockAlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/run-reactivation': {
+      id: '/api/public/hooks/run-reactivation'
+      path: '/api/public/hooks/run-reactivation'
+      fullPath: '/api/public/hooks/run-reactivation'
+      preLoaderRoute: typeof ApiPublicHooksRunReactivationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/run-loyalty-reminder': {
+      id: '/api/public/hooks/run-loyalty-reminder'
+      path: '/api/public/hooks/run-loyalty-reminder'
+      fullPath: '/api/public/hooks/run-loyalty-reminder'
+      preLoaderRoute: typeof ApiPublicHooksRunLoyaltyReminderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/retry-failed-posts': {
+      id: '/api/public/hooks/retry-failed-posts'
+      path: '/api/public/hooks/retry-failed-posts'
+      fullPath: '/api/public/hooks/retry-failed-posts'
+      preLoaderRoute: typeof ApiPublicHooksRetryFailedPostsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/prescription-extract': {
+      id: '/api/public/hooks/prescription-extract'
+      path: '/api/public/hooks/prescription-extract'
+      fullPath: '/api/public/hooks/prescription-extract'
+      preLoaderRoute: typeof ApiPublicHooksPrescriptionExtractRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/nightly-intel': {
+      id: '/api/public/hooks/nightly-intel'
+      path: '/api/public/hooks/nightly-intel'
+      fullPath: '/api/public/hooks/nightly-intel'
+      preLoaderRoute: typeof ApiPublicHooksNightlyIntelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/event-consumer': {
+      id: '/api/public/hooks/event-consumer'
+      path: '/api/public/hooks/event-consumer'
+      fullPath: '/api/public/hooks/event-consumer'
+      preLoaderRoute: typeof ApiPublicHooksEventConsumerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/dlq-alerts': {
+      id: '/api/public/hooks/dlq-alerts'
+      path: '/api/public/hooks/dlq-alerts'
+      fullPath: '/api/public/hooks/dlq-alerts'
+      preLoaderRoute: typeof ApiPublicHooksDlqAlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/customer-rx-notify': {
+      id: '/api/public/hooks/customer-rx-notify'
+      path: '/api/public/hooks/customer-rx-notify'
+      fullPath: '/api/public/hooks/customer-rx-notify'
+      preLoaderRoute: typeof ApiPublicHooksCustomerRxNotifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/collect-social-stats': {
+      id: '/api/public/hooks/collect-social-stats'
+      path: '/api/public/hooks/collect-social-stats'
+      fullPath: '/api/public/hooks/collect-social-stats'
+      preLoaderRoute: typeof ApiPublicHooksCollectSocialStatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/chronic-refills': {
+      id: '/api/public/hooks/chronic-refills'
+      path: '/api/public/hooks/chronic-refills'
+      fullPath: '/api/public/hooks/chronic-refills'
+      preLoaderRoute: typeof ApiPublicHooksChronicRefillsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/alerts-worker': {
+      id: '/api/public/hooks/alerts-worker'
+      path: '/api/public/hooks/alerts-worker'
+      fullPath: '/api/public/hooks/alerts-worker'
+      preLoaderRoute: typeof ApiPublicHooksAlertsWorkerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/agent-maintenance': {
+      id: '/api/public/hooks/agent-maintenance'
+      path: '/api/public/hooks/agent-maintenance'
+      fullPath: '/api/public/hooks/agent-maintenance'
+      preLoaderRoute: typeof ApiPublicHooksAgentMaintenanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/health/quick-check': {
+      id: '/api/public/health/quick-check'
+      path: '/quick-check'
+      fullPath: '/api/public/health/quick-check'
+      preLoaderRoute: typeof ApiPublicHealthQuickCheckRouteImport
+      parentRoute: typeof ApiPublicHealthRoute
+    }
+    '/api/public/health/full-check': {
+      id: '/api/public/health/full-check'
+      path: '/full-check'
+      fullPath: '/api/public/health/full-check'
+      preLoaderRoute: typeof ApiPublicHealthFullCheckRouteImport
+      parentRoute: typeof ApiPublicHealthRoute
+    }
+    '/api/public/hooks/agents/whatsapp': {
+      id: '/api/public/hooks/agents/whatsapp'
+      path: '/api/public/hooks/agents/whatsapp'
+      fullPath: '/api/public/hooks/agents/whatsapp'
+      preLoaderRoute: typeof ApiPublicHooksAgentsWhatsappRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/agents/sales': {
+      id: '/api/public/hooks/agents/sales'
+      path: '/api/public/hooks/agents/sales'
+      fullPath: '/api/public/hooks/agents/sales'
+      preLoaderRoute: typeof ApiPublicHooksAgentsSalesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/agents/operations': {
+      id: '/api/public/hooks/agents/operations'
+      path: '/api/public/hooks/agents/operations'
+      fullPath: '/api/public/hooks/agents/operations'
+      preLoaderRoute: typeof ApiPublicHooksAgentsOperationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/agents/marketing': {
+      id: '/api/public/hooks/agents/marketing'
+      path: '/api/public/hooks/agents/marketing'
+      fullPath: '/api/public/hooks/agents/marketing'
+      preLoaderRoute: typeof ApiPublicHooksAgentsMarketingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/agents/inventory': {
+      id: '/api/public/hooks/agents/inventory'
+      path: '/api/public/hooks/agents/inventory'
+      fullPath: '/api/public/hooks/agents/inventory'
+      preLoaderRoute: typeof ApiPublicHooksAgentsInventoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/agents/cx': {
+      id: '/api/public/hooks/agents/cx'
+      path: '/api/public/hooks/agents/cx'
+      fullPath: '/api/public/hooks/agents/cx'
+      preLoaderRoute: typeof ApiPublicHooksAgentsCxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/agents/cto': {
+      id: '/api/public/hooks/agents/cto'
+      path: '/api/public/hooks/agents/cto'
+      fullPath: '/api/public/hooks/agents/cto'
+      preLoaderRoute: typeof ApiPublicHooksAgentsCtoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/agents/ceo': {
+      id: '/api/public/hooks/agents/ceo'
+      path: '/api/public/hooks/agents/ceo'
+      fullPath: '/api/public/hooks/agents/ceo'
+      preLoaderRoute: typeof ApiPublicHooksAgentsCeoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/agents/bi': {
+      id: '/api/public/hooks/agents/bi'
+      path: '/api/public/hooks/agents/bi'
+      fullPath: '/api/public/hooks/agents/bi'
+      preLoaderRoute: typeof ApiPublicHooksAgentsBiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute;
-  AuthenticatedAdminHealthRoute: typeof AuthenticatedAdminHealthRoute;
-  AuthenticatedAdminInventorySyncLogsRoute: typeof AuthenticatedAdminInventorySyncLogsRoute;
-  AuthenticatedAdminMarketingCampaignsRoute: typeof AuthenticatedAdminMarketingCampaignsRoute;
-  AuthenticatedAdminSalesReportsRoute: typeof AuthenticatedAdminSalesReportsRoute;
-  AuthenticatedAdminSystemHealthRoute: typeof AuthenticatedAdminSystemHealthRoute;
-  AuthenticatedAdminUploadInventoryRoute: typeof AuthenticatedAdminUploadInventoryRoute;
-  AuthenticatedPharmacistDashboardRoute: typeof AuthenticatedPharmacistDashboardRoute;
-  AuthenticatedUploadPrescriptionRoute: typeof AuthenticatedUploadPrescriptionRoute;
+  AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
+  AuthenticatedAdminHealthRoute: typeof AuthenticatedAdminHealthRoute
+  AuthenticatedAdminInventorySyncLogsRoute: typeof AuthenticatedAdminInventorySyncLogsRoute
+  AuthenticatedAdminMarketingCampaignsRoute: typeof AuthenticatedAdminMarketingCampaignsRoute
+  AuthenticatedAdminSalesReportsRoute: typeof AuthenticatedAdminSalesReportsRoute
+  AuthenticatedAdminSystemHealthRoute: typeof AuthenticatedAdminSystemHealthRoute
+  AuthenticatedAdminUploadInventoryRoute: typeof AuthenticatedAdminUploadInventoryRoute
+  AuthenticatedUploadPrescriptionRoute: typeof AuthenticatedUploadPrescriptionRoute
+  AuthenticatedPharmacistDashboardRoute: typeof AuthenticatedPharmacistDashboardRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
   AuthenticatedAdminHealthRoute: AuthenticatedAdminHealthRoute,
-  AuthenticatedAdminInventorySyncLogsRoute: AuthenticatedAdminInventorySyncLogsRoute,
-  AuthenticatedAdminMarketingCampaignsRoute: AuthenticatedAdminMarketingCampaignsRoute,
+  AuthenticatedAdminInventorySyncLogsRoute:
+    AuthenticatedAdminInventorySyncLogsRoute,
+  AuthenticatedAdminMarketingCampaignsRoute:
+    AuthenticatedAdminMarketingCampaignsRoute,
   AuthenticatedAdminSalesReportsRoute: AuthenticatedAdminSalesReportsRoute,
   AuthenticatedAdminSystemHealthRoute: AuthenticatedAdminSystemHealthRoute,
-  AuthenticatedAdminUploadInventoryRoute: AuthenticatedAdminUploadInventoryRoute,
-  AuthenticatedPharmacistDashboardRoute: AuthenticatedPharmacistDashboardRoute,
+  AuthenticatedAdminUploadInventoryRoute:
+    AuthenticatedAdminUploadInventoryRoute,
   AuthenticatedUploadPrescriptionRoute: AuthenticatedUploadPrescriptionRoute,
-};
+  AuthenticatedPharmacistDashboardRoute: AuthenticatedPharmacistDashboardRoute,
+}
 
-const AuthenticatedRouteRouteWithChildren = AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren);
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface ConditionsRouteChildren {
-  ConditionsSlugRoute: typeof ConditionsSlugRoute;
+  ConditionsSlugRoute: typeof ConditionsSlugRoute
 }
 
 const ConditionsRouteChildren: ConditionsRouteChildren = {
   ConditionsSlugRoute: ConditionsSlugRoute,
-};
+}
 
-const ConditionsRouteWithChildren = ConditionsRoute._addFileChildren(ConditionsRouteChildren);
+const ConditionsRouteWithChildren = ConditionsRoute._addFileChildren(
+  ConditionsRouteChildren,
+)
 
 interface ApiPublicHealthRouteChildren {
-  ApiPublicHealthFullCheckRoute: typeof ApiPublicHealthFullCheckRoute;
-  ApiPublicHealthQuickCheckRoute: typeof ApiPublicHealthQuickCheckRoute;
+  ApiPublicHealthFullCheckRoute: typeof ApiPublicHealthFullCheckRoute
+  ApiPublicHealthQuickCheckRoute: typeof ApiPublicHealthQuickCheckRoute
 }
 
 const ApiPublicHealthRouteChildren: ApiPublicHealthRouteChildren = {
   ApiPublicHealthFullCheckRoute: ApiPublicHealthFullCheckRoute,
   ApiPublicHealthQuickCheckRoute: ApiPublicHealthQuickCheckRoute,
-};
+}
 
-const ApiPublicHealthRouteWithChildren = ApiPublicHealthRoute._addFileChildren(ApiPublicHealthRouteChildren);
+const ApiPublicHealthRouteWithChildren = ApiPublicHealthRoute._addFileChildren(
+  ApiPublicHealthRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -2871,6 +3005,7 @@ const rootRouteChildren: RootRouteChildren = {
   BundlesRoute: BundlesRoute,
   CartRoute: CartRoute,
   ConditionsRoute: ConditionsRouteWithChildren,
+  ContactRoute: ContactRoute,
   InsuranceRoute: InsuranceRoute,
   LoyaltyRoute: LoyaltyRoute,
   MyNotificationsRoute: MyNotificationsRoute,
@@ -2891,6 +3026,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProductIdRoute: ProductIdRoute,
   TestFeaturesRoute: TestFeaturesRoute,
   ApiInternalCollectFeedbackRoute: ApiInternalCollectFeedbackRoute,
+  ApiPublicContactRoute: ApiPublicContactRoute,
   ApiPublicHealthRoute: ApiPublicHealthRouteWithChildren,
   ApiPublicImgRoute: ApiPublicImgRoute,
   ApiPublicIncidentCheckRoute: ApiPublicIncidentCheckRoute,
@@ -2906,7 +3042,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksDlqAlertsRoute: ApiPublicHooksDlqAlertsRoute,
   ApiPublicHooksEventConsumerRoute: ApiPublicHooksEventConsumerRoute,
   ApiPublicHooksNightlyIntelRoute: ApiPublicHooksNightlyIntelRoute,
-  ApiPublicHooksPrescriptionExtractRoute: ApiPublicHooksPrescriptionExtractRoute,
+  ApiPublicHooksPrescriptionExtractRoute:
+    ApiPublicHooksPrescriptionExtractRoute,
   ApiPublicHooksRetryFailedPostsRoute: ApiPublicHooksRetryFailedPostsRoute,
   ApiPublicHooksRunLoyaltyReminderRoute: ApiPublicHooksRunLoyaltyReminderRoute,
   ApiPublicHooksRunReactivationRoute: ApiPublicHooksRunReactivationRoute,
@@ -2915,11 +3052,14 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksRxMirrorRoute: ApiPublicHooksRxMirrorRoute,
   ApiPublicHooksRxNotifyRoute: ApiPublicHooksRxNotifyRoute,
   ApiPublicHooksSocialCallbackRoute: ApiPublicHooksSocialCallbackRoute,
-  ApiPublicHooksWaStaleConversationsRoute: ApiPublicHooksWaStaleConversationsRoute,
+  ApiPublicHooksWaStaleConversationsRoute:
+    ApiPublicHooksWaStaleConversationsRoute,
   ApiPublicHooksWeeklyAiEnrichRoute: ApiPublicHooksWeeklyAiEnrichRoute,
   ApiPublicHooksWeeklyExecReportRoute: ApiPublicHooksWeeklyExecReportRoute,
   ApiPublicHooksWhatsappRetryRoute: ApiPublicHooksWhatsappRetryRoute,
   ApiPublicMonitoringHealthRoute: ApiPublicMonitoringHealthRoute,
+  LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
+  LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
@@ -2932,15 +3072,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksAgentsOperationsRoute: ApiPublicHooksAgentsOperationsRoute,
   ApiPublicHooksAgentsSalesRoute: ApiPublicHooksAgentsSalesRoute,
   ApiPublicHooksAgentsWhatsappRoute: ApiPublicHooksAgentsWhatsappRoute,
-};
-export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)._addFileTypes<FileRouteTypes>();
-
-import type { getRouter } from "./router.tsx";
-import type { startInstance } from "./start.ts";
-declare module "@tanstack/react-start" {
-  interface Register {
-    ssr: true;
-    router: Awaited<ReturnType<typeof getRouter>>;
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>;
-  }
 }
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
