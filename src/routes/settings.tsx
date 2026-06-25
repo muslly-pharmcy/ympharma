@@ -114,25 +114,54 @@ function SettingsPage() {
 
       <div className="space-y-4">
         <Section icon={<Sparkles className="h-5 w-5" />} title="شعار العلامة" desc="عاين وبدّل بين الشعار الكلاسيكي والنسخة الذهبية الفاخرة">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div className="inline-flex rounded-md border border-input bg-background p-0.5 text-xs">
+              {(["sm", "md", "lg"] as const).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setPreviewSize(s)}
+                  className={`rounded px-2.5 py-1 transition-colors ${
+                    previewSize === s ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent"
+                  }`}
+                  aria-pressed={previewSize === s}
+                >
+                  {s === "sm" ? "Small" : s === "md" ? "Medium" : "Large"}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={resetVariant}
+              disabled={logoIsDefault}
+              className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-2.5 py-1 text-xs hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+              title="إعادة الضبط للوضع الافتراضي"
+            >
+              <RotateCcw className="h-3.5 w-3.5" /> إعادة ضبط
+            </button>
+          </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <LogoPreview
-              src={classicLogo}
+              src={classicUrl}
               label="الكلاسيكي"
               active={logoVariant === "classic"}
               onClick={() => setVariant("classic")}
+              size={previewSize}
             />
             <LogoPreview
-              src={goldenLogoAsset.url}
+              src={goldenUrl}
               label="الذهبي"
               active={logoVariant === "golden"}
               onClick={() => setVariant("golden")}
+              size={previewSize}
               dark
             />
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            التفضيل يُحفظ على هذا الجهاز ويُطبَّق فوراً على رأس الموقع.
+            التفضيل يُحفظ على هذا الجهاز ويُطبَّق فوراً على رأس الموقع وذيله والصفحة الرئيسية بدون إعادة تحميل.
           </p>
         </Section>
+
 
         <Section icon={<Globe className="h-5 w-5" />} title="اللغة" desc="اختر لغة الواجهة">
           <div className="flex gap-2">
