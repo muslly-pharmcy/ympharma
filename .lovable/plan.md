@@ -1,94 +1,28 @@
-## Titans UI — تكامل كامل مع عزل ستايل
+## الخطة
 
-نقل أقسام Titans إلى `sections/`، تثبيت حزمة `motion`، إضافة `titans/ui/Button` مخصص، وعزل ستايلات Titans في scope محدود حتى لا تكسر باقي الموقع.
+### 1) تشخيص 503 (proxy-worker2)
+أخطاء 503 صادرة من طبقة Cloudflare proxy للموقع المنشور، ليست من كودك. الإجراء:
+- **أنت** تضغط "Publish" / "Redeploy" من Lovable لإعادة نشر الـ Worker.
+- بعدها أتحقق بـ `curl` من `/api/public/health` و `/api/public/hooks/prescription-extract` وأقرأ worker logs لتأكيد الحل.
+- إن استمر الخطأ، أفحص `supabase--cloud_status` + `supabase--db_health` + سجلات الـ worker لتحديد ما إذا كان السبب DB أو bundle init.
 
-### 1. التبعيات
-```bash
-bun add motion react-intersection-observer
-```
-- `lucide-react` و `framer-motion` مثبتان مسبقاً (نتركهما).
-- `motion` (v11+ rebrand) يُستخدم للاستيرادات الجديدة، و `framer-motion` يبقى لباقي الموقع.
+### 2) تطبيق توصيات التدقيق (Section C)
+- **تعريف `titans-stars-bg`**: التحقق من `src/styles.css` — مذكور في الذاكرة أنه مُضاف فعلاً ضمن `.titans-scope`، سأتأكد وأضيفه فقط إن كان ناقصاً.
+- **`prefers-reduced-motion` في `ParticleBackground`**: إضافة فحص `window.matchMedia("(prefers-reduced-motion: reduce)")` للخروج مبكراً.
+- **endpoint اختياري للنموذج**: إنشاء `src/routes/api/public/contact.ts` يستقبل POST، يتحقق بـ Zod، ويخزّن في جدول جديد `contact_messages` (مع RLS + GRANTs)، ثم تحديث `src/routes/contact.tsx` لإرساله للـ endpoint بدل `mailto` فقط (مع fallback).
 
-### 2. نقل الملفات إلى `sections/`
-```
-src/components/titans/
-├── ui/
-│   ├── Button.tsx          (جديد — مخصص لـ titans)
-│   ├── GlassCard.tsx       (موجود — يبقى)
-│   ├── GoldenBorder.tsx    (موجود — يبقى)
-│   └── GradientText.tsx    (موجود — يبقى)
-├── motion/
-│   ├── Reveal.tsx          (موجود — يبقى)
-│   ├── CursorFollower.tsx  (جديد)
-│   ├── CountUp.tsx         (جديد)
-│   └── ParticleBackground.tsx (جديد)
-└── sections/
-    ├── HeroTitans.tsx           (نقل من titans/HeroTitans.tsx)
-    ├── FeaturesTitans.tsx       (نقل)
-    ├── TestimonialsTitans.tsx   (نقل + نسخة محسّنة بنجوم)
-    ├── PricingTitans.tsx        (نقل)
-    └── FooterTitans.tsx         (نقل)
-```
-أحذف الملفات القديمة في `titans/` (المستوى الأعلى) بعد النقل.
+### 3) شعار المصلي الجديد (الذهبي)
+الصور المرفقة هي شعار. هل تريد:
+- (أ) استبدال اللوجو الحالي في الـ header بالنسخة الذهبية الجديدة؟ أم
+- (ب) تركها كمرجع فقط؟
 
-### 3. تكييف الكود
-لكل ملف جديد/منقول:
-- إزالة `'use client'` (نمط Next.js — لا حاجة في TanStack Start).
-- استبدال JSX المفقود في البلوبرنت (الأكواد المنشورة بها JSX مقطوع — أعيد بناء البنية الكاملة).
-- استخدام `motion` package import مباشرة (مثبتة).
-- `Button` الجديد يُستخدم فقط داخل أقسام titans، باقي الموقع يستخدم shadcn.
+أحتاج تأكيدك قبل لمس الـ branding.
 
-### 4. عزل ستايلات Titans (CRITICAL)
-**لن** نلمس `src/styles.css` بنظام ألوان dark عالمي. بدلاً من ذلك:
-- أُضيف utilities وtokens خاصة بـ titans داخل `src/styles.css` تحت `@utility` بأسماء مثل:
-  - `.titans-scope` — يفرض dark background + font + smoothing على الأطفال.
-  - `.stars-bg`, `.glow-gold` — كما في البلوبرنت لكن scoped.
-- ألوان Titans (`--titans-gold`, `--titans-purple`, `--titans-red`, `--titans-blue`) موجودة كـ tokens فقط، تُستخدم عبر `bg-[var(--titans-gold)]`.
-- صفحة `/titans` تلف كل المحتوى بـ `<main className="titans-scope">` لتطبيق الـ dark theme محلياً فقط.
+### تفاصيل تقنية
+- جدول `contact_messages(id, name, email, message, created_at)` — RLS مفعّل، INSERT للجميع (anon+authenticated)، SELECT للأدمن فقط عبر `has_role`.
+- لن أعدّل `src/integrations/supabase/*` ولا `supabase/config.toml`.
+- لن أكتب workaround للـ 503 في كود التطبيق — السبب بنية تحتية، الحل redeploy.
 
-### 5. تحديث Route
-`src/routes/titans.tsx`:
-```tsx
-import { HeroTitans } from "@/components/titans/sections/HeroTitans";
-// ...
-function TitansLanding() {
-  return (
-    <main className="titans-scope min-h-screen">
-      <HeroTitans />
-      <FeaturesTitans />
-      <TestimonialsTitans />
-      <PricingTitans />
-      <FooterTitans />
-    </main>
-  );
-}
-```
-وأُضيف `head()` بـ meta عربية للـ SEO.
-
-### 6. تحديث الاستيرادات الأخرى
-- `src/routes/_authenticated/pharmacist/dashboard.tsx` يستورد `GlassCard`/`GradientText`/`Reveal` من المسارات الحالية (`titans/ui/...` و`titans/motion/...`) — هذه لا تتغير، فلا حاجة لتعديل.
-- لا يوجد كود آخر يستورد من `titans/HeroTitans` ... إلخ خارج `routes/titans.tsx` (تحققت).
-
-### تفاصيل تقنية (للمراجعة)
-
-**لماذا لا نطبق globals.css كما هو:**
-البلوبرنت يحتوي:
-```css
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { background-color: #0a0a0b; color: #f8fafc; }
-::-webkit-scrollbar { ... gold }
-```
-هذا يكسر:
-- كل صفحات Admin (~55 صفحة) المبنية على light/dark tokens الحالية.
-- pharmacist dashboard.
-- shadcn components التي تعتمد على `--background`, `--foreground` الموجودة.
-
-**Reveal:** الموجود حالياً يستخدم `framer-motion` + `useInView` من `react-intersection-observer`. سأبقيه ويعمل مع نسخة motion الجديدة لأن motion@11 = framer-motion rebrand (نفس الـ API).
-
-**Button conflict:** `titans/ui/Button` ≠ `ui/button`. لا تعارض لأن المسارات مختلفة. Capitalization في الاستيراد تطابق اسم الملف (`Button.tsx`).
-
-### الملفات النهائية المتأثرة
-- إنشاء: `titans/ui/Button.tsx`, `titans/motion/CursorFollower.tsx`, `titans/motion/CountUp.tsx`, `titans/motion/ParticleBackground.tsx`, `titans/sections/*.tsx` (5 ملفات)
-- حذف: `titans/HeroTitans.tsx`, `titans/FeaturesTitans.tsx`, `titans/TestimonialsTitans.tsx`, `titans/PricingTitans.tsx`, `titans/FooterTitans.tsx`
-- تعديل: `src/routes/titans.tsx`, `src/styles.css` (إضافة `.titans-scope` + utilities فقط)
-- `package.json`: + motion, + react-intersection-observer
+### أسئلة قبل التنفيذ
+1. اللوجو الذهبي الجديد: استبدال في الـ header، أم مرجع فقط؟
+2. endpoint التواصل: تخزين DB + بريد، أم DB فقط؟
