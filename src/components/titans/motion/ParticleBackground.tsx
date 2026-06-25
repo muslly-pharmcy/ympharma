@@ -23,6 +23,13 @@ export function ParticleBackground({
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+    // Respect user motion preferences — skip animation entirely.
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
 
     const dpr = window.devicePixelRatio || 1;
     const resize = () => {
