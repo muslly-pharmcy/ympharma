@@ -16,10 +16,8 @@ const RejectInput = z.object({
   reason: z.string().min(1).max(2000),
 });
 
-async function assertAdminOrOwner(
-  supabase: { rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown }> },
-  userId: string,
-) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function assertAdminOrOwner(supabase: any, userId: string) {
   const [{ data: isAdmin }, { data: isOwner }] = await Promise.all([
     supabase.rpc("has_role", { _user_id: userId, _role: "admin" }),
     supabase.rpc("has_role", { _user_id: userId, _role: "owner" }),

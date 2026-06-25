@@ -13,6 +13,7 @@ import { Route as YemenDebugRouteImport } from './routes/yemen-debug'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TrustRouteImport } from './routes/trust'
 import { Route as TrackRouteImport } from './routes/track'
+import { Route as TitansRouteImport } from './routes/titans'
 import { Route as StatusRouteImport } from './routes/status'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SettingsRouteImport } from './routes/settings'
@@ -93,6 +94,7 @@ import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
 import { Route as AuthenticatedUploadPrescriptionRouteImport } from './routes/_authenticated/upload-prescription'
+import { Route as AuthenticatedPharmacistDashboardRouteImport } from './routes/_authenticated/pharmacist-dashboard'
 import { Route as AuthenticatedAdminUploadInventoryRouteImport } from './routes/_authenticated/admin-upload-inventory'
 import { Route as AuthenticatedAdminSystemHealthRouteImport } from './routes/_authenticated/admin-system-health'
 import { Route as AuthenticatedAdminSalesReportsRouteImport } from './routes/_authenticated/admin-sales-reports'
@@ -127,6 +129,7 @@ import { Route as ApiPublicHooksRetryFailedPostsRouteImport } from './routes/api
 import { Route as ApiPublicHooksPrescriptionExtractRouteImport } from './routes/api/public/hooks/prescription-extract'
 import { Route as ApiPublicHooksNightlyIntelRouteImport } from './routes/api/public/hooks/nightly-intel'
 import { Route as ApiPublicHooksEventConsumerRouteImport } from './routes/api/public/hooks/event-consumer'
+import { Route as ApiPublicHooksDlqAlertsRouteImport } from './routes/api/public/hooks/dlq-alerts'
 import { Route as ApiPublicHooksCustomerRxNotifyRouteImport } from './routes/api/public/hooks/customer-rx-notify'
 import { Route as ApiPublicHooksCollectSocialStatsRouteImport } from './routes/api/public/hooks/collect-social-stats'
 import { Route as ApiPublicHooksChronicRefillsRouteImport } from './routes/api/public/hooks/chronic-refills'
@@ -162,6 +165,11 @@ const TrustRoute = TrustRouteImport.update({
 const TrackRoute = TrackRouteImport.update({
   id: '/track',
   path: '/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TitansRoute = TitansRouteImport.update({
+  id: '/titans',
+  path: '/titans',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StatusRoute = StatusRouteImport.update({
@@ -570,6 +578,12 @@ const AuthenticatedUploadPrescriptionRoute =
     path: '/upload-prescription',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedPharmacistDashboardRoute =
+  AuthenticatedPharmacistDashboardRouteImport.update({
+    id: '/pharmacist-dashboard',
+    path: '/pharmacist-dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminUploadInventoryRoute =
   AuthenticatedAdminUploadInventoryRouteImport.update({
     id: '/admin-upload-inventory',
@@ -766,6 +780,11 @@ const ApiPublicHooksEventConsumerRoute =
     path: '/api/public/hooks/event-consumer',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksDlqAlertsRoute = ApiPublicHooksDlqAlertsRouteImport.update({
+  id: '/api/public/hooks/dlq-alerts',
+  path: '/api/public/hooks/dlq-alerts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksCustomerRxNotifyRoute =
   ApiPublicHooksCustomerRxNotifyRouteImport.update({
     id: '/api/public/hooks/customer-rx-notify',
@@ -934,6 +953,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/status': typeof StatusRoute
+  '/titans': typeof TitansRoute
   '/track': typeof TrackRoute
   '/trust': typeof TrustRoute
   '/unsubscribe': typeof UnsubscribeRoute
@@ -945,6 +965,7 @@ export interface FileRoutesByFullPath {
   '/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
   '/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
   '/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
+  '/pharmacist-dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -965,6 +986,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
   '/api/public/hooks/collect-social-stats': typeof ApiPublicHooksCollectSocialStatsRoute
   '/api/public/hooks/customer-rx-notify': typeof ApiPublicHooksCustomerRxNotifyRoute
+  '/api/public/hooks/dlq-alerts': typeof ApiPublicHooksDlqAlertsRoute
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
@@ -1069,6 +1091,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/status': typeof StatusRoute
+  '/titans': typeof TitansRoute
   '/track': typeof TrackRoute
   '/trust': typeof TrustRoute
   '/unsubscribe': typeof UnsubscribeRoute
@@ -1080,6 +1103,7 @@ export interface FileRoutesByTo {
   '/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
   '/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
   '/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
+  '/pharmacist-dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -1100,6 +1124,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
   '/api/public/hooks/collect-social-stats': typeof ApiPublicHooksCollectSocialStatsRoute
   '/api/public/hooks/customer-rx-notify': typeof ApiPublicHooksCustomerRxNotifyRoute
+  '/api/public/hooks/dlq-alerts': typeof ApiPublicHooksDlqAlertsRoute
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
@@ -1206,6 +1231,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/status': typeof StatusRoute
+  '/titans': typeof TitansRoute
   '/track': typeof TrackRoute
   '/trust': typeof TrustRoute
   '/unsubscribe': typeof UnsubscribeRoute
@@ -1217,6 +1243,7 @@ export interface FileRoutesById {
   '/_authenticated/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
   '/_authenticated/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
   '/_authenticated/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
+  '/_authenticated/pharmacist-dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/_authenticated/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -1237,6 +1264,7 @@ export interface FileRoutesById {
   '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
   '/api/public/hooks/collect-social-stats': typeof ApiPublicHooksCollectSocialStatsRoute
   '/api/public/hooks/customer-rx-notify': typeof ApiPublicHooksCustomerRxNotifyRoute
+  '/api/public/hooks/dlq-alerts': typeof ApiPublicHooksDlqAlertsRoute
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
@@ -1343,6 +1371,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sitemap.xml'
     | '/status'
+    | '/titans'
     | '/track'
     | '/trust'
     | '/unsubscribe'
@@ -1354,6 +1383,7 @@ export interface FileRouteTypes {
     | '/admin-sales-reports'
     | '/admin-system-health'
     | '/admin-upload-inventory'
+    | '/pharmacist-dashboard'
     | '/upload-prescription'
     | '/conditions/$slug'
     | '/email/unsubscribe'
@@ -1374,6 +1404,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/chronic-refills'
     | '/api/public/hooks/collect-social-stats'
     | '/api/public/hooks/customer-rx-notify'
+    | '/api/public/hooks/dlq-alerts'
     | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/nightly-intel'
     | '/api/public/hooks/prescription-extract'
@@ -1478,6 +1509,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sitemap.xml'
     | '/status'
+    | '/titans'
     | '/track'
     | '/trust'
     | '/unsubscribe'
@@ -1489,6 +1521,7 @@ export interface FileRouteTypes {
     | '/admin-sales-reports'
     | '/admin-system-health'
     | '/admin-upload-inventory'
+    | '/pharmacist-dashboard'
     | '/upload-prescription'
     | '/conditions/$slug'
     | '/email/unsubscribe'
@@ -1509,6 +1542,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/chronic-refills'
     | '/api/public/hooks/collect-social-stats'
     | '/api/public/hooks/customer-rx-notify'
+    | '/api/public/hooks/dlq-alerts'
     | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/nightly-intel'
     | '/api/public/hooks/prescription-extract'
@@ -1614,6 +1648,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sitemap.xml'
     | '/status'
+    | '/titans'
     | '/track'
     | '/trust'
     | '/unsubscribe'
@@ -1625,6 +1660,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin-sales-reports'
     | '/_authenticated/admin-system-health'
     | '/_authenticated/admin-upload-inventory'
+    | '/_authenticated/pharmacist-dashboard'
     | '/_authenticated/upload-prescription'
     | '/conditions/$slug'
     | '/email/unsubscribe'
@@ -1645,6 +1681,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/chronic-refills'
     | '/api/public/hooks/collect-social-stats'
     | '/api/public/hooks/customer-rx-notify'
+    | '/api/public/hooks/dlq-alerts'
     | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/nightly-intel'
     | '/api/public/hooks/prescription-extract'
@@ -1751,6 +1788,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StatusRoute: typeof StatusRoute
+  TitansRoute: typeof TitansRoute
   TrackRoute: typeof TrackRoute
   TrustRoute: typeof TrustRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
@@ -1771,6 +1809,7 @@ export interface RootRouteChildren {
   ApiPublicHooksChronicRefillsRoute: typeof ApiPublicHooksChronicRefillsRoute
   ApiPublicHooksCollectSocialStatsRoute: typeof ApiPublicHooksCollectSocialStatsRoute
   ApiPublicHooksCustomerRxNotifyRoute: typeof ApiPublicHooksCustomerRxNotifyRoute
+  ApiPublicHooksDlqAlertsRoute: typeof ApiPublicHooksDlqAlertsRoute
   ApiPublicHooksEventConsumerRoute: typeof ApiPublicHooksEventConsumerRoute
   ApiPublicHooksNightlyIntelRoute: typeof ApiPublicHooksNightlyIntelRoute
   ApiPublicHooksPrescriptionExtractRoute: typeof ApiPublicHooksPrescriptionExtractRoute
@@ -1829,6 +1868,13 @@ declare module '@tanstack/react-router' {
       path: '/track'
       fullPath: '/track'
       preLoaderRoute: typeof TrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/titans': {
+      id: '/titans'
+      path: '/titans'
+      fullPath: '/titans'
+      preLoaderRoute: typeof TitansRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/status': {
@@ -2391,6 +2437,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUploadPrescriptionRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/pharmacist-dashboard': {
+      id: '/_authenticated/pharmacist-dashboard'
+      path: '/pharmacist-dashboard'
+      fullPath: '/pharmacist-dashboard'
+      preLoaderRoute: typeof AuthenticatedPharmacistDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin-upload-inventory': {
       id: '/_authenticated/admin-upload-inventory'
       path: '/admin-upload-inventory'
@@ -2629,6 +2682,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksEventConsumerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/dlq-alerts': {
+      id: '/api/public/hooks/dlq-alerts'
+      path: '/api/public/hooks/dlq-alerts'
+      fullPath: '/api/public/hooks/dlq-alerts'
+      preLoaderRoute: typeof ApiPublicHooksDlqAlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/customer-rx-notify': {
       id: '/api/public/hooks/customer-rx-notify'
       path: '/api/public/hooks/customer-rx-notify'
@@ -2752,6 +2812,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminSalesReportsRoute: typeof AuthenticatedAdminSalesReportsRoute
   AuthenticatedAdminSystemHealthRoute: typeof AuthenticatedAdminSystemHealthRoute
   AuthenticatedAdminUploadInventoryRoute: typeof AuthenticatedAdminUploadInventoryRoute
+  AuthenticatedPharmacistDashboardRoute: typeof AuthenticatedPharmacistDashboardRoute
   AuthenticatedUploadPrescriptionRoute: typeof AuthenticatedUploadPrescriptionRoute
 }
 
@@ -2766,6 +2827,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminSystemHealthRoute: AuthenticatedAdminSystemHealthRoute,
   AuthenticatedAdminUploadInventoryRoute:
     AuthenticatedAdminUploadInventoryRoute,
+  AuthenticatedPharmacistDashboardRoute: AuthenticatedPharmacistDashboardRoute,
   AuthenticatedUploadPrescriptionRoute: AuthenticatedUploadPrescriptionRoute,
 }
 
@@ -2874,6 +2936,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StatusRoute: StatusRoute,
+  TitansRoute: TitansRoute,
   TrackRoute: TrackRoute,
   TrustRoute: TrustRoute,
   UnsubscribeRoute: UnsubscribeRoute,
@@ -2894,6 +2957,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksChronicRefillsRoute: ApiPublicHooksChronicRefillsRoute,
   ApiPublicHooksCollectSocialStatsRoute: ApiPublicHooksCollectSocialStatsRoute,
   ApiPublicHooksCustomerRxNotifyRoute: ApiPublicHooksCustomerRxNotifyRoute,
+  ApiPublicHooksDlqAlertsRoute: ApiPublicHooksDlqAlertsRoute,
   ApiPublicHooksEventConsumerRoute: ApiPublicHooksEventConsumerRoute,
   ApiPublicHooksNightlyIntelRoute: ApiPublicHooksNightlyIntelRoute,
   ApiPublicHooksPrescriptionExtractRoute:
