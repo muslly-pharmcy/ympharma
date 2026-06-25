@@ -119,6 +119,27 @@ function SettingsPage() {
       </div>
 
       <div className="space-y-4">
+        <Section icon={<Sparkles className="h-5 w-5" />} title="شعار العلامة" desc="عاين وبدّل بين الشعار الكلاسيكي والنسخة الذهبية الفاخرة">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <LogoPreview
+              src={classicLogo}
+              label="الكلاسيكي"
+              active={logoVariant === "classic"}
+              onClick={() => setVariant("classic")}
+            />
+            <LogoPreview
+              src={goldenLogoAsset.url}
+              label="الذهبي"
+              active={logoVariant === "golden"}
+              onClick={() => setVariant("golden")}
+              dark
+            />
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            التفضيل يُحفظ على هذا الجهاز ويُطبَّق فوراً على رأس الموقع.
+          </p>
+        </Section>
+
         <Section icon={<Globe className="h-5 w-5" />} title="اللغة" desc="اختر لغة الواجهة">
           <div className="flex gap-2">
             <Btn active={lang === "ar"} onClick={() => setLang("ar")}>العربية</Btn>
