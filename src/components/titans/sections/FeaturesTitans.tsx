@@ -1,6 +1,6 @@
-import { Reveal } from "./motion/Reveal";
-import { GlassCard } from "./ui/GlassCard";
-import { GradientText } from "./ui/GradientText";
+import { Reveal } from "../motion/Reveal";
+import { GlassCard } from "../ui/GlassCard";
+import { GradientText } from "../ui/GradientText";
 import { Brain, Truck, ShieldCheck, Clock, Sparkles, HeartPulse } from "lucide-react";
 
 const features = [

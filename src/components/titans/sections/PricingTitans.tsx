@@ -1,7 +1,7 @@
-import { Reveal } from "./motion/Reveal";
-import { GlassCard } from "./ui/GlassCard";
-import { GoldenBorder } from "./ui/GoldenBorder";
-import { GradientText } from "./ui/GradientText";
+import { Reveal } from "../motion/Reveal";
+import { GlassCard } from "../ui/GlassCard";
+import { GoldenBorder } from "../ui/GoldenBorder";
+import { GradientText } from "../ui/GradientText";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { Link } from "@tanstack/react-router";
