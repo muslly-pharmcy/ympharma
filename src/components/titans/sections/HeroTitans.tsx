@@ -3,10 +3,13 @@ import { Button } from "@/components/ui/button";
 import { GradientText } from "../ui/GradientText";
 import { Reveal } from "../motion/Reveal";
 import { CountUp } from "../motion/CountUp";
+import { ParticleBackground } from "../motion/ParticleBackground";
 
 export function HeroTitans() {
   return (
     <section className="relative overflow-hidden">
+      <div aria-hidden className="titans-stars-bg pointer-events-none absolute inset-0 opacity-40" />
+      <ParticleBackground density={60} />
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-60"
