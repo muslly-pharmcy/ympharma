@@ -271,6 +271,21 @@ function PrescriptionPage() {
           setBusy(false);
           return;
         }
+        // Strict server-side validation: content-type, size, magic bytes.
+        try {
+          const v = await validateUploadedPrescriptionFile({ data: { path } });
+          if (!v.ok) {
+            updateStage(i, "error", { error: v.message });
+            toast.error(`الصورة ${i + 1}: ${v.message}`);
+            setBusy(false);
+            return;
+          }
+        } catch (e: any) {
+          updateStage(i, "error", { error: e?.message || "فشل التحقق" });
+          toast.error(`فشل التحقق من الصورة ${i + 1} على السيرفر`);
+          setBusy(false);
+          return;
+        }
         uploadedUrls.push(signedUrl);
         backupQueue.push({ path, blob: f as Blob, type: (f as File).type || "image/jpeg" });
         updateStage(i, "done", { signedUrl });
