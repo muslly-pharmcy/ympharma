@@ -25,13 +25,14 @@ export default defineConfig({
   },
   vite: {
     resolve: {
-      // React Email's htmlparser2 chain needs `entities` v4.5.0 (v5+ removed
-      // ./lib/decode.js). Pin all three import paths to the hoisted copy
-      // so a nested newer copy can't get picked up during SSR bundling.
+      // React Email's bundled htmlparser2 still imports the legacy
+      // `entities/lib/decode.js` subpath. v6+ exposes the same modules under
+      // `dist/esm/`. Repoint the legacy paths so SSR bundling resolves them.
       alias: {
-        "entities/lib/decode.js": path.resolve(__dirname, "node_modules/entities/lib/decode.js"),
-        "entities/lib/encode.js": path.resolve(__dirname, "node_modules/entities/lib/encode.js"),
+        "entities/lib/decode.js": path.resolve(__dirname, "node_modules/entities/dist/esm/decode.js"),
+        "entities/lib/encode.js": path.resolve(__dirname, "node_modules/entities/dist/esm/encode.js"),
       },
+
     },
   },
 });
