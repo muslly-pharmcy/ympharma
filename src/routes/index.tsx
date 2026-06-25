@@ -9,6 +9,7 @@ import {
 
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { Logo3D } from "@/components/Logo3D";
+import { useLogoVariant } from "@/hooks/use-logo-variant";
 import { ConditionsStrip } from "@/components/conditions-strip";
 import { MarketingBanner } from "@/components/marketing-banner";
 import { NunDivider } from "@/components/nun-divider";
