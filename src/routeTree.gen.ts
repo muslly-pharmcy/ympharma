@@ -102,6 +102,7 @@ import { Route as AuthenticatedAdminMarketingCampaignsRouteImport } from './rout
 import { Route as AuthenticatedAdminInventorySyncLogsRouteImport } from './routes/_authenticated/admin-inventory-sync-logs'
 import { Route as AuthenticatedAdminHealthRouteImport } from './routes/_authenticated/admin-health'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin-dashboard'
+import { Route as AuthenticatedAdminAgentRunsRouteImport } from './routes/_authenticated/admin-agent-runs'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/public/whatsapp-webhook'
 import { Route as ApiPublicUptimeWebhookRouteImport } from './routes/api/public/uptime-webhook'
@@ -130,6 +131,7 @@ import { Route as ApiPublicHooksRunRestockAlertsRouteImport } from './routes/api
 import { Route as ApiPublicHooksRunReactivationRouteImport } from './routes/api/public/hooks/run-reactivation'
 import { Route as ApiPublicHooksRunLoyaltyReminderRouteImport } from './routes/api/public/hooks/run-loyalty-reminder'
 import { Route as ApiPublicHooksRetryFailedPostsRouteImport } from './routes/api/public/hooks/retry-failed-posts'
+import { Route as ApiPublicHooksRecordHealthRouteImport } from './routes/api/public/hooks/record-health'
 import { Route as ApiPublicHooksPrescriptionExtractRouteImport } from './routes/api/public/hooks/prescription-extract'
 import { Route as ApiPublicHooksNightlyIntelRouteImport } from './routes/api/public/hooks/nightly-intel'
 import { Route as ApiPublicHooksEventConsumerRouteImport } from './routes/api/public/hooks/event-consumer'
@@ -139,6 +141,7 @@ import { Route as ApiPublicHooksCollectSocialStatsRouteImport } from './routes/a
 import { Route as ApiPublicHooksChronicRefillsRouteImport } from './routes/api/public/hooks/chronic-refills'
 import { Route as ApiPublicHooksAlertsWorkerRouteImport } from './routes/api/public/hooks/alerts-worker'
 import { Route as ApiPublicHooksAgentMaintenanceRouteImport } from './routes/api/public/hooks/agent-maintenance'
+import { Route as ApiPublicHooksAgentAlertsRouteImport } from './routes/api/public/hooks/agent-alerts'
 import { Route as ApiPublicHealthQuickCheckRouteImport } from './routes/api/public/health.quick-check'
 import { Route as ApiPublicHealthFullCheckRouteImport } from './routes/api/public/health.full-check'
 import { Route as ApiPublicHooksAgentsWhatsappRouteImport } from './routes/api/public/hooks/agents/whatsapp'
@@ -629,6 +632,12 @@ const AuthenticatedAdminDashboardRoute =
     path: '/admin-dashboard',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminAgentRunsRoute =
+  AuthenticatedAdminAgentRunsRouteImport.update({
+    id: '/admin-agent-runs',
+    path: '/admin-agent-runs',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -786,6 +795,12 @@ const ApiPublicHooksRetryFailedPostsRoute =
     path: '/api/public/hooks/retry-failed-posts',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksRecordHealthRoute =
+  ApiPublicHooksRecordHealthRouteImport.update({
+    id: '/api/public/hooks/record-health',
+    path: '/api/public/hooks/record-health',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksPrescriptionExtractRoute =
   ApiPublicHooksPrescriptionExtractRouteImport.update({
     id: '/api/public/hooks/prescription-extract',
@@ -837,6 +852,12 @@ const ApiPublicHooksAgentMaintenanceRoute =
   ApiPublicHooksAgentMaintenanceRouteImport.update({
     id: '/api/public/hooks/agent-maintenance',
     path: '/api/public/hooks/agent-maintenance',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksAgentAlertsRoute =
+  ApiPublicHooksAgentAlertsRouteImport.update({
+    id: '/api/public/hooks/agent-alerts',
+    path: '/api/public/hooks/agent-alerts',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicHealthQuickCheckRoute =
@@ -983,6 +1004,7 @@ export interface FileRoutesByFullPath {
   '/trust': typeof TrustRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/yemen-debug': typeof YemenDebugRoute
+  '/admin-agent-runs': typeof AuthenticatedAdminAgentRunsRoute
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin-health': typeof AuthenticatedAdminHealthRoute
   '/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
@@ -1007,6 +1029,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
   '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
+  '/api/public/hooks/agent-alerts': typeof ApiPublicHooksAgentAlertsRoute
   '/api/public/hooks/agent-maintenance': typeof ApiPublicHooksAgentMaintenanceRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
   '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
@@ -1016,6 +1039,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
+  '/api/public/hooks/record-health': typeof ApiPublicHooksRecordHealthRoute
   '/api/public/hooks/retry-failed-posts': typeof ApiPublicHooksRetryFailedPostsRoute
   '/api/public/hooks/run-loyalty-reminder': typeof ApiPublicHooksRunLoyaltyReminderRoute
   '/api/public/hooks/run-reactivation': typeof ApiPublicHooksRunReactivationRoute
@@ -1125,6 +1149,7 @@ export interface FileRoutesByTo {
   '/trust': typeof TrustRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/yemen-debug': typeof YemenDebugRoute
+  '/admin-agent-runs': typeof AuthenticatedAdminAgentRunsRoute
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin-health': typeof AuthenticatedAdminHealthRoute
   '/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
@@ -1149,6 +1174,7 @@ export interface FileRoutesByTo {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
   '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
+  '/api/public/hooks/agent-alerts': typeof ApiPublicHooksAgentAlertsRoute
   '/api/public/hooks/agent-maintenance': typeof ApiPublicHooksAgentMaintenanceRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
   '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
@@ -1158,6 +1184,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
+  '/api/public/hooks/record-health': typeof ApiPublicHooksRecordHealthRoute
   '/api/public/hooks/retry-failed-posts': typeof ApiPublicHooksRetryFailedPostsRoute
   '/api/public/hooks/run-loyalty-reminder': typeof ApiPublicHooksRunLoyaltyReminderRoute
   '/api/public/hooks/run-reactivation': typeof ApiPublicHooksRunReactivationRoute
@@ -1269,6 +1296,7 @@ export interface FileRoutesById {
   '/trust': typeof TrustRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/yemen-debug': typeof YemenDebugRoute
+  '/_authenticated/admin-agent-runs': typeof AuthenticatedAdminAgentRunsRoute
   '/_authenticated/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/admin-health': typeof AuthenticatedAdminHealthRoute
   '/_authenticated/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
@@ -1293,6 +1321,7 @@ export interface FileRoutesById {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
   '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
+  '/api/public/hooks/agent-alerts': typeof ApiPublicHooksAgentAlertsRoute
   '/api/public/hooks/agent-maintenance': typeof ApiPublicHooksAgentMaintenanceRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
   '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
@@ -1302,6 +1331,7 @@ export interface FileRoutesById {
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
+  '/api/public/hooks/record-health': typeof ApiPublicHooksRecordHealthRoute
   '/api/public/hooks/retry-failed-posts': typeof ApiPublicHooksRetryFailedPostsRoute
   '/api/public/hooks/run-loyalty-reminder': typeof ApiPublicHooksRunLoyaltyReminderRoute
   '/api/public/hooks/run-reactivation': typeof ApiPublicHooksRunReactivationRoute
@@ -1413,6 +1443,7 @@ export interface FileRouteTypes {
     | '/trust'
     | '/unsubscribe'
     | '/yemen-debug'
+    | '/admin-agent-runs'
     | '/admin-dashboard'
     | '/admin-health'
     | '/admin-inventory-sync-logs'
@@ -1437,6 +1468,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/api/public/health/full-check'
     | '/api/public/health/quick-check'
+    | '/api/public/hooks/agent-alerts'
     | '/api/public/hooks/agent-maintenance'
     | '/api/public/hooks/alerts-worker'
     | '/api/public/hooks/chronic-refills'
@@ -1446,6 +1478,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/nightly-intel'
     | '/api/public/hooks/prescription-extract'
+    | '/api/public/hooks/record-health'
     | '/api/public/hooks/retry-failed-posts'
     | '/api/public/hooks/run-loyalty-reminder'
     | '/api/public/hooks/run-reactivation'
@@ -1555,6 +1588,7 @@ export interface FileRouteTypes {
     | '/trust'
     | '/unsubscribe'
     | '/yemen-debug'
+    | '/admin-agent-runs'
     | '/admin-dashboard'
     | '/admin-health'
     | '/admin-inventory-sync-logs'
@@ -1579,6 +1613,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/api/public/health/full-check'
     | '/api/public/health/quick-check'
+    | '/api/public/hooks/agent-alerts'
     | '/api/public/hooks/agent-maintenance'
     | '/api/public/hooks/alerts-worker'
     | '/api/public/hooks/chronic-refills'
@@ -1588,6 +1623,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/nightly-intel'
     | '/api/public/hooks/prescription-extract'
+    | '/api/public/hooks/record-health'
     | '/api/public/hooks/retry-failed-posts'
     | '/api/public/hooks/run-loyalty-reminder'
     | '/api/public/hooks/run-reactivation'
@@ -1698,6 +1734,7 @@ export interface FileRouteTypes {
     | '/trust'
     | '/unsubscribe'
     | '/yemen-debug'
+    | '/_authenticated/admin-agent-runs'
     | '/_authenticated/admin-dashboard'
     | '/_authenticated/admin-health'
     | '/_authenticated/admin-inventory-sync-logs'
@@ -1722,6 +1759,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/api/public/health/full-check'
     | '/api/public/health/quick-check'
+    | '/api/public/hooks/agent-alerts'
     | '/api/public/hooks/agent-maintenance'
     | '/api/public/hooks/alerts-worker'
     | '/api/public/hooks/chronic-refills'
@@ -1731,6 +1769,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/nightly-intel'
     | '/api/public/hooks/prescription-extract'
+    | '/api/public/hooks/record-health'
     | '/api/public/hooks/retry-failed-posts'
     | '/api/public/hooks/run-loyalty-reminder'
     | '/api/public/hooks/run-reactivation'
@@ -1854,6 +1893,7 @@ export interface RootRouteChildren {
   ApiPublicUptimeWebhookRoute: typeof ApiPublicUptimeWebhookRoute
   ApiPublicWhatsappWebhookRoute: typeof ApiPublicWhatsappWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicHooksAgentAlertsRoute: typeof ApiPublicHooksAgentAlertsRoute
   ApiPublicHooksAgentMaintenanceRoute: typeof ApiPublicHooksAgentMaintenanceRoute
   ApiPublicHooksAlertsWorkerRoute: typeof ApiPublicHooksAlertsWorkerRoute
   ApiPublicHooksChronicRefillsRoute: typeof ApiPublicHooksChronicRefillsRoute
@@ -1863,6 +1903,7 @@ export interface RootRouteChildren {
   ApiPublicHooksEventConsumerRoute: typeof ApiPublicHooksEventConsumerRoute
   ApiPublicHooksNightlyIntelRoute: typeof ApiPublicHooksNightlyIntelRoute
   ApiPublicHooksPrescriptionExtractRoute: typeof ApiPublicHooksPrescriptionExtractRoute
+  ApiPublicHooksRecordHealthRoute: typeof ApiPublicHooksRecordHealthRoute
   ApiPublicHooksRetryFailedPostsRoute: typeof ApiPublicHooksRetryFailedPostsRoute
   ApiPublicHooksRunLoyaltyReminderRoute: typeof ApiPublicHooksRunLoyaltyReminderRoute
   ApiPublicHooksRunReactivationRoute: typeof ApiPublicHooksRunReactivationRoute
@@ -2545,6 +2586,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin-agent-runs': {
+      id: '/_authenticated/admin-agent-runs'
+      path: '/admin-agent-runs'
+      fullPath: '/admin-agent-runs'
+      preLoaderRoute: typeof AuthenticatedAdminAgentRunsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
       path: '/lovable/email/suppression'
@@ -2741,6 +2789,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksRetryFailedPostsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/record-health': {
+      id: '/api/public/hooks/record-health'
+      path: '/api/public/hooks/record-health'
+      fullPath: '/api/public/hooks/record-health'
+      preLoaderRoute: typeof ApiPublicHooksRecordHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/prescription-extract': {
       id: '/api/public/hooks/prescription-extract'
       path: '/api/public/hooks/prescription-extract'
@@ -2802,6 +2857,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/hooks/agent-maintenance'
       fullPath: '/api/public/hooks/agent-maintenance'
       preLoaderRoute: typeof ApiPublicHooksAgentMaintenanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/agent-alerts': {
+      id: '/api/public/hooks/agent-alerts'
+      path: '/api/public/hooks/agent-alerts'
+      fullPath: '/api/public/hooks/agent-alerts'
+      preLoaderRoute: typeof ApiPublicHooksAgentAlertsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/health/quick-check': {
@@ -2885,6 +2947,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminAgentRunsRoute: typeof AuthenticatedAdminAgentRunsRoute
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
   AuthenticatedAdminHealthRoute: typeof AuthenticatedAdminHealthRoute
   AuthenticatedAdminInventorySyncLogsRoute: typeof AuthenticatedAdminInventorySyncLogsRoute
@@ -2897,6 +2960,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminAgentRunsRoute: AuthenticatedAdminAgentRunsRoute,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
   AuthenticatedAdminHealthRoute: AuthenticatedAdminHealthRoute,
   AuthenticatedAdminInventorySyncLogsRoute:
@@ -3034,6 +3098,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicUptimeWebhookRoute: ApiPublicUptimeWebhookRoute,
   ApiPublicWhatsappWebhookRoute: ApiPublicWhatsappWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicHooksAgentAlertsRoute: ApiPublicHooksAgentAlertsRoute,
   ApiPublicHooksAgentMaintenanceRoute: ApiPublicHooksAgentMaintenanceRoute,
   ApiPublicHooksAlertsWorkerRoute: ApiPublicHooksAlertsWorkerRoute,
   ApiPublicHooksChronicRefillsRoute: ApiPublicHooksChronicRefillsRoute,
@@ -3044,6 +3109,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksNightlyIntelRoute: ApiPublicHooksNightlyIntelRoute,
   ApiPublicHooksPrescriptionExtractRoute:
     ApiPublicHooksPrescriptionExtractRoute,
+  ApiPublicHooksRecordHealthRoute: ApiPublicHooksRecordHealthRoute,
   ApiPublicHooksRetryFailedPostsRoute: ApiPublicHooksRetryFailedPostsRoute,
   ApiPublicHooksRunLoyaltyReminderRoute: ApiPublicHooksRunLoyaltyReminderRoute,
   ApiPublicHooksRunReactivationRoute: ApiPublicHooksRunReactivationRoute,
