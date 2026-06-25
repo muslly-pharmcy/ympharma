@@ -85,7 +85,7 @@ export const Route = createFileRoute("/api/public/monitoring/health")({
             status: low > 50 ? "warning" : "ok",
             count_below_5: low,
           };
-          const lastHealth = healthRecent.data?.recorded_at as string | undefined;
+          const lastHealth = healthRecent.data?.created_at as string | undefined;
           const ageMin = lastHealth
             ? (Date.now() - new Date(lastHealth).getTime()) / 60_000
             : null;
