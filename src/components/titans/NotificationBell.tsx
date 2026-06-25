@@ -4,7 +4,9 @@ import { Bell, CheckCircle2, XCircle, Clock, AlertCircle } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import {
   getUserNotifications,
+  getUnreadCount,
   markNotificationRead,
+  markAllNotificationsRead,
 } from "@/lib/notifications.functions";
 
 const iconFor = (type: string) => {
