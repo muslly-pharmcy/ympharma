@@ -127,9 +127,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "icon", type: "image/png", sizes: "192x192", href: "/icon-192.png" },
-      { rel: "icon", type: "image/png", sizes: "512x512", href: "/icon-512.png" },
-      { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
+      { rel: "icon", type: "image/png", sizes: "192x192", href: "https://muslly.com/__l5e/assets-v1/4af5aae8-415a-470d-ab54-15189a22a57e/almusalli-golden-mark.png" },
+      { rel: "icon", type: "image/png", sizes: "512x512", href: "https://muslly.com/__l5e/assets-v1/4af5aae8-415a-470d-ab54-15189a22a57e/almusalli-golden-mark.png" },
+      { rel: "apple-touch-icon", sizes: "180x180", href: "https://muslly.com/__l5e/assets-v1/4af5aae8-415a-470d-ab54-15189a22a57e/almusalli-golden-mark.png" },
+      { rel: "shortcut icon", href: "https://muslly.com/__l5e/assets-v1/4af5aae8-415a-470d-ab54-15189a22a57e/almusalli-golden-mark.png" },
       // Tajawal is self-hosted via @fontsource — no Google Fonts CDN dependency.
       // Preconnect/dns-prefetch to high-latency origins so the first image/Supabase
       // call doesn't pay a full TLS handshake on YemenNet/TeleYemen.
