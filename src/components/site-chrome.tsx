@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { useI18n } from "@/lib/i18n";
 import { useSpeech } from "@/hooks/use-speech";
-import logoUrl from "@/assets/almusalli-logo.webp";
-import goldenLogoAsset from "@/assets/almusalli-golden-mark.png.asset.json";
+import { useLogoVariant } from "@/hooks/use-logo-variant";
 import { categories } from "@/lib/products";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -31,24 +30,7 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
   const { lang, setLang, t } = useI18n();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [logoVariant, setLogoVariant] = useState<"classic" | "golden">("classic");
-
-  useEffect(() => {
-    const read = () => {
-      try {
-        const v = localStorage.getItem("logoVariant");
-        setLogoVariant(v === "golden" ? "golden" : "classic");
-      } catch {}
-    };
-    read();
-    const onChange = () => read();
-    window.addEventListener("logo-variant-change", onChange);
-    window.addEventListener("storage", onChange);
-    return () => {
-      window.removeEventListener("logo-variant-change", onChange);
-      window.removeEventListener("storage", onChange);
-    };
-  }, []);
+  const { url: activeLogo } = useLogoVariant();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -56,8 +38,6 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  const activeLogo = logoVariant === "golden" ? goldenLogoAsset.url : logoUrl;
 
   return (
     <>
@@ -187,13 +167,14 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
 
 export function SiteFooter() {
   const { t } = useI18n();
+  const { url: footerLogo } = useLogoVariant();
   return (
     <footer id="site-footer" className="mt-12 border-t border-border bg-card">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <div className="flex items-center gap-3">
             <div className="grid size-11 place-items-center rounded-2xl bg-white ring-1 ring-border overflow-hidden">
-              <img src={logoUrl} alt="" width="36" height="36" loading="lazy" decoding="async" className="size-9 object-contain" />
+              <img src={footerLogo} alt="" width="36" height="36" loading="lazy" decoding="async" className="size-9 object-contain" />
             </div>
             <div>
               <p className="font-black text-primary-deep">{t("brand.name")}</p>

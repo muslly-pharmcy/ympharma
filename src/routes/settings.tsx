@@ -2,9 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n";
-import { Bell, Globe, Trash2, Download, Smartphone, Shield, Info, ArrowRight, Sparkles } from "lucide-react";
-import classicLogo from "@/assets/almusalli-logo.webp";
-import goldenLogoAsset from "@/assets/almusalli-golden-mark.png.asset.json";
+import { Bell, Globe, Trash2, Download, Smartphone, Shield, Info, ArrowRight, Sparkles, RotateCcw } from "lucide-react";
+import { useLogoVariant, LOGO_VARIANT_DEFAULT, type LogoVariant } from "@/hooks/use-logo-variant";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -27,22 +26,17 @@ function SettingsPage() {
   const [installed, setInstalled] = useState(false);
   const [cacheSize, setCacheSize] = useState<string>("—");
   const [version] = useState("1.0.0");
-  const [logoVariant, setLogoVariant] = useState<"classic" | "golden">("classic");
+  const { variant: logoVariant, setVariant: setLogoVariant, reset: resetLogoVariant, classicUrl, goldenUrl, isDefault: logoIsDefault } = useLogoVariant();
+  const [previewSize, setPreviewSize] = useState<"sm" | "md" | "lg">("md");
 
-  useEffect(() => {
-    try {
-      const v = localStorage.getItem("logoVariant");
-      setLogoVariant(v === "golden" ? "golden" : "classic");
-    } catch {}
-  }, []);
-
-  function setVariant(v: "classic" | "golden") {
+  function setVariant(v: LogoVariant) {
     setLogoVariant(v);
-    try {
-      localStorage.setItem("logoVariant", v);
-      window.dispatchEvent(new Event("logo-variant-change"));
-    } catch {}
     toast.success(v === "golden" ? "تم تفعيل الشعار الذهبي" : "تم العودة للشعار الكلاسيكي");
+  }
+
+  function resetVariant() {
+    resetLogoVariant();
+    toast.success(`تمت إعادة الضبط للوضع الافتراضي (${LOGO_VARIANT_DEFAULT === "classic" ? "الكلاسيكي" : "الذهبي"})`);
   }
 
   useEffect(() => {
@@ -120,25 +114,54 @@ function SettingsPage() {
 
       <div className="space-y-4">
         <Section icon={<Sparkles className="h-5 w-5" />} title="شعار العلامة" desc="عاين وبدّل بين الشعار الكلاسيكي والنسخة الذهبية الفاخرة">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div className="inline-flex rounded-md border border-input bg-background p-0.5 text-xs">
+              {(["sm", "md", "lg"] as const).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setPreviewSize(s)}
+                  className={`rounded px-2.5 py-1 transition-colors ${
+                    previewSize === s ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent"
+                  }`}
+                  aria-pressed={previewSize === s}
+                >
+                  {s === "sm" ? "Small" : s === "md" ? "Medium" : "Large"}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={resetVariant}
+              disabled={logoIsDefault}
+              className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-2.5 py-1 text-xs hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+              title="إعادة الضبط للوضع الافتراضي"
+            >
+              <RotateCcw className="h-3.5 w-3.5" /> إعادة ضبط
+            </button>
+          </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <LogoPreview
-              src={classicLogo}
+              src={classicUrl}
               label="الكلاسيكي"
               active={logoVariant === "classic"}
               onClick={() => setVariant("classic")}
+              size={previewSize}
             />
             <LogoPreview
-              src={goldenLogoAsset.url}
+              src={goldenUrl}
               label="الذهبي"
               active={logoVariant === "golden"}
               onClick={() => setVariant("golden")}
+              size={previewSize}
               dark
             />
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            التفضيل يُحفظ على هذا الجهاز ويُطبَّق فوراً على رأس الموقع.
+            التفضيل يُحفظ على هذا الجهاز ويُطبَّق فوراً على رأس الموقع وذيله والصفحة الرئيسية بدون إعادة تحميل.
           </p>
         </Section>
+
 
         <Section icon={<Globe className="h-5 w-5" />} title="اللغة" desc="اختر لغة الواجهة">
           <div className="flex gap-2">
@@ -200,8 +223,9 @@ function SettingsPage() {
 }
 
 function LogoPreview({
-  src, label, active, onClick, dark,
-}: { src: string; label: string; active: boolean; onClick: () => void; dark?: boolean }) {
+  src, label, active, onClick, dark, size = "md",
+}: { src: string; label: string; active: boolean; onClick: () => void; dark?: boolean; size?: "sm" | "md" | "lg" }) {
+  const dims = size === "sm" ? { box: "size-12", px: 48 } : size === "lg" ? { box: "size-32", px: 128 } : { box: "size-20", px: 80 };
   return (
     <button
       type="button"
@@ -211,12 +235,24 @@ function LogoPreview({
       } ${dark ? "bg-[#0a0a0b]" : "bg-white"}`}
       aria-pressed={active}
     >
-      <div className="grid size-20 place-items-center">
-        <img src={src} alt={label} className="size-full object-contain" />
+      <div className={`grid ${dims.box} place-items-center transition-all`}>
+        <img
+          src={src}
+          alt={label}
+          width={dims.px}
+          height={dims.px}
+          className="size-full object-contain"
+          style={{ imageRendering: "auto" }}
+        />
       </div>
-      <span className={`text-sm font-semibold ${dark ? "text-[color:var(--titans-gold,#d4af37)]" : "text-foreground"}`}>
-        {label}
-      </span>
+      <div className="flex flex-col items-center gap-0.5">
+        <span className={`text-sm font-semibold ${dark ? "text-[color:var(--titans-gold,#d4af37)]" : "text-foreground"}`}>
+          {label}
+        </span>
+        <span className={`text-[10px] ${dark ? "text-white/50" : "text-muted-foreground"}`}>
+          {dims.px}×{dims.px}px
+        </span>
+      </div>
       {active && (
         <span className="absolute end-2 top-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">
           مُفعَّل
