@@ -94,7 +94,6 @@ import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
 import { Route as AuthenticatedUploadPrescriptionRouteImport } from './routes/_authenticated/upload-prescription'
-import { Route as AuthenticatedPharmacistDashboardRouteImport } from './routes/_authenticated/pharmacist-dashboard'
 import { Route as AuthenticatedAdminUploadInventoryRouteImport } from './routes/_authenticated/admin-upload-inventory'
 import { Route as AuthenticatedAdminSystemHealthRouteImport } from './routes/_authenticated/admin-system-health'
 import { Route as AuthenticatedAdminSalesReportsRouteImport } from './routes/_authenticated/admin-sales-reports'
@@ -578,12 +577,6 @@ const AuthenticatedUploadPrescriptionRoute =
     path: '/upload-prescription',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPharmacistDashboardRoute =
-  AuthenticatedPharmacistDashboardRouteImport.update({
-    id: '/pharmacist-dashboard',
-    path: '/pharmacist-dashboard',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedAdminUploadInventoryRoute =
   AuthenticatedAdminUploadInventoryRouteImport.update({
     id: '/admin-upload-inventory',
@@ -965,7 +958,6 @@ export interface FileRoutesByFullPath {
   '/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
   '/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
   '/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
-  '/pharmacist-dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -1103,7 +1095,6 @@ export interface FileRoutesByTo {
   '/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
   '/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
   '/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
-  '/pharmacist-dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -1243,7 +1234,6 @@ export interface FileRoutesById {
   '/_authenticated/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
   '/_authenticated/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
   '/_authenticated/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
-  '/_authenticated/pharmacist-dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/_authenticated/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -1383,7 +1373,6 @@ export interface FileRouteTypes {
     | '/admin-sales-reports'
     | '/admin-system-health'
     | '/admin-upload-inventory'
-    | '/pharmacist-dashboard'
     | '/upload-prescription'
     | '/conditions/$slug'
     | '/email/unsubscribe'
@@ -1521,7 +1510,6 @@ export interface FileRouteTypes {
     | '/admin-sales-reports'
     | '/admin-system-health'
     | '/admin-upload-inventory'
-    | '/pharmacist-dashboard'
     | '/upload-prescription'
     | '/conditions/$slug'
     | '/email/unsubscribe'
@@ -1660,7 +1648,6 @@ export interface FileRouteTypes {
     | '/_authenticated/admin-sales-reports'
     | '/_authenticated/admin-system-health'
     | '/_authenticated/admin-upload-inventory'
-    | '/_authenticated/pharmacist-dashboard'
     | '/_authenticated/upload-prescription'
     | '/conditions/$slug'
     | '/email/unsubscribe'
@@ -2437,13 +2424,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUploadPrescriptionRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pharmacist-dashboard': {
-      id: '/_authenticated/pharmacist-dashboard'
-      path: '/pharmacist-dashboard'
-      fullPath: '/pharmacist-dashboard'
-      preLoaderRoute: typeof AuthenticatedPharmacistDashboardRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/admin-upload-inventory': {
       id: '/_authenticated/admin-upload-inventory'
       path: '/admin-upload-inventory'
@@ -2812,7 +2792,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminSalesReportsRoute: typeof AuthenticatedAdminSalesReportsRoute
   AuthenticatedAdminSystemHealthRoute: typeof AuthenticatedAdminSystemHealthRoute
   AuthenticatedAdminUploadInventoryRoute: typeof AuthenticatedAdminUploadInventoryRoute
-  AuthenticatedPharmacistDashboardRoute: typeof AuthenticatedPharmacistDashboardRoute
   AuthenticatedUploadPrescriptionRoute: typeof AuthenticatedUploadPrescriptionRoute
 }
 
@@ -2827,7 +2806,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminSystemHealthRoute: AuthenticatedAdminSystemHealthRoute,
   AuthenticatedAdminUploadInventoryRoute:
     AuthenticatedAdminUploadInventoryRoute,
-  AuthenticatedPharmacistDashboardRoute: AuthenticatedPharmacistDashboardRoute,
   AuthenticatedUploadPrescriptionRoute: AuthenticatedUploadPrescriptionRoute,
 }
 
@@ -2992,13 +2970,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
