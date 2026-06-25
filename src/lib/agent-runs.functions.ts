@@ -29,7 +29,7 @@ export const getAgentRuns = createServerFn({ method: "GET" })
       .gte("created_at", since)
       .order("created_at", { ascending: false })
       .limit(data.limit);
-    if (data.agent) q = q.eq("agent", data.agent);
+    if (data.agent) q = q.eq("agent", data.agent as any);
     if (data.status) q = q.eq("status", data.status);
     if (data.q) q = q.or(`summary.ilike.%${data.q}%,kind.ilike.%${data.q}%`);
     const { data: runs, error } = await q;
@@ -49,7 +49,7 @@ export const getAgentRunsCsv = createServerFn({ method: "GET" })
       .gte("created_at", since)
       .order("created_at", { ascending: false })
       .limit(data.limit);
-    if (data.agent) q = q.eq("agent", data.agent);
+    if (data.agent) q = q.eq("agent", data.agent as any);
     if (data.status) q = q.eq("status", data.status);
     if (data.q) q = q.or(`summary.ilike.%${data.q}%,kind.ilike.%${data.q}%`);
     const { data: rows, error } = await q;
