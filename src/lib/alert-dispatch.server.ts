@@ -63,17 +63,13 @@ export async function sendSlack(opts: {
       },
     ],
   };
-  try {
-    const r = await fetch(url, {
+  return postWithRetry("slack", () =>
+    fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
-    });
-    return r.ok;
-  } catch (e) {
-    console.error("[alert-dispatch] slack failed:", e);
-    return false;
-  }
+    }),
+  );
 }
 
 export async function sendSms(opts: {
