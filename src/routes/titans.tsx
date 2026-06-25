@@ -28,7 +28,7 @@ export const Route = createFileRoute("/titans")({
 function TitansLanding() {
   return (
     <main className="titans-scope min-h-screen">
-      <HeroTitans />
+      <CursorFollower />
       <FeaturesTitans />
       <TestimonialsTitans />
       <PricingTitans />
