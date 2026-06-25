@@ -101,8 +101,8 @@ export async function sendWhatsApp(opts: {
   const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
   if (!token || !phoneId) return false;
   const cleanTo = opts.to.replace(/^\+/, "");
-  try {
-    const r = await fetch(`https://graph.facebook.com/v20.0/${phoneId}/messages`, {
+  return postWithRetry("whatsapp", () =>
+    fetch(`https://graph.facebook.com/v20.0/${phoneId}/messages`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -114,11 +114,6 @@ export async function sendWhatsApp(opts: {
         type: "text",
         text: { body: opts.message.slice(0, 1500), preview_url: false },
       }),
-    });
-    if (!r.ok) console.error("[alert-dispatch] whatsapp HTTP", r.status, await r.text().catch(() => ""));
-    return r.ok;
-  } catch (e) {
-    console.error("[alert-dispatch] whatsapp failed:", e);
-    return false;
-  }
+    }),
+  );
 }
