@@ -40,7 +40,7 @@ export const Route = createFileRoute("/api/public/hooks/validate-uploads")({
           // Soft-delete + remove object.
           await supabaseAdmin
             .from("prescription_files" as never)
-            .update({ deleted_at: new Date().toISOString(), deletion_reason: res.code } as never)
+            .update({ deleted_at: new Date().toISOString() } as never)
             .eq("id", row.id);
           try {
             await supabaseAdmin.storage.from(row.bucket || "prescriptions").remove([row.object_path]);
@@ -49,15 +49,9 @@ export const Route = createFileRoute("/api/public/hooks/validate-uploads")({
           }
 
           await supabaseAdmin.from("operations_alerts_v14" as never).insert({
-            severity: "warning",
-            source: "upload-validator",
-            title: "Prescription file rejected",
-            details: {
-              file_id: row.id,
-              path: row.object_path,
-              code: res.code,
-              message: res.message,
-            } as never,
+            alert_type: "upload_validation_failed",
+            message: `[${res.code}] ${res.message} (file=${row.id}, path=${row.object_path})`,
+            dedupe_key: `upload_validation:${row.id}:${res.code}`,
           } as never);
         }
 
