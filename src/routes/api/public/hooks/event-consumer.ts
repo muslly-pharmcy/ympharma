@@ -28,11 +28,16 @@ const WORKER = "event-consumer";
 const MAX_RETRIES = 5;
 const DEFAULT_BATCH = 25;
 
-async function handleEvent(
+export type HandlerResult =
+  | { ok: true; note: string }
+  | { ok: false; error: string; dlqNow?: boolean };
+
+export async function handleEvent(
   ev: ClaimedEvent,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabaseAdmin: any,
-): Promise<{ ok: true; note: string } | { ok: false; error: string }> {
+): Promise<HandlerResult> {
+
   switch (ev.event_name) {
     case "TestEvent":
       return { ok: true, note: "test-acknowledged" };
@@ -149,10 +154,40 @@ async function handleEvent(
     }
 
     case "OrderCreated": {
-      // Hand-off: reserve_order_stock is invoked by application flow; the
-      // event acts as observable evidence. Future Batch 5d will use this
-      // to drive notifications. For now just acknowledge.
-      return { ok: true, note: "order-acknowledged" };
+      // Mission 2: reserve stock for the order. reserve_order_stock is a
+      // SECURITY DEFINER plpgsql function that reads orders.items, locks the
+      // product rows and atomically decrements stock. On any partial/logical
+      // failure we run release_order_stock as Saga compensation.
+      const orderId = ev.entity_id;
+      if (!orderId) {
+        // Malformed event — go straight to DLQ, no point retrying.
+        return { ok: false, error: "order_created_missing_entity_id", dlqNow: true };
+      }
+
+      const { data: reserveRes, error: reserveErr } = await supabaseAdmin.rpc(
+        "reserve_order_stock" as never,
+        { _order_id: orderId, _actor: "event_consumer", _reason: "order_created" } as never,
+      );
+      if (reserveErr) {
+        // Transport/SQL error — let normal retry logic run.
+        return { ok: false, error: `reserve_rpc:${reserveErr.message}` };
+      }
+      const r = (reserveRes ?? {}) as { ok?: boolean; skipped?: boolean; reason?: string; error?: string };
+      if (r.ok) {
+        return { ok: true, note: r.skipped ? `reserve-skipped:${r.reason ?? "duplicate"}` : `reserved:${orderId}` };
+      }
+
+      // Saga compensation — release whatever the function may have reserved
+      // before raising. release is idempotent (NEVER_RESERVED → SKIPPED).
+      try {
+        await supabaseAdmin.rpc(
+          "release_order_stock" as never,
+          { _order_id: orderId, _actor: "event_consumer", _reason: "saga_compensation" } as never,
+        );
+      } catch (e) {
+        console.error("[event-consumer] saga release failed", e);
+      }
+      return { ok: false, error: `reserve_failed:${r.error ?? r.reason ?? "unknown"}` };
     }
 
     case "RefillDue": {
@@ -162,11 +197,11 @@ async function handleEvent(
     }
 
     default:
-      // Unknown event: don't retry forever, just acknowledge so the queue
-      // stays drained. Operators can inspect via /admin-event-bus.
-      return { ok: true, note: `unknown:${ev.event_name}` };
+      // Unknown event — route to DLQ immediately instead of burning retries.
+      return { ok: false, error: `unknown_event:${ev.event_name}`, dlqNow: true };
   }
 }
+
 
 export const Route = createFileRoute("/api/public/hooks/event-consumer")({
   server: {
@@ -224,14 +259,16 @@ export const Route = createFileRoute("/api/public/hooks/event-consumer")({
                   outcomes.push({ id: ev.id, event_name: ev.event_name, ok: true, note: res.note });
                 }
               } else {
+                const maxRetries = res.dlqNow ? 1 : MAX_RETRIES;
                 const { data: failRes } = await supabaseAdmin.rpc(
                   "fail_agent_event" as never,
-                  { _event_id: ev.id, _processed_by: WORKER, _error: res.error, _max_retries: MAX_RETRIES } as never,
+                  { _event_id: ev.id, _processed_by: WORKER, _error: res.error, _max_retries: maxRetries } as never,
                 );
                 failed += 1;
                 if ((failRes as { moved_to_dlq?: boolean } | null)?.moved_to_dlq) dlqMoved += 1;
                 outcomes.push({ id: ev.id, event_name: ev.event_name, ok: false, note: res.error });
               }
+
             } catch (e) {
               const errMsg = e instanceof Error ? e.message : String(e);
               await supabaseAdmin.rpc(
