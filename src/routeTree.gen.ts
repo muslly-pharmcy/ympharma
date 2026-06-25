@@ -94,7 +94,6 @@ import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
 import { Route as AuthenticatedUploadPrescriptionRouteImport } from './routes/_authenticated/upload-prescription'
-import { Route as AuthenticatedPharmacistDashboardRouteImport } from './routes/_authenticated/pharmacist-dashboard'
 import { Route as AuthenticatedAdminUploadInventoryRouteImport } from './routes/_authenticated/admin-upload-inventory'
 import { Route as AuthenticatedAdminSystemHealthRouteImport } from './routes/_authenticated/admin-system-health'
 import { Route as AuthenticatedAdminSalesReportsRouteImport } from './routes/_authenticated/admin-sales-reports'
@@ -110,6 +109,7 @@ import { Route as ApiPublicIncidentCheckRouteImport } from './routes/api/public/
 import { Route as ApiPublicImgRouteImport } from './routes/api/public/img'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiInternalCollectFeedbackRouteImport } from './routes/api/internal/collect-feedback'
+import { Route as AuthenticatedPharmacistDashboardRouteImport } from './routes/_authenticated/pharmacist/dashboard'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -578,12 +578,6 @@ const AuthenticatedUploadPrescriptionRoute =
     path: '/upload-prescription',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPharmacistDashboardRoute =
-  AuthenticatedPharmacistDashboardRouteImport.update({
-    id: '/pharmacist-dashboard',
-    path: '/pharmacist-dashboard',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedAdminUploadInventoryRoute =
   AuthenticatedAdminUploadInventoryRouteImport.update({
     id: '/admin-upload-inventory',
@@ -667,6 +661,12 @@ const ApiInternalCollectFeedbackRoute =
     id: '/api/internal/collect-feedback',
     path: '/api/internal/collect-feedback',
     getParentRoute: () => rootRouteImport,
+  } as any)
+const AuthenticatedPharmacistDashboardRoute =
+  AuthenticatedPharmacistDashboardRouteImport.update({
+    id: '/pharmacist/dashboard',
+    path: '/pharmacist/dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
@@ -965,12 +965,12 @@ export interface FileRoutesByFullPath {
   '/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
   '/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
   '/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
-  '/pharmacist-dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
+  '/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/api/internal/collect-feedback': typeof ApiInternalCollectFeedbackRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/img': typeof ApiPublicImgRoute
@@ -1103,12 +1103,12 @@ export interface FileRoutesByTo {
   '/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
   '/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
   '/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
-  '/pharmacist-dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
+  '/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/api/internal/collect-feedback': typeof ApiInternalCollectFeedbackRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/img': typeof ApiPublicImgRoute
@@ -1243,12 +1243,12 @@ export interface FileRoutesById {
   '/_authenticated/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
   '/_authenticated/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
   '/_authenticated/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
-  '/_authenticated/pharmacist-dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/_authenticated/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
+  '/_authenticated/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/api/internal/collect-feedback': typeof ApiInternalCollectFeedbackRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/img': typeof ApiPublicImgRoute
@@ -1383,12 +1383,12 @@ export interface FileRouteTypes {
     | '/admin-sales-reports'
     | '/admin-system-health'
     | '/admin-upload-inventory'
-    | '/pharmacist-dashboard'
     | '/upload-prescription'
     | '/conditions/$slug'
     | '/email/unsubscribe'
     | '/product/$id'
     | '/test/features'
+    | '/pharmacist/dashboard'
     | '/api/internal/collect-feedback'
     | '/api/public/health'
     | '/api/public/img'
@@ -1521,12 +1521,12 @@ export interface FileRouteTypes {
     | '/admin-sales-reports'
     | '/admin-system-health'
     | '/admin-upload-inventory'
-    | '/pharmacist-dashboard'
     | '/upload-prescription'
     | '/conditions/$slug'
     | '/email/unsubscribe'
     | '/product/$id'
     | '/test/features'
+    | '/pharmacist/dashboard'
     | '/api/internal/collect-feedback'
     | '/api/public/health'
     | '/api/public/img'
@@ -1660,12 +1660,12 @@ export interface FileRouteTypes {
     | '/_authenticated/admin-sales-reports'
     | '/_authenticated/admin-system-health'
     | '/_authenticated/admin-upload-inventory'
-    | '/_authenticated/pharmacist-dashboard'
     | '/_authenticated/upload-prescription'
     | '/conditions/$slug'
     | '/email/unsubscribe'
     | '/product/$id'
     | '/test/features'
+    | '/_authenticated/pharmacist/dashboard'
     | '/api/internal/collect-feedback'
     | '/api/public/health'
     | '/api/public/img'
@@ -2437,13 +2437,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUploadPrescriptionRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pharmacist-dashboard': {
-      id: '/_authenticated/pharmacist-dashboard'
-      path: '/pharmacist-dashboard'
-      fullPath: '/pharmacist-dashboard'
-      preLoaderRoute: typeof AuthenticatedPharmacistDashboardRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/admin-upload-inventory': {
       id: '/_authenticated/admin-upload-inventory'
       path: '/admin-upload-inventory'
@@ -2548,6 +2541,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/internal/collect-feedback'
       preLoaderRoute: typeof ApiInternalCollectFeedbackRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/pharmacist/dashboard': {
+      id: '/_authenticated/pharmacist/dashboard'
+      path: '/pharmacist/dashboard'
+      fullPath: '/pharmacist/dashboard'
+      preLoaderRoute: typeof AuthenticatedPharmacistDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
@@ -2812,8 +2812,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminSalesReportsRoute: typeof AuthenticatedAdminSalesReportsRoute
   AuthenticatedAdminSystemHealthRoute: typeof AuthenticatedAdminSystemHealthRoute
   AuthenticatedAdminUploadInventoryRoute: typeof AuthenticatedAdminUploadInventoryRoute
-  AuthenticatedPharmacistDashboardRoute: typeof AuthenticatedPharmacistDashboardRoute
   AuthenticatedUploadPrescriptionRoute: typeof AuthenticatedUploadPrescriptionRoute
+  AuthenticatedPharmacistDashboardRoute: typeof AuthenticatedPharmacistDashboardRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -2827,8 +2827,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminSystemHealthRoute: AuthenticatedAdminSystemHealthRoute,
   AuthenticatedAdminUploadInventoryRoute:
     AuthenticatedAdminUploadInventoryRoute,
-  AuthenticatedPharmacistDashboardRoute: AuthenticatedPharmacistDashboardRoute,
   AuthenticatedUploadPrescriptionRoute: AuthenticatedUploadPrescriptionRoute,
+  AuthenticatedPharmacistDashboardRoute: AuthenticatedPharmacistDashboardRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -2992,13 +2992,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
