@@ -76,6 +76,9 @@
   --border: oklch(0.91 0.012 200);
   --input: oklch(0.91 0.012 200);
   --ring: oklch(0.54 0.09 190);
+
+  /* Titans accent — warm gold for highlights / golden borders */
+  --titans-gold: oklch(0.82 0.14 85);
 }
 
 
@@ -102,6 +105,7 @@
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.72 0.16 235);
+  --titans-gold: oklch(0.86 0.16 88);
 }
 
 @layer base {
