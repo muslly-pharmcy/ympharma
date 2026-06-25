@@ -46,6 +46,9 @@ export function HeroTitans() {
             <Button asChild size="lg" variant="outline" className="rounded-full px-8">
               <Link to="/prescription">رفع وصفة طبية</Link>
             </Button>
+            <Button asChild size="lg" variant="ghost" className="rounded-full px-8">
+              <Link to="/contact">تواصل معنا</Link>
+            </Button>
           </div>
         </Reveal>
 
