@@ -27,7 +27,7 @@ function AdminAuditPage() {
         .order("occurred_at", { ascending: false })
         .limit(500);
       if (error) throw error;
-      return (data ?? []) as Row[];
+      return ((data ?? []) as unknown) as Row[];
     },
   });
 

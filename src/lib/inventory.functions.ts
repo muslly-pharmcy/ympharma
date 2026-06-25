@@ -125,7 +125,7 @@ export const updateInventory = createServerFn({ method: "POST" })
     }
     if ("stock_qty" in cleaned) cleaned.last_restocked_at = new Date().toISOString();
 
-    const { error } = await supabase.from("products").update(cleaned).eq("id", id);
+    const { error } = await supabase.from("products").update(cleaned as any).eq("id", id);
     if (error) throw error;
     return { success: true };
   });
