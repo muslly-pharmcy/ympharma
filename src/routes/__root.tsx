@@ -112,10 +112,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:url", content: "https://muslly.com/" },
       { property: "og:site_name", content: "صيدلية المصلي" },
       { property: "og:locale", content: "ar_YE" },
-      { property: "og:image", content: "https://muslly.com/__l5e/assets-v1/a8ea62c1-1cf3-4707-a017-db411980bb36/pharmacy-storefront.jpg" },
-      { property: "og:image:width", content: "1200" },
-      { property: "og:image:height", content: "1200" },
-      { name: "twitter:image", content: "https://muslly.com/__l5e/assets-v1/a8ea62c1-1cf3-4707-a017-db411980bb36/pharmacy-storefront.jpg" },
+      { property: "og:image", content: "https://muslly.com/__l5e/assets-v1/a2d6f3f0-820c-4cbe-8156-cd82e1b4ca15/almusalli-golden-og.jpeg" },
+      { property: "og:image:width", content: "1280" },
+      { property: "og:image:height", content: "853" },
+      { name: "twitter:image", content: "https://muslly.com/__l5e/assets-v1/a2d6f3f0-820c-4cbe-8156-cd82e1b4ca15/almusalli-golden-og.jpeg" },
       { name: "theme-color", content: "#0e8f7a" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
@@ -127,9 +127,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "icon", type: "image/png", sizes: "192x192", href: "/icon-192.png" },
-      { rel: "icon", type: "image/png", sizes: "512x512", href: "/icon-512.png" },
-      { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
+      { rel: "icon", type: "image/png", sizes: "192x192", href: "https://muslly.com/__l5e/assets-v1/4af5aae8-415a-470d-ab54-15189a22a57e/almusalli-golden-mark.png" },
+      { rel: "icon", type: "image/png", sizes: "512x512", href: "https://muslly.com/__l5e/assets-v1/4af5aae8-415a-470d-ab54-15189a22a57e/almusalli-golden-mark.png" },
+      { rel: "apple-touch-icon", sizes: "180x180", href: "https://muslly.com/__l5e/assets-v1/4af5aae8-415a-470d-ab54-15189a22a57e/almusalli-golden-mark.png" },
+      { rel: "shortcut icon", href: "https://muslly.com/__l5e/assets-v1/4af5aae8-415a-470d-ab54-15189a22a57e/almusalli-golden-mark.png" },
       // Tajawal is self-hosted via @fontsource — no Google Fonts CDN dependency.
       // Preconnect/dns-prefetch to high-latency origins so the first image/Supabase
       // call doesn't pay a full TLS handshake on YemenNet/TeleYemen.

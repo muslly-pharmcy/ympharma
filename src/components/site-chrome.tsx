@@ -5,6 +5,7 @@ import { useCart } from "@/lib/cart";
 import { useI18n } from "@/lib/i18n";
 import { useSpeech } from "@/hooks/use-speech";
 import logoUrl from "@/assets/almusalli-logo.webp";
+import goldenLogoAsset from "@/assets/almusalli-golden-mark.png.asset.json";
 import { categories } from "@/lib/products";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -30,6 +31,24 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
   const { lang, setLang, t } = useI18n();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [logoVariant, setLogoVariant] = useState<"classic" | "golden">("classic");
+
+  useEffect(() => {
+    const read = () => {
+      try {
+        const v = localStorage.getItem("logoVariant");
+        setLogoVariant(v === "golden" ? "golden" : "classic");
+      } catch {}
+    };
+    read();
+    const onChange = () => read();
+    window.addEventListener("logo-variant-change", onChange);
+    window.addEventListener("storage", onChange);
+    return () => {
+      window.removeEventListener("logo-variant-change", onChange);
+      window.removeEventListener("storage", onChange);
+    };
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -37,6 +56,8 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const activeLogo = logoVariant === "golden" ? goldenLogoAsset.url : logoUrl;
 
   return (
     <>
@@ -68,7 +89,7 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
         <div className={`mx-auto flex max-w-7xl items-center gap-4 px-4 transition-all duration-300 ease-in-out ${scrolled ? "py-1.5" : "py-3"}`}>
           <Link to="/" className="flex items-center gap-3 shrink-0">
             <div className={`grid place-items-center rounded-2xl bg-white shadow-card overflow-hidden ring-1 ring-border transition-all duration-300 ${scrolled ? "size-9" : "size-12"}`}>
-              <img src={logoUrl} alt={t("brand.name")} width="40" height="40" decoding="async" fetchPriority="high" className="size-full object-contain p-0.5" />
+              <img src={activeLogo} alt={t("brand.name")} width="40" height="40" decoding="async" fetchPriority="high" className="size-full object-contain p-0.5" />
             </div>
             <div className="hidden min-w-0 sm:block">
               <span className={`block truncate font-black leading-none text-primary-deep transition-all ${scrolled ? "text-base" : "text-lg"}`}>{t("brand.name")}</span>

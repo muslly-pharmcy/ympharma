@@ -2,7 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n";
-import { Bell, Globe, Trash2, Download, Smartphone, Shield, Info, ArrowRight } from "lucide-react";
+import { Bell, Globe, Trash2, Download, Smartphone, Shield, Info, ArrowRight, Sparkles } from "lucide-react";
+import classicLogo from "@/assets/almusalli-logo.webp";
+import goldenLogoAsset from "@/assets/almusalli-golden-mark.png.asset.json";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -25,6 +27,23 @@ function SettingsPage() {
   const [installed, setInstalled] = useState(false);
   const [cacheSize, setCacheSize] = useState<string>("—");
   const [version] = useState("1.0.0");
+  const [logoVariant, setLogoVariant] = useState<"classic" | "golden">("classic");
+
+  useEffect(() => {
+    try {
+      const v = localStorage.getItem("logoVariant");
+      setLogoVariant(v === "golden" ? "golden" : "classic");
+    } catch {}
+  }, []);
+
+  function setVariant(v: "classic" | "golden") {
+    setLogoVariant(v);
+    try {
+      localStorage.setItem("logoVariant", v);
+      window.dispatchEvent(new Event("logo-variant-change"));
+    } catch {}
+    toast.success(v === "golden" ? "تم تفعيل الشعار الذهبي" : "تم العودة للشعار الكلاسيكي");
+  }
 
   useEffect(() => {
     if (typeof Notification !== "undefined") setNotifPerm(Notification.permission);
@@ -100,6 +119,27 @@ function SettingsPage() {
       </div>
 
       <div className="space-y-4">
+        <Section icon={<Sparkles className="h-5 w-5" />} title="شعار العلامة" desc="عاين وبدّل بين الشعار الكلاسيكي والنسخة الذهبية الفاخرة">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <LogoPreview
+              src={classicLogo}
+              label="الكلاسيكي"
+              active={logoVariant === "classic"}
+              onClick={() => setVariant("classic")}
+            />
+            <LogoPreview
+              src={goldenLogoAsset.url}
+              label="الذهبي"
+              active={logoVariant === "golden"}
+              onClick={() => setVariant("golden")}
+              dark
+            />
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            التفضيل يُحفظ على هذا الجهاز ويُطبَّق فوراً على رأس الموقع.
+          </p>
+        </Section>
+
         <Section icon={<Globe className="h-5 w-5" />} title="اللغة" desc="اختر لغة الواجهة">
           <div className="flex gap-2">
             <Btn active={lang === "ar"} onClick={() => setLang("ar")}>العربية</Btn>
@@ -156,6 +196,33 @@ function SettingsPage() {
         </Section>
       </div>
     </div>
+  );
+}
+
+function LogoPreview({
+  src, label, active, onClick, dark,
+}: { src: string; label: string; active: boolean; onClick: () => void; dark?: boolean }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`group relative flex flex-col items-center gap-2 rounded-xl border p-4 transition-all ${
+        active ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"
+      } ${dark ? "bg-[#0a0a0b]" : "bg-white"}`}
+      aria-pressed={active}
+    >
+      <div className="grid size-20 place-items-center">
+        <img src={src} alt={label} className="size-full object-contain" />
+      </div>
+      <span className={`text-sm font-semibold ${dark ? "text-[color:var(--titans-gold,#d4af37)]" : "text-foreground"}`}>
+        {label}
+      </span>
+      {active && (
+        <span className="absolute end-2 top-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">
+          مُفعَّل
+        </span>
+      )}
+    </button>
   );
 }
 
