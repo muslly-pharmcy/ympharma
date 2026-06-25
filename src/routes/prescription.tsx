@@ -14,6 +14,7 @@ import {
   verifyUploaded, commitPending,
   type RxPending,
 } from "@/lib/rx-pending";
+import { validateUploadedPrescriptionFile } from "@/lib/upload-validation.functions";
 
 export const Route = createFileRoute("/prescription")({
   head: () => ({
