@@ -97,6 +97,7 @@ import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
 import { Route as AuthenticatedUploadPrescriptionRouteImport } from './routes/_authenticated/upload-prescription'
 import { Route as AuthenticatedAdminUploadInventoryRouteImport } from './routes/_authenticated/admin-upload-inventory'
 import { Route as AuthenticatedAdminSystemHealthRouteImport } from './routes/_authenticated/admin-system-health'
+import { Route as AuthenticatedAdminSlackTestRouteImport } from './routes/_authenticated/admin-slack-test'
 import { Route as AuthenticatedAdminSalesReportsRouteImport } from './routes/_authenticated/admin-sales-reports'
 import { Route as AuthenticatedAdminMarketingCampaignsRouteImport } from './routes/_authenticated/admin-marketing-campaigns'
 import { Route as AuthenticatedAdminInventorySyncLogsRouteImport } from './routes/_authenticated/admin-inventory-sync-logs'
@@ -605,6 +606,12 @@ const AuthenticatedAdminSystemHealthRoute =
     path: '/admin-system-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminSlackTestRoute =
+  AuthenticatedAdminSlackTestRouteImport.update({
+    id: '/admin-slack-test',
+    path: '/admin-slack-test',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminSalesReportsRoute =
   AuthenticatedAdminSalesReportsRouteImport.update({
     id: '/admin-sales-reports',
@@ -1031,6 +1038,7 @@ export interface FileRoutesByFullPath {
   '/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
   '/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
   '/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
+  '/admin-slack-test': typeof AuthenticatedAdminSlackTestRoute
   '/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
   '/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
@@ -1179,6 +1187,7 @@ export interface FileRoutesByTo {
   '/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
   '/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
   '/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
+  '/admin-slack-test': typeof AuthenticatedAdminSlackTestRoute
   '/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
   '/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
@@ -1329,6 +1338,7 @@ export interface FileRoutesById {
   '/_authenticated/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
   '/_authenticated/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
   '/_authenticated/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
+  '/_authenticated/admin-slack-test': typeof AuthenticatedAdminSlackTestRoute
   '/_authenticated/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
   '/_authenticated/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
   '/_authenticated/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
@@ -1479,6 +1489,7 @@ export interface FileRouteTypes {
     | '/admin-inventory-sync-logs'
     | '/admin-marketing-campaigns'
     | '/admin-sales-reports'
+    | '/admin-slack-test'
     | '/admin-system-health'
     | '/admin-upload-inventory'
     | '/upload-prescription'
@@ -1627,6 +1638,7 @@ export interface FileRouteTypes {
     | '/admin-inventory-sync-logs'
     | '/admin-marketing-campaigns'
     | '/admin-sales-reports'
+    | '/admin-slack-test'
     | '/admin-system-health'
     | '/admin-upload-inventory'
     | '/upload-prescription'
@@ -1776,6 +1788,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin-inventory-sync-logs'
     | '/_authenticated/admin-marketing-campaigns'
     | '/_authenticated/admin-sales-reports'
+    | '/_authenticated/admin-slack-test'
     | '/_authenticated/admin-system-health'
     | '/_authenticated/admin-upload-inventory'
     | '/_authenticated/upload-prescription'
@@ -2589,6 +2602,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSystemHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin-slack-test': {
+      id: '/_authenticated/admin-slack-test'
+      path: '/admin-slack-test'
+      fullPath: '/admin-slack-test'
+      preLoaderRoute: typeof AuthenticatedAdminSlackTestRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin-sales-reports': {
       id: '/_authenticated/admin-sales-reports'
       path: '/admin-sales-reports'
@@ -3014,6 +3034,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminInventorySyncLogsRoute: typeof AuthenticatedAdminInventorySyncLogsRoute
   AuthenticatedAdminMarketingCampaignsRoute: typeof AuthenticatedAdminMarketingCampaignsRoute
   AuthenticatedAdminSalesReportsRoute: typeof AuthenticatedAdminSalesReportsRoute
+  AuthenticatedAdminSlackTestRoute: typeof AuthenticatedAdminSlackTestRoute
   AuthenticatedAdminSystemHealthRoute: typeof AuthenticatedAdminSystemHealthRoute
   AuthenticatedAdminUploadInventoryRoute: typeof AuthenticatedAdminUploadInventoryRoute
   AuthenticatedUploadPrescriptionRoute: typeof AuthenticatedUploadPrescriptionRoute
@@ -3031,6 +3052,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminMarketingCampaignsRoute:
     AuthenticatedAdminMarketingCampaignsRoute,
   AuthenticatedAdminSalesReportsRoute: AuthenticatedAdminSalesReportsRoute,
+  AuthenticatedAdminSlackTestRoute: AuthenticatedAdminSlackTestRoute,
   AuthenticatedAdminSystemHealthRoute: AuthenticatedAdminSystemHealthRoute,
   AuthenticatedAdminUploadInventoryRoute:
     AuthenticatedAdminUploadInventoryRoute,
