@@ -199,6 +199,33 @@ function SettingsPage() {
   );
 }
 
+function LogoPreview({
+  src, label, active, onClick, dark,
+}: { src: string; label: string; active: boolean; onClick: () => void; dark?: boolean }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`group relative flex flex-col items-center gap-2 rounded-xl border p-4 transition-all ${
+        active ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"
+      } ${dark ? "bg-[#0a0a0b]" : "bg-white"}`}
+      aria-pressed={active}
+    >
+      <div className="grid size-20 place-items-center">
+        <img src={src} alt={label} className="size-full object-contain" />
+      </div>
+      <span className={`text-sm font-semibold ${dark ? "text-[color:var(--titans-gold,#d4af37)]" : "text-foreground"}`}>
+        {label}
+      </span>
+      {active && (
+        <span className="absolute end-2 top-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">
+          مُفعَّل
+        </span>
+      )}
+    </button>
+  );
+}
+
 function Section({ icon, title, desc, children }: { icon: React.ReactNode; title: string; desc: string; children: React.ReactNode }) {
   return (
     <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
