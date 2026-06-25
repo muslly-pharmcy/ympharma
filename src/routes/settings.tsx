@@ -2,7 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n";
-import { Bell, Globe, Trash2, Download, Smartphone, Shield, Info, ArrowRight } from "lucide-react";
+import { Bell, Globe, Trash2, Download, Smartphone, Shield, Info, ArrowRight, Sparkles } from "lucide-react";
+import classicLogo from "@/assets/almusalli-logo.webp";
+import goldenLogoAsset from "@/assets/almusalli-golden-mark.png.asset.json";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
