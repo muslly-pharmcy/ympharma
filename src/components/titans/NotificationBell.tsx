@@ -73,8 +73,18 @@ export function NotificationBell() {
 
       {open && (
         <div className="absolute end-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-xl border border-white/10 bg-zinc-950/95 backdrop-blur-md shadow-2xl z-50">
-          <div className="px-4 py-2 border-b border-white/10 text-sm font-semibold text-white">
-            الإشعارات
+          <div className="px-4 py-2 border-b border-white/10 text-sm font-semibold text-white flex items-center justify-between">
+            <span>الإشعارات</span>
+            {unread > 0 && (
+              <button
+                type="button"
+                onClick={() => markAllMutation.mutate()}
+                disabled={markAllMutation.isPending}
+                className="text-[11px] text-sky-400 hover:text-sky-300 disabled:opacity-50"
+              >
+                تحديد الكل كمقروء
+              </button>
+            )}
           </div>
           {notifications.length === 0 ? (
             <div className="p-6 text-center text-sm text-white/60">
