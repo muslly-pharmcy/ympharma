@@ -127,6 +127,7 @@ import { Route as ApiPublicHooksWhatsappRetryRouteImport } from './routes/api/pu
 import { Route as ApiPublicHooksWeeklyExecReportRouteImport } from './routes/api/public/hooks/weekly-exec-report'
 import { Route as ApiPublicHooksWeeklyAiEnrichRouteImport } from './routes/api/public/hooks/weekly-ai-enrich'
 import { Route as ApiPublicHooksWaStaleConversationsRouteImport } from './routes/api/public/hooks/wa-stale-conversations'
+import { Route as ApiPublicHooksValidateUploadsRouteImport } from './routes/api/public/hooks/validate-uploads'
 import { Route as ApiPublicHooksTestAlertRouteImport } from './routes/api/public/hooks/test-alert'
 import { Route as ApiPublicHooksSocialCallbackRouteImport } from './routes/api/public/hooks/social-callback'
 import { Route as ApiPublicHooksRxNotifyRouteImport } from './routes/api/public/hooks/rx-notify'
@@ -777,6 +778,12 @@ const ApiPublicHooksWaStaleConversationsRoute =
     path: '/api/public/hooks/wa-stale-conversations',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksValidateUploadsRoute =
+  ApiPublicHooksValidateUploadsRouteImport.update({
+    id: '/api/public/hooks/validate-uploads',
+    path: '/api/public/hooks/validate-uploads',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksTestAlertRoute = ApiPublicHooksTestAlertRouteImport.update({
   id: '/api/public/hooks/test-alert',
   path: '/api/public/hooks/test-alert',
@@ -1086,6 +1093,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
   '/api/public/hooks/social-callback': typeof ApiPublicHooksSocialCallbackRoute
   '/api/public/hooks/test-alert': typeof ApiPublicHooksTestAlertRoute
+  '/api/public/hooks/validate-uploads': typeof ApiPublicHooksValidateUploadsRoute
   '/api/public/hooks/wa-stale-conversations': typeof ApiPublicHooksWaStaleConversationsRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
@@ -1236,6 +1244,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
   '/api/public/hooks/social-callback': typeof ApiPublicHooksSocialCallbackRoute
   '/api/public/hooks/test-alert': typeof ApiPublicHooksTestAlertRoute
+  '/api/public/hooks/validate-uploads': typeof ApiPublicHooksValidateUploadsRoute
   '/api/public/hooks/wa-stale-conversations': typeof ApiPublicHooksWaStaleConversationsRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
@@ -1388,6 +1397,7 @@ export interface FileRoutesById {
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
   '/api/public/hooks/social-callback': typeof ApiPublicHooksSocialCallbackRoute
   '/api/public/hooks/test-alert': typeof ApiPublicHooksTestAlertRoute
+  '/api/public/hooks/validate-uploads': typeof ApiPublicHooksValidateUploadsRoute
   '/api/public/hooks/wa-stale-conversations': typeof ApiPublicHooksWaStaleConversationsRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
@@ -1540,6 +1550,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/rx-notify'
     | '/api/public/hooks/social-callback'
     | '/api/public/hooks/test-alert'
+    | '/api/public/hooks/validate-uploads'
     | '/api/public/hooks/wa-stale-conversations'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
@@ -1690,6 +1701,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/rx-notify'
     | '/api/public/hooks/social-callback'
     | '/api/public/hooks/test-alert'
+    | '/api/public/hooks/validate-uploads'
     | '/api/public/hooks/wa-stale-conversations'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
@@ -1841,6 +1853,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/rx-notify'
     | '/api/public/hooks/social-callback'
     | '/api/public/hooks/test-alert'
+    | '/api/public/hooks/validate-uploads'
     | '/api/public/hooks/wa-stale-conversations'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
@@ -1976,6 +1989,7 @@ export interface RootRouteChildren {
   ApiPublicHooksRxNotifyRoute: typeof ApiPublicHooksRxNotifyRoute
   ApiPublicHooksSocialCallbackRoute: typeof ApiPublicHooksSocialCallbackRoute
   ApiPublicHooksTestAlertRoute: typeof ApiPublicHooksTestAlertRoute
+  ApiPublicHooksValidateUploadsRoute: typeof ApiPublicHooksValidateUploadsRoute
   ApiPublicHooksWaStaleConversationsRoute: typeof ApiPublicHooksWaStaleConversationsRoute
   ApiPublicHooksWeeklyAiEnrichRoute: typeof ApiPublicHooksWeeklyAiEnrichRoute
   ApiPublicHooksWeeklyExecReportRoute: typeof ApiPublicHooksWeeklyExecReportRoute
@@ -2825,6 +2839,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksWaStaleConversationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/validate-uploads': {
+      id: '/api/public/hooks/validate-uploads'
+      path: '/api/public/hooks/validate-uploads'
+      fullPath: '/api/public/hooks/validate-uploads'
+      preLoaderRoute: typeof ApiPublicHooksValidateUploadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/test-alert': {
       id: '/api/public/hooks/test-alert'
       path: '/api/public/hooks/test-alert'
@@ -3226,6 +3247,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksRxNotifyRoute: ApiPublicHooksRxNotifyRoute,
   ApiPublicHooksSocialCallbackRoute: ApiPublicHooksSocialCallbackRoute,
   ApiPublicHooksTestAlertRoute: ApiPublicHooksTestAlertRoute,
+  ApiPublicHooksValidateUploadsRoute: ApiPublicHooksValidateUploadsRoute,
   ApiPublicHooksWaStaleConversationsRoute:
     ApiPublicHooksWaStaleConversationsRoute,
   ApiPublicHooksWeeklyAiEnrichRoute: ApiPublicHooksWeeklyAiEnrichRoute,
