@@ -65,7 +65,7 @@ export const Route = createFileRoute("/api/public/hooks/hourly-self-heal")({
             for (const row of dlq ?? []) {
               const { error: upErr } = await supabaseAdmin
                 .from("agent_events_dlq")
-                .update({ failed_at: null, retry_count: ((row as { retry_count?: number }).retry_count ?? 0) + 1 })
+                .update({ retry_count: ((row as { retry_count?: number }).retry_count ?? 0) + 1 })
                 .eq("id", row.id);
               if (!upErr) summary.dlq_requeued += 1;
             }
