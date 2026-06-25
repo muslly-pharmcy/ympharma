@@ -4,7 +4,9 @@ import { Bell, CheckCircle2, XCircle, Clock, AlertCircle } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import {
   getUserNotifications,
+  getUnreadCount,
   markNotificationRead,
+  markAllNotificationsRead,
 } from "@/lib/notifications.functions";
 
 const iconFor = (type: string) => {
@@ -24,7 +26,9 @@ export function NotificationBell() {
   const [open, setOpen] = useState(false);
   const qc = useQueryClient();
   const fetchList = useServerFn(getUserNotifications);
+  const fetchUnread = useServerFn(getUnreadCount);
   const mark = useServerFn(markNotificationRead);
+  const markAll = useServerFn(markAllNotificationsRead);
 
   const { data } = useQuery({
     queryKey: ["notifications", "bell"],
@@ -32,13 +36,24 @@ export function NotificationBell() {
     refetchInterval: 30_000,
   });
 
+  const { data: unreadData } = useQuery({
+    queryKey: ["notifications-unread-count"],
+    queryFn: () => fetchUnread(),
+    refetchInterval: 30_000,
+  });
+
   const markMutation = useMutation({
-    mutationFn: (id: string) => mark({ data: { notificationId: id } }),
+    mutationFn: (id: string) => mark({ data: { id } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications"] }),
+  });
+
+  const markAllMutation = useMutation({
+    mutationFn: () => markAll(),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications"] }),
   });
 
   const notifications = data?.notifications ?? [];
-  const unread = notifications.filter((n: any) => !n.read_at).length;
+  const unread = unreadData?.count ?? notifications.filter((n: any) => !n.read).length;
 
   return (
     <div className="titans-scope relative">
@@ -58,8 +73,18 @@ export function NotificationBell() {
 
       {open && (
         <div className="absolute end-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-xl border border-white/10 bg-zinc-950/95 backdrop-blur-md shadow-2xl z-50">
-          <div className="px-4 py-2 border-b border-white/10 text-sm font-semibold text-white">
-            الإشعارات
+          <div className="px-4 py-2 border-b border-white/10 text-sm font-semibold text-white flex items-center justify-between">
+            <span>الإشعارات</span>
+            {unread > 0 && (
+              <button
+                type="button"
+                onClick={() => markAllMutation.mutate()}
+                disabled={markAllMutation.isPending}
+                className="text-[11px] text-sky-400 hover:text-sky-300 disabled:opacity-50"
+              >
+                تحديد الكل كمقروء
+              </button>
+            )}
           </div>
           {notifications.length === 0 ? (
             <div className="p-6 text-center text-sm text-white/60">
@@ -70,8 +95,8 @@ export function NotificationBell() {
               {notifications.map((n: any) => (
                 <li
                   key={n.id}
-                  className={`p-3 cursor-pointer hover:bg-white/5 ${!n.read_at ? "bg-white/[0.02]" : ""}`}
-                  onClick={() => !n.read_at && markMutation.mutate(n.id)}
+                  className={`p-3 cursor-pointer hover:bg-white/5 ${!n.read ? "bg-white/[0.02]" : ""}`}
+                  onClick={() => !n.read && markMutation.mutate(n.id)}
                 >
                   <div className="flex items-start gap-2">
                     <div className="mt-0.5">{iconFor(n.type)}</div>
@@ -86,7 +111,7 @@ export function NotificationBell() {
                         {new Date(n.created_at).toLocaleString("ar-SA")}
                       </div>
                     </div>
-                    {!n.read_at && (
+                    {!n.read && (
                       <span className="w-2 h-2 rounded-full bg-sky-400 mt-1.5 shrink-0" />
                     )}
                   </div>
