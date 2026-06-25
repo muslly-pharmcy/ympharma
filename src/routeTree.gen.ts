@@ -109,6 +109,7 @@ import { Route as ApiPublicIncidentCheckRouteImport } from './routes/api/public/
 import { Route as ApiPublicImgRouteImport } from './routes/api/public/img'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiInternalCollectFeedbackRouteImport } from './routes/api/internal/collect-feedback'
+import { Route as AuthenticatedPharmacistDashboardRouteImport } from './routes/_authenticated/pharmacist/dashboard'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -661,6 +662,12 @@ const ApiInternalCollectFeedbackRoute =
     path: '/api/internal/collect-feedback',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedPharmacistDashboardRoute =
+  AuthenticatedPharmacistDashboardRouteImport.update({
+    id: '/pharmacist/dashboard',
+    path: '/pharmacist/dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -963,6 +970,7 @@ export interface FileRoutesByFullPath {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
+  '/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/api/internal/collect-feedback': typeof ApiInternalCollectFeedbackRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/img': typeof ApiPublicImgRoute
@@ -1100,6 +1108,7 @@ export interface FileRoutesByTo {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
+  '/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/api/internal/collect-feedback': typeof ApiInternalCollectFeedbackRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/img': typeof ApiPublicImgRoute
@@ -1239,6 +1248,7 @@ export interface FileRoutesById {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
+  '/_authenticated/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/api/internal/collect-feedback': typeof ApiInternalCollectFeedbackRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/img': typeof ApiPublicImgRoute
@@ -1378,6 +1388,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/product/$id'
     | '/test/features'
+    | '/pharmacist/dashboard'
     | '/api/internal/collect-feedback'
     | '/api/public/health'
     | '/api/public/img'
@@ -1515,6 +1526,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/product/$id'
     | '/test/features'
+    | '/pharmacist/dashboard'
     | '/api/internal/collect-feedback'
     | '/api/public/health'
     | '/api/public/img'
@@ -1653,6 +1665,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/product/$id'
     | '/test/features'
+    | '/_authenticated/pharmacist/dashboard'
     | '/api/internal/collect-feedback'
     | '/api/public/health'
     | '/api/public/img'
@@ -2529,6 +2542,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiInternalCollectFeedbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/pharmacist/dashboard': {
+      id: '/_authenticated/pharmacist/dashboard'
+      path: '/pharmacist/dashboard'
+      fullPath: '/pharmacist/dashboard'
+      preLoaderRoute: typeof AuthenticatedPharmacistDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -2793,6 +2813,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminSystemHealthRoute: typeof AuthenticatedAdminSystemHealthRoute
   AuthenticatedAdminUploadInventoryRoute: typeof AuthenticatedAdminUploadInventoryRoute
   AuthenticatedUploadPrescriptionRoute: typeof AuthenticatedUploadPrescriptionRoute
+  AuthenticatedPharmacistDashboardRoute: typeof AuthenticatedPharmacistDashboardRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -2807,6 +2828,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminUploadInventoryRoute:
     AuthenticatedAdminUploadInventoryRoute,
   AuthenticatedUploadPrescriptionRoute: AuthenticatedUploadPrescriptionRoute,
+  AuthenticatedPharmacistDashboardRoute: AuthenticatedPharmacistDashboardRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
