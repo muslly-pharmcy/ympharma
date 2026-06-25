@@ -80,8 +80,8 @@ export async function sendSms(opts: {
   const twilioKey = process.env.TWILIO_API_KEY;
   const from = process.env.TWILIO_FROM_NUMBER;
   if (!lovableKey || !twilioKey || !from) return false;
-  try {
-    const r = await fetch("https://connector-gateway.lovable.dev/twilio/Messages.json", {
+  return postWithRetry("twilio-sms", () =>
+    fetch("https://connector-gateway.lovable.dev/twilio/Messages.json", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${lovableKey}`,
@@ -89,13 +89,8 @@ export async function sendSms(opts: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: new URLSearchParams({ To: opts.to, From: from, Body: opts.message.slice(0, 1500) }),
-    });
-    if (!r.ok) console.error("[alert-dispatch] twilio sms HTTP", r.status, await r.text().catch(() => ""));
-    return r.ok;
-  } catch (e) {
-    console.error("[alert-dispatch] sms failed:", e);
-    return false;
-  }
+    }),
+  );
 }
 
 export async function sendWhatsApp(opts: {
