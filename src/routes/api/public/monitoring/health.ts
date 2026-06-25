@@ -48,8 +48,8 @@ export const Route = createFileRoute("/api/public/monitoring/health")({
               .lt("stock_qty", 5),
             supabaseAdmin
               .from("health_checks")
-              .select("recorded_at")
-              .order("recorded_at", { ascending: false })
+              .select("created_at")
+              .order("created_at", { ascending: false })
               .limit(1)
               .maybeSingle(),
             supabaseAdmin
