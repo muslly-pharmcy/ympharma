@@ -25,6 +25,7 @@ import { Route as NetworkHealthRouteImport } from './routes/network-health'
 import { Route as MyNotificationsRouteImport } from './routes/my-notifications'
 import { Route as LoyaltyRouteImport } from './routes/loyalty'
 import { Route as InsuranceRouteImport } from './routes/insurance'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ConditionsRouteImport } from './routes/conditions'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as BundlesRouteImport } from './routes/bundles'
@@ -225,6 +226,11 @@ const LoyaltyRoute = LoyaltyRouteImport.update({
 const InsuranceRoute = InsuranceRouteImport.update({
   id: '/insurance',
   path: '/insurance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConditionsRoute = ConditionsRouteImport.update({
@@ -942,6 +948,7 @@ export interface FileRoutesByFullPath {
   '/bundles': typeof BundlesRoute
   '/cart': typeof CartRoute
   '/conditions': typeof ConditionsRouteWithChildren
+  '/contact': typeof ContactRoute
   '/insurance': typeof InsuranceRoute
   '/loyalty': typeof LoyaltyRoute
   '/my-notifications': typeof MyNotificationsRoute
@@ -1080,6 +1087,7 @@ export interface FileRoutesByTo {
   '/bundles': typeof BundlesRoute
   '/cart': typeof CartRoute
   '/conditions': typeof ConditionsRouteWithChildren
+  '/contact': typeof ContactRoute
   '/insurance': typeof InsuranceRoute
   '/loyalty': typeof LoyaltyRoute
   '/my-notifications': typeof MyNotificationsRoute
@@ -1220,6 +1228,7 @@ export interface FileRoutesById {
   '/bundles': typeof BundlesRoute
   '/cart': typeof CartRoute
   '/conditions': typeof ConditionsRouteWithChildren
+  '/contact': typeof ContactRoute
   '/insurance': typeof InsuranceRoute
   '/loyalty': typeof LoyaltyRoute
   '/my-notifications': typeof MyNotificationsRoute
@@ -1360,6 +1369,7 @@ export interface FileRouteTypes {
     | '/bundles'
     | '/cart'
     | '/conditions'
+    | '/contact'
     | '/insurance'
     | '/loyalty'
     | '/my-notifications'
@@ -1498,6 +1508,7 @@ export interface FileRouteTypes {
     | '/bundles'
     | '/cart'
     | '/conditions'
+    | '/contact'
     | '/insurance'
     | '/loyalty'
     | '/my-notifications'
@@ -1637,6 +1648,7 @@ export interface FileRouteTypes {
     | '/bundles'
     | '/cart'
     | '/conditions'
+    | '/contact'
     | '/insurance'
     | '/loyalty'
     | '/my-notifications'
@@ -1777,6 +1789,7 @@ export interface RootRouteChildren {
   BundlesRoute: typeof BundlesRoute
   CartRoute: typeof CartRoute
   ConditionsRoute: typeof ConditionsRouteWithChildren
+  ContactRoute: typeof ContactRoute
   InsuranceRoute: typeof InsuranceRoute
   LoyaltyRoute: typeof LoyaltyRoute
   MyNotificationsRoute: typeof MyNotificationsRoute
@@ -1952,6 +1965,13 @@ declare module '@tanstack/react-router' {
       path: '/insurance'
       fullPath: '/insurance'
       preLoaderRoute: typeof InsuranceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/conditions': {
@@ -2925,6 +2945,7 @@ const rootRouteChildren: RootRouteChildren = {
   BundlesRoute: BundlesRoute,
   CartRoute: CartRoute,
   ConditionsRoute: ConditionsRouteWithChildren,
+  ContactRoute: ContactRoute,
   InsuranceRoute: InsuranceRoute,
   LoyaltyRoute: LoyaltyRoute,
   MyNotificationsRoute: MyNotificationsRoute,

@@ -4,6 +4,7 @@ import { FeaturesTitans } from "@/components/titans/sections/FeaturesTitans";
 import { TestimonialsTitans } from "@/components/titans/sections/TestimonialsTitans";
 import { PricingTitans } from "@/components/titans/sections/PricingTitans";
 import { FooterTitans } from "@/components/titans/sections/FooterTitans";
+import { CursorFollower } from "@/components/titans/motion/CursorFollower";
 
 export const Route = createFileRoute("/titans")({
   head: () => ({
@@ -27,6 +28,7 @@ export const Route = createFileRoute("/titans")({
 function TitansLanding() {
   return (
     <main className="titans-scope min-h-screen">
+      <CursorFollower />
       <HeroTitans />
       <FeaturesTitans />
       <TestimonialsTitans />
