@@ -26,7 +26,9 @@ export function NotificationBell() {
   const [open, setOpen] = useState(false);
   const qc = useQueryClient();
   const fetchList = useServerFn(getUserNotifications);
+  const fetchUnread = useServerFn(getUnreadCount);
   const mark = useServerFn(markNotificationRead);
+  const markAll = useServerFn(markAllNotificationsRead);
 
   const { data } = useQuery({
     queryKey: ["notifications", "bell"],
@@ -34,13 +36,24 @@ export function NotificationBell() {
     refetchInterval: 30_000,
   });
 
+  const { data: unreadData } = useQuery({
+    queryKey: ["notifications-unread-count"],
+    queryFn: () => fetchUnread(),
+    refetchInterval: 30_000,
+  });
+
   const markMutation = useMutation({
-    mutationFn: (id: string) => mark({ data: { notificationId: id } }),
+    mutationFn: (id: string) => mark({ data: { id } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications"] }),
+  });
+
+  const markAllMutation = useMutation({
+    mutationFn: () => markAll(),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications"] }),
   });
 
   const notifications = data?.notifications ?? [];
-  const unread = notifications.filter((n: any) => !n.read_at).length;
+  const unread = unreadData?.count ?? notifications.filter((n: any) => !n.read).length;
 
   return (
     <div className="titans-scope relative">
