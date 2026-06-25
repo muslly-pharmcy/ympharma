@@ -8,10 +8,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { verifyCronSecret } from "@/lib/cron-auth.server";
 
-const MAX_ATTEMPTS = 3;
+const MAX_ATTEMPTS = 5;
 const BATCH_LIMIT = 25;
 const CONCURRENCY = 3;
-const MIN_AGE_MS = 60_000; // wait ≥1min after last attempt before retrying
+// Exponential backoff in minutes per attempt index (1..5).
+// 5min, 15min, 45min, 2h, 6h. Capped at 6h.
+function backoffMinutes(attempt: number): number {
+  const ladder = [5, 15, 45, 120, 360];
+  return ladder[Math.min(attempt, ladder.length - 1)] ?? 360;
+}
+
 
 async function runWithConcurrency<T, R>(
   items: T[],
