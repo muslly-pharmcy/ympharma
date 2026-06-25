@@ -95,8 +95,8 @@ export function NotificationBell() {
               {notifications.map((n: any) => (
                 <li
                   key={n.id}
-                  className={`p-3 cursor-pointer hover:bg-white/5 ${!n.read_at ? "bg-white/[0.02]" : ""}`}
-                  onClick={() => !n.read_at && markMutation.mutate(n.id)}
+                  className={`p-3 cursor-pointer hover:bg-white/5 ${!n.read ? "bg-white/[0.02]" : ""}`}
+                  onClick={() => !n.read && markMutation.mutate(n.id)}
                 >
                   <div className="flex items-start gap-2">
                     <div className="mt-0.5">{iconFor(n.type)}</div>
@@ -111,7 +111,7 @@ export function NotificationBell() {
                         {new Date(n.created_at).toLocaleString("ar-SA")}
                       </div>
                     </div>
-                    {!n.read_at && (
+                    {!n.read && (
                       <span className="w-2 h-2 rounded-full bg-sky-400 mt-1.5 shrink-0" />
                     )}
                   </div>
