@@ -89,7 +89,7 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
         <div className={`mx-auto flex max-w-7xl items-center gap-4 px-4 transition-all duration-300 ease-in-out ${scrolled ? "py-1.5" : "py-3"}`}>
           <Link to="/" className="flex items-center gap-3 shrink-0">
             <div className={`grid place-items-center rounded-2xl bg-white shadow-card overflow-hidden ring-1 ring-border transition-all duration-300 ${scrolled ? "size-9" : "size-12"}`}>
-              <img src={logoUrl} alt={t("brand.name")} width="40" height="40" decoding="async" fetchPriority="high" className="size-full object-contain p-0.5" />
+              <img src={activeLogo} alt={t("brand.name")} width="40" height="40" decoding="async" fetchPriority="high" className="size-full object-contain p-0.5" />
             </div>
             <div className="hidden min-w-0 sm:block">
               <span className={`block truncate font-black leading-none text-primary-deep transition-all ${scrolled ? "text-base" : "text-lg"}`}>{t("brand.name")}</span>
@@ -193,7 +193,7 @@ export function SiteFooter() {
         <div>
           <div className="flex items-center gap-3">
             <div className="grid size-11 place-items-center rounded-2xl bg-white ring-1 ring-border overflow-hidden">
-              <img src={logoUrl} alt="" width="36" height="36" loading="lazy" decoding="async" className="size-9 object-contain" />
+              <img src={activeLogo} alt="" width="36" height="36" loading="lazy" decoding="async" className="size-9 object-contain" />
             </div>
             <div>
               <p className="font-black text-primary-deep">{t("brand.name")}</p>
