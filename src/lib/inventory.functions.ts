@@ -1,120 +1,151 @@
-// Inventory management server functions.
-// Staff-only; uses `requireSupabaseAuth` + role/permission gate.
-
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
-async function assertInventoryAccess(supabase: any, userId: string) {
-  const [{ data: role }, { data: perms }] = await Promise.all([
-    supabase.from("user_roles").select("role").eq("user_id", userId).in("role", ["owner", "admin"]).maybeSingle(),
-    supabase.from("staff_permissions").select("permission").eq("user_id", userId),
+export type InventoryRow = {
+  id: string;
+  legacy_id: number;
+  name: string;
+  brand: string | null;
+  price: number;
+  stock_qty: number;
+  reorder_point: number;
+  expiry_date: string | null;
+  supplier_name: string | null;
+  supplier_cost: number | null;
+  track_stock: boolean;
+  is_published: boolean;
+};
+
+async function assertAdmin(supabase: any, userId: string) {
+  const [adminRes, ownerRes] = await Promise.all([
+    supabase.rpc("has_role", { _user_id: userId, _role: "admin" }),
+    supabase.rpc("has_role", { _user_id: userId, _role: "owner" }),
   ]);
-  if (role) return;
-  const list = ((perms ?? []) as { permission: string }[]).map((p) => p.permission);
-  if (!list.some((p) => p === "products" || p === "orders")) {
-    throw new Error("ليست لديك صلاحية إدارة المخزون");
-  }
+  if (!adminRes.data && !ownerRes.data) throw new Error("غير مصرح");
 }
+
+const SELECT_COLS =
+  "id, legacy_id, name, brand, price, stock_qty, reorder_point, expiry_date, supplier_name, supplier_cost, track_stock, is_published";
+
+// -------- Report (KPIs) --------
 
 export const fetchInventoryReport = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertInventoryAccess(context.supabase, context.userId);
-    const { data, error } = await context.supabase.rpc("inventory_report" as never);
-    if (error) throw new Error(error.message);
-    return data as {
-      low_stock: Array<{ legacy_id: number; name: string; stock_qty: number; reorder_point: number; supplier_name: string | null }>;
-      near_expiry: Array<{ legacy_id: number; name: string; expiry_date: string; stock_qty: number }>;
-      out_of_stock: Array<{ legacy_id: number; name: string }>;
-      inventory_value: number;
-      checked_at: string;
-    };
+    const { supabase, userId } = context;
+    await assertAdmin(supabase, userId);
+
+    // Pull a bounded slice to compute KPIs. For larger catalogs swap to a SQL function.
+    const { data, error } = await supabase
+      .from("products")
+      .select(SELECT_COLS)
+      .limit(5000);
+    if (error) throw error;
+
+    const rows = (data ?? []) as unknown as InventoryRow[];
+    const tracked = rows.filter((r) => r.track_stock);
+    const low_stock = tracked.filter((r) => r.stock_qty > 0 && r.stock_qty <= r.reorder_point);
+    const out_of_stock = tracked.filter((r) => (r.stock_qty ?? 0) <= 0);
+
+    const now = Date.now();
+    const horizon = now + 90 * 24 * 60 * 60 * 1000;
+    const near_expiry = rows.filter((r) => {
+      if (!r.expiry_date) return false;
+      const t = new Date(r.expiry_date).getTime();
+      return t >= now && t <= horizon;
+    });
+
+    const inventory_value = rows.reduce(
+      (sum, r) => sum + (r.stock_qty ?? 0) * Number(r.supplier_cost ?? r.price ?? 0),
+      0,
+    );
+
+    return { low_stock, out_of_stock, near_expiry, inventory_value };
   });
+
+// -------- List rows --------
 
 export const listInventoryRows = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z.object({
-      search: z.string().trim().max(120).optional(),
-      onlyLow: z.boolean().optional(),
-      onlyTracked: z.boolean().optional(),
-      limit: z.number().int().min(1).max(500).optional(),
-    }).parse(d ?? {}),
+  .inputValidator((d) =>
+    z
+      .object({
+        search: z.string().optional(),
+        onlyLow: z.boolean().optional(),
+        onlyTracked: z.boolean().optional(),
+        limit: z.number().int().min(1).max(1000).default(200),
+      })
+      .parse(d ?? {}),
   )
-  .handler(async ({ data, context }) => {
-    await assertInventoryAccess(context.supabase, context.userId);
-    let q = context.supabase
-      .from("products")
-      .select("id,legacy_id,name,brand,price,stock_qty,reorder_point,expiry_date,supplier_name,supplier_cost,track_stock,is_published")
-      .order("name", { ascending: true })
-      .limit(data.limit ?? 200);
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    await assertAdmin(supabase, userId);
+
+    let q = supabase.from("products").select(SELECT_COLS).limit(data.limit);
     if (data.search) q = q.ilike("name", `%${data.search}%`);
     if (data.onlyTracked) q = q.eq("track_stock", true);
+
     const { data: rows, error } = await q;
-    if (error) throw new Error(error.message);
-    let out = (rows ?? []) as any[];
-    if (data.onlyLow) out = out.filter((r) => r.track_stock && r.stock_qty <= r.reorder_point);
-    return out;
+    if (error) throw error;
+
+    let result = (rows ?? []) as unknown as InventoryRow[];
+    if (data.onlyLow) {
+      result = result.filter((r) => r.track_stock && r.stock_qty <= r.reorder_point);
+    }
+    return result;
   });
 
-const updateSchema = z.object({
-  id: z.string().uuid(),
-  stock_qty: z.number().int().min(0).max(1_000_000).optional(),
-  reorder_point: z.number().int().min(0).max(1_000_000).optional(),
-  expiry_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
-  supplier_name: z.string().trim().max(160).nullable().optional(),
-  supplier_cost: z.number().min(0).max(10_000_000).nullable().optional(),
-  track_stock: z.boolean().optional(),
-});
+// -------- Update one row --------
 
 export const updateInventory = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => updateSchema.parse(d))
-  .handler(async ({ data, context }) => {
-    await assertInventoryAccess(context.supabase, context.userId);
-    const patch: Record<string, unknown> = {};
-    for (const k of ["stock_qty", "reorder_point", "expiry_date", "supplier_name", "supplier_cost", "track_stock"] as const) {
-      if (data[k] !== undefined) patch[k] = data[k];
+  .inputValidator((d) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        stock_qty: z.number().int().min(0).optional(),
+        reorder_point: z.number().int().min(0).optional(),
+        expiry_date: z.string().nullable().optional(),
+        supplier_name: z.string().nullable().optional(),
+        supplier_cost: z.number().nullable().optional(),
+        track_stock: z.boolean().optional(),
+        is_published: z.boolean().optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    await assertAdmin(supabase, userId);
+
+    const { id, ...patch } = data;
+    const cleaned: Record<string, any> = {};
+    for (const [k, v] of Object.entries(patch)) {
+      if (v !== undefined) cleaned[k] = v;
     }
-    if (Object.keys(patch).length === 0) return { ok: true };
-    const { error } = await context.supabase.from("products").update(patch as never).eq("id", data.id);
-    if (error) throw new Error(error.message);
-    await context.supabase.rpc("log_activity", {
-      _action: "inventory.updated",
-      _entity_type: "product",
-      _entity_id: data.id,
-      _details: patch as never,
-    });
-    return { ok: true };
+    if ("stock_qty" in cleaned) cleaned.last_restocked_at = new Date().toISOString();
+
+    const { error } = await supabase.from("products").update(cleaned).eq("id", id);
+    if (error) throw error;
+    return { success: true };
   });
 
-export const bulkAdjustStock = createServerFn({ method: "POST" })
+// -------- Low-stock convenience for new pages --------
+
+export const getLowStockProducts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z.object({
-      adjustments: z.array(z.object({
-        id: z.string().uuid(),
-        delta: z.number().int().min(-100_000).max(100_000),
-      })).min(1).max(500),
-      reason: z.string().trim().max(200).optional(),
-    }).parse(d),
-  )
-  .handler(async ({ data, context }) => {
-    await assertInventoryAccess(context.supabase, context.userId);
-    let applied = 0;
-    for (const a of data.adjustments) {
-      const { data: row, error: ge } = await context.supabase
-        .from("products").select("stock_qty").eq("id", a.id).maybeSingle();
-      if (ge || !row) continue;
-      const next = Math.max(0, (row.stock_qty ?? 0) + a.delta);
-      const { error } = await context.supabase
-        .from("products").update({ stock_qty: next }).eq("id", a.id);
-      if (!error) applied++;
-    }
-    await context.supabase.rpc("log_activity", {
-      _action: "inventory.bulk_adjust",
-      _details: { applied, count: data.adjustments.length, reason: data.reason ?? null } as never,
-    });
-    return { applied };
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    await assertAdmin(supabase, userId);
+    const { data, error } = await supabase
+      .from("products")
+      .select(SELECT_COLS)
+      .eq("track_stock", true)
+      .order("stock_qty", { ascending: true })
+      .limit(200);
+    if (error) throw error;
+    const rows = (data ?? []) as unknown as InventoryRow[];
+    return { lowStock: rows.filter((r) => r.stock_qty <= r.reorder_point) };
   });
+
+export const updateProductStock = updateInventory;
