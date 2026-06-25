@@ -1,9 +1,9 @@
 // Cron-driven: scans recent agent outputs for warning conditions and dispatches
-// alerts via email + operations_alerts_v14 with dedupe.
-// Schedule recommendation: every 30 minutes.
-// Auth: x-cron-secret.
+// alerts via email + Slack + SMS + WhatsApp, with dedupe via alert_dedupe + operations_alerts_v14.
+// Schedule: every 30 minutes. Auth: x-cron-secret.
 import { createFileRoute } from "@tanstack/react-router";
 import { verifyCronSecret } from "@/lib/cron-auth.server";
+import { sendSlack, sendSms, sendWhatsApp, severityAtLeast } from "@/lib/alert-dispatch.server";
 
 const REPORT_URL = "https://muslly.com/admin-agent-runs";
 
@@ -26,22 +26,34 @@ export const Route = createFileRoute("/api/public/hooks/agent-alerts")({
 
         const { data: alerts, error } = await supabaseAdmin.rpc("get_agent_alerts");
         if (error) {
-          return new Response(
-            JSON.stringify({ ok: false, error: error.message }),
-            { status: 500, headers: { "Content-Type": "application/json" } },
-          );
+          return new Response(JSON.stringify({ ok: false, error: error.message }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+          });
         }
         const rows = (alerts as AlertRow[] | null) ?? [];
         if (rows.length === 0) return Response.json({ ok: true, alerts: 0 });
 
-        const recipientsCsv = process.env.STAFF_ALERT_EMAILS ?? process.env.ADMIN_ALERT_EMAILS ?? "";
-        const recipients = recipientsCsv.split(",").map((s) => s.trim()).filter(Boolean);
+        // Load delivery settings + subscribers in parallel
+        const [{ data: settings }, { data: subs }] = await Promise.all([
+          supabaseAdmin.from("alert_settings").select("*").eq("id", 1).maybeSingle(),
+          supabaseAdmin.from("alert_subscribers").select("*").eq("active", true),
+        ]);
+        const enableEmail = settings?.enable_email ?? true;
+        const enableSlack = settings?.enable_slack ?? true;
+        const enableSms = settings?.enable_sms ?? false;
+        const enableWa = settings?.enable_whatsapp ?? false;
 
-        let sent = 0;
+        const recipientsCsv = process.env.STAFF_ALERT_EMAILS ?? process.env.ADMIN_ALERT_EMAILS ?? "";
+        const emailRecipients = recipientsCsv.split(",").map((s) => s.trim()).filter(Boolean);
+
+        let emailsSent = 0;
+        let slackSent = 0;
+        let smsSent = 0;
+        let waSent = 0;
         let opsInserted = 0;
 
         for (const row of rows) {
-          // ops alert (dedupe via unique key per user_id+dedupe_key; user_id NULL = global)
           const { error: opsErr } = await supabaseAdmin
             .from("operations_alerts_v14")
             .upsert(
@@ -55,9 +67,7 @@ export const Route = createFileRoute("/api/public/hooks/agent-alerts")({
             );
           if (!opsErr) opsInserted += 1;
 
-          if (recipients.length === 0) continue;
-
-          // cooldown 6h via alert_dedupe
+          // cooldown 6h
           const cooldownKey = `agent_alert:${row.alert_key}`;
           const { data: dedupe } = await supabaseAdmin
             .from("alert_dedupe")
@@ -70,50 +80,86 @@ export const Route = createFileRoute("/api/public/hooks/agent-alerts")({
           }
 
           const subject = `[${row.severity.toUpperCase()}] ${row.agent} — ${row.message}`;
-          const html = `
-            <div style="font-family:system-ui,sans-serif;max-width:560px">
-              <h2 style="color:#b91c1c">تنبيه وكيل ${row.agent}</h2>
-              <p><strong>الشدة:</strong> ${row.severity}</p>
-              <p>${row.message}</p>
-              <pre style="background:#f3f4f6;padding:12px;border-radius:8px;font-size:12px">${JSON.stringify(row.payload ?? {}, null, 2)}</pre>
-              <p><a href="${REPORT_URL}" style="background:#0f172a;color:white;padding:10px 18px;border-radius:6px;text-decoration:none">عرض التقرير الكامل</a></p>
-            </div>`;
+          const shortMsg = `${subject}\n${REPORT_URL}`;
 
-          for (const to of recipients) {
-            const messageId = `agent-alert-${row.alert_key}-${Date.now()}`;
-            const { error: enqErr } = await supabaseAdmin.rpc("enqueue_email", {
-              queue_name: "transactional_emails",
-              payload: {
-                message_id: messageId,
-                to,
-                from: "ympharma <no-reply@muslly.com>",
-                sender_domain: "notify.muslly.com",
-                subject,
-                html,
-                purpose: "transactional",
-                label: "agent-alert",
-                idempotency_key: messageId,
-                queued_at: new Date().toISOString(),
-              },
+          // Slack
+          if (enableSlack) {
+            const ok = await sendSlack({
+              agent: row.agent,
+              severity: row.severity,
+              message: row.message,
+              reportUrl: REPORT_URL,
+              payload: row.payload,
             });
-            if (!enqErr) {
-              sent += 1;
-              await supabaseAdmin.from("email_send_log").insert({
-                message_id: messageId,
-                template_name: "agent-alert",
-                recipient_email: to,
-                status: "pending",
+            if (ok) slackSent += 1;
+          }
+
+          // Email
+          if (enableEmail && emailRecipients.length > 0) {
+            const html = `
+              <div style="font-family:system-ui,sans-serif;max-width:560px">
+                <h2 style="color:#b91c1c">تنبيه وكيل ${row.agent}</h2>
+                <p><strong>الشدة:</strong> ${row.severity}</p>
+                <p>${row.message}</p>
+                <pre style="background:#f3f4f6;padding:12px;border-radius:8px;font-size:12px">${JSON.stringify(row.payload ?? {}, null, 2)}</pre>
+                <p><a href="${REPORT_URL}" style="background:#0f172a;color:white;padding:10px 18px;border-radius:6px;text-decoration:none">عرض التقرير الكامل</a></p>
+              </div>`;
+            for (const to of emailRecipients) {
+              const messageId = `agent-alert-${row.alert_key}-${Date.now()}`;
+              const { error: enqErr } = await supabaseAdmin.rpc("enqueue_email", {
+                queue_name: "transactional_emails",
+                payload: {
+                  message_id: messageId,
+                  to,
+                  from: "ympharma <no-reply@muslly.com>",
+                  sender_domain: "notify.muslly.com",
+                  subject,
+                  html,
+                  purpose: "transactional",
+                  label: "agent-alert",
+                  idempotency_key: messageId,
+                  queued_at: new Date().toISOString(),
+                },
               });
+              if (!enqErr) {
+                emailsSent += 1;
+                await supabaseAdmin.from("email_send_log").insert({
+                  message_id: messageId,
+                  template_name: "agent-alert",
+                  recipient_email: to,
+                  status: "pending",
+                });
+              }
             }
           }
 
-          await supabaseAdmin.from("alert_dedupe").upsert(
-            { alert_key: cooldownKey, last_sent_at: new Date().toISOString(), count: 1 },
-            { onConflict: "alert_key" },
-          );
+          // SMS + WhatsApp
+          const subscribers = (subs ?? []).filter((s: any) => severityAtLeast(row.severity, s.min_severity ?? "high"));
+          for (const sub of subscribers) {
+            if (enableSms && sub.receive_sms) {
+              const ok = await sendSms({ to: sub.phone_e164, message: shortMsg });
+              if (ok) smsSent += 1;
+            }
+            if (enableWa && sub.receive_whatsapp) {
+              const ok = await sendWhatsApp({ to: sub.phone_e164, message: shortMsg });
+              if (ok) waSent += 1;
+            }
+          }
+
+          await supabaseAdmin
+            .from("alert_dedupe")
+            .upsert({ alert_key: cooldownKey, last_sent_at: new Date().toISOString(), count: 1 }, { onConflict: "alert_key" });
         }
 
-        return Response.json({ ok: true, alerts: rows.length, emails_sent: sent, ops_inserted: opsInserted });
+        return Response.json({
+          ok: true,
+          alerts: rows.length,
+          emails_sent: emailsSent,
+          slack_sent: slackSent,
+          sms_sent: smsSent,
+          whatsapp_sent: waSent,
+          ops_inserted: opsInserted,
+        });
       },
     },
   },
