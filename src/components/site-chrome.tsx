@@ -31,6 +31,24 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
   const { lang, setLang, t } = useI18n();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [logoVariant, setLogoVariant] = useState<"classic" | "golden">("classic");
+
+  useEffect(() => {
+    const read = () => {
+      try {
+        const v = localStorage.getItem("logoVariant");
+        setLogoVariant(v === "golden" ? "golden" : "classic");
+      } catch {}
+    };
+    read();
+    const onChange = () => read();
+    window.addEventListener("logo-variant-change", onChange);
+    window.addEventListener("storage", onChange);
+    return () => {
+      window.removeEventListener("logo-variant-change", onChange);
+      window.removeEventListener("storage", onChange);
+    };
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -38,6 +56,8 @@ export function SiteHeader({ search, onSearch }: { search?: string; onSearch?: (
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const activeLogo = logoVariant === "golden" ? goldenLogoAsset.url : logoUrl;
 
   return (
     <>
