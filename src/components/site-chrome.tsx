@@ -174,7 +174,7 @@ export function SiteFooter() {
         <div>
           <div className="flex items-center gap-3">
             <div className="grid size-11 place-items-center rounded-2xl bg-white ring-1 ring-border overflow-hidden">
-              <img src={logoUrl} alt="" width="36" height="36" loading="lazy" decoding="async" className="size-9 object-contain" />
+              <img src={footerLogo} alt="" width="36" height="36" loading="lazy" decoding="async" className="size-9 object-contain" />
             </div>
             <div>
               <p className="font-black text-primary-deep">{t("brand.name")}</p>
