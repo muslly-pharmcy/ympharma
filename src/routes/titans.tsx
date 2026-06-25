@@ -29,6 +29,7 @@ function TitansLanding() {
   return (
     <main className="titans-scope min-h-screen">
       <CursorFollower />
+      <HeroTitans />
       <FeaturesTitans />
       <TestimonialsTitans />
       <PricingTitans />
