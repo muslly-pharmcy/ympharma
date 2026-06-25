@@ -102,6 +102,7 @@ import { Route as AuthenticatedAdminSalesReportsRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminMarketingCampaignsRouteImport } from './routes/_authenticated/admin-marketing-campaigns'
 import { Route as AuthenticatedAdminInventorySyncLogsRouteImport } from './routes/_authenticated/admin-inventory-sync-logs'
 import { Route as AuthenticatedAdminHealthRouteImport } from './routes/_authenticated/admin-health'
+import { Route as AuthenticatedAdminErrorExplainerRouteImport } from './routes/_authenticated/admin-error-explainer'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin-dashboard'
 import { Route as AuthenticatedAdminAuditRouteImport } from './routes/_authenticated/admin-audit'
 import { Route as AuthenticatedAdminAlertSettingsRouteImport } from './routes/_authenticated/admin-alert-settings'
@@ -636,6 +637,12 @@ const AuthenticatedAdminHealthRoute =
     path: '/admin-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminErrorExplainerRoute =
+  AuthenticatedAdminErrorExplainerRouteImport.update({
+    id: '/admin-error-explainer',
+    path: '/admin-error-explainer',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminDashboardRoute =
   AuthenticatedAdminDashboardRouteImport.update({
     id: '/admin-dashboard',
@@ -1034,6 +1041,7 @@ export interface FileRoutesByFullPath {
   '/admin-alert-settings': typeof AuthenticatedAdminAlertSettingsRoute
   '/admin-audit': typeof AuthenticatedAdminAuditRoute
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/admin-error-explainer': typeof AuthenticatedAdminErrorExplainerRoute
   '/admin-health': typeof AuthenticatedAdminHealthRoute
   '/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
   '/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
@@ -1183,6 +1191,7 @@ export interface FileRoutesByTo {
   '/admin-alert-settings': typeof AuthenticatedAdminAlertSettingsRoute
   '/admin-audit': typeof AuthenticatedAdminAuditRoute
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/admin-error-explainer': typeof AuthenticatedAdminErrorExplainerRoute
   '/admin-health': typeof AuthenticatedAdminHealthRoute
   '/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
   '/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
@@ -1334,6 +1343,7 @@ export interface FileRoutesById {
   '/_authenticated/admin-alert-settings': typeof AuthenticatedAdminAlertSettingsRoute
   '/_authenticated/admin-audit': typeof AuthenticatedAdminAuditRoute
   '/_authenticated/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/_authenticated/admin-error-explainer': typeof AuthenticatedAdminErrorExplainerRoute
   '/_authenticated/admin-health': typeof AuthenticatedAdminHealthRoute
   '/_authenticated/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
   '/_authenticated/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
@@ -1485,6 +1495,7 @@ export interface FileRouteTypes {
     | '/admin-alert-settings'
     | '/admin-audit'
     | '/admin-dashboard'
+    | '/admin-error-explainer'
     | '/admin-health'
     | '/admin-inventory-sync-logs'
     | '/admin-marketing-campaigns'
@@ -1634,6 +1645,7 @@ export interface FileRouteTypes {
     | '/admin-alert-settings'
     | '/admin-audit'
     | '/admin-dashboard'
+    | '/admin-error-explainer'
     | '/admin-health'
     | '/admin-inventory-sync-logs'
     | '/admin-marketing-campaigns'
@@ -1784,6 +1796,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin-alert-settings'
     | '/_authenticated/admin-audit'
     | '/_authenticated/admin-dashboard'
+    | '/_authenticated/admin-error-explainer'
     | '/_authenticated/admin-health'
     | '/_authenticated/admin-inventory-sync-logs'
     | '/_authenticated/admin-marketing-campaigns'
@@ -2637,6 +2650,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin-error-explainer': {
+      id: '/_authenticated/admin-error-explainer'
+      path: '/admin-error-explainer'
+      fullPath: '/admin-error-explainer'
+      preLoaderRoute: typeof AuthenticatedAdminErrorExplainerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin-dashboard': {
       id: '/_authenticated/admin-dashboard'
       path: '/admin-dashboard'
@@ -3030,6 +3050,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminAlertSettingsRoute: typeof AuthenticatedAdminAlertSettingsRoute
   AuthenticatedAdminAuditRoute: typeof AuthenticatedAdminAuditRoute
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
+  AuthenticatedAdminErrorExplainerRoute: typeof AuthenticatedAdminErrorExplainerRoute
   AuthenticatedAdminHealthRoute: typeof AuthenticatedAdminHealthRoute
   AuthenticatedAdminInventorySyncLogsRoute: typeof AuthenticatedAdminInventorySyncLogsRoute
   AuthenticatedAdminMarketingCampaignsRoute: typeof AuthenticatedAdminMarketingCampaignsRoute
@@ -3046,6 +3067,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminAlertSettingsRoute: AuthenticatedAdminAlertSettingsRoute,
   AuthenticatedAdminAuditRoute: AuthenticatedAdminAuditRoute,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
+  AuthenticatedAdminErrorExplainerRoute: AuthenticatedAdminErrorExplainerRoute,
   AuthenticatedAdminHealthRoute: AuthenticatedAdminHealthRoute,
   AuthenticatedAdminInventorySyncLogsRoute:
     AuthenticatedAdminInventorySyncLogsRoute,
