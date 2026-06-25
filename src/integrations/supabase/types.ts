@@ -2454,6 +2454,39 @@ export type Database = {
         }
         Relationships: []
       }
+      operations_alerts_v14: {
+        Row: {
+          acknowledged_at: string | null
+          alert_type: string
+          created_at: string | null
+          dedupe_key: string
+          id: string
+          message: string
+          read_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          alert_type: string
+          created_at?: string | null
+          dedupe_key: string
+          id?: string
+          message: string
+          read_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          alert_type?: string
+          created_at?: string | null
+          dedupe_key?: string
+          id?: string
+          message?: string
+          read_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       order_status_history: {
         Row: {
           changed_by: string | null
