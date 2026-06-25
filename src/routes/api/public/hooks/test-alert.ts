@@ -24,14 +24,23 @@ export const Route = createFileRoute("/api/public/hooks/test-alert")({
         const results: Record<string, any> = {};
 
         if (channel === "slack" || channel === "all") {
-          results.slack_env_present = Boolean(process.env.SLACK_WEBHOOK_URL);
-          results.slack_ok = await sendSlack({
-            agent: "test",
-            severity,
-            message,
-            reportUrl: REPORT_URL,
-            payload: { test: true },
-          });
+          const url = process.env.SLACK_WEBHOOK_URL;
+          results.slack_env_present = Boolean(url);
+          results.slack_url_prefix = url ? url.slice(0, 40) : null;
+          if (url) {
+            try {
+              const r = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: `[${severity.toUpperCase()}] test — ${message}\n<${REPORT_URL}|View Report>` }),
+              });
+              results.slack_status = r.status;
+              results.slack_body = (await r.text()).slice(0, 300);
+              results.slack_ok = r.ok;
+            } catch (e: any) {
+              results.slack_error = String(e?.message ?? e);
+            }
+          }
         }
 
         if (channel === "sms" || channel === "all") {

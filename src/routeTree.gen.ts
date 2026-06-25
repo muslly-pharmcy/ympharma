@@ -124,6 +124,7 @@ import { Route as ApiPublicHooksWhatsappRetryRouteImport } from './routes/api/pu
 import { Route as ApiPublicHooksWeeklyExecReportRouteImport } from './routes/api/public/hooks/weekly-exec-report'
 import { Route as ApiPublicHooksWeeklyAiEnrichRouteImport } from './routes/api/public/hooks/weekly-ai-enrich'
 import { Route as ApiPublicHooksWaStaleConversationsRouteImport } from './routes/api/public/hooks/wa-stale-conversations'
+import { Route as ApiPublicHooksTestAlertRouteImport } from './routes/api/public/hooks/test-alert'
 import { Route as ApiPublicHooksSocialCallbackRouteImport } from './routes/api/public/hooks/social-callback'
 import { Route as ApiPublicHooksRxNotifyRouteImport } from './routes/api/public/hooks/rx-notify'
 import { Route as ApiPublicHooksRxMirrorRouteImport } from './routes/api/public/hooks/rx-mirror'
@@ -756,6 +757,11 @@ const ApiPublicHooksWaStaleConversationsRoute =
     path: '/api/public/hooks/wa-stale-conversations',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksTestAlertRoute = ApiPublicHooksTestAlertRouteImport.update({
+  id: '/api/public/hooks/test-alert',
+  path: '/api/public/hooks/test-alert',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksSocialCallbackRoute =
   ApiPublicHooksSocialCallbackRouteImport.update({
     id: '/api/public/hooks/social-callback',
@@ -1056,6 +1062,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
   '/api/public/hooks/social-callback': typeof ApiPublicHooksSocialCallbackRoute
+  '/api/public/hooks/test-alert': typeof ApiPublicHooksTestAlertRoute
   '/api/public/hooks/wa-stale-conversations': typeof ApiPublicHooksWaStaleConversationsRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
@@ -1202,6 +1209,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
   '/api/public/hooks/social-callback': typeof ApiPublicHooksSocialCallbackRoute
+  '/api/public/hooks/test-alert': typeof ApiPublicHooksTestAlertRoute
   '/api/public/hooks/wa-stale-conversations': typeof ApiPublicHooksWaStaleConversationsRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
@@ -1350,6 +1358,7 @@ export interface FileRoutesById {
   '/api/public/hooks/rx-mirror': typeof ApiPublicHooksRxMirrorRoute
   '/api/public/hooks/rx-notify': typeof ApiPublicHooksRxNotifyRoute
   '/api/public/hooks/social-callback': typeof ApiPublicHooksSocialCallbackRoute
+  '/api/public/hooks/test-alert': typeof ApiPublicHooksTestAlertRoute
   '/api/public/hooks/wa-stale-conversations': typeof ApiPublicHooksWaStaleConversationsRoute
   '/api/public/hooks/weekly-ai-enrich': typeof ApiPublicHooksWeeklyAiEnrichRoute
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
@@ -1498,6 +1507,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/rx-mirror'
     | '/api/public/hooks/rx-notify'
     | '/api/public/hooks/social-callback'
+    | '/api/public/hooks/test-alert'
     | '/api/public/hooks/wa-stale-conversations'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
@@ -1644,6 +1654,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/rx-mirror'
     | '/api/public/hooks/rx-notify'
     | '/api/public/hooks/social-callback'
+    | '/api/public/hooks/test-alert'
     | '/api/public/hooks/wa-stale-conversations'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
@@ -1791,6 +1802,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/rx-mirror'
     | '/api/public/hooks/rx-notify'
     | '/api/public/hooks/social-callback'
+    | '/api/public/hooks/test-alert'
     | '/api/public/hooks/wa-stale-conversations'
     | '/api/public/hooks/weekly-ai-enrich'
     | '/api/public/hooks/weekly-exec-report'
@@ -1925,6 +1937,7 @@ export interface RootRouteChildren {
   ApiPublicHooksRxMirrorRoute: typeof ApiPublicHooksRxMirrorRoute
   ApiPublicHooksRxNotifyRoute: typeof ApiPublicHooksRxNotifyRoute
   ApiPublicHooksSocialCallbackRoute: typeof ApiPublicHooksSocialCallbackRoute
+  ApiPublicHooksTestAlertRoute: typeof ApiPublicHooksTestAlertRoute
   ApiPublicHooksWaStaleConversationsRoute: typeof ApiPublicHooksWaStaleConversationsRoute
   ApiPublicHooksWeeklyAiEnrichRoute: typeof ApiPublicHooksWeeklyAiEnrichRoute
   ApiPublicHooksWeeklyExecReportRoute: typeof ApiPublicHooksWeeklyExecReportRoute
@@ -2753,6 +2766,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksWaStaleConversationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/test-alert': {
+      id: '/api/public/hooks/test-alert'
+      path: '/api/public/hooks/test-alert'
+      fullPath: '/api/public/hooks/test-alert'
+      preLoaderRoute: typeof ApiPublicHooksTestAlertRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/social-callback': {
       id: '/api/public/hooks/social-callback'
       path: '/api/public/hooks/social-callback'
@@ -3140,6 +3160,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksRxMirrorRoute: ApiPublicHooksRxMirrorRoute,
   ApiPublicHooksRxNotifyRoute: ApiPublicHooksRxNotifyRoute,
   ApiPublicHooksSocialCallbackRoute: ApiPublicHooksSocialCallbackRoute,
+  ApiPublicHooksTestAlertRoute: ApiPublicHooksTestAlertRoute,
   ApiPublicHooksWaStaleConversationsRoute:
     ApiPublicHooksWaStaleConversationsRoute,
   ApiPublicHooksWeeklyAiEnrichRoute: ApiPublicHooksWeeklyAiEnrichRoute,
