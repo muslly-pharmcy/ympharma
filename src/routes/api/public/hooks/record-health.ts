@@ -23,8 +23,9 @@ export const Route = createFileRoute("/api/public/hooks/record-health")({
             failed: report.summary.failed,
             warnings: report.summary.warnings,
             total: report.summary.total,
-            details: report as unknown as Record<string, unknown>,
+            details: JSON.parse(JSON.stringify(report)),
           });
+
           if (error) {
             return new Response(JSON.stringify({ ok: false, error: error.message }), {
               status: 500,
