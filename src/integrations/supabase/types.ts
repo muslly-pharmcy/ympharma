@@ -708,6 +708,96 @@ export type Database = {
         }
         Relationships: []
       }
+      alert_settings: {
+        Row: {
+          enable_email: boolean
+          enable_errors: boolean
+          enable_growth: boolean
+          enable_overdue: boolean
+          enable_slack: boolean
+          enable_sms: boolean
+          enable_uptime: boolean
+          enable_whatsapp: boolean
+          errors_threshold: number
+          growth_threshold_pct: number
+          id: number
+          overdue_orders_threshold: number
+          updated_at: string
+          updated_by: string | null
+          uptime_threshold_pct: number
+        }
+        Insert: {
+          enable_email?: boolean
+          enable_errors?: boolean
+          enable_growth?: boolean
+          enable_overdue?: boolean
+          enable_slack?: boolean
+          enable_sms?: boolean
+          enable_uptime?: boolean
+          enable_whatsapp?: boolean
+          errors_threshold?: number
+          growth_threshold_pct?: number
+          id?: number
+          overdue_orders_threshold?: number
+          updated_at?: string
+          updated_by?: string | null
+          uptime_threshold_pct?: number
+        }
+        Update: {
+          enable_email?: boolean
+          enable_errors?: boolean
+          enable_growth?: boolean
+          enable_overdue?: boolean
+          enable_slack?: boolean
+          enable_sms?: boolean
+          enable_uptime?: boolean
+          enable_whatsapp?: boolean
+          errors_threshold?: number
+          growth_threshold_pct?: number
+          id?: number
+          overdue_orders_threshold?: number
+          updated_at?: string
+          updated_by?: string | null
+          uptime_threshold_pct?: number
+        }
+        Relationships: []
+      }
+      alert_subscribers: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          label: string | null
+          min_severity: string
+          phone_e164: string
+          receive_sms: boolean
+          receive_whatsapp: boolean
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string | null
+          min_severity?: string
+          phone_e164: string
+          receive_sms?: boolean
+          receive_whatsapp?: boolean
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string | null
+          min_severity?: string
+          phone_e164?: string
+          receive_sms?: boolean
+          receive_whatsapp?: boolean
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           description: string | null
