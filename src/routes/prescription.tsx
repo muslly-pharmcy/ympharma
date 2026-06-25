@@ -14,6 +14,7 @@ import {
   verifyUploaded, commitPending,
   type RxPending,
 } from "@/lib/rx-pending";
+import { validateUploadedPrescriptionFile } from "@/lib/upload-validation.functions";
 
 export const Route = createFileRoute("/prescription")({
   head: () => ({
@@ -267,6 +268,21 @@ function PrescriptionPage() {
         if (!reachable) {
           updateStage(i, "error", { error: "تعذر التحقق من حفظ الصورة" });
           toast.error(`الصورة ${i + 1} لم يتم التحقق من حفظها — حاول مرة أخرى`);
+          setBusy(false);
+          return;
+        }
+        // Strict server-side validation: content-type, size, magic bytes.
+        try {
+          const v = await validateUploadedPrescriptionFile({ data: { path } });
+          if (!v.ok) {
+            updateStage(i, "error", { error: v.message });
+            toast.error(`الصورة ${i + 1}: ${v.message}`);
+            setBusy(false);
+            return;
+          }
+        } catch (e: any) {
+          updateStage(i, "error", { error: e?.message || "فشل التحقق" });
+          toast.error(`فشل التحقق من الصورة ${i + 1} على السيرفر`);
           setBusy(false);
           return;
         }
