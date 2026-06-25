@@ -1,16 +1,24 @@
-// src/routes/titans.tsx
 import { createFileRoute } from "@tanstack/react-router";
-import { HeroTitans } from "@/components/titans/HeroTitans";
-import { FeaturesTitans } from "@/components/titans/FeaturesTitans";
-import { TestimonialsTitans } from "@/components/titans/TestimonialsTitans";
-import { PricingTitans } from "@/components/titans/PricingTitans";
-import { FooterTitans } from "@/components/titans/FooterTitans";
+import { HeroTitans } from "@/components/titans/sections/HeroTitans";
+import { FeaturesTitans } from "@/components/titans/sections/FeaturesTitans";
+import { TestimonialsTitans } from "@/components/titans/sections/TestimonialsTitans";
+import { PricingTitans } from "@/components/titans/sections/PricingTitans";
+import { FooterTitans } from "@/components/titans/sections/FooterTitans";
 
 export const Route = createFileRoute("/titans")({
   head: () => ({
     meta: [
       { title: "المسلي Titans — تجربة صحية استثنائية" },
-      { name: "description", content: "منصة المسلي Titans: وصفات ذكية، توصيل سريع، وذكاء اصطناعي." },
+      {
+        name: "description",
+        content:
+          "منصة المسلي Titans: وصفات طبية ذكية، توصيل سريع، وذكاء اصطناعي يفهم احتياجك.",
+      },
+      { property: "og:title", content: "المسلي Titans — تجربة صحية استثنائية" },
+      {
+        property: "og:description",
+        content: "وصفات طبية ذكية وتوصيل سريع مع تجربة فاخرة.",
+      },
     ],
   }),
   component: TitansLanding,
@@ -18,7 +26,7 @@ export const Route = createFileRoute("/titans")({
 
 function TitansLanding() {
   return (
-    <main className="min-h-screen bg-background">
+    <main className="titans-scope min-h-screen">
       <HeroTitans />
       <FeaturesTitans />
       <TestimonialsTitans />

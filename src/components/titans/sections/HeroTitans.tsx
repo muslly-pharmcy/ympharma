@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { GradientText } from "./ui/GradientText";
-import { Reveal } from "./motion/Reveal";
-import { CountUp } from "./motion/CountUp";
+import { GradientText } from "../ui/GradientText";
+import { Reveal } from "../motion/Reveal";
+import { CountUp } from "../motion/CountUp";
 
 export function HeroTitans() {
   return (

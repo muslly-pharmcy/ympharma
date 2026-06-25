@@ -1,4 +1,4 @@
-import { GradientText } from "./ui/GradientText";
+import { GradientText } from "../ui/GradientText";
 
 export function FooterTitans() {
   return (

@@ -130,3 +130,49 @@
     color-mix(in oklab, var(--primary) 14%, white) 0%,
     color-mix(in oklab, var(--primary-deep) 10%, white) 100%);
 }
+
+/* ============================================================
+   Titans scope — applies a luxe dark theme ONLY inside
+   `.titans-scope` containers (e.g. /titans landing page) so
+   the rest of the app keeps its own design tokens.
+   ============================================================ */
+@utility titans-scope {
+  --background: oklch(0.14 0.02 260);
+  --foreground: oklch(0.97 0.01 230);
+  --card: oklch(0.18 0.03 260);
+  --card-foreground: oklch(0.97 0.01 230);
+  --muted: oklch(0.24 0.03 260);
+  --muted-foreground: oklch(0.72 0.02 240);
+  --border: oklch(1 0 0 / 12%);
+  --primary: oklch(0.72 0.16 260);
+  --primary-foreground: oklch(0.14 0.02 260);
+  --primary-deep: oklch(0.55 0.18 270);
+  --titans-gold: oklch(0.86 0.16 88);
+
+  background-color: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  isolation: isolate;
+}
+
+@utility titans-stars-bg {
+  background-image:
+    radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.7), transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.5), transparent),
+    radial-gradient(2px 2px at 50px 160px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(2px 2px at 90px 40px, rgba(255,255,255,0.4), transparent),
+    radial-gradient(2px 2px at 130px 80px, rgba(255,255,255,0.7), transparent);
+  background-size: 200px 200px;
+  animation: titans-twinkle 4s ease-in-out infinite alternate;
+}
+
+@utility titans-glow-gold {
+  box-shadow:
+    0 0 60px rgba(251, 191, 36, 0.3),
+    0 0 120px rgba(251, 191, 36, 0.1);
+}
+
+@keyframes titans-twinkle {
+  0% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
