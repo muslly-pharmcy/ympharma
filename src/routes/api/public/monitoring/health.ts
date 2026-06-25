@@ -85,6 +85,26 @@ export const Route = createFileRoute("/api/public/monitoring/health")({
             status: low > 50 ? "warning" : "ok",
             count_below_5: low,
           };
+          const lastHealth = healthRecent.data?.recorded_at as string | undefined;
+          const ageMin = lastHealth
+            ? (Date.now() - new Date(lastHealth).getTime()) / 60_000
+            : null;
+          checks.cron_heartbeat = {
+            status: ageMin === null
+              ? "warning"
+              : ageMin > 30
+                ? "critical"
+                : ageMin > 15
+                  ? "warning"
+                  : "ok",
+            last_recorded_at: lastHealth ?? null,
+            age_minutes: ageMin === null ? null : Math.round(ageMin),
+          };
+
+          checks.agent_activity_1h = {
+            status: (agentRunsRecent.count ?? 0) === 0 ? "warning" : "ok",
+            runs: agentRunsRecent.count ?? 0,
+          };
         } catch (e) {
           checks.snapshot = {
             status: "error",
