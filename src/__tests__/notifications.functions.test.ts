@@ -10,7 +10,7 @@ const NotificationTypes = z.enum([
 ]);
 
 const sendInput = z.object({
-  userId: z.string().uuid(),
+  userId: z.uuid(),
   title: z.string().min(1).max(120),
   body: z.string().min(1).max(500),
   type: NotificationTypes,

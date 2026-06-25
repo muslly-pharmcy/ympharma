@@ -3,7 +3,7 @@ import { z } from "zod";
 
 // Validates the input schema directly — no fake createServerFn mocks.
 const submitReviewInput = z.object({
-  productId: z.string().uuid(),
+  productId: z.uuid(),
   orderId: z.string().optional(),
   rating: z.number().int().min(1).max(5),
   comment: z.string().max(1000).optional(),
