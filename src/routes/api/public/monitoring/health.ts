@@ -26,6 +26,8 @@ export const Route = createFileRoute("/api/public/monitoring/health")({
             dlqRecent,
             recentErrors,
             lowStock,
+            healthRecent,
+            agentRunsRecent,
           ] = await Promise.all([
             supabaseAdmin.from("products").select("id", { head: true, count: "exact" }).limit(1),
             supabaseAdmin
@@ -44,6 +46,16 @@ export const Route = createFileRoute("/api/public/monitoring/health")({
               .from("products")
               .select("id", { head: true, count: "exact" })
               .lt("stock_qty", 5),
+            supabaseAdmin
+              .from("health_checks")
+              .select("recorded_at")
+              .order("recorded_at", { ascending: false })
+              .limit(1)
+              .maybeSingle(),
+            supabaseAdmin
+              .from("agent_runs")
+              .select("id", { head: true, count: "exact" })
+              .gt("started_at", oneHourAgo),
           ]);
 
           checks.database = dbPing.error
