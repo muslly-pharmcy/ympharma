@@ -1,51 +1,40 @@
-## Problem
+# خطة تفعيل واختبار قنوات التنبيهات
 
-Build fails at vite config load:
-```
-ERR_PACKAGE_PATH_NOT_EXPORTED: Package subpath './decode' is not defined by "exports" in /dev-server/node_modules/entities/package.json
-imported from .../cheerio/node_modules/htmlparser2/dist/esm/Parser.js
-```
+## 1. إعداد الأسرار (مطلوب منك)
+- **Slack**: سأطلب منك إضافة `SLACK_WEBHOOK_URL` عبر النافذة الآمنة. تحصل على الرابط من: Slack → Apps → Incoming Webhooks → اختر القناة (مثل `#alerts`) → نسخ Webhook URL.
+- **Twilio**: سأشغّل `standard_connectors--connect` لاختيار/ربط Twilio في الـ workspace، ثم أطلب منك `TWILIO_FROM_NUMBER` (رقم Twilio E.164 الذي يرسل، مثل `+12025551234`).
+- **WhatsApp**: جاهز — يستخدم `WHATSAPP_TOKEN` و`WHATSAPP_PHONE_NUMBER_ID` الموجودَين.
 
-`package.json` forces a global `overrides: { entities: "4.5.0" }`. That was added so `react-email`'s older `htmlparser2` (which imports `entities/lib/decode.js`) keeps working. But cheerio's `htmlparser2@10` (loaded at Vite config time via Tailwind's @tailwindcss/node loader) needs `entities/decode` — a subpath that exists only in v6+. v4.5.0 doesn't export it, and Vite aliases don't apply during Node's own config-load resolution, so the build dies before Vite even starts.
+## 2. اختبار end-to-end لكل قناة
+سأنشئ route مؤقّت `/api/public/hooks/test-alert` (يتطلّب `x-cron-secret`) يستقبل `{ channel: "slack"|"sms"|"whatsapp"|"all", severity }` ويرسل رسالة تجربة دون لمس `alert_dedupe`. ثم:
+1. استدعاء بـ `channel=slack` → تأكيد وصول رسالة "TEST" مع زر View Report.
+2. استدعاء بـ `channel=sms` → التحقّق من تسليم Twilio (status code + رد JSON).
+3. استدعاء بـ `channel=whatsapp` → التحقّق من رد Graph API (200).
+4. إضافة مشترك تجربة (رقمك) في `/admin-alert-settings` قبل اختبار SMS/WhatsApp.
+5. محاكاة Uptime=0 عبر إدراج `agent_runs` صف `cto` بـ `details.uptime_pct=0`، ثم استدعاء `agent-alerts` الفعلي للتأكّد من التدفّق الكامل (Slack+SMS+WA+Email+ops alert+dedupe).
+6. مسح `alert_dedupe` للسطر التجريبي بعد التأكّد، وحذف الـ test route.
 
-There is no single version of `entities` that exports both `./decode` (v6+) and `./lib/decode.js` (v4.x).
+## 3. مراجعة وضبط العتبات في `/admin-alert-settings`
+سأفتح الصفحة لعرض القيم الحالية (الافتراضيات بعد آخر هجرة):
+- Uptime: 50% — اقترح رفعها إلى 80% للحساسية الأعلى.
+- النمو: −25% — اقترح −15% للإنذار المبكر.
+- الطلبات المتأخرة: 5 — اقترح 3.
+- الأخطاء/24س: 50 — اقترح 30.
 
-## Fix
+ستختار القيم النهائية والقنوات المفعّلة (Email/Slack/SMS/WhatsApp) قبل الحفظ.
 
-Pin the override to v6 (satisfies cheerio/htmlparser2@10 natively) and let Vite rewrite the legacy `entities/lib/...` paths to v6's `dist/esm/...` for the SSR bundle that includes react-email.
+## التفاصيل التقنية
 
-### 1) `package.json`
+- **route الاختبار** `src/routes/api/public/hooks/test-alert.ts`: يستخدم نفس `sendSlack/sendSms/sendWhatsApp` من `alert-dispatch.server.ts` ويُعيد `{ channel, ok, http_status }` لكل قناة.
+- **منع التلوّث**: الاختبار لا يكتب في `alert_dedupe` ولا `operations_alerts_v14`، ولا يدفع لـ pg_cron.
+- **التحقّق**: سأستدعي الـ route مباشرة من السندبوكس عبر `curl` للـ stable preview URL مع رأس `x-cron-secret`، وأقرأ السجلات.
+- **التراجع**: حذف ملف `test-alert.ts` تلقائياً بعد نجاح الاختبار، أو إبقاؤه خلف توغل `enable_test_endpoint` إن أردت.
 
-Bump both override blocks from `4.5.0` to `6.0.1`:
-
-```json
-"overrides": {
-  "entities": "6.0.1"
-},
-"resolutions": {
-  "entities": "6.0.1"
-}
-```
-
-### 2) `vite.config.ts`
-
-Repoint the two existing aliases from v4's `lib/` paths to v6's `dist/esm/` paths so anything still importing the legacy subpath (react-email's bundled htmlparser2) resolves cleanly during SSR bundling:
-
-```ts
-alias: {
-  "entities/lib/decode.js": path.resolve(__dirname, "node_modules/entities/dist/esm/decode.js"),
-  "entities/lib/encode.js": path.resolve(__dirname, "node_modules/entities/dist/esm/encode.js"),
-}
-```
-
-No `entities/decode` alias is needed — v6 exports it natively.
-
-### 3) Reinstall + verify
-
-- `bun install` to refresh the lockfile with `entities@6.0.1`.
-- Run `build:dev` and confirm vite config now loads.
-- Smoke-test the auth email preview route (`/lovable/email/auth/preview`) to confirm react-email still renders with v6 entities — the public APIs we use (`decodeHTML`, `fromCodePoint`, `escapeUTF8`) are unchanged across v4→v6.
-
-## Out of scope (deferred from your message)
-
-The rest of the v14.0 message proposes new files (`ParticleBackground` perf rewrite, Vitest setup, `__tests__/unit/*`, `vitest.config.ts`, `package.json` scripts, `DashboardCard`/`PrescriptionList` references) and assumes components that don't exist in this repo (`@/components/dashboard/DashboardCard`, `PrescriptionList`, etc.). I'm intentionally leaving those out of this plan — the build is broken and that's the blocker. Once the build is green, tell me which subset (perf-only? tests-only?) you actually want and I'll adapt it to the real component paths.
+## ترتيب التنفيذ
+1. `add_secret` لـ `SLACK_WEBHOOK_URL`.
+2. `standard_connectors--connect` لـ Twilio + `add_secret` لـ `TWILIO_FROM_NUMBER`.
+3. إنشاء `test-alert` route.
+4. تشغيل اختبارات القنوات الثلاث وتقرير النتائج.
+5. ضبط `alert_settings` بالقيم النهائية (بعد موافقتك).
+6. محاكاة Uptime=0 ثم استدعاء `agent-alerts` الحقيقي للتأكّد من التدفّق الكامل.
+7. حذف `test-alert` route وتنظيف بيانات الاختبار.
