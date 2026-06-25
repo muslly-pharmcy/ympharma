@@ -26,22 +26,17 @@ function SettingsPage() {
   const [installed, setInstalled] = useState(false);
   const [cacheSize, setCacheSize] = useState<string>("—");
   const [version] = useState("1.0.0");
-  const [logoVariant, setLogoVariant] = useState<"classic" | "golden">("classic");
+  const { variant: logoVariant, setVariant: setLogoVariant, reset: resetLogoVariant, classicUrl, goldenUrl, isDefault: logoIsDefault } = useLogoVariant();
+  const [previewSize, setPreviewSize] = useState<"sm" | "md" | "lg">("md");
 
-  useEffect(() => {
-    try {
-      const v = localStorage.getItem("logoVariant");
-      setLogoVariant(v === "golden" ? "golden" : "classic");
-    } catch {}
-  }, []);
-
-  function setVariant(v: "classic" | "golden") {
+  function setVariant(v: LogoVariant) {
     setLogoVariant(v);
-    try {
-      localStorage.setItem("logoVariant", v);
-      window.dispatchEvent(new Event("logo-variant-change"));
-    } catch {}
     toast.success(v === "golden" ? "تم تفعيل الشعار الذهبي" : "تم العودة للشعار الكلاسيكي");
+  }
+
+  function resetVariant() {
+    resetLogoVariant();
+    toast.success(`تمت إعادة الضبط للوضع الافتراضي (${LOGO_VARIANT_DEFAULT === "classic" ? "الكلاسيكي" : "الذهبي"})`);
   }
 
   useEffect(() => {
