@@ -13,7 +13,7 @@ describe("submitReview input validation", () => {
   it("accepts a valid review", () => {
     expect(() =>
       submitReviewInput.parse({
-        productId: "00000000-0000-0000-0000-000000000001",
+        productId: "11111111-1111-4111-8111-111111111111",
         rating: 5,
         comment: "ممتاز",
       }),
@@ -23,7 +23,7 @@ describe("submitReview input validation", () => {
   it("rejects rating out of range", () => {
     expect(() =>
       submitReviewInput.parse({
-        productId: "00000000-0000-0000-0000-000000000001",
+        productId: "11111111-1111-4111-8111-111111111111",
         rating: 6,
       }),
     ).toThrow();
@@ -38,7 +38,7 @@ describe("submitReview input validation", () => {
   it("rejects comments over 1000 chars", () => {
     expect(() =>
       submitReviewInput.parse({
-        productId: "00000000-0000-0000-0000-000000000001",
+        productId: "11111111-1111-4111-8111-111111111111",
         rating: 3,
         comment: "x".repeat(1001),
       }),

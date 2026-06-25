@@ -21,7 +21,7 @@ describe("sendNotification input validation", () => {
   it("accepts a valid payload", () => {
     expect(() =>
       sendInput.parse({
-        userId: "00000000-0000-0000-0000-000000000001",
+        userId: "11111111-1111-4111-8111-111111111111",
         title: "تمت الموافقة",
         body: "تمت الموافقة على روشتتك",
         type: "prescription_approved",
@@ -32,7 +32,7 @@ describe("sendNotification input validation", () => {
   it("rejects unknown notification type", () => {
     expect(() =>
       sendInput.parse({
-        userId: "00000000-0000-0000-0000-000000000001",
+        userId: "11111111-1111-4111-8111-111111111111",
         title: "x",
         body: "y",
         type: "marketing_blast" as any,
@@ -43,7 +43,7 @@ describe("sendNotification input validation", () => {
   it("rejects title over 120 chars", () => {
     expect(() =>
       sendInput.parse({
-        userId: "00000000-0000-0000-0000-000000000001",
+        userId: "11111111-1111-4111-8111-111111111111",
         title: "x".repeat(121),
         body: "y",
         type: "system_alert",
