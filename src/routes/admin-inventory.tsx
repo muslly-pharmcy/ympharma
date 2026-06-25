@@ -8,6 +8,7 @@ import {
   Loader2, ArrowRight, AlertTriangle, PackageX, CalendarClock, Wallet, Search, Save,
 } from "lucide-react";
 import { fetchInventoryReport, listInventoryRows, updateInventory } from "@/lib/inventory.functions";
+import { InventoryAlerts } from "@/components/admin/InventoryAlerts";
 
 export const Route = createFileRoute("/admin-inventory")({
   head: () => ({ meta: [{ title: "إدارة المخزون — صيدلية المصلي" }, { name: "robots", content: "noindex,nofollow" }] }),
@@ -93,6 +94,8 @@ function AdminInventory() {
       </header>
 
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-6">
+        <InventoryAlerts />
+
         {/* KPI tiles */}
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <button type="button" onClick={() => { setOnlyLow(true); setOnlyOut(false); }} className="text-right">
