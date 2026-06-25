@@ -5,6 +5,7 @@ import { useCart } from "@/lib/cart";
 import { useI18n } from "@/lib/i18n";
 import { useSpeech } from "@/hooks/use-speech";
 import logoUrl from "@/assets/almusalli-logo.webp";
+import goldenLogoAsset from "@/assets/almusalli-golden-mark.png.asset.json";
 import { categories } from "@/lib/products";
 import { ThemeToggle } from "@/components/theme-toggle";
 
