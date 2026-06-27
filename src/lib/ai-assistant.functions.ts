@@ -1,7 +1,44 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { generateText } from "ai";
 import { z } from "zod";
+import { createClient } from "@supabase/supabase-js";
 import { createLovableAiGatewayProvider } from "./ai-gateway.server";
+
+const PUBLIC_MODES = new Set([
+  "interactions",
+  "services",
+  "supplement",
+  "symptoms",
+  "prescription",
+  "pharmacist",
+]);
+
+async function assertAdminForMode(mode: string): Promise<void> {
+  if (PUBLIC_MODES.has(mode)) return;
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_PUBLISHABLE_KEY;
+  if (!url || !key) throw new Error("Unauthorized");
+  const req = getRequest();
+  const auth = req?.headers?.get("authorization");
+  if (!auth || !auth.startsWith("Bearer ")) throw new Error("Unauthorized");
+  const token = auth.slice("Bearer ".length);
+  const supabase = createClient(url, key, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const { data: userRes, error: userErr } = await supabase.auth.getUser(token);
+  if (userErr || !userRes?.user) throw new Error("Unauthorized");
+  const userId = userRes.user.id;
+  const [adminRes, ownerRes] = await Promise.all([
+    supabase.rpc("has_role", { _user_id: userId, _role: "admin" }),
+    supabase.rpc("has_role", { _user_id: userId, _role: "owner" }),
+  ]);
+  if (adminRes.data !== true && ownerRes.data !== true) {
+    throw new Error("Forbidden: admin role required");
+  }
+}
+
 
 const MessageSchema = z.object({
   role: z.enum(["user", "assistant"]),
