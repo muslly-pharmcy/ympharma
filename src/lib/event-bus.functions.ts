@@ -243,8 +243,7 @@ export const listThrottlingHits = createServerFn({ method: "POST" })
   });
 
 // ─── DLQ — list / replay / resolve ───────────────────────────────────
-// Re-publishes a DLQ row back into `agent_events` so the consumer picks it
-// up on the next pass. Marks the DLQ row as resolved on success.
+// المنطق الفعلي في src/core/dlq/. هذه أغلفة server-fn رفيعة.
 
 export const listDlqEvents = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -258,64 +257,20 @@ export const listDlqEvents = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    let q = context.supabase
-      .from("agent_events_dlq")
-      .select(
-        "id, original_id, event_name, entity_type, entity_id, payload, source, occurred_at, retry_count, last_error, failed_at, resolved_at, resolution_note",
-      )
-      .order("failed_at", { ascending: false })
-      .limit(data.limit);
-    if (data.status === "UNRESOLVED") q = q.is("resolved_at", null);
-    if (data.status === "RESOLVED") q = q.not("resolved_at", "is", null);
-    const { data: rows, error } = await q;
-    if (error) throw new Error(error.message);
-    return { ok: true as const, rows: rows ?? [] };
+    const { DLQService } = await import("@/core/dlq/DLQService");
+    const service = new DLQService(context.supabase);
+    const rows = await service.list({ status: data.status, limit: data.limit });
+    return { ok: true as const, rows };
   });
-
-async function replayOne(
-  context: { supabase: any; userId: string },
-  id: string,
-): Promise<{ id: string; ok: boolean; error?: string }> {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: row, error } = await supabaseAdmin
-    .from("agent_events_dlq")
-    .select("*")
-    .eq("id", id)
-    .is("resolved_at", null)
-    .maybeSingle();
-  if (error) return { id, ok: false, error: error.message };
-  if (!row) return { id, ok: false, error: "not_found_or_resolved" };
-
-  const { error: insErr } = await supabaseAdmin.from("agent_events").insert({
-    event_name: row.event_name,
-    entity_type: row.entity_type,
-    entity_id: row.entity_id,
-    payload: row.payload,
-    source: `dlq-replay:${row.source ?? "system"}`,
-    occurred_at: new Date().toISOString(),
-    retry_count: 0,
-  });
-  if (insErr) return { id, ok: false, error: insErr.message };
-
-  const { error: updErr } = await supabaseAdmin
-    .from("agent_events_dlq")
-    .update({
-      resolved_at: new Date().toISOString(),
-      resolved_by: context.userId,
-      resolution_note: `replayed by admin ${context.userId}`,
-    })
-    .eq("id", id);
-  if (updErr) return { id, ok: false, error: updErr.message };
-
-  return { id, ok: true };
-}
 
 export const replayDlqEvent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const result = await replayOne(context, data.id);
+    const { DLQReplayEngine } = await import("@/core/dlq/DLQReplayEngine");
+    const engine = new DLQReplayEngine(context.userId);
+    const result = await engine.replayOne(data.id);
     if (!result.ok) throw new Error(result.error ?? "replay failed");
     return { ok: true as const };
   });
@@ -325,18 +280,9 @@ export const bulkReplayDlq = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ limit: z.number().int().min(1).max(50).default(10) }).parse(d ?? {}))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows, error } = await supabaseAdmin
-      .from("agent_events_dlq")
-      .select("id")
-      .is("resolved_at", null)
-      .order("failed_at", { ascending: true })
-      .limit(data.limit);
-    if (error) throw new Error(error.message);
-    const results: Array<{ id: string; ok: boolean; error?: string }> = [];
-    for (const r of rows ?? []) results.push(await replayOne(context, r.id));
-    const replayed = results.filter((r) => r.ok).length;
-    return { ok: true as const, replayed, failed: results.length - replayed, results };
+    const { DLQReplayEngine } = await import("@/core/dlq/DLQReplayEngine");
+    const engine = new DLQReplayEngine(context.userId);
+    return { ok: true as const, ...(await engine.replayBulk(data.limit)) };
   });
 
 export const resolveDlqEvent = createServerFn({ method: "POST" })
@@ -346,17 +292,11 @@ export const resolveDlqEvent = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { error } = await context.supabase
-      .from("agent_events_dlq")
-      .update({
-        resolved_at: new Date().toISOString(),
-        resolved_by: context.userId,
-        resolution_note: data.note ?? `manually resolved by ${context.userId}`,
-      })
-      .eq("id", data.id)
-      .is("resolved_at", null);
-    if (error) throw new Error(error.message);
+    const { DLQService } = await import("@/core/dlq/DLQService");
+    const service = new DLQService(context.supabase);
+    await service.resolve(data.id, context.userId, data.note);
     return { ok: true as const };
   });
+
 
 
