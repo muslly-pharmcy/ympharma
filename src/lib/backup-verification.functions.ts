@@ -1,5 +1,5 @@
-// Backup verification server fn — يستدعي BackupVerificationService.
-// الفحص يعمل عبر supabase user-scoped client (RLS مفعّل) بعد التحقّق من دور admin/owner.
+// Backup verification server fns — verify on demand and list run history.
+// All callers must be admin/owner; checks run via the user-scoped RLS client.
 
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -18,5 +18,41 @@ export const verifyBackups = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const service = new BackupVerificationService(context.supabase);
-    return service.verify(data.limit);
+    const report = await service.verify(data.limit);
+
+    // Persist manual run so it appears in the history alongside cron runs.
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await supabaseAdmin.from("backup_verification_runs" as never).insert({
+        source: "manual",
+        checked: report.checked,
+        passed: report.passed,
+        failed: report.failed,
+        freshness_ok: report.freshness_ok,
+        results: report.results as never,
+      } as never);
+    } catch {
+      // history write failure must not break the verification response
+    }
+
+    return report;
   });
+
+export const listBackupVerificationRuns = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ limit: z.number().int().min(1).max(100).default(30) }).parse(d ?? {}))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { data: rows, error } = await context.supabase
+      .from("backup_verification_runs" as never)
+      .select("id, ran_at, source, checked, passed, failed, freshness_ok, correlation_id")
+      .order("ran_at", { ascending: false })
+      .limit(data.limit);
+    if (error) throw new Error(error.message);
+    return { ok: true as const, rows: (rows ?? []) as Array<{
+      id: string; ran_at: string; source: string;
+      checked: number; passed: number; failed: number;
+      freshness_ok: boolean; correlation_id: string | null;
+    }> };
+  });
+

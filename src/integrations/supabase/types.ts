@@ -348,6 +348,7 @@ export type Database = {
       }
       agent_events_dlq: {
         Row: {
+          correlation_id: string | null
           entity_id: string | null
           entity_type: string | null
           event_name: string
@@ -364,6 +365,7 @@ export type Database = {
           source: string
         }
         Insert: {
+          correlation_id?: string | null
           entity_id?: string | null
           entity_type?: string | null
           event_name: string
@@ -380,6 +382,7 @@ export type Database = {
           source?: string
         }
         Update: {
+          correlation_id?: string | null
           entity_id?: string | null
           entity_type?: string | null
           event_name?: string
@@ -819,6 +822,45 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
           value?: Json
+        }
+        Relationships: []
+      }
+      backup_verification_runs: {
+        Row: {
+          checked: number
+          correlation_id: string | null
+          created_at: string
+          failed: number
+          freshness_ok: boolean
+          id: string
+          passed: number
+          ran_at: string
+          results: Json
+          source: string
+        }
+        Insert: {
+          checked?: number
+          correlation_id?: string | null
+          created_at?: string
+          failed?: number
+          freshness_ok?: boolean
+          id?: string
+          passed?: number
+          ran_at?: string
+          results?: Json
+          source?: string
+        }
+        Update: {
+          checked?: number
+          correlation_id?: string | null
+          created_at?: string
+          failed?: number
+          freshness_ok?: boolean
+          id?: string
+          passed?: number
+          ran_at?: string
+          results?: Json
+          source?: string
         }
         Relationships: []
       }
