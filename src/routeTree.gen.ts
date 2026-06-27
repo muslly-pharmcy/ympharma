@@ -29,6 +29,7 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ConditionsRouteImport } from './routes/conditions'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as BundlesRouteImport } from './routes/bundles'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AiSymptomsRouteImport } from './routes/ai-symptoms'
 import { Route as AiSupplementRouteImport } from './routes/ai-supplement'
 import { Route as AiPrescriptionRouteImport } from './routes/ai-prescription'
@@ -266,6 +267,11 @@ const CartRoute = CartRouteImport.update({
 const BundlesRoute = BundlesRouteImport.update({
   id: '/bundles',
   path: '/bundles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AiSymptomsRoute = AiSymptomsRouteImport.update({
@@ -1080,6 +1086,7 @@ export interface FileRoutesByFullPath {
   '/ai-prescription': typeof AiPrescriptionRoute
   '/ai-supplement': typeof AiSupplementRoute
   '/ai-symptoms': typeof AiSymptomsRoute
+  '/auth': typeof AuthRoute
   '/bundles': typeof BundlesRoute
   '/cart': typeof CartRoute
   '/conditions': typeof ConditionsRouteWithChildren
@@ -1239,6 +1246,7 @@ export interface FileRoutesByTo {
   '/ai-prescription': typeof AiPrescriptionRoute
   '/ai-supplement': typeof AiSupplementRoute
   '/ai-symptoms': typeof AiSymptomsRoute
+  '/auth': typeof AuthRoute
   '/bundles': typeof BundlesRoute
   '/cart': typeof CartRoute
   '/conditions': typeof ConditionsRouteWithChildren
@@ -1400,6 +1408,7 @@ export interface FileRoutesById {
   '/ai-prescription': typeof AiPrescriptionRoute
   '/ai-supplement': typeof AiSupplementRoute
   '/ai-symptoms': typeof AiSymptomsRoute
+  '/auth': typeof AuthRoute
   '/bundles': typeof BundlesRoute
   '/cart': typeof CartRoute
   '/conditions': typeof ConditionsRouteWithChildren
@@ -1561,6 +1570,7 @@ export interface FileRouteTypes {
     | '/ai-prescription'
     | '/ai-supplement'
     | '/ai-symptoms'
+    | '/auth'
     | '/bundles'
     | '/cart'
     | '/conditions'
@@ -1720,6 +1730,7 @@ export interface FileRouteTypes {
     | '/ai-prescription'
     | '/ai-supplement'
     | '/ai-symptoms'
+    | '/auth'
     | '/bundles'
     | '/cart'
     | '/conditions'
@@ -1880,6 +1891,7 @@ export interface FileRouteTypes {
     | '/ai-prescription'
     | '/ai-supplement'
     | '/ai-symptoms'
+    | '/auth'
     | '/bundles'
     | '/cart'
     | '/conditions'
@@ -2041,6 +2053,7 @@ export interface RootRouteChildren {
   AiPrescriptionRoute: typeof AiPrescriptionRoute
   AiSupplementRoute: typeof AiSupplementRoute
   AiSymptomsRoute: typeof AiSymptomsRoute
+  AuthRoute: typeof AuthRoute
   BundlesRoute: typeof BundlesRoute
   CartRoute: typeof CartRoute
   ConditionsRoute: typeof ConditionsRouteWithChildren
@@ -2261,6 +2274,13 @@ declare module '@tanstack/react-router' {
       path: '/bundles'
       fullPath: '/bundles'
       preLoaderRoute: typeof BundlesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ai-symptoms': {
@@ -3363,6 +3383,7 @@ const rootRouteChildren: RootRouteChildren = {
   AiPrescriptionRoute: AiPrescriptionRoute,
   AiSupplementRoute: AiSupplementRoute,
   AiSymptomsRoute: AiSymptomsRoute,
+  AuthRoute: AuthRoute,
   BundlesRoute: BundlesRoute,
   CartRoute: CartRoute,
   ConditionsRoute: ConditionsRouteWithChildren,
