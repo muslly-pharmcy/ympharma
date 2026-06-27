@@ -17,7 +17,7 @@ export interface DlqRow {
   event_name: string;
   entity_type: string | null;
   entity_id: string | null;
-  payload: unknown;
+  payload: Record<string, unknown> | unknown[] | string | number | boolean | null;
   source: string | null;
   occurred_at: string;
   retry_count: number;
