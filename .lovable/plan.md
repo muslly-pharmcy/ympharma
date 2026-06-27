@@ -1,63 +1,51 @@
-# إعادة هيكلة Phase A+B إلى src/core/ (Enterprise OOP)
+## Phase B+ — Observability + Backup Verification Cron (adapted)
 
-## الهدف
-استبدال الملفات المسطّحة الحالية (`src/lib/idempotency.server.ts`, `src/lib/ai-safety.ts`, `src/lib/backup-verification.functions.ts`, منطق DLQ داخل `event-bus.functions.ts`, منطق Retention في hook منفرد) بطبقات Service/Decorator/Engine منظّمة تحت `src/core/` كما في الـ blueprint — **دون كسر أي مستهلك حالي**.
+The attached v17.0 blueprint assumes a Node host (pino streams, full OTLP gRPC exporter, AsyncLocalStorage-heavy DI). Our runtime is Cloudflare Workers + Supabase, so I'll adapt rather than copy verbatim. The two outcomes you asked for stay the same; the implementation fits the runtime.
 
-## مبدأ عدم الكسر
-الملفات القديمة تبقى كـ **shim re-exports** تستدعي الطبقة الجديدة. أي hook أو route يستورد `checkIdempotency` / `storeIdempotency` / `runAiSafety` / `verifyLatestBackup` / `listDlqEvents` يظل يعمل بلا تغيير.
+### 1. Observability (lightweight, Worker-safe)
 
-## الهيكل النهائي
+**Correlation + trace propagation**
+- New `src/core/observability/RequestContext.ts` — generates `correlation_id` (UUID) and parses incoming W3C `traceparent` / `tracestate` headers; falls back to a fresh trace/span id.
+- New `src/core/observability/withObservability.ts` — server-route wrapper that:
+  - extracts/creates the context per request,
+  - sets response headers (`x-correlation-id`, `traceparent`),
+  - times the handler and emits one structured log line.
+- Server-fn middleware `src/core/observability/observabilityMiddleware.ts` so `createServerFn` chains pick up the same context.
 
-```text
-src/
-├── core/
-│   ├── idempotency/
-│   │   ├── IdempotencyService.ts       (SHA-256 عبر Web Crypto، TTL، hash check)
-│   │   └── withIdempotency.ts          (decorator يلفّ server fn)
-│   ├── dlq/
-│   │   ├── DLQService.ts               (list/get/resolve)
-│   │   └── DLQReplayEngine.ts          (single + bulk replay + backoff)
-│   ├── retention/
-│   │   ├── RetentionPolicyEngine.ts    (يستدعي apply_retention_policies RPC)
-│   │   └── RetentionScheduler.ts       (واجهة للـ hook)
-│   ├── ai-safety/
-│   │   ├── PIIRedactor.ts              (هواتف/إيميل/IBAN/رقم وطني)
-│   │   ├── InjectionDetector.ts        (أنماط prompt injection محدّدة)
-│   │   └── AISafetyGuard.ts            (facade يجمع الاثنين)
-│   └── backup/
-│       ├── BackupVerificationService.ts (بنية + تطابق عدّاد + حداثة)
-│       └── BackupRestoreTest.ts        (dry-run integrity فقط — لا restore فعلي على Cloud)
-├── hooks/
-│   └── useMotionAnimation.ts           (variants framer-motion قياسية)
-└── components/admin/
-    └── DLQPanel.tsx                    (يُستبدل محتوى الـ panel الحالي بحركة framer-motion)
-```
+**Central logger**
+- New `src/core/observability/Logger.ts` — tiny JSON logger (`info`/`warn`/`error`) writing to `console.*` (Workers stream stdout to logs). No `pino` — it pulls Node streams and breaks on Workers. Each line includes `correlation_id`, `trace_id`, `span_id`, route, status, latency.
+- Optional OTLP HTTP exporter (`OtlpHttpExporter.ts`) gated by `OTEL_EXPORTER_OTLP_ENDPOINT` env. Uses `fetch` (no gRPC). If env unset → no-op. I'll **not** install `@opentelemetry/sdk-node` (Node-only); only the protocol-shaped JSON payload.
 
-## ملفات Shim (تبقى لتجنّب الكسر)
-- `src/lib/idempotency.server.ts` → `export { checkIdempotency, storeIdempotency } from "@/core/idempotency/IdempotencyService"`
-- `src/lib/ai-safety.ts` → `export * from "@/core/ai-safety/AISafetyGuard"`
-- `src/lib/backup-verification.functions.ts` → يبقى كـ `createServerFn` يستدعي `BackupVerificationService`
-- `src/lib/event-bus.functions.ts` → دوال DLQ تصبح أغلفة رقيقة فوق `DLQService` / `DLQReplayEngine`
+**Persisted correlation**
+- Migration: add nullable `correlation_id text` to `agent_events` and `agent_events_dlq` (+ btree index). New events written through `event-bus.functions.ts` and DLQ replay carry it through.
 
-## التبعيات
-- `framer-motion` (للـ DLQPanel + useMotionAnimation) — أتحقّق إن كانت مثبّتة؛ إن لا، `bun add framer-motion`.
-- لا حاجة لأي package إضافي. كل التشفير عبر `globalThis.crypto.subtle` (متوافق Cloudflare Workers).
+### 2. Backup Verification cron
 
-## ما لن أنفّذه من الـ blueprint
-- **Circuit Breaker** بحالة in-memory — عديم الفائدة على workers stateless (كل request يبدأ من صفر). سيُسجَّل كـ ADR.
-- **BackupRestoreTest فعلي** يستعيد نسخة كاملة — يتطلّب صلاحيات وموارد ليست متاحة على Lovable Cloud. أكتفي بفحص integrity البنيوي.
-- **Rate Limiting داخل IdempotencyService** — موجود فعلياً عبر `rate_limit_buckets` و middleware منفصل.
+- Insert a `pg_cron` job (named `backup-verify-daily`, will be assigned a jobid) running daily at 03:45 UTC, calling `POST /api/public/hooks/backup-verify` via `pg_net` with the `apikey` anon header.
+- New route `src/routes/api/public/hooks/backup-verify.ts`:
+  - verifies cron secret,
+  - calls `BackupVerificationService.verify(10)` using `supabaseAdmin` (dynamic import),
+  - if `failed > 0` or `freshness_ok === false`, dispatches an alert via existing `alert-dispatch.server.ts` (Slack/email).
+- Persists the run in a new `backup_verification_runs` table (passed/failed/freshness/results JSONB) so `/admin-backup-verify` shows history.
+- Manual trigger: existing `verifyBackups` server fn already works for `verifyLatestBackup`-style use; I'll add a "Run now" button on `/admin-backup-verify` that calls it and refreshes the history list.
 
-## خطوات التنفيذ (ترتيب)
-1. التحقّق من `framer-motion` وتثبيته عند اللزوم.
-2. كتابة 10 ملفات `src/core/**` الجديدة (طبقات نظيفة، JSDoc عربي، TS صارم).
-3. كتابة `src/hooks/useMotionAnimation.ts`.
-4. تحويل `src/lib/{idempotency.server,ai-safety,backup-verification.functions}.ts` إلى shims.
-5. تحديث دوال DLQ في `src/lib/event-bus.functions.ts` لاستخدام `DLQService` + `DLQReplayEngine` (نفس التواقيع المُصدَّرة).
-6. تحديث `src/components/admin/DlqPanel` (أو ما يعادله داخل `/admin-event-bus`) لاستخدام framer-motion عبر `useMotionAnimation`.
-7. تشغيل typecheck والتأكّد من خلوّه من الأخطاء.
+### What I'm explicitly NOT building from the v17.0 doc
 
-## معايير القبول
-- لا أخطاء `tsgo` ولا أخطاء build.
-- كل الـ hooks الأربعة (`hourly-*`) و route `/admin-event-bus` و `/admin-backup-verify` تعمل بلا تغيير سلوكي.
-- DLQPanel يعرض حركة دخول/خروج للصفوف عند replay/resolve.
+These don't fit Workers/Supabase and would be dead weight:
+- pino, async-mutex, full `@opentelemetry/sdk-node`, Redis/Valkey/Memcached cache drivers, Vault/AWS/Azure/GCP secret managers, distributed lock with fencing, CQRS/Event Sourcing/Snapshot/Projection engines, message broker, multi-region replica routing, plugin system, chaos testing harness.
+- Real "temporary database" backup restore — not possible on Lovable Cloud; structural dry-run via `BackupRestoreTest` already covers what's verifiable.
+
+If you later want any of those specifically, we revisit per item with a runtime-fit design.
+
+### Files (new)
+- `src/core/observability/{RequestContext,Logger,OtlpHttpExporter,withObservability,observabilityMiddleware}.ts`
+- `src/routes/api/public/hooks/backup-verify.ts`
+- Migration: `correlation_id` columns + `backup_verification_runs` table + grants/RLS + pg_cron schedule
+- `src/routes/admin-backup-verify.tsx` — add history table + "Run now" button
+
+### Files (edited)
+- `src/lib/event-bus.functions.ts` — write `correlation_id` on insert
+- `src/core/dlq/DLQReplayEngine.ts` — propagate `correlation_id`
+- a couple of `/api/public/hooks/*` routes wrapped with `withObservability`
+
+Approve and I'll build it in this order: migration → observability core → wrap hooks → backup-verify route → admin UI button.
