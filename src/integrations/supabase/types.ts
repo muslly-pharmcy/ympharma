@@ -1738,6 +1738,39 @@ export type Database = {
         }
         Relationships: []
       }
+      idempotency_keys: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          key: string
+          request_hash: string | null
+          response_body: Json | null
+          response_status: number | null
+          scope: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          key: string
+          request_hash?: string | null
+          response_body?: Json | null
+          response_status?: number | null
+          scope: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          key?: string
+          request_hash?: string | null
+          response_body?: Json | null
+          response_status?: number | null
+          scope?: string
+        }
+        Relationships: []
+      }
       img_proxy_logs: {
         Row: {
           created_at: string
@@ -3392,6 +3425,42 @@ export type Database = {
         }
         Relationships: []
       }
+      retention_policies: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          last_deleted: number | null
+          last_error: string | null
+          last_run_at: string | null
+          retain_days: number
+          table_name: string
+          timestamp_column: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          last_deleted?: number | null
+          last_error?: string | null
+          last_run_at?: string | null
+          retain_days: number
+          table_name: string
+          timestamp_column?: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          last_deleted?: number | null
+          last_error?: string | null
+          last_run_at?: string | null
+          retain_days?: number
+          table_name?: string
+          timestamp_column?: string
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           comment: string | null
@@ -4716,6 +4785,14 @@ export type Database = {
           price: number
         }[]
       }
+      apply_retention_policies: {
+        Args: never
+        Returns: {
+          deleted: number
+          error: string
+          table_name: string
+        }[]
+      }
       approve_classification: {
         Args: { _edits?: Json; _id: string }
         Returns: boolean
@@ -4833,6 +4910,7 @@ export type Database = {
           deleted_feedback: number
         }[]
       }
+      cleanup_idempotency_keys: { Args: never; Returns: number }
       commit_transfer_receipt: {
         Args: { _transfer_id: string }
         Returns: string
