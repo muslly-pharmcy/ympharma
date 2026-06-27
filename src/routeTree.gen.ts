@@ -69,6 +69,7 @@ import { Route as AdminBundlesRouteImport } from './routes/admin-bundles'
 import { Route as AdminBranchesRouteImport } from './routes/admin-branches'
 import { Route as AdminBannersRouteImport } from './routes/admin-banners'
 import { Route as AdminBackupsRouteImport } from './routes/admin-backups'
+import { Route as AdminBackupVerifyRouteImport } from './routes/admin-backup-verify'
 import { Route as AdminAutomationHubRouteImport } from './routes/admin-automation-hub'
 import { Route as AdminAiWhatsappRouteImport } from './routes/admin-ai-whatsapp'
 import { Route as AdminAiSalesCxRouteImport } from './routes/admin-ai-sales-cx'
@@ -467,6 +468,11 @@ const AdminBannersRoute = AdminBannersRouteImport.update({
 const AdminBackupsRoute = AdminBackupsRouteImport.update({
   id: '/admin-backups',
   path: '/admin-backups',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminBackupVerifyRoute = AdminBackupVerifyRouteImport.update({
+  id: '/admin-backup-verify',
+  path: '/admin-backup-verify',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminAutomationHubRoute = AdminAutomationHubRouteImport.update({
@@ -1019,6 +1025,7 @@ export interface FileRoutesByFullPath {
   '/admin-ai-sales-cx': typeof AdminAiSalesCxRoute
   '/admin-ai-whatsapp': typeof AdminAiWhatsappRoute
   '/admin-automation-hub': typeof AdminAutomationHubRoute
+  '/admin-backup-verify': typeof AdminBackupVerifyRoute
   '/admin-backups': typeof AdminBackupsRoute
   '/admin-banners': typeof AdminBannersRoute
   '/admin-branches': typeof AdminBranchesRoute
@@ -1175,6 +1182,7 @@ export interface FileRoutesByTo {
   '/admin-ai-sales-cx': typeof AdminAiSalesCxRoute
   '/admin-ai-whatsapp': typeof AdminAiWhatsappRoute
   '/admin-automation-hub': typeof AdminAutomationHubRoute
+  '/admin-backup-verify': typeof AdminBackupVerifyRoute
   '/admin-backups': typeof AdminBackupsRoute
   '/admin-banners': typeof AdminBannersRoute
   '/admin-branches': typeof AdminBranchesRoute
@@ -1333,6 +1341,7 @@ export interface FileRoutesById {
   '/admin-ai-sales-cx': typeof AdminAiSalesCxRoute
   '/admin-ai-whatsapp': typeof AdminAiWhatsappRoute
   '/admin-automation-hub': typeof AdminAutomationHubRoute
+  '/admin-backup-verify': typeof AdminBackupVerifyRoute
   '/admin-backups': typeof AdminBackupsRoute
   '/admin-banners': typeof AdminBannersRoute
   '/admin-branches': typeof AdminBranchesRoute
@@ -1491,6 +1500,7 @@ export interface FileRouteTypes {
     | '/admin-ai-sales-cx'
     | '/admin-ai-whatsapp'
     | '/admin-automation-hub'
+    | '/admin-backup-verify'
     | '/admin-backups'
     | '/admin-banners'
     | '/admin-branches'
@@ -1647,6 +1657,7 @@ export interface FileRouteTypes {
     | '/admin-ai-sales-cx'
     | '/admin-ai-whatsapp'
     | '/admin-automation-hub'
+    | '/admin-backup-verify'
     | '/admin-backups'
     | '/admin-banners'
     | '/admin-branches'
@@ -1804,6 +1815,7 @@ export interface FileRouteTypes {
     | '/admin-ai-sales-cx'
     | '/admin-ai-whatsapp'
     | '/admin-automation-hub'
+    | '/admin-backup-verify'
     | '/admin-backups'
     | '/admin-banners'
     | '/admin-branches'
@@ -1962,6 +1974,7 @@ export interface RootRouteChildren {
   AdminAiSalesCxRoute: typeof AdminAiSalesCxRoute
   AdminAiWhatsappRoute: typeof AdminAiWhatsappRoute
   AdminAutomationHubRoute: typeof AdminAutomationHubRoute
+  AdminBackupVerifyRoute: typeof AdminBackupVerifyRoute
   AdminBackupsRoute: typeof AdminBackupsRoute
   AdminBannersRoute: typeof AdminBannersRoute
   AdminBranchesRoute: typeof AdminBranchesRoute
@@ -2501,6 +2514,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-backups'
       fullPath: '/admin-backups'
       preLoaderRoute: typeof AdminBackupsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-backup-verify': {
+      id: '/admin-backup-verify'
+      path: '/admin-backup-verify'
+      fullPath: '/admin-backup-verify'
+      preLoaderRoute: typeof AdminBackupVerifyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-automation-hub': {
@@ -3259,6 +3279,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminAiSalesCxRoute: AdminAiSalesCxRoute,
   AdminAiWhatsappRoute: AdminAiWhatsappRoute,
   AdminAutomationHubRoute: AdminAutomationHubRoute,
+  AdminBackupVerifyRoute: AdminBackupVerifyRoute,
   AdminBackupsRoute: AdminBackupsRoute,
   AdminBannersRoute: AdminBannersRoute,
   AdminBranchesRoute: AdminBranchesRoute,
