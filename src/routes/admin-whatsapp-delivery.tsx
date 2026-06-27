@@ -241,7 +241,7 @@ function RefLink({ kind, id }: { kind: string | null; id: string | null }) {
   }
   if (kind === "prescription") {
     return (
-      <Link to="/admin-rx-review" className="inline-flex items-center gap-1 text-emerald-700 hover:underline">
+      <Link to="/admin-rx-review" search={{}} className="inline-flex items-center gap-1 text-emerald-700 hover:underline">
         <FileText className="size-3" /><span className="font-mono">{id.slice(0, 10)}</span>
       </Link>
     );
