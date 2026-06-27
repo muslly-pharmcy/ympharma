@@ -1,15 +1,14 @@
-// Full health-check endpoint — gated by the project's anon key (apikey header)
-// to match the existing cron/webhook auth pattern in this codebase.
+// Full health-check endpoint — protected by CRON_SECRET (server-only) to match
+// the rest of the cron/hook authentication pattern.
 import { createFileRoute } from "@tanstack/react-router";
+import { verifyCronSecret } from "@/lib/cron-auth.server";
 
 export const Route = createFileRoute("/api/public/health/full-check")({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const apikey = request.headers.get("apikey") || request.headers.get("x-api-key");
-        if (!apikey || apikey !== process.env.SUPABASE_PUBLISHABLE_KEY) {
-          return new Response("Unauthorized", { status: 401 });
-        }
+        const denied = verifyCronSecret(request);
+        if (denied) return denied;
         const { runFullHealthCheck } = await import("@/lib/health-check.server");
         const result = await runFullHealthCheck();
         return Response.json(result, {
