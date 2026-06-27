@@ -1,51 +1,62 @@
-## Phase B+ — Observability + Backup Verification Cron (adapted)
+# ⚠️ Reality Check — AI Copilot v17.0 Blueprint
 
-The attached v17.0 blueprint assumes a Node host (pino streams, full OTLP gRPC exporter, AsyncLocalStorage-heavy DI). Our runtime is Cloudflare Workers + Supabase, so I'll adapt rather than copy verbatim. The two outcomes you asked for stay the same; the implementation fits the runtime.
+Verified the blueprint against the live schema. Multiple assumptions are **fictional**:
 
-### 1. Observability (lightweight, Worker-safe)
+| Blueprint assumes | Reality |
+|---|---|
+| `profiles` table (age, weight, pregnant, smoking…) | ❌ does not exist |
+| `patient_allergies`, `patient_conditions`, `patient_medications` | ❌ none exist |
+| `drug_interactions` table | ❌ does not exist |
+| `agent_approval_requests.extracted_data`, `ai_confidence`, `customer_id` | ❌ real columns are `extracted_medicines` (jsonb), `missing_medicines` (text[]), `payload`, `user_phone` — no `customer_id` |
+| Direct Gemini / Anthropic API keys (`GEMINI_API_KEY`, `ANTHROPIC_API_KEY`) | ❌ project standard is **Lovable AI Gateway** (`LOVABLE_API_KEY`, already set) |
+| `@/core/observability/Logger` exports `logger` | ⚠ exports `Logger` class; need to verify shape |
+| `@/components/dashboard/DashboardButton`, JSX in route file is corrupted (`useState>([])`, `
 
-**Correlation + trace propagation**
-- New `src/core/observability/RequestContext.ts` — generates `correlation_id` (UUID) and parses incoming W3C `traceparent` / `tracestate` headers; falls back to a fresh trace/span id.
-- New `src/core/observability/withObservability.ts` — server-route wrapper that:
-  - extracts/creates the context per request,
-  - sets response headers (`x-correlation-id`, `traceparent`),
-  - times the handler and emits one structured log line.
-- Server-fn middleware `src/core/observability/observabilityMiddleware.ts` so `createServerFn` chains pick up the same context.
+` blocks, empty `< />` tags) | ❌ JSX won't compile as-is |
+| `AICopilotValidator` extends a `BaseValidator` that we deferred in last turn | ❌ not in repo |
+| New tables created without `GRANT` statements | ❌ would 403 via PostgREST |
 
-**Central logger**
-- New `src/core/observability/Logger.ts` — tiny JSON logger (`info`/`warn`/`error`) writing to `console.*` (Workers stream stdout to logs). No `pino` — it pulls Node streams and breaks on Workers. Each line includes `correlation_id`, `trace_id`, `span_id`, route, status, latency.
-- Optional OTLP HTTP exporter (`OtlpHttpExporter.ts`) gated by `OTEL_EXPORTER_OTLP_ENDPOINT` env. Uses `fetch` (no gRPC). If env unset → no-op. I'll **not** install `@opentelemetry/sdk-node` (Node-only); only the protocol-shaped JSON payload.
+If I implement the blueprint verbatim it crashes at build time and at runtime. Pick one:
 
-**Persisted correlation**
-- Migration: add nullable `correlation_id text` to `agent_events` and `agent_events_dlq` (+ btree index). New events written through `event-bus.functions.ts` and DLQ replay carry it through.
+---
 
-### 2. Backup Verification cron
+## Option A — Adapted AI Copilot (recommended)
 
-- Insert a `pg_cron` job (named `backup-verify-daily`, will be assigned a jobid) running daily at 03:45 UTC, calling `POST /api/public/hooks/backup-verify` via `pg_net` with the `apikey` anon header.
-- New route `src/routes/api/public/hooks/backup-verify.ts`:
-  - verifies cron secret,
-  - calls `BackupVerificationService.verify(10)` using `supabaseAdmin` (dynamic import),
-  - if `failed > 0` or `freshness_ok === false`, dispatches an alert via existing `alert-dispatch.server.ts` (Slack/email).
-- Persists the run in a new `backup_verification_runs` table (passed/failed/freshness/results JSONB) so `/admin-backup-verify` shows history.
-- Manual trigger: existing `verifyBackups` server fn already works for `verifyLatestBackup`-style use; I'll add a "Run now" button on `/admin-backup-verify` that calls it and refreshes the history list.
+Build the **real** functionality on top of the **real** schema, keeping the user-visible feature set (analyze prescription, chat with copilot, history, admin page, safety guardrails).
 
-### What I'm explicitly NOT building from the v17.0 doc
+**Files (new):**
+1. `src/lib/ai-clinical-copilot.functions.ts` — three server fns:
+   - `analyzePrescriptionWithAI({ prescriptionId })` — reads `agent_approval_requests` (real columns), uses `LOVABLE_API_KEY` via `createLovableAiGatewayProvider` + `generateText` with `google/gemini-3-flash-preview`, writes back to `extracted_medicines` + a new `ai_analysis` jsonb column.
+   - `chatWithAICopilot({ message, context, prescriptionId? })` — same gateway, optional prescription grounding from `extracted_medicines`.
+   - `getAIAnalysisHistory({ limit })` — reads recent analyzed approval requests (admin-only via `has_role`).
+   - `clearAICache()` — admin-only, clears in-memory TTL cache.
+   - Built-in: in-memory cache (1 h), retry+timeout via existing `src/lib/retry.ts`, PII redaction via existing `src/core/ai-safety/PIIRedactor.ts`.
+2. `src/lib/ai-safety.functions.ts` — thin `checkAISafety` server fn that delegates to the existing `src/core/ai-safety/AISafetyGuard.ts` (no duplicate regex logic).
+3. `src/routes/_authenticated/admin-ai-copilot.tsx` — clean admin UI (analyze form, chat panel, history list) using existing shadcn `Button`/`Input`/`Card` — **not** the broken JSX from the blueprint. Routed under existing `_authenticated/` (flat dot path, no `admin/` subfolder).
+4. Migration `add_ai_copilot_columns`:
+   - `ALTER TABLE agent_approval_requests ADD COLUMN ai_analysis jsonb, ai_confidence numeric, ai_risk_score int, ai_analyzed_at timestamptz` (idempotent).
+   - `CREATE TABLE ai_safety_logs (...)` + full `GRANT` block + RLS (admin read, service_role all).
+   - No `drug_interactions` table for now (blueprint feature requires content nobody has loaded). Interaction checks fall back to LLM reasoning over the medication list.
+   - No `patient_*` tables (no patient profile schema exists). Patient context is built from `whatsapp_conversations` / `prescription_extractions` instead, and gracefully degrades when missing.
 
-These don't fit Workers/Supabase and would be dead weight:
-- pino, async-mutex, full `@opentelemetry/sdk-node`, Redis/Valkey/Memcached cache drivers, Vault/AWS/Azure/GCP secret managers, distributed lock with fencing, CQRS/Event Sourcing/Snapshot/Projection engines, message broker, multi-region replica routing, plugin system, chaos testing harness.
-- Real "temporary database" backup restore — not possible on Lovable Cloud; structural dry-run via `BackupRestoreTest` already covers what's verifiable.
+**Explicitly dropped from blueprint:**
+- `patient_*` table reads (no such schema).
+- `drug_interactions` table read (no data source).
+- `AICopilotValidator.ts` (deferred since the `BaseValidator` framework itself was rejected last turn).
+- Direct Gemini / Anthropic clients.
 
-If you later want any of those specifically, we revisit per item with a runtime-fit design.
+---
 
-### Files (new)
-- `src/core/observability/{RequestContext,Logger,OtlpHttpExporter,withObservability,observabilityMiddleware}.ts`
-- `src/routes/api/public/hooks/backup-verify.ts`
-- Migration: `correlation_id` columns + `backup_verification_runs` table + grants/RLS + pg_cron schedule
-- `src/routes/admin-backup-verify.tsx` — add history table + "Run now" button
+## Option B — Schema-First
 
-### Files (edited)
-- `src/lib/event-bus.functions.ts` — write `correlation_id` on insert
-- `src/core/dlq/DLQReplayEngine.ts` — propagate `correlation_id`
-- a couple of `/api/public/hooks/*` routes wrapped with `withObservability`
+I first design proper `patient_profiles`, `patient_allergies`, `patient_conditions`, `patient_medications`, and `drug_interactions` tables (with seed data source you provide), THEN build the copilot against them. Larger scope, needs your input on where allergy/condition data comes from.
 
-Approve and I'll build it in this order: migration → observability core → wrap hooks → backup-verify route → admin UI button.
+---
+
+## Option C — Ship blueprint verbatim
+
+I refuse — it will not build. Listed for completeness only.
+
+---
+
+**Which option?** (A is fastest and won't break anything; B if you want the full clinical-grade feature; C is a no-op.)
