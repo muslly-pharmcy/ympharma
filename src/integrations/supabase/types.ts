@@ -152,6 +152,10 @@ export type Database = {
         Row: {
           action_type: string
           agent_id: string
+          ai_analysis: Json | null
+          ai_analyzed_at: string | null
+          ai_confidence: number | null
+          ai_risk_score: number | null
           conversation_id: string | null
           correlation_id: string | null
           created_at: string
@@ -172,6 +176,10 @@ export type Database = {
         Insert: {
           action_type: string
           agent_id?: string
+          ai_analysis?: Json | null
+          ai_analyzed_at?: string | null
+          ai_confidence?: number | null
+          ai_risk_score?: number | null
           conversation_id?: string | null
           correlation_id?: string | null
           created_at?: string
@@ -192,6 +200,10 @@ export type Database = {
         Update: {
           action_type?: string
           agent_id?: string
+          ai_analysis?: Json | null
+          ai_analyzed_at?: string | null
+          ai_confidence?: number | null
+          ai_risk_score?: number | null
           conversation_id?: string | null
           correlation_id?: string | null
           created_at?: string
@@ -645,6 +657,33 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
           weight?: number
+        }
+        Relationships: []
+      }
+      ai_safety_logs: {
+        Row: {
+          context: string | null
+          created_at: string
+          details: Json
+          id: string
+          kind: string
+          user_id: string | null
+        }
+        Insert: {
+          context?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          kind: string
+          user_id?: string | null
+        }
+        Update: {
+          context?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          kind?: string
+          user_id?: string | null
         }
         Relationships: []
       }
