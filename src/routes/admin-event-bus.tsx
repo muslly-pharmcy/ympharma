@@ -3,6 +3,8 @@ import { AdminGate } from "@/components/admin/AdminGate";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { AnimatePresence, motion } from "framer-motion";
+import { useMotionAnimation } from "@/hooks/useMotionAnimation";
 import { listAgentEvents, agentEventStats, markAgentEventProcessed, installEventConsumerSchedule, getEventConsumerSchedule, listScheduleLog, listThrottlingHits, listDlqEvents, replayDlqEvent, bulkReplayDlq, resolveDlqEvent } from "@/lib/event-bus.functions";
 
 export const Route = createFileRoute("/admin-event-bus")({
