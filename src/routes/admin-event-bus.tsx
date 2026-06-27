@@ -3,6 +3,8 @@ import { AdminGate } from "@/components/admin/AdminGate";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { AnimatePresence, motion } from "framer-motion";
+import { useMotionAnimation } from "@/hooks/useMotionAnimation";
 import { listAgentEvents, agentEventStats, markAgentEventProcessed, installEventConsumerSchedule, getEventConsumerSchedule, listScheduleLog, listThrottlingHits, listDlqEvents, replayDlqEvent, bulkReplayDlq, resolveDlqEvent } from "@/lib/event-bus.functions";
 
 export const Route = createFileRoute("/admin-event-bus")({
@@ -357,6 +359,7 @@ function DlqPanel() {
   };
 
   const rows = q.data?.rows ?? [];
+  const motionPreset = useMotionAnimation();
 
   return (
     <section className="rounded-xl border p-4 space-y-3">
@@ -378,9 +381,19 @@ function DlqPanel() {
         </div>
       </header>
 
-      {msg && (
-        <div className={`text-sm rounded px-3 py-2 ${msg.kind === "ok" ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-destructive"}`}>{msg.text}</div>
-      )}
+      <AnimatePresence>
+        {msg && (
+          <motion.div
+            key={msg.text}
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className={`text-sm rounded px-3 py-2 ${msg.kind === "ok" ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-destructive"}`}
+          >
+            {msg.text}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
@@ -395,29 +408,37 @@ function DlqPanel() {
               <th className="text-right p-2">إجراء</th>
             </tr>
           </thead>
-          <tbody>
-            {rows.map((r: any) => (
-              <tr key={r.id} className="border-t align-top">
-                <td className="p-2 font-mono text-xs">{r.event_name}</td>
-                <td className="p-2 text-xs">{r.entity_type ?? "—"}<br /><span className="text-muted-foreground" dir="ltr">{r.entity_id ?? ""}</span></td>
-                <td className="p-2 text-xs text-center">{r.retry_count}</td>
-                <td className="p-2 text-xs max-w-[280px] truncate" title={r.last_error ?? ""}>{r.last_error ?? "—"}</td>
-                <td className="p-2 text-xs whitespace-nowrap">{new Date(r.failed_at).toLocaleString("ar")}</td>
-                <td className="p-2 text-xs">{r.resolved_at ? "✓ محلول" : "—"}</td>
-                <td className="p-2 text-xs whitespace-nowrap">
-                  {!r.resolved_at && (
-                    <div className="flex gap-1">
-                      <button onClick={() => onReplay(r.id)} disabled={busy === r.id} className="px-2 py-1 rounded bg-primary text-primary-foreground disabled:opacity-50">إعادة</button>
-                      <button onClick={() => onResolve(r.id)} disabled={busy === r.id} className="px-2 py-1 rounded border">إغلاق</button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
+          <motion.tbody variants={motionPreset.list} initial="hidden" animate="visible">
+            <AnimatePresence initial={false}>
+              {rows.map((r: any) => (
+                <motion.tr
+                  key={r.id}
+                  layout
+                  variants={motionPreset.item}
+                  exit="exit"
+                  className="border-t align-top"
+                >
+                  <td className="p-2 font-mono text-xs">{r.event_name}</td>
+                  <td className="p-2 text-xs">{r.entity_type ?? "—"}<br /><span className="text-muted-foreground" dir="ltr">{r.entity_id ?? ""}</span></td>
+                  <td className="p-2 text-xs text-center">{r.retry_count}</td>
+                  <td className="p-2 text-xs max-w-[280px] truncate" title={r.last_error ?? ""}>{r.last_error ?? "—"}</td>
+                  <td className="p-2 text-xs whitespace-nowrap">{new Date(r.failed_at).toLocaleString("ar")}</td>
+                  <td className="p-2 text-xs">{r.resolved_at ? "✓ محلول" : "—"}</td>
+                  <td className="p-2 text-xs whitespace-nowrap">
+                    {!r.resolved_at && (
+                      <div className="flex gap-1">
+                        <button onClick={() => onReplay(r.id)} disabled={busy === r.id} className="px-2 py-1 rounded bg-primary text-primary-foreground disabled:opacity-50">إعادة</button>
+                        <button onClick={() => onResolve(r.id)} disabled={busy === r.id} className="px-2 py-1 rounded border">إغلاق</button>
+                      </div>
+                    )}
+                  </td>
+                </motion.tr>
+              ))}
+            </AnimatePresence>
             {rows.length === 0 && (
               <tr><td colSpan={7} className="p-3 text-center text-muted-foreground">لا عناصر في DLQ.</td></tr>
             )}
-          </tbody>
+          </motion.tbody>
         </table>
       </div>
     </section>
