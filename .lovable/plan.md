@@ -1,46 +1,63 @@
-## الخطة — تكييف blueprint v14.0 على الواقع
+## رأيي الصريح في v17.0
 
-الـ blueprint المرسل يعيد إدخال أخطاء صحّحناها (`stock` بدل `stock_qty`، `read_at`/`body`/`data` بدل `read`/`metadata`، `supabase.raw()` غير الموجودة، مسارات `/_authenticated/admin/inventory.tsx` متعارضة). سأطبّق فقط ما يضيف قيمة فعلية دون كسر الموجود.
+**التقييم: blueprint جميل أكاديمياً، لكن 80% منه لا يناسب مشروعك الحالي.**
 
-### ما سيُنفَّذ
+### الواقع الحالي للمشروع
+- TanStack Start على Cloudflare Workers + Supabase واحد
+- مستخدم واحد (أنت) + فريق صغير
+- لا يوجد Kafka، لا multi-tenant، لا multi-region، لا فرق متعددة
+- النظام يعمل ويخدم سوقاً واحداً (اليمن)
 
-**1. `src/lib/slack.functions.ts` (جديد)**
-- `isValidSlackWebhookUrl(url)` — regex للتحقق من `https://hooks.slack.com/services/...`.
-- `sendSlackMessage({ message })` — يتحقق من `process.env.SLACK_WEBHOOK_URL` قبل الإرسال، يرجع خطأ واضح إذا كانت القيمة غير صالحة (مثل رقم الهاتف الحالي).
-- `testSlackWebhook()` — يرجع `{ valid, reason }` بدون كشف الرابط الكامل.
-- يستخدم `requireSupabaseAuth` + فحص `has_role(admin)` لمنع إساءة الاستخدام.
+### ما في الـ blueprint لا يمكن أو لا يجب تنفيذه
 
-**2. `src/components/admin/InventoryAlerts.tsx` (جديد)**
-- مكوّن واجهة فقط، يستهلك `getLowStockProducts` الموجود فعلاً في `src/lib/inventory.functions.ts`.
-- يعرض الحقول الحقيقية: `stock_qty` و`reorder_point` (وليس الوهمية).
-- refetch كل 60 ثانية، حالة فارغة + حالة تحميل + قائمة بطاقات.
-
-**3. `src/routes/_authenticated/admin-slack-test.tsx` (جديد)**
-- صفحة صغيرة تستدعي `testSlackWebhook` وتعرض النتيجة + تعليمات الحصول على Webhook صحيح.
-- زر لإرسال رسالة اختبار.
-
-**4. تضمين `InventoryAlerts` في صفحة `/admin-inventory` الحالية** (إضافة في الأعلى، بدون تعديل المنطق).
-
-### ما لن يُنفَّذ (ومبرراته الفنية)
-
-| الملف في الـ blueprint | السبب |
+| البند | لماذا لا |
 |---|---|
-| `src/lib/inventory.server.ts` بـ `stock` | العمود الفعلي `stock_qty`؛ النسخة الحالية `src/lib/inventory.functions.ts` تعمل وتمرّ typecheck/tests. |
-| `src/lib/notifications.server.ts` بـ `read_at`/`body`/`data` | الأعمدة الفعلية `read` (bool) + `metadata` (jsonb)؛ النسخة الحالية صحيحة. |
-| `src/lib/audit.server.ts` على `activity_logs` فقط | لدينا فعلاً `audit_logs_unified` view يجمع 5 جداول (activity_logs + inventory_audit_log + supplier_link_audit + transfer_audit_log + error_logs). |
-| `src/components/admin/AdminAudit.tsx` بديل | صفحة `/admin-audit` الحالية تعمل على الـ view الموحّد. |
-| migration `add_reorder_threshold.sql` | العمود موجود فعلاً (تأكّدنا في الجلسة السابقة). |
-| `src/routes/_authenticated/admin/inventory.tsx` | سيتعارض مع `src/routes/admin-inventory.tsx` المسطّح الموجود. |
-| `supabase.raw(...)` | غير موجودة في supabase-js v2 — ستفشل وقت التشغيل. |
+| 1. Schema Registry (Confluent) | لا يوجد Kafka. Confluent منتج منفصل بآلاف الدولارات/شهر |
+| 5. Kafka Partition Strategy | **لا يوجد Kafka أصلاً** — pg_net + cron فقط |
+| 8. ClickHouse/Elasticsearch/Vector DB | ثلاث بنى تحتية جديدة لا نملكها؛ Postgres FTS + pgvector يكفيان |
+| 11. Tenant Encryption (Master→Tenant→Field) | **لا يوجد multi-tenant**؛ مشروع single-tenant |
+| 12. Data Residency (4 مناطق AWS) | Cloudflare Workers يحدد الموقع تلقائياً؛ لا AWS |
+| 17. Pact Contract Testing | لا يوجد services منفصلة لتختبر عقودها |
+| 18. Service Catalog/Scaffolding | فريق واحد، خدمة واحدة — لا حاجة لـ Backstage |
+| المجلد `platforms/` بـ 17 منصة | كل ما في المشروع `src/` واحد — إعادة الهيكلة بهذا الحجم = إعادة كتابة كاملة |
 
-### تفاصيل تقنية
+### ما في الـ blueprint يستحق التنفيذ فعلاً (مُكَيَّف على الواقع)
 
-- ملفات `.functions.ts` (وليس `.server.ts`) لأن المكوّنات تستوردها — وفق قواعد المشروع.
-- `sendSlackMessage` يستخدم `fetch` مباشرة (Workers-compatible).
-- لا migration مطلوبة.
-- لا تغيير في schema، لا تغيير في الـ tests الناجحة.
+| # | البند | لماذا يناسب الآن |
+|---|---|---|
+| 6 | **DLQ Replay Engine** | لدينا `agent_events_dlq` بالفعل بدون UI لإعادة المعالجة |
+| 7 | **Event Retention Policy** | لدينا `error_logs_archive` و`uptime_incidents_archive` بدون سياسة منظمة |
+| 10 | **Idempotency Keys** | webhooks الحالية (n8n, whatsapp, twilio) معرضة لرسائل مكررة |
+| 14 | **AI Safety Layer (مبسّط)** | لدينا `ai-chat`, prescriptions, voice-pharmacist — حماية الإدخال/الإخراج قيمة |
+| 16 | **Backup Verification** | لدينا جدول `backups` لكن لا نتحقق من سلامتها |
 
-### بعد التنفيذ
-- typecheck يجب أن يبقى نظيفاً.
-- الاختبارات الـ 7 الناجحة سابقاً تبقى ناجحة.
-- ستحتاج لاحقاً تحديث قيمة `SLACK_WEBHOOK_URL` يدوياً بالرابط الصحيح؛ صفحة `/admin-slack-test` ستؤكّد متى يصبح صالحاً.
+### اعتراضات تقنية على الكود نفسه (حتى لو طبقنا)
+
+1. **`get_next_sequence`** يستخدم `SELECT MAX()` بدون قفل — race condition مؤكد. يجب استخدام `Postgres SEQUENCE`.
+2. **`replaceAll(/delete/i, ...)`** في AI Sandbox = حماية وهمية تكسر استعلامات طبية شرعية ("الجرعة المحذوفة من الوصفة").
+3. **`crypto.randomBytes` و`createCipheriv`** — Cloudflare Workers لا يدعم `node:crypto` بشكل كامل؛ يجب Web Crypto API.
+4. **`setInterval` للنسخ الاحتياطي** — Workers stateless؛ لا يعمل. يحتاج `pg_cron`.
+5. **Idempotency table بدون TTL/cleanup** — ينمو بلا حد.
+
+### اقتراحي
+
+نفذ **5 بنود فقط** بشكل واقعي ومحكم بدلاً من 18 سطحياً:
+
+**Phase A (هذه الجلسة):**
+1. **Idempotency middleware** للـ `/api/public/hooks/*` (جدول + cleanup cron + Web Crypto)
+2. **DLQ Replay UI** على `/admin-event-bus` (زر إعادة محاولة + bulk replay محدود)
+3. **Retention policy موحدة** — function `apply_retention_policy()` تنقل من جداول `*_archive` إلى Supabase Storage بعد N يوم، وتحذف بعد M يوم، مع cron يومي
+
+**Phase B (جلسة لاحقة):**
+4. **AI Safety**: PII redactor + injection detector فقط (بدون regex naive)، يُسجّل المحاولات في `operations_alerts_v14`
+5. **Backup verification**: server fn يقرأ آخر backup من Storage، يفك ضغطه، يعدّ الصفوف، يقارن مع جدول `backups.expected_rows`
+
+**ما لن ننفذه:** كل ما يحتاج Kafka/ClickHouse/Vault/Backstage/multi-region/multi-tenant. سنعيد طرحه عندما يصبح المشروع متعدد المستأجرين فعلاً.
+
+### القرار المطلوب منك
+
+اختر واحداً:
+- **A**: نفّذ Phase A الآن (3 بنود واقعية، migration واحد + 3-4 ملفات)
+- **B**: نفّذ Phase A + B (5 بنود، أكبر)
+- **C**: عدّل الاختيار — اذكر أي بنود من الـ 18 تريدها صراحة وسأقول أيها قابل للتنفيذ على البنية الحالية
+- **D**: لا تنفذ شيئاً، فقط احفظ هذا التقييم كـ ADR في `docs/`
