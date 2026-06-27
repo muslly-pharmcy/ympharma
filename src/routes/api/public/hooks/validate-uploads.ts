@@ -4,11 +4,14 @@
 
 import { createFileRoute } from "@tanstack/react-router";
 import { validateStorageObject } from "@/lib/upload-validation.functions";
+import { verifyCronSecret } from "@/lib/cron-auth.server";
 
 export const Route = createFileRoute("/api/public/hooks/validate-uploads")({
   server: {
     handlers: {
-      POST: async () => {
+      POST: async ({ request }) => {
+        const denied = verifyCronSecret(request);
+        if (denied) return denied;
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
         const since = new Date(Date.now() - 13 * 60 * 60 * 1000).toISOString();
