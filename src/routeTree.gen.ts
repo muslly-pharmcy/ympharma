@@ -137,6 +137,7 @@ import { Route as ApiPublicHooksRunRestockAlertsRouteImport } from './routes/api
 import { Route as ApiPublicHooksRunReactivationRouteImport } from './routes/api/public/hooks/run-reactivation'
 import { Route as ApiPublicHooksRunLoyaltyReminderRouteImport } from './routes/api/public/hooks/run-loyalty-reminder'
 import { Route as ApiPublicHooksRetryFailedPostsRouteImport } from './routes/api/public/hooks/retry-failed-posts'
+import { Route as ApiPublicHooksRetentionSweepRouteImport } from './routes/api/public/hooks/retention-sweep'
 import { Route as ApiPublicHooksRecordHealthRouteImport } from './routes/api/public/hooks/record-health'
 import { Route as ApiPublicHooksPrescriptionExtractRouteImport } from './routes/api/public/hooks/prescription-extract'
 import { Route as ApiPublicHooksNightlyIntelRouteImport } from './routes/api/public/hooks/nightly-intel'
@@ -839,6 +840,12 @@ const ApiPublicHooksRetryFailedPostsRoute =
     path: '/api/public/hooks/retry-failed-posts',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksRetentionSweepRoute =
+  ApiPublicHooksRetentionSweepRouteImport.update({
+    id: '/api/public/hooks/retention-sweep',
+    path: '/api/public/hooks/retention-sweep',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksRecordHealthRoute =
   ApiPublicHooksRecordHealthRouteImport.update({
     id: '/api/public/hooks/record-health',
@@ -1116,6 +1123,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
   '/api/public/hooks/record-health': typeof ApiPublicHooksRecordHealthRoute
+  '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
   '/api/public/hooks/retry-failed-posts': typeof ApiPublicHooksRetryFailedPostsRoute
   '/api/public/hooks/run-loyalty-reminder': typeof ApiPublicHooksRunLoyaltyReminderRoute
   '/api/public/hooks/run-reactivation': typeof ApiPublicHooksRunReactivationRoute
@@ -1271,6 +1279,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
   '/api/public/hooks/record-health': typeof ApiPublicHooksRecordHealthRoute
+  '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
   '/api/public/hooks/retry-failed-posts': typeof ApiPublicHooksRetryFailedPostsRoute
   '/api/public/hooks/run-loyalty-reminder': typeof ApiPublicHooksRunLoyaltyReminderRoute
   '/api/public/hooks/run-reactivation': typeof ApiPublicHooksRunReactivationRoute
@@ -1428,6 +1437,7 @@ export interface FileRoutesById {
   '/api/public/hooks/nightly-intel': typeof ApiPublicHooksNightlyIntelRoute
   '/api/public/hooks/prescription-extract': typeof ApiPublicHooksPrescriptionExtractRoute
   '/api/public/hooks/record-health': typeof ApiPublicHooksRecordHealthRoute
+  '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
   '/api/public/hooks/retry-failed-posts': typeof ApiPublicHooksRetryFailedPostsRoute
   '/api/public/hooks/run-loyalty-reminder': typeof ApiPublicHooksRunLoyaltyReminderRoute
   '/api/public/hooks/run-reactivation': typeof ApiPublicHooksRunReactivationRoute
@@ -1585,6 +1595,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/nightly-intel'
     | '/api/public/hooks/prescription-extract'
     | '/api/public/hooks/record-health'
+    | '/api/public/hooks/retention-sweep'
     | '/api/public/hooks/retry-failed-posts'
     | '/api/public/hooks/run-loyalty-reminder'
     | '/api/public/hooks/run-reactivation'
@@ -1740,6 +1751,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/nightly-intel'
     | '/api/public/hooks/prescription-extract'
     | '/api/public/hooks/record-health'
+    | '/api/public/hooks/retention-sweep'
     | '/api/public/hooks/retry-failed-posts'
     | '/api/public/hooks/run-loyalty-reminder'
     | '/api/public/hooks/run-reactivation'
@@ -1896,6 +1908,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/nightly-intel'
     | '/api/public/hooks/prescription-extract'
     | '/api/public/hooks/record-health'
+    | '/api/public/hooks/retention-sweep'
     | '/api/public/hooks/retry-failed-posts'
     | '/api/public/hooks/run-loyalty-reminder'
     | '/api/public/hooks/run-reactivation'
@@ -2036,6 +2049,7 @@ export interface RootRouteChildren {
   ApiPublicHooksNightlyIntelRoute: typeof ApiPublicHooksNightlyIntelRoute
   ApiPublicHooksPrescriptionExtractRoute: typeof ApiPublicHooksPrescriptionExtractRoute
   ApiPublicHooksRecordHealthRoute: typeof ApiPublicHooksRecordHealthRoute
+  ApiPublicHooksRetentionSweepRoute: typeof ApiPublicHooksRetentionSweepRoute
   ApiPublicHooksRetryFailedPostsRoute: typeof ApiPublicHooksRetryFailedPostsRoute
   ApiPublicHooksRunLoyaltyReminderRoute: typeof ApiPublicHooksRunLoyaltyReminderRoute
   ApiPublicHooksRunReactivationRoute: typeof ApiPublicHooksRunReactivationRoute
@@ -2965,6 +2979,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksRetryFailedPostsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/retention-sweep': {
+      id: '/api/public/hooks/retention-sweep'
+      path: '/api/public/hooks/retention-sweep'
+      fullPath: '/api/public/hooks/retention-sweep'
+      preLoaderRoute: typeof ApiPublicHooksRetentionSweepRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/record-health': {
       id: '/api/public/hooks/record-health'
       path: '/api/public/hooks/record-health'
@@ -3327,6 +3348,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksPrescriptionExtractRoute:
     ApiPublicHooksPrescriptionExtractRoute,
   ApiPublicHooksRecordHealthRoute: ApiPublicHooksRecordHealthRoute,
+  ApiPublicHooksRetentionSweepRoute: ApiPublicHooksRetentionSweepRoute,
   ApiPublicHooksRetryFailedPostsRoute: ApiPublicHooksRetryFailedPostsRoute,
   ApiPublicHooksRunLoyaltyReminderRoute: ApiPublicHooksRunLoyaltyReminderRoute,
   ApiPublicHooksRunReactivationRoute: ApiPublicHooksRunReactivationRoute,
@@ -3361,13 +3383,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -3,7 +3,7 @@ import { AdminGate } from "@/components/admin/AdminGate";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listAgentEvents, agentEventStats, markAgentEventProcessed, installEventConsumerSchedule, getEventConsumerSchedule, listScheduleLog, listThrottlingHits } from "@/lib/event-bus.functions";
+import { listAgentEvents, agentEventStats, markAgentEventProcessed, installEventConsumerSchedule, getEventConsumerSchedule, listScheduleLog, listThrottlingHits, listDlqEvents, replayDlqEvent, bulkReplayDlq, resolveDlqEvent } from "@/lib/event-bus.functions";
 
 export const Route = createFileRoute("/admin-event-bus")({
   head: () => ({ meta: [{ title: "Event Bus — Admin" }] }),
@@ -304,9 +304,126 @@ function EventBusPage() {
           </table>
         </div>
       </section>
+
+      <DlqPanel />
     </div>
   );
 }
+
+function DlqPanel() {
+  const listFn = useServerFn(listDlqEvents);
+  const replayFn = useServerFn(replayDlqEvent);
+  const bulkFn = useServerFn(bulkReplayDlq);
+  const resolveFn = useServerFn(resolveDlqEvent);
+  const qc = useQueryClient();
+  const [status, setStatus] = useState<"UNRESOLVED" | "RESOLVED" | "ALL">("UNRESOLVED");
+  const [busy, setBusy] = useState<string | null>(null);
+  const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+
+  const q = useQuery({
+    queryKey: ["dlq_events", status],
+    queryFn: () => listFn({ data: { status, limit: 100 } }),
+    refetchInterval: 30_000,
+  });
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["dlq_events"] });
+    qc.invalidateQueries({ queryKey: ["agent_events"] });
+    qc.invalidateQueries({ queryKey: ["agent_events_stats"] });
+  };
+
+  const onReplay = async (id: string) => {
+    setBusy(id); setMsg(null);
+    try { await replayFn({ data: { id } }); setMsg({ kind: "ok", text: `✓ أُعيد إرسال ${id.slice(0, 8)}` }); invalidate(); }
+    catch (e: any) { setMsg({ kind: "err", text: `✗ ${e?.message ?? String(e)}` }); }
+    finally { setBusy(null); }
+  };
+
+  const onResolve = async (id: string) => {
+    setBusy(id); setMsg(null);
+    try { await resolveFn({ data: { id } }); setMsg({ kind: "ok", text: `✓ أُغلق ${id.slice(0, 8)}` }); invalidate(); }
+    catch (e: any) { setMsg({ kind: "err", text: `✗ ${e?.message ?? String(e)}` }); }
+    finally { setBusy(null); }
+  };
+
+  const onBulk = async () => {
+    setBusy("bulk"); setMsg(null);
+    try {
+      const r = await bulkFn({ data: { limit: 10 } });
+      setMsg({ kind: "ok", text: `✓ أُعيدت ${r.replayed}، فشلت ${r.failed}` });
+      invalidate();
+    } catch (e: any) { setMsg({ kind: "err", text: `✗ ${e?.message ?? String(e)}` }); }
+    finally { setBusy(null); }
+  };
+
+  const rows = q.data?.rows ?? [];
+
+  return (
+    <section className="rounded-xl border p-4 space-y-3">
+      <header className="flex items-center justify-between flex-wrap gap-2">
+        <h2 className="text-lg font-semibold">طابور الرسائل الميتة (DLQ)</h2>
+        <div className="flex items-center gap-2">
+          <select className="border rounded px-2 py-1 text-sm" value={status} onChange={(e) => setStatus(e.target.value as never)}>
+            <option value="UNRESOLVED">غير محلولة</option>
+            <option value="RESOLVED">محلولة</option>
+            <option value="ALL">الكل</option>
+          </select>
+          <button
+            onClick={onBulk}
+            disabled={busy === "bulk"}
+            className="px-3 py-1 rounded bg-primary text-primary-foreground text-sm disabled:opacity-50"
+          >
+            {busy === "bulk" ? "..." : "إعادة إرسال أول 10"}
+          </button>
+        </div>
+      </header>
+
+      {msg && (
+        <div className={`text-sm rounded px-3 py-2 ${msg.kind === "ok" ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-destructive"}`}>{msg.text}</div>
+      )}
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="bg-muted/40">
+            <tr>
+              <th className="text-right p-2">الحدث</th>
+              <th className="text-right p-2">الكيان</th>
+              <th className="text-right p-2">محاولات</th>
+              <th className="text-right p-2">آخر خطأ</th>
+              <th className="text-right p-2">فشل في</th>
+              <th className="text-right p-2">الحالة</th>
+              <th className="text-right p-2">إجراء</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r: any) => (
+              <tr key={r.id} className="border-t align-top">
+                <td className="p-2 font-mono text-xs">{r.event_name}</td>
+                <td className="p-2 text-xs">{r.entity_type ?? "—"}<br /><span className="text-muted-foreground" dir="ltr">{r.entity_id ?? ""}</span></td>
+                <td className="p-2 text-xs text-center">{r.retry_count}</td>
+                <td className="p-2 text-xs max-w-[280px] truncate" title={r.last_error ?? ""}>{r.last_error ?? "—"}</td>
+                <td className="p-2 text-xs whitespace-nowrap">{new Date(r.failed_at).toLocaleString("ar")}</td>
+                <td className="p-2 text-xs">{r.resolved_at ? "✓ محلول" : "—"}</td>
+                <td className="p-2 text-xs whitespace-nowrap">
+                  {!r.resolved_at && (
+                    <div className="flex gap-1">
+                      <button onClick={() => onReplay(r.id)} disabled={busy === r.id} className="px-2 py-1 rounded bg-primary text-primary-foreground disabled:opacity-50">إعادة</button>
+                      <button onClick={() => onResolve(r.id)} disabled={busy === r.id} className="px-2 py-1 rounded border">إغلاق</button>
+                    </div>
+                  )}
+                </td>
+              </tr>
+            ))}
+            {rows.length === 0 && (
+              <tr><td colSpan={7} className="p-3 text-center text-muted-foreground">لا عناصر في DLQ.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
 
 function Card({ title, value, tone = "neutral" }: { title: string; value: number | string; tone?: "ok" | "warn" | "neutral" }) {
   const toneCls = tone === "warn" ? "text-amber-600" : tone === "ok" ? "text-emerald-600" : "";
