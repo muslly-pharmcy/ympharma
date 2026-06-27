@@ -151,6 +151,7 @@ import { Route as ApiPublicHooksDlqAlertsRouteImport } from './routes/api/public
 import { Route as ApiPublicHooksCustomerRxNotifyRouteImport } from './routes/api/public/hooks/customer-rx-notify'
 import { Route as ApiPublicHooksCollectSocialStatsRouteImport } from './routes/api/public/hooks/collect-social-stats'
 import { Route as ApiPublicHooksChronicRefillsRouteImport } from './routes/api/public/hooks/chronic-refills'
+import { Route as ApiPublicHooksBackupVerifyRouteImport } from './routes/api/public/hooks/backup-verify'
 import { Route as ApiPublicHooksAlertsWorkerRouteImport } from './routes/api/public/hooks/alerts-worker'
 import { Route as ApiPublicHooksAgentMaintenanceRouteImport } from './routes/api/public/hooks/agent-maintenance'
 import { Route as ApiPublicHooksAgentAlertsRouteImport } from './routes/api/public/hooks/agent-alerts'
@@ -923,6 +924,12 @@ const ApiPublicHooksChronicRefillsRoute =
     path: '/api/public/hooks/chronic-refills',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksBackupVerifyRoute =
+  ApiPublicHooksBackupVerifyRouteImport.update({
+    id: '/api/public/hooks/backup-verify',
+    path: '/api/public/hooks/backup-verify',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksAlertsWorkerRoute =
   ApiPublicHooksAlertsWorkerRouteImport.update({
     id: '/api/public/hooks/alerts-worker',
@@ -1118,6 +1125,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/agent-alerts': typeof ApiPublicHooksAgentAlertsRoute
   '/api/public/hooks/agent-maintenance': typeof ApiPublicHooksAgentMaintenanceRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
+  '/api/public/hooks/backup-verify': typeof ApiPublicHooksBackupVerifyRoute
   '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
   '/api/public/hooks/collect-social-stats': typeof ApiPublicHooksCollectSocialStatsRoute
   '/api/public/hooks/customer-rx-notify': typeof ApiPublicHooksCustomerRxNotifyRoute
@@ -1275,6 +1283,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/agent-alerts': typeof ApiPublicHooksAgentAlertsRoute
   '/api/public/hooks/agent-maintenance': typeof ApiPublicHooksAgentMaintenanceRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
+  '/api/public/hooks/backup-verify': typeof ApiPublicHooksBackupVerifyRoute
   '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
   '/api/public/hooks/collect-social-stats': typeof ApiPublicHooksCollectSocialStatsRoute
   '/api/public/hooks/customer-rx-notify': typeof ApiPublicHooksCustomerRxNotifyRoute
@@ -1434,6 +1443,7 @@ export interface FileRoutesById {
   '/api/public/hooks/agent-alerts': typeof ApiPublicHooksAgentAlertsRoute
   '/api/public/hooks/agent-maintenance': typeof ApiPublicHooksAgentMaintenanceRoute
   '/api/public/hooks/alerts-worker': typeof ApiPublicHooksAlertsWorkerRoute
+  '/api/public/hooks/backup-verify': typeof ApiPublicHooksBackupVerifyRoute
   '/api/public/hooks/chronic-refills': typeof ApiPublicHooksChronicRefillsRoute
   '/api/public/hooks/collect-social-stats': typeof ApiPublicHooksCollectSocialStatsRoute
   '/api/public/hooks/customer-rx-notify': typeof ApiPublicHooksCustomerRxNotifyRoute
@@ -1593,6 +1603,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/agent-alerts'
     | '/api/public/hooks/agent-maintenance'
     | '/api/public/hooks/alerts-worker'
+    | '/api/public/hooks/backup-verify'
     | '/api/public/hooks/chronic-refills'
     | '/api/public/hooks/collect-social-stats'
     | '/api/public/hooks/customer-rx-notify'
@@ -1750,6 +1761,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/agent-alerts'
     | '/api/public/hooks/agent-maintenance'
     | '/api/public/hooks/alerts-worker'
+    | '/api/public/hooks/backup-verify'
     | '/api/public/hooks/chronic-refills'
     | '/api/public/hooks/collect-social-stats'
     | '/api/public/hooks/customer-rx-notify'
@@ -1908,6 +1920,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/agent-alerts'
     | '/api/public/hooks/agent-maintenance'
     | '/api/public/hooks/alerts-worker'
+    | '/api/public/hooks/backup-verify'
     | '/api/public/hooks/chronic-refills'
     | '/api/public/hooks/collect-social-stats'
     | '/api/public/hooks/customer-rx-notify'
@@ -2050,6 +2063,7 @@ export interface RootRouteChildren {
   ApiPublicHooksAgentAlertsRoute: typeof ApiPublicHooksAgentAlertsRoute
   ApiPublicHooksAgentMaintenanceRoute: typeof ApiPublicHooksAgentMaintenanceRoute
   ApiPublicHooksAlertsWorkerRoute: typeof ApiPublicHooksAlertsWorkerRoute
+  ApiPublicHooksBackupVerifyRoute: typeof ApiPublicHooksBackupVerifyRoute
   ApiPublicHooksChronicRefillsRoute: typeof ApiPublicHooksChronicRefillsRoute
   ApiPublicHooksCollectSocialStatsRoute: typeof ApiPublicHooksCollectSocialStatsRoute
   ApiPublicHooksCustomerRxNotifyRoute: typeof ApiPublicHooksCustomerRxNotifyRoute
@@ -3090,6 +3104,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksChronicRefillsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/backup-verify': {
+      id: '/api/public/hooks/backup-verify'
+      path: '/api/public/hooks/backup-verify'
+      fullPath: '/api/public/hooks/backup-verify'
+      preLoaderRoute: typeof ApiPublicHooksBackupVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/alerts-worker': {
       id: '/api/public/hooks/alerts-worker'
       path: '/api/public/hooks/alerts-worker'
@@ -3355,6 +3376,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksAgentAlertsRoute: ApiPublicHooksAgentAlertsRoute,
   ApiPublicHooksAgentMaintenanceRoute: ApiPublicHooksAgentMaintenanceRoute,
   ApiPublicHooksAlertsWorkerRoute: ApiPublicHooksAlertsWorkerRoute,
+  ApiPublicHooksBackupVerifyRoute: ApiPublicHooksBackupVerifyRoute,
   ApiPublicHooksChronicRefillsRoute: ApiPublicHooksChronicRefillsRoute,
   ApiPublicHooksCollectSocialStatsRoute: ApiPublicHooksCollectSocialStatsRoute,
   ApiPublicHooksCustomerRxNotifyRoute: ApiPublicHooksCustomerRxNotifyRoute,

@@ -58,7 +58,7 @@ export const Route = createFileRoute("/api/public/hooks/backup-verify")({
         }
 
         return new Response(
-          JSON.stringify({ ok: true, correlation_id: ctx.correlation_id, ...report }),
+          JSON.stringify({ correlation_id: ctx.correlation_id, ...report }),
           { status: 200, headers: { "content-type": "application/json" } },
         );
       }),
