@@ -1,62 +1,85 @@
-# ⚠️ Reality Check — AI Copilot v17.0 Blueprint
+# TITANUS OMEGA X v17.0 — Full System Audit
 
-Verified the blueprint against the live schema. Multiple assumptions are **fictional**:
+## Scope
+Forensic-grade audit of the entire codebase across 6 dimensions: Code quality, Architecture, Security, Functional completeness, Runtime/Operational readiness, Configuration/Deployment. No areas excluded.
 
-| Blueprint assumes | Reality |
-|---|---|
-| `profiles` table (age, weight, pregnant, smoking…) | ❌ does not exist |
-| `patient_allergies`, `patient_conditions`, `patient_medications` | ❌ none exist |
-| `drug_interactions` table | ❌ does not exist |
-| `agent_approval_requests.extracted_data`, `ai_confidence`, `customer_id` | ❌ real columns are `extracted_medicines` (jsonb), `missing_medicines` (text[]), `payload`, `user_phone` — no `customer_id` |
-| Direct Gemini / Anthropic API keys (`GEMINI_API_KEY`, `ANTHROPIC_API_KEY`) | ❌ project standard is **Lovable AI Gateway** (`LOVABLE_API_KEY`, already set) |
-| `@/core/observability/Logger` exports `logger` | ⚠ exports `Logger` class; need to verify shape |
-| `@/components/dashboard/DashboardButton`, JSX in route file is corrupted (`useState>([])`, `
+## Deliverables
+1. **`docs/titanus-audit-v17.md`** — committed to the repo. Full report with all sections (A–J) from the spec: executive summary, P0/P1/P2/P3 issue cards, scorecards (architecture/security/performance), functional completeness matrix, recommended next steps.
+2. **Chat summary** — executive summary table + GO/CONDITIONAL/NO-GO verdict + the P0 list with file:line refs.
+3. **Auto-applied P0 patches** — for every finding classified CRITICAL (P0), apply the fix immediately after the report is delivered. Stop and wait for approval on P1/P2/P3.
 
-` blocks, empty `< />` tags) | ❌ JSX won't compile as-is |
-| `AICopilotValidator` extends a `BaseValidator` that we deferred in last turn | ❌ not in repo |
-| New tables created without `GRANT` statements | ❌ would 403 via PostgREST |
+## Audit method (read-only, no code changes during discovery)
 
-If I implement the blueprint verbatim it crashes at build time and at runtime. Pick one:
+**Phase 1 — Inventory** (parallel)
+- File counts and LOC per directory (`src/`, `src/core/`, `src/routes/`, `src/lib/`, `supabase/migrations/`).
+- Dependency tree from `package.json`, lockfile drift, `bun pm ls` for duplicates.
+- Cron jobs (`SELECT * FROM cron.job`), RLS coverage (`pg_policies`), table grants.
 
----
+**Phase 2 — Static analysis** (parallel)
+- `tsgo` full typecheck — capture every error/warning.
+- ESLint full run — capture every rule violation.
+- `rg` sweeps for: `any` casts, `// @ts-ignore`, `TODO|FIXME|XXX`, `console.log` in production paths, `dangerouslySetInnerHTML`, hardcoded secrets/URLs, `process.env` at module scope in `*.functions.ts`, raw `fetch` without retry/timeout, missing try/catch around DB calls.
+- `supabase--linter` for DB-side findings.
+- `code--dependency_scan` for known CVEs.
 
-## Option A — Adapted AI Copilot (recommended)
+**Phase 3 — Architecture review**
+- Module dependency direction: routes → lib → core → integrations. Flag inverted imports.
+- `client.server` import-graph audit — any leak into client bundle = P0.
+- God-files (>500 LOC) and God-routes (>10 responsibilities).
+- Duplicate logic detection across `src/lib/` vs `src/core/`.
 
-Build the **real** functionality on top of the **real** schema, keeping the user-visible feature set (analyze prescription, chat with copilot, history, admin page, safety guardrails).
+**Phase 4 — Security review**
+- Every `/api/public/*` route: signature/secret verification, input validation, PII exposure.
+- Every `createServerFn` without `requireSupabaseAuth`: confirm it's intentionally public.
+- RLS: every public-schema table has policies AND grants AND `auth.uid()` scoping where needed.
+- Storage buckets: path scoping, public vs signed URL discipline.
+- Secrets hygiene: `.env` contents, `git log` for accidental commits, client-bundle scan for service-role key shape.
+- AI safety: prompt injection guards on every AI call site, PII redaction before LLM.
+- Rate limiting coverage on public endpoints.
 
-**Files (new):**
-1. `src/lib/ai-clinical-copilot.functions.ts` — three server fns:
-   - `analyzePrescriptionWithAI({ prescriptionId })` — reads `agent_approval_requests` (real columns), uses `LOVABLE_API_KEY` via `createLovableAiGatewayProvider` + `generateText` with `google/gemini-3-flash-preview`, writes back to `extracted_medicines` + a new `ai_analysis` jsonb column.
-   - `chatWithAICopilot({ message, context, prescriptionId? })` — same gateway, optional prescription grounding from `extracted_medicines`.
-   - `getAIAnalysisHistory({ limit })` — reads recent analyzed approval requests (admin-only via `has_role`).
-   - `clearAICache()` — admin-only, clears in-memory TTL cache.
-   - Built-in: in-memory cache (1 h), retry+timeout via existing `src/lib/retry.ts`, PII redaction via existing `src/core/ai-safety/PIIRedactor.ts`.
-2. `src/lib/ai-safety.functions.ts` — thin `checkAISafety` server fn that delegates to the existing `src/core/ai-safety/AISafetyGuard.ts` (no duplicate regex logic).
-3. `src/routes/_authenticated/admin-ai-copilot.tsx` — clean admin UI (analyze form, chat panel, history list) using existing shadcn `Button`/`Input`/`Card` — **not** the broken JSX from the blueprint. Routed under existing `_authenticated/` (flat dot path, no `admin/` subfolder).
-4. Migration `add_ai_copilot_columns`:
-   - `ALTER TABLE agent_approval_requests ADD COLUMN ai_analysis jsonb, ai_confidence numeric, ai_risk_score int, ai_analyzed_at timestamptz` (idempotent).
-   - `CREATE TABLE ai_safety_logs (...)` + full `GRANT` block + RLS (admin read, service_role all).
-   - No `drug_interactions` table for now (blueprint feature requires content nobody has loaded). Interaction checks fall back to LLM reasoning over the medication list.
-   - No `patient_*` tables (no patient profile schema exists). Patient context is built from `whatsapp_conversations` / `prescription_extractions` instead, and gracefully degrades when missing.
+**Phase 5 — Functional verification**
+- UI feature ↔ backend endpoint ↔ DB table mapping. Flag any UI feature without backing implementation or with schema mismatch (column names, types).
+- Webhook handlers: signal vs silent failure.
+- Event consumer / DLQ: confirm replay path is wired and tested.
+- Cron jobs: confirm each scheduled job points at a live endpoint with correct secret header.
 
-**Explicitly dropped from blueprint:**
-- `patient_*` table reads (no such schema).
-- `drug_interactions` table read (no data source).
-- `AICopilotValidator.ts` (deferred since the `BaseValidator` framework itself was rejected last turn).
-- Direct Gemini / Anthropic clients.
+**Phase 6 — Runtime/Ops review**
+- Health endpoints, startup validation, graceful shutdown, retry/circuit-breaker coverage.
+- Backup verification cron + restore drill status.
+- Observability: correlation IDs, structured logs, error reporter installation.
+- Memory leak surfaces: subscriptions, intervals, blob/object URLs, event listeners without cleanup.
 
----
+**Phase 7 — Config/Deployment review**
+- `vite.config.ts`, `tsconfig.json`, `wrangler`-equivalent, CI workflow.
+- Required env vars present in `.env.example`.
+- Cron job inventory vs declared endpoints — flag orphans and misaligned secrets.
+- Indexes vs slow-query candidates (`supabase--slow_queries`).
 
-## Option B — Schema-First
+## Classification
+- **P0 Critical** — security breach, data loss, RLS gap, exposed secret, production-breaking. Auto-fixed.
+- **P1 High** — significant security/correctness risk, broken feature, missing auth. Plan only.
+- **P2 Medium** — quality/architecture debt, perf regression risk. Plan only.
+- **P3 Low** — style, minor cleanup. Plan only.
 
-I first design proper `patient_profiles`, `patient_allergies`, `patient_conditions`, `patient_medications`, and `drug_interactions` tables (with seed data source you provide), THEN build the copilot against them. Larger scope, needs your input on where allergy/condition data comes from.
+Each issue card includes: category, severity, file:line, description, root cause, impact, proposed fix (with code where short), effort estimate.
 
----
+## Auto-fix policy for P0
+For each P0:
+1. Apply the minimal patch that closes the finding.
+2. Re-run the relevant check (typecheck, linter, RLS query) to confirm.
+3. Record in the report under "P0 — FIXED IN THIS PASS" with before/after.
+P0s that require user input (e.g. a new secret, a third-party config change) are flagged as "P0 — BLOCKED ON USER" with the exact action required.
 
-## Option C — Ship blueprint verbatim
+## Out of scope
+- No P1/P2/P3 fixes without explicit approval.
+- No design/visual changes.
+- No new features.
+- No changes to integration-managed files (`src/integrations/supabase/*` auto-gen, `_authenticated/route.tsx`, `supabase/config.toml`).
 
-I refuse — it will not build. Listed for completeness only.
+## Estimated runtime
+- Phases 1–7 read-only investigation: produced in a single pass via parallel subagents and shell sweeps.
+- Report assembly: one writeup to `docs/titanus-audit-v17.md`.
+- P0 patches: depends on count discovered; each patched and verified individually.
 
----
-
-**Which option?** (A is fastest and won't break anything; B if you want the full clinical-grade feature; C is a no-op.)
+## Note re: "exposed git token" warning in the prompt
+The prompt template warns about a token in `.git/config`. This codebase's `.git` directory is sandboxed and not part of the published bundle; I'll verify during Phase 4 (secrets hygiene) and report findings rather than treat the template's example token as real.
