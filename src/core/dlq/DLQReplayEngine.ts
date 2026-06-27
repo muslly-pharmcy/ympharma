@@ -40,7 +40,8 @@ export class DLQReplayEngine {
       source: `dlq-replay:${row.source ?? "system"}`,
       occurred_at: new Date().toISOString(),
       retry_count: 0,
-    });
+      correlation_id: (row as { correlation_id?: string | null }).correlation_id ?? null,
+    } as never);
     if (insErr) return { id, ok: false, error: insErr.message };
 
     const { error: updErr } = await supabaseAdmin
