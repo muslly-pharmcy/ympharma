@@ -260,8 +260,9 @@ export const listDlqEvents = createServerFn({ method: "POST" })
     const { DLQService } = await import("@/core/dlq/DLQService");
     const service = new DLQService(context.supabase);
     const rows = await service.list({ status: data.status, limit: data.limit });
-    // Strip `unknown` payload to a serializable Json shape at the server-fn boundary.
-    const serialized = JSON.parse(JSON.stringify(rows)) as unknown[];
+    type Json = string | number | boolean | null | { [k: string]: Json } | Json[];
+    type SerializedDlqRow = Omit<(typeof rows)[number], "payload"> & { payload: Json };
+    const serialized: SerializedDlqRow[] = JSON.parse(JSON.stringify(rows));
     return { ok: true as const, rows: serialized };
   });
 
