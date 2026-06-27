@@ -1,14 +1,13 @@
-// Quick health-check (database + env + whatsapp). Gated by anon key.
+// Quick health-check — protected by CRON_SECRET (server-only).
 import { createFileRoute } from "@tanstack/react-router";
+import { verifyCronSecret } from "@/lib/cron-auth.server";
 
 export const Route = createFileRoute("/api/public/health/quick-check")({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const apikey = request.headers.get("apikey") || request.headers.get("x-api-key");
-        if (!apikey || apikey !== process.env.SUPABASE_PUBLISHABLE_KEY) {
-          return new Response("Unauthorized", { status: 401 });
-        }
+        const denied = verifyCronSecret(request);
+        if (denied) return denied;
         const { runQuickHealthCheck } = await import("@/lib/health-check.server");
         const result = await runQuickHealthCheck();
         return Response.json(result, {
