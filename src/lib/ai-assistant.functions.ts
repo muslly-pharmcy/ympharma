@@ -572,6 +572,8 @@ function formatProductHints(hints: z.infer<typeof ProductHintSchema>[]) {
 export const askAssistant = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => InputSchema.parse(input))
   .handler(async ({ data }) => {
+    await assertAdminForMode(data.mode);
+
     const key = process.env.LOVABLE_API_KEY;
     if (!key) throw new Error("AI service unavailable");
 
