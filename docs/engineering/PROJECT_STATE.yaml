@@ -6,13 +6,14 @@ last_updated: 2026-06-28
 phase_status: ACTIVE
 current:
   feature: SEC-P1-003
-  batch: 1
-  action: PASS
+  batch: 2
+  action: COMPLETED
 failure_budget:
   consecutive_failures: 0
 blockers: []
 notes:
   - "DB-P1-005 applied live; 156/156 SECURITY DEFINER fns: authenticated=true, anon=false, public=false."
   - "SEC-P1-003 Batch 1 PASS — classification report at docs/engineering/reports/SEC-P1-003-batch-1-classification.md."
-  - "Buckets: KEEP_AUTHENTICATED=66, RESTRICT_ADMIN_ONLY=12, SERVICE_ROLE_ONLY=11, REVIEW_REQUIRED=67."
-  - "Batch 2 (REVOKE/guard SQL) AWAITING_APPROVAL — gated on CTO review of REVIEW_REQUIRED bucket."
+  - "SEC-P1-003 Batch 1.5 PASS — name-rule reclassification of 67 REVIEW_REQUIRED."
+  - "SEC-P1-003 Batch 2 COMPLETED — commit-ready SQL at docs/engineering/artifacts/20260628053000_sec_p1_003_batch_2.sql (REVOKE EXECUTE FROM authenticated on 57 functions: 5 admin + 52 service). NOT yet applied to DB; awaiting CTO manual apply."
+  - "Final Phase-2 bucket totals: KEEP_AUTHENTICATED=74, RESTRICT_ADMIN_ONLY=17, SERVICE_ROLE_ONLY=63, REVIEW_REQUIRED=0."
