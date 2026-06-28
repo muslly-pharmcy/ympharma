@@ -3,16 +3,16 @@ plan_version: 1
 phase: Phase2
 plan_file: plans/phase-2.yaml
 last_updated: 2026-06-28
-phase_status: READY
+phase_status: ACTIVE
 current:
   feature: SEC-P1-003
   batch: 1
-  action: EXECUTE
+  action: PASS
 failure_budget:
   consecutive_failures: 0
-blockers:
-  - "plans/phase-2.yaml not yet authored — SEC-P1-003 scope (file list + acceptance criteria) must be defined before EXECUTE."
+blockers: []
 notes:
-  - "DB-P1-005 applied live on 2026-06-28. 156/156 SECURITY DEFINER functions in public now: authenticated=true, anon=false, public=false. Offenders=0."
-  - "Verification report: docs/engineering/reports/verification-results.md. CSV: /mnt/documents/db-p1-005-verification.csv."
-  - "Phase 1 CLOSED. Phase 2 opens with SEC-P1-003 (RPC GRANT tightening) — narrow specific RPCs from authenticated to admin/owner or switch to SECURITY INVOKER per Supabase linter 0029 review."
+  - "DB-P1-005 applied live; 156/156 SECURITY DEFINER fns: authenticated=true, anon=false, public=false."
+  - "SEC-P1-003 Batch 1 PASS — classification report at docs/engineering/reports/SEC-P1-003-batch-1-classification.md."
+  - "Buckets: KEEP_AUTHENTICATED=66, RESTRICT_ADMIN_ONLY=12, SERVICE_ROLE_ONLY=11, REVIEW_REQUIRED=67."
+  - "Batch 2 (REVOKE/guard SQL) AWAITING_APPROVAL — gated on CTO review of REVIEW_REQUIRED bucket."
