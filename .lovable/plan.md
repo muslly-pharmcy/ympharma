@@ -1,36 +1,50 @@
-## SEC-P1-002 Batch 1 — Already CLOSED (no execution needed)
+## Context — blocker on the contract
 
-### Findings after reading the requested files
+The brief assumes `plans/phase-3.yaml` exists and `PROJECT_STATE.yaml` is already flipped to `Phase3 / SEC-P1-004 / EXECUTING`. Neither is true in the repo:
 
-I read exactly the files you listed. The actual `docs/engineering/plans/phase-1.yaml` (the frozen, signed plan in the repo) defines **SEC-P1-002 Batch 1** as an **inventory-only task — explicitly "No code edits"**:
+- `docs/engineering/plans/` contains only `phase-1.yaml`, `phase-2.yaml`.
+- `docs/engineering/PROJECT_STATE.yaml` is still `Phase2 / CLOSED / IDLE`.
 
-```
-- id: 1
-  scope: "Enumerate every *.server.ts module imported at top-level of a
-          client-reachable file. NO source changes."
-  output_format: docs/engineering/reports/SEC-P1-002-batch-1-inventory.md
-  acceptance:
-    - "Every *.functions.ts file ... has been grep-checked..."
-    - "Each finding has a proposed remediation."
-    - "No code edits."
-```
+Per `ENGINEERING_CONTRACT.md` I cannot self-flip state. So this plan covers both the governance flip and the actual SEC-P1-004 Batch 1 work in one approved step.
 
-That report already exists and was accepted:
-- `docs/engineering/reports/SEC-P1-002-batch-1-inventory.md` (8 offenders enumerated)
-- `docs/engineering/reports/SEC-P1-002-batch-2-fixes.md` (Batch 2 remediation already shipped)
+## Scope (approve once, then I switch to build mode and do all of it)
 
-`PROJECT_STATE.yaml` (the only one in `docs/engineering/`; there is no other) confirms: `SEC-P1-002 PASS`, Phase 2 CLOSED.
+### A. Governance files
+1. **CREATE** `docs/engineering/plans/phase-3.yaml` — full 15-feature plan exactly as you pasted.
+2. **UPDATE** `docs/engineering/PROJECT_STATE.yaml`:
+   - `phase: Phase3`
+   - `plan_file: plans/phase-3.yaml`
+   - `phase_status: READY`
+   - `current: { feature: SEC-P1-004, batch: 1, action: EXECUTING }`
+   - keep prior notes, append Phase 3 opening note.
+3. **UPDATE** `docs/engineering/CHANGELOG.md` — append "Phase 3 opened; SEC-P1-004 Batch 1 started".
+4. **UPDATE** `docs/engineering/REGISTRY.yaml` if present — register the 15 Phase 3 features.
 
-The plan text you pasted in your previous message ("Batch 1 files: products-admin.functions.ts, orders.server.ts") is from a **different draft plan** that was never frozen into the repo. The repo's frozen Batch 1 is inventory; the repo's frozen Batch 2 (already done) is the 8-file dynamic-import remediation, which included `products-admin.functions.ts`.
+### B. SEC-P1-004 Batch 1 — CI Import-Graph Guard
+Per `plans/phase-3.yaml`:
+1. **CREATE** `scripts/check-imports.ts` — Node/Bun script that:
+   - Walks `src/**/*.{ts,tsx}` excluding `*.server.ts`, `*.server.tsx`, `src/integrations/supabase/client.server.ts`, `src/core/**/*.server.ts`, and test files.
+   - Parses each file for `import ... from '...'` and dynamic `import('...')`.
+   - Flags **top-level static imports** whose resolved path ends in `.server.ts`/`.server.tsx` or matches `**/*.server`.
+   - Allows dynamic `await import(...)` inside function bodies (matches our SEC-P1-002 remediation pattern).
+   - Exits non-zero on any violation, printing file:line + offending import.
+2. **CREATE** `.github/workflows/import-guard.yml` — runs on every PR + push to main:
+   - Sets up Bun.
+   - Runs `bun run scripts/check-imports.ts`.
+   - Fails the PR on violations.
+3. **CREATE** `docs/engineering/reports/SEC-P1-004-batch-1-fixes.md` — execution report.
 
-### Decision required
+### C. Validation
+- `bunx tsgo --noEmit`
+- `bun run build`
+- `bun run scripts/check-imports.ts` locally → expect 0 violations (SEC-P1-002 already cleaned the offenders).
 
-There is nothing to execute for "SEC-P1-002 Batch 1" — running it again would only regenerate an already-accepted report. Pick one:
+## Out of scope (will not touch)
+Source files under `src/` other than the new script; any of the other 14 Phase 3 features; database; secrets.
 
-**Option A — Re-verify (no-op refresh).** I re-run the grep audit, confirm the existing inventory still matches reality, and append a "re-verified 2026-06-28" line to the existing report. No source or state changes. Output report unchanged in substance.
+## Final report shape
+Will return the exact `STATUS / FILES CHANGED / VALIDATION / OUT_OF_SCOPE_CANDIDATES / TRACE` block the contract requires.
 
-**Option B — Replace the frozen plan.** If you want the draft layout (`products-admin.functions.ts` + `orders.server.ts` as Batch 1) to become the new truth, I need explicit CTO approval to overwrite `plans/phase-1.yaml` AND `PROJECT_STATE.yaml` (which the contract forbids me from touching unilaterally). This also reopens already-PASS work.
+---
 
-**Option C — Open new work.** Name a real Phase 3 feature and I'll author `plans/phase-3.yaml` + update state.
-
-I will not silently re-run closed work or modify `PROJECT_STATE.yaml` without your explicit selection.
+**Approve and I execute A + B + C in one build-mode batch.** If you'd rather I split A (governance) from B (code) into two approvals, say so.
