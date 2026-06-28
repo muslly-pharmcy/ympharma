@@ -132,7 +132,31 @@ features:
           - "AdminGate and _authenticated layout both redirect to /auth."
           - "No source file modified."
 
+  - id: DB-P1-005
+    title: "SECURITY DEFINER lockdown — dry-run SQL artifact"
+    rationale: >
+      Produce a single generic, idempotent SQL artifact that, when
+      applied manually via Supabase SQL Editor, revokes EXECUTE from
+      PUBLIC and anon for every SECURITY DEFINER function in schema
+      public and grants EXECUTE to `authenticated` only. The platform's
+      supabase/migrations/ folder is managed by the migration tool and
+      cannot accept directly authored files, so the artifact lives
+      under docs/engineering/artifacts/ for manual apply + review.
+    batches:
+      - id: 1
+        files:
+          - docs/engineering/artifacts/20260628044324_fix_security_definer.sql (CREATE)
+        output_format: "docs/engineering/reports/DB-P1-005-batch-1-verification.md"
+        acceptance:
+          - "Artifact filename matches YYYYMMDDHHMMSS_*.sql."
+          - "Single balanced DO $$ ... $$; block iterates pg_proc filtered by nspname='public' AND prosecdef=true AND prokind='f'."
+          - "Block emits REVOKE EXECUTE ... FROM PUBLIC, REVOKE EXECUTE ... FROM anon, and GRANT EXECUTE ... TO authenticated per function."
+          - "Trailing read-only SELECT reports has_authenticated / has_anon / has_public per function."
+          - "No hard-coded function names; idempotent on re-run."
+          - "No source-code changes (typecheck/build N/A)."
+
 
 failure_budget:
   per_batch_consecutive_failures: 3
   on_exhaustion: "Halt phase, file blocker in PROJECT_STATE.blockers, request ITRB intervention."
+
