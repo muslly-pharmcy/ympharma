@@ -1,94 +1,54 @@
+## Scope
 
-## Context
+Adopt the user-provided governance refresh and dispatch the next feature **CRON-P1-004** (Cron Auth Middleware) under the Engineering Execution System.
 
-The user's note references a placeholder line ("remaining files in src/lib/ (if any)") and a `Batch 4`. Neither exists in the current `docs/engineering/plans/phase-1.yaml` — the actual plan has SEC-P1-002 Batch 2 with the generic scope *"Apply the remediations approved by ITRB from batch 1, one offender at a time"*. The intent of the instruction still applies: pin the batch to the exact files from the Batch 1 inventory so execution cannot drift.
+## Reality check (must be acknowledged before I execute)
 
-The Batch 1 inventory (already PASS) lists 8 client-reachable `.functions.ts` files leaking `*.server` imports.
+1. **SEC-P1-002 Batch 2 is still `AWAITING_ITRB_VERDICT`.** The contract says only ITRB advances `PROJECT_STATE.yaml` after a PASS. Overwriting state to `CRON-P1-004 / EXECUTE` is an implicit PASS verdict on SEC-P1-002 Batch 2. I will record it as such in `CHANGELOG.md`.
+2. **`CRON-P1-004` collides with the existing `SEC-P1-001`** in `plans/phase-1.yaml`, which already covers cron auth in two batches (inventory → fix). I will **add** `CRON-P1-004` alongside it rather than delete SEC-P1-001, so audit history stays intact. SEC-P1-001 will be marked `superseded_by: CRON-P1-004`.
+3. The user's plan lists the scope as `src/middleware/cron-auth.ts (CREATE)` + `src/routes/api/public/hooks/*.ts (UPDATE)`. The project already has `src/lib/cron-auth.server.ts` (`verifyCronSecret`). Creating a second copy under `src/middleware/` duplicates logic. **Proposed adjustment**: the new file `src/middleware/cron-auth.ts` will be a thin re-export wrapper around `verifyCronSecret` so all hook routes import from one place going forward, with zero behavior change. If you'd rather I move the existing file outright, say so and I'll change the plan.
 
-## Plan
+## Files I will write (governance refresh)
 
-### Step 1 — Freeze Batch 2 file list (governance edit)
+- `docs/engineering/ENGINEERING_CONTRACT.md` → replace with v3.1 LOCKED text from your message.
+- `docs/engineering/PROJECT_STATE.yaml` → set `current: { feature: CRON-P1-004, batch: 1, action: EXECUTE }`.
+- `docs/engineering/plans/phase-1.yaml` → append `CRON-P1-004` feature with the file list you provided; mark `SEC-P1-001` as `superseded_by: CRON-P1-004`; leave SEC-P1-002 / SEC-P1-003 untouched.
+- `docs/engineering/CHANGELOG.md` → append:
+  - `SEC-P1-002 Batch 2: PASS (implicit, per CTO dispatch of CRON-P1-004).`
+  - `CRON-P1-004 Batch 1: dispatched.`
 
-Edit `docs/engineering/plans/phase-1.yaml`, SEC-P1-002 → Batch 2 only. Replace the generic `scope` string with an explicit file enumeration so the engineer cannot edit anything else:
+## Files I will change (CRON-P1-004 / Batch 1 execution)
 
-```yaml
-- id: 2
-  scope: |
-    Apply `dynamic-import-in-handler` remediation to the 8 files listed
-    below — and ONLY these files. For each file: remove the top-level
-    `import … from "*.server"` and move it inside every `.handler()`
-    body that uses it. Type-only imports stay at the top.
-  files:
-    - src/lib/ai-assistant.functions.ts
-    - src/lib/ai-clinical-copilot.functions.ts
-    - src/lib/api/example.functions.ts
-    - src/lib/pharmacy-intel.functions.ts
-    - src/lib/pharmacy-copilot.functions.ts
-    - src/lib/products-admin.functions.ts
-    - src/lib/vitamin-info.functions.ts
-    - src/lib/sentiment.functions.ts
-  output_format: docs/engineering/reports/SEC-P1-002-batch-2-fixes.md
-  acceptance:
-    - "Zero top-level *.server imports remain in the 8 files above."
-    - "tsgo --noEmit passes."
-    - "bun run build passes."
-    - "Smoke test of /admin-ai-copilot and /ai-assistant routes still works."
-```
+1. **CREATE** `src/middleware/cron-auth.ts` — re-exports `verifyCronSecret` from `@/lib/cron-auth.server` as `requireCronAuth(request)`, returning the same `Response | null` contract.
+2. **UPDATE** every file under `src/routes/api/public/hooks/*.ts` that does not already short-circuit on `verifyCronSecret`. For each:
+   - Add `import { requireCronAuth } from "@/middleware/cron-auth"`.
+   - At the very top of the `POST`/`GET` handler: `const unauth = requireCronAuth(request); if (unauth) return unauth;`
+   - No other edits, no formatting drift.
+   - Files already protected stay untouched (will be listed in the report as `ALREADY_PROTECTED`).
 
-No other features or batches are touched. `PROJECT_STATE.yaml` is **not** modified (per the contract — only ITRB writes it after PASS).
+I will enumerate `src/routes/api/public/hooks/*.ts` in the execute step and only touch files where the guard is missing. The full list lands in the evidence report below.
 
-### Step 2 — Advance state (ITRB action, requires your approval)
+## Out of scope (will NOT touch in this batch)
 
-Because the contract forbids the engineer from editing `PROJECT_STATE.yaml`, ITRB (you) must approve advancing:
+- `src/routes/api/public/monitoring/*` (separate batch under SEC-P1-001, now folded into CRON-P1-004 backlog if you want it later).
+- `src/lib/cron-auth.server.ts` (not deleted; new middleware re-exports it).
+- Any non-hook public route, contact form, image proxy, etc.
 
-```yaml
-current:
-  feature: SEC-P1-002
-  batch: 2
-  action: EXECUTE
-```
-
-I will perform this edit as part of the same approval since you are the ITRB and this plan is your written verdict. Append a one-line PASS entry to `CHANGELOG.md` covering Batch 1.
-
-### Step 3 — Execute Batch 2
-
-For each of the 8 files:
-
-1. Remove top-level `import { … } from "…*.server"`.
-2. Inside each `createServerFn().handler(async … => { … })` that needed the symbol, insert `const { … } = await import("…*.server")` as the first line of the handler.
-3. Preserve all other code (no formatting drift, no reorganization).
-
-### Step 4 — Validate
-
-Run in order:
+## Validation
 
 - `bunx tsgo --noEmit`
 - `bun run build`
+- Evidence written to `docs/engineering/reports/CRON-P1-004-batch-1-fixes.md` with: files changed, before/after for one route, validation tails, `ALREADY_PROTECTED` list, `OUT_OF_SCOPE_CANDIDATES` if any.
 
-If either fails, revert the offending file, file a blocker in `PROJECT_STATE.blockers`, and stop.
+## Report format (matches your contract v3.1)
 
-### Step 5 — Evidence
+```
+STATUS: SUCCESS | FAILED | HALTED | BLOCKED
+FILES CHANGED: …
+VALIDATION: Typecheck PASS/FAIL, Build PASS/FAIL
+TRACE: …
+```
 
-Write `docs/engineering/reports/SEC-P1-002-batch-2-fixes.md` containing:
+## Approve to switch to build mode
 
-- Per-file before/after snippet (top of file + one handler).
-- `tsgo` and `bun run build` output tails.
-- Acceptance checklist (4 items from the plan) with ✅/❌.
-- Smoke-test note for `/admin-ai-copilot` and `/ai-assistant` (manual confirmation required from you — I cannot click through authenticated admin routes without your session).
-
-### Out of scope (will NOT touch)
-
-- `src/lib/api/example.functions.ts` deletion (separate batch).
-- Any other `.functions.ts` not in the 8-file list.
-- ESLint guard rule (recommended as future `SEC-P1-004`).
-- Any documentation outside `phase-1.yaml`, `CHANGELOG.md`, and the new `reports/SEC-P1-002-batch-2-fixes.md`.
-
-## Deliverables
-
-1. Updated `docs/engineering/plans/phase-1.yaml` (SEC-P1-002 Batch 2 only).
-2. Updated `docs/engineering/PROJECT_STATE.yaml` (Batch 1 → Batch 2).
-3. Updated `docs/engineering/CHANGELOG.md` (Batch 1 PASS line).
-4. 8 file edits under `src/lib/**`.
-5. New `docs/engineering/reports/SEC-P1-002-batch-2-fixes.md`.
-
-Approve to switch to build mode and execute.
+Approve as written, or tell me to (a) replace `src/lib/cron-auth.server.ts` instead of wrapping it, (b) skip the implicit PASS on SEC-P1-002 Batch 2 and have you record it manually first, or (c) include `api/public/monitoring/*` in the same batch.
