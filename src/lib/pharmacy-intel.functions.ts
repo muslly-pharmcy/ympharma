@@ -113,6 +113,7 @@ export const runAiClassifierBatch = createServerFn({ method: "POST" })
       return { processed: 0, upserted: 0, skipped: 0, message: "لا توجد منتجات للتصنيف" };
     }
 
+    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
     const gateway = createLovableAiGatewayProvider(key);
     const model = gateway("google/gemini-3-flash-preview");
 

@@ -6,7 +6,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { generateText } from "ai";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 import { logger } from "@/core/observability/Logger";
 import { checkPromptSafety } from "@/core/ai-safety/AISafetyGuard";
 
@@ -116,6 +115,7 @@ export const analyzePrescriptionWithAI = createServerFn({ method: "POST" })
     const safety = checkPromptSafety(sourceText);
     const safePrompt = safety.redactedPrompt ?? sourceText;
 
+    const { createLovableAiGatewayProvider } = await import("@/lib/ai-gateway.server");
     const gateway = createLovableAiGatewayProvider(key);
     const model = gateway(CHAT_MODEL);
 
@@ -250,6 +250,7 @@ export const chatWithAICopilot = createServerFn({ method: "POST" })
     }
 
     try {
+      const { createLovableAiGatewayProvider } = await import("@/lib/ai-gateway.server");
       const gateway = createLovableAiGatewayProvider(key);
       const { text } = await generateText({
         model: gateway(CHAT_MODEL),

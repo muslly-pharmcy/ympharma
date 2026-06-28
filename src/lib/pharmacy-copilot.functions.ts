@@ -253,6 +253,7 @@ export const askExecutiveCopilot = createServerFn({ method: "POST" })
 ${JSON.stringify(snapshot)}
 \`\`\``;
 
+    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
     const gateway = createLovableAiGatewayProvider(key);
     const { text } = await generateText({
       model: gateway("google/gemini-3-flash-preview"),
