@@ -38,8 +38,23 @@ interface RunRow {
 export async function checkCronHealth(): Promise<CronHealthEntry[]> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-  const { data: jobs, error: jobsError } = await supabaseAdmin
-    .schema("cron")
+  // `cron` schema is not in the generated Database types; access via untyped client.
+  const cron = (supabaseAdmin as unknown as {
+    schema: (s: string) => {
+      from: (t: string) => {
+        select: (cols: string) => {
+          returns: <T>() => Promise<{ data: T | null; error: Error | null }>;
+          gte: (col: string, val: string) => {
+            order: (col: string, opts: { ascending: boolean }) => {
+              returns: <T>() => Promise<{ data: T | null; error: Error | null }>;
+            };
+          };
+        };
+      };
+    };
+  }).schema("cron");
+
+  const { data: jobs, error: jobsError } = await cron
     .from("job")
     .select("jobid, jobname")
     .returns<JobRow[]>();
@@ -47,8 +62,7 @@ export async function checkCronHealth(): Promise<CronHealthEntry[]> {
   if (!jobs || jobs.length === 0) return [];
 
   const since = new Date(Date.now() - LOOKBACK_HOURS * 60 * 60 * 1000).toISOString();
-  const { data: runs, error: runsError } = await supabaseAdmin
-    .schema("cron")
+  const { data: runs, error: runsError } = await cron
     .from("job_run_details")
     .select("jobid, status, start_time")
     .gte("start_time", since)
