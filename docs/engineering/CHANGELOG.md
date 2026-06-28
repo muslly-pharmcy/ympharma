@@ -67,3 +67,10 @@ event, newest at the bottom of each section.
 - SQL ends with ROLLBACK; — no DB changes applied.
 - Discrepancies flagged: 2 missing admin function names, "admin" role substituted with service_role + has_role guard.
 - PROJECT_STATE.yaml NOT modified (per CTO instruction).
+
+## 2026-06-28 — SEC-P1-003 Batch 2 PASS (commit-ready, not applied)
+- Artifact regenerated: docs/engineering/artifacts/20260628053000_sec_p1_003_batch_2.sql
+- Rule: REVOKE EXECUTE ON FUNCTION <fn> FROM authenticated;
+- 57 functions affected (5 RESTRICT_ADMIN_ONLY + 52 SERVICE_ROLE_ONLY).
+- SQL ends with COMMIT; — awaiting CTO manual apply via Supabase migration tool.
+- PROJECT_STATE.yaml updated: SEC-P1-003 → batch=2, action=COMPLETED.
