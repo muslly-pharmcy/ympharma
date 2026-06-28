@@ -206,3 +206,176 @@
 ## Verdict
 
 **Batch 1 PASS.** Classification complete. Batch 2 (GRANT/body changes) is **gated on CTO review** of `REVIEW_REQUIRED` entries.
+
+---
+## Batch 1.5 — Name-based reclassification of REVIEW_REQUIRED (2026-06-28)
+**Mode:** AUDIT / CLASSIFICATION ONLY. No GRANT/REVOKE applied. No code or PROJECT_STATE changes.
+**Rules (in order):**
+1. Name contains `_service_|_cron_|_internal_|_sync_|_trigger_|_maintenance_` → SERVICE_ROLE_ONLY
+2. Name starts with `get_|search_|list_|select_|load_|fetch_|find_` → KEEP_AUTHENTICATED
+3. Name starts with `set_|update_|delete_|remove_|create_|insert_|admin_|configure_|manage_` → RESTRICT_ADMIN_ONLY
+4. Otherwise → REVIEW_REQUIRED (residual)
+
+### New bucket counts (Batch 1 + Batch 1.5)
+
+| Bucket | Batch 1 | + Batch 1.5 | New total |
+| --- | ---: | ---: | ---: |
+| KEEP_AUTHENTICATED | 66 | 2 | 68 |
+| RESTRICT_ADMIN_ONLY | 12 | 1 | 13 |
+| SERVICE_ROLE_ONLY | 11 | 1 | 12 |
+| REVIEW_REQUIRED | 0 | 63 | 63 |
+| **TOTAL** | **89** | **67** | **156** |
+
+### SERVICE_ROLE_ONLY (1)
+
+| Function | Rule matched | Callers (src/) |
+| --- | --- | --- |
+| `monitor_cron_failures` | name contains service/cron/internal/sync/trigger/maintenance token | _none_ |
+
+### KEEP_AUTHENTICATED (2)
+
+| Function | Rule matched | Callers (src/) |
+| --- | --- | --- |
+| `get_backup_schedule` | read-prefix (get/search/list/...) | _none_ |
+| `list_approved_classifications_public` | read-prefix (get/search/list/...) | _none_ |
+
+### RESTRICT_ADMIN_ONLY (1)
+
+| Function | Rule matched | Callers (src/) |
+| --- | --- | --- |
+| `create_scheduled_backup` | write/admin-prefix (set/update/delete/admin/...) | _none_ |
+
+### REVIEW_REQUIRED (63)
+
+| Function | Rule matched | Callers (src/) |
+| --- | --- | --- |
+| `ack_staff_alert` | no rule matched — needs manual review | _none_ |
+| `alert_on_failed_agent_action` | no rule matched — needs manual review | _none_ |
+| `auto_populate_bundle_items` | no rule matched — needs manual review | _none_ |
+| `branch_reorder_suggestions` | no rule matched — needs manual review | _none_ |
+| `check_tracking_rate_limit` | no rule matched — needs manual review | _none_ |
+| `claim_agent_events` | no rule matched — needs manual review | _none_ |
+| `claim_customer_rx_notifications` | no rule matched — needs manual review | _none_ |
+| `consume_rate_limit` | no rule matched — needs manual review | _none_ |
+| `current_inventory_write_mode` | no rule matched — needs manual review | _none_ |
+| `customer_notification_get_status` | no rule matched — needs manual review | _none_ |
+| `customer_notification_set_optout` | no rule matched — needs manual review | _none_ |
+| `detect_stale_transfers` | no rule matched — needs manual review | _none_ |
+| `emit_event_on_order_insert` | no rule matched — needs manual review | _none_ |
+| `emit_event_on_prescription_insert` | no rule matched — needs manual review | _none_ |
+| `emit_order_event` | no rule matched — needs manual review | _none_ |
+| `emit_order_status_event` | no rule matched — needs manual review | _none_ |
+| `emit_prescription_review_requested` | no rule matched — needs manual review | _none_ |
+| `enqueue_chronic_refill_action` | no rule matched — needs manual review | _none_ |
+| `enqueue_customer_order_notification` | no rule matched — needs manual review | _none_ |
+| `enqueue_customer_rx_notification` | no rule matched — needs manual review | _none_ |
+| `exec_dashboard` | no rule matched — needs manual review | lib/pharmacy-copilot.functions.ts, lib/pharmacy-intel-admin.functions.ts |
+| `fail_agent_event` | no rule matched — needs manual review | _none_ |
+| `generate_agent_actions` | no rule matched — needs manual review | _none_ |
+| `generate_invoice_number` | no rule matched — needs manual review | _none_ |
+| `generate_marketing_campaigns` | no rule matched — needs manual review | _none_ |
+| `handle_order_cancel_release` | no rule matched — needs manual review | _none_ |
+| `has_branch_access` | no rule matched — needs manual review | _none_ |
+| `intercept_new_order` | no rule matched — needs manual review | _none_ |
+| `intercept_new_prescription` | no rule matched — needs manual review | _none_ |
+| `inventory_report` | no rule matched — needs manual review | _none_ |
+| `is_branch_manager_of` | no rule matched — needs manual review | _none_ |
+| `log_inventory_shadow` | no rule matched — needs manual review | _none_ |
+| `log_product_stock_change` | no rule matched — needs manual review | _none_ |
+| `log_table_activity` | no rule matched — needs manual review | _none_ |
+| `mark_event_processed` | no rule matched — needs manual review | _none_ |
+| `notify_inventory_audit_issues` | no rule matched — needs manual review | _none_ |
+| `on_order_inserted_alert` | no rule matched — needs manual review | _none_ |
+| `on_rx_inserted_alert` | no rule matched — needs manual review | _none_ |
+| `open_escalation_on_review` | no rule matched — needs manual review | _none_ |
+| `prescription_file_count` | no rule matched — needs manual review | _none_ |
+| `publish_transfer_event` | no rule matched — needs manual review | _none_ |
+| `rebuild_customer_intel` | no rule matched — needs manual review | lib/pharmacy-intel-admin.functions.ts, routes/api/public/hooks/nightly-intel.ts |
+| `recompute_loyalty_tier` | no rule matched — needs manual review | _none_ |
+| `record_order_status_change` | no rule matched — needs manual review | _none_ |
+| `redeem_loyalty_points` | no rule matched — needs manual review | _none_ |
+| `release_order_stock` | no rule matched — needs manual review | _none_ |
+| `release_transfer_reservation` | no rule matched — needs manual review | _none_ |
+| `reserve_order_stock` | no rule matched — needs manual review | _none_ |
+| `run_bi_worker` | no rule matched — needs manual review | _none_ |
+| `run_ceo_worker` | no rule matched — needs manual review | _none_ |
+| `run_cto_worker` | no rule matched — needs manual review | _none_ |
+| `run_cx_worker` | no rule matched — needs manual review | _none_ |
+| `run_inventory_worker` | no rule matched — needs manual review | _none_ |
+| `run_marketing_worker` | no rule matched — needs manual review | _none_ |
+| `run_operations_worker` | no rule matched — needs manual review | _none_ |
+| `run_sales_worker` | no rule matched — needs manual review | _none_ |
+| `seed_prescription_review` | no rule matched — needs manual review | _none_ |
+| `tg_publish_wa_escalation_event` | no rule matched — needs manual review | _none_ |
+| `tg_publish_wa_message_event` | no rule matched — needs manual review | _none_ |
+| `transfer_status_guard` | no rule matched — needs manual review | _none_ |
+| `trim_img_proxy_logs` | no rule matched — needs manual review | _none_ |
+| `validate_prescription_review_transition` | no rule matched — needs manual review | _none_ |
+| `verify_prescription_image_coverage` | no rule matched — needs manual review | _none_ |
+
+### Residual REVIEW_REQUIRED — needs human eyes
+
+- `ack_staff_alert`
+- `alert_on_failed_agent_action`
+- `auto_populate_bundle_items`
+- `branch_reorder_suggestions`
+- `check_tracking_rate_limit`
+- `claim_agent_events`
+- `claim_customer_rx_notifications`
+- `consume_rate_limit`
+- `current_inventory_write_mode`
+- `customer_notification_get_status`
+- `customer_notification_set_optout`
+- `detect_stale_transfers`
+- `emit_event_on_order_insert`
+- `emit_event_on_prescription_insert`
+- `emit_order_event`
+- `emit_order_status_event`
+- `emit_prescription_review_requested`
+- `enqueue_chronic_refill_action`
+- `enqueue_customer_order_notification`
+- `enqueue_customer_rx_notification`
+- `exec_dashboard`
+- `fail_agent_event`
+- `generate_agent_actions`
+- `generate_invoice_number`
+- `generate_marketing_campaigns`
+- `handle_order_cancel_release`
+- `has_branch_access`
+- `intercept_new_order`
+- `intercept_new_prescription`
+- `inventory_report`
+- `is_branch_manager_of`
+- `log_inventory_shadow`
+- `log_product_stock_change`
+- `log_table_activity`
+- `mark_event_processed`
+- `notify_inventory_audit_issues`
+- `on_order_inserted_alert`
+- `on_rx_inserted_alert`
+- `open_escalation_on_review`
+- `prescription_file_count`
+- `publish_transfer_event`
+- `rebuild_customer_intel`
+- `recompute_loyalty_tier`
+- `record_order_status_change`
+- `redeem_loyalty_points`
+- `release_order_stock`
+- `release_transfer_reservation`
+- `reserve_order_stock`
+- `run_bi_worker`
+- `run_ceo_worker`
+- `run_cto_worker`
+- `run_cx_worker`
+- `run_inventory_worker`
+- `run_marketing_worker`
+- `run_operations_worker`
+- `run_sales_worker`
+- `seed_prescription_review`
+- `tg_publish_wa_escalation_event`
+- `tg_publish_wa_message_event`
+- `transfer_status_guard`
+- `trim_img_proxy_logs`
+- `validate_prescription_review_transition`
+- `verify_prescription_image_coverage`
+
