@@ -96,3 +96,13 @@ event, newest at the bottom of each section.
 - Static guard scans 370 client-reachable files; 0 violations on current tree.
 - CI will fail any PR introducing a top-level *.server import in client code.
 - Report: docs/engineering/reports/SEC-P1-004-batch-1-fixes.md.
+
+## 2026-06-28 — SEC-P1-004 Batch 1 CLOSED (ITRB PASS)
+- Reviewer (ITRB) approved: implementation matches plan, 0 violations, CI active.
+
+## 2026-06-28 — OPS-P2-002 Batch 1 EXECUTING
+- src/lib/monitoring/cron-monitor.ts (CREATE) — checkCronHealth + dispatchCronAlerts.
+- src/lib/notifications/slack-alerts.ts (CREATE) — sendSlackAlert wrapper over alert-dispatch.server.
+- No DB schema changes. No cron hook wiring (Batch 2 candidate).
+- Validation: tsgo PASS.
+- Report: docs/engineering/reports/OPS-P2-002-batch-1-execution.md.
