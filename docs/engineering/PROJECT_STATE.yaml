@@ -4,9 +4,11 @@ phase: Phase1
 plan_file: plans/phase-1.yaml
 last_updated: 2026-06-28
 current:
-  feature: CRON-P1-004
+  feature: DB-P1-005
   batch: 1
-  action: AWAITING_ITRB_VERDICT
+  action: AWAITING_PLAN_DEFINITION
 failure_budget:
   consecutive_failures: 0
-blockers: []
+blockers:
+  - id: DB-P1-005-undefined
+    note: "DB-P1-005 must be appended to plans/phase-1.yaml with explicit file list and acceptance criteria before EXECUTE can be set. CTO to provide scope."
