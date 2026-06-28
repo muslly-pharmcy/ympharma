@@ -74,3 +74,15 @@ event, newest at the bottom of each section.
 - 57 functions affected (5 RESTRICT_ADMIN_ONLY + 52 SERVICE_ROLE_ONLY).
 - SQL ends with COMMIT; — awaiting CTO manual apply via Supabase migration tool.
 - PROJECT_STATE.yaml updated: SEC-P1-003 → batch=2, action=COMPLETED.
+
+## 2026-06-28 — SEC-P1-003 Batch 2 APPLIED LIVE ✅
+- Migration executed via supabase--migration; REVOKE EXECUTE FROM authenticated on all 57 SECURITY DEFINER functions.
+- Live verification: 0/57 functions retain EXECUTE for `authenticated` role.
+- Report: docs/engineering/reports/SEC-P1-003-batch-2-verification.md.
+- service_role and cron paths unaffected; admin endpoints continue to enforce has_role(auth.uid(),'admin') server-side.
+
+## 2026-06-28 — Phase 2 CLOSED 🏁
+- All P1 security features PASS: SEC-P1-002, CRON-P1-004, AUTH-P1-003, DB-P1-005, SEC-P1-003.
+- PROJECT_STATE.yaml: phase_status=CLOSED, current.feature=null, action=IDLE.
+- System READY FOR PRODUCTION from a P1 security standpoint.
+
