@@ -1,50 +1,42 @@
-## Context — blocker on the contract
+## Plan: Close SEC-P1-004 → Execute OPS-P2-002 Batch 1
 
-The brief assumes `plans/phase-3.yaml` exists and `PROJECT_STATE.yaml` is already flipped to `Phase3 / SEC-P1-004 / EXECUTING`. Neither is true in the repo:
+### Step 1 — Flip state (CTO action)
+Update `docs/engineering/PROJECT_STATE.yaml`:
+- `current.feature: OPS-P2-002`
+- `current.batch: 1`
+- `current.action: EXECUTING`
+- Append note: "SEC-P1-004 Batch 1 CLOSED — PASS (ITRB approved). OPS-P2-002 Batch 1 OPENED."
 
-- `docs/engineering/plans/` contains only `phase-1.yaml`, `phase-2.yaml`.
-- `docs/engineering/PROJECT_STATE.yaml` is still `Phase2 / CLOSED / IDLE`.
+### Step 2 — Append CHANGELOG entry
+`docs/engineering/CHANGELOG.md`:
+- "SEC-P1-004 Batch 1 — PASS (ITRB approved 2026-06-28). CI import-graph guard active."
+- "OPS-P2-002 Batch 1 — OPENED."
 
-Per `ENGINEERING_CONTRACT.md` I cannot self-flip state. So this plan covers both the governance flip and the actual SEC-P1-004 Batch 1 work in one approved step.
+### Step 3 — Execute OPS-P2-002 Batch 1 (Cron Job Monitoring & Alerts)
+Per `plans/phase-3.yaml`, files in scope:
+- `src/lib/monitoring/cron-monitor.ts` (CREATE)
+- `src/lib/notifications/slack-alerts.ts` (UPDATE — file does not exist yet; will CREATE as thin wrapper around the existing `src/lib/slack.functions.ts` / `src/lib/alert-dispatch.server.ts` to avoid duplicating dispatch logic)
 
-## Scope (approve once, then I switch to build mode and do all of it)
+**`src/lib/monitoring/cron-monitor.ts`** — server-only helper (`.server`-style; exported via plain `.ts` since the file is not client-reachable). Provides:
+- `checkCronHealth()`: queries `cron.job_run_details` for last 24h runs of registered jobs, flags jobs with no recent successful run within their expected interval, or with >N consecutive failures.
+- Returns `{ jobName, lastRun, status, consecutiveFailures }[]`.
+- `dispatchCronAlerts(report)`: when unhealthy entries exist, calls the slack-alerts wrapper.
 
-### A. Governance files
-1. **CREATE** `docs/engineering/plans/phase-3.yaml` — full 15-feature plan exactly as you pasted.
-2. **UPDATE** `docs/engineering/PROJECT_STATE.yaml`:
-   - `phase: Phase3`
-   - `plan_file: plans/phase-3.yaml`
-   - `phase_status: READY`
-   - `current: { feature: SEC-P1-004, batch: 1, action: EXECUTING }`
-   - keep prior notes, append Phase 3 opening note.
-3. **UPDATE** `docs/engineering/CHANGELOG.md` — append "Phase 3 opened; SEC-P1-004 Batch 1 started".
-4. **UPDATE** `docs/engineering/REGISTRY.yaml` if present — register the 15 Phase 3 features.
+**`src/lib/notifications/slack-alerts.ts`** — thin re-export/wrapper:
+- `sendSlackAlert({ title, body, severity })` → delegates to existing `postWithRetry` Slack dispatcher in `alert-dispatch.server.ts`.
+- Centralizes alert formatting (severity prefix, code block) so future monitors share one entrypoint.
 
-### B. SEC-P1-004 Batch 1 — CI Import-Graph Guard
-Per `plans/phase-3.yaml`:
-1. **CREATE** `scripts/check-imports.ts` — Node/Bun script that:
-   - Walks `src/**/*.{ts,tsx}` excluding `*.server.ts`, `*.server.tsx`, `src/integrations/supabase/client.server.ts`, `src/core/**/*.server.ts`, and test files.
-   - Parses each file for `import ... from '...'` and dynamic `import('...')`.
-   - Flags **top-level static imports** whose resolved path ends in `.server.ts`/`.server.tsx` or matches `**/*.server`.
-   - Allows dynamic `await import(...)` inside function bodies (matches our SEC-P1-002 remediation pattern).
-   - Exits non-zero on any violation, printing file:line + offending import.
-2. **CREATE** `.github/workflows/import-guard.yml` — runs on every PR + push to main:
-   - Sets up Bun.
-   - Runs `bun run scripts/check-imports.ts`.
-   - Fails the PR on violations.
-3. **CREATE** `docs/engineering/reports/SEC-P1-004-batch-1-fixes.md` — execution report.
+No DB schema changes. No cron hook changes. No client imports.
 
-### C. Validation
-- `bunx tsgo --noEmit`
-- `bun run build`
-- `bun run scripts/check-imports.ts` locally → expect 0 violations (SEC-P1-002 already cleaned the offenders).
+### Step 4 — Validation
+- `bunx tsgo --noEmit` → must PASS
+- `bun run build` → must PASS
+- Confirm no client-reachable file imports the new monitor module.
 
-## Out of scope (will not touch)
-Source files under `src/` other than the new script; any of the other 14 Phase 3 features; database; secrets.
+### Step 5 — Reports
+- Create `docs/engineering/reports/OPS-P2-002-batch-1-execution.md` with files touched, validation results, OUT_OF_SCOPE_CANDIDATES.
 
-## Final report shape
-Will return the exact `STATUS / FILES CHANGED / VALIDATION / OUT_OF_SCOPE_CANDIDATES / TRACE` block the contract requires.
-
----
-
-**Approve and I execute A + B + C in one build-mode batch.** If you'd rather I split A (governance) from B (code) into two approvals, say so.
+### Out of scope
+- Wiring `checkCronHealth()` into a scheduled hook (would touch `src/routes/api/public/hooks/*` and the cron schedule — propose as OPS-P2-002 Batch 2).
+- Slack webhook configuration (already managed via secrets).
+- Any other Phase-3 feature.
