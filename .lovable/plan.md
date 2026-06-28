@@ -1,35 +1,36 @@
-## Status: No Feature To Execute
+## SEC-P1-002 Batch 1 — Already CLOSED (no execution needed)
 
-Per the contract, I read `docs/engineering/PROJECT_STATE.yaml` and the referenced plan `docs/engineering/plans/phase-2.yaml`. Current state:
+### Findings after reading the requested files
+
+I read exactly the files you listed. The actual `docs/engineering/plans/phase-1.yaml` (the frozen, signed plan in the repo) defines **SEC-P1-002 Batch 1** as an **inventory-only task — explicitly "No code edits"**:
 
 ```
-phase: Phase2
-phase_status: CLOSED
-current.feature: null
-current.batch:   null
-current.action:  IDLE
+- id: 1
+  scope: "Enumerate every *.server.ts module imported at top-level of a
+          client-reachable file. NO source changes."
+  output_format: docs/engineering/reports/SEC-P1-002-batch-1-inventory.md
+  acceptance:
+    - "Every *.functions.ts file ... has been grep-checked..."
+    - "Each finding has a proposed remediation."
+    - "No code edits."
 ```
 
-All Phase 1 + Phase 2 P1 security features (SEC-P1-002, CRON-P1-004, AUTH-P1-003, DB-P1-005, SEC-P1-003) are PASS and the live `REVOKE EXECUTE` migration has been applied and verified (0/57 functions executable by `authenticated`).
+That report already exists and was accepted:
+- `docs/engineering/reports/SEC-P1-002-batch-1-inventory.md` (8 offenders enumerated)
+- `docs/engineering/reports/SEC-P1-002-batch-2-fixes.md` (Batch 2 remediation already shipped)
 
-The prompt you sent instructs me to "Execute ONLY the requested Feature and Batch" — but `PROJECT_STATE` has no active feature. Per the contract's State Update Rule ("DO NOT modify `PROJECT_STATE.yaml`. Only CTO updates it"), I cannot pick a feature on my own.
+`PROJECT_STATE.yaml` (the only one in `docs/engineering/`; there is no other) confirms: `SEC-P1-002 PASS`, Phase 2 CLOSED.
 
-The dossier you pasted also references a different plan layout (SEC-P1-002 → SEC-P1-005 under `phase-1.yaml`) that does not match the project's actual state. Those features are already closed under different IDs (SEC-P1-002, CRON-P1-004, AUTH-P1-003, DB-P1-005, SEC-P1-003) and re-running them would duplicate completed work.
+The plan text you pasted in your previous message ("Batch 1 files: products-admin.functions.ts, orders.server.ts") is from a **different draft plan** that was never frozen into the repo. The repo's frozen Batch 1 is inventory; the repo's frozen Batch 2 (already done) is the 8-file dynamic-import remediation, which included `products-admin.functions.ts`.
 
-### Decision needed from CTO
+### Decision required
 
-Pick one path so I can act:
+There is nothing to execute for "SEC-P1-002 Batch 1" — running it again would only regenerate an already-accepted report. Pick one:
 
-**Option A — Open Phase 3.** Tell me which features/batches Phase 3 should contain. I will:
-1. Author `docs/engineering/plans/phase-3.yaml`.
-2. Update `PROJECT_STATE.yaml` to `phase: Phase3`, `phase_status: READY`, `current.feature: <first>`, `batch: 1`, `action: READY`.
-3. Append CHANGELOG entry. No source code changes in this batch.
+**Option A — Re-verify (no-op refresh).** I re-run the grep audit, confirm the existing inventory still matches reality, and append a "re-verified 2026-06-28" line to the existing report. No source or state changes. Output report unchanged in substance.
 
-**Option B — Re-open a closed Phase-2 item** (e.g. tighten a specific `RESTRICT_ADMIN_ONLY` function further). Name the feature ID + scope and I will draft a fresh batch plan.
+**Option B — Replace the frozen plan.** If you want the draft layout (`products-admin.functions.ts` + `orders.server.ts` as Batch 1) to become the new truth, I need explicit CTO approval to overwrite `plans/phase-1.yaml` AND `PROJECT_STATE.yaml` (which the contract forbids me from touching unilaterally). This also reopens already-PASS work.
 
-**Option C — Acknowledge IDLE.** Confirm Phase 2 closure stands and no execution is required right now. I will only refresh the CHANGELOG with a "no-op session" note if you want a paper trail.
+**Option C — Open new work.** Name a real Phase 3 feature and I'll author `plans/phase-3.yaml` + update state.
 
-### Out of scope
-- No edits to closed-feature SQL, source files, or migrations.
-- No `PROJECT_STATE.yaml` mutation without explicit CTO direction.
-- No new docs scaffolding (the v4.0 governance files the message describes already exist in the repo under their v3.1 names; recreating them would overwrite live, signed state).
+I will not silently re-run closed work or modify `PROJECT_STATE.yaml` without your explicit selection.
