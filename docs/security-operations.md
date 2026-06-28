@@ -160,3 +160,7 @@ All three primitives have audit-friendly properties:
 | AdminGate | Every `assertCallerIsAdmin` call goes through the server fn middleware, visible in `server-function-logs` |
 | consume_rate_limit | `rate_limit_buckets` rows persist with `updated_at`; the `/admin-event-bus` Throttling panel surfaces the latest |
 | Sentry | Each captured exception carries the `correlation_id` tag set via `setCorrelationId`, so an incident in Sentry can be linked back to the order/event lifecycle in the database |
+
+## Dependency Provenance
+
+- xlsx is pinned to the SheetJS CDN tarball v0.20.3 (https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz); integrity is verified via bun.lockb hash. Enforced via `overrides` and `resolutions` in package.json to prevent transitive downgrades to the vulnerable 0.18.5.
