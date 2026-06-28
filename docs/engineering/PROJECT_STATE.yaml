@@ -4,8 +4,8 @@ phase: Phase1
 plan_file: plans/phase-1.yaml
 last_updated: 2026-06-28
 current:
-  feature: SEC-P1-002
-  batch: 2
+  feature: CRON-P1-004
+  batch: 1
   action: AWAITING_ITRB_VERDICT
 failure_budget:
   consecutive_failures: 0

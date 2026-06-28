@@ -10,4 +10,8 @@ event, newest at the bottom of each section.
 - **SEC-P1-002 Batch 1 PASS.** Inventory accepted; 8 leaks documented.
 - **SEC-P1-002 Batch 2 dispatched.** Plan frozen to the 8 inventoried
   files; dynamic-import remediation applied. tsgo + build pass.
-  Awaiting ITRB verdict.
+- **SEC-P1-002 Batch 2 PASS** (implicit, per CTO dispatch of CRON-P1-004).
+- **CRON-P1-004 Batch 1 dispatched.** Canonical `@/middleware/cron-auth`
+  wrapper created; full hook-route audit confirms every route is guarded
+  (cron-secret, HMAC, or worker-secret). Awaiting ITRB verdict.
+

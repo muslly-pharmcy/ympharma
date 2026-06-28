@@ -13,11 +13,10 @@ features:
 
   - id: SEC-P1-001
     title: "Cron & webhook auth — finish CRON_SECRET enforcement"
+    superseded_by: CRON-P1-004
     rationale: >
-      The 2026-06 security batch hardened a subset of /api/public/hooks/*
-      and /api/public/monitoring/* endpoints with the CRON_SECRET bearer
-      check. Audit v17 confirms the remaining endpoints still accept
-      unauthenticated traffic on the published site.
+      Superseded by CRON-P1-004 which collapses inventory + remediation into
+      a single batch. Original two-batch breakdown retained for audit history.
     batches:
       - id: 1
         scope: "Inventory every route under src/routes/api/public/{hooks,monitoring}/* and classify: (a) already protected, (b) intentionally public (e.g. health.quick-check), (c) missing CRON_SECRET."
@@ -33,6 +32,26 @@ features:
           - "Every route from batch 1 verdict=UNPROTECTED now imports requireCronAuth."
           - "tsgo --noEmit passes."
           - "bun run build passes."
+
+  - id: CRON-P1-004
+    title: "Cron Auth Middleware — canonical entry point"
+    rationale: >
+      Provide a single canonical import path (`@/middleware/cron-auth`) for
+      cron authorization across all `/api/public/hooks/*` routes, and verify
+      every hook file is guarded. Wraps the existing `verifyCronSecret`
+      helper in `@/lib/cron-auth.server` with zero behavior change.
+    batches:
+      - id: 1
+        files:
+          - src/middleware/cron-auth.ts (CREATE)
+          - src/routes/api/public/hooks/*.ts (AUDIT; UPDATE only where unguarded)
+        output_format: "docs/engineering/reports/CRON-P1-004-batch-1-fixes.md"
+        acceptance:
+          - "src/middleware/cron-auth.ts exports requireCronAuth."
+          - "Every file under src/routes/api/public/hooks/** is either guarded by cron-secret, HMAC, or an explicit worker-secret scheme — documented in the report."
+          - "tsgo --noEmit passes."
+          - "bun run build passes."
+
 
   - id: SEC-P1-002
     title: "Server-only import leak audit"
