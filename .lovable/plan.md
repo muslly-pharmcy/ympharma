@@ -1,23 +1,35 @@
-## Apply SEC-P1-003 Batch 2 & Close Phase 2
+## Status: No Feature To Execute
 
-**Goal:** Apply the prepared `REVOKE EXECUTE` migration for 57 SECURITY DEFINER functions, verify success, and mark Phase 2 closed.
+Per the contract, I read `docs/engineering/PROJECT_STATE.yaml` and the referenced plan `docs/engineering/plans/phase-2.yaml`. Current state:
 
-### Steps
+```
+phase: Phase2
+phase_status: CLOSED
+current.feature: null
+current.batch:   null
+current.action:  IDLE
+```
 
-1. **Apply migration via Supabase tool**
-   - Read `docs/engineering/artifacts/20260628053000_sec_p1_003_batch_2.sql`
-   - Submit its contents through `supabase--migration` for user approval & execution
+All Phase 1 + Phase 2 P1 security features (SEC-P1-002, CRON-P1-004, AUTH-P1-003, DB-P1-005, SEC-P1-003) are PASS and the live `REVOKE EXECUTE` migration has been applied and verified (0/57 functions executable by `authenticated`).
 
-2. **Verify**
-   - Run the verification query from `SEC-P1-003-batch-2-dryrun.md` against `pg_proc` / `information_schema.role_routine_grants` via `psql`
-   - Confirm 0 of the 57 functions retain EXECUTE for `authenticated`
-   - Save results to `docs/engineering/reports/SEC-P1-003-batch-2-verification.md`
+The prompt you sent instructs me to "Execute ONLY the requested Feature and Batch" — but `PROJECT_STATE` has no active feature. Per the contract's State Update Rule ("DO NOT modify `PROJECT_STATE.yaml`. Only CTO updates it"), I cannot pick a feature on my own.
 
-3. **Close Phase 2 governance**
-   - `docs/engineering/PROJECT_STATE.yaml` → `phase: Phase2`, `phase_status: CLOSED`, current feature cleared
-   - `docs/engineering/CHANGELOG.md` → append closure entry with date/feature IDs
-   - `docs/engineering/REGISTRY.yaml` → mark SEC-P1-003 status `CLOSED`
-   - Update `docs/engineering/features/SEC-P1-003.md` dossier with apply + verification outcome
+The dossier you pasted also references a different plan layout (SEC-P1-002 → SEC-P1-005 under `phase-1.yaml`) that does not match the project's actual state. Those features are already closed under different IDs (SEC-P1-002, CRON-P1-004, AUTH-P1-003, DB-P1-005, SEC-P1-003) and re-running them would duplicate completed work.
+
+### Decision needed from CTO
+
+Pick one path so I can act:
+
+**Option A — Open Phase 3.** Tell me which features/batches Phase 3 should contain. I will:
+1. Author `docs/engineering/plans/phase-3.yaml`.
+2. Update `PROJECT_STATE.yaml` to `phase: Phase3`, `phase_status: READY`, `current.feature: <first>`, `batch: 1`, `action: READY`.
+3. Append CHANGELOG entry. No source code changes in this batch.
+
+**Option B — Re-open a closed Phase-2 item** (e.g. tighten a specific `RESTRICT_ADMIN_ONLY` function further). Name the feature ID + scope and I will draft a fresh batch plan.
+
+**Option C — Acknowledge IDLE.** Confirm Phase 2 closure stands and no execution is required right now. I will only refresh the CHANGELOG with a "no-op session" note if you want a paper trail.
 
 ### Out of scope
-No source code edits, no new features, no schema changes beyond the prepared REVOKEs.
+- No edits to closed-feature SQL, source files, or migrations.
+- No `PROJECT_STATE.yaml` mutation without explicit CTO direction.
+- No new docs scaffolding (the v4.0 governance files the message describes already exist in the repo under their v3.1 names; recreating them would overwrite live, signed state).
