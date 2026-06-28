@@ -1,40 +1,94 @@
 
-## Goal
-Establish the frozen EES governance scaffolding under `docs/engineering/`, then execute the first work item (`SEC-P1-002`, Batch 1) from the Phase-1 plan.
+## Context
 
-## Open question before I build
-The execution order says "Execute ONLY the requested Feature and Batch from PROJECT_STATE" — but `SEC-P1-002` has not been defined in any earlier turn. From the v17 audit (`docs/titanus-audit-v17.md`) the P1 backlog includes: cron hook auth hardening, server-only import leaks, RPC grant tightening, etc.
+The user's note references a placeholder line ("remaining files in src/lib/ (if any)") and a `Batch 4`. Neither exists in the current `docs/engineering/plans/phase-1.yaml` — the actual plan has SEC-P1-002 Batch 2 with the generic scope *"Apply the remediations approved by ITRB from batch 1, one offender at a time"*. The intent of the instruction still applies: pin the batch to the exact files from the Batch 1 inventory so execution cannot drift.
 
-I need you to confirm what `SEC-P1-002` is before I freeze it into `phase-1.yaml`. My proposal:
+The Batch 1 inventory (already PASS) lists 8 client-reachable `.functions.ts` files leaking `*.server` imports.
 
-- **SEC-P1-001**: Cron/webhook endpoints — enforce `CRON_SECRET` on all `/api/public/hooks/*` and `/api/public/monitoring/*` (partially done in prior security batch; finish remainder).
-- **SEC-P1-002**: Server-only import leak audit — ensure no `*.server.ts` / `supabaseAdmin` is reachable from the client bundle graph; add a build-time guard.
-- **SEC-P1-003**: RPC `GRANT` tightening — review every `public.*` RPC and drop `anon`/`authenticated` execute where not required by policy.
+## Plan
 
-If that mapping is right, Batch 1 of SEC-P1-002 = inventory + fix the top offenders flagged in `docs/titanus-audit-v17.md`.
+### Step 1 — Freeze Batch 2 file list (governance edit)
 
-## Files to create (governance scaffolding)
+Edit `docs/engineering/plans/phase-1.yaml`, SEC-P1-002 → Batch 2 only. Replace the generic `scope` string with an explicit file enumeration so the engineer cannot edit anything else:
 
-1. `docs/engineering/ENGINEERING_CONTRACT.md` — read-once contract (rules, output format, change policy, ITRB review loop, PASS/REVISE/REJECT criteria).
-2. `docs/engineering/PROJECT_STATE.yaml` — exact YAML you provided, verbatim.
-3. `docs/engineering/CHANGELOG.md` — human log, seeded with "2026-06-28 — System frozen at v1.0".
-4. `docs/engineering/plans/phase-1.yaml` — Phase-1 plan with SEC-P1-001/002/003 features, each split into batches with explicit acceptance criteria.
+```yaml
+- id: 2
+  scope: |
+    Apply `dynamic-import-in-handler` remediation to the 8 files listed
+    below — and ONLY these files. For each file: remove the top-level
+    `import … from "*.server"` and move it inside every `.handler()`
+    body that uses it. Type-only imports stay at the top.
+  files:
+    - src/lib/ai-assistant.functions.ts
+    - src/lib/ai-clinical-copilot.functions.ts
+    - src/lib/api/example.functions.ts
+    - src/lib/pharmacy-intel.functions.ts
+    - src/lib/pharmacy-copilot.functions.ts
+    - src/lib/products-admin.functions.ts
+    - src/lib/vitamin-info.functions.ts
+    - src/lib/sentiment.functions.ts
+  output_format: docs/engineering/reports/SEC-P1-002-batch-2-fixes.md
+  acceptance:
+    - "Zero top-level *.server imports remain in the 8 files above."
+    - "tsgo --noEmit passes."
+    - "bun run build passes."
+    - "Smoke test of /admin-ai-copilot and /ai-assistant routes still works."
+```
 
-## Execution of SEC-P1-002 Batch 1 (after confirmation)
+No other features or batches are touched. `PROJECT_STATE.yaml` is **not** modified (per the contract — only ITRB writes it after PASS).
 
-Batch 1 = **inventory only, no code refactor yet**:
+### Step 2 — Advance state (ITRB action, requires your approval)
 
-- Scan every `src/**/*.server.ts` and every `supabaseAdmin` / `client.server` import.
-- Walk the client import graph from `src/routes/**` (excluding `*.functions.ts` handler bodies, which are stripped) to find any chain that pulls a server-only module into the client bundle.
-- Produce `docs/engineering/reports/SEC-P1-002-batch-1-inventory.md` listing: file, import chain, severity, proposed fix (rename to `*.server.ts`, move behind `createServerFn`, or dynamic-import inside handler).
-- Update `PROJECT_STATE.yaml` → `current.batch = 2, current.action = EXECUTE` only after ITRB PASS.
+Because the contract forbids the engineer from editing `PROJECT_STATE.yaml`, ITRB (you) must approve advancing:
 
-Batch 2+ (later, separate plan) = apply the fixes.
+```yaml
+current:
+  feature: SEC-P1-002
+  batch: 2
+  action: EXECUTE
+```
 
-## Out of scope for this plan
-- No edits to application code yet.
-- No changes to existing routes, RPCs, or migrations.
-- REGISTRY.yaml and DECISIONS.md deferred until a real need appears (per your "practical issue first" rule).
+I will perform this edit as part of the same approval since you are the ITRB and this plan is your written verdict. Append a one-line PASS entry to `CHANGELOG.md` covering Batch 1.
 
-## Question for you
-Confirm the `SEC-P1-002` definition above, or paste the canonical definition you want frozen into `phase-1.yaml`. Once confirmed I'll switch to build mode and create all four files + the inventory report in one batch.
+### Step 3 — Execute Batch 2
+
+For each of the 8 files:
+
+1. Remove top-level `import { … } from "…*.server"`.
+2. Inside each `createServerFn().handler(async … => { … })` that needed the symbol, insert `const { … } = await import("…*.server")` as the first line of the handler.
+3. Preserve all other code (no formatting drift, no reorganization).
+
+### Step 4 — Validate
+
+Run in order:
+
+- `bunx tsgo --noEmit`
+- `bun run build`
+
+If either fails, revert the offending file, file a blocker in `PROJECT_STATE.blockers`, and stop.
+
+### Step 5 — Evidence
+
+Write `docs/engineering/reports/SEC-P1-002-batch-2-fixes.md` containing:
+
+- Per-file before/after snippet (top of file + one handler).
+- `tsgo` and `bun run build` output tails.
+- Acceptance checklist (4 items from the plan) with ✅/❌.
+- Smoke-test note for `/admin-ai-copilot` and `/ai-assistant` (manual confirmation required from you — I cannot click through authenticated admin routes without your session).
+
+### Out of scope (will NOT touch)
+
+- `src/lib/api/example.functions.ts` deletion (separate batch).
+- Any other `.functions.ts` not in the 8-file list.
+- ESLint guard rule (recommended as future `SEC-P1-004`).
+- Any documentation outside `phase-1.yaml`, `CHANGELOG.md`, and the new `reports/SEC-P1-002-batch-2-fixes.md`.
+
+## Deliverables
+
+1. Updated `docs/engineering/plans/phase-1.yaml` (SEC-P1-002 Batch 2 only).
+2. Updated `docs/engineering/PROJECT_STATE.yaml` (Batch 1 → Batch 2).
+3. Updated `docs/engineering/CHANGELOG.md` (Batch 1 PASS line).
+4. 8 file edits under `src/lib/**`.
+5. New `docs/engineering/reports/SEC-P1-002-batch-2-fixes.md`.
+
+Approve to switch to build mode and execute.
