@@ -31,6 +31,16 @@ event, newest at the bottom of each section.
   CRON-P1-004. SEC-P1-003 deferred to Phase 2 (RPC GRANT tightening
   overlaps DB-P1-005 outcomes and should be re-scoped after manual
   apply review).
+- **DB-P1-005 LIVE APPLY (post-close hardening).** Artifact applied via
+  Supabase migration tool. Verification: 156/156 SECURITY DEFINER
+  functions in `public` now `authenticated=true, anon=false, public=false`;
+  offenders=0. Report: `reports/verification-results.md`. CSV:
+  `/mnt/documents/db-p1-005-verification.csv`. Supabase linter 0029
+  WARNs (one per function) are by-design for Phase 1; narrowing per
+  function is Phase 2 / SEC-P1-003 work.
+- **Phase 2 OPENED.** `PROJECT_STATE.yaml` advanced to `Phase2 / SEC-P1-003`
+  with `phase_status: READY` and blocker `plans/phase-2.yaml not yet authored`.
+
 
 
 
