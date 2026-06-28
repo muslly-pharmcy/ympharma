@@ -113,6 +113,26 @@ features:
           - "Migration is idempotent (uses REVOKE then GRANT)."
           - "All admin pages still load post-migration in smoke test."
 
+  - id: AUTH-P1-003
+    title: "Auth surface unification — verification only"
+    rationale: >
+      Confirm `src/routes/auth.tsx` is the single unified email/password
+      sign-in + sign-up page (mode toggle, ?redirect= search param, session
+      check, redirects to intended target post-auth) and that no duplicate
+      auth routes (/login, /signin, /sign-up, /register) exist. No code
+      changes. Closed by CTO confirmation on 2026-06-28.
+    batches:
+      - id: 1
+        files: []
+        scope: "Inventory the auth surface; produce verification report. NO source edits."
+        output_format: "docs/engineering/reports/AUTH-P1-003-batch-1-verification.md"
+        acceptance:
+          - "src/routes/auth.tsx exists and handles both sign-in and sign-up."
+          - "No /login, /signin, /sign-up, or /register route files exist."
+          - "AdminGate and _authenticated layout both redirect to /auth."
+          - "No source file modified."
+
+
 failure_budget:
   per_batch_consecutive_failures: 3
   on_exhaustion: "Halt phase, file blocker in PROJECT_STATE.blockers, request ITRB intervention."

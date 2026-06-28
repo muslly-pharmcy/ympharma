@@ -14,4 +14,11 @@ event, newest at the bottom of each section.
 - **CRON-P1-004 Batch 1 dispatched.** Canonical `@/middleware/cron-auth`
   wrapper created; full hook-route audit confirms every route is guarded
   (cron-secret, HMAC, or worker-secret). Awaiting ITRB verdict.
+- **CRON-P1-004 Batch 1 PASS** (CTO-confirmed).
+- **AUTH-P1-003 PASS** (verification-only; CTO Option C). `src/routes/auth.tsx`
+  already satisfies the unified email/password sign-in + sign-up spec; no
+  source edits. Report: `reports/AUTH-P1-003-batch-1-verification.md`.
+- **DB-P1-005 queued.** Awaiting plan definition (file list + acceptance
+  criteria) before EXECUTE can be dispatched.
+
 
