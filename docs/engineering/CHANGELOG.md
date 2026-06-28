@@ -40,6 +40,14 @@ event, newest at the bottom of each section.
   function is Phase 2 / SEC-P1-003 work.
 - **Phase 2 OPENED.** `PROJECT_STATE.yaml` advanced to `Phase2 / SEC-P1-003`
   with `phase_status: READY` and blocker `plans/phase-2.yaml not yet authored`.
+- **plans/phase-2.yaml authored.** SEC-P1-003 scope frozen: Batch 1 audit
+  (classify 156 SECURITY DEFINER fns into 4 buckets), Batch 2 execute
+  (AWAITING_APPROVAL).
+- **SEC-P1-003 Batch 1 PASS.** Classification report committed at
+  `reports/SEC-P1-003-batch-1-classification.md`. Buckets:
+  KEEP_AUTHENTICATED=66, RESTRICT_ADMIN_ONLY=12, SERVICE_ROLE_ONLY=11,
+  REVIEW_REQUIRED=67. No GRANT/REVOKE applied; no source changes.
+  PROJECT_STATE blocker cleared; phase_status ACTIVE.
 
 
 
