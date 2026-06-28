@@ -59,3 +59,11 @@ event, newest at the bottom of each section.
 - New deltas: +2 KEEP_AUTHENTICATED, +1 RESTRICT_ADMIN_ONLY, +1 SERVICE_ROLE_ONLY, 63 remain REVIEW_REQUIRED.
 - No SQL, no source, no PROJECT_STATE changes.
 - Report: docs/engineering/reports/SEC-P1-003-batch-1-classification.md (Batch 1.5 section).
+
+## 2026-06-28 — SEC-P1-003 Batch 2 dry-run generated (READY_FOR_REVIEW)
+- Artifact: docs/engineering/artifacts/20260628053000_sec_p1_003_batch_2.sql
+- Report:   docs/engineering/reports/SEC-P1-003-batch-2-dryrun.md
+- 57 functions targeted (54 SERVICE_ROLE_ONLY + 3 RESTRICT_ADMIN_ONLY).
+- SQL ends with ROLLBACK; — no DB changes applied.
+- Discrepancies flagged: 2 missing admin function names, "admin" role substituted with service_role + has_role guard.
+- PROJECT_STATE.yaml NOT modified (per CTO instruction).
