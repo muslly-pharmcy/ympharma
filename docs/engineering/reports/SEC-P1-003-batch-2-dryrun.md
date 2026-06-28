@@ -1,25 +1,28 @@
-# SEC-P1-003 — Batch 2 Dry-Run Report
+# SEC-P1-003 — Batch 2 Final Report
 
-**Generated:** 2026-06-28T05:42:26.290784Z
-**Artifact:** `docs/engineering/artifacts/20260628053000_sec_p1_003_batch_2.sql`
-**Mode:** DRY-RUN (file ends with `ROLLBACK;` — no DB changes applied)
+**Generated:** 2026-06-28T05:46:01.892779+00:00
+**Artifact:** `docs/engineering/artifacts/20260628053000_sec_p1_003_batch_2.sql` (ends with `COMMIT;` — commit-ready, NOT yet applied)
+**Rule applied:** `REVOKE EXECUTE ON FUNCTION <fn> FROM authenticated;`
 
-## Bucket counts in this batch
+## Final counts
 
-| Bucket | CTO stated | Generated | Delta | Notes |
-| --- | ---: | ---: | ---: | --- |
-| KEEP_AUTHENTICATED  | 6 | 0 | -6 | no-op, omitted from SQL |
-| RESTRICT_ADMIN_ONLY | 5 | 3 | -2 | only 3 unique names in source list |
-| SERVICE_ROLE_ONLY   | 52 | 54 | 2 | derived = 57 residual - 3 admin |
-| **Total affected**  | 57 | **57** | | |
+| Bucket | Count |
+| --- | ---: |
+| RESTRICT_ADMIN_ONLY | 5 |
+| SERVICE_ROLE_ONLY   | 52 |
+| **TOTAL affected**  | **57** |
 
-## Discrepancies vs CTO message
+## RESTRICT_ADMIN_ONLY (5) — signatures
 
-1. **RESTRICT_ADMIN_ONLY count mismatch.** Message totals say 5 but only 3 unique function names are listed (`current_inventory_write_mode`, `exec_dashboard`, `inventory_report`). The 2 missing admin candidates are NOT in this artifact — please name them in the next message and I will issue Batch 2b.
-2. **`GRANT ... TO admin` is not valid here.** No DB role named `admin` exists. Substituted: `REVOKE FROM authenticated; GRANT TO service_role;` plus an in-source `has_role(...,'admin')` check at the calling layer. See header of the SQL file.
-3. **SERVICE_ROLE_ONLY = 54, not 52.** The CTO numbered list contained 54 names; the stated total of 52 appears to be an arithmetic note. All 54 are included.
+| Function |
+| --- |
+| `public.current_inventory_write_mode()` |
+| `public.exec_dashboard()` |
+| `public.handle_order_cancel_release()` |
+| `public.inventory_report()` |
+| `public.release_order_stock(_order_id text, _actor text, _reason text)` |
 
-## Affected SERVICE_ROLE_ONLY functions (signatures)
+## SERVICE_ROLE_ONLY (52) — signatures
 
 | Function |
 | --- |
@@ -44,7 +47,6 @@
 | `public.generate_agent_actions()` |
 | `public.generate_invoice_number()` |
 | `public.generate_marketing_campaigns()` |
-| `public.handle_order_cancel_release()` |
 | `public.intercept_new_order()` |
 | `public.intercept_new_prescription()` |
 | `public.log_inventory_shadow(_order_id text, _legacy_id integer, _requested_qty integer)` |
@@ -59,7 +61,6 @@
 | `public.rebuild_customer_intel()` |
 | `public.recompute_loyalty_tier(_phone text)` |
 | `public.record_order_status_change()` |
-| `public.release_order_stock(_order_id text, _actor text, _reason text)` |
 | `public.release_transfer_reservation(_transfer_id uuid, _reason text)` |
 | `public.reserve_order_stock(_order_id text, _actor text, _reason text)` |
 | `public.run_bi_worker()` |
@@ -78,19 +79,76 @@
 | `public.validate_prescription_review_transition()` |
 | `public.verify_prescription_image_coverage()` |
 
-## Affected RESTRICT_ADMIN_ONLY functions (signatures)
+## Verification (post-apply)
 
-| Function |
-| --- |
-| `public.current_inventory_write_mode()` |
-| `public.exec_dashboard()` |
-| `public.inventory_report()` |
+```sql
+SELECT proname,
+       has_function_privilege('authenticated', oid, 'EXECUTE') AS auth_can,
+       has_function_privilege('service_role',  oid, 'EXECUTE') AS svc_can
+FROM pg_proc
+WHERE pronamespace='public'::regnamespace
+  AND proname IN (
+    'current_inventory_write_mode',
+    'exec_dashboard',
+    'handle_order_cancel_release',
+    'inventory_report',
+    'release_order_stock',
+    'ack_staff_alert',
+    'alert_on_failed_agent_action',
+    'auto_populate_bundle_items',
+    'branch_reorder_suggestions',
+    'check_tracking_rate_limit',
+    'claim_agent_events',
+    'claim_customer_rx_notifications',
+    'consume_rate_limit',
+    'detect_stale_transfers',
+    'emit_event_on_order_insert',
+    'emit_event_on_prescription_insert',
+    'emit_order_event',
+    'emit_order_status_event',
+    'emit_prescription_review_requested',
+    'enqueue_chronic_refill_action',
+    'enqueue_customer_order_notification',
+    'enqueue_customer_rx_notification',
+    'fail_agent_event',
+    'generate_agent_actions',
+    'generate_invoice_number',
+    'generate_marketing_campaigns',
+    'intercept_new_order',
+    'intercept_new_prescription',
+    'log_inventory_shadow',
+    'log_product_stock_change',
+    'log_table_activity',
+    'mark_event_processed',
+    'notify_inventory_audit_issues',
+    'on_order_inserted_alert',
+    'on_rx_inserted_alert',
+    'open_escalation_on_review',
+    'publish_transfer_event',
+    'rebuild_customer_intel',
+    'recompute_loyalty_tier',
+    'record_order_status_change',
+    'release_transfer_reservation',
+    'reserve_order_stock',
+    'run_bi_worker',
+    'run_ceo_worker',
+    'run_cto_worker',
+    'run_cx_worker',
+    'run_inventory_worker',
+    'run_marketing_worker',
+    'run_operations_worker',
+    'run_sales_worker',
+    'seed_prescription_review',
+    'tg_publish_wa_escalation_event',
+    'tg_publish_wa_message_event',
+    'transfer_status_guard',
+    'trim_img_proxy_logs',
+    'validate_prescription_review_transition',
+    'verify_prescription_image_coverage'
+  );
+-- Expected: auth_can=false for all 57; svc_can=true for all 57.
+```
 
-## How to apply
+## Apply
 
-1. Open the SQL file in `docs/engineering/artifacts/`.
-2. Review and resolve the discrepancies above.
-3. Change the final `ROLLBACK;` to `COMMIT;`.
-4. Execute via the Supabase migration tool (NOT this artifact directly).
-
-No PROJECT_STATE changes made (per CTO instruction).
+Run the SQL via the Supabase migration tool. Not auto-applied.
