@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { generateText } from "ai";
-import { createLovableAiGatewayProvider } from "./ai-gateway.server";
+
 
 // ---------- Read helpers (admin-only) ----------
 
