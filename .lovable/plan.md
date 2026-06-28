@@ -1,54 +1,42 @@
-## Scope
+## Reality check — must resolve before I execute
 
-Adopt the user-provided governance refresh and dispatch the next feature **CRON-P1-004** (Cron Auth Middleware) under the Engineering Execution System.
+Per `ENGINEERING_CONTRACT.md` (v3.1, LOCKED): precedence is **PROJECT_STATE → PLAN → CONTRACT**, and I execute *only* the Feature defined in the plan. Two blockers:
 
-## Reality check (must be acknowledged before I execute)
+### Blocker 1 — `AUTH-P1-003` is not in `plans/phase-1.yaml`
 
-1. **SEC-P1-002 Batch 2 is still `AWAITING_ITRB_VERDICT`.** The contract says only ITRB advances `PROJECT_STATE.yaml` after a PASS. Overwriting state to `CRON-P1-004 / EXECUTE` is an implicit PASS verdict on SEC-P1-002 Batch 2. I will record it as such in `CHANGELOG.md`.
-2. **`CRON-P1-004` collides with the existing `SEC-P1-001`** in `plans/phase-1.yaml`, which already covers cron auth in two batches (inventory → fix). I will **add** `CRON-P1-004` alongside it rather than delete SEC-P1-001, so audit history stays intact. SEC-P1-001 will be marked `superseded_by: CRON-P1-004`.
-3. The user's plan lists the scope as `src/middleware/cron-auth.ts (CREATE)` + `src/routes/api/public/hooks/*.ts (UPDATE)`. The project already has `src/lib/cron-auth.server.ts` (`verifyCronSecret`). Creating a second copy under `src/middleware/` duplicates logic. **Proposed adjustment**: the new file `src/middleware/cron-auth.ts` will be a thin re-export wrapper around `verifyCronSecret` so all hook routes import from one place going forward, with zero behavior change. If you'd rather I move the existing file outright, say so and I'll change the plan.
+The plan currently defines: `SEC-P1-001` (superseded), `CRON-P1-004` (just PASSed), `SEC-P1-002` (Batch 2 done, awaiting verdict for further work), `SEC-P1-003`. No `AUTH-P1-003`. If I flip `PROJECT_STATE.yaml` to `AUTH-P1-003 / EXECUTE` without adding the feature to the plan first, I have no scope file list to obey — the contract's "ONLY the files explicitly listed under that Feature" rule becomes impossible to honor and the run is `BLOCKED` on the first step.
 
-## Files I will write (governance refresh)
+### Blocker 2 — "توحيد صفحة المصادقة" appears to already be done
 
-- `docs/engineering/ENGINEERING_CONTRACT.md` → replace with v3.1 LOCKED text from your message.
-- `docs/engineering/PROJECT_STATE.yaml` → set `current: { feature: CRON-P1-004, batch: 1, action: EXECUTE }`.
-- `docs/engineering/plans/phase-1.yaml` → append `CRON-P1-004` feature with the file list you provided; mark `SEC-P1-001` as `superseded_by: CRON-P1-004`; leave SEC-P1-002 / SEC-P1-003 untouched.
-- `docs/engineering/CHANGELOG.md` → append:
-  - `SEC-P1-002 Batch 2: PASS (implicit, per CTO dispatch of CRON-P1-004).`
-  - `CRON-P1-004 Batch 1: dispatched.`
+Current state of the auth surface:
 
-## Files I will change (CRON-P1-004 / Batch 1 execution)
+- `src/routes/auth.tsx` — single public route, handles both sign-in and sign-up via a mode toggle, accepts `?redirect=` search param, redirects already-signed-in users.
+- `src/components/admin/AdminGate.tsx` → `<Navigate to="/auth" />` on no-session.
+- `src/routes/_authenticated/route.tsx` (integration-managed) → `redirect({ to: "/auth" })` on no-session.
+- No `/login`, `/signin`, `/sign-up`, `/register` duplicates exist.
 
-1. **CREATE** `src/middleware/cron-auth.ts` — re-exports `verifyCronSecret` from `@/lib/cron-auth.server` as `requireCronAuth(request)`, returning the same `Response | null` contract.
-2. **UPDATE** every file under `src/routes/api/public/hooks/*.ts` that does not already short-circuit on `verifyCronSecret`. For each:
-   - Add `import { requireCronAuth } from "@/middleware/cron-auth"`.
-   - At the very top of the `POST`/`GET` handler: `const unauth = requireCronAuth(request); if (unauth) return unauth;`
-   - No other edits, no formatting drift.
-   - Files already protected stay untouched (will be listed in the report as `ALREADY_PROTECTED`).
+So I don't know what "unify" means here that isn't already true. Possible real intents:
+- (a) Add Google OAuth button via the Lovable broker.
+- (b) Add forgot-password flow + `/reset-password` route.
+- (c) Replace the raw `<input>` markup with shadcn `Input`/`Button`/`Form` for consistency with the rest of the app.
+- (d) Move `/auth` under a different path (e.g. `/sign-in`) and add redirects.
+- (e) Something else entirely.
 
-I will enumerate `src/routes/api/public/hooks/*.ts` in the execute step and only touch files where the guard is missing. The full list lands in the evidence report below.
+## What I will NOT do
 
-## Out of scope (will NOT touch in this batch)
+- I will not overwrite `PROJECT_STATE.yaml` to point at a Feature that does not exist in the plan.
+- I will not invent a file list for `AUTH-P1-003` and call that "the scope".
+- I will not modify `src/routes/auth.tsx` until the scope is frozen in `plans/phase-1.yaml`.
 
-- `src/routes/api/public/monitoring/*` (separate batch under SEC-P1-001, now folded into CRON-P1-004 backlog if you want it later).
-- `src/lib/cron-auth.server.ts` (not deleted; new middleware re-exports it).
-- Any non-hook public route, contact form, image proxy, etc.
+## What I propose instead (pick one and I'll re-issue this plan)
 
-## Validation
+**Option A — Define `AUTH-P1-003` first, then execute.** You tell me the real intent (a–e above or other). I:
+1. Append `AUTH-P1-003` to `plans/phase-1.yaml` with an explicit file list and acceptance criteria.
+2. Update `PROJECT_STATE.yaml` to `AUTH-P1-003 / batch 1 / EXECUTE`.
+3. Implement only those files, run `bunx tsgo --noEmit` + `bun run build`, write the report to `docs/engineering/reports/AUTH-P1-003-batch-1-fixes.md`.
 
-- `bunx tsgo --noEmit`
-- `bun run build`
-- Evidence written to `docs/engineering/reports/CRON-P1-004-batch-1-fixes.md` with: files changed, before/after for one route, validation tails, `ALREADY_PROTECTED` list, `OUT_OF_SCOPE_CANDIDATES` if any.
+**Option B — Skip AUTH-P1-003, advance to the next real backlog item.** Most natural next step from the audit is `SEC-P1-003 / Batch 1` (RPC GRANT inventory — no SQL changes, pure read). I update `PROJECT_STATE.yaml` to that and produce the inventory report.
 
-## Report format (matches your contract v3.1)
+**Option C — You're certain AUTH-P1-003 means "no-op verify that /auth is the only auth route".** I add a tiny Feature to the plan whose entire scope is producing a verification report (no source edits), mark it PASS, and move on.
 
-```
-STATUS: SUCCESS | FAILED | HALTED | BLOCKED
-FILES CHANGED: …
-VALIDATION: Typecheck PASS/FAIL, Build PASS/FAIL
-TRACE: …
-```
-
-## Approve to switch to build mode
-
-Approve as written, or tell me to (a) replace `src/lib/cron-auth.server.ts` instead of wrapping it, (b) skip the implicit PASS on SEC-P1-002 Batch 2 and have you record it manually first, or (c) include `api/public/monitoring/*` in the same batch.
+Tell me A (with the intent), B, or C — and I'll re-issue the plan with the frozen scope.
