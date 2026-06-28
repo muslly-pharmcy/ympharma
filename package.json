@@ -119,9 +119,11 @@
     "vitest": "^4.1.9"
   },
   "overrides": {
-    "htmlparser2": "^10.1.0"
+    "htmlparser2": "^10.1.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "resolutions": {
-    "htmlparser2": "^10.1.0"
+    "htmlparser2": "^10.1.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   }
 }
