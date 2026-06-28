@@ -67,11 +67,18 @@ function walk(dir: string, acc: string[] = []): string[] {
 }
 
 const SKIP_DIR = ["__tests__", "test", "tests"];
+// Paths that execute server-side only (server routes, server middleware).
+// Their top-level imports never ship to the browser, so *.server imports are allowed.
+const SERVER_ONLY_PREFIXES = [
+  "routes/api/",      // TanStack server routes
+  "middleware/",      // server-fn middleware
+];
 function isClientReachable(file: string): boolean {
   if (SERVER_FILE_RE.test(file)) return false;
-  const rel = relative(SRC, file);
+  const rel = relative(SRC, file).replace(/\\/g, "/");
   if (SKIP_DIR.some((d) => rel.split("/").includes(d))) return false;
   if (/\.(test|spec)\.(ts|tsx)$/.test(file)) return false;
+  if (SERVER_ONLY_PREFIXES.some((p) => rel.startsWith(p))) return false;
   return true;
 }
 
