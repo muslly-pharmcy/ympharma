@@ -3,12 +3,14 @@ plan_version: 1
 phase: Phase1
 plan_file: plans/phase-1.yaml
 last_updated: 2026-06-28
+phase_status: CLOSED
 current:
   feature: DB-P1-005
   batch: 1
-  action: AWAITING_PLAN_DEFINITION
+  action: PASS
 failure_budget:
   consecutive_failures: 0
-blockers:
-  - id: DB-P1-005-undefined
-    note: "DB-P1-005 must be appended to plans/phase-1.yaml with explicit file list and acceptance criteria before EXECUTE can be set. CTO to provide scope."
+blockers: []
+notes:
+  - "DB-P1-005 PASS (verification-only). Artifact at docs/engineering/artifacts/20260628044324_fix_security_definer.sql awaits manual apply via Supabase SQL Editor."
+  - "Phase 1 closed. SEC-P1-003 deferred to Phase 2 — re-scope after manual apply of DB-P1-005 artifact."
