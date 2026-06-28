@@ -52,10 +52,24 @@ features:
           - "Each finding has a proposed remediation."
           - "No code edits."
       - id: 2
-        scope: "Apply the remediations approved by ITRB from batch 1, one offender at a time. Each fix is its own commit-equivalent unit."
+        scope: |
+          Apply `dynamic-import-in-handler` remediation to the 8 files
+          listed below — and ONLY these files. For each file: remove the
+          top-level `import … from "*.server"` and move it inside every
+          `.handler()` body that uses the symbol. Type-only imports stay
+          at the top. No formatting drift, no other edits.
+        files:
+          - src/lib/ai-assistant.functions.ts
+          - src/lib/ai-clinical-copilot.functions.ts
+          - src/lib/api/example.functions.ts
+          - src/lib/pharmacy-intel.functions.ts
+          - src/lib/pharmacy-copilot.functions.ts
+          - src/lib/products-admin.functions.ts
+          - src/lib/vitamin-info.functions.ts
+          - src/lib/sentiment.functions.ts
         output_format: "Per-fix diff + tsgo/build evidence in docs/engineering/reports/SEC-P1-002-batch-2-fixes.md."
         acceptance:
-          - "Zero top-level *.server imports remain in client-reachable files."
+          - "Zero top-level *.server imports remain in the 8 files above."
           - "tsgo --noEmit passes."
           - "bun run build passes."
           - "Smoke test of /admin-ai-copilot and /ai-assistant routes still works."

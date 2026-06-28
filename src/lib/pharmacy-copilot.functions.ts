@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { generateText } from "ai";
-import { createLovableAiGatewayProvider } from "./ai-gateway.server";
+
 
 // ---------- Read helpers (admin-only) ----------
 
@@ -253,6 +253,7 @@ export const askExecutiveCopilot = createServerFn({ method: "POST" })
 ${JSON.stringify(snapshot)}
 \`\`\``;
 
+    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
     const gateway = createLovableAiGatewayProvider(key);
     const { text } = await generateText({
       model: gateway("google/gemini-3-flash-preview"),

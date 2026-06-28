@@ -7,7 +7,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 
 const Input = z.object({
   text: z.string().min(1).max(2000),
@@ -28,6 +27,7 @@ export const analyzeSentiment = createServerFn({ method: "POST" })
     if (!apiKey) return { ok: false, error: "ai_not_configured" };
 
     try {
+      const { createLovableAiGatewayProvider } = await import("@/lib/ai-gateway.server");
       const gateway = createLovableAiGatewayProvider(apiKey);
       const { experimental_output } = await generateText({
         model: gateway("google/gemini-3-flash-preview"),

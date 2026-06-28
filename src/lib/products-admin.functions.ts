@@ -2,7 +2,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import * as XLSX from "xlsx";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 import { generateText } from "ai";
 
 const productSchema = z.object({
@@ -243,6 +242,7 @@ export const importFromAI = createServerFn({ method: "POST" })
     await assertPerm(context.supabase, context.userId, "products");
     const key = process.env.LOVABLE_API_KEY;
     if (!key) throw new Error("LOVABLE_API_KEY غير مهيأ");
+    const { createLovableAiGatewayProvider } = await import("@/lib/ai-gateway.server");
     const gateway = createLovableAiGatewayProvider(key);
     const prompt = `أنت مساعد صيدلية يمنية. أنشئ قائمة JSON صرفة (بدون أي شرح) تحتوي على ${data.count} منتجاً واقعياً تنتجه أو تسوّقه شركة "${data.brand}" ضمن فئة "${data.category}".
 الإخراج يجب أن يكون مصفوفة JSON فقط، كل عنصر بهذا الشكل بالضبط:

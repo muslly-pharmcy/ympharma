@@ -3,7 +3,6 @@ import { getRequest } from "@tanstack/react-start/server";
 import { generateText } from "ai";
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
-import { createLovableAiGatewayProvider } from "./ai-gateway.server";
 
 const PUBLIC_MODES = new Set([
   "interactions",
@@ -572,6 +571,7 @@ function formatProductHints(hints: z.infer<typeof ProductHintSchema>[]) {
 export const askAssistant = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => InputSchema.parse(input))
   .handler(async ({ data }) => {
+    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
     await assertAdminForMode(data.mode);
 
     const key = process.env.LOVABLE_API_KEY;

@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { generateText, Output } from "ai";
-import { createLovableAiGatewayProvider } from "./ai-gateway.server";
 
 const Input = z.object({
   name: z.string().min(1).max(200),
@@ -25,6 +24,7 @@ export const getVitaminInfo = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const key = process.env.LOVABLE_API_KEY;
     if (!key) throw new Error("Missing LOVABLE_API_KEY");
+    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
     const gateway = createLovableAiGatewayProvider(key);
     const prompt = `أنت صيدلي خبير وموثوق. قدّم معلومات دقيقة وموجزة باللغة العربية الفصحى عن المنتج التالي:
 الاسم: ${data.name}

@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { generateText, Output } from "ai";
-import { createLovableAiGatewayProvider } from "./ai-gateway.server";
+
 
 const THERAPEUTIC_CATEGORIES = [
   "diabetes","hypertension","cardiology","allergy","asthma","gi",
@@ -113,6 +113,7 @@ export const runAiClassifierBatch = createServerFn({ method: "POST" })
       return { processed: 0, upserted: 0, skipped: 0, message: "لا توجد منتجات للتصنيف" };
     }
 
+    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
     const gateway = createLovableAiGatewayProvider(key);
     const model = gateway("google/gemini-3-flash-preview");
 
