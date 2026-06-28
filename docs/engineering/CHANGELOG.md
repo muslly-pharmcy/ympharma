@@ -53,3 +53,9 @@ event, newest at the bottom of each section.
 
 
 
+
+## 2026-06-28 — SEC-P1-003 Batch 1.5 (docs-only)
+- Re-classified 67 REVIEW_REQUIRED functions using name-rule heuristics.
+- New deltas: +2 KEEP_AUTHENTICATED, +1 RESTRICT_ADMIN_ONLY, +1 SERVICE_ROLE_ONLY, 63 remain REVIEW_REQUIRED.
+- No SQL, no source, no PROJECT_STATE changes.
+- Report: docs/engineering/reports/SEC-P1-003-batch-1-classification.md (Batch 1.5 section).
