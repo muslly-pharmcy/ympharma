@@ -1,16 +1,18 @@
 schema_version: 1
 plan_version: 1
-phase: Phase1
-plan_file: plans/phase-1.yaml
+phase: Phase2
+plan_file: plans/phase-2.yaml
 last_updated: 2026-06-28
-phase_status: CLOSED
+phase_status: READY
 current:
-  feature: DB-P1-005
+  feature: SEC-P1-003
   batch: 1
-  action: PASS
+  action: EXECUTE
 failure_budget:
   consecutive_failures: 0
-blockers: []
+blockers:
+  - "plans/phase-2.yaml not yet authored — SEC-P1-003 scope (file list + acceptance criteria) must be defined before EXECUTE."
 notes:
-  - "DB-P1-005 PASS (verification-only). Artifact at docs/engineering/artifacts/20260628044324_fix_security_definer.sql awaits manual apply via Supabase SQL Editor."
-  - "Phase 1 closed. SEC-P1-003 deferred to Phase 2 — re-scope after manual apply of DB-P1-005 artifact."
+  - "DB-P1-005 applied live on 2026-06-28. 156/156 SECURITY DEFINER functions in public now: authenticated=true, anon=false, public=false. Offenders=0."
+  - "Verification report: docs/engineering/reports/verification-results.md. CSV: /mnt/documents/db-p1-005-verification.csv."
+  - "Phase 1 CLOSED. Phase 2 opens with SEC-P1-003 (RPC GRANT tightening) — narrow specific RPCs from authenticated to admin/owner or switch to SECURITY INVOKER per Supabase linter 0029 review."
