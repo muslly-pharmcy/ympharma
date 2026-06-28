@@ -86,3 +86,13 @@ event, newest at the bottom of each section.
 - PROJECT_STATE.yaml: phase_status=CLOSED, current.feature=null, action=IDLE.
 - System READY FOR PRODUCTION from a P1 security standpoint.
 
+
+## 2026-06-28 — Phase 3 OPENED
+- plans/phase-3.yaml created (15 features).
+- PROJECT_STATE.yaml flipped to Phase3 / SEC-P1-004 / EXECUTING.
+
+## 2026-06-28 — SEC-P1-004 Batch 1 PASS
+- scripts/check-imports.ts + .github/workflows/import-guard.yml created.
+- Static guard scans 370 client-reachable files; 0 violations on current tree.
+- CI will fail any PR introducing a top-level *.server import in client code.
+- Report: docs/engineering/reports/SEC-P1-004-batch-1-fixes.md.

@@ -1,20 +1,17 @@
 schema_version: 1
 plan_version: 1
-phase: Phase2
-plan_file: plans/phase-2.yaml
+phase: Phase3
+plan_file: plans/phase-3.yaml
 last_updated: 2026-06-28
-phase_status: CLOSED
+phase_status: READY
 current:
-  feature: null
-  batch: null
-  action: IDLE
+  feature: SEC-P1-004
+  batch: 1
+  action: EXECUTING
 failure_budget:
   consecutive_failures: 0
 blockers: []
 notes:
-  - "DB-P1-005 applied live; 156/156 SECURITY DEFINER fns: authenticated=true, anon=false, public=false."
-  - "SEC-P1-003 Batch 1 PASS — classification report at docs/engineering/reports/SEC-P1-003-batch-1-classification.md."
-  - "SEC-P1-003 Batch 1.5 PASS — name-rule reclassification of 67 REVIEW_REQUIRED."
-  - "SEC-P1-003 Batch 2 APPLIED — REVOKE EXECUTE FROM authenticated on 57 functions (5 admin + 52 service). Verified live: 0/57 retain EXECUTE for authenticated."
-  - "Final Phase-2 bucket totals: KEEP_AUTHENTICATED=74, RESTRICT_ADMIN_ONLY=17, SERVICE_ROLE_ONLY=63, REVIEW_REQUIRED=0."
   - "Phase 2 CLOSED 2026-06-28 — all P1 security features (SEC-P1-002, CRON-P1-004, AUTH-P1-003, DB-P1-005, SEC-P1-003) PASS."
+  - "Phase 3 OPENED 2026-06-28 — 15 features tracked in plans/phase-3.yaml."
+  - "SEC-P1-004 Batch 1 EXECUTING — CI import-graph guard."

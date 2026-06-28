@@ -1,0 +1,131 @@
+schema_version: 1
+plan_version: 1
+phase: Phase3
+features:
+  SEC-P1-004:
+    title: "CI Import-Graph Guard"
+    description: Prevent `*.server` imports from client-reachable code via CI.
+    batches:
+      - id: 1
+        files:
+          - .github/workflows/import-guard.yml (CREATE)
+          - scripts/check-imports.ts (CREATE)
+        steps:
+          - "Create check-imports.ts static analyzer."
+          - "Create GitHub Action to run guard on every PR."
+        acceptance:
+          - "Script runs successfully (0 violations on current tree)."
+          - "PR fails if a forbidden top-level *.server import is added."
+
+  OPS-P2-002:
+    title: "Cron Job Monitoring & Alerts"
+    batches:
+      - id: 1
+        files:
+          - src/lib/monitoring/cron-monitor.ts (CREATE)
+          - src/lib/notifications/slack-alerts.ts (UPDATE)
+
+  AUDIT-P2-003:
+    title: "Admin Action Audit Log"
+    batches:
+      - id: 1
+        files:
+          - src/lib/audit/audit-log.ts (CREATE)
+          - src/lib/middleware/audit-middleware.ts (CREATE)
+          - supabase/migrations/20260629000000_audit_log_table.sql (CREATE)
+
+  REL-P3-001:
+    title: "Worker Retry Policy Improvement"
+    batches:
+      - id: 1
+        files:
+          - src/lib/workers/base-worker.ts (UPDATE)
+          - src/lib/workers/retry-config.ts (CREATE)
+
+  PERF-P2-001:
+    title: "Admin Dashboard Bundle Optimization"
+    batches:
+      - id: 1
+        files:
+          - src/routes/_authenticated/admin-dashboard.tsx (UPDATE)
+          - vite.config.ts (UPDATE)
+
+  QOS-P3-002:
+    title: "API Response Time Monitoring"
+    batches:
+      - id: 1
+        files:
+          - src/lib/monitoring/api-monitor.ts (CREATE)
+          - src/lib/middleware/response-time.ts (CREATE)
+
+  DEV-P3-003:
+    title: "Developer Experience Improvements"
+    batches:
+      - id: 1
+        files:
+          - .vscode/settings.json (CREATE)
+          - .vscode/extensions.json (CREATE)
+          - scripts/dev-setup.sh (CREATE)
+
+  DB-P3-004:
+    title: "Database Index Optimization"
+    batches:
+      - id: 1
+        files:
+          - supabase/migrations/20260630000000_optimize_indexes.sql (CREATE)
+
+  DOC-P4-001:
+    title: "Documentation Update"
+    batches:
+      - id: 1
+        files:
+          - README.md (UPDATE)
+          - docs/deployment.md (CREATE)
+          - docs/security.md (CREATE)
+
+  TEST-P4-002:
+    title: "Unit Test Coverage Improvement"
+    batches:
+      - id: 1
+        files:
+          - src/lib/__tests__/**/*.test.ts (CREATE/UPDATE)
+          - vitest.config.ts (UPDATE)
+
+  RISK-P3-005:
+    title: "Risk Register & Mitigation Plan"
+    batches:
+      - id: 1
+        files:
+          - docs/engineering/risk-register.md (CREATE)
+
+  SCALE-P4-003:
+    title: "Horizontal Scaling Readiness"
+    batches:
+      - id: 1
+        files:
+          - src/lib/config/scaling.ts (CREATE)
+          - docker-compose.scale.yml (CREATE)
+
+  INT-P3-006:
+    title: "Third-Party Integration Health Checks"
+    batches:
+      - id: 1
+        files:
+          - src/lib/health-checks/integrations.ts (CREATE)
+          - src/routes/api/public/health.full-check.ts (UPDATE)
+
+  EFF-P4-004:
+    title: "Background Job Efficiency"
+    batches:
+      - id: 1
+        files:
+          - src/lib/workers/optimization.ts (CREATE)
+          - src/lib/workers/scheduler.ts (UPDATE)
+
+  REPORT-P4-005:
+    title: "Production Readiness Dashboard"
+    batches:
+      - id: 1
+        files:
+          - src/routes/_authenticated/admin-production-readiness.tsx (CREATE)
+          - src/lib/dashboard/production-readiness.ts (CREATE)
