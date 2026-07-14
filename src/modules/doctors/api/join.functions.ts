@@ -98,7 +98,7 @@ export const reviewJoinSubmission = createServerFn({ method: "POST" })
     if (data.duplicate_of) patch.duplicate_of = data.duplicate_of;
     const { error } = await context.supabase
       .from("hc_doctor_join_submissions")
-      .update(patch)
+      .update(patch as never)
       .eq("id", data.submission_id);
     if (error) throw new Error(error.message);
     return { ok: true };
