@@ -1,92 +1,53 @@
-# PHOENIX INVOICE INTELLIGENCE ENGINE — Foundation Plan
+## PHOENIX BUILD RECOVERY Plan
 
-## Objective
-Let pharmacies/suppliers add products by uploading an invoice photo. Extract lines via OCR, match against the existing catalog (via `product-intelligence`), let a human review/edit, then commit through existing inventory RPCs. **No stock mutation without explicit confirmation.**
+**Scope lock:** no feature work. Only restore a green build, typecheck, import boundary guard, and route graph.
 
-## Architecture (aligned with Phoenix modules)
+### First observed build signal
+- Current dev logs do not yet show the fatal `build:dev` stack trace, but they do show a real route hygiene issue:
+  - **File:** `src/routes/trust.test.tsx`
+  - **Line:** route plugin warning at route discovery, because this test file is inside `src/routes/` and does not export `Route`
+  - **Root cause:** test/spec file placed in the route tree; TanStack route generator treats it as a route candidate
+  - **Minimal fix:** move/rename it out of route discovery, preferably `src/routes/-trust.test.tsx` or move to `src/__tests__/...`
 
-```text
-[Mobile Camera / File Upload]
-        ↓ (signed upload)
-[Storage bucket: invoice-uploads (private)]
-        ↓
-[createServerFn: extractInvoice]
-        ↓
-[Lovable AI Gateway: gemini-3-flash-preview (multimodal image → structured JSON)]
-        ↓
-[Line-item normalization + matching via product-intelligence.searchMedicinesIntelligent]
-        ↓
-[invoice_extractions table (status='pending_review')]
-        ↓
-[Review UI: /pharmacist/invoice-review/$id]
-        ↓ (user confirms per-line: product_id, qty, cost, price, expiry, batch)
-[createServerFn: commitInvoice → existing inv_stock_batches + inv_stock_movements RPCs]
-        ↓
-[Audit log: invoice_audit_events]
-```
+### Likely first fatal errors to verify/fix after running build
+Based on the newly added invoice routes:
+1. **Typed route navigation misuse**
+   - Failing files likely:
+     - `src/routes/_authenticated/pharmacist/invoice-upload.tsx`
+     - `src/routes/_authenticated/pharmacist/invoice-list.tsx`
+     - `src/routes/_authenticated/pharmacist/invoice-review.$id.tsx`
+   - Root cause: navigation/link targets use internal route IDs (`/_authenticated/...`) instead of public URL paths (`/pharmacist/...`), currently hidden with `as never`.
+   - Minimal fix: use public paths:
+     - `/pharmacist/invoice-list`
+     - `/pharmacist/invoice-review/$id`
 
-## Deliverables
+2. **Server function boundary/splitting risk**
+   - Failing files likely:
+     - `src/modules/invoice-intake/server/extract.functions.ts`
+     - `src/modules/invoice-intake/server/upload.functions.ts`
+     - `src/modules/invoice-intake/server/review.functions.ts`
+   - Root cause: client routes import server functions from a `server/` folder and the server-function files contain module-scope helpers/constants used inside handlers. TanStack Start can split handlers strictly; helpers used by handlers may need to be inside the handler or in a safe shared module.
+   - Minimal fix: keep imports client-safe, move server-only helper usage inside handlers or into non-server-only safe modules, and ensure admin/server-only imports remain dynamic inside handlers.
 
-### 1. Database (migration)
-New module `src/modules/invoice-intake/`. Tables (with GRANT + RLS, org-scoped via `has_org_permission`):
-- `invoice_uploads` — one row per uploaded image. Columns: `id`, `org_id`, `branch_id`, `uploaded_by`, `storage_path`, `mime_type`, `source` (`camera`|`file`), `status` (`uploaded`|`extracting`|`extracted`|`failed`|`committed`|`cancelled`), `supplier_id nullable`, `notes`, `created_at`.
-- `invoice_extractions` — parsed header: `id`, `upload_id`, `supplier_name_raw`, `invoice_number`, `invoice_date`, `currency`, `subtotal`, `tax`, `total`, `ocr_confidence`, `raw_ocr_text`, `model_used`, `extracted_at`.
-- `invoice_line_items` — one row per detected line: `id`, `extraction_id`, `line_no`, `raw_text`, `detected_name`, `detected_name_normalized`, `quantity`, `unit_cost`, `unit_price`, `expiry_date`, `batch_number`, `matched_product_id` (nullable FK `catalog_products`), `match_confidence`, `match_source` (`exact`|`alias`|`fuzzy`|`manual`|`unmatched`), `user_confirmed_product_id`, `user_confirmed_qty`, `user_confirmed_cost`, `user_confirmed_expiry`, `status` (`pending`|`confirmed`|`skipped`).
-- `invoice_audit_events` — append-only: `id`, `upload_id`, `actor_user_id`, `event_type` (`uploaded`|`extraction_started`|`extraction_completed`|`extraction_failed`|`line_reviewed`|`committed`|`cancelled`), `payload jsonb`, `created_at`.
+### Execution steps after approval
+1. Run `bun run build:dev` and capture the **first real error**, not the final stack trace.
+2. Fix only that first failing file/line with the smallest patch.
+3. Re-run `bun run build:dev`.
+4. Repeat only for subsequent build blockers until `build:dev` exits `0`.
+5. Run typecheck with `bunx tsgo --noEmit`.
+6. Run import boundary guard with `bun run scripts/check-imports.ts`.
+7. Check route graph issues: no duplicate routes, no route test files in `src/routes`, no unresolved imports.
+8. Add/update `docs/engineering/reports/PHOENIX-BUILD-RECOVERY.md` with:
+   - exact failing file
+   - exact failing line
+   - root cause
+   - minimal fix
+   - verification results
 
-Storage: private bucket `invoice-uploads`, RLS: only org members can read their org's paths.
-
-### 2. Server functions (`src/modules/invoice-intake/server/`)
-- `uploadInvoice.functions.ts` — `createInvoiceUpload({ mime, source, branchId })` → returns signed upload URL + `upload_id`. Requires `requireSupabaseAuth`.
-- `extract.functions.ts` — `extractInvoice({ uploadId })`:
-  1. Load image from storage (signed URL, in-handler).
-  2. Call Lovable AI Gateway with `google/gemini-3-flash-preview`, multimodal `image_url` input, JSON schema output (header + `line_items[]`). Supports Arabic + English + mixed supplier formats.
-  3. For each line, run `product-intelligence.searchMedicinesIntelligent` (already handles Arabic normalization, aliases, fuzzy) → set `matched_product_id` + `match_source` + `match_confidence`.
-  4. Persist to `invoice_extractions` + `invoice_line_items`. Emit audit event.
-- `review.functions.ts` — `listPendingInvoices`, `getInvoiceForReview(id)`, `updateLineItem({ lineId, patch })`, `cancelInvoice(id)`.
-- `commit.functions.ts` — `commitInvoice({ uploadId })`:
-  - Guard: reject if any line still `pending` and not `skipped`.
-  - For each confirmed line, call existing inventory RPCs (`inv_stock_batches` insert + `inv_stock_movements` type=`purchase`).
-  - Set `invoice_uploads.status='committed'`. Audit event with per-line summary.
-
-All privileged writes verify `has_org_permission(auth.uid(), org_id, 'inventory:write')`.
-
-### 3. UI (mobile-first, Arabic RTL)
-- `src/routes/_authenticated/pharmacist/invoice-upload.tsx` — camera-first uploader (`<input capture="environment" accept="image/*">`), drag-drop fallback, progress + status polling.
-- `src/routes/_authenticated/pharmacist/invoice-review.$id.tsx` — review screen:
-  - Header (supplier, invoice #, date, totals, OCR confidence badge).
-  - Line grid: raw text | detected name | qty | cost | expiry | matched product (searchable combobox using `searchMedicinesIntelligent`) | confidence badge | actions (Confirm / Edit / Skip).
-  - Sticky footer: "Confirm all & commit to stock" (disabled until every line is confirmed or skipped) + "Cancel".
-- `src/routes/_authenticated/pharmacist/invoice-list.tsx` — list of the org's uploads with status filter.
-
-Reuse `src/components/medical/*` primitives for consistency.
-
-### 4. Product intelligence integration
-- Extend `medicineNormalize.ts` only if new supplier abbreviations appear (no schema change).
-- Route each `detected_name` through `searchMedicinesIntelligent`; take top result when `confidence ≥ 0.75`, otherwise mark `unmatched` and force manual pick.
-
-### 5. Security & audit
-- RLS on all four tables (org-scoped read/write; audit read-only for org admins).
-- `invoice-uploads` bucket private; signed URLs only inside server handlers.
-- Every state transition writes an `invoice_audit_events` row (who, what, when, payload).
-- No client ever calls `supabaseAdmin`; commits use `requireSupabaseAuth` + `has_org_permission` gate.
-- Rate-limit `extractInvoice` per user (reuse `rate_limit_buckets`, 10/hour).
-
-### 6. Tests
-- Unit: normalization of common supplier line formats (Arabic + English), confidence scoring thresholds.
-- Server-fn happy path: mock Gemini response → verify extraction + matching → verify commit calls inventory RPCs exactly once per confirmed line.
-
-### 7. Report
-`docs/engineering/reports/PHOENIX-INVOICE-INTELLIGENCE.md` — schema, RPCs, RLS matrix, audit event catalog, matching thresholds, mobile UX notes, next steps (multi-page invoices, PDF, supplier-format learning loop).
-
-## Explicit non-goals (this phase)
-- No PDF ingestion (images only).
-- No multi-page stitching.
-- No automatic supplier learning / feedback loop.
-- No price-list updates to `catalog_products` (invoice affects stock/cost only).
-- No auto-commit path — human review is mandatory.
-
-## Technical notes
-- AI: `google/gemini-3-flash-preview` via existing `createLovableAiGatewayProvider` helper, `Output` structured schema (Zod). Multimodal `image_url` block with signed URL.
-- Server-only imports (`supabaseAdmin`) stay inside handler bodies via `await import()` per Phoenix rules.
-- `invoice-review.$id.tsx` lives under `_authenticated/pharmacist/` so the org gate + bearer middleware apply.
+### Completion criteria
+- `build:dev` exits `0`
+- typecheck passes
+- import guard passes
+- no duplicate routes
+- no unresolved imports
+- report is written

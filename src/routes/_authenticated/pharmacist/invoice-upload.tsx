@@ -8,8 +8,8 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import {
   createInvoiceUpload,
-} from "@/modules/invoice-intake/server/upload.functions";
-import { extractInvoice } from "@/modules/invoice-intake/server/extract.functions";
+} from "@/modules/invoice-intake/functions/upload.functions";
+import { extractInvoice } from "@/modules/invoice-intake/functions/extract.functions";
 
 export const Route = createFileRoute("/_authenticated/pharmacist/invoice-upload")({
   head: () => ({
@@ -59,8 +59,8 @@ function InvoiceUploadPage() {
 
       toast.success("تم استخراج الفاتورة — راجع البنود");
       navigate({
-        to: "/_authenticated/pharmacist/invoice-review/$id" as never,
-        params: { id: created.upload_id } as never,
+        to: "/pharmacist/invoice-review/$id",
+        params: { id: created.upload_id },
       });
     } catch (e) {
       toast.error(`فشل: ${(e as Error).message}`);
@@ -114,7 +114,7 @@ function InvoiceUploadPage() {
 
       <div className="pt-4 border-t">
         <Link
-          to={"/_authenticated/pharmacist/invoice-list" as never}
+          to="/pharmacist/invoice-list"
           className="text-sm text-primary underline"
         >
           عرض الفواتير السابقة
