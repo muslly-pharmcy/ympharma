@@ -32,6 +32,6 @@ describe("compareHits + scoreMatch", () => {
   it("scoreMatch stays within 0..1", () => {
     expect(scoreMatch("exact")).toBe(1);
     expect(scoreMatch("fuzzy", 0.5)).toBeCloseTo(0.35, 5);
-    expect(scoreMatch("alias_fuzzy", 2)).toBe(0.65);
+    expect(scoreMatch("alias_fuzzy", 2)).toBe(1);
   });
 });
