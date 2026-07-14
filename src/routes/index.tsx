@@ -495,3 +495,42 @@ function SectionHeader({ title, subtitle, action }: { title: string; subtitle?: 
     </div>
   );
 }
+
+function DiscoveryGrid() {
+  const items: Array<{ to: string; title: string; desc: string; icon: React.ComponentType<{ className?: string }>; soon?: boolean }> = [
+    { to: "/products", title: "ابحث عن دواء", desc: "أدوية، فيتامينات ومكملات — بحث عربي/إنجليزي ذكي.", icon: Pill },
+    { to: "/doctors", title: "ابحث عن طبيب", desc: "أطباء موثوقون في عدن حسب التخصص والمدينة.", icon: Stethoscope },
+    { to: "/sahtak", title: "تثقيف صحي", desc: "مقالات ونصائح طبية موثّقة باللغة العربية.", icon: HeartPulse },
+    { to: "/doctor/join", title: "شبكة الصيدليات — قريباً", desc: "نُجهّز شبكة صيدليات موحّدة لتوفّر أسرع للأدوية.", icon: PillBottle, soon: true },
+  ];
+  return (
+    <section dir="rtl" aria-labelledby="discovery-title" className="mx-auto max-w-6xl px-4 py-8">
+      <h2 id="discovery-title" className="mb-4 text-xl font-black sm:text-2xl">ماذا تريد أن تفعل اليوم؟</h2>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {items.map((it) => {
+          const Icon = it.icon;
+          return (
+            <Link
+              key={it.to + it.title}
+              to={it.to}
+              className="group relative flex h-full flex-col justify-between rounded-2xl border border-border bg-card p-4 shadow-card transition hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-elevated"
+            >
+              {it.soon && (
+                <span className="absolute left-3 top-3 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-700">
+                  قريباً
+                </span>
+              )}
+              <div className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary">
+                <Icon className="size-5" />
+              </div>
+              <div className="mt-3">
+                <div className="text-sm font-black">{it.title}</div>
+                <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">{it.desc}</p>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
