@@ -1,12 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { MapPin, Stethoscope, Clock3 } from "lucide-react";
 import type { PublicDoctorRow } from "../server/doctors.functions";
-import { computeTrustLevel, TrustBadge } from "./TrustBadge";
+import { TrustBadge } from "./TrustBadge";
 
 export function DoctorCard({ d }: { d: PublicDoctorRow }) {
   const primarySpec = d.specialties.find((s) => s.is_primary) ?? d.specialties[0];
   const primaryLoc = d.locations[0];
-  const trust = computeTrustLevel(d);
+  const trust = d.trust_level;
   return (
     <Link
       to="/doctors/$slug"
