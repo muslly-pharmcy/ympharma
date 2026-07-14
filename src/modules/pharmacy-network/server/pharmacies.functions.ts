@@ -72,9 +72,18 @@ const ListSchema = z.object({
   offset: z.number().int().min(0).default(0),
 });
 
+export interface PnProductRow {
+  catalog_product_id: string;
+  product_name: string;
+  availability: "in_stock" | "low" | "out";
+  price_yer: number | null;
+  price_visible: boolean;
+  expiry_date: string | null;
+}
+
 export const pnListPharmacyProducts = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => ListSchema.parse(i))
-  .handler(async ({ data }) => {
+  .handler(async ({ data }): Promise<PnProductRow[]> => {
     const { data: rows, error } = await sbPublic().rpc(
       "pn_list_pharmacy_products" as never,
       { _slug: data.slug, _q: data.q, _limit: data.limit, _offset: data.offset } as never,
@@ -83,5 +92,5 @@ export const pnListPharmacyProducts = createServerFn({ method: "POST" })
       console.error("[pnListPharmacyProducts]", error.message);
       return [];
     }
-    return ((rows ?? []) as unknown[]);
+    return ((rows ?? []) as unknown as PnProductRow[]);
   });
