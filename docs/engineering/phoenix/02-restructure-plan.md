@@ -39,6 +39,7 @@ src/
     prescription-ai/
     invoice-ai/
     catalog/                   # national medicine catalog master
+    product-intelligence/      # NEW — OCR, barcode, image recognition, AR/EN aliases, misspellings, expiry engine (consumed by prescription-ai, invoice-ai, marketplace, pharmacy-network)
     media-library/             # centralized reusable product images
     inventory/
     warehouse/
@@ -46,24 +47,27 @@ src/
     suppliers/
     marketplace/
     pharmacy-network/          # inter-pharmacy lookup + P2P exchange + near-expiry
-    orders/
-    payments/
-    subscriptions/
-    insurance/
+    orders/                    # thin — status/timeline only; money moves through commerce-core
+    commerce-core/             # NEW — subscriptions, billing, payments, commissions, SaaS plans, revenue ledger (absorbs commerce parts of payments/subscriptions; insurance keeps claims)
+    payments/                  # adapter layer; providers only — settlement recorded in commerce-core
+    subscriptions/             # adapter — recurring refill rules; billing in commerce-core
+    insurance/                 # claims lifecycle only
     laboratories/
-    notifications/
+    notification-engine/       # NEW — push, WhatsApp, SMS, email, in-app, campaign automation, user preferences (replaces standalone notifications module)
     healthcare-media/
     knowledge-base/
     ai-engine/                 # unified prompts, guardrails, tool registry
+    growth-engine/             # NEW — referrals, loyalty, coupons, campaigns, customer engagement, social automation (absorbs marketing growth surface)
     analytics/
-    marketing/
-    cms/
+    marketing/                 # thin — delegates dispatch to notification-engine and growth-engine
+    cms/                       # marketing pages content only
     erp/
     monitoring/
     audit/
     security/
     api-gateway/
     administration/            # unified admin shell (replaces admin-hub/command/dashboard)
+
   routes/                      # thin: route files re-export from modules
     (public)/                  # marketing, catalog browsing, prescription upload
     (app)/                     # customer / doctor / pharmacist authenticated shells
