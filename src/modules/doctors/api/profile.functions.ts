@@ -37,7 +37,16 @@ const ProfileExtrasSchema = z.object({
 });
 
 async function assertDoctorAccess(
-  supabase: Awaited<ReturnType<typeof getAuthedSupabase>>,
+  supabase: {
+    from: (t: string) => {
+      select: (c: string) => {
+        eq: (col: string, val: string) => {
+          maybeSingle: () => Promise<{ data: { id: string; user_id: string | null } | null; error: { message: string } | null }>;
+        };
+      };
+    };
+    rpc: (name: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
+  },
   doctorId: string,
   userId: string,
 ) {
@@ -57,12 +66,6 @@ async function assertDoctorAccess(
   }
 }
 
-// Helper type — supabase client from middleware context.
-type AuthedSupabase = Parameters<Parameters<typeof requireSupabaseAuth.server.handler>[0]>[0]["context"]["supabase"];
-async function getAuthedSupabase(): Promise<AuthedSupabase> {
-  throw new Error("type-only");
-}
-
 export const updateDoctorProfileExtras = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => ProfileExtrasSchema.parse(d))
@@ -76,11 +79,13 @@ export const updateDoctorProfileExtras = createServerFn({ method: "POST" })
     if (Object.keys(payload).length === 0) return { ok: true, updated: 0 };
     const { error } = await context.supabase
       .from("hc_doctors")
-      .update(payload)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .update(payload as any)
       .eq("id", doctor_id);
     if (error) throw new Error(error.message);
     return { ok: true, updated: Object.keys(payload).length };
   });
+
 
 export const getMyDoctorProfile = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
