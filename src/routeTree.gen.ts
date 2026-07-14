@@ -62,6 +62,7 @@ import { Route as AdminInventoryRouteImport } from './routes/admin-inventory'
 import { Route as AdminHubRouteImport } from './routes/admin-hub'
 import { Route as AdminHmacPreflightRouteImport } from './routes/admin-hmac-preflight'
 import { Route as AdminEventBusRouteImport } from './routes/admin-event-bus'
+import { Route as AdminDoctorJoinQueueRouteImport } from './routes/admin-doctor-join-queue'
 import { Route as AdminDiscountsRouteImport } from './routes/admin-discounts'
 import { Route as AdminDiagnosticsRouteImport } from './routes/admin-diagnostics'
 import { Route as AdminCronJobsRouteImport } from './routes/admin-cron-jobs'
@@ -130,6 +131,7 @@ import { Route as AuthenticatedPharmacistPrescriptionQueueRouteImport } from './
 import { Route as AuthenticatedPharmacistInvoiceUploadRouteImport } from './routes/_authenticated/pharmacist/invoice-upload'
 import { Route as AuthenticatedPharmacistInvoiceListRouteImport } from './routes/_authenticated/pharmacist/invoice-list'
 import { Route as AuthenticatedPharmacistDashboardRouteImport } from './routes/_authenticated/pharmacist/dashboard'
+import { Route as AuthenticatedDoctorDashboardRouteImport } from './routes/_authenticated/doctor/dashboard'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -449,6 +451,11 @@ const AdminHmacPreflightRoute = AdminHmacPreflightRouteImport.update({
 const AdminEventBusRoute = AdminEventBusRouteImport.update({
   id: '/admin-event-bus',
   path: '/admin-event-bus',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminDoctorJoinQueueRoute = AdminDoctorJoinQueueRouteImport.update({
+  id: '/admin-doctor-join-queue',
+  path: '/admin-doctor-join-queue',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminDiscountsRoute = AdminDiscountsRouteImport.update({
@@ -811,6 +818,12 @@ const AuthenticatedPharmacistDashboardRoute =
     path: '/pharmacist/dashboard',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDoctorDashboardRoute =
+  AuthenticatedDoctorDashboardRouteImport.update({
+    id: '/doctor/dashboard',
+    path: '/doctor/dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -1141,6 +1154,7 @@ export interface FileRoutesByFullPath {
   '/admin-cron-jobs': typeof AdminCronJobsRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
   '/admin-discounts': typeof AdminDiscountsRoute
+  '/admin-doctor-join-queue': typeof AdminDoctorJoinQueueRoute
   '/admin-event-bus': typeof AdminEventBusRoute
   '/admin-hmac-preflight': typeof AdminHmacPreflightRoute
   '/admin-hub': typeof AdminHubRoute
@@ -1215,6 +1229,7 @@ export interface FileRoutesByFullPath {
   '/pharmacies/$slug': typeof PharmaciesSlugRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
+  '/doctor/dashboard': typeof AuthenticatedDoctorDashboardRoute
   '/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/pharmacist/invoice-list': typeof AuthenticatedPharmacistInvoiceListRoute
   '/pharmacist/invoice-upload': typeof AuthenticatedPharmacistInvoiceUploadRoute
@@ -1314,6 +1329,7 @@ export interface FileRoutesByTo {
   '/admin-cron-jobs': typeof AdminCronJobsRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
   '/admin-discounts': typeof AdminDiscountsRoute
+  '/admin-doctor-join-queue': typeof AdminDoctorJoinQueueRoute
   '/admin-event-bus': typeof AdminEventBusRoute
   '/admin-hmac-preflight': typeof AdminHmacPreflightRoute
   '/admin-hub': typeof AdminHubRoute
@@ -1388,6 +1404,7 @@ export interface FileRoutesByTo {
   '/pharmacies/$slug': typeof PharmaciesSlugRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
+  '/doctor/dashboard': typeof AuthenticatedDoctorDashboardRoute
   '/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/pharmacist/invoice-list': typeof AuthenticatedPharmacistInvoiceListRoute
   '/pharmacist/invoice-upload': typeof AuthenticatedPharmacistInvoiceUploadRoute
@@ -1489,6 +1506,7 @@ export interface FileRoutesById {
   '/admin-cron-jobs': typeof AdminCronJobsRoute
   '/admin-diagnostics': typeof AdminDiagnosticsRoute
   '/admin-discounts': typeof AdminDiscountsRoute
+  '/admin-doctor-join-queue': typeof AdminDoctorJoinQueueRoute
   '/admin-event-bus': typeof AdminEventBusRoute
   '/admin-hmac-preflight': typeof AdminHmacPreflightRoute
   '/admin-hub': typeof AdminHubRoute
@@ -1563,6 +1581,7 @@ export interface FileRoutesById {
   '/pharmacies/$slug': typeof PharmaciesSlugRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
+  '/_authenticated/doctor/dashboard': typeof AuthenticatedDoctorDashboardRoute
   '/_authenticated/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/_authenticated/pharmacist/invoice-list': typeof AuthenticatedPharmacistInvoiceListRoute
   '/_authenticated/pharmacist/invoice-upload': typeof AuthenticatedPharmacistInvoiceUploadRoute
@@ -1664,6 +1683,7 @@ export interface FileRouteTypes {
     | '/admin-cron-jobs'
     | '/admin-diagnostics'
     | '/admin-discounts'
+    | '/admin-doctor-join-queue'
     | '/admin-event-bus'
     | '/admin-hmac-preflight'
     | '/admin-hub'
@@ -1738,6 +1758,7 @@ export interface FileRouteTypes {
     | '/pharmacies/$slug'
     | '/product/$id'
     | '/test/features'
+    | '/doctor/dashboard'
     | '/pharmacist/dashboard'
     | '/pharmacist/invoice-list'
     | '/pharmacist/invoice-upload'
@@ -1837,6 +1858,7 @@ export interface FileRouteTypes {
     | '/admin-cron-jobs'
     | '/admin-diagnostics'
     | '/admin-discounts'
+    | '/admin-doctor-join-queue'
     | '/admin-event-bus'
     | '/admin-hmac-preflight'
     | '/admin-hub'
@@ -1911,6 +1933,7 @@ export interface FileRouteTypes {
     | '/pharmacies/$slug'
     | '/product/$id'
     | '/test/features'
+    | '/doctor/dashboard'
     | '/pharmacist/dashboard'
     | '/pharmacist/invoice-list'
     | '/pharmacist/invoice-upload'
@@ -2011,6 +2034,7 @@ export interface FileRouteTypes {
     | '/admin-cron-jobs'
     | '/admin-diagnostics'
     | '/admin-discounts'
+    | '/admin-doctor-join-queue'
     | '/admin-event-bus'
     | '/admin-hmac-preflight'
     | '/admin-hub'
@@ -2085,6 +2109,7 @@ export interface FileRouteTypes {
     | '/pharmacies/$slug'
     | '/product/$id'
     | '/test/features'
+    | '/_authenticated/doctor/dashboard'
     | '/_authenticated/pharmacist/dashboard'
     | '/_authenticated/pharmacist/invoice-list'
     | '/_authenticated/pharmacist/invoice-upload'
@@ -2186,6 +2211,7 @@ export interface RootRouteChildren {
   AdminCronJobsRoute: typeof AdminCronJobsRoute
   AdminDiagnosticsRoute: typeof AdminDiagnosticsRoute
   AdminDiscountsRoute: typeof AdminDiscountsRoute
+  AdminDoctorJoinQueueRoute: typeof AdminDoctorJoinQueueRoute
   AdminEventBusRoute: typeof AdminEventBusRoute
   AdminHmacPreflightRoute: typeof AdminHmacPreflightRoute
   AdminHubRoute: typeof AdminHubRoute
@@ -2675,6 +2701,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminEventBusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin-doctor-join-queue': {
+      id: '/admin-doctor-join-queue'
+      path: '/admin-doctor-join-queue'
+      fullPath: '/admin-doctor-join-queue'
+      preLoaderRoute: typeof AdminDoctorJoinQueueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin-discounts': {
       id: '/admin-discounts'
       path: '/admin-discounts'
@@ -3151,6 +3184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPharmacistDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/doctor/dashboard': {
+      id: '/_authenticated/doctor/dashboard'
+      path: '/doctor/dashboard'
+      fullPath: '/doctor/dashboard'
+      preLoaderRoute: typeof AuthenticatedDoctorDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -3526,6 +3566,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminSystemHealthRoute: typeof AuthenticatedAdminSystemHealthRoute
   AuthenticatedAdminUploadInventoryRoute: typeof AuthenticatedAdminUploadInventoryRoute
   AuthenticatedUploadPrescriptionRoute: typeof AuthenticatedUploadPrescriptionRoute
+  AuthenticatedDoctorDashboardRoute: typeof AuthenticatedDoctorDashboardRoute
   AuthenticatedPharmacistDashboardRoute: typeof AuthenticatedPharmacistDashboardRoute
   AuthenticatedPharmacistInvoiceListRoute: typeof AuthenticatedPharmacistInvoiceListRoute
   AuthenticatedPharmacistInvoiceUploadRoute: typeof AuthenticatedPharmacistInvoiceUploadRoute
@@ -3552,6 +3593,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminUploadInventoryRoute:
     AuthenticatedAdminUploadInventoryRoute,
   AuthenticatedUploadPrescriptionRoute: AuthenticatedUploadPrescriptionRoute,
+  AuthenticatedDoctorDashboardRoute: AuthenticatedDoctorDashboardRoute,
   AuthenticatedPharmacistDashboardRoute: AuthenticatedPharmacistDashboardRoute,
   AuthenticatedPharmacistInvoiceListRoute:
     AuthenticatedPharmacistInvoiceListRoute,
@@ -3651,6 +3693,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminCronJobsRoute: AdminCronJobsRoute,
   AdminDiagnosticsRoute: AdminDiagnosticsRoute,
   AdminDiscountsRoute: AdminDiscountsRoute,
+  AdminDoctorJoinQueueRoute: AdminDoctorJoinQueueRoute,
   AdminEventBusRoute: AdminEventBusRoute,
   AdminHmacPreflightRoute: AdminHmacPreflightRoute,
   AdminHubRoute: AdminHubRoute,
@@ -3772,13 +3815,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
