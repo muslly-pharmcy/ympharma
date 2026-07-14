@@ -1,6 +1,11 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import "@fontsource/cairo/400.css";
+@import "@fontsource/cairo/600.css";
+@import "@fontsource/cairo/700.css";
+@import "@fontsource/cairo/900.css";
+@import "@fontsource-variable/montserrat";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -12,7 +17,22 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
 
-  --font-sans: "Tajawal", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Cairo", "Tajawal", ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: "Cairo", "Tajawal", ui-sans-serif, system-ui, sans-serif;
+  --font-latin: "Montserrat Variable", "Montserrat", ui-sans-serif, system-ui, sans-serif;
+
+  /* Muslly Medical palette (additive; existing --primary tokens preserved) */
+  --color-medical-turquoise: oklch(0.68 0.11 200);
+  --color-medical-turquoise-deep: oklch(0.55 0.11 200);
+  --color-medical-turquoise-soft: oklch(0.94 0.03 200);
+  --color-medical-ink: oklch(0.42 0 0);
+  --color-medical-surface: oklch(0.975 0.006 220);
+  --color-medical-white: #ffffff;
+
+  --shadow-medical-card: 0 4px 18px -6px color-mix(in oklab, var(--color-medical-turquoise) 22%, transparent);
+  --shadow-medical-elevated: 0 18px 44px -18px color-mix(in oklab, var(--color-medical-turquoise-deep) 35%, transparent);
+  --radius-medical-card: 1rem;
+  --radius-medical-pill: 9999px;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -175,4 +195,59 @@
 @keyframes titans-twinkle {
   0% { opacity: 0.5; }
   100% { opacity: 1; }
+}
+
+/* ============================================================
+   Muslly Medical — reusable presentation utilities.
+   Additive only; do not override existing tokens.
+   ============================================================ */
+@utility medical-card {
+  background-color: var(--color-medical-white);
+  border: 1px solid color-mix(in oklab, var(--color-medical-turquoise) 12%, transparent);
+  border-radius: var(--radius-medical-card);
+  box-shadow: var(--shadow-medical-card);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+@utility medical-card-hover {
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medical-elevated);
+    border-color: color-mix(in oklab, var(--color-medical-turquoise) 30%, transparent);
+  }
+}
+@utility medical-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-medical-pill);
+  font-size: 0.75rem;
+  font-weight: 700;
+  background-color: var(--color-medical-turquoise-soft);
+  color: var(--color-medical-turquoise-deep);
+}
+@utility medical-focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--color-medical-turquoise);
+    outline-offset: 2px;
+    border-radius: calc(var(--radius-medical-card) - 4px);
+  }
+}
+@utility medical-tap {
+  min-height: 44px;
+  min-width: 44px;
+}
+@utility medical-shimmer {
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--color-medical-turquoise-soft) 60%, transparent) 0%,
+    color-mix(in oklab, var(--color-medical-turquoise-soft) 100%, transparent) 50%,
+    color-mix(in oklab, var(--color-medical-turquoise-soft) 60%, transparent) 100%
+  );
+  background-size: 200% 100%;
+  animation: medical-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes medical-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
