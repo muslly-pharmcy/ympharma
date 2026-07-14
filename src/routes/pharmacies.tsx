@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
 import { MapPin, Phone, Store, Search, Loader2 } from "lucide-react";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
-import { pnSearchMedicineNearby } from "@/modules/pharmacy-network/server/pharmacies.functions";
+import { pnSearchMedicineNearby } from "@/modules/pharmacy-network/functions/pharmacies.functions";
 import type { PnSearchHit } from "@/modules/pharmacy-network/domain/types";
 
 const searchSchema = z.object({
