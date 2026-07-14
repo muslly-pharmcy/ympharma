@@ -1208,6 +1208,370 @@ export type Database = {
           },
         ]
       }
+      catalog_ai_signals: {
+        Row: {
+          confidence: number | null
+          correlation_id: string | null
+          created_at: string
+          id: string
+          organization_id: string | null
+          payload: Json
+          product_id: string | null
+          signal_type: Database["public"]["Enums"]["catalog_ai_signal_type"]
+          source: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          confidence?: number | null
+          correlation_id?: string | null
+          created_at?: string
+          id?: string
+          organization_id?: string | null
+          payload?: Json
+          product_id?: string | null
+          signal_type: Database["public"]["Enums"]["catalog_ai_signal_type"]
+          source?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          confidence?: number | null
+          correlation_id?: string | null
+          created_at?: string
+          id?: string
+          organization_id?: string | null
+          payload?: Json
+          product_id?: string | null
+          signal_type?: Database["public"]["Enums"]["catalog_ai_signal_type"]
+          source?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_ai_signals_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "catalog_ai_signals_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      catalog_barcodes: {
+        Row: {
+          barcode: string
+          created_at: string
+          id: string
+          is_primary: boolean
+          product_id: string
+          symbology: string | null
+          updated_at: string
+        }
+        Insert: {
+          barcode: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          product_id: string
+          symbology?: string | null
+          updated_at?: string
+        }
+        Update: {
+          barcode?: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          product_id?: string
+          symbology?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_barcodes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      catalog_categories: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name_ar: string
+          name_en: string
+          organization_id: string | null
+          parent_id: string | null
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name_ar: string
+          name_en: string
+          organization_id?: string | null
+          parent_id?: string | null
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name_ar?: string
+          name_en?: string
+          organization_id?: string | null
+          parent_id?: string | null
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_categories_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "catalog_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      catalog_product_aliases: {
+        Row: {
+          alias: string
+          alias_normalized: string
+          confidence: number | null
+          created_at: string
+          id: string
+          locale: string
+          product_id: string
+          source: Database["public"]["Enums"]["catalog_alias_source"]
+          updated_at: string
+        }
+        Insert: {
+          alias: string
+          alias_normalized?: string
+          confidence?: number | null
+          created_at?: string
+          id?: string
+          locale?: string
+          product_id: string
+          source?: Database["public"]["Enums"]["catalog_alias_source"]
+          updated_at?: string
+        }
+        Update: {
+          alias?: string
+          alias_normalized?: string
+          confidence?: number | null
+          created_at?: string
+          id?: string
+          locale?: string
+          product_id?: string
+          source?: Database["public"]["Enums"]["catalog_alias_source"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_product_aliases_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      catalog_product_media: {
+        Row: {
+          bytes: number | null
+          checksum: string | null
+          created_at: string
+          height: number | null
+          id: string
+          kind: Database["public"]["Enums"]["catalog_media_kind"]
+          metadata: Json
+          mime: string | null
+          product_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          sort_order: number
+          status: Database["public"]["Enums"]["catalog_media_status"]
+          storage_bucket: string
+          storage_path: string
+          updated_at: string
+          uploaded_by: string | null
+          width: number | null
+        }
+        Insert: {
+          bytes?: number | null
+          checksum?: string | null
+          created_at?: string
+          height?: number | null
+          id?: string
+          kind?: Database["public"]["Enums"]["catalog_media_kind"]
+          metadata?: Json
+          mime?: string | null
+          product_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["catalog_media_status"]
+          storage_bucket?: string
+          storage_path: string
+          updated_at?: string
+          uploaded_by?: string | null
+          width?: number | null
+        }
+        Update: {
+          bytes?: number | null
+          checksum?: string | null
+          created_at?: string
+          height?: number | null
+          id?: string
+          kind?: Database["public"]["Enums"]["catalog_media_kind"]
+          metadata?: Json
+          mime?: string | null
+          product_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["catalog_media_status"]
+          storage_bucket?: string
+          storage_path?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_product_media_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      catalog_products: {
+        Row: {
+          active_ingredients: Json
+          barcode: string | null
+          brand: string | null
+          category_id: string | null
+          created_at: string
+          created_by: string | null
+          description_ar: string | null
+          description_en: string | null
+          dosage_form: string | null
+          generic_name: string | null
+          id: string
+          is_public: boolean
+          manufacturer: string | null
+          metadata: Json
+          name_ar: string
+          name_en: string | null
+          organization_id: string | null
+          owner_org_id: string | null
+          status: Database["public"]["Enums"]["catalog_status"]
+          strength: string | null
+          updated_at: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          active_ingredients?: Json
+          barcode?: string | null
+          brand?: string | null
+          category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          dosage_form?: string | null
+          generic_name?: string | null
+          id?: string
+          is_public?: boolean
+          manufacturer?: string | null
+          metadata?: Json
+          name_ar: string
+          name_en?: string | null
+          organization_id?: string | null
+          owner_org_id?: string | null
+          status?: Database["public"]["Enums"]["catalog_status"]
+          strength?: string | null
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          active_ingredients?: Json
+          barcode?: string | null
+          brand?: string | null
+          category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          dosage_form?: string | null
+          generic_name?: string | null
+          id?: string
+          is_public?: boolean
+          manufacturer?: string | null
+          metadata?: Json
+          name_ar?: string
+          name_en?: string | null
+          organization_id?: string | null
+          owner_org_id?: string | null
+          status?: Database["public"]["Enums"]["catalog_status"]
+          strength?: string | null
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "catalog_products_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "catalog_products_owner_org_id_fkey"
+            columns: ["owner_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       confidence_calibration_log: {
         Row: {
           computed_at: string
@@ -5221,6 +5585,18 @@ export type Database = {
         Args: { _reason?: string; _transfer_id: string }
         Returns: string
       }
+      catalog_normalize_ar: { Args: { _t: string }; Returns: string }
+      catalog_search: {
+        Args: { _limit?: number; _org_id: string; _q: string }
+        Returns: {
+          brand: string
+          generic_name: string
+          id: string
+          name_ar: string
+          name_en: string
+          score: number
+        }[]
+      }
       check_img_rate_limit: {
         Args: { _ip: string; _max: number; _window_seconds: number }
         Returns: boolean
@@ -5675,6 +6051,8 @@ export type Database = {
         Args: { _group?: string; _legacy_ids: number[] }
         Returns: Json
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       submit_prescription: {
         Args: { _customer: Json; _id: string; _image_urls: string[] }
         Returns: Json
@@ -5716,6 +6094,21 @@ export type Database = {
       app_role: "admin" | "user" | "owner"
       branch_role: "manager" | "staff" | "viewer"
       branch_type: "WAREHOUSE" | "BRANCH" | "OFFICE"
+      catalog_ai_signal_type:
+        | "ocr"
+        | "barcode"
+        | "image"
+        | "invoice"
+        | "prescription"
+      catalog_alias_source: "manual" | "ocr" | "ai" | "import"
+      catalog_media_kind: "primary" | "gallery" | "thumbnail" | "barcode"
+      catalog_media_status: "pending" | "approved" | "rejected"
+      catalog_status:
+        | "draft"
+        | "pending_review"
+        | "approved"
+        | "rejected"
+        | "archived"
       classification_status: "pending" | "approved" | "rejected"
       org_role:
         | "owner"
@@ -5924,6 +6317,23 @@ export const Constants = {
       app_role: ["admin", "user", "owner"],
       branch_role: ["manager", "staff", "viewer"],
       branch_type: ["WAREHOUSE", "BRANCH", "OFFICE"],
+      catalog_ai_signal_type: [
+        "ocr",
+        "barcode",
+        "image",
+        "invoice",
+        "prescription",
+      ],
+      catalog_alias_source: ["manual", "ocr", "ai", "import"],
+      catalog_media_kind: ["primary", "gallery", "thumbnail", "barcode"],
+      catalog_media_status: ["pending", "approved", "rejected"],
+      catalog_status: [
+        "draft",
+        "pending_review",
+        "approved",
+        "rejected",
+        "archived",
+      ],
       classification_status: ["pending", "approved", "rejected"],
       org_role: [
         "owner",
