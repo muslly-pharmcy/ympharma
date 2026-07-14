@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { MapPin, Stethoscope, Clock3 } from "lucide-react";
-import type { PublicDoctorRow } from "../server/doctors.functions";
+import type { PublicDoctorRow } from "../api/doctors.functions";
 import { TrustBadge } from "./TrustBadge";
 
 export function DoctorCard({ d }: { d: PublicDoctorRow }) {

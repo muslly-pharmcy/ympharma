@@ -5,4 +5,4 @@ export {
   createDoctor, submitDoctorVerification, verifyDoctor, createSpecialty,
   listPublicDoctors, searchDoctorsPublic, getDoctorBySlugPublic, listPublicFacets,
   type PublicDoctorRow,
-} from "./server/doctors.functions";
+} from "./api/doctors.functions";

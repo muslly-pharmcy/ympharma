@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import {
   Truck, FileText, Pill, Baby, Stethoscope, Sparkles, HeartPulse, Leaf, Bot,
   ChevronLeft, ShieldCheck, Clock3, BadgePercent, Beaker, MessageCircle,
@@ -18,9 +18,16 @@ import { useI18n } from "@/lib/i18n";
 import { useHomepageBundle } from "@/lib/use-homepage-bundle";
 import { useLegacyMap } from "@/lib/use-pharmacy-intel";
 import { waLink } from "@/lib/whatsapp";
+import { UnifiedSearch } from "@/modules/visitor/components/UnifiedSearch";
+import { useVisitorAnalytics } from "@/modules/visitor/analytics/useVisitorAnalytics";
 import storefrontUrl from "@/assets/pharmacy-storefront.jpg";
 import robotUrl from "@/assets/pharmacy-robot.jpg";
 import nightUrl from "@/assets/pharmacy-night.jpg";
+
+const DoctorDiscoveryEntry = lazy(() => import("@/modules/visitor/components/DoctorDiscoveryEntry"));
+const HealthEducationPreview = lazy(() => import("@/modules/visitor/components/HealthEducationPreview"));
+const WhatsNew = lazy(() => import("@/modules/visitor/components/WhatsNew"));
+const NotificationNudge = lazy(() => import("@/modules/visitor/components/NotificationNudge"));
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -100,6 +107,7 @@ function Home() {
   const [query, setQuery] = useState("");
   const [trackId, setTrackId] = useState("");
   const navigate = useNavigate();
+  useVisitorAnalytics();
   const { products, sections, banners } = useHomepageBundle();
   const { t } = useI18n();
   const legacyMap = useLegacyMap(products);
@@ -127,6 +135,9 @@ function Home() {
 
       <main className="mx-auto max-w-7xl px-4 py-6 space-y-10">
         <Logo3D className="w-full" logoUrl={heroLogoUrl} />
+        <section aria-label="بحث صحي موحّد">
+          <UnifiedSearch />
+        </section>
         <MarketingBanner placement="home" banners={banners} />
         <section className="grid gap-6 lg:grid-cols-[1.05fr_.95fr] items-center overflow-hidden rounded-2xl brand-gradient p-6 text-primary-foreground shadow-elevated sm:p-10">
           <div className="relative">
@@ -432,7 +443,21 @@ function Home() {
             </div>
           </div>
         </section>
+
+        <Suspense fallback={null}>
+          <DoctorDiscoveryEntry />
+        </Suspense>
+        <Suspense fallback={null}>
+          <HealthEducationPreview />
+        </Suspense>
+        <Suspense fallback={null}>
+          <WhatsNew />
+        </Suspense>
       </main>
+
+      <Suspense fallback={null}>
+        <NotificationNudge />
+      </Suspense>
 
       <a
         href={waLink("مرحبًا، لدي استفسار")}

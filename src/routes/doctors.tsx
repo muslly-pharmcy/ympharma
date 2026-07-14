@@ -7,7 +7,7 @@ import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { DoctorCard } from "@/modules/doctors/components/DoctorCard";
 import { DoctorFilters } from "@/modules/doctors/components/DoctorFilters";
 import { EmptyState } from "@/modules/doctors/components/EmptyState";
-import { searchDoctorsPublic, listPublicFacets } from "@/modules/doctors/server/doctors.functions";
+import { searchDoctorsPublic, listPublicFacets } from "@/modules/doctors/api/doctors.functions";
 
 const searchSchema = z.object({
   q: z.string().catch("").default(""),

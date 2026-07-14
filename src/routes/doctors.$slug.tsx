@@ -6,7 +6,7 @@ import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { TrustBadge } from "@/modules/doctors/components/TrustBadge";
 import { ScheduleTable } from "@/modules/doctors/components/ScheduleTable";
 import { AppointmentCTA } from "@/modules/doctors/components/AppointmentCTA";
-import { getDoctorBySlugPublic } from "@/modules/doctors/server/doctors.functions";
+import { getDoctorBySlugPublic } from "@/modules/doctors/api/doctors.functions";
 
 const doctorQO = (slug: string) =>
   queryOptions({

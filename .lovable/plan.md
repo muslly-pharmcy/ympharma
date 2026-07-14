@@ -1,114 +1,76 @@
-# PHOENIX P6.5-A — Doctor Network Activation (Plan)
+## Phase 6.6 — Visitor Experience Activation
 
-Zero DB changes. Reuses existing `hc_*` tables, RPCs, RLS, and modules from Phase 6.
+### 0. Fix the blocking build error first
 
-## 1. Server layer (read-only)
+`src/routes/doctors.$slug.tsx` and `src/routes/doctors.tsx` import from `src/modules/doctors/server/doctors.functions.ts`. The path segment `/server/` is blocked by TanStack Start's client-side import protection, so the build fails even though the file only exports `createServerFn` RPCs (which are client-safe).
 
-`src/modules/doctors/server/doctors.functions.ts` — add:
-- `searchDoctorsPublic({ q, specialty, city, area, facility, hasAvailability, page })` — `createServerFn` GET, no auth, filters on `hc_doctors` (`is_public=true`, `verification_status='verified'`) joined with `hc_doctor_specialties`, `hc_specialties`, `hc_doctor_locations`, `hc_locations`. Arabic normalization done in a shared helper (see §2).
-- `getDoctorBySlug({ slug })` — public profile: doctor + specialties + locations + qualifications + next N availability blocks from `hc_doctor_availability`.
-- `listFilterFacets()` — distinct specialties/cities/areas/facilities for filter UI.
+Fix: move the file out of `/server/` (client-safe module path per project conventions) and update the two route imports.
 
-`src/modules/healthcare-locations/server/locations.functions.ts` — add `listPublicCitiesAreas()` if not present.
+- Move `src/modules/doctors/server/doctors.functions.ts` → `src/modules/doctors/api/doctors.functions.ts`
+- Update imports in `src/routes/doctors.tsx` and `src/routes/doctors.$slug.tsx`
+- Remove the now-empty `src/modules/doctors/server/` directory
 
-All use publishable client via existing pattern; rely on existing RLS `public read verified` policies.
+No behavior change; server functions still run on the server via the RPC bridge.
 
-## 2. Arabic normalization
+### 1. Public homepage rebuild (`src/routes/index.tsx`)
 
-`src/modules/doctors/domain/arabicNormalize.ts` — pure TS:
-- strip tashkeel, unify ي/ى, ه/ة, ا/أ/إ/آ, remove tatweel, collapse spaces
-- regional variant map: `{ "المنصوره": "المنصورة", "باطنيه": "باطنية", ... }` (seed ~30 pairs, extendable)
-- exported `normalizeAr(s)` used both client-side (instant filter) and server-side (query rewrite via ILIKE on normalized column OR `catalog_normalize_ar` SQL if reachable; fallback: fetch + client filter for wave-1 volume < 100).
+Arabic-first, mobile-first, healthcare-focused landing page composed from lazy sections:
 
-## 3. Routes (public)
+- `HeroHealthSearch` — RTL hero with a single search bar (uses the unified search component below), quick chips (أدوية / أطباء / محتوى صحي).
+- `MainServices` — grid of core services (استشارة، حجز موعد، رفع روشتة، دليل الأدوية).
+- `DoctorDiscoveryEntry` — teaser + CTA to `/doctors` (shows 3–4 featured doctors via existing `searchDoctorsPublic` limit=4).
+- `MedicineDiscoveryEntry` — CTA to catalog/search (no new backend calls; static preview cards).
+- `HealthEducationPreview` — 3 static cards → `/sahtak`.
+- `LatestUpdates` — renders the new `WhatsNew` component.
 
-```
-src/routes/doctors.tsx              → /doctors        directory + filters
-src/routes/doctors.$slug.tsx        → /doctors/:slug  profile
-src/routes/sahtak.tsx               → /sahtak         "صحتك" education shell (static sections placeholder)
-```
+All sections in `src/modules/visitor/components/`, code-split via `React.lazy` + `Suspense` where meaningful. Per-route `head()` metadata (Arabic title/description, og:*, twitter:card).
 
-Each route:
-- SSR loader via `ensureQueryData` + `useSuspenseQuery`
-- head() with unique Arabic title/description, og tags; profile route derives og:image from `doctor.photo_url`
-- `errorComponent`, `notFoundComponent`
-- mobile-first Tailwind, RTL, uses existing Titans `GlassCard`/`Button`
-- link into admin hub for logged-in staff
+### 2. Unified public search — `src/modules/visitor/components/UnifiedSearch.tsx`
 
-## 4. Components
+Client component with:
+- Single input, RTL, Arabic normalization via existing `src/modules/doctors/domain/arabicNormalize.ts`.
+- Category tabs: أدوية / أطباء / محتوى.
+- Debounced query; doctors tab calls existing `searchDoctorsPublic`. Medicines + content tabs render "قريباً" placeholders (no schema changes).
+- Keyboard + ARIA, mobile sheet on small screens.
 
-`src/modules/doctors/components/`
-- `DoctorCard.tsx` — photo, name, specialty chips, city, trust badge, CTA
-- `DoctorFilters.tsx` — search box, specialty/city/area/facility selects, "متاح اليوم" toggle; URL-synced via `validateSearch` + `zodValidator` + `fallback`
-- `TrustBadge.tsx` — A/B/C/D pill (colors: emerald/blue/amber/slate) with tooltip explaining source
-- `DoctorProfileHeader.tsx`, `ScheduleTable.tsx`, `AppointmentCTA.tsx` (placeholder button → toast "قريباً" + prefilled WhatsApp deep link when phone exists), `EmptyState.tsx`
+### 3. "What's New" — `src/modules/visitor/components/WhatsNew.tsx`
 
-Trust level derived from existing `verification_status` + `metadata.source_tier`:
-- A = `verified` + tier `hospital|doctor`
-- B = `verified` + tier `official`
-- C = `pending` + tier `public`
-- D = `pending` + no tier / needs review
+Static, config-driven list from `src/modules/visitor/data/whats-new.ts` (title, date, href, tag). No DB. Renders as horizontal snap carousel on mobile, grid on desktop.
 
-## 5. Seed scaffold (no import execution)
+### 4. Visitor analytics foundation — `src/modules/visitor/analytics/`
 
-```
-healthcare/seed/
-  README.md                      # column contract + import instructions
-  aden-doctors-wave1.csv         # header row + 20 sample rows (categories listed)
-  schema.ts                      # Zod schema for a seed row
-```
+- `track.ts` — anonymous event helper: `trackEvent(name, props?)`.
+- Buffers events in `sessionStorage`, flushes on `visibilitychange` / `beforeunload` via `navigator.sendBeacon` to a *new* server route `src/routes/api/public/analytics/ingest.ts` (accepts POST, validates with Zod, and for now just logs — no DB writes, no PII, respects `sendBeacon`).
+- Auto-track: `page_view`, `search_submitted`, `cta_clicked`. No cookies, no identifiers, hashed session-scoped id only.
 
-CSV columns exactly as specified: `full_name, specialty, facility, city, area, phone, whatsapp, schedule, experience, verification_status, source, confidence_level`.
+### 5. Notification permission preparation — `src/modules/visitor/notifications/`
 
-`scripts/import-doctors-seed.ts` — dry-run by default; maps CSV → `hc_doctors` + `hc_doctor_specialties` + `hc_doctor_locations` inserts via service-role (`.server.ts` guard). Requires `--commit` flag. NOT executed in this phase.
+- `useNotificationNudge.ts` — after N meaningful engagements (e.g. 2 searches or 45s dwell) shows a soft in-page banner offering to enable notifications. Never calls `Notification.requestPermission()` automatically; only on explicit click. Stores dismissal in `localStorage`.
+- `NotificationNudge.tsx` — dismissible RTL banner mounted on homepage.
 
-Seed content covers 7 categories × ~3 doctors each = 20 rows across Aden facilities.
+### 6. Performance
 
-## 6. Appointments — CTA only
+- `React.lazy` for below-the-fold homepage sections (`MainServices`, `DoctorDiscoveryEntry`, `MedicineDiscoveryEntry`, `HealthEducationPreview`, `LatestUpdates`, `WhatsNew`, `NotificationNudge`).
+- Preload LCP hero image via route `head().links` (`rel=preload`, `as=image`, `fetchpriority=high`) using an optimized asset in `src/assets/`.
+- All `<img>` below the fold get `loading="lazy"` and `decoding="async"`.
+- Audit the current index route for heavy top-level imports; move admin/pharmacy-only client bundles out of the public homepage import graph.
 
-Reuse `src/modules/appointments`. Only surface:
-- schedule display from `hc_doctor_availability`
-- CTA button rendered but disabled/placeholder (toast + WhatsApp fallback). No new booking logic.
+### 7. Report
 
-## 7. "صحتك" education shell
+`docs/engineering/reports/PHOENIX-P6.6-visitor-experience.md` with:
+- Files changed (list)
+- Build size delta (before/after `bun run build:dev`)
+- Security verification (no new tables, no RLS/auth changes, analytics endpoint is anonymous + rate-note)
+- Screenshots list (references to captures under `/tmp/browser/p6.6/`)
 
-`src/routes/sahtak.tsx` — three empty sections (articles / tips / doctor content) with placeholder cards. No CMS, no new tables. Ready for later CMS phase.
+### Out of scope (per directive)
 
-## 8. Nav integration
+No migrations, no RLS, no auth, no changes to inventory/doctors/catalog domain logic.
 
-- Add "الأطباء" and "صحتك" links to public `SiteChrome` header.
-- No admin changes required.
+### Files touched (summary)
 
-## 9. Verification
-
-- `bunx tsgo` typecheck
-- `bun run build`
-- `supabase--linter` sanity
-- Manual RLS check via `supabase--read_query` as anon-simulated select on `hc_doctors` where `is_public=true`
-- Playwright mobile viewport screenshots: `/doctors`, `/doctors/:slug`, `/sahtak`
-
-## 10. Report
-
-`docs/engineering/reports/PHOENIX-P6.5-doctor-network.md` — files changed, DB objects reused (list), seed process, verification output, screenshot filenames. Phase marked CLOSED.
-
-## Out of scope (explicit)
-
-- No new tables, columns, enums, RLS, or RPCs.
-- No real booking engine.
-- No bulk import execution.
-- No CMS for صحتك.
-
-## Files touched (summary)
-
-New:
-- `src/modules/doctors/domain/arabicNormalize.ts`
-- `src/modules/doctors/components/*` (6 files)
-- `src/routes/doctors.tsx`, `src/routes/doctors.$slug.tsx`, `src/routes/sahtak.tsx`
-- `healthcare/seed/README.md`, `aden-doctors-wave1.csv`, `schema.ts`
-- `scripts/import-doctors-seed.ts`
-- `docs/engineering/reports/PHOENIX-P6.5-doctor-network.md`
-
-Edited:
-- `src/modules/doctors/server/doctors.functions.ts` (add public fns)
-- `src/modules/doctors/index.ts` (exports)
-- `src/components/site-chrome.tsx` (nav links)
+- Move: `src/modules/doctors/server/doctors.functions.ts` → `src/modules/doctors/api/doctors.functions.ts` (+ update 2 route imports)
+- New: `src/modules/visitor/**` (components, analytics, notifications, data)
+- New: `src/routes/api/public/analytics/ingest.ts`
+- Rewrite: `src/routes/index.tsx`
+- New: `docs/engineering/reports/PHOENIX-P6.6-visitor-experience.md`
