@@ -28,6 +28,8 @@ const DoctorDiscoveryEntry = lazy(() => import("@/modules/visitor/components/Doc
 const HealthEducationPreview = lazy(() => import("@/modules/visitor/components/HealthEducationPreview"));
 const WhatsNew = lazy(() => import("@/modules/visitor/components/WhatsNew"));
 const NotificationNudge = lazy(() => import("@/modules/visitor/components/NotificationNudge"));
+const PlatformUpdates = lazy(() => import("@/modules/visitor/components/PlatformUpdates"));
+const NotificationOptIn = lazy(() => import("@/modules/visitor/components/NotificationOptIn"));
 
 export const Route = createFileRoute("/")({
   head: () => ({
