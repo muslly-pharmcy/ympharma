@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import {
   Truck, FileText, Pill, Baby, Stethoscope, Sparkles, HeartPulse, Leaf, Bot,
   ChevronLeft, ShieldCheck, Clock3, BadgePercent, Beaker, MessageCircle,
@@ -18,9 +18,16 @@ import { useI18n } from "@/lib/i18n";
 import { useHomepageBundle } from "@/lib/use-homepage-bundle";
 import { useLegacyMap } from "@/lib/use-pharmacy-intel";
 import { waLink } from "@/lib/whatsapp";
+import { UnifiedSearch } from "@/modules/visitor/components/UnifiedSearch";
+import { useVisitorAnalytics } from "@/modules/visitor/analytics/useVisitorAnalytics";
 import storefrontUrl from "@/assets/pharmacy-storefront.jpg";
 import robotUrl from "@/assets/pharmacy-robot.jpg";
 import nightUrl from "@/assets/pharmacy-night.jpg";
+
+const DoctorDiscoveryEntry = lazy(() => import("@/modules/visitor/components/DoctorDiscoveryEntry"));
+const HealthEducationPreview = lazy(() => import("@/modules/visitor/components/HealthEducationPreview"));
+const WhatsNew = lazy(() => import("@/modules/visitor/components/WhatsNew"));
+const NotificationNudge = lazy(() => import("@/modules/visitor/components/NotificationNudge"));
 
 export const Route = createFileRoute("/")({
   head: () => ({
