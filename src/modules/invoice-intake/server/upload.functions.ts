@@ -109,7 +109,7 @@ export const getInvoiceForReview = createServerFn({ method: "POST" })
       .eq("upload_id", data.upload_id)
       .maybeSingle();
 
-    let lines: unknown[] = [];
+    let lines: Record<string, unknown>[] = [];
     if (extraction) {
       const { data: rows } = await context.supabase
         .from("invoice_line_items")
