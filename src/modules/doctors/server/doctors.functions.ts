@@ -160,8 +160,53 @@ export const getDoctorBySlugPublic = createServerFn({ method: "GET" })
       .eq("is_public", true)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    return row ?? null;
+    if (!row) return null;
+    const r: any = row;
+    return {
+      id: r.id as string,
+      slug: r.slug as string,
+      full_name_ar: r.full_name_ar as string,
+      full_name_en: (r.full_name_en ?? null) as string | null,
+      title: (r.title ?? null) as string | null,
+      bio_ar: (r.bio_ar ?? null) as string | null,
+      bio_en: (r.bio_en ?? null) as string | null,
+      photo_url: (r.photo_url ?? null) as string | null,
+      years_experience: (r.years_experience ?? null) as number | null,
+      languages: (r.languages ?? []) as string[],
+      gender: (r.gender ?? null) as string | null,
+      verification_status: r.verification_status as string,
+      trust_level: trustFrom(r.verification_status, r.metadata),
+      specialties: (r.specialties ?? []).filter((s: any) => s.specialty).map((s: any) => ({
+        id: s.specialty.id as string, code: s.specialty.code as string,
+        name_ar: s.specialty.name_ar as string, name_en: s.specialty.name_en as string,
+        is_primary: !!s.is_primary,
+      })),
+      locations: (r.locations ?? []).filter((l: any) => l.location).map((l: any) => ({
+        id: l.location.id as string, name_ar: l.location.name_ar as string,
+        address: (l.location.address ?? null) as string | null,
+        city: (l.location.city ?? null) as string | null,
+        governorate: (l.location.governorate ?? null) as string | null,
+        kind: l.location.kind as string,
+        phone: (l.location.phone ?? null) as string | null,
+        whatsapp: (l.location.whatsapp ?? null) as string | null,
+        lat: (l.location.lat ?? null) as number | null,
+        lng: (l.location.lng ?? null) as number | null,
+        role: (l.role ?? null) as string | null,
+      })),
+      availability: (r.availability ?? []).map((a: any) => ({
+        id: a.id as string, location_id: a.location_id as string,
+        weekday: a.weekday as number, start_time: a.start_time as string, end_time: a.end_time as string,
+        is_active: !!a.is_active,
+      })),
+      qualifications: (r.qualifications ?? []).map((q: any) => ({
+        id: q.id as string, title: q.title as string,
+        institution: (q.institution ?? null) as string | null,
+        year: (q.year ?? null) as number | null,
+        country: (q.country ?? null) as string | null,
+      })),
+    };
   });
+
 
 export const listPublicFacets = createServerFn({ method: "GET" }).handler(async () => {
   const { supabase } = await import("@/integrations/supabase/client");
