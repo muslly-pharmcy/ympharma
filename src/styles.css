@@ -1,6 +1,11 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import "@fontsource/cairo/400.css";
+@import "@fontsource/cairo/600.css";
+@import "@fontsource/cairo/700.css";
+@import "@fontsource/cairo/900.css";
+@import "@fontsource-variable/montserrat";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -12,7 +17,22 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
 
-  --font-sans: "Tajawal", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Cairo", "Tajawal", ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: "Cairo", "Tajawal", ui-sans-serif, system-ui, sans-serif;
+  --font-latin: "Montserrat Variable", "Montserrat", ui-sans-serif, system-ui, sans-serif;
+
+  /* Muslly Medical palette (additive; existing --primary tokens preserved) */
+  --color-medical-turquoise: oklch(0.68 0.11 200);
+  --color-medical-turquoise-deep: oklch(0.55 0.11 200);
+  --color-medical-turquoise-soft: oklch(0.94 0.03 200);
+  --color-medical-ink: oklch(0.42 0 0);
+  --color-medical-surface: oklch(0.975 0.006 220);
+  --color-medical-white: #ffffff;
+
+  --shadow-medical-card: 0 4px 18px -6px color-mix(in oklab, var(--color-medical-turquoise) 22%, transparent);
+  --shadow-medical-elevated: 0 18px 44px -18px color-mix(in oklab, var(--color-medical-turquoise-deep) 35%, transparent);
+  --radius-medical-card: 1rem;
+  --radius-medical-pill: 9999px;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
