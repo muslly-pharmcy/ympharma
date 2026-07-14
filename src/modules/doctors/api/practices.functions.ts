@@ -98,7 +98,7 @@ export const updateDoctorProfile = createServerFn({ method: "POST" })
     if (Object.keys(patch).length === 0) return { ok: true };
     const { error } = await context.supabase
       .from("hc_doctors")
-      .update(patch)
+      .update(patch as never)
       .eq("id", data.doctor_id);
     if (error) throw new Error(error.message);
     await context.supabase.rpc("hc_normalize_doctor_row", { _doctor: data.doctor_id });
