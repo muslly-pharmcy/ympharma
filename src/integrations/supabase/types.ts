@@ -2610,6 +2610,7 @@ export type Database = {
       }
       hc_doctor_join_submissions: {
         Row: {
+          admin_notes: string | null
           biography: string | null
           city: string | null
           claimed_specialties: string[]
@@ -2627,6 +2628,8 @@ export type Database = {
           normalized_name_ar: string
           phone: string
           phone_e164: string
+          photo_review_notes: string | null
+          photo_review_status: string | null
           practice_wishlist: Json
           reviewer_id: string | null
           reviewer_notes: string | null
@@ -2636,6 +2639,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          admin_notes?: string | null
           biography?: string | null
           city?: string | null
           claimed_specialties?: string[]
@@ -2653,6 +2657,8 @@ export type Database = {
           normalized_name_ar: string
           phone: string
           phone_e164: string
+          photo_review_notes?: string | null
+          photo_review_status?: string | null
           practice_wishlist?: Json
           reviewer_id?: string | null
           reviewer_notes?: string | null
@@ -2662,6 +2668,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          admin_notes?: string | null
           biography?: string | null
           city?: string | null
           claimed_specialties?: string[]
@@ -2679,6 +2686,8 @@ export type Database = {
           normalized_name_ar?: string
           phone?: string
           phone_e164?: string
+          photo_review_notes?: string | null
+          photo_review_status?: string | null
           practice_wishlist?: Json
           reviewer_id?: string | null
           reviewer_notes?: string | null
@@ -2743,14 +2752,18 @@ export type Database = {
           consultation_duration_min: number | null
           created_at: string
           doctor_id: string
+          emergency_available: boolean
           gallery: Json
           id: string
           is_active: boolean
           is_primary: boolean
+          lat: number | null
+          lng: number | null
           location_id: string
           notes: string | null
           phone: string | null
           practice_type: Database["public"]["Enums"]["hc_practice_type"]
+          telemedicine_ready: boolean
           updated_at: string
           whatsapp: string | null
           working_hours: Json
@@ -2761,14 +2774,18 @@ export type Database = {
           consultation_duration_min?: number | null
           created_at?: string
           doctor_id: string
+          emergency_available?: boolean
           gallery?: Json
           id?: string
           is_active?: boolean
           is_primary?: boolean
+          lat?: number | null
+          lng?: number | null
           location_id: string
           notes?: string | null
           phone?: string | null
           practice_type?: Database["public"]["Enums"]["hc_practice_type"]
+          telemedicine_ready?: boolean
           updated_at?: string
           whatsapp?: string | null
           working_hours?: Json
@@ -2779,14 +2796,18 @@ export type Database = {
           consultation_duration_min?: number | null
           created_at?: string
           doctor_id?: string
+          emergency_available?: boolean
           gallery?: Json
           id?: string
           is_active?: boolean
           is_primary?: boolean
+          lat?: number | null
+          lng?: number | null
           location_id?: string
           notes?: string | null
           phone?: string | null
           practice_type?: Database["public"]["Enums"]["hc_practice_type"]
+          telemedicine_ready?: boolean
           updated_at?: string
           whatsapp?: string | null
           working_hours?: Json
@@ -8289,6 +8310,11 @@ export type Database = {
         }
         Returns: undefined
       }
+      hc_flag_join_photo: {
+        Args: { _notes: string; _status: string; _submission: string }
+        Returns: undefined
+      }
+      hc_healthcare_kpis: { Args: never; Returns: Json }
       hc_normalize_ar: { Args: { _s: string }; Returns: string }
       hc_normalize_doctor_row: { Args: { _doctor: string }; Returns: undefined }
       hc_recompute_profile_completeness: {
@@ -8296,6 +8322,10 @@ export type Database = {
         Returns: number
       }
       hc_recompute_trust_score: { Args: { _doctor: string }; Returns: number }
+      hc_reject_join_submission: {
+        Args: { _reason: string; _submission: string }
+        Returns: undefined
+      }
       hc_submit_verification: {
         Args: { _doctor: string; _documents?: Json }
         Returns: string
