@@ -17,6 +17,7 @@ import { Route as TitansRouteImport } from './routes/titans'
 import { Route as StatusRouteImport } from './routes/status'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SahtakRouteImport } from './routes/sahtak'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as PrescriptionRouteImport } from './routes/prescription'
 import { Route as NotificationsRouteImport } from './routes/notifications'
@@ -25,6 +26,7 @@ import { Route as NetworkHealthRouteImport } from './routes/network-health'
 import { Route as MyNotificationsRouteImport } from './routes/my-notifications'
 import { Route as LoyaltyRouteImport } from './routes/loyalty'
 import { Route as InsuranceRouteImport } from './routes/insurance'
+import { Route as DoctorsRouteImport } from './routes/doctors'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ConditionsRouteImport } from './routes/conditions'
 import { Route as CartRouteImport } from './routes/cart'
@@ -95,6 +97,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as TestFeaturesRouteImport } from './routes/test.features'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as DoctorsSlugRouteImport } from './routes/doctors.$slug'
 import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
 import { Route as AuthenticatedUploadPrescriptionRouteImport } from './routes/_authenticated/upload-prescription'
 import { Route as AuthenticatedAdminUploadInventoryRouteImport } from './routes/_authenticated/admin-upload-inventory'
@@ -209,6 +212,11 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SahtakRoute = SahtakRouteImport.update({
+  id: '/sahtak',
+  path: '/sahtak',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProductsRoute = ProductsRouteImport.update({
   id: '/products',
   path: '/products',
@@ -247,6 +255,11 @@ const LoyaltyRoute = LoyaltyRouteImport.update({
 const InsuranceRoute = InsuranceRouteImport.update({
   id: '/insurance',
   path: '/insurance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DoctorsRoute = DoctorsRouteImport.update({
+  id: '/doctors',
+  path: '/doctors',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -603,6 +616,11 @@ const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
   path: '/email/unsubscribe',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DoctorsSlugRoute = DoctorsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => DoctorsRoute,
 } as any)
 const ConditionsSlugRoute = ConditionsSlugRouteImport.update({
   id: '/$slug',
@@ -1091,6 +1109,7 @@ export interface FileRoutesByFullPath {
   '/cart': typeof CartRoute
   '/conditions': typeof ConditionsRouteWithChildren
   '/contact': typeof ContactRoute
+  '/doctors': typeof DoctorsRouteWithChildren
   '/insurance': typeof InsuranceRoute
   '/loyalty': typeof LoyaltyRoute
   '/my-notifications': typeof MyNotificationsRoute
@@ -1099,6 +1118,7 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof NotificationsRoute
   '/prescription': typeof PrescriptionRoute
   '/products': typeof ProductsRoute
+  '/sahtak': typeof SahtakRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/status': typeof StatusRoute
@@ -1122,6 +1142,7 @@ export interface FileRoutesByFullPath {
   '/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
+  '/doctors/$slug': typeof DoctorsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
@@ -1251,6 +1272,7 @@ export interface FileRoutesByTo {
   '/cart': typeof CartRoute
   '/conditions': typeof ConditionsRouteWithChildren
   '/contact': typeof ContactRoute
+  '/doctors': typeof DoctorsRouteWithChildren
   '/insurance': typeof InsuranceRoute
   '/loyalty': typeof LoyaltyRoute
   '/my-notifications': typeof MyNotificationsRoute
@@ -1259,6 +1281,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof NotificationsRoute
   '/prescription': typeof PrescriptionRoute
   '/products': typeof ProductsRoute
+  '/sahtak': typeof SahtakRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/status': typeof StatusRoute
@@ -1282,6 +1305,7 @@ export interface FileRoutesByTo {
   '/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
+  '/doctors/$slug': typeof DoctorsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
@@ -1413,6 +1437,7 @@ export interface FileRoutesById {
   '/cart': typeof CartRoute
   '/conditions': typeof ConditionsRouteWithChildren
   '/contact': typeof ContactRoute
+  '/doctors': typeof DoctorsRouteWithChildren
   '/insurance': typeof InsuranceRoute
   '/loyalty': typeof LoyaltyRoute
   '/my-notifications': typeof MyNotificationsRoute
@@ -1421,6 +1446,7 @@ export interface FileRoutesById {
   '/notifications': typeof NotificationsRoute
   '/prescription': typeof PrescriptionRoute
   '/products': typeof ProductsRoute
+  '/sahtak': typeof SahtakRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/status': typeof StatusRoute
@@ -1444,6 +1470,7 @@ export interface FileRoutesById {
   '/_authenticated/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
   '/_authenticated/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
+  '/doctors/$slug': typeof DoctorsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
@@ -1575,6 +1602,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/conditions'
     | '/contact'
+    | '/doctors'
     | '/insurance'
     | '/loyalty'
     | '/my-notifications'
@@ -1583,6 +1611,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/prescription'
     | '/products'
+    | '/sahtak'
     | '/settings'
     | '/sitemap.xml'
     | '/status'
@@ -1606,6 +1635,7 @@ export interface FileRouteTypes {
     | '/admin-upload-inventory'
     | '/upload-prescription'
     | '/conditions/$slug'
+    | '/doctors/$slug'
     | '/email/unsubscribe'
     | '/product/$id'
     | '/test/features'
@@ -1735,6 +1765,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/conditions'
     | '/contact'
+    | '/doctors'
     | '/insurance'
     | '/loyalty'
     | '/my-notifications'
@@ -1743,6 +1774,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/prescription'
     | '/products'
+    | '/sahtak'
     | '/settings'
     | '/sitemap.xml'
     | '/status'
@@ -1766,6 +1798,7 @@ export interface FileRouteTypes {
     | '/admin-upload-inventory'
     | '/upload-prescription'
     | '/conditions/$slug'
+    | '/doctors/$slug'
     | '/email/unsubscribe'
     | '/product/$id'
     | '/test/features'
@@ -1896,6 +1929,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/conditions'
     | '/contact'
+    | '/doctors'
     | '/insurance'
     | '/loyalty'
     | '/my-notifications'
@@ -1904,6 +1938,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/prescription'
     | '/products'
+    | '/sahtak'
     | '/settings'
     | '/sitemap.xml'
     | '/status'
@@ -1927,6 +1962,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin-upload-inventory'
     | '/_authenticated/upload-prescription'
     | '/conditions/$slug'
+    | '/doctors/$slug'
     | '/email/unsubscribe'
     | '/product/$id'
     | '/test/features'
@@ -2058,6 +2094,7 @@ export interface RootRouteChildren {
   CartRoute: typeof CartRoute
   ConditionsRoute: typeof ConditionsRouteWithChildren
   ContactRoute: typeof ContactRoute
+  DoctorsRoute: typeof DoctorsRouteWithChildren
   InsuranceRoute: typeof InsuranceRoute
   LoyaltyRoute: typeof LoyaltyRoute
   MyNotificationsRoute: typeof MyNotificationsRoute
@@ -2066,6 +2103,7 @@ export interface RootRouteChildren {
   NotificationsRoute: typeof NotificationsRoute
   PrescriptionRoute: typeof PrescriptionRoute
   ProductsRoute: typeof ProductsRoute
+  SahtakRoute: typeof SahtakRoute
   SettingsRoute: typeof SettingsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StatusRoute: typeof StatusRoute
@@ -2192,6 +2230,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sahtak': {
+      id: '/sahtak'
+      path: '/sahtak'
+      fullPath: '/sahtak'
+      preLoaderRoute: typeof SahtakRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/products': {
       id: '/products'
       path: '/products'
@@ -2246,6 +2291,13 @@ declare module '@tanstack/react-router' {
       path: '/insurance'
       fullPath: '/insurance'
       preLoaderRoute: typeof InsuranceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/doctors': {
+      id: '/doctors'
+      path: '/doctors'
+      fullPath: '/doctors'
+      preLoaderRoute: typeof DoctorsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -2737,6 +2789,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/email/unsubscribe'
       preLoaderRoute: typeof EmailUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/doctors/$slug': {
+      id: '/doctors/$slug'
+      path: '/$slug'
+      fullPath: '/doctors/$slug'
+      preLoaderRoute: typeof DoctorsSlugRouteImport
+      parentRoute: typeof DoctorsRoute
     }
     '/conditions/$slug': {
       id: '/conditions/$slug'
@@ -3306,6 +3365,17 @@ const ConditionsRouteWithChildren = ConditionsRoute._addFileChildren(
   ConditionsRouteChildren,
 )
 
+interface DoctorsRouteChildren {
+  DoctorsSlugRoute: typeof DoctorsSlugRoute
+}
+
+const DoctorsRouteChildren: DoctorsRouteChildren = {
+  DoctorsSlugRoute: DoctorsSlugRoute,
+}
+
+const DoctorsRouteWithChildren =
+  DoctorsRoute._addFileChildren(DoctorsRouteChildren)
+
 interface ApiPublicHealthRouteChildren {
   ApiPublicHealthFullCheckRoute: typeof ApiPublicHealthFullCheckRoute
   ApiPublicHealthQuickCheckRoute: typeof ApiPublicHealthQuickCheckRoute
@@ -3388,6 +3458,7 @@ const rootRouteChildren: RootRouteChildren = {
   CartRoute: CartRoute,
   ConditionsRoute: ConditionsRouteWithChildren,
   ContactRoute: ContactRoute,
+  DoctorsRoute: DoctorsRouteWithChildren,
   InsuranceRoute: InsuranceRoute,
   LoyaltyRoute: LoyaltyRoute,
   MyNotificationsRoute: MyNotificationsRoute,
@@ -3396,6 +3467,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotificationsRoute: NotificationsRoute,
   PrescriptionRoute: PrescriptionRoute,
   ProductsRoute: ProductsRoute,
+  SahtakRoute: SahtakRoute,
   SettingsRoute: SettingsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StatusRoute: StatusRoute,
