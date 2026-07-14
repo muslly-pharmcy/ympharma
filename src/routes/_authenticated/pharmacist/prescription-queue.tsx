@@ -10,7 +10,7 @@ import { listPrescriptionReviews } from "@/lib/prescription-review.functions";
 const STATUSES = ["PENDING_REVIEW", "ASSIGNED", "IN_REVIEW", "ESCALATED"] as const;
 type Status = (typeof STATUSES)[number];
 
-export const Route = createFileRoute("/pharmacist/prescription-queue")({
+export const Route = createFileRoute("/_authenticated/pharmacist/prescription-queue")({
   head: () => ({ meta: [{ title: "طابور الوصفات | Muslly" }] }),
   component: QueuePage,
 });
