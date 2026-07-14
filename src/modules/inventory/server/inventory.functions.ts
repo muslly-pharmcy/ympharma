@@ -11,8 +11,8 @@ export const receiveStock = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: batchId, error } = await context.supabase.rpc("inv_receive_stock", {
       _org: data.organization_id, _warehouse: data.warehouse_id, _product: data.product_id,
-      _qty: data.qty, _batch_no: data.batch_no ?? null, _expiry: data.expiry_date ?? null,
-      _cost: data.cost ?? null, _supplier: data.supplier_id ?? null, _reason: data.reason ?? null,
+      _qty: data.qty, _batch_no: data.batch_no ?? undefined, _expiry: data.expiry_date ?? undefined,
+      _cost: data.cost ?? undefined, _supplier: data.supplier_id ?? undefined, _reason: data.reason ?? undefined,
     });
     if (error) throw new Error(error.message);
     return { batch_id: batchId as string };
