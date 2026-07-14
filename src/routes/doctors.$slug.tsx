@@ -89,7 +89,7 @@ function DoctorProfilePage() {
                   <TrustBadge level={d.trust_level} />
                 </div>
                 <div className="mt-1 flex flex-wrap gap-1.5">
-                  {d.specialties.map((s) => (
+                  {d.specialties.map((s: any) => (
                     <span key={s.id} className={`rounded-full px-2 py-0.5 text-xs font-bold ${s.is_primary ? "bg-primary/10 text-primary-deep" : "bg-muted text-muted-foreground"}`}>{s.name_ar}</span>
                   ))}
                 </div>
@@ -111,14 +111,14 @@ function DoctorProfilePage() {
 
             <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
               <h2 className="mb-3 text-sm font-black">مواعيد العمل</h2>
-              <ScheduleTable slots={d.availability} locations={d.locations.map((l) => ({ id: l.id, name_ar: l.name_ar }))} />
+              <ScheduleTable slots={d.availability} locations={d.locations.map((l: any) => ({ id: l.id, name_ar: l.name_ar }))} />
             </div>
 
             {d.qualifications.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
                 <h2 className="mb-3 flex items-center gap-1 text-sm font-black"><GraduationCap className="size-4" /> المؤهلات</h2>
                 <ul className="space-y-1.5 text-sm">
-                  {d.qualifications.map((q) => (
+                  {d.qualifications.map((q: any) => (
                     <li key={q.id} className="flex items-baseline gap-2">
                       <span className="font-bold">{q.title}</span>
                       {q.institution && <span className="text-muted-foreground">— {q.institution}</span>}
@@ -143,7 +143,7 @@ function DoctorProfilePage() {
               <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
                 <h2 className="mb-3 flex items-center gap-1 text-sm font-black"><MapPin className="size-4" /> المواقع</h2>
                 <ul className="space-y-3 text-sm">
-                  {d.locations.map((l) => (
+                  {d.locations.map((l: any) => (
                     <li key={l.id} className="border-b border-border pb-2 last:border-none last:pb-0">
                       <p className="font-bold">{l.name_ar}</p>
                       {l.address && <p className="text-xs text-muted-foreground">{l.address}</p>}
