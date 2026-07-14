@@ -106,3 +106,7 @@ event, newest at the bottom of each section.
 - No DB schema changes. No cron hook wiring (Batch 2 candidate).
 - Validation: tsgo PASS.
 - Report: docs/engineering/reports/OPS-P2-002-batch-1-execution.md.
+
+## 2026-07-14
+
+- **PHOENIX-P0 OPENED.** Phoenix Rebuild Phase 1 deliverables committed under `docs/engineering/phoenix/` (01 audit, 02 restructure plan, 03 keep list, 04 rebuild list, 05 phases). Docs only — no source or schema changes.

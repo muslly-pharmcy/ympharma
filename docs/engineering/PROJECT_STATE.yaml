@@ -16,3 +16,4 @@ notes:
   - "Phase 3 OPENED 2026-06-28 — 15 features tracked in plans/phase-3.yaml."
   - "SEC-P1-004 Batch 1 CLOSED 2026-06-28 — PASS (ITRB approved). CI import-graph guard active."
   - "OPS-P2-002 Batch 1 OPENED 2026-06-28 — Cron Job Monitoring & Alerts."
+  - "PHOENIX-P0 OPENED 2026-07-14 — docs-only architectural audit + restructure plan committed under docs/engineering/phoenix/ (deliverables 1–5). No source or schema changes."
