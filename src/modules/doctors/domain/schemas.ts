@@ -13,7 +13,7 @@ export const createDoctorSchema = z.object({
   years_experience: z.number().int().min(0).max(80).nullish(),
   languages: z.array(z.string()).default([]),
   gender: z.enum(["male", "female", "other"]).nullish(),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 export type CreateDoctorInput = z.infer<typeof createDoctorSchema>;
 
