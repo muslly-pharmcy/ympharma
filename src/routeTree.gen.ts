@@ -130,6 +130,7 @@ import { Route as AuthenticatedPharmacistPrescriptionQueueRouteImport } from './
 import { Route as AuthenticatedPharmacistInvoiceUploadRouteImport } from './routes/_authenticated/pharmacist/invoice-upload'
 import { Route as AuthenticatedPharmacistInvoiceListRouteImport } from './routes/_authenticated/pharmacist/invoice-list'
 import { Route as AuthenticatedPharmacistDashboardRouteImport } from './routes/_authenticated/pharmacist/dashboard'
+import { Route as AuthenticatedDoctorProfileRouteImport } from './routes/_authenticated/doctor/profile'
 import { Route as AuthenticatedDoctorDashboardRouteImport } from './routes/_authenticated/doctor/dashboard'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -812,6 +813,12 @@ const AuthenticatedPharmacistDashboardRoute =
     path: '/pharmacist/dashboard',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDoctorProfileRoute =
+  AuthenticatedDoctorProfileRouteImport.update({
+    id: '/doctor/profile',
+    path: '/doctor/profile',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDoctorDashboardRoute =
   AuthenticatedDoctorDashboardRouteImport.update({
     id: '/doctor/dashboard',
@@ -1223,6 +1230,7 @@ export interface FileRoutesByFullPath {
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
   '/doctor/dashboard': typeof AuthenticatedDoctorDashboardRoute
+  '/doctor/profile': typeof AuthenticatedDoctorProfileRoute
   '/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/pharmacist/invoice-list': typeof AuthenticatedPharmacistInvoiceListRoute
   '/pharmacist/invoice-upload': typeof AuthenticatedPharmacistInvoiceUploadRoute
@@ -1397,6 +1405,7 @@ export interface FileRoutesByTo {
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
   '/doctor/dashboard': typeof AuthenticatedDoctorDashboardRoute
+  '/doctor/profile': typeof AuthenticatedDoctorProfileRoute
   '/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/pharmacist/invoice-list': typeof AuthenticatedPharmacistInvoiceListRoute
   '/pharmacist/invoice-upload': typeof AuthenticatedPharmacistInvoiceUploadRoute
@@ -1573,6 +1582,7 @@ export interface FileRoutesById {
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
   '/_authenticated/doctor/dashboard': typeof AuthenticatedDoctorDashboardRoute
+  '/_authenticated/doctor/profile': typeof AuthenticatedDoctorProfileRoute
   '/_authenticated/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/_authenticated/pharmacist/invoice-list': typeof AuthenticatedPharmacistInvoiceListRoute
   '/_authenticated/pharmacist/invoice-upload': typeof AuthenticatedPharmacistInvoiceUploadRoute
@@ -1749,6 +1759,7 @@ export interface FileRouteTypes {
     | '/product/$id'
     | '/test/features'
     | '/doctor/dashboard'
+    | '/doctor/profile'
     | '/pharmacist/dashboard'
     | '/pharmacist/invoice-list'
     | '/pharmacist/invoice-upload'
@@ -1923,6 +1934,7 @@ export interface FileRouteTypes {
     | '/product/$id'
     | '/test/features'
     | '/doctor/dashboard'
+    | '/doctor/profile'
     | '/pharmacist/dashboard'
     | '/pharmacist/invoice-list'
     | '/pharmacist/invoice-upload'
@@ -2098,6 +2110,7 @@ export interface FileRouteTypes {
     | '/product/$id'
     | '/test/features'
     | '/_authenticated/doctor/dashboard'
+    | '/_authenticated/doctor/profile'
     | '/_authenticated/pharmacist/dashboard'
     | '/_authenticated/pharmacist/invoice-list'
     | '/_authenticated/pharmacist/invoice-upload'
@@ -3164,6 +3177,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPharmacistDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/doctor/profile': {
+      id: '/_authenticated/doctor/profile'
+      path: '/doctor/profile'
+      fullPath: '/doctor/profile'
+      preLoaderRoute: typeof AuthenticatedDoctorProfileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/doctor/dashboard': {
       id: '/_authenticated/doctor/dashboard'
       path: '/doctor/dashboard'
@@ -3547,6 +3567,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminUploadInventoryRoute: typeof AuthenticatedAdminUploadInventoryRoute
   AuthenticatedUploadPrescriptionRoute: typeof AuthenticatedUploadPrescriptionRoute
   AuthenticatedDoctorDashboardRoute: typeof AuthenticatedDoctorDashboardRoute
+  AuthenticatedDoctorProfileRoute: typeof AuthenticatedDoctorProfileRoute
   AuthenticatedPharmacistDashboardRoute: typeof AuthenticatedPharmacistDashboardRoute
   AuthenticatedPharmacistInvoiceListRoute: typeof AuthenticatedPharmacistInvoiceListRoute
   AuthenticatedPharmacistInvoiceUploadRoute: typeof AuthenticatedPharmacistInvoiceUploadRoute
@@ -3574,6 +3595,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminUploadInventoryRoute,
   AuthenticatedUploadPrescriptionRoute: AuthenticatedUploadPrescriptionRoute,
   AuthenticatedDoctorDashboardRoute: AuthenticatedDoctorDashboardRoute,
+  AuthenticatedDoctorProfileRoute: AuthenticatedDoctorProfileRoute,
   AuthenticatedPharmacistDashboardRoute: AuthenticatedPharmacistDashboardRoute,
   AuthenticatedPharmacistInvoiceListRoute:
     AuthenticatedPharmacistInvoiceListRoute,
