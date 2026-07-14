@@ -1,140 +1,161 @@
 
-# Phoenix Phase 4 — Catalog + Media Library Foundation
+# Phoenix Phase 5 — Inventory Foundation
 
-Legacy `public.products` (single-tenant commerce SKU) stays untouched. Phase 4 adds a **parallel catalog layer** the rest of Phoenix will build on. Inventory quantities and marketplace ordering are explicitly out of scope.
+Build enterprise inventory architecture. **No stock data migration, no marketplace activation.** Foundation only: schema, module scaffolds, RPCs, events, RLS, audit, and docs.
 
-## 1. Database (single migration)
+## Scope Boundaries
 
-New tables under `public`. All follow: CREATE TABLE → GRANT (authenticated + service_role; anon only where noted) → ENABLE RLS → policies. Every table gets `created_at` / `updated_at` + trigger.
+- New tables all prefixed `inv_*` / `wh_*` / `sup_*` to avoid collision with legacy `products`, `branch_inventory`, `inventory_*`, `inventory_transfers`, `transfer_items`. Legacy tables stay untouched and continue serving current app.
+- No backfill from legacy tables in this phase. A follow-up phase will migrate.
+- No UI wiring into existing admin pages; scaffold module `ui/` barrel only.
 
-- **`catalog_categories`** — `id, organization_id (nullable = global), parent_id, slug, name_ar, name_en, sort_order, is_active`.
-- **`catalog_products`** — the new catalog record.
-  - `id, organization_id (nullable = global/shared catalog), owner_org_id (writer), category_id`
-  - `name_ar, name_en, generic_name, brand, manufacturer`
-  - `barcode` (unique per org via partial index), `active_ingredients jsonb`, `dosage_form`, `strength`
-  - `description_ar, description_en, metadata jsonb`
-  - `status ENUM('draft','pending_review','approved','rejected','archived')`
-  - `is_public boolean` (only meaningful when `status='approved'`)
-  - `verified_at, verified_by`
-- **`catalog_product_aliases`** — `id, product_id, alias, alias_normalized, locale ('ar'|'en'|'mixed'), source ('manual'|'ocr'|'ai'|'import'), confidence`. Powers Arabic/English spelling variants (فيتامين / فتمين / vitamin).
-- **`catalog_product_media`** — `id, product_id, storage_bucket, storage_path, kind ('primary'|'gallery'|'thumbnail'|'barcode'), width, height, bytes, checksum, mime, status ('pending'|'approved'|'rejected'), uploaded_by, reviewed_by, reviewed_at, sort_order, metadata jsonb`.
-- **`catalog_barcodes`** — normalized barcode index: `barcode, product_id, symbology, is_primary`.
-- **`catalog_ai_signals`** — contract-only table for future OCR / barcode / image / invoice / prescription AI: `product_id (nullable), signal_type, source, payload jsonb, confidence, status, correlation_id`. No AI code shipped; the table is the integration seam.
+## 1. Database Migration (single migration, follows 4-step GRANT rule)
 
-### Enums
-`catalog_status`, `catalog_media_kind`, `catalog_media_status`, `catalog_alias_source`, `catalog_ai_signal_type`.
+New tables in `public`:
 
-### Storage
-New private bucket **`catalog-media`** via `supabase--storage_create_bucket`. RLS on `storage.objects` restricts writes to org members with `catalog.write`; reads limited to org members OR approved+public rows via a security-definer helper.
+- `wh_warehouses` — org-scoped physical/logical location (`kind`: central | branch | virtual), FK `branch_id` nullable, `is_active`, `metadata`.
+- `wh_locations` — sub-locations inside a warehouse (aisle/shelf/bin), optional.
+- `sup_suppliers` — org-scoped supplier profile (name, legal_name, tax_id, contact JSONB, status, metadata).
+- `sup_supplier_products` — link `sup_suppliers` ↔ `catalog_products` with supplier SKU, lead time, default cost.
+- `inv_stock_batches` — one row per (warehouse, product, batch_no, expiry_date). Columns: `qty_on_hand`, `qty_reserved`, `cost`, `selling_price`, `received_at`, `supplier_id`, `metadata`. Unique key on (warehouse_id, product_id, coalesce(batch_no,''), coalesce(expiry_date,'infinity')).
+- `inv_stock_movements` — immutable ledger. `movement_type` enum: `STOCK_RECEIVED | STOCK_TRANSFERRED_OUT | STOCK_TRANSFERRED_IN | STOCK_SOLD | STOCK_ADJUSTED | STOCK_EXPIRED | STOCK_RESERVED | STOCK_RELEASED`. Fields: org, warehouse, product, batch_id, qty_delta, actor_id, reason, ref_type, ref_id, occurred_at.
+- `inv_transfers` — org-scoped transfer header. `status` enum: `draft | approved | reserved | picked | packed | dispatched | received | cancelled`. Fields: source_warehouse, dest_warehouse, requested_by, approved_by, timestamps per status.
+- `inv_transfer_items` — line items with `qty_requested`, `qty_reserved`, `qty_picked`, `qty_received`, batch_id nullable (auto-picked at reserve).
+- `inv_expiry_alerts` — pre-computed alert rows (batch_id, tier: `NEAR_30 | NEAR_60 | NEAR_90 | EXPIRED`, alerted_at). Populated by scheduled job (contract only, no cron activation).
 
-### SECURITY DEFINER helpers
-- `catalog_normalize_ar(text)` — strips tashkeel, unifies ا/أ/إ/آ, ى→ي, ة→ه, ؤ/ئ, digits, whitespace. Pure SQL, `IMMUTABLE`.
-- `catalog_search(_q text, _org_id uuid, _limit int)` — matches name/generic/aliases via normalized text + `pg_trgm`. Fail-closed on org scope.
-- `catalog_can_write(_user_id, _org_id)` → uses `has_org_permission(..., 'catalog.write')`.
-- `catalog_can_verify(_user_id, _org_id)` → `catalog.verify`.
+Enums: `wh_kind`, `inv_movement_type`, `inv_transfer_status`, `sup_status`.
 
-### Permissions seed (extends Phase 3)
-`catalog.read · catalog.write · catalog.verify · catalog.media.upload · catalog.media.review`.
-Baseline `role_permissions` grants: owner/admin → all; manager → read+write+media.upload; pharmacist/doctor → read; customer → none.
+Each `CREATE TABLE` followed by:
+```
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.<t> TO authenticated;
+GRANT ALL ON public.<t> TO service_role;
+ALTER TABLE ... ENABLE ROW LEVEL SECURITY;
+```
 
-### RLS summary
-- `catalog_products` SELECT: `is_public AND status='approved'` (anon+authenticated) OR `is_org_member(organization_id)` (authenticated). Writes: `catalog_can_write`.
-- `catalog_product_aliases`, `catalog_product_media`, `catalog_barcodes`: readable when parent is readable; writes gated by `catalog.write` / `catalog.media.upload`; approve/reject gated by `catalog.verify` / `catalog.media.review`.
-- `catalog_categories`: global rows (`organization_id IS NULL`) readable by all; org rows gated by membership.
-- `catalog_ai_signals`: writes service_role only; reads gated by `catalog.read` in org.
+RLS pattern (mirrors Phase 4 catalog):
+- SELECT: `is_org_member(organization_id, auth.uid())` AND (for branch-scoped) branch access via existing `branch_user_assignments` OR `has_org_permission(org, 'inventory.read')`.
+- INSERT/UPDATE: `has_org_permission(org, 'inventory.write')` for stock; `has_org_permission(org, 'transfers.manage')` for transfers; `has_org_permission(org, 'suppliers.manage')` for suppliers.
+- `inv_stock_movements` write: service_role + security-definer RPCs only (no direct writes from clients).
 
-### Indexes
-- `catalog_products (organization_id, status)`, `(barcode) WHERE barcode IS NOT NULL`, GIN trigram on `name_ar`, `name_en`, `generic_name`.
-- `catalog_product_aliases (alias_normalized)` GIN trigram + `(product_id)`.
-- `catalog_barcodes (barcode)` unique per `product_id`.
+New permission keys seeded into `public.permissions` and mapped to roles in `role_permissions`:
+- `inventory.read` → Owner, Admin, Manager, Pharmacist, Employee
+- `inventory.write` → Owner, Admin, Manager, Pharmacist
+- `transfers.read` / `transfers.manage` → Owner, Admin, Manager
+- `suppliers.read` / `suppliers.manage` → Owner, Admin, Manager
+- `warehouses.manage` → Owner, Admin
 
-### Triggers
-- `updated_at` on every table.
-- Alias insert/update: auto-populate `alias_normalized = catalog_normalize_ar(alias)`.
-- Product transition triggers emit rows into `organization_audit_events` for `PRODUCT_CREATED`, `PRODUCT_UPDATED`, `PRODUCT_VERIFIED`; media insert emits `PRODUCT_IMAGE_ADDED`. All events also enqueue an `agent_events` row consumed by the Phase 2 event bus.
+Security-definer RPCs (all `SET search_path = public`, revoke from anon):
+- `inv_receive_stock(org, warehouse, product, qty, batch_no, expiry, cost, supplier)` — inserts batch (or upserts) + movement + emits `STOCK_RECEIVED`.
+- `inv_adjust_stock(batch_id, qty_delta, reason)` — movement + emits `STOCK_MOVEMENT_CREATED`.
+- `inv_reserve_for_transfer(transfer_id)` — allocates batches FEFO, updates `qty_reserved`, movement rows.
+- `inv_dispatch_transfer(transfer_id)` — movements OUT + `TRANSFER_CREATED` (progress) events.
+- `inv_receive_transfer(transfer_id)` — creates batches in dest warehouse, movements IN, `TRANSFER_COMPLETED`.
+- `inv_scan_expiry(org, horizon_days)` — populates `inv_expiry_alerts`, emits `EXPIRY_ALERT_CREATED` per new alert.
 
-## 2. Platform / module code
+Triggers:
+- `inv_stock_batches` after INSERT/UPDATE → publish `STOCK_MOVEMENT_CREATED` via existing `agent_events` + event bus sink.
+- `inv_transfers` status transitions → publish `TRANSFER_CREATED` / `TRANSFER_COMPLETED`.
+- Audit inserts into `identity_audit_events` (reuse existing table) with entity `inventory.*`.
 
-New module `src/modules/catalog/` following `MODULE-STRUCTURE.md`:
+## 2. Module Scaffold — `src/modules/inventory/`
 
 ```
-src/modules/catalog/
-  domain/       types.ts, schemas.ts (Zod), normalize.ts (mirrors SQL)
-  data/         queries.ts (read helpers)
-  server/       catalog.functions.ts (createServerFn, guarded by PermissionService)
-                media.functions.ts (signed-URL upload + review flow)
-                aiSignals.functions.ts (write path service-role only)
-  events/       constants.ts, schemas.ts (Zod), publisher.ts
-  ui/           empty; UI ships in later phase
-  index.ts      public barrel
+inventory/
   README.md
+  domain/
+    types.ts          # Warehouse, StockBatch, Movement, Transfer, TransferItem, ExpiryAlert
+    schemas.ts        # Zod for RPC inputs
+    movementTypes.ts  # enum mirror
+  data/
+    queries.ts        # read-only helpers over Data API
+  server/
+    inventory.functions.ts   # listBatches, getBatch, receiveStock, adjustStock
+    transfers.functions.ts   # createTransfer, approve, reserve, pick, pack, dispatch, receive
+    expiry.functions.ts      # scanExpiry, listExpiryAlerts
+  events/
+    schemas.ts        # zod schemas per event
+  ui/
+    index.ts          # empty barrel (no components yet)
+  index.ts            # public barrel
 ```
 
-Server functions (all `requireSupabaseAuth` + `PermissionService.require`):
+Each server fn: `createServerFn` + `.middleware([requireSupabaseAuth])` + Zod validator + calls RPC + returns DTO. No `supabaseAdmin` at module scope; use `context.supabase` (RLS enforces org/branch).
 
-- `listCatalogProducts({ orgId, q?, status?, cursor })`
-- `getCatalogProduct({ id })`
-- `createCatalogProduct(payload)`
-- `updateCatalogProduct({ id, patch })`
-- `submitForReview({ id })` / `verifyCatalogProduct({ id })` / `rejectCatalogProduct({ id, reason })`
-- `addProductAlias({ productId, alias, locale, source })`
-- `requestMediaUploadUrl({ productId, kind, mime, bytes })` → signed URL to `catalog-media` bucket (size/mime whitelist enforced).
-- `registerUploadedMedia({ productId, storagePath, kind, checksum, ... })` → row in `catalog_product_media`, status=`pending`.
-- `reviewMedia({ id, decision, reason? })`.
-- `recordAiSignal(...)` — service-role only, module-internal, no client exposure.
+## 3. Module Scaffold — `src/modules/warehouse/`
 
-### Search foundation
-`searchCatalog({ orgId, q, limit })` invokes `catalog_search` RPC. Uses Arabic normalization + trigram similarity + alias join. Barcode lookup path: `lookupByBarcode({ barcode, orgId })` hits `catalog_barcodes`.
+```
+warehouse/
+  README.md
+  domain/{types.ts,schemas.ts}
+  server/warehouse.functions.ts   # listWarehouses, createWarehouse, updateWarehouse, listLocations, addLocation
+  events/schemas.ts
+  ui/index.ts
+  index.ts
+```
 
-### Events
-Register in `src/core/events/constants.ts`: `PRODUCT_CREATED`, `PRODUCT_UPDATED`, `PRODUCT_IMAGE_ADDED`, `PRODUCT_VERIFIED`. Payload schema in `modules/catalog/events/schemas.ts` (Zod): `{ org_id, actor_user_id, product_id, data }`. Publisher wires through Phase 2 `EventPublisher` with idempotency keys.
+## 4. Module Scaffold — `src/modules/suppliers/`
 
-### AI integration contract (no models yet)
-`src/modules/catalog/domain/aiContract.ts` exports Zod schemas + TypeScript interfaces only:
-`OcrExtractionInput/Result`, `BarcodeRecognitionInput/Result`, `ImageRecognitionInput/Result`, `InvoiceParseInput/Result`, `PrescriptionParseInput/Result`. Each maps to a `catalog_ai_signal_type` enum value. Consumers of these contracts land in later phases.
+```
+suppliers/
+  README.md
+  domain/{types.ts,schemas.ts}
+  server/suppliers.functions.ts   # listSuppliers, getSupplier, createSupplier, linkProduct, unlinkProduct, listSupplierProducts
+  events/schemas.ts
+  ui/index.ts
+  index.ts
+```
 
-### Import boundaries
-`scripts/check-imports.ts` R3 already enforces module isolation — `catalog` exports only through `index.ts`; no other module imports catalog internals.
+## 5. Event Registry Updates
 
-## 3. Security verification (executed after migration)
+`src/core/events/constants.ts` — add:
+- `STOCK_RECEIVED`
+- `STOCK_MOVEMENT_CREATED`
+- `TRANSFER_CREATED`
+- `TRANSFER_COMPLETED`
+- `EXPIRY_ALERT_CREATED`
 
-- `has_anon = false` on all new SECURITY DEFINER functions.
-- RLS enabled on every new table; policies scoped via `is_org_member` / `has_org_permission`.
-- Anonymous SELECT confined to `catalog_products` rows with `status='approved' AND is_public=true` and safe columns only.
-- Cross-tenant probe: authenticated user in org A cannot read draft/pending rows of org B.
-- Storage bucket `catalog-media` is private; only signed URLs reach clients; upload MIME whitelist (`image/png|jpeg|webp|avif`) and 5 MB cap enforced in `requestMediaUploadUrl`.
-- Media rows cannot be flipped to `approved` without `catalog.media.review`.
+Add zod schemas + register in `EventRegistry.ts`. Update `docs/engineering/standards/EVENT-CATALOG.md`.
 
-## 4. Testing
+## 6. Import-Graph Guard
 
-- `bunx tsgo --noEmit` (typecheck).
-- `bun run build` (build gate).
-- Vitest units:
-  - `catalog.normalize.test.ts` — Arabic normalization parity between SQL + TS mirror.
-  - `catalog.permissions.test.ts` — cross-tenant deny + role matrix.
-  - `catalog.media.security.test.ts` — MIME/size rejection, review-only approval, signed-URL enforcement.
-  - `catalog.events.test.ts` — event names in central catalog + payload schema round-trip.
-- Import-graph guard (`scripts/check-imports.ts`) — no module leak into catalog.
+Update `scripts/check-imports.ts` allow-list so `modules/inventory`, `modules/warehouse`, `modules/suppliers` follow same layer rules as `modules/catalog` (domain has no deps, server can import platform/core, ui cannot import server/*).
 
-## 5. Documentation
+## 7. Tests
 
-`docs/engineering/reports/PHOENIX-P4-catalog.md` covering:
-- Architecture (module + DB layout, legacy `products` coexistence).
-- Database changes (tables, enums, functions, triggers, indexes).
-- Security model (RLS, permissions, storage, SECURITY DEFINER inventory).
-- Media strategy (private bucket, signed URLs, MIME/size limits, approval workflow).
-- Future AI integration (contracts + `catalog_ai_signals` seam).
-- Events emitted + payload shapes.
-- Migration notes: legacy `products` untouched; Phase 5+ will map SKUs to `catalog_products.id`.
-- Risks: dual-catalog period, alias search cost, storage bucket privacy toggles.
+- `src/__tests__/unit/modules/inventory/movements.test.ts` — reducer that projects batch state from a movement list; asserts integrity (no negative qty_on_hand, reserved ≤ on_hand).
+- `src/__tests__/unit/modules/inventory/transfer-state.test.ts` — state machine transitions (invalid transitions rejected).
+- `src/__tests__/unit/modules/inventory/expiry-scan.test.ts` — pure logic bucketing NEAR_30/60/90/EXPIRED.
+- `src/__tests__/unit/modules/warehouse/schemas.test.ts` — zod validation.
+- `src/__tests__/unit/modules/suppliers/schemas.test.ts` — zod validation.
 
-## Completion gate
+DB isolation verified through migration-level policies (documented in report); no live DB test runner in project.
 
-Stop after Phase 4. Do not begin Phase 5. Report artifacts, security results, permission model, media architecture, and risks back for approval.
+## 8. Documentation
 
-## Explicit non-goals
+`docs/engineering/reports/PHOENIX-P5-inventory.md`:
+- Architecture diagram (ASCII)
+- Data model (table + column table)
+- Security model (RLS matrix per table × role)
+- Event flow (movement → event → dispatcher → downstream)
+- Transfer state machine diagram
+- Migration readiness checklist (what Phase 6 must do to backfill from legacy `products.stock_qty` / `branch_inventory` / `inventory_transfers`)
+- Explicit non-goals (no cron, no UI, no marketplace)
 
-- No changes to `public.products`, `product_gallery_images`, `product_image_overrides`, `product_classifications`.
-- No inventory quantities, pricing writes, reorder logic, or marketplace ordering.
-- No AI model calls — contracts and the signals table only.
-- No UI beyond the module scaffold (`ui/` stays empty).
+## Technical Notes
+
+- All new tables use `gen_random_uuid()` PKs, `created_at`/`updated_at` with trigger `update_updated_at_column` (already exists).
+- Movement ledger is append-only: RLS denies UPDATE/DELETE for `authenticated`; only service_role.
+- Batch allocation uses FEFO (first-expiry-first-out) sort in RPC.
+- Reuses Phase 3 `has_org_permission` and existing `is_org_member(_org uuid, _user uuid)` signatures.
+- Emits events through the Phase 2 EventPublisher pattern; DB triggers write to `agent_events` for the consumer.
+
+## Deliverables Summary
+
+1. One migration (tables + enums + grants + RLS + RPCs + triggers + permission seed).
+2. Three module scaffolds (`inventory`, `warehouse`, `suppliers`) with domain, server fns, events, empty UI barrel.
+3. Event constants + registry + catalog doc update.
+4. Import-graph guard update.
+5. Five unit tests.
+6. Phase 5 completion report.
+
+Stop after Phase 5. Await Phase 6.
