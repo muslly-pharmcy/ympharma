@@ -50,7 +50,7 @@ function SahtakPage() {
         <div className="mt-8 rounded-2xl border border-border bg-card p-5 text-sm">
           <p className="font-bold">هل تبحث عن طبيب؟</p>
           <p className="mt-1 text-muted-foreground">
-            استعرض <Link to="/doctors" className="text-primary-deep underline">دليل الأطباء</Link> لاختيار المختص المناسب.
+            استعرض <Link to="/doctors" search={{}} className="text-primary-deep underline">دليل الأطباء</Link> لاختيار المختص المناسب.
           </p>
         </div>
       </main>

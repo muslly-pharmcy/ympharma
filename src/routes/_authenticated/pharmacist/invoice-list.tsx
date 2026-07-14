@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { listMyInvoices } from "@/modules/invoice-intake/server/upload.functions";
+import { listMyInvoices } from "@/modules/invoice-intake/functions/upload.functions";
 
 export const Route = createFileRoute("/_authenticated/pharmacist/invoice-list")({
   head: () => ({ meta: [{ title: "الفواتير | Muslly" }] }),
@@ -34,8 +34,8 @@ function InvoiceListPage() {
         {(data as Array<Record<string, string | number | boolean | null>>).map((row) => (
           <Link
             key={String(row.id)}
-            to={"/_authenticated/pharmacist/invoice-review/$id" as never}
-            params={{ id: String(row.id) } as never}
+            to="/pharmacist/invoice-review/$id"
+            params={{ id: String(row.id) }}
             className="block border rounded-md p-3 hover:bg-muted"
           >
             <div className="flex items-center justify-between">

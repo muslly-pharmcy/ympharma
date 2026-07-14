@@ -7,11 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { getInvoiceForReview } from "@/modules/invoice-intake/server/upload.functions";
+import { getInvoiceForReview } from "@/modules/invoice-intake/functions/upload.functions";
 import {
   updateInvoiceLine,
   commitInvoice,
-} from "@/modules/invoice-intake/server/review.functions";
+} from "@/modules/invoice-intake/functions/review.functions";
 
 export const Route = createFileRoute("/_authenticated/pharmacist/invoice-review/$id")({
   head: () => ({ meta: [{ title: "مراجعة فاتورة | Muslly" }] }),
@@ -46,7 +46,7 @@ function InvoiceReviewPage() {
     try {
       const res = await commitFn({ data: { upload_id: id, warehouse_id: warehouseId } });
       toast.success(`تم إضافة ${res.committed} منتج للمخزون`);
-      navigate({ to: "/_authenticated/pharmacist/invoice-list" as never });
+      navigate({ to: "/pharmacist/invoice-list" });
     } catch (e) {
       toast.error(`فشل الترحيل: ${(e as Error).message}`);
     }
