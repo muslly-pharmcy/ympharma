@@ -123,24 +123,18 @@ function DoctorDashboard() {
           </section>
 
           <section className="mt-6 grid gap-3 sm:grid-cols-2">
-            <Link
-              to="/_authenticated/doctor/practices" as any
-              className="rounded-2xl border border-border bg-card p-4 hover:bg-accent"
-            >
+            <div className="rounded-2xl border border-dashed border-border bg-card p-4">
               <div className="text-base font-black">إدارة أماكن العمل</div>
               <p className="mt-1 text-xs text-muted-foreground">
-                أضف مستشفيات وعيادات وحدد ساعات العمل وطرق الحجز.
+                قريباً: أضف مستشفيات وعيادات وحدد ساعات العمل وطرق الحجز.
               </p>
-            </Link>
-            <Link
-              to="/_authenticated/doctor/profile-editor" as any
-              className="rounded-2xl border border-border bg-card p-4 hover:bg-accent"
-            >
+            </div>
+            <div className="rounded-2xl border border-dashed border-border bg-card p-4">
               <div className="text-base font-black">تحديث الملف المهني</div>
               <p className="mt-1 text-xs text-muted-foreground">
-                عدّل السيرة، الشهادات، الخدمات، والتأمينات المقبولة.
+                قريباً: عدّل السيرة، الشهادات، الخدمات، والتأمينات المقبولة.
               </p>
-            </Link>
+            </div>
           </section>
         </>
       )}
