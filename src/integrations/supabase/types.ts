@@ -2167,6 +2167,616 @@ export type Database = {
         }
         Relationships: []
       }
+      hc_appointments: {
+        Row: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          completed_at: string | null
+          confirmed_at: string | null
+          created_at: string
+          created_by: string | null
+          doctor_id: string
+          ends_at: string
+          id: string
+          location_id: string
+          notes: string | null
+          organization_id: string
+          patient_id: string
+          reason: string | null
+          starts_at: string
+          status: Database["public"]["Enums"]["hc_appointment_status"]
+          updated_at: string
+        }
+        Insert: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          completed_at?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          doctor_id: string
+          ends_at: string
+          id?: string
+          location_id: string
+          notes?: string | null
+          organization_id: string
+          patient_id: string
+          reason?: string | null
+          starts_at: string
+          status?: Database["public"]["Enums"]["hc_appointment_status"]
+          updated_at?: string
+        }
+        Update: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          completed_at?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          doctor_id?: string
+          ends_at?: string
+          id?: string
+          location_id?: string
+          notes?: string | null
+          organization_id?: string
+          patient_id?: string
+          reason?: string | null
+          starts_at?: string
+          status?: Database["public"]["Enums"]["hc_appointment_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hc_appointments_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hc_appointments_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "hc_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hc_appointments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hc_appointments_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "hc_patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hc_availability_blocks: {
+        Row: {
+          created_at: string
+          doctor_id: string
+          ends_at: string
+          id: string
+          location_id: string | null
+          reason: string | null
+          starts_at: string
+        }
+        Insert: {
+          created_at?: string
+          doctor_id: string
+          ends_at: string
+          id?: string
+          location_id?: string | null
+          reason?: string | null
+          starts_at: string
+        }
+        Update: {
+          created_at?: string
+          doctor_id?: string
+          ends_at?: string
+          id?: string
+          location_id?: string | null
+          reason?: string | null
+          starts_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hc_availability_blocks_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hc_availability_blocks_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "hc_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hc_doctor_availability: {
+        Row: {
+          created_at: string
+          doctor_id: string
+          end_time: string
+          id: string
+          is_active: boolean
+          location_id: string
+          slot_duration_minutes: number
+          start_time: string
+          updated_at: string
+          weekday: number
+        }
+        Insert: {
+          created_at?: string
+          doctor_id: string
+          end_time: string
+          id?: string
+          is_active?: boolean
+          location_id: string
+          slot_duration_minutes?: number
+          start_time: string
+          updated_at?: string
+          weekday: number
+        }
+        Update: {
+          created_at?: string
+          doctor_id?: string
+          end_time?: string
+          id?: string
+          is_active?: boolean
+          location_id?: string
+          slot_duration_minutes?: number
+          start_time?: string
+          updated_at?: string
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hc_doctor_availability_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hc_doctor_availability_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "hc_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hc_doctor_locations: {
+        Row: {
+          created_at: string
+          doctor_id: string
+          id: string
+          location_id: string
+          role: string
+        }
+        Insert: {
+          created_at?: string
+          doctor_id: string
+          id?: string
+          location_id: string
+          role?: string
+        }
+        Update: {
+          created_at?: string
+          doctor_id?: string
+          id?: string
+          location_id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hc_doctor_locations_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hc_doctor_locations_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "hc_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hc_doctor_qualifications: {
+        Row: {
+          country: string | null
+          created_at: string
+          doctor_id: string
+          document_url: string | null
+          id: string
+          institution: string | null
+          title: string
+          updated_at: string
+          year: number | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          doctor_id: string
+          document_url?: string | null
+          id?: string
+          institution?: string | null
+          title: string
+          updated_at?: string
+          year?: number | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          doctor_id?: string
+          document_url?: string | null
+          id?: string
+          institution?: string | null
+          title?: string
+          updated_at?: string
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hc_doctor_qualifications_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hc_doctor_specialties: {
+        Row: {
+          created_at: string
+          doctor_id: string
+          id: string
+          is_primary: boolean
+          specialty_id: string
+        }
+        Insert: {
+          created_at?: string
+          doctor_id: string
+          id?: string
+          is_primary?: boolean
+          specialty_id: string
+        }
+        Update: {
+          created_at?: string
+          doctor_id?: string
+          id?: string
+          is_primary?: boolean
+          specialty_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hc_doctor_specialties_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hc_doctor_specialties_specialty_id_fkey"
+            columns: ["specialty_id"]
+            isOneToOne: false
+            referencedRelation: "hc_specialties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hc_doctors: {
+        Row: {
+          bio_ar: string | null
+          bio_en: string | null
+          created_at: string
+          full_name_ar: string
+          full_name_en: string | null
+          gender: string | null
+          id: string
+          is_public: boolean
+          languages: string[]
+          metadata: Json
+          organization_id: string | null
+          photo_url: string | null
+          rejection_reason: string | null
+          slug: string
+          title: string | null
+          updated_at: string
+          user_id: string | null
+          verification_status: Database["public"]["Enums"]["hc_verification_status"]
+          verified_at: string | null
+          verified_by: string | null
+          years_experience: number | null
+        }
+        Insert: {
+          bio_ar?: string | null
+          bio_en?: string | null
+          created_at?: string
+          full_name_ar: string
+          full_name_en?: string | null
+          gender?: string | null
+          id?: string
+          is_public?: boolean
+          languages?: string[]
+          metadata?: Json
+          organization_id?: string | null
+          photo_url?: string | null
+          rejection_reason?: string | null
+          slug: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string | null
+          verification_status?: Database["public"]["Enums"]["hc_verification_status"]
+          verified_at?: string | null
+          verified_by?: string | null
+          years_experience?: number | null
+        }
+        Update: {
+          bio_ar?: string | null
+          bio_en?: string | null
+          created_at?: string
+          full_name_ar?: string
+          full_name_en?: string | null
+          gender?: string | null
+          id?: string
+          is_public?: boolean
+          languages?: string[]
+          metadata?: Json
+          organization_id?: string | null
+          photo_url?: string | null
+          rejection_reason?: string | null
+          slug?: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string | null
+          verification_status?: Database["public"]["Enums"]["hc_verification_status"]
+          verified_at?: string | null
+          verified_by?: string | null
+          years_experience?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hc_doctors_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hc_locations: {
+        Row: {
+          address: string | null
+          branch_id: string | null
+          city: string | null
+          country: string
+          created_at: string
+          email: string | null
+          governorate: string | null
+          id: string
+          is_active: boolean
+          kind: Database["public"]["Enums"]["hc_location_kind"]
+          lat: number | null
+          lng: number | null
+          metadata: Json
+          name_ar: string
+          name_en: string | null
+          organization_id: string
+          phone: string | null
+          updated_at: string
+          whatsapp: string | null
+          working_hours: Json
+        }
+        Insert: {
+          address?: string | null
+          branch_id?: string | null
+          city?: string | null
+          country?: string
+          created_at?: string
+          email?: string | null
+          governorate?: string | null
+          id?: string
+          is_active?: boolean
+          kind: Database["public"]["Enums"]["hc_location_kind"]
+          lat?: number | null
+          lng?: number | null
+          metadata?: Json
+          name_ar: string
+          name_en?: string | null
+          organization_id: string
+          phone?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+          working_hours?: Json
+        }
+        Update: {
+          address?: string | null
+          branch_id?: string | null
+          city?: string | null
+          country?: string
+          created_at?: string
+          email?: string | null
+          governorate?: string | null
+          id?: string
+          is_active?: boolean
+          kind?: Database["public"]["Enums"]["hc_location_kind"]
+          lat?: number | null
+          lng?: number | null
+          metadata?: Json
+          name_ar?: string
+          name_en?: string | null
+          organization_id?: string
+          phone?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+          working_hours?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hc_locations_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hc_locations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hc_patients: {
+        Row: {
+          created_at: string
+          date_of_birth: string | null
+          full_name: string
+          gender: string | null
+          id: string
+          metadata: Json
+          national_id_hash: string | null
+          organization_id: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          date_of_birth?: string | null
+          full_name: string
+          gender?: string | null
+          id?: string
+          metadata?: Json
+          national_id_hash?: string | null
+          organization_id?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          date_of_birth?: string | null
+          full_name?: string
+          gender?: string | null
+          id?: string
+          metadata?: Json
+          national_id_hash?: string | null
+          organization_id?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hc_patients_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hc_specialties: {
+        Row: {
+          code: string
+          created_at: string
+          description_ar: string | null
+          description_en: string | null
+          id: string
+          name_ar: string
+          name_en: string
+          sort_order: number
+          status: Database["public"]["Enums"]["hc_specialty_status"]
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
+          id?: string
+          name_ar: string
+          name_en: string
+          sort_order?: number
+          status?: Database["public"]["Enums"]["hc_specialty_status"]
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
+          id?: string
+          name_ar?: string
+          name_en?: string
+          sort_order?: number
+          status?: Database["public"]["Enums"]["hc_specialty_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      hc_verification_requests: {
+        Row: {
+          created_at: string
+          doctor_id: string
+          documents: Json
+          id: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewer_id: string | null
+          status: Database["public"]["Enums"]["hc_verification_status"]
+          submitted_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          doctor_id: string
+          documents?: Json
+          id?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          status?: Database["public"]["Enums"]["hc_verification_status"]
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          doctor_id?: string
+          documents?: Json
+          id?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          status?: Database["public"]["Enums"]["hc_verification_status"]
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hc_verification_requests_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       health_checks: {
         Row: {
           created_at: string
@@ -6440,6 +7050,59 @@ export type Database = {
         }
         Returns: boolean
       }
+      hc_create_appointment: {
+        Args: {
+          _doctor: string
+          _duration_minutes?: number
+          _location: string
+          _patient: string
+          _reason?: string
+          _starts_at: string
+        }
+        Returns: string
+      }
+      hc_create_doctor: { Args: { _payload: Json }; Returns: string }
+      hc_create_location: { Args: { _payload: Json }; Returns: string }
+      hc_create_specialty: {
+        Args: {
+          _code: string
+          _description_ar?: string
+          _description_en?: string
+          _name_ar: string
+          _name_en: string
+          _sort_order?: number
+        }
+        Returns: string
+      }
+      hc_emit_event: {
+        Args: {
+          _entity_id: string
+          _entity_type: string
+          _name: string
+          _payload: Json
+        }
+        Returns: undefined
+      }
+      hc_submit_verification: {
+        Args: { _doctor: string; _documents?: Json }
+        Returns: string
+      }
+      hc_transition_appointment: {
+        Args: {
+          _appt: string
+          _new: Database["public"]["Enums"]["hc_appointment_status"]
+          _reason?: string
+        }
+        Returns: undefined
+      }
+      hc_verify_doctor: {
+        Args: {
+          _decision: Database["public"]["Enums"]["hc_verification_status"]
+          _doctor: string
+          _notes?: string
+        }
+        Returns: undefined
+      }
       inv_adjust_stock: {
         Args: { _batch: string; _qty_delta: number; _reason: string }
         Returns: string
@@ -6714,6 +7377,19 @@ export type Database = {
         | "rejected"
         | "archived"
       classification_status: "pending" | "approved" | "rejected"
+      hc_appointment_status:
+        | "requested"
+        | "confirmed"
+        | "completed"
+        | "cancelled"
+        | "no_show"
+      hc_location_kind:
+        | "clinic"
+        | "hospital"
+        | "medical_center"
+        | "pharmacy_clinic"
+      hc_specialty_status: "active" | "inactive"
+      hc_verification_status: "pending" | "verified" | "rejected"
       inv_expiry_tier: "NEAR_90" | "NEAR_60" | "NEAR_30" | "EXPIRED"
       inv_movement_type:
         | "STOCK_RECEIVED"
@@ -6960,6 +7636,21 @@ export const Constants = {
         "archived",
       ],
       classification_status: ["pending", "approved", "rejected"],
+      hc_appointment_status: [
+        "requested",
+        "confirmed",
+        "completed",
+        "cancelled",
+        "no_show",
+      ],
+      hc_location_kind: [
+        "clinic",
+        "hospital",
+        "medical_center",
+        "pharmacy_clinic",
+      ],
+      hc_specialty_status: ["active", "inactive"],
+      hc_verification_status: ["pending", "verified", "rejected"],
       inv_expiry_tier: ["NEAR_90", "NEAR_60", "NEAR_30", "EXPIRED"],
       inv_movement_type: [
         "STOCK_RECEIVED",
