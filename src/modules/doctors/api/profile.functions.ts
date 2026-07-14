@@ -36,20 +36,8 @@ const ProfileExtrasSchema = z.object({
   seo_desc_ar: z.string().max(320).optional().nullable(),
 });
 
-async function assertDoctorAccess(
-  supabase: {
-    from: (t: string) => {
-      select: (c: string) => {
-        eq: (col: string, val: string) => {
-          maybeSingle: () => Promise<{ data: { id: string; user_id: string | null } | null; error: { message: string } | null }>;
-        };
-      };
-    };
-    rpc: (name: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
-  },
-  doctorId: string,
-  userId: string,
-) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function assertDoctorAccess(supabase: any, doctorId: string, userId: string) {
   const { data, error } = await supabase
     .from("hc_doctors")
     .select("id, user_id")
@@ -65,6 +53,8 @@ async function assertDoctorAccess(
     if (!isAdmin) throw new Error("forbidden");
   }
 }
+
+
 
 export const updateDoctorProfileExtras = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
