@@ -4,9 +4,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 // xlsx is lazy-loaded on demand inside handlers to keep it out of the initial admin chunk.
-type XLSXModule = typeof import("xlsx");
+type XLSXModule = typeof import("@e965/xlsx");
 let _xlsxPromise: Promise<XLSXModule> | null = null;
-const loadXLSX = () => (_xlsxPromise ??= import("xlsx"));
+const loadXLSX = () => (_xlsxPromise ??= import("@e965/xlsx"));
 import {
   ArrowLeft, Loader2, FileSpreadsheet, AlertTriangle, Send, Upload,
   Download, FileJson, Sheet, Bell, ShieldCheck,
