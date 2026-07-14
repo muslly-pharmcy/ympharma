@@ -109,14 +109,14 @@ export const getInvoiceForReview = createServerFn({ method: "POST" })
       .eq("upload_id", data.upload_id)
       .maybeSingle();
 
-    let lines: Record<string, unknown>[] = [];
+    let lines: Array<Record<string, string | number | boolean | null>> = [];
     if (extraction) {
       const { data: rows } = await context.supabase
         .from("invoice_line_items")
         .select("*")
         .eq("extraction_id", (extraction as { id: string }).id)
         .order("line_no");
-      lines = rows ?? [];
+      lines = (rows ?? []) as Array<Record<string, string | number | boolean | null>>;
     }
 
     // Signed image URL (10 min)
