@@ -93,10 +93,8 @@ export const updateCatalogProduct = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-type Supa = Parameters<typeof requireSupabaseAuth>[never] extends never ? never : never;
-
 async function transitionStatus(
-  ctxSupabase: Awaited<ReturnType<Parameters<typeof createServerFn>[never] extends never ? never : never>> extends never ? any : any,
+  ctxSupabase: any,
   userId: string,
   id: string,
   next: "pending_review" | "approved" | "rejected",
