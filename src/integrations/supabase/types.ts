@@ -2608,6 +2608,95 @@ export type Database = {
           },
         ]
       }
+      hc_doctor_join_submissions: {
+        Row: {
+          biography: string | null
+          city: string | null
+          claimed_specialties: string[]
+          created_at: string
+          decision_at: string | null
+          documents: Json
+          duplicate_of: string | null
+          duplicate_score: number
+          email: string | null
+          full_name_ar: string
+          full_name_en: string | null
+          governorate: string | null
+          id: string
+          metadata: Json
+          normalized_name_ar: string
+          phone: string
+          phone_e164: string
+          practice_wishlist: Json
+          reviewer_id: string | null
+          reviewer_notes: string | null
+          status: Database["public"]["Enums"]["hc_join_status"]
+          submitter_user_id: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          biography?: string | null
+          city?: string | null
+          claimed_specialties?: string[]
+          created_at?: string
+          decision_at?: string | null
+          documents?: Json
+          duplicate_of?: string | null
+          duplicate_score?: number
+          email?: string | null
+          full_name_ar: string
+          full_name_en?: string | null
+          governorate?: string | null
+          id?: string
+          metadata?: Json
+          normalized_name_ar: string
+          phone: string
+          phone_e164: string
+          practice_wishlist?: Json
+          reviewer_id?: string | null
+          reviewer_notes?: string | null
+          status?: Database["public"]["Enums"]["hc_join_status"]
+          submitter_user_id?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          biography?: string | null
+          city?: string | null
+          claimed_specialties?: string[]
+          created_at?: string
+          decision_at?: string | null
+          documents?: Json
+          duplicate_of?: string | null
+          duplicate_score?: number
+          email?: string | null
+          full_name_ar?: string
+          full_name_en?: string | null
+          governorate?: string | null
+          id?: string
+          metadata?: Json
+          normalized_name_ar?: string
+          phone?: string
+          phone_e164?: string
+          practice_wishlist?: Json
+          reviewer_id?: string | null
+          reviewer_notes?: string | null
+          status?: Database["public"]["Enums"]["hc_join_status"]
+          submitter_user_id?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hc_doctor_join_submissions_duplicate_of_fkey"
+            columns: ["duplicate_of"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hc_doctor_locations: {
         Row: {
           created_at: string
@@ -2640,6 +2729,78 @@ export type Database = {
           },
           {
             foreignKeyName: "hc_doctor_locations_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "hc_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hc_doctor_practices: {
+        Row: {
+          assistant_phone: string | null
+          booking_method: Database["public"]["Enums"]["hc_booking_method"]
+          consultation_duration_min: number | null
+          created_at: string
+          doctor_id: string
+          gallery: Json
+          id: string
+          is_active: boolean
+          is_primary: boolean
+          location_id: string
+          notes: string | null
+          phone: string | null
+          practice_type: Database["public"]["Enums"]["hc_practice_type"]
+          updated_at: string
+          whatsapp: string | null
+          working_hours: Json
+        }
+        Insert: {
+          assistant_phone?: string | null
+          booking_method?: Database["public"]["Enums"]["hc_booking_method"]
+          consultation_duration_min?: number | null
+          created_at?: string
+          doctor_id: string
+          gallery?: Json
+          id?: string
+          is_active?: boolean
+          is_primary?: boolean
+          location_id: string
+          notes?: string | null
+          phone?: string | null
+          practice_type?: Database["public"]["Enums"]["hc_practice_type"]
+          updated_at?: string
+          whatsapp?: string | null
+          working_hours?: Json
+        }
+        Update: {
+          assistant_phone?: string | null
+          booking_method?: Database["public"]["Enums"]["hc_booking_method"]
+          consultation_duration_min?: number | null
+          created_at?: string
+          doctor_id?: string
+          gallery?: Json
+          id?: string
+          is_active?: boolean
+          is_primary?: boolean
+          location_id?: string
+          notes?: string | null
+          phone?: string | null
+          practice_type?: Database["public"]["Enums"]["hc_practice_type"]
+          updated_at?: string
+          whatsapp?: string | null
+          working_hours?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hc_doctor_practices_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hc_doctor_practices_location_id_fkey"
             columns: ["location_id"]
             isOneToOne: false
             referencedRelation: "hc_locations"
@@ -2732,21 +2893,45 @@ export type Database = {
       }
       hc_doctors: {
         Row: {
+          academic_title: string | null
+          accepted_insurance: string[]
+          awards: Json
           bio_ar: string | null
           bio_en: string | null
+          certificates: Json
+          confidence_score: number
+          consultation_fee_max: number | null
+          consultation_fee_min: number | null
           created_at: string
+          currency: string
+          emergency_available: boolean
           full_name_ar: string
           full_name_en: string | null
+          gallery: Json
           gender: string | null
           id: string
+          intro_video_url: string | null
           is_public: boolean
           languages: string[]
+          last_verified_at: string | null
+          medical_title: string | null
           metadata: Json
+          normalized_name_ar: string | null
           organization_id: string | null
+          phone_e164: string | null
           photo_url: string | null
+          profile_completeness: number
+          qr_token: string | null
           rejection_reason: string | null
+          seo_desc_ar: string | null
+          seo_title_ar: string | null
+          services: Json
           slug: string
+          source: string
+          sub_specialties: string[]
+          telemedicine_ready: boolean
           title: string | null
+          trust_score: number
           updated_at: string
           user_id: string | null
           verification_status: Database["public"]["Enums"]["hc_verification_status"]
@@ -2755,21 +2940,45 @@ export type Database = {
           years_experience: number | null
         }
         Insert: {
+          academic_title?: string | null
+          accepted_insurance?: string[]
+          awards?: Json
           bio_ar?: string | null
           bio_en?: string | null
+          certificates?: Json
+          confidence_score?: number
+          consultation_fee_max?: number | null
+          consultation_fee_min?: number | null
           created_at?: string
+          currency?: string
+          emergency_available?: boolean
           full_name_ar: string
           full_name_en?: string | null
+          gallery?: Json
           gender?: string | null
           id?: string
+          intro_video_url?: string | null
           is_public?: boolean
           languages?: string[]
+          last_verified_at?: string | null
+          medical_title?: string | null
           metadata?: Json
+          normalized_name_ar?: string | null
           organization_id?: string | null
+          phone_e164?: string | null
           photo_url?: string | null
+          profile_completeness?: number
+          qr_token?: string | null
           rejection_reason?: string | null
+          seo_desc_ar?: string | null
+          seo_title_ar?: string | null
+          services?: Json
           slug: string
+          source?: string
+          sub_specialties?: string[]
+          telemedicine_ready?: boolean
           title?: string | null
+          trust_score?: number
           updated_at?: string
           user_id?: string | null
           verification_status?: Database["public"]["Enums"]["hc_verification_status"]
@@ -2778,21 +2987,45 @@ export type Database = {
           years_experience?: number | null
         }
         Update: {
+          academic_title?: string | null
+          accepted_insurance?: string[]
+          awards?: Json
           bio_ar?: string | null
           bio_en?: string | null
+          certificates?: Json
+          confidence_score?: number
+          consultation_fee_max?: number | null
+          consultation_fee_min?: number | null
           created_at?: string
+          currency?: string
+          emergency_available?: boolean
           full_name_ar?: string
           full_name_en?: string | null
+          gallery?: Json
           gender?: string | null
           id?: string
+          intro_video_url?: string | null
           is_public?: boolean
           languages?: string[]
+          last_verified_at?: string | null
+          medical_title?: string | null
           metadata?: Json
+          normalized_name_ar?: string | null
           organization_id?: string | null
+          phone_e164?: string | null
           photo_url?: string | null
+          profile_completeness?: number
+          qr_token?: string | null
           rejection_reason?: string | null
+          seo_desc_ar?: string | null
+          seo_title_ar?: string | null
+          services?: Json
           slug?: string
+          source?: string
+          sub_specialties?: string[]
+          telemedicine_ready?: boolean
           title?: string | null
+          trust_score?: number
           updated_at?: string
           user_id?: string | null
           verification_status?: Database["public"]["Enums"]["hc_verification_status"]
@@ -2988,11 +3221,15 @@ export type Database = {
           created_at: string
           doctor_id: string
           documents: Json
+          duplicate_of: string | null
           id: string
+          photo_review_status: string | null
           review_notes: string | null
           reviewed_at: string | null
           reviewer_id: string | null
+          reviewer_notes: string | null
           status: Database["public"]["Enums"]["hc_verification_status"]
+          status_history: Json
           submitted_by: string | null
           updated_at: string
         }
@@ -3000,11 +3237,15 @@ export type Database = {
           created_at?: string
           doctor_id: string
           documents?: Json
+          duplicate_of?: string | null
           id?: string
+          photo_review_status?: string | null
           review_notes?: string | null
           reviewed_at?: string | null
           reviewer_id?: string | null
+          reviewer_notes?: string | null
           status?: Database["public"]["Enums"]["hc_verification_status"]
+          status_history?: Json
           submitted_by?: string | null
           updated_at?: string
         }
@@ -3012,11 +3253,15 @@ export type Database = {
           created_at?: string
           doctor_id?: string
           documents?: Json
+          duplicate_of?: string | null
           id?: string
+          photo_review_status?: string | null
           review_notes?: string | null
           reviewed_at?: string | null
           reviewer_id?: string | null
+          reviewer_notes?: string | null
           status?: Database["public"]["Enums"]["hc_verification_status"]
+          status_history?: Json
           submitted_by?: string | null
           updated_at?: string
         }
@@ -3024,6 +3269,13 @@ export type Database = {
           {
             foreignKeyName: "hc_verification_requests_doctor_id_fkey"
             columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hc_verification_requests_duplicate_of_fkey"
+            columns: ["duplicate_of"]
             isOneToOne: false
             referencedRelation: "hc_doctors"
             referencedColumns: ["id"]
@@ -7990,6 +8242,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      hc_approve_join_submission: {
+        Args: { _submission: string }
+        Returns: string
+      }
       hc_create_appointment: {
         Args: {
           _doctor: string
@@ -8014,6 +8270,16 @@ export type Database = {
         }
         Returns: string
       }
+      hc_detect_doctor_duplicates: {
+        Args: { _name_ar: string; _phone: string }
+        Returns: {
+          doctor_id: string
+          full_name_ar: string
+          phone_e164: string
+          score: number
+          slug: string
+        }[]
+      }
       hc_emit_event: {
         Args: {
           _entity_id: string
@@ -8023,6 +8289,13 @@ export type Database = {
         }
         Returns: undefined
       }
+      hc_normalize_ar: { Args: { _s: string }; Returns: string }
+      hc_normalize_doctor_row: { Args: { _doctor: string }; Returns: undefined }
+      hc_recompute_profile_completeness: {
+        Args: { _doctor: string }
+        Returns: number
+      }
+      hc_recompute_trust_score: { Args: { _doctor: string }; Returns: number }
       hc_submit_verification: {
         Args: { _doctor: string; _documents?: Json }
         Returns: string
@@ -8428,11 +8701,32 @@ export type Database = {
         | "completed"
         | "cancelled"
         | "no_show"
+      hc_booking_method:
+        | "walk_in"
+        | "phone"
+        | "whatsapp"
+        | "online"
+        | "assistant"
+      hc_join_status:
+        | "new"
+        | "reviewing"
+        | "approved"
+        | "rejected"
+        | "duplicate"
       hc_location_kind:
         | "clinic"
         | "hospital"
         | "medical_center"
         | "pharmacy_clinic"
+      hc_practice_type:
+        | "gov_hospital"
+        | "private_hospital"
+        | "military_hospital"
+        | "teaching_hospital"
+        | "clinic"
+        | "medical_center"
+        | "charity"
+        | "ngo"
       hc_specialty_status: "active" | "inactive"
       hc_verification_status: "pending" | "verified" | "rejected"
       inv_expiry_tier: "NEAR_90" | "NEAR_60" | "NEAR_30" | "EXPIRED"
@@ -8733,11 +9027,29 @@ export const Constants = {
         "cancelled",
         "no_show",
       ],
+      hc_booking_method: [
+        "walk_in",
+        "phone",
+        "whatsapp",
+        "online",
+        "assistant",
+      ],
+      hc_join_status: ["new", "reviewing", "approved", "rejected", "duplicate"],
       hc_location_kind: [
         "clinic",
         "hospital",
         "medical_center",
         "pharmacy_clinic",
+      ],
+      hc_practice_type: [
+        "gov_hospital",
+        "private_hospital",
+        "military_hospital",
+        "teaching_hospital",
+        "clinic",
+        "medical_center",
+        "charity",
+        "ngo",
       ],
       hc_specialty_status: ["active", "inactive"],
       hc_verification_status: ["pending", "verified", "rejected"],
