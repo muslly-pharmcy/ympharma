@@ -1,0 +1,9 @@
+// Inventory domain event names — emitted by DB RPCs into agent_events.
+export const INVENTORY_EVENTS = {
+  STOCK_RECEIVED: "STOCK_RECEIVED",
+  STOCK_MOVEMENT_CREATED: "STOCK_MOVEMENT_CREATED",
+  TRANSFER_CREATED: "TRANSFER_CREATED",
+  TRANSFER_COMPLETED: "TRANSFER_COMPLETED",
+  EXPIRY_ALERT_CREATED: "EXPIRY_ALERT_CREATED",
+} as const;
+export type InventoryEventName = (typeof INVENTORY_EVENTS)[keyof typeof INVENTORY_EVENTS];
