@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { searchMedicinesIntelligent } from "@/modules/product-intelligence/server/intelligence.functions";
+import { searchMedicinesIntelligent } from "@/modules/product-intelligence/functions/intelligence.functions";
 import type { SearchHit } from "@/modules/product-intelligence/domain/types";
 import { canonicalQuery } from "@/modules/product-intelligence/domain/normalize";
 
