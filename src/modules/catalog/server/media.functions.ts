@@ -9,15 +9,12 @@ import {
   ALLOWED_MIME,
   MAX_MEDIA_BYTES,
 } from "../domain/schemas";
-import { AppError } from "@/core/errors/AppError";
+import { ValidationError } from "@/core/errors/AppError";
 
 const BUCKET = "catalog-media";
 const SIGNED_UPLOAD_TTL_SEC = 600;
 
-async function productOrg(
-  supabase: ReturnType<typeof getCtx>,
-  productId: string,
-): Promise<string> {
+async function productOrg(supabase: any, productId: string): Promise<string> {
   const { data, error } = await supabase
     .from("catalog_products" as never)
     .select("organization_id")
@@ -25,9 +22,6 @@ async function productOrg(
     .single();
   if (error) throw error;
   return (data as { organization_id: string }).organization_id;
-}
-function getCtx<T>(x: T): T {
-  return x;
 }
 
 export const requestMediaUploadUrl = createServerFn({ method: "POST" })
