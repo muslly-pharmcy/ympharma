@@ -32,5 +32,15 @@ Every event carries:
 | `prescription.approved`    | clinical             | commerce, notifications               |
 | `user.registered`          | auth                 | notifications, growth-engine          |
 | `user.invited`             | auth                 | notifications                         |
+| `USER_CREATED`             | identity (DB trigger)| notifications, growth-engine          |
+| `USER_UPDATED`             | identity (DB trigger)| notifications, audit                  |
+| `PROFILE_COMPLETED`        | identity (DB trigger)| notifications, growth-engine          |
+| `ORGANIZATION_MEMBER_ADDED`| identity (DB trigger)| notifications, audit                  |
+| `ORGANIZATION_MEMBER_REMOVED`| identity (DB trigger)| notifications, audit                |
+| `ROLE_CHANGED`             | identity (DB trigger)| notifications, audit, permissions     |
+| `BRANCH_CREATED`           | identity (DB trigger)| audit, inventory (future)             |
+| `BRANCH_UPDATED`           | identity (DB trigger)| audit                                 |
+| `BRANCH_MEMBER_ASSIGNED`   | identity (DB trigger)| notifications, audit                  |
+| `BRANCH_MEMBER_UNASSIGNED` | identity (DB trigger)| notifications, audit                  |
 
-Producers/consumers are indicative — wiring happens in Phase 3+. Adding a new event: append to `constants.ts`, define a Zod schema in the owning module, update this table in the same PR.
+Producers/consumers are indicative — wiring extends per phase. Adding a new event: append to `constants.ts`, define a Zod schema in the owning module, update this table in the same PR.

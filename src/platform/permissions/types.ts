@@ -1,11 +1,20 @@
 export type Role = "owner" | "admin" | "manager" | "member" | "viewer";
 
-// Permission strings use dotted namespacing: "<domain>.<action>".
-// Add entries here as modules onboard; treat as an open string on the type side.
+// Permission keys — matches public.permissions seed in Phase 3.
 export type Permission =
-  | "admin.read"
-  | "admin.write"
   | "org.manage"
-  | "org.members.read"
-  | "org.members.write"
+  | "org.read"
+  | "members.manage"
+  | "members.read"
+  | "branches.manage"
+  | "branches.read"
+  | "inventory.read"
+  | "inventory.update"
+  | "orders.read"
+  | "orders.manage"
+  | "prescriptions.read"
+  | "prescriptions.review"
+  | "patients.view"
+  | "reports.export"
+  | "subscriptions.manage"
   | (string & {});

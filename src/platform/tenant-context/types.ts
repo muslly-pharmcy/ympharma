@@ -7,7 +7,16 @@ export type OrganizationType =
   | "CORPORATE";
 
 export type OrganizationStatus = "active" | "suspended" | "archived";
-export type OrganizationRole = "owner" | "admin" | "member";
+export type OrganizationRole =
+  | "owner"
+  | "admin"
+  | "manager"
+  | "employee"
+  | "pharmacist"
+  | "doctor"
+  | "supplier_user"
+  | "insurance_user"
+  | "customer";
 export type MemberStatus = "active" | "invited" | "suspended" | "removed";
 
 export type OrgMetadataValue =

@@ -1,23 +1,14 @@
 // ============================================================
-// PermissionService — adapter over legacy user_roles / has_role.
-// Do NOT replace existing role gating yet; this is a forward-compatible
-// facade so modules can start writing against a stable contract.
+// PermissionService — org-scoped permission checks backed by
+// public.has_org_permission RPC. Legacy hasRole retained for
+// admin/owner platform-level checks (public.user_roles).
 // ============================================================
 import { ForbiddenError } from "@/core/errors/AppError";
 import type { Permission, Role } from "./types";
 
-// Initial mapping: permission -> roles that satisfy it.
-// Extend as modules onboard. Keep additive.
-const PERMISSION_ROLE_MAP: Record<string, Role[]> = {
-  "admin.read": ["owner", "admin"],
-  "admin.write": ["owner", "admin"],
-  "org.manage": ["owner", "admin"],
-  "org.members.read": ["owner", "admin", "manager"],
-  "org.members.write": ["owner", "admin"],
-};
-
 export interface PermissionCheckContext {
   orgId?: string | null;
+  branchId?: string | null;
 }
 
 export const PermissionService = {
@@ -31,14 +22,13 @@ export const PermissionService = {
   async check(
     userId: string,
     permission: Permission,
-    _ctx: PermissionCheckContext = {},
+    ctx: PermissionCheckContext = {},
   ): Promise<boolean> {
-    const roles = PERMISSION_ROLE_MAP[permission];
-    if (!roles || roles.length === 0) return false;
-    for (const r of roles) {
-      if (await this.hasRole(userId, r)) return true;
-    }
-    return false;
+    if (!ctx.orgId) return false;
+    const { hasOrgPermission } = await import(
+      "./adapters/orgPermissionAdapter.server"
+    );
+    return hasOrgPermission(userId, ctx.orgId, permission, ctx.branchId ?? undefined);
   },
 
   async requireRole(userId: string, role: Role): Promise<void> {
@@ -55,7 +45,7 @@ export const PermissionService = {
     if (!(await this.check(userId, permission, ctx))) {
       throw new ForbiddenError(
         "Insufficient permission",
-        `requires permission=${permission}`,
+        `requires permission=${permission}${ctx.orgId ? ` in org=${ctx.orgId}` : ""}`,
       );
     }
   },
