@@ -5,7 +5,7 @@ import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import {
   pnGetPharmacyPublic,
   pnListPharmacyProducts,
-} from "@/modules/pharmacy-network/server/pharmacies.functions";
+} from "@/modules/pharmacy-network/functions/pharmacies.functions";
 
 const detailQO = (slug: string) =>
   queryOptions({

@@ -3,4 +3,4 @@ export {
   pnSearchMedicineNearby,
   pnGetPharmacyPublic,
   pnListPharmacyProducts,
-} from "./server/pharmacies.functions";
+} from "./functions/pharmacies.functions";

@@ -930,6 +930,259 @@ export type Database = {
         }
         Relationships: []
       }
+      billing_audit_events: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          id: string
+          payload: Json
+          target_id: string | null
+          target_table: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          payload?: Json
+          target_id?: string | null
+          target_table?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          payload?: Json
+          target_id?: string | null
+          target_table?: string | null
+        }
+        Relationships: []
+      }
+      billing_invoices: {
+        Row: {
+          amount_yer: number
+          created_at: string
+          currency: string
+          due_at: string | null
+          external_ref: string | null
+          id: string
+          issued_at: string | null
+          metadata: Json
+          paid_at: string | null
+          period_end: string | null
+          period_start: string | null
+          status: Database["public"]["Enums"]["billing_invoice_status"]
+          subscription_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_yer: number
+          created_at?: string
+          currency?: string
+          due_at?: string | null
+          external_ref?: string | null
+          id?: string
+          issued_at?: string | null
+          metadata?: Json
+          paid_at?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          status?: Database["public"]["Enums"]["billing_invoice_status"]
+          subscription_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_yer?: number
+          created_at?: string
+          currency?: string
+          due_at?: string | null
+          external_ref?: string | null
+          id?: string
+          issued_at?: string | null
+          metadata?: Json
+          paid_at?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          status?: Database["public"]["Enums"]["billing_invoice_status"]
+          subscription_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_invoices_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "billing_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_ledger: {
+        Row: {
+          amount_yer: number
+          created_at: string
+          created_by: string | null
+          entry_type: Database["public"]["Enums"]["billing_ledger_entry"]
+          id: string
+          invoice_id: string | null
+          notes: string | null
+          subject_id: string | null
+          subject_type: Database["public"]["Enums"]["billing_audience"] | null
+        }
+        Insert: {
+          amount_yer: number
+          created_at?: string
+          created_by?: string | null
+          entry_type: Database["public"]["Enums"]["billing_ledger_entry"]
+          id?: string
+          invoice_id?: string | null
+          notes?: string | null
+          subject_id?: string | null
+          subject_type?: Database["public"]["Enums"]["billing_audience"] | null
+        }
+        Update: {
+          amount_yer?: number
+          created_at?: string
+          created_by?: string | null
+          entry_type?: Database["public"]["Enums"]["billing_ledger_entry"]
+          id?: string
+          invoice_id?: string | null
+          notes?: string | null
+          subject_id?: string | null
+          subject_type?: Database["public"]["Enums"]["billing_audience"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_ledger_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "billing_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_plans: {
+        Row: {
+          audience: Database["public"]["Enums"]["billing_audience"]
+          code: string
+          created_at: string
+          description_ar: string | null
+          features: Json
+          id: string
+          is_active: boolean
+          name_ar: string
+          name_en: string | null
+          price_month_yer: number
+          price_year_yer: number
+          sort_order: number
+          tier: Database["public"]["Enums"]["billing_tier"]
+          updated_at: string
+        }
+        Insert: {
+          audience: Database["public"]["Enums"]["billing_audience"]
+          code: string
+          created_at?: string
+          description_ar?: string | null
+          features?: Json
+          id?: string
+          is_active?: boolean
+          name_ar: string
+          name_en?: string | null
+          price_month_yer?: number
+          price_year_yer?: number
+          sort_order?: number
+          tier: Database["public"]["Enums"]["billing_tier"]
+          updated_at?: string
+        }
+        Update: {
+          audience?: Database["public"]["Enums"]["billing_audience"]
+          code?: string
+          created_at?: string
+          description_ar?: string | null
+          features?: Json
+          id?: string
+          is_active?: boolean
+          name_ar?: string
+          name_en?: string | null
+          price_month_yer?: number
+          price_year_yer?: number
+          sort_order?: number
+          tier?: Database["public"]["Enums"]["billing_tier"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      billing_subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          current_period_end: string | null
+          id: string
+          metadata: Json
+          organization_id: string | null
+          plan_id: string
+          started_at: string
+          status: Database["public"]["Enums"]["billing_sub_status"]
+          subject_id: string
+          subject_type: Database["public"]["Enums"]["billing_audience"]
+          trial_ends_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_period_end?: string | null
+          id?: string
+          metadata?: Json
+          organization_id?: string | null
+          plan_id: string
+          started_at?: string
+          status?: Database["public"]["Enums"]["billing_sub_status"]
+          subject_id: string
+          subject_type: Database["public"]["Enums"]["billing_audience"]
+          trial_ends_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_period_end?: string | null
+          id?: string
+          metadata?: Json
+          organization_id?: string | null
+          plan_id?: string
+          started_at?: string
+          status?: Database["public"]["Enums"]["billing_sub_status"]
+          subject_id?: string
+          subject_type?: Database["public"]["Enums"]["billing_audience"]
+          trial_ends_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_subscriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "billing_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       branch_inventory: {
         Row: {
           branch_id: string
@@ -2956,6 +3209,108 @@ export type Database = {
           window_start?: string
         }
         Relationships: []
+      }
+      ins_companies: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          logo_url: string | null
+          metadata: Json
+          name_ar: string
+          name_en: string | null
+          phone: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          metadata?: Json
+          name_ar: string
+          name_en?: string | null
+          phone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          metadata?: Json
+          name_ar?: string
+          name_en?: string | null
+          phone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      ins_patient_coverage: {
+        Row: {
+          company_id: string
+          copay_percent: number | null
+          created_at: string
+          id: string
+          metadata: Json
+          notes: string | null
+          patient_id: string | null
+          patient_user_id: string | null
+          policy_no: string | null
+          updated_at: string
+          valid_from: string | null
+          valid_to: string | null
+        }
+        Insert: {
+          company_id: string
+          copay_percent?: number | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          patient_id?: string | null
+          patient_user_id?: string | null
+          policy_no?: string | null
+          updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
+        }
+        Update: {
+          company_id?: string
+          copay_percent?: number | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          patient_id?: string | null
+          patient_user_id?: string | null
+          policy_no?: string | null
+          updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ins_patient_coverage_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "ins_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ins_patient_coverage_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "hc_patients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       insurance_claims: {
         Row: {
@@ -7294,6 +7649,32 @@ export type Database = {
         }[]
       }
       auto_populate_bundle_items: { Args: never; Returns: number }
+      billing_activate_plan: {
+        Args: {
+          _organization_id?: string
+          _plan_code: string
+          _subject_id: string
+          _subject_type: Database["public"]["Enums"]["billing_audience"]
+          _trial_days?: number
+        }
+        Returns: string
+      }
+      billing_cancel_subscription: {
+        Args: { _at_period_end?: boolean; _subscription_id: string }
+        Returns: undefined
+      }
+      billing_issue_invoice: {
+        Args: {
+          _period_end: string
+          _period_start: string
+          _subscription_id: string
+        }
+        Returns: string
+      }
+      billing_record_payment: {
+        Args: { _amount_yer: number; _invoice_id: string; _notes?: string }
+        Returns: undefined
+      }
       bootstrap_owner: { Args: never; Returns: boolean }
       branch_reorder_suggestions: {
         Args: {
@@ -8007,6 +8388,22 @@ export type Database = {
         | "MARKETING_QUEUE"
         | "INVENTORY"
       app_role: "admin" | "user" | "owner"
+      billing_audience: "pharmacy" | "doctor" | "supplier" | "organization"
+      billing_invoice_status: "draft" | "issued" | "paid" | "void" | "failed"
+      billing_ledger_entry: "charge" | "refund" | "credit" | "adjustment"
+      billing_sub_status:
+        | "trialing"
+        | "active"
+        | "past_due"
+        | "cancelled"
+        | "expired"
+      billing_tier:
+        | "free"
+        | "basic"
+        | "premium"
+        | "enterprise"
+        | "professional"
+        | "analytics"
       branch_role: "manager" | "staff" | "viewer"
       branch_type: "WAREHOUSE" | "BRANCH" | "OFFICE"
       catalog_ai_signal_type:
@@ -8291,6 +8688,24 @@ export const Constants = {
         "INVENTORY",
       ],
       app_role: ["admin", "user", "owner"],
+      billing_audience: ["pharmacy", "doctor", "supplier", "organization"],
+      billing_invoice_status: ["draft", "issued", "paid", "void", "failed"],
+      billing_ledger_entry: ["charge", "refund", "credit", "adjustment"],
+      billing_sub_status: [
+        "trialing",
+        "active",
+        "past_due",
+        "cancelled",
+        "expired",
+      ],
+      billing_tier: [
+        "free",
+        "basic",
+        "premium",
+        "enterprise",
+        "professional",
+        "analytics",
+      ],
       branch_role: ["manager", "staff", "viewer"],
       branch_type: ["WAREHOUSE", "BRANCH", "OFFICE"],
       catalog_ai_signal_type: [

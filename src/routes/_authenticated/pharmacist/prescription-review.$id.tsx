@@ -18,7 +18,7 @@ import {
   rejectPrescription,
   escalatePrescription,
 } from "@/lib/prescription-review.functions";
-import { searchMedicinesIntelligent } from "@/modules/product-intelligence/server/intelligence.functions";
+import { searchMedicinesIntelligent } from "@/modules/product-intelligence/functions/intelligence.functions";
 
 export const Route = createFileRoute("/_authenticated/pharmacist/prescription-review/$id")({
   head: () => ({ meta: [{ title: "مراجعة وصفة | Muslly" }] }),
