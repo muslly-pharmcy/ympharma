@@ -3706,6 +3706,258 @@ export type Database = {
           },
         ]
       }
+      invoice_audit_events: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          event_type: Database["public"]["Enums"]["invoice_audit_event_type"]
+          id: string
+          payload: Json
+          upload_id: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type: Database["public"]["Enums"]["invoice_audit_event_type"]
+          id?: string
+          payload?: Json
+          upload_id: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type?: Database["public"]["Enums"]["invoice_audit_event_type"]
+          id?: string
+          payload?: Json
+          upload_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_audit_events_upload_id_fkey"
+            columns: ["upload_id"]
+            isOneToOne: false
+            referencedRelation: "invoice_uploads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_extractions: {
+        Row: {
+          currency: string | null
+          extracted_at: string
+          id: string
+          invoice_date: string | null
+          invoice_number: string | null
+          model_used: string | null
+          ocr_confidence: number | null
+          raw_ocr_text: string | null
+          subtotal: number | null
+          supplier_name_raw: string | null
+          tax: number | null
+          total: number | null
+          upload_id: string
+        }
+        Insert: {
+          currency?: string | null
+          extracted_at?: string
+          id?: string
+          invoice_date?: string | null
+          invoice_number?: string | null
+          model_used?: string | null
+          ocr_confidence?: number | null
+          raw_ocr_text?: string | null
+          subtotal?: number | null
+          supplier_name_raw?: string | null
+          tax?: number | null
+          total?: number | null
+          upload_id: string
+        }
+        Update: {
+          currency?: string | null
+          extracted_at?: string
+          id?: string
+          invoice_date?: string | null
+          invoice_number?: string | null
+          model_used?: string | null
+          ocr_confidence?: number | null
+          raw_ocr_text?: string | null
+          subtotal?: number | null
+          supplier_name_raw?: string | null
+          tax?: number | null
+          total?: number | null
+          upload_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_extractions_upload_id_fkey"
+            columns: ["upload_id"]
+            isOneToOne: false
+            referencedRelation: "invoice_uploads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_line_items: {
+        Row: {
+          batch_number: string | null
+          created_at: string
+          detected_name: string | null
+          detected_name_normalized: string | null
+          expiry_date: string | null
+          extraction_id: string
+          id: string
+          line_no: number
+          match_confidence: number | null
+          match_source: Database["public"]["Enums"]["invoice_match_source"]
+          matched_product_id: string | null
+          quantity: number | null
+          raw_text: string | null
+          status: Database["public"]["Enums"]["invoice_line_status"]
+          unit_cost: number | null
+          unit_price: number | null
+          updated_at: string
+          user_confirmed_cost: number | null
+          user_confirmed_expiry: string | null
+          user_confirmed_product_id: string | null
+          user_confirmed_qty: number | null
+        }
+        Insert: {
+          batch_number?: string | null
+          created_at?: string
+          detected_name?: string | null
+          detected_name_normalized?: string | null
+          expiry_date?: string | null
+          extraction_id: string
+          id?: string
+          line_no: number
+          match_confidence?: number | null
+          match_source?: Database["public"]["Enums"]["invoice_match_source"]
+          matched_product_id?: string | null
+          quantity?: number | null
+          raw_text?: string | null
+          status?: Database["public"]["Enums"]["invoice_line_status"]
+          unit_cost?: number | null
+          unit_price?: number | null
+          updated_at?: string
+          user_confirmed_cost?: number | null
+          user_confirmed_expiry?: string | null
+          user_confirmed_product_id?: string | null
+          user_confirmed_qty?: number | null
+        }
+        Update: {
+          batch_number?: string | null
+          created_at?: string
+          detected_name?: string | null
+          detected_name_normalized?: string | null
+          expiry_date?: string | null
+          extraction_id?: string
+          id?: string
+          line_no?: number
+          match_confidence?: number | null
+          match_source?: Database["public"]["Enums"]["invoice_match_source"]
+          matched_product_id?: string | null
+          quantity?: number | null
+          raw_text?: string | null
+          status?: Database["public"]["Enums"]["invoice_line_status"]
+          unit_cost?: number | null
+          unit_price?: number | null
+          updated_at?: string
+          user_confirmed_cost?: number | null
+          user_confirmed_expiry?: string | null
+          user_confirmed_product_id?: string | null
+          user_confirmed_qty?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_line_items_extraction_id_fkey"
+            columns: ["extraction_id"]
+            isOneToOne: false
+            referencedRelation: "invoice_extractions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_line_items_matched_product_id_fkey"
+            columns: ["matched_product_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_line_items_user_confirmed_product_id_fkey"
+            columns: ["user_confirmed_product_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_uploads: {
+        Row: {
+          branch_id: string | null
+          created_at: string
+          id: string
+          mime_type: string
+          notes: string | null
+          organization_id: string
+          source: Database["public"]["Enums"]["invoice_upload_source"]
+          status: Database["public"]["Enums"]["invoice_upload_status"]
+          storage_path: string
+          supplier_id: string | null
+          updated_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          branch_id?: string | null
+          created_at?: string
+          id?: string
+          mime_type: string
+          notes?: string | null
+          organization_id: string
+          source?: Database["public"]["Enums"]["invoice_upload_source"]
+          status?: Database["public"]["Enums"]["invoice_upload_status"]
+          storage_path: string
+          supplier_id?: string | null
+          updated_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          branch_id?: string | null
+          created_at?: string
+          id?: string
+          mime_type?: string
+          notes?: string | null
+          organization_id?: string
+          source?: Database["public"]["Enums"]["invoice_upload_source"]
+          status?: Database["public"]["Enums"]["invoice_upload_status"]
+          storage_path?: string
+          supplier_id?: string | null
+          updated_at?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_uploads_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_uploads_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_uploads_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "sup_suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoices: {
         Row: {
           created_at: string
@@ -7423,6 +7675,24 @@ export type Database = {
         | "dispatched"
         | "received"
         | "cancelled"
+      invoice_audit_event_type:
+        | "uploaded"
+        | "extraction_started"
+        | "extraction_completed"
+        | "extraction_failed"
+        | "line_reviewed"
+        | "committed"
+        | "cancelled"
+      invoice_line_status: "pending" | "confirmed" | "skipped"
+      invoice_match_source: "exact" | "alias" | "fuzzy" | "manual" | "unmatched"
+      invoice_upload_source: "camera" | "file"
+      invoice_upload_status:
+        | "uploaded"
+        | "extracting"
+        | "extracted"
+        | "failed"
+        | "committed"
+        | "cancelled"
       org_role:
         | "owner"
         | "admin"
@@ -7684,6 +7954,26 @@ export const Constants = {
         "packed",
         "dispatched",
         "received",
+        "cancelled",
+      ],
+      invoice_audit_event_type: [
+        "uploaded",
+        "extraction_started",
+        "extraction_completed",
+        "extraction_failed",
+        "line_reviewed",
+        "committed",
+        "cancelled",
+      ],
+      invoice_line_status: ["pending", "confirmed", "skipped"],
+      invoice_match_source: ["exact", "alias", "fuzzy", "manual", "unmatched"],
+      invoice_upload_source: ["camera", "file"],
+      invoice_upload_status: [
+        "uploaded",
+        "extracting",
+        "extracted",
+        "failed",
+        "committed",
         "cancelled",
       ],
       org_role: [
