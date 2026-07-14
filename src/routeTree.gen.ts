@@ -124,6 +124,7 @@ import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiPublicDoctorJoinRouteImport } from './routes/api/public/doctor-join'
 import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
 import { Route as ApiInternalCollectFeedbackRouteImport } from './routes/api/internal/collect-feedback'
+import { Route as AuthenticatedPharmacistPrescriptionQueueRouteImport } from './routes/_authenticated/pharmacist/prescription-queue'
 import { Route as AuthenticatedPharmacistInvoiceUploadRouteImport } from './routes/_authenticated/pharmacist/invoice-upload'
 import { Route as AuthenticatedPharmacistInvoiceListRouteImport } from './routes/_authenticated/pharmacist/invoice-list'
 import { Route as AuthenticatedPharmacistDashboardRouteImport } from './routes/_authenticated/pharmacist/dashboard'
@@ -773,6 +774,12 @@ const ApiInternalCollectFeedbackRoute =
     path: '/api/internal/collect-feedback',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedPharmacistPrescriptionQueueRoute =
+  AuthenticatedPharmacistPrescriptionQueueRouteImport.update({
+    id: '/pharmacist/prescription-queue',
+    path: '/pharmacist/prescription-queue',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPharmacistInvoiceUploadRoute =
   AuthenticatedPharmacistInvoiceUploadRouteImport.update({
     id: '/pharmacist/invoice-upload',
@@ -1190,6 +1197,7 @@ export interface FileRoutesByFullPath {
   '/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/pharmacist/invoice-list': typeof AuthenticatedPharmacistInvoiceListRoute
   '/pharmacist/invoice-upload': typeof AuthenticatedPharmacistInvoiceUploadRoute
+  '/pharmacist/prescription-queue': typeof AuthenticatedPharmacistPrescriptionQueueRoute
   '/api/internal/collect-feedback': typeof ApiInternalCollectFeedbackRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/doctor-join': typeof ApiPublicDoctorJoinRoute
@@ -1359,6 +1367,7 @@ export interface FileRoutesByTo {
   '/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/pharmacist/invoice-list': typeof AuthenticatedPharmacistInvoiceListRoute
   '/pharmacist/invoice-upload': typeof AuthenticatedPharmacistInvoiceUploadRoute
+  '/pharmacist/prescription-queue': typeof AuthenticatedPharmacistPrescriptionQueueRoute
   '/api/internal/collect-feedback': typeof ApiInternalCollectFeedbackRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/doctor-join': typeof ApiPublicDoctorJoinRoute
@@ -1530,6 +1539,7 @@ export interface FileRoutesById {
   '/_authenticated/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/_authenticated/pharmacist/invoice-list': typeof AuthenticatedPharmacistInvoiceListRoute
   '/_authenticated/pharmacist/invoice-upload': typeof AuthenticatedPharmacistInvoiceUploadRoute
+  '/_authenticated/pharmacist/prescription-queue': typeof AuthenticatedPharmacistPrescriptionQueueRoute
   '/api/internal/collect-feedback': typeof ApiInternalCollectFeedbackRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/doctor-join': typeof ApiPublicDoctorJoinRoute
@@ -1701,6 +1711,7 @@ export interface FileRouteTypes {
     | '/pharmacist/dashboard'
     | '/pharmacist/invoice-list'
     | '/pharmacist/invoice-upload'
+    | '/pharmacist/prescription-queue'
     | '/api/internal/collect-feedback'
     | '/api/public/contact'
     | '/api/public/doctor-join'
@@ -1870,6 +1881,7 @@ export interface FileRouteTypes {
     | '/pharmacist/dashboard'
     | '/pharmacist/invoice-list'
     | '/pharmacist/invoice-upload'
+    | '/pharmacist/prescription-queue'
     | '/api/internal/collect-feedback'
     | '/api/public/contact'
     | '/api/public/doctor-join'
@@ -2040,6 +2052,7 @@ export interface FileRouteTypes {
     | '/_authenticated/pharmacist/dashboard'
     | '/_authenticated/pharmacist/invoice-list'
     | '/_authenticated/pharmacist/invoice-upload'
+    | '/_authenticated/pharmacist/prescription-queue'
     | '/api/internal/collect-feedback'
     | '/api/public/contact'
     | '/api/public/doctor-join'
@@ -3058,6 +3071,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiInternalCollectFeedbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/pharmacist/prescription-queue': {
+      id: '/_authenticated/pharmacist/prescription-queue'
+      path: '/pharmacist/prescription-queue'
+      fullPath: '/pharmacist/prescription-queue'
+      preLoaderRoute: typeof AuthenticatedPharmacistPrescriptionQueueRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/pharmacist/invoice-upload': {
       id: '/_authenticated/pharmacist/invoice-upload'
       path: '/pharmacist/invoice-upload'
@@ -3450,6 +3470,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPharmacistDashboardRoute: typeof AuthenticatedPharmacistDashboardRoute
   AuthenticatedPharmacistInvoiceListRoute: typeof AuthenticatedPharmacistInvoiceListRoute
   AuthenticatedPharmacistInvoiceUploadRoute: typeof AuthenticatedPharmacistInvoiceUploadRoute
+  AuthenticatedPharmacistPrescriptionQueueRoute: typeof AuthenticatedPharmacistPrescriptionQueueRoute
   AuthenticatedPharmacistInvoiceReviewIdRoute: typeof AuthenticatedPharmacistInvoiceReviewIdRoute
 }
 
@@ -3476,6 +3497,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedPharmacistInvoiceListRoute,
   AuthenticatedPharmacistInvoiceUploadRoute:
     AuthenticatedPharmacistInvoiceUploadRoute,
+  AuthenticatedPharmacistPrescriptionQueueRoute:
+    AuthenticatedPharmacistPrescriptionQueueRoute,
   AuthenticatedPharmacistInvoiceReviewIdRoute:
     AuthenticatedPharmacistInvoiceReviewIdRoute,
 }
