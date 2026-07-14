@@ -1,161 +1,209 @@
 
-# Phoenix Phase 5 — Inventory Foundation
+# Phoenix Phase 6 — Doctor Foundation + Healthcare Directory
 
-Build enterprise inventory architecture. **No stock data migration, no marketplace activation.** Foundation only: schema, module scaffolds, RPCs, events, RLS, audit, and docs.
+Foundation only. **No booking UI, no prescription AI, no marketplace.** Mirrors the Phase 4/5 pattern (prefixed tables, RLS via `is_org_member` + `has_org_permission`, security-definer RPCs, event emission, module scaffolds).
 
 ## Scope Boundaries
 
-- New tables all prefixed `inv_*` / `wh_*` / `sup_*` to avoid collision with legacy `products`, `branch_inventory`, `inventory_*`, `inventory_transfers`, `transfer_items`. Legacy tables stay untouched and continue serving current app.
-- No backfill from legacy tables in this phase. A follow-up phase will migrate.
-- No UI wiring into existing admin pages; scaffold module `ui/` barrel only.
+- New tables prefixed `hc_*` (healthcare) to avoid collision with any legacy tables.
+- No backfill from any legacy doctor/prescription data.
+- No wiring into existing routes/admin pages; module `ui/` barrels only.
+- No cron activation, no public booking page, no notifications.
 
-## 1. Database Migration (single migration, follows 4-step GRANT rule)
+## 1. Database Migration (single migration, 4-step GRANT rule)
+
+New enums:
+- `hc_location_kind` — `clinic | hospital | medical_center | pharmacy_clinic`
+- `hc_verification_status` — `pending | verified | rejected`
+- `hc_appointment_status` — `requested | confirmed | completed | cancelled | no_show`
+- `hc_specialty_status` — `active | inactive`
 
 New tables in `public`:
 
-- `wh_warehouses` — org-scoped physical/logical location (`kind`: central | branch | virtual), FK `branch_id` nullable, `is_active`, `metadata`.
-- `wh_locations` — sub-locations inside a warehouse (aisle/shelf/bin), optional.
-- `sup_suppliers` — org-scoped supplier profile (name, legal_name, tax_id, contact JSONB, status, metadata).
-- `sup_supplier_products` — link `sup_suppliers` ↔ `catalog_products` with supplier SKU, lead time, default cost.
-- `inv_stock_batches` — one row per (warehouse, product, batch_no, expiry_date). Columns: `qty_on_hand`, `qty_reserved`, `cost`, `selling_price`, `received_at`, `supplier_id`, `metadata`. Unique key on (warehouse_id, product_id, coalesce(batch_no,''), coalesce(expiry_date,'infinity')).
-- `inv_stock_movements` — immutable ledger. `movement_type` enum: `STOCK_RECEIVED | STOCK_TRANSFERRED_OUT | STOCK_TRANSFERRED_IN | STOCK_SOLD | STOCK_ADJUSTED | STOCK_EXPIRED | STOCK_RESERVED | STOCK_RELEASED`. Fields: org, warehouse, product, batch_id, qty_delta, actor_id, reason, ref_type, ref_id, occurred_at.
-- `inv_transfers` — org-scoped transfer header. `status` enum: `draft | approved | reserved | picked | packed | dispatched | received | cancelled`. Fields: source_warehouse, dest_warehouse, requested_by, approved_by, timestamps per status.
-- `inv_transfer_items` — line items with `qty_requested`, `qty_reserved`, `qty_picked`, `qty_received`, batch_id nullable (auto-picked at reserve).
-- `inv_expiry_alerts` — pre-computed alert rows (batch_id, tier: `NEAR_30 | NEAR_60 | NEAR_90 | EXPIRED`, alerted_at). Populated by scheduled job (contract only, no cron activation).
-
-Enums: `wh_kind`, `inv_movement_type`, `inv_transfer_status`, `sup_status`.
+- `hc_specialties` — global catalog. Columns: `id`, `code` (unique slug), `name_ar`, `name_en`, `description_ar`, `description_en`, `status hc_specialty_status`, `sort_order`, timestamps. Not org-scoped (global reference data).
+- `hc_locations` — org-scoped facility. Columns: `id`, `organization_id`, `branch_id` (nullable), `kind hc_location_kind`, `name_ar`, `name_en`, `address`, `city`, `governorate`, `country` default `'YE'`, `lat numeric(9,6)`, `lng numeric(9,6)`, `phone`, `email`, `whatsapp`, `working_hours jsonb` (per weekday), `is_active`, `metadata jsonb`, timestamps.
+- `hc_doctors` — doctor profile. Columns: `id`, `organization_id` (nullable — independent doctors allowed), `user_id uuid` (nullable FK → `auth.users` for claimed profiles), `slug` (unique), `full_name_ar`, `full_name_en`, `title` (Dr/Prof/etc), `bio_ar`, `bio_en`, `photo_url`, `years_experience int`, `languages text[]`, `gender`, `verification_status hc_verification_status` default `pending`, `verified_at`, `verified_by`, `rejection_reason`, `is_public boolean` default `false`, `metadata jsonb`, timestamps.
+- `hc_doctor_specialties` — M:N link (`doctor_id`, `specialty_id`, `is_primary bool`), unique on pair.
+- `hc_doctor_qualifications` — degrees/certifications. `doctor_id`, `title`, `institution`, `year int`, `country`, `document_url` (nullable, private).
+- `hc_doctor_locations` — M:N doctor ↔ location with `role` (`consultant | resident | visiting | owner`).
+- `hc_doctor_availability` — weekly recurring schedule. `doctor_id`, `location_id`, `weekday smallint` (0-6), `start_time time`, `end_time time`, `slot_duration_minutes int` default 30, `is_active`.
+- `hc_availability_blocks` — one-off blocked ranges. `doctor_id`, `location_id` (nullable), `starts_at timestamptz`, `ends_at timestamptz`, `reason`.
+- `hc_patients` — patient shell (foundation only). `id`, `organization_id` (nullable), `user_id` (nullable), `full_name`, `phone`, `date_of_birth`, `gender`, `national_id_hash` (SHA256, nullable), `metadata jsonb`, timestamps. RLS: owner (`auth.uid() = user_id`) OR org member with `patients.read`.
+- `hc_appointments` — appointment entity. `id`, `organization_id`, `location_id`, `doctor_id`, `patient_id`, `starts_at timestamptz`, `ends_at timestamptz`, `status hc_appointment_status` default `requested`, `reason`, `notes` (private), `created_by`, `confirmed_at`, `completed_at`, `cancelled_at`, `cancel_reason`, timestamps. Constraint: `ends_at > starts_at`. Index on `(doctor_id, starts_at)`.
+- `hc_verification_requests` — verification workflow. `doctor_id`, `submitted_by`, `documents jsonb`, `status hc_verification_status`, `reviewer_id`, `review_notes`, `reviewed_at`, timestamps.
 
 Each `CREATE TABLE` followed by:
 ```
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.<t> TO authenticated;
 GRANT ALL ON public.<t> TO service_role;
+-- anon GRANT SELECT only on: hc_specialties, hc_locations, hc_doctors (public rows), hc_doctor_specialties, hc_doctor_locations
 ALTER TABLE ... ENABLE ROW LEVEL SECURITY;
 ```
 
-RLS pattern (mirrors Phase 4 catalog):
-- SELECT: `is_org_member(organization_id, auth.uid())` AND (for branch-scoped) branch access via existing `branch_user_assignments` OR `has_org_permission(org, 'inventory.read')`.
-- INSERT/UPDATE: `has_org_permission(org, 'inventory.write')` for stock; `has_org_permission(org, 'transfers.manage')` for transfers; `has_org_permission(org, 'suppliers.manage')` for suppliers.
-- `inv_stock_movements` write: service_role + security-definer RPCs only (no direct writes from clients).
+RLS matrix:
+- `hc_specialties`: public SELECT of `status='active'`; write via `has_role('admin')` only.
+- `hc_locations`: public SELECT of `is_active=true`; write via `has_org_permission(auth.uid(), org, 'healthcare.locations.manage')`.
+- `hc_doctors`: public SELECT of `is_public=true AND verification_status='verified'`; org-member SELECT of all org rows via `is_org_member(org, auth.uid())`; write via `has_org_permission(..., 'healthcare.doctors.manage')`; the doctor themselves (`user_id = auth.uid()`) can SELECT/UPDATE own row (excluding verification fields, enforced by trigger).
+- `hc_doctor_specialties` / `hc_doctor_locations` / `hc_doctor_qualifications`: read follows parent doctor visibility; write via `healthcare.doctors.manage`.
+- `hc_doctor_availability` / `hc_availability_blocks`: public read for verified public doctors; write via `healthcare.doctors.manage` OR the doctor themselves.
+- `hc_patients`: NO public read. Owner OR org member with `healthcare.patients.read`; write via `healthcare.patients.manage`.
+- `hc_appointments`: NO public read. Patient owner OR doctor's `user_id` OR org member with `healthcare.appointments.read`; insert requires `healthcare.appointments.create` OR patient self-request (constrained by trigger to `status='requested'`); status transitions via RPC only.
+- `hc_verification_requests`: doctor submitter OR org admin with `healthcare.doctors.verify`; writes to `status` restricted to reviewers via RPC.
 
-New permission keys seeded into `public.permissions` and mapped to roles in `role_permissions`:
-- `inventory.read` → Owner, Admin, Manager, Pharmacist, Employee
-- `inventory.write` → Owner, Admin, Manager, Pharmacist
-- `transfers.read` / `transfers.manage` → Owner, Admin, Manager
-- `suppliers.read` / `suppliers.manage` → Owner, Admin, Manager
-- `warehouses.manage` → Owner, Admin
+Movement/audit ledger: verification decisions and status transitions write to existing `identity_audit_events` (entity `healthcare.*`).
 
-Security-definer RPCs (all `SET search_path = public`, revoke from anon):
-- `inv_receive_stock(org, warehouse, product, qty, batch_no, expiry, cost, supplier)` — inserts batch (or upserts) + movement + emits `STOCK_RECEIVED`.
-- `inv_adjust_stock(batch_id, qty_delta, reason)` — movement + emits `STOCK_MOVEMENT_CREATED`.
-- `inv_reserve_for_transfer(transfer_id)` — allocates batches FEFO, updates `qty_reserved`, movement rows.
-- `inv_dispatch_transfer(transfer_id)` — movements OUT + `TRANSFER_CREATED` (progress) events.
-- `inv_receive_transfer(transfer_id)` — creates batches in dest warehouse, movements IN, `TRANSFER_COMPLETED`.
-- `inv_scan_expiry(org, horizon_days)` — populates `inv_expiry_alerts`, emits `EXPIRY_ALERT_CREATED` per new alert.
+New permission keys seeded into `public.permissions` + mapped in `role_permissions`:
+- `healthcare.doctors.read` → Owner, Admin, Manager, Pharmacist, Employee
+- `healthcare.doctors.manage` → Owner, Admin, Manager
+- `healthcare.doctors.verify` → Owner, Admin
+- `healthcare.locations.manage` → Owner, Admin, Manager
+- `healthcare.patients.read` → Owner, Admin, Manager, Pharmacist
+- `healthcare.patients.manage` → Owner, Admin, Manager
+- `healthcare.appointments.read` → Owner, Admin, Manager, Pharmacist, Employee
+- `healthcare.appointments.create` → Owner, Admin, Manager, Pharmacist, Employee
+- `healthcare.appointments.manage` → Owner, Admin, Manager
+
+Security-definer RPCs (`SET search_path = public`, `REVOKE ... FROM anon, PUBLIC`):
+- `hc_create_doctor(payload jsonb)` — inserts doctor (+ specialties, qualifications, locations); emits `DOCTOR_CREATED`.
+- `hc_submit_verification(doctor_id, documents jsonb)` — creates `hc_verification_requests`, sets doctor status to `pending`.
+- `hc_verify_doctor(doctor_id, decision, notes)` — checks `healthcare.doctors.verify`; updates `verification_status`, `verified_at`, `verified_by`; emits `DOCTOR_VERIFIED` on approval; audit-log.
+- `hc_create_specialty(...)` — admin-only; emits `SPECIALTY_CREATED`.
+- `hc_create_location(payload jsonb)` — emits `LOCATION_CREATED`.
+- `hc_create_appointment(doctor_id, location_id, patient_id, starts_at, reason)` — checks slot vs `hc_doctor_availability` + `hc_availability_blocks` + existing appointments; inserts with `status='requested'`; emits `APPOINTMENT_CREATED`.
+- `hc_transition_appointment(appointment_id, new_status, reason)` — validates state machine (`requested → confirmed → completed`, plus `→ cancelled` / `→ no_show`); writes timestamps; emits status-change event.
 
 Triggers:
-- `inv_stock_batches` after INSERT/UPDATE → publish `STOCK_MOVEMENT_CREATED` via existing `agent_events` + event bus sink.
-- `inv_transfers` status transitions → publish `TRANSFER_CREATED` / `TRANSFER_COMPLETED`.
-- Audit inserts into `identity_audit_events` (reuse existing table) with entity `inventory.*`.
+- `hc_doctors` INSERT → emit `DOCTOR_CREATED` via `agent_events` sink.
+- `hc_doctors` UPDATE on `verification_status='verified'` → emit `DOCTOR_VERIFIED`.
+- `hc_locations` INSERT → `LOCATION_CREATED`.
+- `hc_appointments` INSERT → `APPOINTMENT_CREATED`.
+- Reuse `update_updated_at_column` for `updated_at`.
+- Doctor self-update trigger: block changes to `verification_status`, `verified_at`, `verified_by`, `is_public` unless caller has `healthcare.doctors.verify`.
 
-## 2. Module Scaffold — `src/modules/inventory/`
+Indexes: `hc_doctors(organization_id)`, `hc_doctors(slug)`, `hc_doctors(verification_status, is_public)`, `hc_appointments(doctor_id, starts_at)`, `hc_appointments(patient_id)`, `hc_locations(organization_id, is_active)`, trigram indexes on `hc_doctors(full_name_ar, full_name_en)` and `hc_locations(name_ar, name_en)` for future search.
+
+## 2. Module Scaffold — `src/modules/doctors/`
 
 ```
-inventory/
+doctors/
   README.md
   domain/
-    types.ts          # Warehouse, StockBatch, Movement, Transfer, TransferItem, ExpiryAlert
-    schemas.ts        # Zod for RPC inputs
-    movementTypes.ts  # enum mirror
+    types.ts             # Doctor, Specialty, Qualification, DoctorLocation, VerificationStatus
+    schemas.ts           # Zod: createDoctor, updateDoctor, submitVerification
+    verificationState.ts # pure state-machine helpers
   data/
-    queries.ts        # read-only helpers over Data API
+    queries.ts           # Data-API read helpers (public directory)
   server/
-    inventory.functions.ts   # listBatches, getBatch, receiveStock, adjustStock
-    transfers.functions.ts   # createTransfer, approve, reserve, pick, pack, dispatch, receive
-    expiry.functions.ts      # scanExpiry, listExpiryAlerts
+    doctors.functions.ts     # listDoctors, getDoctor, createDoctor, updateDoctor
+    specialties.functions.ts # listSpecialties, createSpecialty
+    verification.functions.ts # submitVerification, verifyDoctor
   events/
-    schemas.ts        # zod schemas per event
+    schemas.ts
   ui/
-    index.ts          # empty barrel (no components yet)
-  index.ts            # public barrel
+    index.ts             # empty barrel
+  index.ts
 ```
 
-Each server fn: `createServerFn` + `.middleware([requireSupabaseAuth])` + Zod validator + calls RPC + returns DTO. No `supabaseAdmin` at module scope; use `context.supabase` (RLS enforces org/branch).
-
-## 3. Module Scaffold — `src/modules/warehouse/`
+## 3. Module Scaffold — `src/modules/healthcare-locations/`
 
 ```
-warehouse/
+healthcare-locations/
   README.md
   domain/{types.ts,schemas.ts}
-  server/warehouse.functions.ts   # listWarehouses, createWarehouse, updateWarehouse, listLocations, addLocation
+  data/queries.ts
+  server/locations.functions.ts   # listLocations, getLocation, createLocation, updateLocation
   events/schemas.ts
   ui/index.ts
   index.ts
 ```
 
-## 4. Module Scaffold — `src/modules/suppliers/`
+## 4. Module Scaffold — `src/modules/appointments/`
 
 ```
-suppliers/
+appointments/
   README.md
-  domain/{types.ts,schemas.ts}
-  server/suppliers.functions.ts   # listSuppliers, getSupplier, createSupplier, linkProduct, unlinkProduct, listSupplierProducts
+  domain/
+    types.ts
+    schemas.ts
+    appointmentState.ts  # allowed status transitions
+  data/queries.ts
+  server/
+    appointments.functions.ts   # listAppointments, getAppointment, createAppointment, transitionAppointment
+    availability.functions.ts   # getDoctorAvailability, setWeeklySchedule, addBlock
   events/schemas.ts
   ui/index.ts
   index.ts
 ```
 
-## 5. Event Registry Updates
+## 5. Module Scaffold — `src/modules/patients/`
+
+```
+patients/
+  README.md
+  domain/{types.ts,schemas.ts}
+  data/queries.ts
+  server/patients.functions.ts    # listPatients (org-scoped), getPatient, createPatient, updatePatient
+  events/schemas.ts
+  ui/index.ts
+  index.ts
+```
+
+All server fns: `createServerFn` + `.middleware([requireSupabaseAuth])` + Zod validator + `context.supabase` (RLS-scoped) or call security-definer RPC. No `supabaseAdmin` at module scope.
+
+## 6. Event Registry Updates
 
 `src/core/events/constants.ts` — add:
-- `STOCK_RECEIVED`
-- `STOCK_MOVEMENT_CREATED`
-- `TRANSFER_CREATED`
-- `TRANSFER_COMPLETED`
-- `EXPIRY_ALERT_CREATED`
+- `DOCTOR_CREATED`
+- `DOCTOR_VERIFIED`
+- `SPECIALTY_CREATED`
+- `LOCATION_CREATED`
+- `APPOINTMENT_CREATED`
+- `APPOINTMENT_STATUS_CHANGED`
 
-Add zod schemas + register in `EventRegistry.ts`. Update `docs/engineering/standards/EVENT-CATALOG.md`.
+Register Zod schemas in `EventRegistry.ts`. Update `docs/engineering/standards/EVENT-CATALOG.md`.
 
-## 6. Import-Graph Guard
+## 7. Import-Graph Guard
 
-Update `scripts/check-imports.ts` allow-list so `modules/inventory`, `modules/warehouse`, `modules/suppliers` follow same layer rules as `modules/catalog` (domain has no deps, server can import platform/core, ui cannot import server/*).
+Update `scripts/check-imports.ts` allow-list so `modules/doctors`, `modules/healthcare-locations`, `modules/appointments`, `modules/patients` follow the same layer rules as `modules/catalog` and `modules/inventory` (domain no deps; server can import platform/core; ui cannot import server/*).
 
-## 7. Tests
+## 8. Tests
 
-- `src/__tests__/unit/modules/inventory/movements.test.ts` — reducer that projects batch state from a movement list; asserts integrity (no negative qty_on_hand, reserved ≤ on_hand).
-- `src/__tests__/unit/modules/inventory/transfer-state.test.ts` — state machine transitions (invalid transitions rejected).
-- `src/__tests__/unit/modules/inventory/expiry-scan.test.ts` — pure logic bucketing NEAR_30/60/90/EXPIRED.
-- `src/__tests__/unit/modules/warehouse/schemas.test.ts` — zod validation.
-- `src/__tests__/unit/modules/suppliers/schemas.test.ts` — zod validation.
+- `src/__tests__/unit/modules/doctors/schemas.test.ts` — Zod validation (required fields, slug format, languages array).
+- `src/__tests__/unit/modules/doctors/verification-state.test.ts` — state machine (`pending → verified`, `pending → rejected`, `verified → pending` blocked).
+- `src/__tests__/unit/modules/appointments/state-machine.test.ts` — transitions and terminal states.
+- `src/__tests__/unit/modules/appointments/availability.test.ts` — pure slot-overlap detection.
+- `src/__tests__/unit/modules/healthcare-locations/schemas.test.ts` — Zod (coordinates range, working_hours shape).
+- `src/__tests__/unit/modules/patients/schemas.test.ts` — Zod (national_id hashing helper, DOB in past).
+- `src/__tests__/unit/platform/permissions/healthcare-permissions.test.ts` — permission-key registration.
 
-DB isolation verified through migration-level policies (documented in report); no live DB test runner in project.
+## 9. Documentation
 
-## 8. Documentation
-
-`docs/engineering/reports/PHOENIX-P5-inventory.md`:
-- Architecture diagram (ASCII)
-- Data model (table + column table)
-- Security model (RLS matrix per table × role)
-- Event flow (movement → event → dispatcher → downstream)
-- Transfer state machine diagram
-- Migration readiness checklist (what Phase 6 must do to backfill from legacy `products.stock_qty` / `branch_inventory` / `inventory_transfers`)
-- Explicit non-goals (no cron, no UI, no marketplace)
+`docs/engineering/reports/PHOENIX-P6-doctors.md`:
+- Architecture (ASCII diagram: directory → doctors → verification → appointments)
+- Data model (table + column matrix)
+- Security model (RLS matrix per table × role × audience)
+- Verification workflow diagram (pending → verified/rejected)
+- Appointment state machine diagram
+- Event flow (trigger → agent_events → dispatcher)
+- Future booking roadmap (Phase 7+ notes: public booking UI, notifications, e-prescriptions, payments, reviews, telemedicine)
+- Migration readiness checklist for any future legacy data import
+- Explicit non-goals (no booking UI, no prescription AI, no cron, no notifications, no marketplace)
 
 ## Technical Notes
 
-- All new tables use `gen_random_uuid()` PKs, `created_at`/`updated_at` with trigger `update_updated_at_column` (already exists).
-- Movement ledger is append-only: RLS denies UPDATE/DELETE for `authenticated`; only service_role.
-- Batch allocation uses FEFO (first-expiry-first-out) sort in RPC.
-- Reuses Phase 3 `has_org_permission` and existing `is_org_member(_org uuid, _user uuid)` signatures.
-- Emits events through the Phase 2 EventPublisher pattern; DB triggers write to `agent_events` for the consumer.
+- All new tables use `gen_random_uuid()` PKs + `update_updated_at_column` trigger.
+- Reuses Phase 3 signatures: `is_org_member(_org uuid, _user uuid)` and `has_org_permission(_user_id uuid, _org_id uuid, _permission text, _branch_id uuid DEFAULT NULL)`.
+- `permissions` inserts use column `key`; `role_permissions` uses `permission_key`.
+- Emits events through Phase 2 EventPublisher pattern; DB triggers write to `agent_events`.
+- Anon GRANTs limited to directory tables where policies filter to public+verified rows only. `hc_patients`, `hc_appointments`, `hc_doctor_qualifications`, `hc_verification_requests` get NO anon GRANT.
 
 ## Deliverables Summary
 
-1. One migration (tables + enums + grants + RLS + RPCs + triggers + permission seed).
-2. Three module scaffolds (`inventory`, `warehouse`, `suppliers`) with domain, server fns, events, empty UI barrel.
+1. One migration (enums + 11 tables + grants + RLS + 7 RPCs + triggers + permission seed).
+2. Four module scaffolds (`doctors`, `healthcare-locations`, `appointments`, `patients`) with domain / data / server / events / empty UI barrel.
 3. Event constants + registry + catalog doc update.
 4. Import-graph guard update.
-5. Five unit tests.
-6. Phase 5 completion report.
+5. Seven unit tests.
+6. Phase 6 completion report.
 
-Stop after Phase 5. Await Phase 6.
+Stop after Phase 6. Await Phase 7.
