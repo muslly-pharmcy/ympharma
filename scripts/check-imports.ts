@@ -102,3 +102,92 @@ if (violations.length) {
 }
 
 console.log(`✅ SEC-P1-004: scanned ${files.length} client-reachable files — 0 violations.`);
+
+// ============================================================
+// PHOENIX-P2 — Layer boundary guard
+// ============================================================
+// R1: src/core/**     may NOT import from src/modules/** or src/platform/**
+// R2: src/platform/** may NOT import from src/modules/**
+// R3: src/modules/<A>/** may NOT import from src/modules/<B>/internal
+//     (allowed: `@/modules/<B>` or `@/modules/<B>/index`)
+
+type LayerViolation = { file: string; spec: string; line: number; rule: string };
+
+const ALL_FILES = walk(SRC);
+const layerViolations: LayerViolation[] = [];
+
+function normalizeSpec(spec: string): string | null {
+  if (spec.startsWith("@/")) return spec.slice(2);
+  return null;
+}
+function layerOf(rel: string): "core" | "platform" | "modules" | "other" {
+  if (rel.startsWith("core/")) return "core";
+  if (rel.startsWith("platform/")) return "platform";
+  if (rel.startsWith("modules/")) return "modules";
+  return "other";
+}
+function moduleNameOf(rel: string): string | null {
+  const m = /^modules\/([^/]+)/.exec(rel);
+  return m ? m[1] : null;
+}
+
+for (const f of ALL_FILES) {
+  const rel = relative(SRC, f).replace(/\\/g, "/");
+  const fileLayer = layerOf(rel);
+  if (fileLayer === "other") continue;
+  const src = stripComments(readFileSync(f, "utf8"));
+
+  const pushMatches = (re: RegExp) => {
+    for (const m of src.matchAll(re)) {
+      const spec = m[1];
+      const norm = normalizeSpec(spec);
+      if (!norm) continue;
+      const targetLayer = layerOf(norm);
+      const line = src.slice(0, m.index ?? 0).split("\n").length;
+      const relFile = relative(ROOT, f);
+
+      if (fileLayer === "core" && (targetLayer === "modules" || targetLayer === "platform")) {
+        layerViolations.push({ file: relFile, spec, line, rule: "R1 core → " + targetLayer });
+        continue;
+      }
+      if (fileLayer === "platform" && targetLayer === "modules") {
+        layerViolations.push({ file: relFile, spec, line, rule: "R2 platform → modules" });
+        continue;
+      }
+      if (fileLayer === "modules" && targetLayer === "modules") {
+        const from = moduleNameOf(rel);
+        const to = moduleNameOf(norm);
+        if (from && to && from !== to) {
+          const allowed = norm === `modules/${to}` || norm === `modules/${to}/index`;
+          if (!allowed) {
+            layerViolations.push({
+              file: relFile,
+              spec,
+              line,
+              rule: `R3 modules/${from} → modules/${to} internal`,
+            });
+          }
+        }
+      }
+    }
+  };
+  pushMatches(STATIC_IMPORT_RE);
+  pushMatches(BARE_IMPORT_RE);
+}
+
+if (layerViolations.length) {
+  console.error("\n❌ PHOENIX-P2 layer boundary guard FAILED");
+  console.error(`   ${layerViolations.length} forbidden cross-layer import(s):\n`);
+  for (const v of layerViolations) {
+    console.error(`   [${v.rule}]  ${v.file}:${v.line}  imports  ${v.spec}`);
+  }
+  console.error(
+    "\n   Fix: cross-module reads go through the target module's public index,",
+  );
+  console.error(
+    "        or communicate via @/core/events (emit / registerHandler).\n",
+  );
+  process.exit(1);
+}
+
+console.log(`✅ PHOENIX-P2: scanned ${ALL_FILES.length} files — 0 layer violations.`);
