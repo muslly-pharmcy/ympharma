@@ -19,6 +19,9 @@
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^2.0.50",
+    "@e965/xlsx": "^0.20.3",
+    "@fontsource-variable/montserrat": "^5.2.8",
+    "@fontsource/cairo": "^5.2.7",
     "@fontsource/tajawal": "^5.2.7",
     "@hookform/resolvers": "^5.2.2",
     "@lovable.dev/email-js": "^0.0.4",
@@ -89,7 +92,6 @@
     "tw-animate-css": "^1.3.4",
     "vaul": "^1.1.2",
     "vite-tsconfig-paths": "^6.0.2",
-    "@e965/xlsx": "^0.20.3",
     "zod": "^4.4.3"
   },
   "devDependencies": {
