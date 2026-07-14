@@ -443,7 +443,21 @@ function Home() {
             </div>
           </div>
         </section>
+
+        <Suspense fallback={null}>
+          <DoctorDiscoveryEntry />
+        </Suspense>
+        <Suspense fallback={null}>
+          <HealthEducationPreview />
+        </Suspense>
+        <Suspense fallback={null}>
+          <WhatsNew />
+        </Suspense>
       </main>
+
+      <Suspense fallback={null}>
+        <NotificationNudge />
+      </Suspense>
 
       <a
         href={waLink("مرحبًا، لدي استفسار")}
