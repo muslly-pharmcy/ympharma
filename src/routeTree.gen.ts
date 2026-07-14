@@ -124,6 +124,7 @@ import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiPublicDoctorJoinRouteImport } from './routes/api/public/doctor-join'
 import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
 import { Route as ApiInternalCollectFeedbackRouteImport } from './routes/api/internal/collect-feedback'
+import { Route as AuthenticatedPharmacistPrescriptionQueueRouteImport } from './routes/_authenticated/pharmacist/prescription-queue'
 import { Route as AuthenticatedPharmacistInvoiceUploadRouteImport } from './routes/_authenticated/pharmacist/invoice-upload'
 import { Route as AuthenticatedPharmacistInvoiceListRouteImport } from './routes/_authenticated/pharmacist/invoice-list'
 import { Route as AuthenticatedPharmacistDashboardRouteImport } from './routes/_authenticated/pharmacist/dashboard'
@@ -167,6 +168,7 @@ import { Route as ApiPublicHooksAgentAlertsRouteImport } from './routes/api/publ
 import { Route as ApiPublicHealthQuickCheckRouteImport } from './routes/api/public/health.quick-check'
 import { Route as ApiPublicHealthFullCheckRouteImport } from './routes/api/public/health.full-check'
 import { Route as ApiPublicAnalyticsIngestRouteImport } from './routes/api/public/analytics/ingest'
+import { Route as AuthenticatedPharmacistPrescriptionReviewIdRouteImport } from './routes/_authenticated/pharmacist/prescription-review.$id'
 import { Route as AuthenticatedPharmacistInvoiceReviewIdRouteImport } from './routes/_authenticated/pharmacist/invoice-review.$id'
 import { Route as ApiPublicHooksAgentsWhatsappRouteImport } from './routes/api/public/hooks/agents/whatsapp'
 import { Route as ApiPublicHooksAgentsSalesRouteImport } from './routes/api/public/hooks/agents/sales'
@@ -773,6 +775,12 @@ const ApiInternalCollectFeedbackRoute =
     path: '/api/internal/collect-feedback',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedPharmacistPrescriptionQueueRoute =
+  AuthenticatedPharmacistPrescriptionQueueRouteImport.update({
+    id: '/pharmacist/prescription-queue',
+    path: '/pharmacist/prescription-queue',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPharmacistInvoiceUploadRoute =
   AuthenticatedPharmacistInvoiceUploadRouteImport.update({
     id: '/pharmacist/invoice-upload',
@@ -1025,6 +1033,12 @@ const ApiPublicAnalyticsIngestRoute =
     path: '/api/public/analytics/ingest',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedPharmacistPrescriptionReviewIdRoute =
+  AuthenticatedPharmacistPrescriptionReviewIdRouteImport.update({
+    id: '/pharmacist/prescription-review/$id',
+    path: '/pharmacist/prescription-review/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPharmacistInvoiceReviewIdRoute =
   AuthenticatedPharmacistInvoiceReviewIdRouteImport.update({
     id: '/pharmacist/invoice-review/$id',
@@ -1190,6 +1204,7 @@ export interface FileRoutesByFullPath {
   '/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/pharmacist/invoice-list': typeof AuthenticatedPharmacistInvoiceListRoute
   '/pharmacist/invoice-upload': typeof AuthenticatedPharmacistInvoiceUploadRoute
+  '/pharmacist/prescription-queue': typeof AuthenticatedPharmacistPrescriptionQueueRoute
   '/api/internal/collect-feedback': typeof ApiInternalCollectFeedbackRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/doctor-join': typeof ApiPublicDoctorJoinRoute
@@ -1201,6 +1216,7 @@ export interface FileRoutesByFullPath {
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/pharmacist/invoice-review/$id': typeof AuthenticatedPharmacistInvoiceReviewIdRoute
+  '/pharmacist/prescription-review/$id': typeof AuthenticatedPharmacistPrescriptionReviewIdRoute
   '/api/public/analytics/ingest': typeof ApiPublicAnalyticsIngestRoute
   '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
   '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
@@ -1359,6 +1375,7 @@ export interface FileRoutesByTo {
   '/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/pharmacist/invoice-list': typeof AuthenticatedPharmacistInvoiceListRoute
   '/pharmacist/invoice-upload': typeof AuthenticatedPharmacistInvoiceUploadRoute
+  '/pharmacist/prescription-queue': typeof AuthenticatedPharmacistPrescriptionQueueRoute
   '/api/internal/collect-feedback': typeof ApiInternalCollectFeedbackRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/doctor-join': typeof ApiPublicDoctorJoinRoute
@@ -1370,6 +1387,7 @@ export interface FileRoutesByTo {
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/pharmacist/invoice-review/$id': typeof AuthenticatedPharmacistInvoiceReviewIdRoute
+  '/pharmacist/prescription-review/$id': typeof AuthenticatedPharmacistPrescriptionReviewIdRoute
   '/api/public/analytics/ingest': typeof ApiPublicAnalyticsIngestRoute
   '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
   '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
@@ -1530,6 +1548,7 @@ export interface FileRoutesById {
   '/_authenticated/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/_authenticated/pharmacist/invoice-list': typeof AuthenticatedPharmacistInvoiceListRoute
   '/_authenticated/pharmacist/invoice-upload': typeof AuthenticatedPharmacistInvoiceUploadRoute
+  '/_authenticated/pharmacist/prescription-queue': typeof AuthenticatedPharmacistPrescriptionQueueRoute
   '/api/internal/collect-feedback': typeof ApiInternalCollectFeedbackRoute
   '/api/public/contact': typeof ApiPublicContactRoute
   '/api/public/doctor-join': typeof ApiPublicDoctorJoinRoute
@@ -1541,6 +1560,7 @@ export interface FileRoutesById {
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/pharmacist/invoice-review/$id': typeof AuthenticatedPharmacistInvoiceReviewIdRoute
+  '/_authenticated/pharmacist/prescription-review/$id': typeof AuthenticatedPharmacistPrescriptionReviewIdRoute
   '/api/public/analytics/ingest': typeof ApiPublicAnalyticsIngestRoute
   '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
   '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
@@ -1701,6 +1721,7 @@ export interface FileRouteTypes {
     | '/pharmacist/dashboard'
     | '/pharmacist/invoice-list'
     | '/pharmacist/invoice-upload'
+    | '/pharmacist/prescription-queue'
     | '/api/internal/collect-feedback'
     | '/api/public/contact'
     | '/api/public/doctor-join'
@@ -1712,6 +1733,7 @@ export interface FileRouteTypes {
     | '/api/public/whatsapp-webhook'
     | '/lovable/email/suppression'
     | '/pharmacist/invoice-review/$id'
+    | '/pharmacist/prescription-review/$id'
     | '/api/public/analytics/ingest'
     | '/api/public/health/full-check'
     | '/api/public/health/quick-check'
@@ -1870,6 +1892,7 @@ export interface FileRouteTypes {
     | '/pharmacist/dashboard'
     | '/pharmacist/invoice-list'
     | '/pharmacist/invoice-upload'
+    | '/pharmacist/prescription-queue'
     | '/api/internal/collect-feedback'
     | '/api/public/contact'
     | '/api/public/doctor-join'
@@ -1881,6 +1904,7 @@ export interface FileRouteTypes {
     | '/api/public/whatsapp-webhook'
     | '/lovable/email/suppression'
     | '/pharmacist/invoice-review/$id'
+    | '/pharmacist/prescription-review/$id'
     | '/api/public/analytics/ingest'
     | '/api/public/health/full-check'
     | '/api/public/health/quick-check'
@@ -2040,6 +2064,7 @@ export interface FileRouteTypes {
     | '/_authenticated/pharmacist/dashboard'
     | '/_authenticated/pharmacist/invoice-list'
     | '/_authenticated/pharmacist/invoice-upload'
+    | '/_authenticated/pharmacist/prescription-queue'
     | '/api/internal/collect-feedback'
     | '/api/public/contact'
     | '/api/public/doctor-join'
@@ -2051,6 +2076,7 @@ export interface FileRouteTypes {
     | '/api/public/whatsapp-webhook'
     | '/lovable/email/suppression'
     | '/_authenticated/pharmacist/invoice-review/$id'
+    | '/_authenticated/pharmacist/prescription-review/$id'
     | '/api/public/analytics/ingest'
     | '/api/public/health/full-check'
     | '/api/public/health/quick-check'
@@ -3058,6 +3084,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiInternalCollectFeedbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/pharmacist/prescription-queue': {
+      id: '/_authenticated/pharmacist/prescription-queue'
+      path: '/pharmacist/prescription-queue'
+      fullPath: '/pharmacist/prescription-queue'
+      preLoaderRoute: typeof AuthenticatedPharmacistPrescriptionQueueRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/pharmacist/invoice-upload': {
       id: '/_authenticated/pharmacist/invoice-upload'
       path: '/pharmacist/invoice-upload'
@@ -3359,6 +3392,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAnalyticsIngestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/pharmacist/prescription-review/$id': {
+      id: '/_authenticated/pharmacist/prescription-review/$id'
+      path: '/pharmacist/prescription-review/$id'
+      fullPath: '/pharmacist/prescription-review/$id'
+      preLoaderRoute: typeof AuthenticatedPharmacistPrescriptionReviewIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/pharmacist/invoice-review/$id': {
       id: '/_authenticated/pharmacist/invoice-review/$id'
       path: '/pharmacist/invoice-review/$id'
@@ -3450,7 +3490,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPharmacistDashboardRoute: typeof AuthenticatedPharmacistDashboardRoute
   AuthenticatedPharmacistInvoiceListRoute: typeof AuthenticatedPharmacistInvoiceListRoute
   AuthenticatedPharmacistInvoiceUploadRoute: typeof AuthenticatedPharmacistInvoiceUploadRoute
+  AuthenticatedPharmacistPrescriptionQueueRoute: typeof AuthenticatedPharmacistPrescriptionQueueRoute
   AuthenticatedPharmacistInvoiceReviewIdRoute: typeof AuthenticatedPharmacistInvoiceReviewIdRoute
+  AuthenticatedPharmacistPrescriptionReviewIdRoute: typeof AuthenticatedPharmacistPrescriptionReviewIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -3476,8 +3518,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedPharmacistInvoiceListRoute,
   AuthenticatedPharmacistInvoiceUploadRoute:
     AuthenticatedPharmacistInvoiceUploadRoute,
+  AuthenticatedPharmacistPrescriptionQueueRoute:
+    AuthenticatedPharmacistPrescriptionQueueRoute,
   AuthenticatedPharmacistInvoiceReviewIdRoute:
     AuthenticatedPharmacistInvoiceReviewIdRoute,
+  AuthenticatedPharmacistPrescriptionReviewIdRoute:
+    AuthenticatedPharmacistPrescriptionReviewIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
