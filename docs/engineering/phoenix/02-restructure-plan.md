@@ -174,10 +174,14 @@ Enforcement: extend `scripts/check-imports.ts` with a module-boundary rule — a
 | Titans marketing (`HeroTitans`, `FeaturesTitans`, `PricingTitans`, `FooterTitans`, `TestimonialsTitans`) | `src/components/titans/sections/**` | KEEP for public `/` and `/titans` — scope to `modules/cms` |
 | Admin shell fragments (`admin/*.tsx` tabs) | `src/components/admin/**` | REBUILD → decomposed into `modules/administration/ui/` |
 | `AdminGate` | `src/components/admin/AdminGate.tsx` | KEEP → move to `platform/tenant-context/guards` |
-| `NotificationBell`, `ShareButtons` | `src/components/titans/**` | KEEP → `modules/notifications/ui` / `platform/ui-kit` |
+| `NotificationBell`, `ShareButtons` | `src/components/titans/**` | KEEP → `modules/notification-engine/ui` / `platform/ui-kit` |
 | Ad-hoc dashboards (`admin-hub`, `admin-command`, `admin-dashboard`, `admin-ai-executive*`) | routes | RETIRE → single `modules/administration` shell |
 | `Logo3D`, `nun-divider`, `page-transition` | components | KEEP → `platform/ui-kit/brand` |
 | `product-card`, `product-gallery` | components | KEEP → `modules/catalog/ui` |
+| `alert-dispatch.server.ts`, `slack.functions.ts`, WhatsApp/email dispatchers | `src/lib/**` | KEEP → relocate as adapters under `modules/notification-engine/server/adapters/` |
+| `loyalty`, `campaigns`, `banners`, `offers`, `discounts` routes/UI | `src/routes/admin-*` | KEEP → relocate to `modules/growth-engine/ui/` |
+| OCR / barcode / image-recognition helpers | scattered in `prescription-ai`, `catalog` | REBUILD → consolidate in `modules/product-intelligence/server/` |
+| Payments / subscriptions / commissions server fns | `src/lib/**`, routes | REBUILD → single ledger in `modules/commerce-core/server/` |
 
 ---
 
@@ -186,8 +190,12 @@ Enforcement: extend `scripts/check-imports.ts` with a module-boundary rule — a
 - **Feature flags** — `platform/feature-flags` reads from `app_settings` (already exists). Every Phoenix migration ships behind a flag `phoenix.<module>` defaulting to OFF.
 - **AI Engine** — one `modules/ai-engine` owns prompt templates, guardrails (`core/ai-safety` reused), tool registry, provider selection. Every AI feature imports the engine; no direct Lovable AI Gateway calls scattered.
 - **API Gateway** — `modules/api-gateway` centralizes `/api/public/*` — HMAC verification, rate-limit, replay window. Existing hooks refactored to call gateway helpers (no route relocations required; only server-side helpers).
-- **Notifications** — one `modules/notifications` unifies email + WhatsApp + Slack + in-app. Existing dispatchers (`alert-dispatch.server.ts`, `slack.functions.ts`) become adapters.
+- **Notification Engine** — one `modules/notification-engine` unifies push, WhatsApp, SMS, email, in-app, campaign automation, and per-user channel preferences. Existing dispatchers (`alert-dispatch.server.ts`, `slack.functions.ts`) become adapters; `marketing` and `growth-engine` never call channels directly.
+- **Commerce Core** — one `modules/commerce-core` owns the revenue ledger (subscriptions, billing, payments, commissions, SaaS plans, revenue tracking). `orders`, `payments`, `subscriptions`, `insurance` post to it; `analytics`/`erp` read from it. No money movement outside this module.
+- **Product Intelligence** — one `modules/product-intelligence` owns OCR, barcode, image recognition, AR/EN aliases, misspelling correction, and expiry intelligence. Consumed by `prescription-ai`, `invoice-ai`, `marketplace`, `pharmacy-network`; nobody else re-implements vision or fuzzy matching.
+- **Growth Engine** — one `modules/growth-engine` owns referrals, loyalty, coupons, campaigns, engagement, social automation. Dispatches through `notification-engine`; measured by `analytics`.
 - **Audit** — every write action goes through `modules/audit` interceptor → `activity_logs`.
+
 
 ---
 
