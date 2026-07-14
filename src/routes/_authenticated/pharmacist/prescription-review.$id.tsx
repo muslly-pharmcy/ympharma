@@ -20,7 +20,7 @@ import {
 } from "@/lib/prescription-review.functions";
 import { searchMedicinesIntelligent } from "@/modules/product-intelligence/server/intelligence.functions";
 
-export const Route = createFileRoute("/_authenticated/pharmacist/prescription-review/$id")({
+export const Route = createFileRoute("/pharmacist/prescription-review/$id")({
   head: () => ({ meta: [{ title: "مراجعة وصفة | Muslly" }] }),
   component: ReviewPage,
 });
@@ -234,7 +234,7 @@ function ReviewPage() {
         </ol>
       </section>
 
-      <Link to="/_authenticated/pharmacist/prescription-queue" className="text-xs underline">← عودة للطابور</Link>
+      <Link to="/pharmacist/prescription-queue" className="text-xs underline">← عودة للطابور</Link>
     </div>
   );
 }
