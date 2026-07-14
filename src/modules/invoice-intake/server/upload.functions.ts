@@ -124,5 +124,10 @@ export const getInvoiceForReview = createServerFn({ method: "POST" })
       .from("invoice-uploads")
       .createSignedUrl((upload as { storage_path: string }).storage_path, 600);
 
-    return { upload, extraction, lines, image_url: signed?.signedUrl ?? null };
+    return {
+      upload: JSON.parse(JSON.stringify(upload)) as Record<string, string | number | boolean | null>,
+      extraction: extraction ? (JSON.parse(JSON.stringify(extraction)) as Record<string, string | number | boolean | null>) : null,
+      lines,
+      image_url: signed?.signedUrl ?? null,
+    };
   });
