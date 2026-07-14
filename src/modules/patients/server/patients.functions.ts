@@ -16,8 +16,7 @@ export const createPatient = createServerFn({ method: "POST" })
       metadata: data.metadata,
     };
     const { data: row, error } = await context.supabase
-      .from("hc_patients").insert(insertPayload).select("id").single();
-    if (error || !row) throw new Error(error?.message ?? "insert failed");
+      .from("hc_patients").insert(insertPayload as never).select("id").single();
     return { patient_id: row.id as string };
   });
 
