@@ -114,7 +114,7 @@ function InvoiceUploadPage() {
 
       <div className="pt-4 border-t">
         <Link
-          to="/_authenticated/pharmacist/invoice-list" as never
+          to={"/_authenticated/pharmacist/invoice-list" as never}
           className="text-sm text-primary underline"
         >
           عرض الفواتير السابقة
