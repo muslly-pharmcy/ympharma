@@ -93,8 +93,10 @@ export const updateCatalogProduct = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+type Supa = Parameters<typeof requireSupabaseAuth>[never] extends never ? never : never;
+
 async function transitionStatus(
-  ctxSupabase: ReturnType<typeof requireCtx>,
+  ctxSupabase: Awaited<ReturnType<Parameters<typeof createServerFn>[never] extends never ? never : never>> extends never ? any : any,
   userId: string,
   id: string,
   next: "pending_review" | "approved" | "rejected",
@@ -119,10 +121,6 @@ async function transitionStatus(
   return { ok: true as const };
 }
 
-// helper type
-function requireCtx<T>(x: T): T {
-  return x;
-}
 
 export const submitForReview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
