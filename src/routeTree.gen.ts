@@ -20,6 +20,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SahtakRouteImport } from './routes/sahtak'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as PrescriptionRouteImport } from './routes/prescription'
+import { Route as PharmaciesRouteImport } from './routes/pharmacies'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as NetworkTestRouteImport } from './routes/network-test'
 import { Route as NetworkHealthRouteImport } from './routes/network-health'
@@ -96,6 +97,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TestFeaturesRouteImport } from './routes/test.features'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
+import { Route as PharmaciesSlugRouteImport } from './routes/pharmacies.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as DoctorsSlugRouteImport } from './routes/doctors.$slug'
 import { Route as DoctorJoinRouteImport } from './routes/doctor.join'
@@ -233,6 +235,11 @@ const ProductsRoute = ProductsRouteImport.update({
 const PrescriptionRoute = PrescriptionRouteImport.update({
   id: '/prescription',
   path: '/prescription',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PharmaciesRoute = PharmaciesRouteImport.update({
+  id: '/pharmacies',
+  path: '/pharmacies',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NotificationsRoute = NotificationsRouteImport.update({
@@ -619,6 +626,11 @@ const ProductIdRoute = ProductIdRouteImport.update({
   id: '/product/$id',
   path: '/product/$id',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PharmaciesSlugRoute = PharmaciesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => PharmaciesRoute,
 } as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
@@ -1170,6 +1182,7 @@ export interface FileRoutesByFullPath {
   '/network-health': typeof NetworkHealthRoute
   '/network-test': typeof NetworkTestRoute
   '/notifications': typeof NotificationsRoute
+  '/pharmacies': typeof PharmaciesRouteWithChildren
   '/prescription': typeof PrescriptionRoute
   '/products': typeof ProductsRoute
   '/sahtak': typeof SahtakRoute
@@ -1199,6 +1212,7 @@ export interface FileRoutesByFullPath {
   '/doctor/join': typeof DoctorJoinRoute
   '/doctors/$slug': typeof DoctorsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/pharmacies/$slug': typeof PharmaciesSlugRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
   '/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
@@ -1341,6 +1355,7 @@ export interface FileRoutesByTo {
   '/network-health': typeof NetworkHealthRoute
   '/network-test': typeof NetworkTestRoute
   '/notifications': typeof NotificationsRoute
+  '/pharmacies': typeof PharmaciesRouteWithChildren
   '/prescription': typeof PrescriptionRoute
   '/products': typeof ProductsRoute
   '/sahtak': typeof SahtakRoute
@@ -1370,6 +1385,7 @@ export interface FileRoutesByTo {
   '/doctor/join': typeof DoctorJoinRoute
   '/doctors/$slug': typeof DoctorsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/pharmacies/$slug': typeof PharmaciesSlugRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
   '/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
@@ -1514,6 +1530,7 @@ export interface FileRoutesById {
   '/network-health': typeof NetworkHealthRoute
   '/network-test': typeof NetworkTestRoute
   '/notifications': typeof NotificationsRoute
+  '/pharmacies': typeof PharmaciesRouteWithChildren
   '/prescription': typeof PrescriptionRoute
   '/products': typeof ProductsRoute
   '/sahtak': typeof SahtakRoute
@@ -1543,6 +1560,7 @@ export interface FileRoutesById {
   '/doctor/join': typeof DoctorJoinRoute
   '/doctors/$slug': typeof DoctorsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/pharmacies/$slug': typeof PharmaciesSlugRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
   '/_authenticated/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
@@ -1687,6 +1705,7 @@ export interface FileRouteTypes {
     | '/network-health'
     | '/network-test'
     | '/notifications'
+    | '/pharmacies'
     | '/prescription'
     | '/products'
     | '/sahtak'
@@ -1716,6 +1735,7 @@ export interface FileRouteTypes {
     | '/doctor/join'
     | '/doctors/$slug'
     | '/email/unsubscribe'
+    | '/pharmacies/$slug'
     | '/product/$id'
     | '/test/features'
     | '/pharmacist/dashboard'
@@ -1858,6 +1878,7 @@ export interface FileRouteTypes {
     | '/network-health'
     | '/network-test'
     | '/notifications'
+    | '/pharmacies'
     | '/prescription'
     | '/products'
     | '/sahtak'
@@ -1887,6 +1908,7 @@ export interface FileRouteTypes {
     | '/doctor/join'
     | '/doctors/$slug'
     | '/email/unsubscribe'
+    | '/pharmacies/$slug'
     | '/product/$id'
     | '/test/features'
     | '/pharmacist/dashboard'
@@ -2030,6 +2052,7 @@ export interface FileRouteTypes {
     | '/network-health'
     | '/network-test'
     | '/notifications'
+    | '/pharmacies'
     | '/prescription'
     | '/products'
     | '/sahtak'
@@ -2059,6 +2082,7 @@ export interface FileRouteTypes {
     | '/doctor/join'
     | '/doctors/$slug'
     | '/email/unsubscribe'
+    | '/pharmacies/$slug'
     | '/product/$id'
     | '/test/features'
     | '/_authenticated/pharmacist/dashboard'
@@ -2203,6 +2227,7 @@ export interface RootRouteChildren {
   NetworkHealthRoute: typeof NetworkHealthRoute
   NetworkTestRoute: typeof NetworkTestRoute
   NotificationsRoute: typeof NotificationsRoute
+  PharmaciesRoute: typeof PharmaciesRouteWithChildren
   PrescriptionRoute: typeof PrescriptionRoute
   ProductsRoute: typeof ProductsRoute
   SahtakRoute: typeof SahtakRoute
@@ -2354,6 +2379,13 @@ declare module '@tanstack/react-router' {
       path: '/prescription'
       fullPath: '/prescription'
       preLoaderRoute: typeof PrescriptionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pharmacies': {
+      id: '/pharmacies'
+      path: '/pharmacies'
+      fullPath: '/pharmacies'
+      preLoaderRoute: typeof PharmaciesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/notifications': {
@@ -2887,6 +2919,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/product/$id'
       preLoaderRoute: typeof ProductIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/pharmacies/$slug': {
+      id: '/pharmacies/$slug'
+      path: '/$slug'
+      fullPath: '/pharmacies/$slug'
+      preLoaderRoute: typeof PharmaciesSlugRouteImport
+      parentRoute: typeof PharmaciesRoute
     }
     '/email/unsubscribe': {
       id: '/email/unsubscribe'
@@ -3552,6 +3591,18 @@ const DoctorsRouteChildren: DoctorsRouteChildren = {
 const DoctorsRouteWithChildren =
   DoctorsRoute._addFileChildren(DoctorsRouteChildren)
 
+interface PharmaciesRouteChildren {
+  PharmaciesSlugRoute: typeof PharmaciesSlugRoute
+}
+
+const PharmaciesRouteChildren: PharmaciesRouteChildren = {
+  PharmaciesSlugRoute: PharmaciesSlugRoute,
+}
+
+const PharmaciesRouteWithChildren = PharmaciesRoute._addFileChildren(
+  PharmaciesRouteChildren,
+)
+
 interface ApiPublicHealthRouteChildren {
   ApiPublicHealthFullCheckRoute: typeof ApiPublicHealthFullCheckRoute
   ApiPublicHealthQuickCheckRoute: typeof ApiPublicHealthQuickCheckRoute
@@ -3641,6 +3692,7 @@ const rootRouteChildren: RootRouteChildren = {
   NetworkHealthRoute: NetworkHealthRoute,
   NetworkTestRoute: NetworkTestRoute,
   NotificationsRoute: NotificationsRoute,
+  PharmaciesRoute: PharmaciesRouteWithChildren,
   PrescriptionRoute: PrescriptionRoute,
   ProductsRoute: ProductsRoute,
   SahtakRoute: SahtakRoute,

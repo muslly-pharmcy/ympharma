@@ -1,80 +1,85 @@
-## Context — what already exists
+## Phoenix Pharmacy Network — Foundation Plan
 
-Both foundations were shipped in earlier turns; only the pharmacist-facing prescription review and cross-module wiring are missing. To avoid rework, this plan closes gaps rather than rebuilding.
+Build a national pharmacy discovery layer on top of existing `catalog_products`, `search_medicines_public`, and `organizations` (each pharmacy = an organization). No payments, no live transfers yet — just discovery + scaffolding for future exchange.
 
-**Invoice Intelligence (already delivered)**
-- Tables: `invoice_uploads`, `invoice_extractions`, `invoice_line_items`, `invoice_audit_events` (RLS org-scoped, all present)
-- Private bucket `invoice-uploads`
-- Server fns in `src/modules/invoice-intake/functions/`: `upload`, `extract` (Gemini 3 Flash OCR), `review` (`updateInvoiceLine`, `commitInvoice` → `inv_receive_stock`)
-- Mobile-friendly routes: `/pharmacist/invoice-upload`, `/pharmacist/invoice-review/$id`, `/pharmacist/invoice-list`
-- Line matcher uses `search_medicines_public`; nothing writes stock until user confirms in review screen
-- Report: `docs/engineering/reports/PHOENIX-INVOICE-INTELLIGENCE.md`
+### 1. Database (single migration)
 
-**Prescription Intelligence (partially delivered)**
-- Tables: `prescription_files`, `prescription_extractions`, `prescription_reviews`, `prescription_escalations`, `prescription_orders` (RLS present)
-- Public upload route `/prescription` (mobile camera, offline queue, compression)
-- Extractor `src/lib/prescription-extractor.server.ts` (Gemini Flash → Pro escalation, confidence threshold 80, writes to `prescription_reviews`)
-- Admin views `/admin-ai-extractions`, `/admin-ai-extraction-failures`
-- **Missing**: pharmacist-facing review UI, medicine matching against product intelligence, explicit doctor/patient linkage on the review screen, "requires pharmacist verification" surfaced to end users
+New tables (all `public.pn_*`, RLS on, GRANTs applied):
 
----
+- `pn_pharmacies` — one row per pharmacy org: `organization_id`, `slug`, `name_ar/en`, `phone`, `whatsapp`, `city`, `district`, `address`, `lat`, `lng`, `logo_url`, `is_public`, `verification_status` (pending/verified/rejected), `verified_at`.
+- `pn_pharmacy_hours` — weekday, `open_time`, `close_time`, `is_24_7`.
+- `pn_pharmacy_stock` — `pharmacy_id`, `catalog_product_id`, `availability` (in_stock/low/out), `price_yer` (nullable, hidden by default), `expiry_date` (nullable), `updated_at`. Unique(pharmacy_id, catalog_product_id).
+- `pn_verification_requests` — submission + reviewer audit.
+- `pn_transfer_requests` (scaffold only, no execution): `from_pharmacy_id`, `to_pharmacy_id`, `catalog_product_id`, `qty`, `reason` (near_expiry/shortage), `status` (draft/pending/accepted/rejected/cancelled). No stock movement yet.
 
-## Scope of this plan (foundation gaps only)
+RLS:
+- `pn_pharmacies`: anon SELECT where `is_public AND verification_status='verified'`; org members full; admin verify.
+- `pn_pharmacy_stock`: anon SELECT joined to public pharmacy; pharmacy owner/manager write.
+- `pn_transfer_requests`: only involved pharmacies + admin.
 
-### A. Invoice Intelligence — verification + report refresh
-1. Verify the three routes render and `commitInvoice` audit event lands in `invoice_audit_events` after a real click-through.
-2. Add a `SECURITY / AUDIT` section to `docs/engineering/reports/PHOENIX-INVOICE-INTELLIGENCE.md` documenting: no-auto-stock rule, audit event names, RLS policies, and the confirmation gate.
+RPCs (SECURITY DEFINER, revoke anon where private):
+- `pn_search_medicine_nearby(_q text, _lat float8, _lng float8, _radius_km int, _limit int)` — joins `search_medicines_public` → `pn_pharmacy_stock` → `pn_pharmacies`, computes haversine distance, returns pharmacy + availability + contact + distance_km.
+- `pn_get_pharmacy_public(_slug text)` — profile + hours + summary counts.
+- `pn_list_pharmacy_products(_slug text, _q text, _limit int, _offset int)` — public product listing.
+- `pn_upsert_stock`, `pn_bulk_upsert_stock` — pharmacy-scoped writes.
+- `pn_submit_verification`, `pn_verify_pharmacy` (admin).
+- `pn_request_transfer` — inserts a `pn_transfer_requests` row only; explicit comment `-- NO stock movement; marketplace disabled`.
 
-No new tables, no new endpoints.
+Seed: 5 demo pharmacies in Aden (verified) with hours + ~15 stock rows each, using existing `catalog_products` IDs.
 
-### B. Prescription Intelligence — pharmacist review layer
-1. **New pharmacist route** `/pharmacist/prescription-review/$id` (under `_authenticated/pharmacist/`):
-   - Signed-URL image viewer (reuses `RX_SIGNED_TTL_SECONDS`)
-   - Extraction panel: medications (name, dose, frequency/duration), doctor, date, diagnosis, allergies, interactions
-   - Each medication row calls `search_medicines_public` (product-intelligence layer) and lets pharmacist pick the matching canonical product or mark "not matched"
-   - Persistent banner: **"يتطلب مراجعة صيدلي — Requires pharmacist verification"** (Arabic + English), non-dismissible
-   - Approve / Request re-scan / Escalate actions write to `prescription_reviews`
-2. **New pharmacist list** `/pharmacist/prescription-queue` — pending items from `prescription_reviews` (status = pending/review), org-scoped.
-3. **Server fns** in `src/lib/prescription-review.functions.ts` (extend existing file):
-   - `listPendingPrescriptionReviews` (auth-gated, RLS)
-   - `getPrescriptionReviewDetail` (joins `prescription_extractions`, `prescription_files`, optional `hc_doctors` / `hc_patients` if linked)
-   - `savePrescriptionReviewDecision({ id, status, matchedProducts, notes })` — no stock mutation, writes audit row into `prescription_reviews` and appends to `activity_logs`
-4. **User-facing banner**: on `/prescription`, after upload success, show the same "Requires pharmacist verification — never a substitute for a doctor" line.
-5. **Doctor / Patient module integration** (linkage only, no new tables): if the upload form has `patient_id` / `doctor_id` context (via signed-in user's `hc_patients` row or referral link), persist those FKs on `prescription_extractions` when the extractor writes its row. No schema change — columns already exist.
-6. **Report**: create `docs/engineering/reports/PHOENIX-PRESCRIPTION-INTELLIGENCE.md` covering: pipeline (upload → OCR → Gemini → review), privacy (RLS, signed URLs, no PHI in logs), audit (`activity_logs` entries), pharmacist-verification gate, integration points.
+### 2. Module scaffolding (`src/modules/pharmacy-network/`)
 
-### C. Security / privacy guardrails (both engines)
-- Confirm RLS on `prescription_reviews` allows only `pharmacist` / `admin` roles via `has_role`.
-- Ensure signed URLs for prescription images use existing TTL (`RX_SIGNED_TTL_SECONDS`), never public URLs.
-- Log every pharmacist action in `activity_logs` with `entity='prescription_review'`.
+```
+domain/{types,schemas}.ts
+server/pharmacies.functions.ts   # searchNearby, getPharmacyPublic, listPharmacyProducts
+server/stock.functions.ts        # upsertStock, bulkUpsert (requireSupabaseAuth)
+server/transfers.functions.ts    # requestTransfer, listMyTransfers (scaffold)
+components/PharmacyCard.tsx      # extend existing medical/PharmacyCard
+components/PharmacyResultCard.tsx  # medicine + pharmacy + distance + CTA
+components/HoursTable.tsx
+components/StockBadge.tsx
+components/DistanceBadge.tsx
+index.ts
+```
 
----
+Public server functions use the server publishable client (anon key + apikey shim) — same pattern as `product-intelligence/server/intelligence.functions.ts`. Writes go through `requireSupabaseAuth`.
 
-## Technical details
+### 3. Routes
 
-**Files to create**
-- `src/routes/_authenticated/pharmacist/prescription-review.$id.tsx`
-- `src/routes/_authenticated/pharmacist/prescription-queue.tsx`
-- `docs/engineering/reports/PHOENIX-PRESCRIPTION-INTELLIGENCE.md`
+**Patient (public):**
+- `src/routes/pharmacies.tsx` → `/pharmacies` — search box (medicine name, powered by `medicineNormalize`), optional "use my location" button (browser geolocation, sent as search params `lat`/`lng`/`r`), results grouped by medicine → list of pharmacies sorted by distance. Falls back to city filter if no coords.
+- `src/routes/pharmacies.$slug.tsx` → `/pharmacies/:slug` — profile: header, hours, verified badge, WhatsApp/phone CTAs, searchable product list with availability badges. og:image from pharmacy `logo_url`.
 
-**Files to extend**
-- `src/lib/prescription-review.functions.ts` — three new server fns above (all `requireSupabaseAuth` + `has_role` check)
-- `src/routes/prescription.tsx` — add persistent verification banner after upload
-- `docs/engineering/reports/PHOENIX-INVOICE-INTELLIGENCE.md` — Security/Audit section
+**Pharmacy owner (authenticated, under `_authenticated/pharmacy/`):**
+- `pharmacy-profile.tsx` — edit profile + hours + submit verification.
+- `pharmacy-stock.tsx` — table with search + inline availability/price/expiry edit; CSV/paste bulk import (reuses catalog search for matching).
+- `pharmacy-transfers.tsx` — list scaffold; "Request transfer" form (disabled state banner: "التبادل بين الصيدليات — قريباً").
 
-**No changes** to: database schema, migrations, existing invoice code, extractor server file, cron jobs, RLS policies (verify only), dependencies.
+Nav: add "🏥 الصيدليات" to `SiteHeader` public nav; add "لوحة الصيدلية" group under authenticated user menu when the user has pharmacy org membership.
 
-**Rules honored**
-- No auto-stock modification on invoice commit paths beyond the existing confirmation gate.
-- Never displays prescription output without the "requires pharmacist verification" banner.
-- All pharmacist decisions audited.
-- Uses existing product-intelligence RPC for medicine matching (no duplicate normalizer).
+### 4. Near-expiry / transfer preparation (no execution)
 
----
+- `pn_pharmacy_stock.expiry_date` + a scheduled RPC `pn_flag_near_expiry(_days int default 90)` that writes into existing `inv_expiry_alerts` (already exists). No cron scheduled in this phase — RPC defined only.
+- `pn_transfer_requests` accepts drafts; UI clearly marks "قريباً — لن يتم النقل الفعلي بعد".
 
-## Out of scope (deferred)
-- New medicine matching heuristics beyond `search_medicines_public`
-- Doctor e-signature verification
-- Insurance claim automation
-- Real OCR benchmarks / load tests
-- Any credit-spending model swap
+### 5. Deliberately deferred
+
+- Marketplace payments / order flow.
+- Actual `inv_stock_movements` writes on transfer accept.
+- Cron for expiry sweep.
+- Push notifications to pharmacies for incoming transfers.
+- Distance filter using PostGIS (haversine in SQL is enough at current scale).
+
+### 6. Report
+
+`docs/engineering/reports/PHOENIX-PHARMACY-NETWORK.md` covering: schema, RPCs, RLS, module map, routes, seed, security (anon exposure limited to verified public pharmacies + availability/contact only; prices optional), and explicit list of deferred marketplace features.
+
+### Acceptance
+- Migration approved and applied; `bun run build:dev` exits 0; typecheck 0.
+- `/pharmacies?q=paracetamol` returns seeded Aden pharmacies with distance when geolocation provided.
+- `/pharmacies/{slug}` renders profile + product list.
+- Pharmacy owner can edit stock and submit for verification.
+- Transfer form saves a draft row; no stock ledger writes occur.
+- Report committed.
+
+Approve to proceed.
