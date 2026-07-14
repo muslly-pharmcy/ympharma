@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { z } from "zod";
-import { zodValidator, fallback } from "@tanstack/zod-adapter";
+
 import { Stethoscope } from "lucide-react";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { DoctorCard } from "@/modules/doctors/components/DoctorCard";
@@ -10,12 +10,13 @@ import { EmptyState } from "@/modules/doctors/components/EmptyState";
 import { searchDoctorsPublic, listPublicFacets } from "@/modules/doctors/server/doctors.functions";
 
 const searchSchema = z.object({
-  q: fallback(z.string(), "").default(""),
-  specialty: fallback(z.string(), "").default(""),
-  city: fallback(z.string(), "").default(""),
-  facility: fallback(z.string(), "").default(""),
-  page: fallback(z.number().int(), 1).default(1),
+  q: z.string().catch("").default(""),
+  specialty: z.string().catch("").default(""),
+  city: z.string().catch("").default(""),
+  facility: z.string().catch("").default(""),
+  page: z.number().int().catch(1).default(1),
 });
+type SearchT = z.infer<typeof searchSchema>;
 
 const facetsQO = queryOptions({
   queryKey: ["doctors", "facets"],
@@ -31,7 +32,7 @@ const doctorsQO = (filters: z.infer<typeof searchSchema>) =>
   });
 
 export const Route = createFileRoute("/doctors")({
-  validateSearch: zodValidator(searchSchema),
+  validateSearch: (s: Record<string, unknown>): SearchT => searchSchema.parse(s),
   loaderDeps: ({ search }) => search,
   loader: async ({ context, deps }) => {
     await Promise.all([
@@ -64,8 +65,8 @@ function DoctorsPage() {
   const { data: facets } = useSuspenseQuery(facetsQO);
   const { data: result } = useSuspenseQuery(doctorsQO(search));
 
-  const onChange = (patch: Partial<typeof search>) =>
-    navigate({ search: (prev) => ({ ...prev, ...patch, page: 1 }) });
+  const onChange = (patch: Partial<SearchT>) =>
+    navigate({ search: (prev: SearchT) => ({ ...prev, ...patch, page: 1 }) });
 
   return (
     <>
