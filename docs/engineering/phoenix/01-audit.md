@@ -143,3 +143,18 @@
 - Foundation is solid enough that Phoenix is a **restructure + tenancy retrofit**, not a rewrite.
 - Data layer is preserved; the rebuild is in code organization, UX consolidation, and tenancy.
 - All existing security wins from Phase 1/2 are carried forward untouched.
+
+---
+
+## 10. Architecture Additions (2026-07-14)
+
+Post-approval review flagged four capability gaps under-scoped in §1–§9. They do not invalidate the audit; they extend the target module set and are absorbed into `02-restructure-plan.md` §2 and `05-phases.md`.
+
+| Gap | Evidence today | Closed by |
+|---|---|---|
+| Commerce / SaaS revenue surface fragmented | `orders`, `payments`, `subscriptions`, `insurance`, commissions logic scattered across routes and server fns; no single revenue ledger | New `commerce-core` module |
+| Notification dispatch scattered | `alert-dispatch.server.ts`, `slack.functions.ts`, WhatsApp hooks, email routes, in-app bell — no unified engine, no user preferences store | New `notification-engine` module |
+| Product intelligence embedded in AI features | OCR / barcode / image recognition / AR-EN aliases / misspellings / expiry logic lives inside `prescription-ai` and `catalog`; no shared brain for `invoice-ai`, marketplace, or pharmacy-network lookup | New `product-intelligence` module |
+| Growth surface spread thin | `loyalty`, `campaigns`, `banners`, `offers`, `discounts`, social automation live as sibling routes with duplicated dispatch | New `growth-engine` module |
+
+Doctor Foundation is also promoted earlier in phasing (was Phase 8, now Phase 6) so appointments/laboratories in later phases build on a stable doctor spine rather than co-evolving with advanced prescription AI.

@@ -1,127 +1,81 @@
-# TITANUS OMEGA X — Phoenix Rebuild (Phase 1)
+# Phoenix Architecture Additions — Docs-Only Update
 
-**Scope of this plan:** documentation and architecture only. No code, no migrations, no dependency changes. Deliverables are five reports/lists written under `docs/engineering/phoenix/`. Business data and stable runtime behavior are preserved untouched.
+Scope: update three Phoenix deliverables under `docs/engineering/phoenix/` to register four new modules and reorder Doctor Foundation. No source, migrations, dependencies, or `PROJECT_STATE.yaml` changes.
 
----
+## Files to update
 
-## Deliverable 1 — Architecture Audit Report
-File: `docs/engineering/phoenix/01-audit.md`
+### 1. `01-audit.md`
+Append an "Architecture Additions (2026-07-14)" section noting four capability gaps the audit under-scoped, which the additions below close:
+- Commerce / SaaS revenue surface fragmented across orders, subscriptions, payments, insurance.
+- Notification dispatch scattered (Slack, WhatsApp, email, in-app) with no unified engine or user preferences.
+- Product intelligence (OCR, barcode, image recognition, AR/EN aliases, misspellings, expiry) lives inside prescription-ai / catalog with no shared brain.
+- Growth (referrals, loyalty, coupons, campaigns, social) spread across marketing/loyalty/campaigns routes with no cohesive engine.
 
-Sections:
-1. **Current architecture snapshot** — TanStack Start v1 + React 19 + Vite 7 on Cloudflare Workers; Supabase (Postgres + Auth + Storage); 478 files, 131 migrations, ~180 routes, 108 tables, 156 SECURITY DEFINER functions, 32 pg_cron jobs, 8 AI agents through `agent_events` + DLQ.
-2. **Layer map** — client routes / server fns / `/api/public/*` hooks / RPCs / cron / event bus. Reuses diagram from `docs/cto-final-verdict-2026-06-20.md`.
-3. **Technical debt register** — route sprawl (~90 `admin-*` top-level routes vs `_authenticated/`), duplicated admin dashboards, mixed Titans UI vs shadcn, inconsistent error taxonomy, no module boundaries, no tenant/organization abstraction, `pages`-style flat routing under `src/routes/` with domain concerns collapsed.
-4. **Dependency analysis** — production vs dev, edge-incompatible risks, `xlsx` pin status (F-01 closed), overrides in `package.json`.
-5. **Security audit** — carry-forward from Phase 1/2 closures (SEC-P1-002/003/004, CRON-P1-004, AUTH-P1-003, DB-P1-005). Gaps: no tenant isolation, no per-org RLS scoping, missing signed-webhook coverage on 3 external integrations, no bot detection layer.
-6. **Performance audit** — bundle by route group, LCP on `/`, cold-start on Workers, N+1 candidates in admin dashboards, missing skeletons on 40+ routes.
-7. **Database audit** — 108 tables classified by domain, orphan tables, missing FKs, RLS coverage matrix, GRANT correctness (post DB-P1-005), cron ownership map.
-8. **Observability & DR** — Logger/Otlp/RequestContext core, backup verification cron (jobid=42), gaps vs enterprise SLO.
+### 2. `02-restructure-plan.md`
+- In the `src/modules/` directory layout, add four modules and mark the merges they consolidate:
+  - `commerce-core/` — owns subscriptions, billing, payments, commissions, SaaS plans, revenue tracking. Absorbs the commerce parts of `payments`, `subscriptions`, `insurance` (claims stay in `insurance`).
+  - `notification-engine/` — owns push, WhatsApp, SMS, email, in-app, campaigns automation, user preferences. Replaces standalone `notifications` module; `marketing` delegates dispatch to it.
+  - `product-intelligence/` — owns catalog intelligence, OCR matching, barcode, image recognition, AR/EN aliases, misspelling correction, expiry intelligence. Sits between `catalog` and `prescription-ai` / `invoice-ai`; the AI modules consume it.
+  - `growth-engine/` — owns referrals, loyalty, coupons, campaigns, customer engagement, social automation. Absorbs `marketing` growth surface (CMS content stays in `cms`).
+- Update the module dependency DAG:
+  - `commerce-core` sits above `orders`, feeds `analytics` and `erp`; consumes `identity`, `organizations`.
+  - `notification-engine` replaces `notifications` node; every module dispatches through it.
+  - `product-intelligence` sits between `catalog` + `media-library` (below) and `prescription-ai` + `invoice-ai` (above).
+  - `growth-engine` sits alongside `marketing`, above `customers` and `orders`, below `analytics`.
+- Update the reusable-components table: route `alert-dispatch.server.ts`, `slack.functions.ts`, existing loyalty/campaigns/banners UIs into the new modules as adapters (KEEP, relocate).
+- Update Cross-cutting layers: Notifications bullet now points to `notification-engine`; add a Commerce bullet (single revenue ledger) and a Product Intelligence bullet (shared OCR/vision/alias service consumed by AI modules).
 
-Method: read-only queries via `supabase--read_query`, `rg` inventories, and existing reports in `docs/engineering/reports/`. No schema changes.
+### 3. `05-phases.md`
+Reorder and rename phases 5–11 to insert Doctor Foundation earlier and land the four new modules on the right layer. New order:
 
----
-
-## Deliverable 2 — Restructuring Plan (Target Architecture)
-File: `docs/engineering/phoenix/02-restructure-plan.md`
-
-**Target: modular monolith on TanStack Start**, module-per-domain, event bus as the seam, multi-tenant from day one.
-
-Proposed layout:
+```text
+Phase 0  Foundations (docs + guards)               [done]
+Phase 1  Tenancy spine                              [unchanged]
+Phase 2  Platform layer                             [unchanged]
+Phase 3  Identity/Orgs/Branches/Users/Roles/Perms   [unchanged]
+Phase 4  Catalog + Media Library                    [unchanged]
+Phase 5  Inventory + Warehouse + Transfers + Suppliers [unchanged]
+Phase 6  Doctor Foundation (NEW, moved earlier)
+         - doctor profiles, specialties, locations,
+           availability, appointment foundation
+         - no advanced prescription AI yet
+Phase 7  Product Intelligence (NEW)
+         - OCR, barcode, image recognition,
+           AR/EN aliases, misspellings, expiry engine
+Phase 8  Customers + Family + Prescriptions + Prescription AI + Invoice AI
+         - consumes product-intelligence
+Phase 9  Commerce Core (NEW)
+         - subscriptions, billing, payments,
+           commissions, SaaS plans, revenue ledger
+         - absorbs current Orders/Payments/Subscriptions/Insurance work
+Phase 10 Orders (thin) + Insurance claims
+Phase 11 Appointments + Laboratories (advanced)
+         - builds on Phase 6 doctor foundation;
+           adds e-prescription QR, voice prescription,
+           lab orders/results
+Phase 12 Marketplace + Pharmacy Network
+Phase 13 Notification Engine (NEW)
+         - unified push/WhatsApp/SMS/email/in-app,
+           campaigns automation, user preferences
+Phase 14 Growth Engine (NEW)
+         - referrals, loyalty, coupons, campaigns,
+           social automation
+Phase 15 CMS + Healthcare Media + Knowledge Base
+Phase 16 Analytics + ERP + AI Engine consolidation
+Phase 17 Administration shell + Monitoring + Audit + Security + API Gateway
+         - enforce organization_id NOT NULL, tighten RLS,
+           retire legacy admin routes
 ```
-src/
-  modules/
-    identity/         organizations/    branches/       users/
-    roles/            permissions/      customers/      family/
-    doctors/          appointments/     prescriptions/  prescription-ai/
-    invoice-ai/       inventory/        warehouse/      transfers/
-    suppliers/        marketplace/      orders/         payments/
-    subscriptions/    insurance/        laboratories/   notifications/
-    healthcare-media/ knowledge-base/   ai-engine/      analytics/
-    marketing/        cms/              erp/            monitoring/
-    audit/            security/         api-gateway/    administration/
-  core/               (existing: idempotency, dlq, observability, ai-safety, backup, retention)
-  platform/           (ui-kit, hooks, utils, tenant-context)
-  routes/             (thin: import from modules; group under (public), (app), (admin), api/)
-```
 
-Each module owns: `domain/` (types + zod), `data/` (RPC + queries), `server/` (`.functions.ts`, `.server.ts`), `ui/` (components), `routes/` (re-exported by `src/routes/*` thin wrappers), `events/` (emit + consume), `README.md`.
+Keep per-phase mandatory checks, rollback contract, and additive-only rule unchanged. Refresh the indicative-timeline table to match the new numbering (no committed dates).
 
-Cross-cutting: multi-tenancy via `organization_id` on every domain table, `current_org()` RLS helper, `tenant-context` provider, per-org rate limits, per-org feature flags.
+### 4. `README.md` (Phoenix index)
+One-line update: note the 2026-07-14 architecture additions (4 new modules + Doctor Foundation reorder) and that phase count is now 17.
 
-Module dependency graph (Deliverable 2 appendix): DAG with `core` and `platform` at the bottom; `identity → organizations → branches → users → roles/permissions`; domain modules depend only on lower layers and the event bus.
+## Out of scope
+- `PROJECT_STATE.yaml`, `CHANGELOG.md` — untouched (per contract, CTO flips state).
+- `03-keep-list.md`, `04-rebuild-list.md` — no re-classification needed; module relocations already covered by rebuild-list categories.
+- Any source, SQL, or dependency change.
 
-Reusable components report (Deliverable 2 appendix): inventory of shadcn primitives, Titans motion components, admin table/shell patterns, form patterns — with keep/merge/retire verdicts.
-
-Migration strategy (Deliverable 2 appendix): strangler-fig, module by module; each module ships behind a feature flag; old routes redirect to new once parity is verified; DB migrations are additive-only during transition (add `organization_id` NULL → backfill → NOT NULL → RLS tighten).
-
----
-
-## Deliverable 3 — Files to KEEP (verbatim)
-File: `docs/engineering/phoenix/03-keep-list.md`
-
-Categories (enumerated at report time):
-- All `supabase/migrations/*` (immutable history).
-- `src/core/**` (idempotency, dlq, observability, ai-safety, backup, retention).
-- `src/integrations/supabase/**` (auto-generated).
-- `src/middleware/cron-auth.ts`, `src/lib/cron-auth.server.ts`.
-- `src/routes/api/public/hooks/**` (already hardened Batch by CRON-P1-004).
-- `docs/engineering/**` (governance + reports + artifacts).
-- `scripts/check-imports.ts`, `.github/workflows/**`.
-- Titans UI primitives (`src/components/titans/ui/**`, `src/components/titans/motion/**`).
-- Core UI kit (`src/components/ui/**` shadcn).
-- Configs: `vite.config.ts`, `tsconfig.json`, `package.json`, `eslint.config.js`, `playwright.config.ts`, `vitest.config.ts`, `supabase/config.toml`.
-- Domain data: all Postgres data (no destructive migration in Phoenix).
-
----
-
-## Deliverable 4 — Files to REBUILD
-File: `docs/engineering/phoenix/04-rebuild-list.md`
-
-Categories:
-- Flat `src/routes/admin-*.tsx` (~90 files) → migrate under `src/routes/(admin)/<module>/*` with logic moved into `src/modules/<module>/`.
-- Duplicated dashboards: `admin-hub`, `admin-command`, `admin-dashboard`, `admin-ai-executive*`, `admin-ai-orchestrator`, `admin-agents`, `admin-automation-hub` → consolidate to one `administration` module shell.
-- Scattered AI routes (`admin-ai-*`, `ai-*`) → unified `ai-engine` + `prescription-ai` + `invoice-ai` modules.
-- `src/lib/**` — split by module owner; retire generic bucket. Keep only truly cross-cutting utils in `src/platform/utils/`.
-- `src/hooks/**` — same split.
-- `src/components/admin/**` — decomposed into per-module `ui/`.
-- `src/routes/__root.tsx` — rewrite with tenant provider, simplified head, split shell.
-- Homepage (`src/routes/index.tsx`) and public routes — rebuilt against UX requirements (mobile-first, minimal steps).
-
-Every entry lists: current path → target module → dependency notes → rebuild vs move-and-refactor.
-
----
-
-## Deliverable 5 — Execution Phasing
-File: `docs/engineering/phoenix/05-phases.md`
-
-- **Phase 0 — Foundations (docs + guards, no runtime change).** This plan's five docs. Update `PROJECT_STATE.yaml` to open `PHOENIX-P0`. Add module boundary lint rule to `scripts/check-imports.ts` (dry-run only).
-- **Phase 1 — Tenancy spine.** Add `organizations`, `organization_members`, `current_org()` RLS helper as additive migrations. No table rewrites. Backfill single default org for existing data.
-- **Phase 2 — Platform layer.** Create `src/modules/` scaffolding + `src/platform/tenant-context`. Move `core/` untouched. Zero behavior change.
-- **Phase 3 — Identity + Organizations + Branches + Users + Roles + Permissions.** First real module migrations.
-- **Phase 4 — Catalog + Media Library (national medicine catalog, reusable product images).**
-- **Phase 5 — Inventory + Warehouse + Transfers + Suppliers.**
-- **Phase 6 — Customers + Family + Prescriptions + Prescription AI + Invoice AI.**
-- **Phase 7 — Orders + Payments + Subscriptions + Insurance.**
-- **Phase 8 — Doctors + Appointments + Laboratories.**
-- **Phase 9 — Marketplace + Pharmacy Network (nationwide lookup, P2P exchange, near-expiry).**
-- **Phase 10 — Notifications + Marketing + CMS + Healthcare Media + Knowledge Base.**
-- **Phase 11 — Analytics + ERP + AI Engine consolidation.**
-- **Phase 12 — Administration shell, Monitoring, Audit, Security, API Gateway hardening.**
-
-Each phase: strangler-fig, feature-flagged, additive migrations, parity tests before old-route deletion. Every phase closes with a report under `docs/engineering/reports/PHOENIX-P<n>-*.md` and a `PROJECT_STATE.yaml` flip, matching the existing EES v4.0 governance.
-
----
-
-## Governance touchpoints (this phase only)
-- Append `PHOENIX-P0` to `docs/engineering/plans/phase-3.yaml` or open `plans/phase-4.yaml` (decide during writing).
-- Update `docs/engineering/PROJECT_STATE.yaml` to `Phase3 or Phase4 / PHOENIX-P0 / EXECUTING` after approval.
-- Append CHANGELOG entry.
-
-## What this plan explicitly does NOT do
-- No source code edits.
-- No SQL, no migrations, no GRANT/REVOKE.
-- No dependency install/removal.
-- No route deletions or moves.
-- No UI changes.
-
-Approve to proceed with writing Deliverables 1–5.
+## Deliverable
+Four edited docs. Reply summarizes the additions and confirms Phase 1 is still gated on your explicit go.
