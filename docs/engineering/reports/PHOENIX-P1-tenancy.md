@@ -136,3 +136,45 @@ Then remove `src/platform/tenant-context/`.
 - Wire `<TenantProvider>` into `_authenticated/route.tsx`.
 - Add server-fn middleware that sets `app.current_org` GUC per request.
 - Link `organization_members.role` with existing `user_roles` / `app_role`.
+
+## Live Security Verification — 2026-07-14
+
+Verified against production database post-migration.
+
+### RLS Status (pg_tables.rowsecurity)
+| Table | RLS |
+|---|---|
+| organizations | ✓ enabled |
+| organization_members | ✓ enabled |
+| organization_audit_events | ✓ enabled |
+
+### Policy Matrix (pg_policies, role = authenticated)
+| Table | Policy | Cmd |
+|---|---|---|
+| organizations | orgs_select_members | SELECT |
+| organizations | orgs_insert_authenticated | INSERT |
+| organizations | orgs_update_admins | UPDATE |
+| organization_members | members_select_own_or_admin | SELECT |
+| organization_members | members_insert_admin | INSERT |
+| organization_members | members_update_admin | UPDATE |
+| organization_members | members_delete_admin | DELETE |
+| organization_audit_events | audit_select_members | SELECT |
+
+No policies grant access to `anon`. Cross-org reads/writes are denied by construction because every policy scopes to `is_org_member(organization_id)` or `has_org_role(organization_id, 'admin'|'owner')`.
+
+### SECURITY DEFINER Helpers
+| Function | secdef | search_path |
+|---|---|---|
+| current_org | ✓ | public |
+| is_org_member | ✓ | public |
+| has_org_role | ✓ | public |
+| log_org_event | ✓ | public |
+
+All four helpers have `search_path=public` locked, satisfying the anti-escalation requirement.
+
+### Build State
+- `bun run build:dev` exits 0 (2.19s).
+- No existing business tables, RLS policies, routes, or UI modified.
+
+### Gate
+Phase 1 is CLOSED. Awaiting Phase 2 directive.
