@@ -7314,6 +7314,20 @@ export type Database = {
         }
         Returns: Json
       }
+      search_medicines_public: {
+        Args: { _limit?: number; _q: string }
+        Returns: {
+          brand: string
+          dosage_form: string
+          generic_name: string
+          id: string
+          match_kind: string
+          name_ar: string
+          name_en: string
+          score: number
+          strength: string
+        }[]
+      }
       set_inventory_pilot: {
         Args: { _group?: string; _legacy_ids: number[] }
         Returns: Json
