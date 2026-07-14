@@ -5060,6 +5060,7 @@ export type Database = {
           alerts_updated: number
         }[]
       }
+      email_queue_dispatch: { Args: never; Returns: undefined }
       emit_agent_event: {
         Args: {
           _entity_id?: string
