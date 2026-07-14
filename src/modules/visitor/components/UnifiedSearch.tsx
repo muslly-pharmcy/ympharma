@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { Search, Pill, Stethoscope, BookOpen } from "lucide-react";
 import { useState } from "react";
-import { normalizeArabic } from "@/modules/doctors/domain/arabicNormalize";
+import { normalizeAr } from "@/modules/doctors/domain/arabicNormalize";
 import { trackEvent } from "../analytics/track";
 
 type Category = "medicines" | "doctors" | "content";
@@ -21,7 +21,7 @@ export function UnifiedSearch({ compact = false }: { compact?: boolean }) {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const query = normalizeArabic(q.trim());
+    const query = normalizeAr(q.trim());
     if (!query && cat === "medicines") return;
     trackEvent("search_submitted", { category: cat, length: query.length });
     if (cat === "medicines") navigate({ to: "/products", search: { q: query } as never });

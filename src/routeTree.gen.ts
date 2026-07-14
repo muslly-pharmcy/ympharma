@@ -162,6 +162,7 @@ import { Route as ApiPublicHooksAgentMaintenanceRouteImport } from './routes/api
 import { Route as ApiPublicHooksAgentAlertsRouteImport } from './routes/api/public/hooks/agent-alerts'
 import { Route as ApiPublicHealthQuickCheckRouteImport } from './routes/api/public/health.quick-check'
 import { Route as ApiPublicHealthFullCheckRouteImport } from './routes/api/public/health.full-check'
+import { Route as ApiPublicAnalyticsIngestRouteImport } from './routes/api/public/analytics/ingest'
 import { Route as ApiPublicHooksAgentsWhatsappRouteImport } from './routes/api/public/hooks/agents/whatsapp'
 import { Route as ApiPublicHooksAgentsSalesRouteImport } from './routes/api/public/hooks/agents/sales'
 import { Route as ApiPublicHooksAgentsOperationsRouteImport } from './routes/api/public/hooks/agents/operations'
@@ -991,6 +992,12 @@ const ApiPublicHealthFullCheckRoute =
     path: '/full-check',
     getParentRoute: () => ApiPublicHealthRoute,
   } as any)
+const ApiPublicAnalyticsIngestRoute =
+  ApiPublicAnalyticsIngestRouteImport.update({
+    id: '/api/public/analytics/ingest',
+    path: '/api/public/analytics/ingest',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksAgentsWhatsappRoute =
   ApiPublicHooksAgentsWhatsappRouteImport.update({
     id: '/api/public/hooks/agents/whatsapp',
@@ -1156,6 +1163,7 @@ export interface FileRoutesByFullPath {
   '/api/public/uptime-webhook': typeof ApiPublicUptimeWebhookRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/analytics/ingest': typeof ApiPublicAnalyticsIngestRoute
   '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
   '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
   '/api/public/hooks/agent-alerts': typeof ApiPublicHooksAgentAlertsRoute
@@ -1319,6 +1327,7 @@ export interface FileRoutesByTo {
   '/api/public/uptime-webhook': typeof ApiPublicUptimeWebhookRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/analytics/ingest': typeof ApiPublicAnalyticsIngestRoute
   '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
   '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
   '/api/public/hooks/agent-alerts': typeof ApiPublicHooksAgentAlertsRoute
@@ -1484,6 +1493,7 @@ export interface FileRoutesById {
   '/api/public/uptime-webhook': typeof ApiPublicUptimeWebhookRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/analytics/ingest': typeof ApiPublicAnalyticsIngestRoute
   '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
   '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
   '/api/public/hooks/agent-alerts': typeof ApiPublicHooksAgentAlertsRoute
@@ -1649,6 +1659,7 @@ export interface FileRouteTypes {
     | '/api/public/uptime-webhook'
     | '/api/public/whatsapp-webhook'
     | '/lovable/email/suppression'
+    | '/api/public/analytics/ingest'
     | '/api/public/health/full-check'
     | '/api/public/health/quick-check'
     | '/api/public/hooks/agent-alerts'
@@ -1812,6 +1823,7 @@ export interface FileRouteTypes {
     | '/api/public/uptime-webhook'
     | '/api/public/whatsapp-webhook'
     | '/lovable/email/suppression'
+    | '/api/public/analytics/ingest'
     | '/api/public/health/full-check'
     | '/api/public/health/quick-check'
     | '/api/public/hooks/agent-alerts'
@@ -1976,6 +1988,7 @@ export interface FileRouteTypes {
     | '/api/public/uptime-webhook'
     | '/api/public/whatsapp-webhook'
     | '/lovable/email/suppression'
+    | '/api/public/analytics/ingest'
     | '/api/public/health/full-check'
     | '/api/public/health/quick-check'
     | '/api/public/hooks/agent-alerts'
@@ -2124,6 +2137,7 @@ export interface RootRouteChildren {
   ApiPublicUptimeWebhookRoute: typeof ApiPublicUptimeWebhookRoute
   ApiPublicWhatsappWebhookRoute: typeof ApiPublicWhatsappWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicAnalyticsIngestRoute: typeof ApiPublicAnalyticsIngestRoute
   ApiPublicHooksAgentAlertsRoute: typeof ApiPublicHooksAgentAlertsRoute
   ApiPublicHooksAgentMaintenanceRoute: typeof ApiPublicHooksAgentMaintenanceRoute
   ApiPublicHooksAlertsWorkerRoute: typeof ApiPublicHooksAlertsWorkerRoute
@@ -3245,6 +3259,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHealthFullCheckRouteImport
       parentRoute: typeof ApiPublicHealthRoute
     }
+    '/api/public/analytics/ingest': {
+      id: '/api/public/analytics/ingest'
+      path: '/api/public/analytics/ingest'
+      fullPath: '/api/public/analytics/ingest'
+      preLoaderRoute: typeof ApiPublicAnalyticsIngestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/agents/whatsapp': {
       id: '/api/public/hooks/agents/whatsapp'
       path: '/api/public/hooks/agents/whatsapp'
@@ -3488,6 +3509,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicUptimeWebhookRoute: ApiPublicUptimeWebhookRoute,
   ApiPublicWhatsappWebhookRoute: ApiPublicWhatsappWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicAnalyticsIngestRoute: ApiPublicAnalyticsIngestRoute,
   ApiPublicHooksAgentAlertsRoute: ApiPublicHooksAgentAlertsRoute,
   ApiPublicHooksAgentMaintenanceRoute: ApiPublicHooksAgentMaintenanceRoute,
   ApiPublicHooksAlertsWorkerRoute: ApiPublicHooksAlertsWorkerRoute,
