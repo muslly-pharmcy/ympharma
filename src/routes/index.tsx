@@ -446,11 +446,19 @@ function Home() {
           </div>
         </section>
 
+        <DiscoveryGrid />
+
         <Suspense fallback={null}>
           <DoctorDiscoveryEntry />
         </Suspense>
         <Suspense fallback={null}>
           <HealthEducationPreview />
+        </Suspense>
+        <Suspense fallback={null}>
+          <PlatformUpdates />
+        </Suspense>
+        <Suspense fallback={null}>
+          <NotificationOptIn />
         </Suspense>
         <Suspense fallback={null}>
           <WhatsNew />
