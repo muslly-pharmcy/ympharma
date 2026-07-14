@@ -1,106 +1,81 @@
 
-# Phoenix Phase 7-A — Product Intelligence Foundation
+# Phoenix Design System — Premium Healthcare UX
 
-Additive-only. Reuses existing `catalog_product_aliases` and `catalog_product_media` tables (already in the DB with `alias_normalized` + trigram index and media `status`/`kind`), and layers a dedicated intelligence module on top of catalog.
+Most of the "Quick Execution — User Growth" block is already shipped in prior phases (Doctor Join at `/doctor/join`, homepage discovery grid + unified search, notification nudge, medicine + Arabic normalization, latest updates via `PlatformUpdates`). This plan focuses on the **new work** — the unified design system — and only re-touches growth surfaces to apply the new tokens/components.
 
-## 1. New module scaffold — `src/modules/product-intelligence/`
+## Scope
 
-```text
-product-intelligence/
-  domain/
-    types.ts              # ProductAlias, ProductMediaRef, SearchHit, MatchKind
-    schemas.ts            # zod: SearchQuery, AliasInput, NormalizationInput
-    normalize.ts          # Arabic + Latin normalization (single source of truth)
-    aliases.ts            # buildAliasCandidates(query), scoreMatch()
-  data/
-    queries.ts            # publishable-key SSR reads (public search only)
-  server/
-    normalization.functions.ts   # normalizeQuery({query})
-    aliases.functions.ts         # addAlias / listAliases / verifyAlias (authenticated)
-    intelligence.functions.ts    # searchMedicinesIntelligent({query, limit})
-  events/
-    schemas.ts            # alias.created / alias.verified / media.verified event zods
-  ui/
-    ProductImage.tsx      # lazy, WebP-first, placeholder fallback, verification badge
-    index.ts
-  index.ts                # barrel: re-exports domain + ui only (no server)
-```
+Presentation-layer only. No migrations, no RLS, no server-function changes, no schema changes. Business logic in `src/modules/**/server` and `src/platform/**` stays untouched.
 
-Server files stay outside `src/server/` (import-protection rule). `ui/` is lazy-imported so nothing enters the homepage bundle.
+## 1. Design tokens (src/styles.css)
 
-## 2. Normalization engine (`domain/normalize.ts`)
+Extend the existing `@theme` block with a **Muslly Medical** palette layered on top of current semantic tokens (so `bg-primary`, `text-foreground`, etc. keep working).
 
-Pure functions, no deps. Behaviour:
-- Arabic letter folding: `أ إ آ ٱ → ا`, `ى → ي`, `ة → ه`, `ؤ → و`, `ئ → ي`.
-- Strip tatweel `ـ`, tashkeel (`\u064B-\u0652`), zero-width chars.
-- Lowercase Latin, collapse whitespace, strip punctuation.
-- `normalize(query)` → canonical string.
-- `tokenize(query)` → tokens after canonical-map + bigram merge (reuses the maps already in `src/modules/catalog/domain/medicineNormalize.ts`, which is re-exported from here — old imports keep working).
+- Add tokens:
+  - `--color-medical-turquoise: oklch(~0.68 0.12 200)` (≈ `#00A8B5`)
+  - `--color-medical-turquoise-deep`, `--color-medical-turquoise-soft` (hover / tint)
+  - `--color-medical-ink: oklch(~0.35 0 0)` (≈ `#4D4D4D`)
+  - `--color-medical-surface: oklch(~0.98 0.005 220)` (≈ `#F4F7F8`)
+  - `--color-medical-white: #FFFFFF`
+  - `--shadow-medical-card`, `--shadow-medical-elevated`
+  - `--radius-medical-card: 1rem`, `--radius-medical-pill: 999px`
+- Map onto existing semantic tokens where sensible (no breaking change): keep current `--primary` but expose `--color-medical-*` as an additive layer used by the new components.
+- Typography: load **Cairo** (Arabic) + **Montserrat** (Latin) via `<link>` in `src/routes/__root.tsx` (preconnect + stylesheet — never `@import` a URL in styles.css). Register `--font-arabic: "Cairo", ...` and `--font-latin: "Montserrat", ...` in `@theme`. Set body to `font-family: var(--font-arabic), var(--font-latin), system-ui`.
+- Add `@utility` helpers: `medical-card`, `medical-pill`, `medical-focus-ring`, `medical-tap` (min 44px touch target).
 
-## 3. Alias engine (`domain/aliases.ts`)
+## 2. Reusable components (new folder `src/components/medical/`)
 
-- `buildAliasCandidates(query)` → `{ exact, normalized, tokens, bigrams }`.
-- `scoreMatch(hit, query)` → 0..1 (exact > normalized > alias-hit > trigram distance).
-- Prepares for fuzzy: exposes normalized form for `pg_trgm` similarity server-side.
+Presentation-only wrappers. Each accepts props + `className`, uses tokens above, RTL-safe (`dir="rtl"` friendly, logical properties). No new data fetching — components render props passed by existing pages.
 
-## 4. Data layer (no schema changes)
+- `MedicalCard.tsx` — base card (surface, radius, shadow, hover lift).
+- `DoctorCard.tsx` — thin re-skin wrapping the existing doctor data shape used in `src/modules/doctors/components/DoctorCard.tsx`. Keep the old component; new one is opt-in.
+- `MedicineCard.tsx` — image + name (ar/en) + price + availability chip. Uses `ProductImage` from `product-intelligence`.
+- `PharmacyCard.tsx` — name, city, "قريباً" badge variant.
+- `TrustBadge.tsx` — verified / license / rating variants (re-uses semantics from existing `TrustBadge` if present; otherwise new).
+- `HealthArticleCard.tsx` — for Sahtak education cards.
+- `SearchBox.tsx` — visual shell around inputs; wraps existing `UnifiedSearch` styling without changing its logic.
+- `EmptyState.tsx` — icon + title + description + optional CTA.
+- `LoadingSkeleton.tsx` — shimmer primitives (`SkeletonLine`, `SkeletonCard`, `SkeletonAvatar`).
 
-DB already has everything needed:
-- `catalog_product_aliases(product_id, alias, alias_normalized, locale, source, confidence)` with GIN trigram on `alias_normalized`.
-- `catalog_product_media(product_id, storage_bucket, storage_path, kind, status, mime, width, height, sort_order)`.
+All components:
+- Mobile-first, min 44px tap targets, focus-visible rings using `--color-medical-turquoise`.
+- Use `content-visibility: auto` on list items where safe.
+- No new deps. Animations use CSS transitions + existing `Reveal`/`CountUp` in `src/components/titans/motion/` when needed.
 
-No migration. If a helper RPC is missing for public trigram search, add ONE `SECURITY DEFINER` function `search_medicines_intelligent(_q text, _limit int)` in a small additive migration — read-only, `GRANT EXECUTE TO anon, authenticated`, respects `is_public AND status='approved'`. Only added if the same query cannot be expressed with existing PostgREST filters at acceptable perf.
+## 3. Apply to existing surfaces (visual only)
 
-## 5. Server functions
+Swap presentation on:
+- Homepage (`src/routes/index.tsx`) — Discovery Grid + Latest Updates + Search wrap use new tokens/components. Keep sections and copy identical.
+- Doctors directory cards — render via new `DoctorCard` (behind a small feature swap in the list component). Old card kept as fallback.
+- Products list card — apply `MedicineCard` skin.
+- Sahtak (`/sahtak`) education cards — apply `HealthArticleCard`.
 
-- `normalizeQuery` — pure, no auth, returns normalized + tokens (used by the UI for highlighting).
-- `searchMedicinesIntelligent` — publishable-key server client; joins `catalog_products` + `catalog_product_aliases` on normalized match / trigram; returns products with primary approved media URL; ranks by match kind then similarity.
-- `addAlias` / `verifyAlias` — `requireSupabaseAuth`; RLS on `catalog_product_aliases` already enforces org membership; writes audit row into existing `identity_audit_events` or `organization_audit_events` (whichever fits; no new table).
+No route changes, no data-fetching changes, no server function edits.
 
-## 6. Public search upgrade
+## 4. Performance
 
-Wire `src/modules/visitor/components/UnifiedSearch.tsx` medicine branch to call `searchMedicinesIntelligent` instead of the current exact-match path. Keeps existing UI and analytics events. Behaviour:
-- exact match → normalized match → alias match → trigram fallback.
-- "فتمين سي" → returns Vitamin C products.
+- Lazy-load medical components via existing route-level lazy patterns.
+- No new runtime libraries. Fonts: `display=swap`, `preconnect`, subset to `arabic,latin`.
+- Verify build output size stays within current envelope (spot check `bun run build` locally is out of scope — rely on CI).
 
-## 7. Product image foundation — `ui/ProductImage.tsx`
+## 5. Deliverables
 
-- Accepts `productId` + optional `mediaId`.
-- Picks primary approved media (`kind='primary'` or lowest `sort_order` with `status='approved'`).
-- `<img loading="lazy" decoding="async">`, `srcset` with WebP variant when `mime='image/webp'`, otherwise original.
-- Placeholder SVG fallback on error / missing.
-- Small `VerifiedBadge` when `status='approved'`.
-- Zero impact on homepage bundle — imported only inside lazy visitor sections.
+- Updated `src/styles.css` (+ tokens/utilities).
+- Updated `src/routes/__root.tsx` head links (Cairo + Montserrat).
+- New `src/components/medical/*` (8 files + `index.ts`).
+- Minimal edits to `src/routes/index.tsx`, doctors list card wrapper, products card wrapper, sahtak card wrapper — presentation only.
+- Report: `docs/engineering/reports/PHOENIX-DESIGN-SYSTEM.md` documenting tokens, component API, RTL rules, and where each is applied.
 
-## 8. Security
+## Explicitly out of scope
 
-- No new tables (or one additive read-only RPC). Existing RLS preserved.
-- All writes go through `requireSupabaseAuth` server functions.
-- Public search uses publishable-key SSR client + existing `TO anon` SELECT policy.
-- Audit alias verification via existing audit table.
+- Any migration, RLS, admin import, schema change.
+- Rewriting existing `titans/` components (kept as-is).
+- Redesigning admin routes.
+- Changing business logic in `src/modules/**/server` or `src/platform/**`.
 
-## 9. Tests — `src/modules/product-intelligence/__tests__/`
+## Technical notes
 
-Vitest, pure functions only:
-- `normalize.test.ts` — Arabic folding, tashkeel strip, whitespace, mixed-script.
-- `aliases.test.ts` — "فتمين", "فتامين", "vit c" → same canonical bucket as "vitamin c".
-- `search-ranking.test.ts` — exact > normalized > alias > trigram ordering.
-- `invalid-input.test.ts` — empty, whitespace-only, extremely long, RTL control chars, emoji.
-
-## 10. Performance
-
-- Module tree-shaken; only `domain/normalize.ts` (~2KB) reaches the client from search.
-- `ProductImage` and `searchMedicinesIntelligent` are lazy-imported.
-- Homepage bundle size verified unchanged (± noise) via `bun run build` output.
-
-## 11. Deliverable
-
-Single short report at `docs/engineering/reports/PHOENIX-P7A-product-intelligence.md`:
-- files added, DB additions (0 or 1 RPC), search behaviour before/after, vitest results, build status.
-
-## Non-goals (explicitly out)
-
-- No changes to inventory, orders, prescriptions, admin dashboards.
-- No new tables for aliases/media (reuse existing).
-- No AI-generated aliases in this phase (event schemas prepared for later).
-- No image transformer route — CDN/WebP variant only if already produced upstream.
+- Tailwind v4 tokens go in `@theme` in `src/styles.css`; custom utilities use `@utility` (no `@layer utilities`).
+- Fonts loaded via `<link>` in `__root.tsx` `head()` — never `@import` a URL from styles.css.
+- New components must not import from `*.server.ts` or `src/modules/**/server/*`.
+- RTL: use logical properties (`ps-`/`pe-`, `ms-`/`me-`) and avoid hard-coded `left/right` in class names.
