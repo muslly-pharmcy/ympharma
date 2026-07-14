@@ -29,10 +29,10 @@ export const requestMediaUploadUrl = createServerFn({ method: "POST" })
   .inputValidator((input) => RequestUploadUrlSchema.parse(input))
   .handler(async ({ data, context }): Promise<{ path: string; token: string; ttl: number }> => {
     if (!ALLOWED_MIME.includes(data.mime)) {
-      throw new AppError("VALIDATION", "unsupported media type", `mime=${data.mime}`);
+      throw new ValidationError("unsupported media type", undefined, `mime=${data.mime}`);
     }
     if (data.bytes > MAX_MEDIA_BYTES) {
-      throw new AppError("VALIDATION", "file too large", `bytes=${data.bytes}`);
+      throw new ValidationError("file too large", undefined, `bytes=${data.bytes}`);
     }
     const orgId = await productOrg(context.supabase, data.productId);
     await PermissionService.require(context.userId, "catalog.media.upload", { orgId });
@@ -52,17 +52,17 @@ export const registerUploadedMedia = createServerFn({ method: "POST" })
   .inputValidator((input) => RegisterMediaSchema.parse(input))
   .handler(async ({ data, context }): Promise<{ id: string }> => {
     if (!ALLOWED_MIME.includes(data.mime)) {
-      throw new AppError("VALIDATION", "unsupported media type", `mime=${data.mime}`);
+      throw new ValidationError("unsupported media type", undefined, `mime=${data.mime}`);
     }
     if (data.bytes > MAX_MEDIA_BYTES) {
-      throw new AppError("VALIDATION", "file too large", `bytes=${data.bytes}`);
+      throw new ValidationError("file too large", undefined, `bytes=${data.bytes}`);
     }
     const orgId = await productOrg(context.supabase, data.productId);
     await PermissionService.require(context.userId, "catalog.media.upload", { orgId });
 
     // Path must live under `<product_id>/...` per storage RLS.
     if (!data.storagePath.startsWith(`${data.productId}/`)) {
-      throw new AppError("VALIDATION", "storage path outside product namespace");
+      throw new ValidationError("storage path outside product namespace");
     }
 
     const { data: row, error } = await context.supabase
