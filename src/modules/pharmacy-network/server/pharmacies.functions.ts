@@ -53,7 +53,7 @@ const SlugSchema = z.object({ slug: z.string().min(1).max(160) });
 
 export const pnGetPharmacyPublic = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => SlugSchema.parse(i))
-  .handler(async ({ data }) => {
+  .handler(async ({ data }): Promise<Record<string, unknown> | null> => {
     const { data: row, error } = await sbPublic().rpc(
       "pn_get_pharmacy_public" as never,
       { _slug: data.slug } as never,
@@ -62,7 +62,7 @@ export const pnGetPharmacyPublic = createServerFn({ method: "POST" })
       console.error("[pnGetPharmacyPublic]", error.message);
       return null;
     }
-    return (row as unknown) ?? null;
+    return (row as Record<string, unknown> | null) ?? null;
   });
 
 const ListSchema = z.object({
