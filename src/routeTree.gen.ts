@@ -133,6 +133,7 @@ import { Route as AuthenticatedPharmacistDashboardRouteImport } from './routes/_
 import { Route as AuthenticatedDoctorProfileRouteImport } from './routes/_authenticated/doctor/profile'
 import { Route as AuthenticatedDoctorPracticesRouteImport } from './routes/_authenticated/doctor/practices'
 import { Route as AuthenticatedDoctorDashboardRouteImport } from './routes/_authenticated/doctor/dashboard'
+import { Route as AuthenticatedAdminDoctorJoinQueueRouteImport } from './routes/_authenticated/admin/doctor-join-queue'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -832,6 +833,12 @@ const AuthenticatedDoctorDashboardRoute =
     path: '/doctor/dashboard',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminDoctorJoinQueueRoute =
+  AuthenticatedAdminDoctorJoinQueueRouteImport.update({
+    id: '/admin/doctor-join-queue',
+    path: '/admin/doctor-join-queue',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -1236,6 +1243,7 @@ export interface FileRoutesByFullPath {
   '/pharmacies/$slug': typeof PharmaciesSlugRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
+  '/admin/doctor-join-queue': typeof AuthenticatedAdminDoctorJoinQueueRoute
   '/doctor/dashboard': typeof AuthenticatedDoctorDashboardRoute
   '/doctor/practices': typeof AuthenticatedDoctorPracticesRoute
   '/doctor/profile': typeof AuthenticatedDoctorProfileRoute
@@ -1412,6 +1420,7 @@ export interface FileRoutesByTo {
   '/pharmacies/$slug': typeof PharmaciesSlugRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
+  '/admin/doctor-join-queue': typeof AuthenticatedAdminDoctorJoinQueueRoute
   '/doctor/dashboard': typeof AuthenticatedDoctorDashboardRoute
   '/doctor/practices': typeof AuthenticatedDoctorPracticesRoute
   '/doctor/profile': typeof AuthenticatedDoctorProfileRoute
@@ -1590,6 +1599,7 @@ export interface FileRoutesById {
   '/pharmacies/$slug': typeof PharmaciesSlugRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
+  '/_authenticated/admin/doctor-join-queue': typeof AuthenticatedAdminDoctorJoinQueueRoute
   '/_authenticated/doctor/dashboard': typeof AuthenticatedDoctorDashboardRoute
   '/_authenticated/doctor/practices': typeof AuthenticatedDoctorPracticesRoute
   '/_authenticated/doctor/profile': typeof AuthenticatedDoctorProfileRoute
@@ -1768,6 +1778,7 @@ export interface FileRouteTypes {
     | '/pharmacies/$slug'
     | '/product/$id'
     | '/test/features'
+    | '/admin/doctor-join-queue'
     | '/doctor/dashboard'
     | '/doctor/practices'
     | '/doctor/profile'
@@ -1944,6 +1955,7 @@ export interface FileRouteTypes {
     | '/pharmacies/$slug'
     | '/product/$id'
     | '/test/features'
+    | '/admin/doctor-join-queue'
     | '/doctor/dashboard'
     | '/doctor/practices'
     | '/doctor/profile'
@@ -2121,6 +2133,7 @@ export interface FileRouteTypes {
     | '/pharmacies/$slug'
     | '/product/$id'
     | '/test/features'
+    | '/_authenticated/admin/doctor-join-queue'
     | '/_authenticated/doctor/dashboard'
     | '/_authenticated/doctor/practices'
     | '/_authenticated/doctor/profile'
@@ -3211,6 +3224,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDoctorDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/doctor-join-queue': {
+      id: '/_authenticated/admin/doctor-join-queue'
+      path: '/admin/doctor-join-queue'
+      fullPath: '/admin/doctor-join-queue'
+      preLoaderRoute: typeof AuthenticatedAdminDoctorJoinQueueRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -3586,6 +3606,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminSystemHealthRoute: typeof AuthenticatedAdminSystemHealthRoute
   AuthenticatedAdminUploadInventoryRoute: typeof AuthenticatedAdminUploadInventoryRoute
   AuthenticatedUploadPrescriptionRoute: typeof AuthenticatedUploadPrescriptionRoute
+  AuthenticatedAdminDoctorJoinQueueRoute: typeof AuthenticatedAdminDoctorJoinQueueRoute
   AuthenticatedDoctorDashboardRoute: typeof AuthenticatedDoctorDashboardRoute
   AuthenticatedDoctorPracticesRoute: typeof AuthenticatedDoctorPracticesRoute
   AuthenticatedDoctorProfileRoute: typeof AuthenticatedDoctorProfileRoute
@@ -3615,6 +3636,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminUploadInventoryRoute:
     AuthenticatedAdminUploadInventoryRoute,
   AuthenticatedUploadPrescriptionRoute: AuthenticatedUploadPrescriptionRoute,
+  AuthenticatedAdminDoctorJoinQueueRoute:
+    AuthenticatedAdminDoctorJoinQueueRoute,
   AuthenticatedDoctorDashboardRoute: AuthenticatedDoctorDashboardRoute,
   AuthenticatedDoctorPracticesRoute: AuthenticatedDoctorPracticesRoute,
   AuthenticatedDoctorProfileRoute: AuthenticatedDoctorProfileRoute,
