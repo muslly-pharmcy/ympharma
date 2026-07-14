@@ -8,7 +8,7 @@
 // Not client-reachable: imported only from server functions / cron hooks
 // (Batch 2 will wire this into a scheduled endpoint).
 
-import { sendSlackAlert } from "@/lib/notifications/slack-alerts";
+import { sendSlackAlert } from "@/lib/notifications/slack-alerts.server";
 
 const LOOKBACK_HOURS = 24;
 const MAX_CONSECUTIVE_FAILURES = 3;
