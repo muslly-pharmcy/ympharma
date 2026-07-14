@@ -9,7 +9,9 @@ type EventName =
   | "notification_nudge_shown"
   | "notification_nudge_dismissed"
   | "notification_permission_granted"
-  | "notification_permission_denied";
+  | "notification_permission_denied"
+  | "notification_optin_saved"
+  | "doctor_join_submitted";
 
 type Payload = { name: EventName; ts: number; sid: string; path: string; props?: Record<string, string | number | boolean | null> };
 
