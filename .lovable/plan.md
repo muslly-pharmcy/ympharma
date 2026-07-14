@@ -1,81 +1,37 @@
+## Status: Already Shipped (Phoenix P7-A)
 
-# Phoenix Design System — Premium Healthcare UX
+Everything in this directive was implemented and reported in the previous "Phoenix Phase 7-A — Product Intelligence Foundation" turn. Re-running it would only rewrite the same files.
 
-Most of the "Quick Execution — User Growth" block is already shipped in prior phases (Doctor Join at `/doctor/join`, homepage discovery grid + unified search, notification nudge, medicine + Arabic normalization, latest updates via `PlatformUpdates`). This plan focuses on the **new work** — the unified design system — and only re-touches growth surfaces to apply the new tokens/components.
+### Current coverage vs. request
 
-## Scope
+| Requirement | Existing artifact |
+|---|---|
+| Arabic normalization (فتمين/فتامين/فيتامين → vitamin, بنادول/باندول → panadol) | `src/modules/product-intelligence/domain/normalize.ts` (`CANONICAL_MAP`, `BIGRAM_MAP`, `normalize`, `tokenize`, `canonicalQuery`) |
+| Alias engine (AR/EN, misspellings, confidence) | `catalog_product_aliases` table + `src/modules/product-intelligence/server/aliases.functions.ts` (`listAliases`, `addAlias`, `verifyAlias` with 0..1 `confidence`) |
+| Search priority Exact → Normalized → Alias → Fuzzy | `public.search_medicines_public` RPC + `compareHits`/`scoreMatch` in `domain/aliases.ts` (ranks `exact`>`alias`>`fuzzy`>`alias_fuzzy`) |
+| Product media (real images, verification, source, WebP) | `catalog_product_media` (kind/status/sort_order) + `src/modules/product-intelligence/ui/ProductImage.tsx` (`<picture>` WebP, verified badge, lazy) |
+| Prep for OCR / barcode / prescription AI | `catalog_barcodes` table + `lookupByBarcode` in catalog module; alias engine reusable for OCR/prescription outputs |
+| RLS respected | Public RPC scoped to `is_public AND status='approved'`; alias writes go through `requireSupabaseAuth`; no new tables |
+| Tests (normalization, aliases, ranking) | 17 tests passing in `src/modules/product-intelligence/__tests__/` |
+| Report | `docs/engineering/reports/PHOENIX-P7A-product-intelligence.md` |
 
-Presentation-layer only. No migrations, no RLS, no server-function changes, no schema changes. Business logic in `src/modules/**/server` and `src/platform/**` stays untouched.
+### Proposed action — pick one
 
-## 1. Design tokens (src/styles.css)
+**A. No-op + rename report (recommended, ~0 credits)**  
+Copy the existing `PHOENIX-P7A-product-intelligence.md` to `PHOENIX-PRODUCT-INTELLIGENCE.md` (the filename the directive asked for) so the deliverable exists at the expected path. Nothing else changes.
 
-Extend the existing `@theme` block with a **Muslly Medical** palette layered on top of current semantic tokens (so `bg-primary`, `text-foreground`, etc. keep working).
+**B. Lite extension pass**  
+Keep A, plus small additive upgrades that go beyond what P7-A shipped:
+- Expand `CANONICAL_MAP` with a larger misspelling set (curated ~50 more AR variants for common OTC/chronic meds).
+- Add `image_source` enum hint + `verified_by` display in `ProductImage` tooltip.
+- Wire `searchMedicinesIntelligent` into the existing `useSmartSearch` hook behind a feature flag so the homepage search actually benefits — currently the module is available but no consumer imports it.
+- Add 5–8 more ranking tests (tie-breaking, mixed-script hits).
 
-- Add tokens:
-  - `--color-medical-turquoise: oklch(~0.68 0.12 200)` (≈ `#00A8B5`)
-  - `--color-medical-turquoise-deep`, `--color-medical-turquoise-soft` (hover / tint)
-  - `--color-medical-ink: oklch(~0.35 0 0)` (≈ `#4D4D4D`)
-  - `--color-medical-surface: oklch(~0.98 0.005 220)` (≈ `#F4F7F8`)
-  - `--color-medical-white: #FFFFFF`
-  - `--shadow-medical-card`, `--shadow-medical-elevated`
-  - `--radius-medical-card: 1rem`, `--radius-medical-pill: 999px`
-- Map onto existing semantic tokens where sensible (no breaking change): keep current `--primary` but expose `--color-medical-*` as an additive layer used by the new components.
-- Typography: load **Cairo** (Arabic) + **Montserrat** (Latin) via `<link>` in `src/routes/__root.tsx` (preconnect + stylesheet — never `@import` a URL in styles.css). Register `--font-arabic: "Cairo", ...` and `--font-latin: "Montserrat", ...` in `@theme`. Set body to `font-family: var(--font-arabic), var(--font-latin), system-ui`.
-- Add `@utility` helpers: `medical-card`, `medical-pill`, `medical-focus-ring`, `medical-tap` (min 44px touch target).
+**C. Full re-execute**  
+Rewrite the module from scratch under the new report name. Not recommended — pure churn, risks regressions, no functional gain.
 
-## 2. Reusable components (new folder `src/components/medical/`)
+### Recommendation
 
-Presentation-only wrappers. Each accepts props + `className`, uses tokens above, RTL-safe (`dir="rtl"` friendly, logical properties). No new data fetching — components render props passed by existing pages.
+Go with **B**. It closes the one real gap (the intelligent search RPC isn't wired to any UI yet) and delivers the report at the requested filename, without duplicating shipped work.
 
-- `MedicalCard.tsx` — base card (surface, radius, shadow, hover lift).
-- `DoctorCard.tsx` — thin re-skin wrapping the existing doctor data shape used in `src/modules/doctors/components/DoctorCard.tsx`. Keep the old component; new one is opt-in.
-- `MedicineCard.tsx` — image + name (ar/en) + price + availability chip. Uses `ProductImage` from `product-intelligence`.
-- `PharmacyCard.tsx` — name, city, "قريباً" badge variant.
-- `TrustBadge.tsx` — verified / license / rating variants (re-uses semantics from existing `TrustBadge` if present; otherwise new).
-- `HealthArticleCard.tsx` — for Sahtak education cards.
-- `SearchBox.tsx` — visual shell around inputs; wraps existing `UnifiedSearch` styling without changing its logic.
-- `EmptyState.tsx` — icon + title + description + optional CTA.
-- `LoadingSkeleton.tsx` — shimmer primitives (`SkeletonLine`, `SkeletonCard`, `SkeletonAvatar`).
-
-All components:
-- Mobile-first, min 44px tap targets, focus-visible rings using `--color-medical-turquoise`.
-- Use `content-visibility: auto` on list items where safe.
-- No new deps. Animations use CSS transitions + existing `Reveal`/`CountUp` in `src/components/titans/motion/` when needed.
-
-## 3. Apply to existing surfaces (visual only)
-
-Swap presentation on:
-- Homepage (`src/routes/index.tsx`) — Discovery Grid + Latest Updates + Search wrap use new tokens/components. Keep sections and copy identical.
-- Doctors directory cards — render via new `DoctorCard` (behind a small feature swap in the list component). Old card kept as fallback.
-- Products list card — apply `MedicineCard` skin.
-- Sahtak (`/sahtak`) education cards — apply `HealthArticleCard`.
-
-No route changes, no data-fetching changes, no server function edits.
-
-## 4. Performance
-
-- Lazy-load medical components via existing route-level lazy patterns.
-- No new runtime libraries. Fonts: `display=swap`, `preconnect`, subset to `arabic,latin`.
-- Verify build output size stays within current envelope (spot check `bun run build` locally is out of scope — rely on CI).
-
-## 5. Deliverables
-
-- Updated `src/styles.css` (+ tokens/utilities).
-- Updated `src/routes/__root.tsx` head links (Cairo + Montserrat).
-- New `src/components/medical/*` (8 files + `index.ts`).
-- Minimal edits to `src/routes/index.tsx`, doctors list card wrapper, products card wrapper, sahtak card wrapper — presentation only.
-- Report: `docs/engineering/reports/PHOENIX-DESIGN-SYSTEM.md` documenting tokens, component API, RTL rules, and where each is applied.
-
-## Explicitly out of scope
-
-- Any migration, RLS, admin import, schema change.
-- Rewriting existing `titans/` components (kept as-is).
-- Redesigning admin routes.
-- Changing business logic in `src/modules/**/server` or `src/platform/**`.
-
-## Technical notes
-
-- Tailwind v4 tokens go in `@theme` in `src/styles.css`; custom utilities use `@utility` (no `@layer utilities`).
-- Fonts loaded via `<link>` in `__root.tsx` `head()` — never `@import` a URL from styles.css.
-- New components must not import from `*.server.ts` or `src/modules/**/server/*`.
-- RTL: use logical properties (`ps-`/`pe-`, `ms-`/`me-`) and avoid hard-coded `left/right` in class names.
+Reply with **A**, **B**, or **C** (or a custom scope) and I'll switch to build mode.
