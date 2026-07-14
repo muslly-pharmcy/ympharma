@@ -668,3 +668,70 @@ export const getPrescriptionReviewDetail = createServerFn({ method: "POST" })
       correlation_ref: correlationIdFor(data.prescriptionId),
     };
   });
+
+// ────────────────────────────────────────────────────────────────────────
+// getPrescriptionFileSignedUrl — short-lived signed URL for a private
+// prescription file. Only admin/owner may sign; audited on every call.
+// ────────────────────────────────────────────────────────────────────────
+export const getPrescriptionFileSignedUrl = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({ fileId: z.string().uuid(), ttlSeconds: z.number().int().min(60).max(3600).default(600) }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const [{ data: isAdmin }, { data: isOwner }] = await Promise.all([
+      context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" }),
+      context.supabase.rpc("has_role", { _user_id: context.userId, _role: "owner" }),
+    ]);
+    if (!isAdmin && !isOwner) throw new Error("forbidden");
+
+    const { data: file, error: fErr } = await context.supabase
+      .from("prescription_files" as never)
+      .select("id, bucket, object_path, prescription_id")
+      .eq("id", data.fileId)
+      .maybeSingle();
+    if (fErr) throw new Error(fErr.message);
+    if (!file) throw new Error("file_not_found");
+    const f = file as { bucket: string; object_path: string; prescription_id: string };
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: signed, error: sErr } = await supabaseAdmin
+      .storage.from(f.bucket)
+      .createSignedUrl(f.object_path, data.ttlSeconds);
+    if (sErr || !signed?.signedUrl) throw new Error(sErr?.message ?? "sign_failed");
+
+    await audit(context.supabase, "prescription_review.file_signed", f.prescription_id, {
+      file_id: data.fileId,
+      ttl_seconds: data.ttlSeconds,
+      viewer_id: context.userId,
+    });
+    return { url: signed.signedUrl, expiresIn: data.ttlSeconds };
+  });
+
+// ────────────────────────────────────────────────────────────────────────
+// savePrescriptionMatchedProducts — pharmacist records the verified
+// product matches for an extraction (audit only; does not mutate stock).
+// ────────────────────────────────────────────────────────────────────────
+export const savePrescriptionMatchedProducts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({
+      prescriptionId: rxIdSchema,
+      matches: z.array(z.object({
+        line: z.string().max(200),
+        productId: z.string().uuid().nullable(),
+        productLabel: z.string().max(200).optional(),
+        note: z.string().max(500).optional(),
+      })).max(50),
+    }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    // RLS on prescription_reviews already restricts to staff; ensure review exists.
+    await loadReview(context.supabase, data.prescriptionId);
+    await audit(context.supabase, "prescription_review.matched_products", data.prescriptionId, {
+      reviewer_id: context.userId,
+      matches: data.matches,
+      count: data.matches.length,
+    });
+    return { ok: true, saved: data.matches.length };
+  });
