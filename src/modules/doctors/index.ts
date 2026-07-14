@@ -1,5 +1,8 @@
 export * from "./domain/types";
 export * from "./domain/schemas";
+export * from "./domain/arabicNormalize";
 export {
-  createDoctor, submitDoctorVerification, verifyDoctor, createSpecialty, listPublicDoctors,
+  createDoctor, submitDoctorVerification, verifyDoctor, createSpecialty,
+  listPublicDoctors, searchDoctorsPublic, getDoctorBySlugPublic, listPublicFacets,
+  type PublicDoctorRow,
 } from "./server/doctors.functions";
