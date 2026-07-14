@@ -13,7 +13,7 @@ export {
   MAX_MEDIA_BYTES,
 } from "./domain/schemas";
 export { normalizeAr } from "./domain/normalize";
-export { normalizeMedicineQuery, buildMedicineSearchVariants } from "./domain/medicineNormalize";
+export { normalizeMedicineQuery, medicineSearchTerms } from "./domain/medicineNormalize";
 export { CATALOG_EVENTS, CatalogEventPayload, type CatalogEventName } from "./events/schemas";
 export * as aiContract from "./domain/aiContract";
 export {
