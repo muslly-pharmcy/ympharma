@@ -64,6 +64,8 @@ export const listPublicDoctors = createServerFn({ method: "GET" })
 
 // ---------- P6.5-A public directory ----------
 
+export type TrustTier = "A" | "B" | "C" | "D";
+
 export type PublicDoctorRow = {
   id: string;
   slug: string;
@@ -74,10 +76,16 @@ export type PublicDoctorRow = {
   years_experience: number | null;
   languages: string[];
   verification_status: string;
-  metadata: Record<string, string | number | boolean | null>;
+  trust_level: TrustTier;
   specialties: Array<{ id: string; code: string; name_ar: string; name_en: string; is_primary: boolean }>;
   locations: Array<{ id: string; name_ar: string; city: string | null; governorate: string | null; kind: string; phone: string | null; whatsapp: string | null }>;
 };
+
+function trustFrom(status: string, metadata: any): TrustTier {
+  const tier = metadata?.source_tier;
+  if (status === "verified") return (tier === "hospital" || tier === "doctor") ? "A" : "B";
+  return tier === "public" ? "C" : "D";
+}
 
 const searchInput = z.object({
   q: z.string().optional().default(""),
@@ -108,7 +116,7 @@ export const searchDoctorsPublic = createServerFn({ method: "GET" })
       id: r.id, slug: r.slug, full_name_ar: r.full_name_ar, full_name_en: r.full_name_en,
       title: r.title, photo_url: r.photo_url, years_experience: r.years_experience,
       languages: r.languages ?? [], verification_status: r.verification_status,
-      metadata: r.metadata ?? {},
+      trust_level: trustFrom(r.verification_status, r.metadata),
       specialties: (r.specialties ?? []).filter((s: any) => s.specialty).map((s: any) => ({
         id: s.specialty.id, code: s.specialty.code, name_ar: s.specialty.name_ar,
         name_en: s.specialty.name_en, is_primary: !!s.is_primary,
@@ -119,6 +127,7 @@ export const searchDoctorsPublic = createServerFn({ method: "GET" })
         phone: l.location.phone, whatsapp: l.location.whatsapp,
       })),
     }));
+
 
     const filtered = shaped.filter((d) => {
       if (data.q && !(matchesAr(d.full_name_ar, data.q) || matchesAr(d.title, data.q) || d.specialties.some((s) => matchesAr(s.name_ar, data.q)))) return false;
