@@ -107,6 +107,7 @@ function Home() {
   const [query, setQuery] = useState("");
   const [trackId, setTrackId] = useState("");
   const navigate = useNavigate();
+  useVisitorAnalytics();
   const { products, sections, banners } = useHomepageBundle();
   const { t } = useI18n();
   const legacyMap = useLegacyMap(products);
