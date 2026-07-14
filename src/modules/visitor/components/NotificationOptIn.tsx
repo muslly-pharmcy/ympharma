@@ -44,7 +44,7 @@ export function NotificationOptIn() {
     try {
       window.localStorage.setItem(KEY, JSON.stringify({ ...prefs, savedAt: new Date().toISOString() }));
     } catch { /* ignore */ }
-    trackEvent("notification_optin_saved", prefs as unknown as Record<string, unknown>);
+    trackEvent("notification_optin_saved", { medicines: prefs.medicines, tips: prefs.tips, offers: prefs.offers });
     setSaved(true);
   };
 
