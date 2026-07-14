@@ -125,24 +125,41 @@ identity      organizations                    audit / security / monitoring
               ┌── branches ── customers ── family ── doctors ── appointments
               │        │           │
               ▼        ▼           ▼
-          catalog  inventory   prescriptions ──► prescription-ai
-              │        │           │
-              ▼        ▼           ▼
-        media-lib  warehouse    invoice-ai
-                     │
-                     ▼
-                 transfers ── suppliers ── marketplace ── pharmacy-network
-                                                          │
-                              ┌───────────────────────────┘
+          catalog  inventory     (see prescriptions branch below)
+              │        │
+              ▼        ▼
+        media-lib  warehouse
+              │        │
+              ▼        ▼
+     product-intelligence (OCR / barcode / vision / aliases / expiry)
+              │
+              ├──► prescriptions ──► prescription-ai
+              │                          │
+              │                          ▼
+              │                      invoice-ai
+              │
+              ▼
+         transfers ── suppliers ── marketplace ── pharmacy-network
+                                                     │
+                              ┌──────────────────────┘
                               ▼
-                          orders ── payments ── subscriptions ── insurance ── laboratories
+                          orders ──► commerce-core ──► payments · subscriptions · insurance-claims · laboratories
+                              │             │
+                              │             └──► analytics · erp
+                              ▼
+                      growth-engine  (referrals · loyalty · coupons · campaigns · social)
                               │
                               ▼
-               notifications · marketing · cms · healthcare-media · knowledge-base
+                  notification-engine  (push · WhatsApp · SMS · email · in-app · preferences)
+                              │
+                              ▼
+                 cms · healthcare-media · knowledge-base
                               │
                               ▼
                      analytics ── erp ── ai-engine ── administration ── api-gateway
 ```
+
+Every module dispatches user-facing messages through `notification-engine`. Every AI module (`prescription-ai`, `invoice-ai`, `ai-engine` tools) consumes `product-intelligence` instead of re-implementing OCR/vision. Money movement (payments, subscriptions, commissions, SaaS plans) is booked into a single revenue ledger in `commerce-core`; `orders`, `payments`, `subscriptions`, `insurance` become thin adapters.
 
 Enforcement: extend `scripts/check-imports.ts` with a module-boundary rule — a module may only import from lower layers (`core`, `platform`, and modules it declares in its `README.md`). Violations fail CI.
 
