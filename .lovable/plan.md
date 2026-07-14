@@ -1,106 +1,140 @@
 
-# Phoenix Phase 3 — Identity Foundation
+# Phoenix Phase 4 — Catalog + Media Library Foundation
 
-Builds the org-aware identity layer on top of Phase 1 tenancy and Phase 2 platform. **No inventory/products/orders/prescriptions migration** — only identity, roles, permissions, branches, and subscription scaffolding.
+Legacy `public.products` (single-tenant commerce SKU) stays untouched. Phase 4 adds a **parallel catalog layer** the rest of Phoenix will build on. Inventory quantities and marketplace ordering are explicitly out of scope.
 
-## 1. Database migrations (single migration)
+## 1. Database (single migration)
 
-### 1.1 `public.profiles` (application profile layer)
-Columns: `id uuid PK → auth.users(id) on delete cascade`, `display_name`, `avatar_url`, `phone`, `email`, `preferred_language text default 'ar'`, `notification_prefs jsonb default '{}'`, `status text default 'active'` (active/suspended/deleted), `profile_completed_at timestamptz`, `metadata jsonb`, timestamps.
-- Trigger: auto-create profile row on `auth.users` insert.
-- RLS: user reads/updates own; admins read all via `has_role`.
-- GRANTs to `authenticated` + `service_role`.
+New tables under `public`. All follow: CREATE TABLE → GRANT (authenticated + service_role; anon only where noted) → ENABLE RLS → policies. Every table gets `created_at` / `updated_at` + trigger.
 
-### 1.2 Org-scoped role enum + rewrite `organization_members.role`
-- New enum `public.org_role`: `owner, admin, manager, employee, pharmacist, doctor, supplier_user, insurance_user, customer`.
-- Alter `organization_members.role` from `text` → `org_role` (map existing owner/admin/member; member → employee).
-- Add `organization_members.branch_scope uuid[] default '{}'` for optional branch restriction.
+- **`catalog_categories`** — `id, organization_id (nullable = global), parent_id, slug, name_ar, name_en, sort_order, is_active`.
+- **`catalog_products`** — the new catalog record.
+  - `id, organization_id (nullable = global/shared catalog), owner_org_id (writer), category_id`
+  - `name_ar, name_en, generic_name, brand, manufacturer`
+  - `barcode` (unique per org via partial index), `active_ingredients jsonb`, `dosage_form`, `strength`
+  - `description_ar, description_en, metadata jsonb`
+  - `status ENUM('draft','pending_review','approved','rejected','archived')`
+  - `is_public boolean` (only meaningful when `status='approved'`)
+  - `verified_at, verified_by`
+- **`catalog_product_aliases`** — `id, product_id, alias, alias_normalized, locale ('ar'|'en'|'mixed'), source ('manual'|'ocr'|'ai'|'import'), confidence`. Powers Arabic/English spelling variants (فيتامين / فتمين / vitamin).
+- **`catalog_product_media`** — `id, product_id, storage_bucket, storage_path, kind ('primary'|'gallery'|'thumbnail'|'barcode'), width, height, bytes, checksum, mime, status ('pending'|'approved'|'rejected'), uploaded_by, reviewed_by, reviewed_at, sort_order, metadata jsonb`.
+- **`catalog_barcodes`** — normalized barcode index: `barcode, product_id, symbology, is_primary`.
+- **`catalog_ai_signals`** — contract-only table for future OCR / barcode / image / invoice / prescription AI: `product_id (nullable), signal_type, source, payload jsonb, confidence, status, correlation_id`. No AI code shipped; the table is the integration seam.
 
-### 1.3 `public.permissions` catalog + `public.role_permissions`
-- `permissions(key text PK, resource text, action text, description text)` — seeded with `inventory.read/update`, `orders.manage`, `patients.view`, `reports.export`, `org.manage`, `members.manage`, `branches.manage`, etc.
-- `role_permissions(role org_role, permission_key text, PRIMARY KEY(role, permission_key))` — seeded defaults per role.
-- SECURITY DEFINER function `public.has_org_permission(_user_id uuid, _org_id uuid, _permission text, _branch_id uuid default null) returns boolean` — checks membership + role_permissions + optional branch scope.
-- GRANT execute to `authenticated`; REVOKE from `anon`.
+### Enums
+`catalog_status`, `catalog_media_kind`, `catalog_media_status`, `catalog_alias_source`, `catalog_ai_signal_type`.
 
-### 1.4 Attach branches to organizations
-- Add `branches.organization_id uuid references organizations(id)` (nullable initially; backfill NULL — legacy single-tenant preserved).
-- Add `branches.location jsonb` (lat/lng/city).
-- Extend RLS: members can read branches of their org; managers can write.
-- `branch_user_assignments`: add `assigned_by uuid`, `status text default 'active'`; RLS scoped via org membership of the branch.
+### Storage
+New private bucket **`catalog-media`** via `supabase--storage_create_bucket`. RLS on `storage.objects` restricts writes to org members with `catalog.write`; reads limited to org members OR approved+public rows via a security-definer helper.
 
-### 1.5 `public.organization_subscriptions` (foundation only, no billing)
-Columns: `organization_id PK`, `plan text default 'free'`, `features jsonb default '{}'`, `limits jsonb default '{}'` (e.g. `{max_branches, max_users}`), `usage jsonb default '{}'`, `trial_ends_at`, `current_period_end`, `status text default 'active'`, timestamps.
-- Helper: `public.org_feature_enabled(_org_id, _feature text)`, `public.org_within_limit(_org_id, _limit text, _current bigint)`.
+### SECURITY DEFINER helpers
+- `catalog_normalize_ar(text)` — strips tashkeel, unifies ا/أ/إ/آ, ى→ي, ة→ه, ؤ/ئ, digits, whitespace. Pure SQL, `IMMUTABLE`.
+- `catalog_search(_q text, _org_id uuid, _limit int)` — matches name/generic/aliases via normalized text + `pg_trgm`. Fail-closed on org scope.
+- `catalog_can_write(_user_id, _org_id)` → uses `has_org_permission(..., 'catalog.write')`.
+- `catalog_can_verify(_user_id, _org_id)` → `catalog.verify`.
 
-### 1.6 Audit / event emission
-- `public.identity_audit_events(id, event_type, org_id, actor_user_id, subject_user_id, branch_id, payload jsonb, created_at)`.
-- Triggers on `organization_members`, `branches`, `branch_user_assignments`, `profiles` role/status change → insert audit row **and** insert into `agent_events` with event names below (Phase 2 event bus consumes them).
+### Permissions seed (extends Phase 3)
+`catalog.read · catalog.write · catalog.verify · catalog.media.upload · catalog.media.review`.
+Baseline `role_permissions` grants: owner/admin → all; manager → read+write+media.upload; pharmacist/doctor → read; customer → none.
 
-All new tables: GRANT → `authenticated` (scoped SELECT) + `service_role`; RLS enabled; policies via `is_org_member` + `has_org_permission`.
+### RLS summary
+- `catalog_products` SELECT: `is_public AND status='approved'` (anon+authenticated) OR `is_org_member(organization_id)` (authenticated). Writes: `catalog_can_write`.
+- `catalog_product_aliases`, `catalog_product_media`, `catalog_barcodes`: readable when parent is readable; writes gated by `catalog.write` / `catalog.media.upload`; approve/reject gated by `catalog.verify` / `catalog.media.review`.
+- `catalog_categories`: global rows (`organization_id IS NULL`) readable by all; org rows gated by membership.
+- `catalog_ai_signals`: writes service_role only; reads gated by `catalog.read` in org.
 
-## 2. Platform code
+### Indexes
+- `catalog_products (organization_id, status)`, `(barcode) WHERE barcode IS NOT NULL`, GIN trigram on `name_ar`, `name_en`, `generic_name`.
+- `catalog_product_aliases (alias_normalized)` GIN trigram + `(product_id)`.
+- `catalog_barcodes (barcode)` unique per `product_id`.
 
-### 2.1 `src/platform/identity/` (new)
-- `types.ts` — `UserProfile`, `OrgRole`, `PermissionKey`, `Subscription`.
-- `profile.functions.ts` — `getMyProfile`, `updateMyProfile`, `completeProfile` (server fns w/ `requireSupabaseAuth`).
-- `ProfileContext.tsx` — client React context, loads current profile, exposes `refresh`.
-- `index.ts` barrel.
+### Triggers
+- `updated_at` on every table.
+- Alias insert/update: auto-populate `alias_normalized = catalog_normalize_ar(alias)`.
+- Product transition triggers emit rows into `organization_audit_events` for `PRODUCT_CREATED`, `PRODUCT_UPDATED`, `PRODUCT_VERIFIED`; media insert emits `PRODUCT_IMAGE_ADDED`. All events also enqueue an `agent_events` row consumed by the Phase 2 event bus.
 
-### 2.2 Extend `src/platform/permissions/`
-- Replace static `PERMISSION_ROLE_MAP` with DB-backed `has_org_permission` RPC via `PermissionService.check(userId, permission, { orgId, branchId })`.
-- Keep legacy `hasRole` adapter for backward compat.
-- Add `useHasPermission(permission, opts)` React hook.
-- New unit tests: role→permission mapping, org isolation, branch scope enforcement.
+## 2. Platform / module code
 
-### 2.3 `src/platform/tenant-context/`
-- `TenantContext` gains `currentBranch`, `switchBranch`, `permissions` snapshot (permission keys for current user in current org).
-- `queries.functions.ts`: add `listOrgBranches`, `assertOrgAccess`, `listMyPermissions`.
+New module `src/modules/catalog/` following `MODULE-STRUCTURE.md`:
 
-### 2.4 `src/platform/branches/` (new)
-- `types.ts`, `branches.functions.ts` (`listBranches`, `createBranch`, `updateBranch`, `assignUserToBranch`, `removeAssignment`).
-- All server fns validate `has_org_permission(..., 'branches.manage')`.
+```
+src/modules/catalog/
+  domain/       types.ts, schemas.ts (Zod), normalize.ts (mirrors SQL)
+  data/         queries.ts (read helpers)
+  server/       catalog.functions.ts (createServerFn, guarded by PermissionService)
+                media.functions.ts (signed-URL upload + review flow)
+                aiSignals.functions.ts (write path service-role only)
+  events/       constants.ts, schemas.ts (Zod), publisher.ts
+  ui/           empty; UI ships in later phase
+  index.ts      public barrel
+  README.md
+```
 
-### 2.5 `src/platform/subscriptions/` (new)
-- `types.ts`, `subscriptions.functions.ts` (`getOrgSubscription`, `isFeatureEnabled`, `checkLimit`).
-- `FeatureFlagService` extended with `orgFeatureProvider` reading from subscription.
+Server functions (all `requireSupabaseAuth` + `PermissionService.require`):
 
-### 2.6 Event catalog
-Register in `src/core/events/constants.ts` and emit from server fns / DB triggers:
-- `USER_CREATED`, `USER_UPDATED`
-- `ORGANIZATION_MEMBER_ADDED`, `ORGANIZATION_MEMBER_REMOVED`
-- `ROLE_CHANGED`
-- `BRANCH_CREATED`, `BRANCH_UPDATED`, `BRANCH_MEMBER_ASSIGNED`, `BRANCH_MEMBER_UNASSIGNED`
-- `PROFILE_COMPLETED`
+- `listCatalogProducts({ orgId, q?, status?, cursor })`
+- `getCatalogProduct({ id })`
+- `createCatalogProduct(payload)`
+- `updateCatalogProduct({ id, patch })`
+- `submitForReview({ id })` / `verifyCatalogProduct({ id })` / `rejectCatalogProduct({ id, reason })`
+- `addProductAlias({ productId, alias, locale, source })`
+- `requestMediaUploadUrl({ productId, kind, mime, bytes })` → signed URL to `catalog-media` bucket (size/mime whitelist enforced).
+- `registerUploadedMedia({ productId, storagePath, kind, checksum, ... })` → row in `catalog_product_media`, status=`pending`.
+- `reviewMedia({ id, decision, reason? })`.
+- `recordAiSignal(...)` — service-role only, module-internal, no client exposure.
 
-Zod payload schemas in `src/platform/identity/events.ts`; documented in `docs/engineering/standards/EVENT-CATALOG.md`.
+### Search foundation
+`searchCatalog({ orgId, q, limit })` invokes `catalog_search` RPC. Uses Arabic normalization + trigram similarity + alias join. Barcode lookup path: `lookupByBarcode({ barcode, orgId })` hits `catalog_barcodes`.
 
-## 3. Tests
+### Events
+Register in `src/core/events/constants.ts`: `PRODUCT_CREATED`, `PRODUCT_UPDATED`, `PRODUCT_IMAGE_ADDED`, `PRODUCT_VERIFIED`. Payload schema in `modules/catalog/events/schemas.ts` (Zod): `{ org_id, actor_user_id, product_id, data }`. Publisher wires through Phase 2 `EventPublisher` with idempotency keys.
 
-- `src/__tests__/unit/platform/permissions/PermissionService.test.ts` — mocks RPC, verifies allow/deny per role.
-- `src/__tests__/unit/platform/identity/tenant-isolation.test.ts` — user in org A cannot resolve permission in org B.
-- `src/__tests__/unit/platform/branches/branch-scope.test.ts` — user assigned to branch 1 denied on branch 2.
-- `src/__tests__/unit/platform/subscriptions/limits.test.ts`.
-- Typecheck + `bun run build` + import-graph guard pass.
+### AI integration contract (no models yet)
+`src/modules/catalog/domain/aiContract.ts` exports Zod schemas + TypeScript interfaces only:
+`OcrExtractionInput/Result`, `BarcodeRecognitionInput/Result`, `ImageRecognitionInput/Result`, `InvoiceParseInput/Result`, `PrescriptionParseInput/Result`. Each maps to a `catalog_ai_signal_type` enum value. Consumers of these contracts land in later phases.
 
-## 4. Security verification
+### Import boundaries
+`scripts/check-imports.ts` R3 already enforces module isolation — `catalog` exports only through `index.ts`; no other module imports catalog internals.
 
-Run in report:
-- Query `pg_policies` on new tables — every table has policies referencing `is_org_member` / `has_org_permission`.
-- REVOKE EXECUTE on new SECURITY DEFINER fns from `anon`.
-- Confirm cross-org query returns 0 rows via SQL probe.
-- Confirm `organization_members` RLS unchanged for owners.
+## 3. Security verification (executed after migration)
+
+- `has_anon = false` on all new SECURITY DEFINER functions.
+- RLS enabled on every new table; policies scoped via `is_org_member` / `has_org_permission`.
+- Anonymous SELECT confined to `catalog_products` rows with `status='approved' AND is_public=true` and safe columns only.
+- Cross-tenant probe: authenticated user in org A cannot read draft/pending rows of org B.
+- Storage bucket `catalog-media` is private; only signed URLs reach clients; upload MIME whitelist (`image/png|jpeg|webp|avif`) and 5 MB cap enforced in `requestMediaUploadUrl`.
+- Media rows cannot be flipped to `approved` without `catalog.media.review`.
+
+## 4. Testing
+
+- `bunx tsgo --noEmit` (typecheck).
+- `bun run build` (build gate).
+- Vitest units:
+  - `catalog.normalize.test.ts` — Arabic normalization parity between SQL + TS mirror.
+  - `catalog.permissions.test.ts` — cross-tenant deny + role matrix.
+  - `catalog.media.security.test.ts` — MIME/size rejection, review-only approval, signed-URL enforcement.
+  - `catalog.events.test.ts` — event names in central catalog + payload schema round-trip.
+- Import-graph guard (`scripts/check-imports.ts`) — no module leak into catalog.
 
 ## 5. Documentation
 
-`docs/engineering/reports/PHOENIX-P3-identity.md` — architecture diagram, tables/functions added, permissions matrix (role × permission grid), security verification output, migration notes, risks (branch backfill NULL, legacy `user_roles` still in use for platform admin).
-
-Also update: `docs/engineering/standards/EVENT-CATALOG.md`, `docs/engineering/REGISTRY.yaml` (new features `IDENT-P3-001..005`), `docs/engineering/plans/phase-3.yaml`.
-
-## Explicit non-goals
-- No inventory / products / orders / prescriptions changes.
-- No billing integration (subscriptions is schema + service only).
-- No UI dashboards beyond what's needed to expose profile edit + org/branch switcher.
-- Legacy `public.user_roles` (platform admin/owner) preserved; not removed.
+`docs/engineering/reports/PHOENIX-P4-catalog.md` covering:
+- Architecture (module + DB layout, legacy `products` coexistence).
+- Database changes (tables, enums, functions, triggers, indexes).
+- Security model (RLS, permissions, storage, SECURITY DEFINER inventory).
+- Media strategy (private bucket, signed URLs, MIME/size limits, approval workflow).
+- Future AI integration (contracts + `catalog_ai_signals` seam).
+- Events emitted + payload shapes.
+- Migration notes: legacy `products` untouched; Phase 5+ will map SKUs to `catalog_products.id`.
+- Risks: dual-catalog period, alias search cost, storage bucket privacy toggles.
 
 ## Completion gate
-Stop after Phase 3. Return: files created, security probe results, permissions matrix, branch architecture summary, risks.
+
+Stop after Phase 4. Do not begin Phase 5. Report artifacts, security results, permission model, media architecture, and risks back for approval.
+
+## Explicit non-goals
+
+- No changes to `public.products`, `product_gallery_images`, `product_image_overrides`, `product_classifications`.
+- No inventory quantities, pricing writes, reorder logic, or marketplace ordering.
+- No AI model calls — contracts and the signals table only.
+- No UI beyond the module scaffold (`ui/` stays empty).
