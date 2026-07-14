@@ -1,81 +1,103 @@
-# Phoenix Architecture Additions — Docs-Only Update
+## Phoenix Phase 1 — Tenancy Spine
 
-Scope: update three Phoenix deliverables under `docs/engineering/phoenix/` to register four new modules and reorder Doctor Foundation. No source, migrations, dependencies, or `PROJECT_STATE.yaml` changes.
+Additive-only foundation for multi-tenant organizations. No business logic changes, no UI rebuild, no route deletions.
 
-## Files to update
+### 0. Pre-flight: fix broken build
 
-### 1. `01-audit.md`
-Append an "Architecture Additions (2026-07-14)" section noting four capability gaps the audit under-scoped, which the additions below close:
-- Commerce / SaaS revenue surface fragmented across orders, subscriptions, payments, insurance.
-- Notification dispatch scattered (Slack, WhatsApp, email, in-app) with no unified engine or user preferences.
-- Product intelligence (OCR, barcode, image recognition, AR/EN aliases, misspellings, expiry) lives inside prescription-ai / catalog with no shared brain.
-- Growth (referrals, loyalty, coupons, campaigns, social) spread across marketing/loyalty/campaigns routes with no cohesive engine.
+`bun install` is failing because `bun.lockb` pins `xlsx` to the SheetJS CDN tarball which now returns 403. Since `package.json` already has a `resolutions` entry for `xlsx`, regenerate the lockfile:
 
-### 2. `02-restructure-plan.md`
-- In the `src/modules/` directory layout, add four modules and mark the merges they consolidate:
-  - `commerce-core/` — owns subscriptions, billing, payments, commissions, SaaS plans, revenue tracking. Absorbs the commerce parts of `payments`, `subscriptions`, `insurance` (claims stay in `insurance`).
-  - `notification-engine/` — owns push, WhatsApp, SMS, email, in-app, campaigns automation, user preferences. Replaces standalone `notifications` module; `marketing` delegates dispatch to it.
-  - `product-intelligence/` — owns catalog intelligence, OCR matching, barcode, image recognition, AR/EN aliases, misspelling correction, expiry intelligence. Sits between `catalog` and `prescription-ai` / `invoice-ai`; the AI modules consume it.
-  - `growth-engine/` — owns referrals, loyalty, coupons, campaigns, customer engagement, social automation. Absorbs `marketing` growth surface (CMS content stays in `cms`).
-- Update the module dependency DAG:
-  - `commerce-core` sits above `orders`, feeds `analytics` and `erp`; consumes `identity`, `organizations`.
-  - `notification-engine` replaces `notifications` node; every module dispatches through it.
-  - `product-intelligence` sits between `catalog` + `media-library` (below) and `prescription-ai` + `invoice-ai` (above).
-  - `growth-engine` sits alongside `marketing`, above `customers` and `orders`, below `analytics`.
-- Update the reusable-components table: route `alert-dispatch.server.ts`, `slack.functions.ts`, existing loyalty/campaigns/banners UIs into the new modules as adapters (KEEP, relocate).
-- Update Cross-cutting layers: Notifications bullet now points to `notification-engine`; add a Commerce bullet (single revenue ledger) and a Product Intelligence bullet (shared OCR/vision/alias service consumed by AI modules).
-
-### 3. `05-phases.md`
-Reorder and rename phases 5–11 to insert Doctor Foundation earlier and land the four new modules on the right layer. New order:
-
-```text
-Phase 0  Foundations (docs + guards)               [done]
-Phase 1  Tenancy spine                              [unchanged]
-Phase 2  Platform layer                             [unchanged]
-Phase 3  Identity/Orgs/Branches/Users/Roles/Perms   [unchanged]
-Phase 4  Catalog + Media Library                    [unchanged]
-Phase 5  Inventory + Warehouse + Transfers + Suppliers [unchanged]
-Phase 6  Doctor Foundation (NEW, moved earlier)
-         - doctor profiles, specialties, locations,
-           availability, appointment foundation
-         - no advanced prescription AI yet
-Phase 7  Product Intelligence (NEW)
-         - OCR, barcode, image recognition,
-           AR/EN aliases, misspellings, expiry engine
-Phase 8  Customers + Family + Prescriptions + Prescription AI + Invoice AI
-         - consumes product-intelligence
-Phase 9  Commerce Core (NEW)
-         - subscriptions, billing, payments,
-           commissions, SaaS plans, revenue ledger
-         - absorbs current Orders/Payments/Subscriptions/Insurance work
-Phase 10 Orders (thin) + Insurance claims
-Phase 11 Appointments + Laboratories (advanced)
-         - builds on Phase 6 doctor foundation;
-           adds e-prescription QR, voice prescription,
-           lab orders/results
-Phase 12 Marketplace + Pharmacy Network
-Phase 13 Notification Engine (NEW)
-         - unified push/WhatsApp/SMS/email/in-app,
-           campaigns automation, user preferences
-Phase 14 Growth Engine (NEW)
-         - referrals, loyalty, coupons, campaigns,
-           social automation
-Phase 15 CMS + Healthcare Media + Knowledge Base
-Phase 16 Analytics + ERP + AI Engine consolidation
-Phase 17 Administration shell + Monitoring + Audit + Security + API Gateway
-         - enforce organization_id NOT NULL, tighten RLS,
-           retire legacy admin routes
+```
+rm -f bun.lockb bun.lock && bun install
 ```
 
-Keep per-phase mandatory checks, rollback contract, and additive-only rule unchanged. Refresh the indicative-timeline table to match the new numbering (no committed dates).
+Nothing else in the codebase changes for this step.
 
-### 4. `README.md` (Phoenix index)
-One-line update: note the 2026-07-14 architecture additions (4 new modules + Doctor Foundation reorder) and that phase count is now 17.
+### 1. Database migration (additive-only)
 
-## Out of scope
-- `PROJECT_STATE.yaml`, `CHANGELOG.md` — untouched (per contract, CTO flips state).
-- `03-keep-list.md`, `04-rebuild-list.md` — no re-classification needed; module relocations already covered by rebuild-list categories.
-- Any source, SQL, or dependency change.
+One migration file creating:
 
-## Deliverable
-Four edited docs. Reply summarizes the additions and confirms Phase 1 is still gated on your explicit go.
+**`public.organization_type`** enum: `PHARMACY`, `CLINIC`, `LAB`, `INSURANCE`, `SUPPLIER`, `CORPORATE`.
+
+**`public.organizations`**
+- `id uuid pk`, `name text not null`, `type organization_type not null`
+- `status text not null default 'active'` (`active` | `suspended` | `archived`)
+- `metadata jsonb not null default '{}'`
+- `created_at`, `updated_at` timestamps + update trigger
+- GRANT `SELECT, INSERT, UPDATE` to `authenticated`; `ALL` to `service_role`
+- RLS: members can `SELECT`; only members with role `owner`/`admin` can `UPDATE`; `INSERT` allowed to any authenticated user (creator becomes owner via trigger)
+
+**`public.organization_members`**
+- `id uuid pk`, `organization_id uuid fk → organizations(id) on delete cascade`
+- `user_id uuid not null` (references `auth.users`, no FK per platform rules)
+- `role text not null` (`owner` | `admin` | `member`) — string role for now, integrates later with `user_roles`
+- `status text not null default 'active'`
+- `created_at`, `updated_at` + unique `(organization_id, user_id)`
+- GRANT + RLS: user sees own memberships; org owners/admins see all rows in their orgs; only owners/admins can insert/delete members
+
+**`public.organization_audit_events`**
+- `id`, `organization_id`, `actor_user_id`, `event_type` (`org.created` | `member.added` | `member.removed` | `org.switched`), `payload jsonb`, `created_at`
+- GRANT + RLS: org members can `SELECT`; inserts via SECURITY DEFINER helper only
+
+**Helpers (SECURITY DEFINER, `search_path = public`)**
+- `public.is_org_member(_org uuid, _user uuid) returns boolean`
+- `public.has_org_role(_org uuid, _user uuid, _roles text[]) returns boolean`
+- `public.current_org() returns uuid` — reads `current_setting('app.current_org', true)::uuid`; returns null if unset
+- `public.log_org_event(_org uuid, _type text, _payload jsonb) returns void`
+- Trigger on `organizations` insert: auto-insert creator into `organization_members` as `owner` and log `org.created`
+- Triggers on `organization_members` insert/delete: log `member.added` / `member.removed`
+
+REVOKE EXECUTE from `authenticated` on `log_org_event` (service/trigger use only); keep `current_org`, `is_org_member`, `has_org_role` available to `authenticated`.
+
+### 2. Tenant context module
+
+New folder `src/platform/tenant-context/`:
+
+- `types.ts` — `Organization`, `OrganizationMember`, `OrganizationRole` types
+- `queries.functions.ts` — server fns behind `requireSupabaseAuth`:
+  - `listMyOrganizations()` → orgs the current user belongs to
+  - `getOrganization({ id })` → single org (RLS-gated)
+  - `switchOrganization({ id })` → validates membership, sets `app.current_org` via `set_config`, logs `org.switched`, returns org
+  - `createOrganization({ name, type, metadata? })` → inserts org (trigger adds owner membership)
+  - `addMember({ organizationId, userId, role })` / `removeMember({ organizationId, userId })`
+- `TenantContext.tsx` — React context + `TenantProvider` + `useTenant()` hook; persists selected `organizationId` in `localStorage` under `phoenix.currentOrg`; hydrates via `listMyOrganizations`
+- `index.ts` — public re-exports
+
+Provider is **not** mounted into `__root.tsx` yet — Phase 1 only ships the module. Wiring into layouts happens in a later phase per the strangler-fig plan.
+
+### 3. Safety & verification
+
+- All migrations idempotent (`create table if not exists`, `create or replace function`, guarded `create policy` via `do $$ ... $$` blocks).
+- No changes to existing tables, no data backfill, no drops.
+- Existing auth, RLS, and user data are untouched — verified by inspecting that no `alter table`/`drop`/`update` statements target pre-existing objects.
+- Post-migration read-only verification queries (documented in report):
+  - `select count(*) from auth.users` unchanged
+  - `select count(*) from public.products/orders/prescriptions` unchanged
+  - `select current_org()` returns null with no setting
+  - member insert/select from a non-member session returns 0 rows
+
+### 4. Documentation
+
+`docs/engineering/reports/PHOENIX-P1-tenancy.md`:
+- Migration SQL summary and file name
+- Table/enum/function inventory
+- RLS matrix (who can read/write what)
+- Verification queries + expected results
+- Rollback plan (drop new tables/functions/enum in reverse order — safe because additive-only)
+- Explicit list of what was **not** touched
+
+Update `docs/engineering/PROJECT_STATE.yaml` → `PHOENIX-P1 / EXECUTED` and append `docs/engineering/CHANGELOG.md`.
+
+### 5. Out of scope (per directive)
+
+- No business module migration
+- No UI rebuild, no route changes/deletes
+- No `organization_id` columns added to existing tables (Phase 2)
+- No changes to existing RLS policies
+
+### Technical notes
+
+- `current_org()` uses PostgreSQL session GUC (`app.current_org`) set per-request via `set_config('app.current_org', $1, true)` inside `switchOrganization`. The `local=true` flag scopes to the transaction; for cross-request tenant state we rely on the client-side `TenantProvider` re-calling `switchOrganization` at the start of each server fn that needs tenant scoping (Phase 2 will add a middleware for this).
+- `organization_members.role` is a plain text column now; Phase 2 will link it to the existing `app_role` enum / `user_roles` table once the org-scoped role model is designed.
+- Server fns live at `src/platform/tenant-context/queries.functions.ts` (client-safe path per import-graph rules); no `.server.ts` helpers needed this phase.
+
+Stops after Phase 1. Awaits explicit go for Phase 2.
