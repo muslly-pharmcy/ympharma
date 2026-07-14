@@ -1,37 +1,92 @@
-## Status: Already Shipped (Phoenix P7-A)
+# PHOENIX INVOICE INTELLIGENCE ENGINE — Foundation Plan
 
-Everything in this directive was implemented and reported in the previous "Phoenix Phase 7-A — Product Intelligence Foundation" turn. Re-running it would only rewrite the same files.
+## Objective
+Let pharmacies/suppliers add products by uploading an invoice photo. Extract lines via OCR, match against the existing catalog (via `product-intelligence`), let a human review/edit, then commit through existing inventory RPCs. **No stock mutation without explicit confirmation.**
 
-### Current coverage vs. request
+## Architecture (aligned with Phoenix modules)
 
-| Requirement | Existing artifact |
-|---|---|
-| Arabic normalization (فتمين/فتامين/فيتامين → vitamin, بنادول/باندول → panadol) | `src/modules/product-intelligence/domain/normalize.ts` (`CANONICAL_MAP`, `BIGRAM_MAP`, `normalize`, `tokenize`, `canonicalQuery`) |
-| Alias engine (AR/EN, misspellings, confidence) | `catalog_product_aliases` table + `src/modules/product-intelligence/server/aliases.functions.ts` (`listAliases`, `addAlias`, `verifyAlias` with 0..1 `confidence`) |
-| Search priority Exact → Normalized → Alias → Fuzzy | `public.search_medicines_public` RPC + `compareHits`/`scoreMatch` in `domain/aliases.ts` (ranks `exact`>`alias`>`fuzzy`>`alias_fuzzy`) |
-| Product media (real images, verification, source, WebP) | `catalog_product_media` (kind/status/sort_order) + `src/modules/product-intelligence/ui/ProductImage.tsx` (`<picture>` WebP, verified badge, lazy) |
-| Prep for OCR / barcode / prescription AI | `catalog_barcodes` table + `lookupByBarcode` in catalog module; alias engine reusable for OCR/prescription outputs |
-| RLS respected | Public RPC scoped to `is_public AND status='approved'`; alias writes go through `requireSupabaseAuth`; no new tables |
-| Tests (normalization, aliases, ranking) | 17 tests passing in `src/modules/product-intelligence/__tests__/` |
-| Report | `docs/engineering/reports/PHOENIX-P7A-product-intelligence.md` |
+```text
+[Mobile Camera / File Upload]
+        ↓ (signed upload)
+[Storage bucket: invoice-uploads (private)]
+        ↓
+[createServerFn: extractInvoice]
+        ↓
+[Lovable AI Gateway: gemini-3-flash-preview (multimodal image → structured JSON)]
+        ↓
+[Line-item normalization + matching via product-intelligence.searchMedicinesIntelligent]
+        ↓
+[invoice_extractions table (status='pending_review')]
+        ↓
+[Review UI: /pharmacist/invoice-review/$id]
+        ↓ (user confirms per-line: product_id, qty, cost, price, expiry, batch)
+[createServerFn: commitInvoice → existing inv_stock_batches + inv_stock_movements RPCs]
+        ↓
+[Audit log: invoice_audit_events]
+```
 
-### Proposed action — pick one
+## Deliverables
 
-**A. No-op + rename report (recommended, ~0 credits)**  
-Copy the existing `PHOENIX-P7A-product-intelligence.md` to `PHOENIX-PRODUCT-INTELLIGENCE.md` (the filename the directive asked for) so the deliverable exists at the expected path. Nothing else changes.
+### 1. Database (migration)
+New module `src/modules/invoice-intake/`. Tables (with GRANT + RLS, org-scoped via `has_org_permission`):
+- `invoice_uploads` — one row per uploaded image. Columns: `id`, `org_id`, `branch_id`, `uploaded_by`, `storage_path`, `mime_type`, `source` (`camera`|`file`), `status` (`uploaded`|`extracting`|`extracted`|`failed`|`committed`|`cancelled`), `supplier_id nullable`, `notes`, `created_at`.
+- `invoice_extractions` — parsed header: `id`, `upload_id`, `supplier_name_raw`, `invoice_number`, `invoice_date`, `currency`, `subtotal`, `tax`, `total`, `ocr_confidence`, `raw_ocr_text`, `model_used`, `extracted_at`.
+- `invoice_line_items` — one row per detected line: `id`, `extraction_id`, `line_no`, `raw_text`, `detected_name`, `detected_name_normalized`, `quantity`, `unit_cost`, `unit_price`, `expiry_date`, `batch_number`, `matched_product_id` (nullable FK `catalog_products`), `match_confidence`, `match_source` (`exact`|`alias`|`fuzzy`|`manual`|`unmatched`), `user_confirmed_product_id`, `user_confirmed_qty`, `user_confirmed_cost`, `user_confirmed_expiry`, `status` (`pending`|`confirmed`|`skipped`).
+- `invoice_audit_events` — append-only: `id`, `upload_id`, `actor_user_id`, `event_type` (`uploaded`|`extraction_started`|`extraction_completed`|`extraction_failed`|`line_reviewed`|`committed`|`cancelled`), `payload jsonb`, `created_at`.
 
-**B. Lite extension pass**  
-Keep A, plus small additive upgrades that go beyond what P7-A shipped:
-- Expand `CANONICAL_MAP` with a larger misspelling set (curated ~50 more AR variants for common OTC/chronic meds).
-- Add `image_source` enum hint + `verified_by` display in `ProductImage` tooltip.
-- Wire `searchMedicinesIntelligent` into the existing `useSmartSearch` hook behind a feature flag so the homepage search actually benefits — currently the module is available but no consumer imports it.
-- Add 5–8 more ranking tests (tie-breaking, mixed-script hits).
+Storage: private bucket `invoice-uploads`, RLS: only org members can read their org's paths.
 
-**C. Full re-execute**  
-Rewrite the module from scratch under the new report name. Not recommended — pure churn, risks regressions, no functional gain.
+### 2. Server functions (`src/modules/invoice-intake/server/`)
+- `uploadInvoice.functions.ts` — `createInvoiceUpload({ mime, source, branchId })` → returns signed upload URL + `upload_id`. Requires `requireSupabaseAuth`.
+- `extract.functions.ts` — `extractInvoice({ uploadId })`:
+  1. Load image from storage (signed URL, in-handler).
+  2. Call Lovable AI Gateway with `google/gemini-3-flash-preview`, multimodal `image_url` input, JSON schema output (header + `line_items[]`). Supports Arabic + English + mixed supplier formats.
+  3. For each line, run `product-intelligence.searchMedicinesIntelligent` (already handles Arabic normalization, aliases, fuzzy) → set `matched_product_id` + `match_source` + `match_confidence`.
+  4. Persist to `invoice_extractions` + `invoice_line_items`. Emit audit event.
+- `review.functions.ts` — `listPendingInvoices`, `getInvoiceForReview(id)`, `updateLineItem({ lineId, patch })`, `cancelInvoice(id)`.
+- `commit.functions.ts` — `commitInvoice({ uploadId })`:
+  - Guard: reject if any line still `pending` and not `skipped`.
+  - For each confirmed line, call existing inventory RPCs (`inv_stock_batches` insert + `inv_stock_movements` type=`purchase`).
+  - Set `invoice_uploads.status='committed'`. Audit event with per-line summary.
 
-### Recommendation
+All privileged writes verify `has_org_permission(auth.uid(), org_id, 'inventory:write')`.
 
-Go with **B**. It closes the one real gap (the intelligent search RPC isn't wired to any UI yet) and delivers the report at the requested filename, without duplicating shipped work.
+### 3. UI (mobile-first, Arabic RTL)
+- `src/routes/_authenticated/pharmacist/invoice-upload.tsx` — camera-first uploader (`<input capture="environment" accept="image/*">`), drag-drop fallback, progress + status polling.
+- `src/routes/_authenticated/pharmacist/invoice-review.$id.tsx` — review screen:
+  - Header (supplier, invoice #, date, totals, OCR confidence badge).
+  - Line grid: raw text | detected name | qty | cost | expiry | matched product (searchable combobox using `searchMedicinesIntelligent`) | confidence badge | actions (Confirm / Edit / Skip).
+  - Sticky footer: "Confirm all & commit to stock" (disabled until every line is confirmed or skipped) + "Cancel".
+- `src/routes/_authenticated/pharmacist/invoice-list.tsx` — list of the org's uploads with status filter.
 
-Reply with **A**, **B**, or **C** (or a custom scope) and I'll switch to build mode.
+Reuse `src/components/medical/*` primitives for consistency.
+
+### 4. Product intelligence integration
+- Extend `medicineNormalize.ts` only if new supplier abbreviations appear (no schema change).
+- Route each `detected_name` through `searchMedicinesIntelligent`; take top result when `confidence ≥ 0.75`, otherwise mark `unmatched` and force manual pick.
+
+### 5. Security & audit
+- RLS on all four tables (org-scoped read/write; audit read-only for org admins).
+- `invoice-uploads` bucket private; signed URLs only inside server handlers.
+- Every state transition writes an `invoice_audit_events` row (who, what, when, payload).
+- No client ever calls `supabaseAdmin`; commits use `requireSupabaseAuth` + `has_org_permission` gate.
+- Rate-limit `extractInvoice` per user (reuse `rate_limit_buckets`, 10/hour).
+
+### 6. Tests
+- Unit: normalization of common supplier line formats (Arabic + English), confidence scoring thresholds.
+- Server-fn happy path: mock Gemini response → verify extraction + matching → verify commit calls inventory RPCs exactly once per confirmed line.
+
+### 7. Report
+`docs/engineering/reports/PHOENIX-INVOICE-INTELLIGENCE.md` — schema, RPCs, RLS matrix, audit event catalog, matching thresholds, mobile UX notes, next steps (multi-page invoices, PDF, supplier-format learning loop).
+
+## Explicit non-goals (this phase)
+- No PDF ingestion (images only).
+- No multi-page stitching.
+- No automatic supplier learning / feedback loop.
+- No price-list updates to `catalog_products` (invoice affects stock/cost only).
+- No auto-commit path — human review is mandatory.
+
+## Technical notes
+- AI: `google/gemini-3-flash-preview` via existing `createLovableAiGatewayProvider` helper, `Output` structured schema (Zod). Multimodal `image_url` block with signed URL.
+- Server-only imports (`supabaseAdmin`) stay inside handler bodies via `await import()` per Phoenix rules.
+- `invoice-review.$id.tsx` lives under `_authenticated/pharmacist/` so the org gate + bearer middleware apply.
