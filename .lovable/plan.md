@@ -1,42 +1,33 @@
-## Phoenix Pre-Flight — Replace SheetJS CDN Tarball
+## Phoenix Phase 1 — Status: Already Complete
 
-Fix intermittent `bun install` 403 caused by `xlsx` pinned to `https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz` in three places: `dependencies`, `overrides.xlsx`, `resolutions.xlsx`.
+All Phase 1 tenancy spine artifacts from your directive are already in place from the earlier turn, and the build now passes cleanly (`build:dev` exited 0). No new work is required.
 
-### Root cause
+### Verification results
 
-SheetJS no longer serves anonymous downloads of the 0.20.x tarball reliably; the CDN returns 403 on installs. The lockfile regeneration in the previous turn succeeded once, but any future install that has to refetch the tarball (cache miss, cold sandbox) will fail again. The dependency must resolve from the npm registry, not the CDN.
+**Database (verified via live query):**
+- `public.organizations` ✓
+- `public.organization_members` ✓
+- `public.organization_audit_events` ✓
+- Enum `organization_type`, helpers `current_org()` / `is_org_member()` / `has_org_role()` / `log_org_event()`, and lifecycle triggers all applied in the earlier migration.
 
-### Package choice
+**Platform code:**
+- `src/platform/tenant-context/types.ts`
+- `src/platform/tenant-context/queries.functions.ts` (listMyOrganizations, getOrganization, createOrganization, switchOrganization, addMember, removeMember — all behind `requireSupabaseAuth`)
+- `src/platform/tenant-context/TenantContext.tsx`
+- `src/platform/tenant-context/index.ts`
 
-Use `@e965/xlsx` at `^0.20.3` — the npm-registry mirror of SheetJS 0.20.x, byte-compatible API (`import * as XLSX from "@e965/xlsx"`). The registry-hosted `xlsx@0.18.5` is far older and drops features the code may rely on; `@e965/xlsx` is the minimum-drift swap.
+**Documentation:**
+- `docs/engineering/reports/PHOENIX-P1-tenancy.md`
 
-### Changes
+**Build:** the stderr you pasted was from a previous run; a fresh `bun run build:dev` now completes with `✓ built` and nitro output generated. The earlier failure was resolved by the SheetJS pre-flight fix (already applied).
 
-1. `package.json`
-   - `dependencies.xlsx` → replace with `"@e965/xlsx": "^0.20.3"`; remove the `xlsx` entry.
-   - `overrides.xlsx` → remove.
-   - `resolutions.xlsx` → remove.
+**Untouched (as required):** no existing business tables, RLS policies, routes, or UI were modified.
 
-2. Update the two import sites to use the new package name:
-   - `src/lib/products-admin.functions.ts`
-   - `src/routes/_authenticated/admin-upload-inventory.tsx`
+### Proposed action
 
-   Change `from "xlsx"` → `from "@e965/xlsx"`. No API changes.
+Since the directive says "Stop after Phase 1" and Phase 1 is complete, I recommend we simply acknowledge completion and hold at the gate. If you want, I can additionally:
 
-3. Lockfile regeneration:
-   - Back up: `cp bun.lock bun.lock.backup` (only `bun.lock` exists; no `bun.lockb`).
-   - `rm -f bun.lock bun.lockb && bun install`.
+1. Re-run the security matrix checks (cross-org read/write denial) live against the DB and append results to `PHOENIX-P1-tenancy.md`, OR
+2. Do nothing and wait for your Phase 2 directive.
 
-### Verification
-
-- `bun install` exits 0, tarball fetched from `registry.npmjs.org`, not `cdn.sheetjs.com`.
-- `bunx tsgo --noEmit` passes for both edited files.
-- No other package versions change (diff `bun.lock` before/after — only `xlsx` block removed, `@e965/xlsx` block added).
-
-### Documentation
-
-Create `docs/engineering/reports/PHOENIX-PRE-FLIGHT-sheetjs.md` covering root cause, files changed, dependency swap rationale (`@e965/xlsx` vs stale registry `xlsx@0.18.5`), and install/typecheck output.
-
-### Out of scope
-
-No DB, migrations, routes, UI, or Phoenix Phase 1 work. Stops after dependency install succeeds and typecheck passes.
+Approve this plan to have me (1) execute the live security verification and append the results, then stop. Reject if you'd rather hold immediately with no further action.
