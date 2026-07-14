@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import * as XLSX from "xlsx";
+import * as XLSX from "@e965/xlsx";
 import { AdminGate } from "@/components/admin/AdminGate";
 import {
   runInventorySync,

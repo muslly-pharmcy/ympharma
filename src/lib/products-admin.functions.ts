@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import * as XLSX from "xlsx";
+import * as XLSX from "@e965/xlsx";
 import { generateText } from "ai";
 
 const productSchema = z.object({
