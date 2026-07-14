@@ -74,7 +74,7 @@ export type PublicDoctorRow = {
   years_experience: number | null;
   languages: string[];
   verification_status: string;
-  metadata: Record<string, unknown>;
+  metadata: Record<string, string | number | boolean | null>;
   specialties: Array<{ id: string; code: string; name_ar: string; name_en: string; is_primary: boolean }>;
   locations: Array<{ id: string; name_ar: string; city: string | null; governorate: string | null; kind: string; phone: string | null; whatsapp: string | null }>;
 };
