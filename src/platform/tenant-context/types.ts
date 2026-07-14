@@ -10,12 +10,21 @@ export type OrganizationStatus = "active" | "suspended" | "archived";
 export type OrganizationRole = "owner" | "admin" | "member";
 export type MemberStatus = "active" | "invited" | "suspended" | "removed";
 
+export type OrgMetadataValue =
+  | string
+  | number
+  | boolean
+  | null
+  | OrgMetadataValue[]
+  | { [key: string]: OrgMetadataValue };
+export type OrgMetadata = { [key: string]: OrgMetadataValue };
+
 export interface Organization {
   id: string;
   name: string;
   type: OrganizationType;
   status: OrganizationStatus;
-  metadata: Record<string, unknown>;
+  metadata: OrgMetadata;
   created_at: string;
   updated_at: string;
 }

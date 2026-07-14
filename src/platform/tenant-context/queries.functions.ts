@@ -6,7 +6,25 @@ import type {
   OrganizationRole,
   OrganizationType,
   OrganizationWithRole,
+  OrgMetadata,
+  OrgMetadataValue,
 } from "./types";
+
+const MetadataSchema: z.ZodType<OrgMetadata> = z.lazy(() =>
+  z.record(
+    z.string(),
+    z.lazy(() =>
+      z.union([
+        z.string(),
+        z.number(),
+        z.boolean(),
+        z.null(),
+        z.array(z.any()),
+        z.record(z.string(), z.any()),
+      ]),
+    ) as z.ZodType<OrgMetadataValue>,
+  ),
+);
 
 const OrgTypeSchema = z.enum([
   "PHARMACY",
@@ -56,7 +74,7 @@ export const createOrganization = createServerFn({ method: "POST" })
       .object({
         name: z.string().min(1).max(200),
         type: OrgTypeSchema,
-        metadata: z.record(z.string(), z.unknown()).optional(),
+        metadata: MetadataSchema.optional(),
       })
       .parse(input),
   )
