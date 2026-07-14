@@ -4694,6 +4694,313 @@ export type Database = {
         }
         Relationships: []
       }
+      pn_pharmacies: {
+        Row: {
+          address: string | null
+          bio_ar: string | null
+          city: string | null
+          cover_url: string | null
+          created_at: string
+          created_by: string | null
+          district: string | null
+          email: string | null
+          id: string
+          is_24_7: boolean
+          is_public: boolean
+          lat: number | null
+          lng: number | null
+          logo_url: string | null
+          metadata: Json
+          name_ar: string
+          name_en: string | null
+          organization_id: string | null
+          phone: string | null
+          slug: string
+          updated_at: string
+          verification_status: Database["public"]["Enums"]["pn_verification_status"]
+          verified_at: string | null
+          verified_by: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          bio_ar?: string | null
+          city?: string | null
+          cover_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          district?: string | null
+          email?: string | null
+          id?: string
+          is_24_7?: boolean
+          is_public?: boolean
+          lat?: number | null
+          lng?: number | null
+          logo_url?: string | null
+          metadata?: Json
+          name_ar: string
+          name_en?: string | null
+          organization_id?: string | null
+          phone?: string | null
+          slug: string
+          updated_at?: string
+          verification_status?: Database["public"]["Enums"]["pn_verification_status"]
+          verified_at?: string | null
+          verified_by?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          bio_ar?: string | null
+          city?: string | null
+          cover_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          district?: string | null
+          email?: string | null
+          id?: string
+          is_24_7?: boolean
+          is_public?: boolean
+          lat?: number | null
+          lng?: number | null
+          logo_url?: string | null
+          metadata?: Json
+          name_ar?: string
+          name_en?: string | null
+          organization_id?: string | null
+          phone?: string | null
+          slug?: string
+          updated_at?: string
+          verification_status?: Database["public"]["Enums"]["pn_verification_status"]
+          verified_at?: string | null
+          verified_by?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pn_pharmacies_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pn_pharmacy_hours: {
+        Row: {
+          close_time: string | null
+          created_at: string
+          id: string
+          is_closed: boolean
+          open_time: string | null
+          pharmacy_id: string
+          updated_at: string
+          weekday: number
+        }
+        Insert: {
+          close_time?: string | null
+          created_at?: string
+          id?: string
+          is_closed?: boolean
+          open_time?: string | null
+          pharmacy_id: string
+          updated_at?: string
+          weekday: number
+        }
+        Update: {
+          close_time?: string | null
+          created_at?: string
+          id?: string
+          is_closed?: boolean
+          open_time?: string | null
+          pharmacy_id?: string
+          updated_at?: string
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pn_pharmacy_hours_pharmacy_id_fkey"
+            columns: ["pharmacy_id"]
+            isOneToOne: false
+            referencedRelation: "pn_pharmacies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pn_pharmacy_stock: {
+        Row: {
+          availability: Database["public"]["Enums"]["pn_availability"]
+          catalog_product_id: string
+          created_at: string
+          expiry_date: string | null
+          id: string
+          notes: string | null
+          pharmacy_id: string
+          price_visible: boolean
+          price_yer: number | null
+          updated_at: string
+        }
+        Insert: {
+          availability?: Database["public"]["Enums"]["pn_availability"]
+          catalog_product_id: string
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          notes?: string | null
+          pharmacy_id: string
+          price_visible?: boolean
+          price_yer?: number | null
+          updated_at?: string
+        }
+        Update: {
+          availability?: Database["public"]["Enums"]["pn_availability"]
+          catalog_product_id?: string
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          notes?: string | null
+          pharmacy_id?: string
+          price_visible?: boolean
+          price_yer?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pn_pharmacy_stock_catalog_product_id_fkey"
+            columns: ["catalog_product_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pn_pharmacy_stock_pharmacy_id_fkey"
+            columns: ["pharmacy_id"]
+            isOneToOne: false
+            referencedRelation: "pn_pharmacies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pn_transfer_requests: {
+        Row: {
+          catalog_product_id: string
+          created_at: string
+          from_pharmacy_id: string
+          id: string
+          notes: string | null
+          qty: number
+          reason: Database["public"]["Enums"]["pn_transfer_reason"]
+          requested_by: string
+          responded_at: string | null
+          responded_by: string | null
+          status: Database["public"]["Enums"]["pn_transfer_status"]
+          to_pharmacy_id: string
+          updated_at: string
+        }
+        Insert: {
+          catalog_product_id: string
+          created_at?: string
+          from_pharmacy_id: string
+          id?: string
+          notes?: string | null
+          qty: number
+          reason?: Database["public"]["Enums"]["pn_transfer_reason"]
+          requested_by: string
+          responded_at?: string | null
+          responded_by?: string | null
+          status?: Database["public"]["Enums"]["pn_transfer_status"]
+          to_pharmacy_id: string
+          updated_at?: string
+        }
+        Update: {
+          catalog_product_id?: string
+          created_at?: string
+          from_pharmacy_id?: string
+          id?: string
+          notes?: string | null
+          qty?: number
+          reason?: Database["public"]["Enums"]["pn_transfer_reason"]
+          requested_by?: string
+          responded_at?: string | null
+          responded_by?: string | null
+          status?: Database["public"]["Enums"]["pn_transfer_status"]
+          to_pharmacy_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pn_transfer_requests_catalog_product_id_fkey"
+            columns: ["catalog_product_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pn_transfer_requests_from_pharmacy_id_fkey"
+            columns: ["from_pharmacy_id"]
+            isOneToOne: false
+            referencedRelation: "pn_pharmacies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pn_transfer_requests_to_pharmacy_id_fkey"
+            columns: ["to_pharmacy_id"]
+            isOneToOne: false
+            referencedRelation: "pn_pharmacies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pn_verification_requests: {
+        Row: {
+          created_at: string
+          documents: Json
+          id: string
+          notes: string | null
+          pharmacy_id: string
+          reviewed_at: string | null
+          reviewer_id: string | null
+          reviewer_notes: string | null
+          status: Database["public"]["Enums"]["pn_verification_status"]
+          submitted_by: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          documents?: Json
+          id?: string
+          notes?: string | null
+          pharmacy_id: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          reviewer_notes?: string | null
+          status?: Database["public"]["Enums"]["pn_verification_status"]
+          submitted_by: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          documents?: Json
+          id?: string
+          notes?: string | null
+          pharmacy_id?: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          reviewer_notes?: string | null
+          status?: Database["public"]["Enums"]["pn_verification_status"]
+          submitted_by?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pn_verification_requests_pharmacy_id_fkey"
+            columns: ["pharmacy_id"]
+            isOneToOne: false
+            referencedRelation: "pn_pharmacies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prescription_escalations: {
         Row: {
           assigned_to: string | null
@@ -7494,6 +7801,81 @@ export type Database = {
             }
             Returns: Json
           }
+      pn_flag_near_expiry: { Args: { _days?: number }; Returns: number }
+      pn_get_pharmacy_public: { Args: { _slug: string }; Returns: Json }
+      pn_list_pharmacy_products: {
+        Args: { _limit?: number; _offset?: number; _q?: string; _slug: string }
+        Returns: {
+          availability: Database["public"]["Enums"]["pn_availability"]
+          catalog_product_id: string
+          expiry_date: string
+          price_visible: boolean
+          price_yer: number
+          product_name: string
+        }[]
+      }
+      pn_request_transfer: {
+        Args: {
+          _catalog_product_id: string
+          _from_pharmacy_id: string
+          _notes?: string
+          _qty: number
+          _reason?: Database["public"]["Enums"]["pn_transfer_reason"]
+          _to_pharmacy_id: string
+        }
+        Returns: string
+      }
+      pn_search_medicine_nearby: {
+        Args: {
+          _lat?: number
+          _limit?: number
+          _lng?: number
+          _q: string
+          _radius_km?: number
+        }
+        Returns: {
+          availability: Database["public"]["Enums"]["pn_availability"]
+          catalog_product_id: string
+          city: string
+          distance_km: number
+          district: string
+          expiry_date: string
+          lat: number
+          lng: number
+          pharmacy_id: string
+          pharmacy_name_ar: string
+          pharmacy_slug: string
+          phone: string
+          price_visible: boolean
+          price_yer: number
+          product_name: string
+          whatsapp: string
+        }[]
+      }
+      pn_submit_verification: {
+        Args: { _documents?: Json; _notes?: string; _pharmacy_id: string }
+        Returns: string
+      }
+      pn_upsert_stock: {
+        Args: {
+          _availability: Database["public"]["Enums"]["pn_availability"]
+          _catalog_product_id: string
+          _expiry_date?: string
+          _notes?: string
+          _pharmacy_id: string
+          _price_visible?: boolean
+          _price_yer?: number
+        }
+        Returns: string
+      }
+      pn_verify_pharmacy: {
+        Args: {
+          _approved: boolean
+          _pharmacy_id: string
+          _reviewer_notes?: string
+        }
+        Returns: undefined
+      }
       prescription_file_count: {
         Args: { _prescription_id: string }
         Returns: number
@@ -7710,6 +8092,15 @@ export type Database = {
         | "INSURANCE"
         | "SUPPLIER"
         | "CORPORATE"
+      pn_availability: "in_stock" | "low" | "out"
+      pn_transfer_reason: "near_expiry" | "shortage" | "other"
+      pn_transfer_status:
+        | "draft"
+        | "pending"
+        | "accepted"
+        | "rejected"
+        | "cancelled"
+      pn_verification_status: "pending" | "verified" | "rejected"
       sup_status: "active" | "inactive" | "suspended"
       therapeutic_category:
         | "diabetes"
@@ -7995,6 +8386,16 @@ export const Constants = {
         "SUPPLIER",
         "CORPORATE",
       ],
+      pn_availability: ["in_stock", "low", "out"],
+      pn_transfer_reason: ["near_expiry", "shortage", "other"],
+      pn_transfer_status: [
+        "draft",
+        "pending",
+        "accepted",
+        "rejected",
+        "cancelled",
+      ],
+      pn_verification_status: ["pending", "verified", "rejected"],
       sup_status: ["active", "inactive", "suspended"],
       therapeutic_category: [
         "diabetes",
