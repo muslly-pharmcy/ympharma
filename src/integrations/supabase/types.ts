@@ -2815,6 +2815,112 @@ export type Database = {
           },
         ]
       }
+      organization_audit_events: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          organization_id: string
+          payload: Json
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          organization_id: string
+          payload?: Json
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          organization_id?: string
+          payload?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_audit_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_members: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+          role: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          metadata: Json
+          name: string
+          status: string
+          type: Database["public"]["Enums"]["organization_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          metadata?: Json
+          name: string
+          status?: string
+          type: Database["public"]["Enums"]["organization_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          metadata?: Json
+          name?: string
+          status?: string
+          type?: Database["public"]["Enums"]["organization_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payment_transactions: {
         Row: {
           amount: number
@@ -5013,6 +5119,7 @@ export type Database = {
       create_scheduled_backup: { Args: { _kind: string }; Returns: string }
       cto_health: { Args: never; Returns: Json }
       current_inventory_write_mode: { Args: never; Returns: string }
+      current_org: { Args: never; Returns: string }
       customer_notification_get_status: {
         Args: { _token: string }
         Returns: Json
@@ -5158,6 +5265,10 @@ export type Database = {
         Args: { _branch_id: string; _user_id: string }
         Returns: boolean
       }
+      has_org_role: {
+        Args: { _org: string; _roles: string[]; _user: string }
+        Returns: boolean
+      }
       has_permission: {
         Args: { _perm: string; _user_id: string }
         Returns: boolean
@@ -5177,6 +5288,7 @@ export type Database = {
         Args: { _branch_id: string; _user_id: string }
         Returns: boolean
       }
+      is_org_member: { Args: { _org: string; _user: string }; Returns: boolean }
       is_owner_or_admin: { Args: { _user_id: string }; Returns: boolean }
       latest_executive_report: { Args: never; Returns: Json }
       list_approved_classifications_public: { Args: never; Returns: Json }
@@ -5196,6 +5308,10 @@ export type Database = {
       }
       log_inventory_shadow: {
         Args: { _legacy_id: number; _order_id: string; _requested_qty: number }
+        Returns: undefined
+      }
+      log_org_event: {
+        Args: { _actor: string; _org: string; _payload: Json; _type: string }
         Returns: undefined
       }
       mark_customer_rx_notification_failed: {
@@ -5372,6 +5488,13 @@ export type Database = {
       branch_role: "manager" | "staff" | "viewer"
       branch_type: "WAREHOUSE" | "BRANCH" | "OFFICE"
       classification_status: "pending" | "approved" | "rejected"
+      organization_type:
+        | "PHARMACY"
+        | "CLINIC"
+        | "LAB"
+        | "INSURANCE"
+        | "SUPPLIER"
+        | "CORPORATE"
       therapeutic_category:
         | "diabetes"
         | "hypertension"
@@ -5563,6 +5686,14 @@ export const Constants = {
       branch_role: ["manager", "staff", "viewer"],
       branch_type: ["WAREHOUSE", "BRANCH", "OFFICE"],
       classification_status: ["pending", "approved", "rejected"],
+      organization_type: [
+        "PHARMACY",
+        "CLINIC",
+        "LAB",
+        "INSURANCE",
+        "SUPPLIER",
+        "CORPORATE",
+      ],
       therapeutic_category: [
         "diabetes",
         "hypertension",
