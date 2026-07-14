@@ -977,24 +977,30 @@ export type Database = {
       }
       branch_user_assignments: {
         Row: {
+          assigned_by: string | null
           branch_id: string
           created_at: string
           id: string
           role: Database["public"]["Enums"]["branch_role"]
+          status: string
           user_id: string
         }
         Insert: {
+          assigned_by?: string | null
           branch_id: string
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["branch_role"]
+          status?: string
           user_id: string
         }
         Update: {
+          assigned_by?: string | null
           branch_id?: string
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["branch_role"]
+          status?: string
           user_id?: string
         }
         Relationships: [
@@ -1014,9 +1020,11 @@ export type Database = {
           created_at: string
           id: string
           is_active: boolean
+          location: Json
           manager_user_id: string | null
           metadata: Json
           name: string
+          organization_id: string | null
           phone: string | null
           type: Database["public"]["Enums"]["branch_type"]
           updated_at: string
@@ -1027,9 +1035,11 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          location?: Json
           manager_user_id?: string | null
           metadata?: Json
           name: string
+          organization_id?: string | null
           phone?: string | null
           type: Database["public"]["Enums"]["branch_type"]
           updated_at?: string
@@ -1040,14 +1050,24 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          location?: Json
           manager_user_id?: string | null
           metadata?: Json
           name?: string
+          organization_id?: string | null
           phone?: string | null
           type?: Database["public"]["Enums"]["branch_type"]
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "branches_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       bundle_items: {
         Row: {
@@ -1849,6 +1869,39 @@ export type Database = {
           response_body?: Json | null
           response_status?: number | null
           scope?: string
+        }
+        Relationships: []
+      }
+      identity_audit_events: {
+        Row: {
+          actor_user_id: string | null
+          branch_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          org_id: string | null
+          payload: Json
+          subject_user_id: string | null
+        }
+        Insert: {
+          actor_user_id?: string | null
+          branch_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          org_id?: string | null
+          payload?: Json
+          subject_user_id?: string | null
+        }
+        Update: {
+          actor_user_id?: string | null
+          branch_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          org_id?: string | null
+          payload?: Json
+          subject_user_id?: string | null
         }
         Relationships: []
       }
@@ -2852,28 +2905,31 @@ export type Database = {
       }
       organization_members: {
         Row: {
+          branch_scope: string[]
           created_at: string
           id: string
           organization_id: string
-          role: string
+          role: Database["public"]["Enums"]["org_role"]
           status: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          branch_scope?: string[]
           created_at?: string
           id?: string
           organization_id: string
-          role?: string
+          role?: Database["public"]["Enums"]["org_role"]
           status?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          branch_scope?: string[]
           created_at?: string
           id?: string
           organization_id?: string
-          role?: string
+          role?: Database["public"]["Enums"]["org_role"]
           status?: string
           updated_at?: string
           user_id?: string
@@ -2883,6 +2939,53 @@ export type Database = {
             foreignKeyName: "organization_members_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          features: Json
+          limits: Json
+          organization_id: string
+          plan: string
+          status: string
+          trial_ends_at: string | null
+          updated_at: string
+          usage: Json
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          features?: Json
+          limits?: Json
+          organization_id: string
+          plan?: string
+          status?: string
+          trial_ends_at?: string | null
+          updated_at?: string
+          usage?: Json
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          features?: Json
+          limits?: Json
+          organization_id?: string
+          plan?: string
+          status?: string
+          trial_ends_at?: string | null
+          updated_at?: string
+          usage?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_subscriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
@@ -2976,6 +3079,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      permissions: {
+        Row: {
+          action: string
+          created_at: string
+          description: string | null
+          key: string
+          resource: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          description?: string | null
+          key: string
+          resource: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          description?: string | null
+          key?: string
+          resource?: string
+        }
+        Relationships: []
       }
       prescription_escalations: {
         Row: {
@@ -3549,6 +3676,51 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          metadata: Json
+          notification_prefs: Json
+          phone: string | null
+          preferred_language: string
+          profile_completed_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id: string
+          metadata?: Json
+          notification_prefs?: Json
+          phone?: string | null
+          preferred_language?: string
+          profile_completed_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          metadata?: Json
+          notification_prefs?: Json
+          phone?: string | null
+          preferred_language?: string
+          profile_completed_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       rate_limit_buckets: {
         Row: {
           count: number
@@ -3696,6 +3868,29 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "products"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_permissions: {
+        Row: {
+          permission_key: string
+          role: Database["public"]["Enums"]["org_role"]
+        }
+        Insert: {
+          permission_key: string
+          role: Database["public"]["Enums"]["org_role"]
+        }
+        Update: {
+          permission_key?: string
+          role?: Database["public"]["Enums"]["org_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_permission_key_fkey"
+            columns: ["permission_key"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["key"]
           },
         ]
       }
@@ -5178,6 +5373,17 @@ export type Database = {
         }
         Returns: string
       }
+      emit_identity_event: {
+        Args: {
+          _actor: string
+          _branch: string
+          _org: string
+          _payload: Json
+          _subject: string
+          _type: string
+        }
+        Returns: undefined
+      }
       emit_order_event: {
         Args: {
           _correlation_id?: string
@@ -5265,6 +5471,15 @@ export type Database = {
         Args: { _branch_id: string; _user_id: string }
         Returns: boolean
       }
+      has_org_permission: {
+        Args: {
+          _branch_id?: string
+          _org_id: string
+          _permission: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_org_role: {
         Args: { _org: string; _roles: string[]; _user: string }
         Returns: boolean
@@ -5296,6 +5511,12 @@ export type Database = {
       list_classifications_admin: {
         Args: { _category?: string; _limit?: number; _status?: string }
         Returns: Json
+      }
+      list_my_org_permissions: {
+        Args: { _org_id: string }
+        Returns: {
+          permission_key: string
+        }[]
       }
       log_activity: {
         Args: {
@@ -5350,6 +5571,14 @@ export type Database = {
           source_queue: string
         }
         Returns: number
+      }
+      org_feature_enabled: {
+        Args: { _feature: string; _org_id: string }
+        Returns: boolean
+      }
+      org_within_limit: {
+        Args: { _current: number; _limit: string; _org_id: string }
+        Returns: boolean
       }
       pharmacy_chronic_legacy_ids: { Args: never; Returns: Json }
       pharmacy_homepage_sections: { Args: never; Returns: Json }
@@ -5488,6 +5717,16 @@ export type Database = {
       branch_role: "manager" | "staff" | "viewer"
       branch_type: "WAREHOUSE" | "BRANCH" | "OFFICE"
       classification_status: "pending" | "approved" | "rejected"
+      org_role:
+        | "owner"
+        | "admin"
+        | "manager"
+        | "employee"
+        | "pharmacist"
+        | "doctor"
+        | "supplier_user"
+        | "insurance_user"
+        | "customer"
       organization_type:
         | "PHARMACY"
         | "CLINIC"
@@ -5686,6 +5925,17 @@ export const Constants = {
       branch_role: ["manager", "staff", "viewer"],
       branch_type: ["WAREHOUSE", "BRANCH", "OFFICE"],
       classification_status: ["pending", "approved", "rejected"],
+      org_role: [
+        "owner",
+        "admin",
+        "manager",
+        "employee",
+        "pharmacist",
+        "doctor",
+        "supplier_user",
+        "insurance_user",
+        "customer",
+      ],
       organization_type: [
         "PHARMACY",
         "CLINIC",

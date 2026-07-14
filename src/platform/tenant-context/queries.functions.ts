@@ -34,7 +34,17 @@ const OrgTypeSchema = z.enum([
   "SUPPLIER",
   "CORPORATE",
 ]);
-const RoleSchema = z.enum(["owner", "admin", "member"]);
+const RoleSchema = z.enum([
+  "owner",
+  "admin",
+  "manager",
+  "employee",
+  "pharmacist",
+  "doctor",
+  "supplier_user",
+  "insurance_user",
+  "customer",
+]);
 
 export const listMyOrganizations = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -140,7 +150,7 @@ export const addMember = createServerFn({ method: "POST" })
       .object({
         organizationId: z.string().uuid(),
         userId: z.string().uuid(),
-        role: RoleSchema.default("member"),
+        role: RoleSchema.default("employee"),
       })
       .parse(input),
   )
@@ -174,5 +184,39 @@ export const removeMember = createServerFn({ method: "POST" })
       .eq("organization_id", data.organizationId)
       .eq("user_id", data.userId);
     if (error) throw error;
+    return { ok: true };
+  });
+
+// ---- Phoenix Phase 3 ---------------------------------------
+
+export const listMyOrgPermissions = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ organizationId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }): Promise<string[]> => {
+    const { supabase } = context;
+    const { data: rows, error } = await supabase.rpc(
+      "list_my_org_permissions" as never,
+      { _org_id: data.organizationId } as never,
+    );
+    if (error) throw error;
+    return ((rows as Array<{ permission_key: string }> | null) ?? []).map(
+      (r) => r.permission_key,
+    );
+  });
+
+export const assertOrgAccess = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ organizationId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    const { supabase, userId } = context;
+    const { data: row, error } = await supabase
+      .from("organization_members")
+      .select("id")
+      .eq("organization_id", data.organizationId)
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .maybeSingle();
+    if (error) throw error;
+    if (!row) throw new Error("Forbidden: not a member of this organization");
     return { ok: true };
   });

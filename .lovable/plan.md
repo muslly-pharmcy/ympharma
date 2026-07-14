@@ -1,123 +1,106 @@
-## Phoenix Phase 2 — Platform Layer & Event Bus
 
-Additive-only foundation. Zero business behavior changes. Existing `src/core/*` (dlq, idempotency, observability, ai-safety, backup, retention) and `src/platform/tenant-context/` are reused, not replaced.
+# Phoenix Phase 3 — Identity Foundation
 
-### 1. Directory scaffolding
+Builds the org-aware identity layer on top of Phase 1 tenancy and Phase 2 platform. **No inventory/products/orders/prescriptions migration** — only identity, roles, permissions, branches, and subscription scaffolding.
 
-```
-src/
-  core/
-    events/                    NEW — enterprise event bus
-      types.ts                  Event, EventEnvelope, HandlerContext, Result types
-      EventPublisher.ts         emit() with org/actor/correlation/idempotency
-      EventRegistry.ts          in-process handler registration
-      EventDispatcher.ts        executes handlers w/ isolation, retry, DLQ
-      constants.ts              canonical event names (ORDER_CREATED, PAYMENT_COMPLETED, INVENTORY_UPDATED, PRESCRIPTION_RECEIVED, USER_REGISTERED, …)
-      index.ts                  public surface
-    errors/                    NEW — unified error taxonomy
-      AppError.ts               typed base + subclasses (ValidationError, AuthError, ForbiddenError, NotFoundError, ConflictError, RateLimitError, InternalError)
-      toApiResponse.ts          security-safe serializer (user msg vs dev log)
-      index.ts
-    validation/                NEW — shared Zod helpers
-      commonSchemas.ts          uuid, orgId, pagination, isoDate
-      validateInput.ts          server-side wrapper returning typed ValidationError
-      index.ts
-    cache/                     NEW — abstraction only, no infra
-      CacheProvider.ts          interface (get/set/del/wrap)
-      InMemoryCache.ts          default implementation, TTL + LRU cap
-      keys.ts                   namespace helpers (product:, doctor:, availability:)
-      index.ts
-  platform/
-    tenant-context/            EXISTS — untouched
-    permissions/               NEW — adapter over existing user_roles / has_role
-      PermissionService.ts      check(userId, permission), hasRole, requireRole
-      adapters/legacyRolesAdapter.server.ts   wraps public.has_role RPC
-      types.ts                  Permission enum stub, Role type
-      index.ts
-    feature-flags/             NEW
-      FeatureFlagService.ts    isEnabled(flag, {orgId,userId})
-      providers/staticProvider.ts   env / JSON backed default
-      types.ts
-      index.ts
-    observability/             NEW — thin re-export of core/observability + trace helpers
-      index.ts
-  modules/                     NEW — empty scaffold + README (no modules migrated)
-    README.md                  module structure standard (domain/data/server/ui/events)
-    _template/                 reference skeleton (empty files + README)
-docs/engineering/
-  standards/
-    MODULE-STRUCTURE.md        canonical module layout & rules
-    EVENT-CATALOG.md            registry of event names + payload contracts
-  reports/
-    PHOENIX-P2-platform.md     final report
-```
+## 1. Database migrations (single migration)
 
-### 2. Event Bus design
+### 1.1 `public.profiles` (application profile layer)
+Columns: `id uuid PK → auth.users(id) on delete cascade`, `display_name`, `avatar_url`, `phone`, `email`, `preferred_language text default 'ar'`, `notification_prefs jsonb default '{}'`, `status text default 'active'` (active/suspended/deleted), `profile_completed_at timestamptz`, `metadata jsonb`, timestamps.
+- Trigger: auto-create profile row on `auth.users` insert.
+- RLS: user reads/updates own; admins read all via `has_role`.
+- GRANTs to `authenticated` + `service_role`.
 
-- **EventEnvelope**: `{ id (uuid), name, occurredAt, orgId?, actorId?, correlationId, causationId?, idempotencyKey?, payload }`.
-- **Publisher.emit(name, payload, ctx)**: builds envelope, calls `IdempotencyService` to short-circuit duplicates, writes an `event_log` audit row via existing `Logger` + Supabase (through a `.server.ts` sink), then hands to `EventDispatcher`.
-- **Registry**: process-local map `name -> Handler[]`. Handlers registered via `registerHandler(name, fn, {retries, isolation})`.
-- **Dispatcher**: runs handlers with `Promise.allSettled`, applies exponential backoff (reuse `src/lib/retry.ts`), on terminal failure forwards to existing `DLQService` (`src/core/dlq/DLQService.ts`) tagged with `source:'event-bus'`.
-- **Idempotency**: reuses `src/core/idempotency/IdempotencyService.ts` (`event:{name}:{idempotencyKey}`).
-- **Observability**: each dispatch wraps in `withObservability` + `RequestContext` so trace/correlation/org/user ids propagate to Logger.
-- **Server-only pieces** (Supabase writes, DLQ sink) live in `*.server.ts` files; client-safe API surface stays in `index.ts` so UI can call `publisher.emit()` through a server fn.
-- Existing `src/lib/event-bus.functions.ts` and `src/routes/api/public/hooks/event-consumer.ts` are **left untouched**; new bus lives alongside and a follow-up phase migrates them.
+### 1.2 Org-scoped role enum + rewrite `organization_members.role`
+- New enum `public.org_role`: `owner, admin, manager, employee, pharmacist, doctor, supplier_user, insurance_user, customer`.
+- Alter `organization_members.role` from `text` → `org_role` (map existing owner/admin/member; member → employee).
+- Add `organization_members.branch_scope uuid[] default '{}'` for optional branch restriction.
 
-### 3. Permissions adapter
+### 1.3 `public.permissions` catalog + `public.role_permissions`
+- `permissions(key text PK, resource text, action text, description text)` — seeded with `inventory.read/update`, `orders.manage`, `patients.view`, `reports.export`, `org.manage`, `members.manage`, `branches.manage`, etc.
+- `role_permissions(role org_role, permission_key text, PRIMARY KEY(role, permission_key))` — seeded defaults per role.
+- SECURITY DEFINER function `public.has_org_permission(_user_id uuid, _org_id uuid, _permission text, _branch_id uuid default null) returns boolean` — checks membership + role_permissions + optional branch scope.
+- GRANT execute to `authenticated`; REVOKE from `anon`.
 
-- `PermissionService.hasRole(userId, role)` calls `supabase.rpc('has_role', ...)` server-side via adapter.
-- `check(userId, permission)` maps permission strings to role sets (initial map: `admin.*` -> admin/owner; extensible).
-- No DB migrations. Existing `user_roles` table + policies unchanged.
+### 1.4 Attach branches to organizations
+- Add `branches.organization_id uuid references organizations(id)` (nullable initially; backfill NULL — legacy single-tenant preserved).
+- Add `branches.location jsonb` (lat/lng/city).
+- Extend RLS: members can read branches of their org; managers can write.
+- `branch_user_assignments`: add `assigned_by uuid`, `status text default 'active'`; RLS scoped via org membership of the branch.
 
-### 4. Feature flags
+### 1.5 `public.organization_subscriptions` (foundation only, no billing)
+Columns: `organization_id PK`, `plan text default 'free'`, `features jsonb default '{}'`, `limits jsonb default '{}'` (e.g. `{max_branches, max_users}`), `usage jsonb default '{}'`, `trial_ends_at`, `current_period_end`, `status text default 'active'`, timestamps.
+- Helper: `public.org_feature_enabled(_org_id, _feature text)`, `public.org_within_limit(_org_id, _limit text, _current bigint)`.
 
-- Static provider reads `FEATURE_FLAGS` env JSON + optional per-org overrides via `organizations.metadata.feature_flags` (already exists from Phase 1, read-only).
-- Interface allows future DB-backed provider without API break.
+### 1.6 Audit / event emission
+- `public.identity_audit_events(id, event_type, org_id, actor_user_id, subject_user_id, branch_id, payload jsonb, created_at)`.
+- Triggers on `organization_members`, `branches`, `branch_user_assignments`, `profiles` role/status change → insert audit row **and** insert into `agent_events` with event names below (Phase 2 event bus consumes them).
 
-### 5. Errors, validation, cache
+All new tables: GRANT → `authenticated` (scoped SELECT) + `service_role`; RLS enabled; policies via `is_org_member` + `has_org_permission`.
 
-- `AppError` carries `code`, `httpStatus`, `userMessage`, `devDetail`; `toApiResponse` strips `devDetail` in production.
-- `validateInput(schema, data)` throws `ValidationError` with Zod issue map.
-- `InMemoryCache` is process-local; suitable for SSR worker lifespan; interface leaves room for KV/Redis later.
+## 2. Platform code
 
-### 6. Import boundary governance
+### 2.1 `src/platform/identity/` (new)
+- `types.ts` — `UserProfile`, `OrgRole`, `PermissionKey`, `Subscription`.
+- `profile.functions.ts` — `getMyProfile`, `updateMyProfile`, `completeProfile` (server fns w/ `requireSupabaseAuth`).
+- `ProfileContext.tsx` — client React context, loads current profile, exposes `refresh`.
+- `index.ts` barrel.
 
-Extend `scripts/check-imports.ts` with layer rules (additive, run in same script):
+### 2.2 Extend `src/platform/permissions/`
+- Replace static `PERMISSION_ROLE_MAP` with DB-backed `has_org_permission` RPC via `PermissionService.check(userId, permission, { orgId, branchId })`.
+- Keep legacy `hasRole` adapter for backward compat.
+- Add `useHasPermission(permission, opts)` React hook.
+- New unit tests: role→permission mapping, org isolation, branch scope enforcement.
 
-- `src/core/**` may NOT import from `src/modules/**` or `src/platform/**`.
-- `src/platform/**` may NOT import from `src/modules/**`.
-- `src/modules/<A>/**` may NOT import from `src/modules/<B>/**` except via `src/modules/<B>/index.ts` (public export) or `src/core/events`.
+### 2.3 `src/platform/tenant-context/`
+- `TenantContext` gains `currentBranch`, `switchBranch`, `permissions` snapshot (permission keys for current user in current org).
+- `queries.functions.ts`: add `listOrgBranches`, `assertOrgAccess`, `listMyPermissions`.
 
-Violations fail CI with the same formatter as existing SEC-P1-004 output. Existing server-only rule preserved.
+### 2.4 `src/platform/branches/` (new)
+- `types.ts`, `branches.functions.ts` (`listBranches`, `createBranch`, `updateBranch`, `assignUserToBranch`, `removeAssignment`).
+- All server fns validate `has_org_permission(..., 'branches.manage')`.
 
-### 7. Observability integration
+### 2.5 `src/platform/subscriptions/` (new)
+- `types.ts`, `subscriptions.functions.ts` (`getOrgSubscription`, `isFeatureEnabled`, `checkLimit`).
+- `FeatureFlagService` extended with `orgFeatureProvider` reading from subscription.
 
-`EventPublisher` and `PermissionService` both accept an optional `RequestContext`; when omitted they pull the ambient one. Every emit/permission-check log line includes `traceId, orgId, userId, eventId, correlationId`.
+### 2.6 Event catalog
+Register in `src/core/events/constants.ts` and emit from server fns / DB triggers:
+- `USER_CREATED`, `USER_UPDATED`
+- `ORGANIZATION_MEMBER_ADDED`, `ORGANIZATION_MEMBER_REMOVED`
+- `ROLE_CHANGED`
+- `BRANCH_CREATED`, `BRANCH_UPDATED`, `BRANCH_MEMBER_ASSIGNED`, `BRANCH_MEMBER_UNASSIGNED`
+- `PROFILE_COMPLETED`
 
-### 8. Tests
+Zod payload schemas in `src/platform/identity/events.ts`; documented in `docs/engineering/standards/EVENT-CATALOG.md`.
 
-- `src/__tests__/unit/core/events/EventPublisher.test.ts` — emit + envelope shape + idempotency short-circuit.
-- `src/__tests__/unit/core/events/EventDispatcher.test.ts` — success, retry, DLQ handoff, handler isolation (one throws, others still run).
-- `src/__tests__/unit/core/errors/AppError.test.ts` — serializer strips dev detail.
-- `src/__tests__/unit/platform/feature-flags/FeatureFlagService.test.ts` — org + user override precedence.
-- `scripts/check-imports.ts` self-test via `bun scripts/check-imports.ts`.
+## 3. Tests
 
-Run: `bunx vitest run src/__tests__/unit/core src/__tests__/unit/platform` + typecheck + `bun scripts/check-imports.ts` + `bun run build:dev`.
+- `src/__tests__/unit/platform/permissions/PermissionService.test.ts` — mocks RPC, verifies allow/deny per role.
+- `src/__tests__/unit/platform/identity/tenant-isolation.test.ts` — user in org A cannot resolve permission in org B.
+- `src/__tests__/unit/platform/branches/branch-scope.test.ts` — user assigned to branch 1 denied on branch 2.
+- `src/__tests__/unit/platform/subscriptions/limits.test.ts`.
+- Typecheck + `bun run build` + import-graph guard pass.
 
-### 9. Documentation
+## 4. Security verification
 
-- `docs/engineering/standards/MODULE-STRUCTURE.md` — required folders, public export rule, event-only cross-module comms.
-- `docs/engineering/standards/EVENT-CATALOG.md` — initial 5 event names with payload Zod schemas (definitions only, no publishers wired yet).
-- `docs/engineering/reports/PHOENIX-P2-platform.md` — architecture changes, file inventory, event model, dependency rules, test results, rollback (delete `src/core/{events,errors,validation,cache}`, `src/platform/{permissions,feature-flags,observability}`, `src/modules/`, revert `scripts/check-imports.ts`).
+Run in report:
+- Query `pg_policies` on new tables — every table has policies referencing `is_org_member` / `has_org_permission`.
+- REVOKE EXECUTE on new SECURITY DEFINER fns from `anon`.
+- Confirm cross-org query returns 0 rows via SQL probe.
+- Confirm `organization_members` RLS unchanged for owners.
 
-### 10. Non-goals (explicit)
+## 5. Documentation
 
-- No DB migrations.
-- No changes to routes, auth, tenant context, or business logic.
-- Existing `event-bus.functions.ts` and `event-consumer.ts` NOT modified.
-- No module migrations — `src/modules/` ships empty aside from README + `_template/`.
-- No new external infrastructure (Redis/KV/queue).
+`docs/engineering/reports/PHOENIX-P3-identity.md` — architecture diagram, tables/functions added, permissions matrix (role × permission grid), security verification output, migration notes, risks (branch backfill NULL, legacy `user_roles` still in use for platform admin).
 
-### Completion gate
+Also update: `docs/engineering/standards/EVENT-CATALOG.md`, `docs/engineering/REGISTRY.yaml` (new features `IDENT-P3-001..005`), `docs/engineering/plans/phase-3.yaml`.
 
-Stop after Phase 2. Report: files created, event model, security impact (none — additive, server-only sinks behind `.server.ts`), performance impact (in-memory only), remaining risks (dual event system until Phase 3 migration; single-worker cache coherency).
+## Explicit non-goals
+- No inventory / products / orders / prescriptions changes.
+- No billing integration (subscriptions is schema + service only).
+- No UI dashboards beyond what's needed to expose profile edit + org/branch switcher.
+- Legacy `public.user_roles` (platform admin/owner) preserved; not removed.
+
+## Completion gate
+Stop after Phase 3. Return: files created, security probe results, permissions matrix, branch architecture summary, risks.
