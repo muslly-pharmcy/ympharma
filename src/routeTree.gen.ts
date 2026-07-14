@@ -98,6 +98,7 @@ import { Route as TestFeaturesRouteImport } from './routes/test.features'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as DoctorsSlugRouteImport } from './routes/doctors.$slug'
+import { Route as DoctorJoinRouteImport } from './routes/doctor.join'
 import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
 import { Route as AuthenticatedUploadPrescriptionRouteImport } from './routes/_authenticated/upload-prescription'
 import { Route as AuthenticatedAdminUploadInventoryRouteImport } from './routes/_authenticated/admin-upload-inventory'
@@ -120,6 +121,7 @@ import { Route as ApiPublicLogErrorRouteImport } from './routes/api/public/log-e
 import { Route as ApiPublicIncidentCheckRouteImport } from './routes/api/public/incident-check'
 import { Route as ApiPublicImgRouteImport } from './routes/api/public/img'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
+import { Route as ApiPublicDoctorJoinRouteImport } from './routes/api/public/doctor-join'
 import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
 import { Route as ApiInternalCollectFeedbackRouteImport } from './routes/api/internal/collect-feedback'
 import { Route as AuthenticatedPharmacistDashboardRouteImport } from './routes/_authenticated/pharmacist/dashboard'
@@ -623,6 +625,11 @@ const DoctorsSlugRoute = DoctorsSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => DoctorsRoute,
 } as any)
+const DoctorJoinRoute = DoctorJoinRouteImport.update({
+  id: '/doctor/join',
+  path: '/doctor/join',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConditionsSlugRoute = ConditionsSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -745,6 +752,11 @@ const ApiPublicImgRoute = ApiPublicImgRouteImport.update({
 const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
   id: '/api/public/health',
   path: '/api/public/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicDoctorJoinRoute = ApiPublicDoctorJoinRouteImport.update({
+  id: '/api/public/doctor-join',
+  path: '/api/public/doctor-join',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
@@ -1149,6 +1161,7 @@ export interface FileRoutesByFullPath {
   '/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
+  '/doctor/join': typeof DoctorJoinRoute
   '/doctors/$slug': typeof DoctorsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
@@ -1156,6 +1169,7 @@ export interface FileRoutesByFullPath {
   '/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/api/internal/collect-feedback': typeof ApiInternalCollectFeedbackRoute
   '/api/public/contact': typeof ApiPublicContactRoute
+  '/api/public/doctor-join': typeof ApiPublicDoctorJoinRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/img': typeof ApiPublicImgRoute
   '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
@@ -1313,6 +1327,7 @@ export interface FileRoutesByTo {
   '/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
+  '/doctor/join': typeof DoctorJoinRoute
   '/doctors/$slug': typeof DoctorsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
@@ -1320,6 +1335,7 @@ export interface FileRoutesByTo {
   '/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/api/internal/collect-feedback': typeof ApiInternalCollectFeedbackRoute
   '/api/public/contact': typeof ApiPublicContactRoute
+  '/api/public/doctor-join': typeof ApiPublicDoctorJoinRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/img': typeof ApiPublicImgRoute
   '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
@@ -1479,6 +1495,7 @@ export interface FileRoutesById {
   '/_authenticated/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
   '/_authenticated/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
+  '/doctor/join': typeof DoctorJoinRoute
   '/doctors/$slug': typeof DoctorsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/product/$id': typeof ProductIdRoute
@@ -1486,6 +1503,7 @@ export interface FileRoutesById {
   '/_authenticated/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/api/internal/collect-feedback': typeof ApiInternalCollectFeedbackRoute
   '/api/public/contact': typeof ApiPublicContactRoute
+  '/api/public/doctor-join': typeof ApiPublicDoctorJoinRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/img': typeof ApiPublicImgRoute
   '/api/public/incident-check': typeof ApiPublicIncidentCheckRoute
@@ -1645,6 +1663,7 @@ export interface FileRouteTypes {
     | '/admin-upload-inventory'
     | '/upload-prescription'
     | '/conditions/$slug'
+    | '/doctor/join'
     | '/doctors/$slug'
     | '/email/unsubscribe'
     | '/product/$id'
@@ -1652,6 +1671,7 @@ export interface FileRouteTypes {
     | '/pharmacist/dashboard'
     | '/api/internal/collect-feedback'
     | '/api/public/contact'
+    | '/api/public/doctor-join'
     | '/api/public/health'
     | '/api/public/img'
     | '/api/public/incident-check'
@@ -1809,6 +1829,7 @@ export interface FileRouteTypes {
     | '/admin-upload-inventory'
     | '/upload-prescription'
     | '/conditions/$slug'
+    | '/doctor/join'
     | '/doctors/$slug'
     | '/email/unsubscribe'
     | '/product/$id'
@@ -1816,6 +1837,7 @@ export interface FileRouteTypes {
     | '/pharmacist/dashboard'
     | '/api/internal/collect-feedback'
     | '/api/public/contact'
+    | '/api/public/doctor-join'
     | '/api/public/health'
     | '/api/public/img'
     | '/api/public/incident-check'
@@ -1974,6 +1996,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin-upload-inventory'
     | '/_authenticated/upload-prescription'
     | '/conditions/$slug'
+    | '/doctor/join'
     | '/doctors/$slug'
     | '/email/unsubscribe'
     | '/product/$id'
@@ -1981,6 +2004,7 @@ export interface FileRouteTypes {
     | '/_authenticated/pharmacist/dashboard'
     | '/api/internal/collect-feedback'
     | '/api/public/contact'
+    | '/api/public/doctor-join'
     | '/api/public/health'
     | '/api/public/img'
     | '/api/public/incident-check'
@@ -2125,11 +2149,13 @@ export interface RootRouteChildren {
   TrustRoute: typeof TrustRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   YemenDebugRoute: typeof YemenDebugRoute
+  DoctorJoinRoute: typeof DoctorJoinRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ProductIdRoute: typeof ProductIdRoute
   TestFeaturesRoute: typeof TestFeaturesRoute
   ApiInternalCollectFeedbackRoute: typeof ApiInternalCollectFeedbackRoute
   ApiPublicContactRoute: typeof ApiPublicContactRoute
+  ApiPublicDoctorJoinRoute: typeof ApiPublicDoctorJoinRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRouteWithChildren
   ApiPublicImgRoute: typeof ApiPublicImgRoute
   ApiPublicIncidentCheckRoute: typeof ApiPublicIncidentCheckRoute
@@ -2811,6 +2837,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DoctorsSlugRouteImport
       parentRoute: typeof DoctorsRoute
     }
+    '/doctor/join': {
+      id: '/doctor/join'
+      path: '/doctor/join'
+      fullPath: '/doctor/join'
+      preLoaderRoute: typeof DoctorJoinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/conditions/$slug': {
       id: '/conditions/$slug'
       path: '/$slug'
@@ -2963,6 +2996,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/health'
       fullPath: '/api/public/health'
       preLoaderRoute: typeof ApiPublicHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/doctor-join': {
+      id: '/api/public/doctor-join'
+      path: '/api/public/doctor-join'
+      fullPath: '/api/public/doctor-join'
+      preLoaderRoute: typeof ApiPublicDoctorJoinRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/contact': {
@@ -3497,11 +3537,13 @@ const rootRouteChildren: RootRouteChildren = {
   TrustRoute: TrustRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   YemenDebugRoute: YemenDebugRoute,
+  DoctorJoinRoute: DoctorJoinRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ProductIdRoute: ProductIdRoute,
   TestFeaturesRoute: TestFeaturesRoute,
   ApiInternalCollectFeedbackRoute: ApiInternalCollectFeedbackRoute,
   ApiPublicContactRoute: ApiPublicContactRoute,
+  ApiPublicDoctorJoinRoute: ApiPublicDoctorJoinRoute,
   ApiPublicHealthRoute: ApiPublicHealthRouteWithChildren,
   ApiPublicImgRoute: ApiPublicImgRoute,
   ApiPublicIncidentCheckRoute: ApiPublicIncidentCheckRoute,

@@ -1,76 +1,55 @@
-## Phase 6.6 — Visitor Experience Activation
+## Phoenix Quick Execution — High Impact, Low Credit
 
-### 0. Fix the blocking build error first
+Scope: additive UX/discovery improvements only. No DB rewrites, no changes to existing Phoenix foundations.
 
-`src/routes/doctors.$slug.tsx` and `src/routes/doctors.tsx` import from `src/modules/doctors/server/doctors.functions.ts`. The path segment `/server/` is blocked by TanStack Start's client-side import protection, so the build fails even though the file only exports `createServerFn` RPCs (which are client-safe).
+### 1. Doctor Join Flow (public)
+- New route `src/routes/doctor.join.tsx` (public, mobile-first, Arabic-first).
+- Reusable form in `src/modules/doctors/components/DoctorJoinForm.tsx` using `react-hook-form` + `zod`.
+- Fields: name, specialty (select from existing catalog), city, clinic/hospital, phone, working hours, profile image upload, notes.
+- Server function `submitDoctorJoinRequest` in `src/modules/doctors/api/doctor-join.functions.ts` → writes to existing `contact_messages` (or nearest existing intake table) tagged `type = 'doctor_join'` with payload JSON. No schema changes.
+- Image upload → existing public bucket if available; else base64 preview only + note in payload (avoids new bucket policies).
+- Success screen with "verification pending" state; architecture ready for future admin review UI.
 
-Fix: move the file out of `/server/` (client-safe module path per project conventions) and update the two route imports.
+### 2. Visitor Experience
+- `src/modules/visitor/components/PlatformUpdates.tsx` — static config-driven "Latest Updates" list (Arabic), lazy-loaded on homepage.
+- `src/modules/visitor/components/NotificationOptIn.tsx` — soft opt-in card (medicines / health tips / offers checkboxes). Stores preferences in `localStorage` + posts to existing analytics ingest route. Does NOT call `Notification.requestPermission()`.
 
-- Move `src/modules/doctors/server/doctors.functions.ts` → `src/modules/doctors/api/doctors.functions.ts`
-- Update imports in `src/routes/doctors.tsx` and `src/routes/doctors.$slug.tsx`
-- Remove the now-empty `src/modules/doctors/server/` directory
+### 3. Arabic Medicine Normalization
+- Extend `src/modules/catalog/domain/arabicNormalize.ts` (or create if missing) with:
+  - transliteration map (vitamin/فيتامين/فتمين → `vitamin`)
+  - common misspellings & Latin↔Arabic aliases
+  - `normalizeMedicineQuery(input)` returning canonical tokens.
+- Wire into existing `UnifiedSearch` medicine branch — pure client transform, no DB changes.
 
-No behavior change; server functions still run on the server via the RPC bridge.
+### 4. Homepage Sections
+- Update `src/routes/index.tsx` with four clear cards (lazy-loaded):
+  1. ابحث عن دواء (→ `/search?type=medicine`)
+  2. ابحث عن طبيب (→ `/doctors`)
+  3. تثقيف صحي (→ `/sahtak`)
+  4. شبكة الصيدليات — قريباً (placeholder card).
+- Keep existing sections; add above/interleave without removal.
 
-### 1. Public homepage rebuild (`src/routes/index.tsx`)
+### 5. Performance
+- `React.lazy` + `Suspense` for all new homepage sections and `NotificationOptIn`.
+- No admin imports on public routes — verified by grep of `src/routes/index.tsx` and `/doctor/join`.
+- Images: `loading="lazy"`, `decoding="async"`.
 
-Arabic-first, mobile-first, healthcare-focused landing page composed from lazy sections:
+### Deliverable
+Single short report at `docs/engineering/reports/PHOENIX-QUICK-EXECUTION.md` covering: files added, routes, normalization coverage, no-DB-change confirmation.
 
-- `HeroHealthSearch` — RTL hero with a single search bar (uses the unified search component below), quick chips (أدوية / أطباء / محتوى صحي).
-- `MainServices` — grid of core services (استشارة، حجز موعد، رفع روشتة، دليل الأدوية).
-- `DoctorDiscoveryEntry` — teaser + CTA to `/doctors` (shows 3–4 featured doctors via existing `searchDoctorsPublic` limit=4).
-- `MedicineDiscoveryEntry` — CTA to catalog/search (no new backend calls; static preview cards).
-- `HealthEducationPreview` — 3 static cards → `/sahtak`.
-- `LatestUpdates` — renders the new `WhatsNew` component.
+### Files (new)
+- `src/routes/doctor.join.tsx`
+- `src/modules/doctors/components/DoctorJoinForm.tsx`
+- `src/modules/doctors/api/doctor-join.functions.ts`
+- `src/modules/visitor/components/PlatformUpdates.tsx`
+- `src/modules/visitor/components/NotificationOptIn.tsx`
+- `src/modules/catalog/domain/arabicNormalize.ts` (if absent)
+- `docs/engineering/reports/PHOENIX-QUICK-EXECUTION.md`
 
-All sections in `src/modules/visitor/components/`, code-split via `React.lazy` + `Suspense` where meaningful. Per-route `head()` metadata (Arabic title/description, og:*, twitter:card).
+### Files (modified, additive only)
+- `src/routes/index.tsx` — add 4-section grid + lazy sections
+- `src/modules/visitor/components/UnifiedSearch.tsx` — call medicine normalizer
 
-### 2. Unified public search — `src/modules/visitor/components/UnifiedSearch.tsx`
-
-Client component with:
-- Single input, RTL, Arabic normalization via existing `src/modules/doctors/domain/arabicNormalize.ts`.
-- Category tabs: أدوية / أطباء / محتوى.
-- Debounced query; doctors tab calls existing `searchDoctorsPublic`. Medicines + content tabs render "قريباً" placeholders (no schema changes).
-- Keyboard + ARIA, mobile sheet on small screens.
-
-### 3. "What's New" — `src/modules/visitor/components/WhatsNew.tsx`
-
-Static, config-driven list from `src/modules/visitor/data/whats-new.ts` (title, date, href, tag). No DB. Renders as horizontal snap carousel on mobile, grid on desktop.
-
-### 4. Visitor analytics foundation — `src/modules/visitor/analytics/`
-
-- `track.ts` — anonymous event helper: `trackEvent(name, props?)`.
-- Buffers events in `sessionStorage`, flushes on `visibilitychange` / `beforeunload` via `navigator.sendBeacon` to a *new* server route `src/routes/api/public/analytics/ingest.ts` (accepts POST, validates with Zod, and for now just logs — no DB writes, no PII, respects `sendBeacon`).
-- Auto-track: `page_view`, `search_submitted`, `cta_clicked`. No cookies, no identifiers, hashed session-scoped id only.
-
-### 5. Notification permission preparation — `src/modules/visitor/notifications/`
-
-- `useNotificationNudge.ts` — after N meaningful engagements (e.g. 2 searches or 45s dwell) shows a soft in-page banner offering to enable notifications. Never calls `Notification.requestPermission()` automatically; only on explicit click. Stores dismissal in `localStorage`.
-- `NotificationNudge.tsx` — dismissible RTL banner mounted on homepage.
-
-### 6. Performance
-
-- `React.lazy` for below-the-fold homepage sections (`MainServices`, `DoctorDiscoveryEntry`, `MedicineDiscoveryEntry`, `HealthEducationPreview`, `LatestUpdates`, `WhatsNew`, `NotificationNudge`).
-- Preload LCP hero image via route `head().links` (`rel=preload`, `as=image`, `fetchpriority=high`) using an optimized asset in `src/assets/`.
-- All `<img>` below the fold get `loading="lazy"` and `decoding="async"`.
-- Audit the current index route for heavy top-level imports; move admin/pharmacy-only client bundles out of the public homepage import graph.
-
-### 7. Report
-
-`docs/engineering/reports/PHOENIX-P6.6-visitor-experience.md` with:
-- Files changed (list)
-- Build size delta (before/after `bun run build:dev`)
-- Security verification (no new tables, no RLS/auth changes, analytics endpoint is anonymous + rate-note)
-- Screenshots list (references to captures under `/tmp/browser/p6.6/`)
-
-### Out of scope (per directive)
-
-No migrations, no RLS, no auth, no changes to inventory/doctors/catalog domain logic.
-
-### Files touched (summary)
-
-- Move: `src/modules/doctors/server/doctors.functions.ts` → `src/modules/doctors/api/doctors.functions.ts` (+ update 2 route imports)
-- New: `src/modules/visitor/**` (components, analytics, notifications, data)
-- New: `src/routes/api/public/analytics/ingest.ts`
-- Rewrite: `src/routes/index.tsx`
-- New: `docs/engineering/reports/PHOENIX-P6.6-visitor-experience.md`
+### Non-goals
+- No migrations, no RLS changes, no new buckets unless one already exists.
+- No changes to auth, admin, or existing modules' business logic.
