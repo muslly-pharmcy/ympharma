@@ -59,6 +59,18 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
           return Response.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
+        // Require owner/admin role — prevents self-registered accounts from abusing
+        // the verified sending domain to send phishing emails to arbitrary recipients.
+        const { data: roleRow, error: roleError } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .in('role', ['owner', 'admin'])
+          .maybeSingle()
+        if (roleError || !roleRow) {
+          return Response.json({ error: 'Forbidden' }, { status: 403 })
+        }
+
         // Parse request body
         let templateName: string
         let recipientEmail: string
