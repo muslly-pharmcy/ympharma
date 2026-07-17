@@ -31,8 +31,8 @@ export class CFOAgent extends BaseAgent {
     await supabaseAdmin.from("ai_business_insights").insert({
       insight_type: "FINANCIAL",
       summary: `الربح التقديري خلال 30 يوم: ${profit.toFixed(2)}`,
-      recommendation: { action: recommendation, profit },
-      metrics: { sales, finance },
+      recommendation: { action: recommendation, profit } as never,
+      metrics: { sales, finance } as never,
       confidence: 0.9,
       agent_name: this.name,
     });

@@ -38,8 +38,8 @@ export class BiSalesAgent extends BaseAgent {
         insights.map((i) => ({
           insight_type: i.type,
           summary: i.summary,
-          recommendation: i.recommendation,
-          metrics: { sales, inventory: inv },
+          recommendation: i.recommendation as never,
+          metrics: { sales, inventory: inv } as never,
           confidence: i.confidence,
           agent_name: this.name,
         })),
