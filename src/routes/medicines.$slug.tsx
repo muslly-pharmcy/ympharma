@@ -64,7 +64,7 @@ function MedicinePage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("drug_interactions")
-        .select("id, drug_a_id, drug_b_id, severity, effect_ar, recommendation_ar")
+        .select("id, drug_a_id, drug_b_id, severity, clinical_effect_ar, recommendation_ar")
         .or(`drug_a_id.eq.${medicine!.id},drug_b_id.eq.${medicine!.id}`)
         .limit(20);
       if (error) throw error;
@@ -149,7 +149,7 @@ function MedicinePage() {
                       {i.severity}
                     </span>
                   </div>
-                  <p className="text-muted-foreground">{i.effect_ar}</p>
+                  <p className="text-muted-foreground">{i.clinical_effect_ar}</p>
                   {i.recommendation_ar && (
                     <p className="mt-1 text-xs font-medium">توصية: {i.recommendation_ar}</p>
                   )}
