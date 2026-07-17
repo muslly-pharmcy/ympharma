@@ -2750,6 +2750,57 @@ export type Database = {
           },
         ]
       }
+      drug_interactions: {
+        Row: {
+          clinical_effect_ar: string | null
+          created_at: string
+          drug_a_id: string
+          drug_b_id: string
+          evidence_source: string | null
+          id: string
+          mechanism: string | null
+          recommendation_ar: string | null
+          severity: string
+        }
+        Insert: {
+          clinical_effect_ar?: string | null
+          created_at?: string
+          drug_a_id: string
+          drug_b_id: string
+          evidence_source?: string | null
+          id?: string
+          mechanism?: string | null
+          recommendation_ar?: string | null
+          severity: string
+        }
+        Update: {
+          clinical_effect_ar?: string | null
+          created_at?: string
+          drug_a_id?: string
+          drug_b_id?: string
+          evidence_source?: string | null
+          id?: string
+          mechanism?: string | null
+          recommendation_ar?: string | null
+          severity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drug_interactions_drug_a_id_fkey"
+            columns: ["drug_a_id"]
+            isOneToOne: false
+            referencedRelation: "medical_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drug_interactions_drug_b_id_fkey"
+            columns: ["drug_b_id"]
+            isOneToOne: false
+            referencedRelation: "medical_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_delivery_logs: {
         Row: {
           created_at: string
@@ -5502,6 +5553,60 @@ export type Database = {
         }
         Relationships: []
       }
+      medical_entities: {
+        Row: {
+          atc_code: string | null
+          created_at: string
+          description_ar: string | null
+          description_en: string | null
+          embedding: string | null
+          entity_type: string
+          icd_code: string | null
+          id: string
+          metadata: Json
+          name_ar: string
+          name_en: string | null
+          severity: string | null
+          slug: string
+          synonyms: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          atc_code?: string | null
+          created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
+          embedding?: string | null
+          entity_type: string
+          icd_code?: string | null
+          id?: string
+          metadata?: Json
+          name_ar: string
+          name_en?: string | null
+          severity?: string | null
+          slug: string
+          synonyms?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          atc_code?: string | null
+          created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
+          embedding?: string | null
+          entity_type?: string
+          icd_code?: string | null
+          id?: string
+          metadata?: Json
+          name_ar?: string
+          name_en?: string | null
+          severity?: string | null
+          slug?: string
+          synonyms?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       medical_posts: {
         Row: {
           ai_generated: boolean
@@ -5561,6 +5666,54 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      medical_relationships: {
+        Row: {
+          confidence: number
+          created_at: string
+          evidence_source: string | null
+          id: string
+          metadata: Json
+          relationship_type: string
+          source_id: string
+          target_id: string
+        }
+        Insert: {
+          confidence?: number
+          created_at?: string
+          evidence_source?: string | null
+          id?: string
+          metadata?: Json
+          relationship_type: string
+          source_id: string
+          target_id: string
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          evidence_source?: string | null
+          id?: string
+          metadata?: Json
+          relationship_type?: string
+          source_id?: string
+          target_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medical_relationships_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "medical_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medical_relationships_target_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "medical_entities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
@@ -6971,6 +7124,51 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_ranking_scores: {
+        Row: {
+          computed_at: string
+          factors: Json
+          id: string
+          level: string
+          provider_id: string
+          provider_kind: string
+          rating: number | null
+          response_rate: number | null
+          reviews_count: number | null
+          score: number
+          verified: boolean | null
+          years_experience: number | null
+        }
+        Insert: {
+          computed_at?: string
+          factors?: Json
+          id?: string
+          level?: string
+          provider_id: string
+          provider_kind: string
+          rating?: number | null
+          response_rate?: number | null
+          reviews_count?: number | null
+          score?: number
+          verified?: boolean | null
+          years_experience?: number | null
+        }
+        Update: {
+          computed_at?: string
+          factors?: Json
+          id?: string
+          level?: string
+          provider_id?: string
+          provider_kind?: string
+          rating?: number | null
+          response_rate?: number | null
+          reviews_count?: number | null
+          score?: number
+          verified?: boolean | null
+          years_experience?: number | null
+        }
+        Relationships: []
+      }
       purchase_recommendations: {
         Row: {
           created_at: string
@@ -7830,6 +8028,79 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      telemedicine_sessions: {
+        Row: {
+          appointment_id: string | null
+          created_at: string
+          doctor_id: string
+          ended_at: string | null
+          id: string
+          join_token: string
+          metadata: Json
+          notes: string | null
+          patient_id: string
+          scheduled_at: string | null
+          session_type: string
+          started_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          created_at?: string
+          doctor_id: string
+          ended_at?: string | null
+          id?: string
+          join_token?: string
+          metadata?: Json
+          notes?: string | null
+          patient_id: string
+          scheduled_at?: string | null
+          session_type?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string | null
+          created_at?: string
+          doctor_id?: string
+          ended_at?: string | null
+          id?: string
+          join_token?: string
+          metadata?: Json
+          notes?: string | null
+          patient_id?: string
+          scheduled_at?: string | null
+          session_type?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "telemedicine_sessions_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "hc_appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "telemedicine_sessions_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "telemedicine_sessions_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "hc_patients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tracking_lookups: {
         Row: {
