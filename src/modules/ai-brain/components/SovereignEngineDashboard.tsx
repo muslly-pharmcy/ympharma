@@ -100,7 +100,11 @@ export const SovereignEngineDashboard: React.FC = () => {
   ).length;
 
   return (
-    <div className="max-w-7xl mx-auto p-6 bg-slate-950 text-slate-100 rounded-3xl border border-slate-900 shadow-2xl font-sans" dir="rtl">
+    <div className="max-w-7xl mx-auto p-6 bg-slate-950 text-slate-100 rounded-3xl border border-slate-900 shadow-2xl font-sans relative overflow-hidden" dir="rtl">
+      {/* Neon background glow layers */}
+      <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -left-24 w-96 h-96 bg-fuchsia-500/10 rounded-full blur-3xl" />
+
       {/* Injected keyframes for the glowing neural pulse */}
       <style>{`
         @keyframes sovereign-glow {
