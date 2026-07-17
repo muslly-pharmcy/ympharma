@@ -2142,6 +2142,44 @@ export type Database = {
           },
         ]
       }
+      demand_forecasts: {
+        Row: {
+          computed_at: string
+          confidence: number
+          expected_units: number
+          horizon_days: number
+          id: string
+          method: string
+          product_id: string
+        }
+        Insert: {
+          computed_at?: string
+          confidence?: number
+          expected_units?: number
+          horizon_days: number
+          id?: string
+          method?: string
+          product_id: string
+        }
+        Update: {
+          computed_at?: string
+          confidence?: number
+          expected_units?: number
+          horizon_days?: number
+          id?: string
+          method?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demand_forecasts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       discount_codes: {
         Row: {
           active: boolean
@@ -4185,6 +4223,56 @@ export type Database = {
           status?: string
         }
         Relationships: []
+      }
+      inventory_health_scores: {
+        Row: {
+          availability_pct: number
+          computed_at: string
+          current_qty: number
+          days_of_cover: number | null
+          expiry_risk: number
+          id: string
+          product_id: string
+          recommendation: string | null
+          score: number
+          status: string
+          velocity_daily: number
+        }
+        Insert: {
+          availability_pct?: number
+          computed_at?: string
+          current_qty?: number
+          days_of_cover?: number | null
+          expiry_risk?: number
+          id?: string
+          product_id: string
+          recommendation?: string | null
+          score: number
+          status: string
+          velocity_daily?: number
+        }
+        Update: {
+          availability_pct?: number
+          computed_at?: string
+          current_qty?: number
+          days_of_cover?: number | null
+          expiry_risk?: number
+          id?: string
+          product_id?: string
+          recommendation?: string | null
+          score?: number
+          status?: string
+          velocity_daily?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_health_scores_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       inventory_manual_adjustments: {
         Row: {
@@ -6335,6 +6423,60 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      purchase_recommendations: {
+        Row: {
+          created_at: string
+          expected_stockout_at: string | null
+          id: string
+          preferred_supplier_id: string | null
+          product_id: string
+          reason: string
+          recommended_qty: number
+          resolved_at: string | null
+          status: string
+          urgency: string
+        }
+        Insert: {
+          created_at?: string
+          expected_stockout_at?: string | null
+          id?: string
+          preferred_supplier_id?: string | null
+          product_id: string
+          reason: string
+          recommended_qty: number
+          resolved_at?: string | null
+          status?: string
+          urgency: string
+        }
+        Update: {
+          created_at?: string
+          expected_stockout_at?: string | null
+          id?: string
+          preferred_supplier_id?: string | null
+          product_id?: string
+          reason?: string
+          recommended_qty?: number
+          resolved_at?: string | null
+          status?: string
+          urgency?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_recommendations_preferred_supplier_id_fkey"
+            columns: ["preferred_supplier_id"]
+            isOneToOne: false
+            referencedRelation: "sup_suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_recommendations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rate_limit_buckets: {
         Row: {
@@ -8549,6 +8691,13 @@ export type Database = {
           _payload: Json
         }
         Returns: undefined
+      }
+      inv_intel_snapshot: {
+        Args: never
+        Returns: {
+          products_scored: number
+          recommendations_created: number
+        }[]
       }
       inv_receive_stock: {
         Args: {
