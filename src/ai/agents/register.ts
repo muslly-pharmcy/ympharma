@@ -11,6 +11,7 @@ import { SupportAgent } from "./customer/support-agent";
 import { SalesAgent } from "./business/sales-agent";
 import { MarketingAgent } from "./business/marketing-agent";
 import { GuardianAgent } from "./security/guardian-agent";
+import { BrainAgent } from "./brain/brain-agent";
 
 /**
  * Central Agent Universe registration (Phase 3 + Phase 11).
@@ -29,6 +30,7 @@ export function registerAllAgents(registry: AgentRegistry) {
   registry.register(new SalesAgent());
   registry.register(new MarketingAgent());
   registry.register(new GuardianAgent());
+  registry.register(new BrainAgent());
 }
 
 export const ALL_AGENT_NAMES = [
@@ -44,4 +46,5 @@ export const ALL_AGENT_NAMES = [
   "sales_agent",
   "marketing_agent",
   "guardian_agent",
+  "brain_agent",
 ] as const;
