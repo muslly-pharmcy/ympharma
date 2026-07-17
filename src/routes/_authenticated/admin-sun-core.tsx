@@ -6,6 +6,7 @@ import {
   sunListDecisions,
   sunStats,
 } from "@/ai/sun-core/sun.functions";
+import { sunBridgeStats } from "@/lib/sun-bridge.functions";
 
 export const Route = createFileRoute("/_authenticated/admin-sun-core")({
   head: () => ({
@@ -28,6 +29,7 @@ function SunCorePage() {
   const listDecisions = useServerFn(sunListDecisions);
   const listAgents = useServerFn(sunListAgents);
   const stats = useServerFn(sunStats);
+  const bridgeStats = useServerFn(sunBridgeStats);
 
   const decisionsQ = useSuspenseQuery({
     queryKey: ["sun", "decisions"],
@@ -42,6 +44,11 @@ function SunCorePage() {
   const statsQ = useSuspenseQuery({
     queryKey: ["sun", "stats"],
     queryFn: () => stats(),
+    refetchInterval: 15_000,
+  });
+  const bridgeQ = useSuspenseQuery({
+    queryKey: ["sun", "bridge"],
+    queryFn: () => bridgeStats(),
     refetchInterval: 15_000,
   });
 
@@ -63,7 +70,58 @@ function SunCorePage() {
         <StatCard label="عدد الوكلاء" value={agentsQ.data.length} accent="sky" />
       </section>
 
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard label="Phoenix Bridge Lag" value={bridgeQ.data.bridgeLag} accent="amber" />
+        <StatCard label="Sun Queue Pending" value={bridgeQ.data.sunPending} accent="emerald" />
+        <StatCard label="Sun Failed" value={bridgeQ.data.sunFailed} accent="sky" />
+        <StatCard
+          label="آخر قرار"
+          value={
+            bridgeQ.data.lastDecisionAt
+              ? Math.max(
+                  0,
+                  Math.round(
+                    (Date.now() - new Date(bridgeQ.data.lastDecisionAt).getTime()) / 1000,
+                  ),
+                )
+              : 0
+          }
+          accent="emerald"
+        />
+      </section>
+
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Panel title="🌉 Phoenix ↔ Sun Bridge (v1.2)">
+          <div className="text-sm text-emerald-100/90 space-y-2">
+            <div>
+              آخر قرار من الوكيل:{" "}
+              <span className="text-amber-300">
+                {bridgeQ.data.lastDecisionAgent ?? "—"}
+              </span>{" "}
+              {bridgeQ.data.lastDecisionAt
+                ? `(${new Date(bridgeQ.data.lastDecisionAt).toLocaleString("ar")})`
+                : ""}
+            </div>
+            <div>
+              قرارات آخر 24 ساعة (per-agent):
+              <ul className="mt-1 space-y-1">
+                {Object.entries(bridgeQ.data.perAgent24h).length === 0 && (
+                  <li className="text-emerald-200/60">لا توجد قرارات بعد.</li>
+                )}
+                {Object.entries(bridgeQ.data.perAgent24h).map(([k, v]) => (
+                  <li key={k} className="flex justify-between border-b border-white/5 py-1">
+                    <span>{k}</span>
+                    <span className="text-amber-300">{v}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="text-xs text-emerald-200/60 pt-2">
+              يعمل عبر <code>POST /api/public/ai/sun-tick</code> كل دقيقة (pg_cron).
+            </div>
+          </div>
+        </Panel>
+
         <Panel title="🤖 الوكلاء المسجَّلون">
           <div className="space-y-2">
             {agentsQ.data.map((a) => (
