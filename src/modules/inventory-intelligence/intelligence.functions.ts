@@ -17,7 +17,7 @@ const ListInput = z.object({ limit: z.number().int().min(1).max(200).default(50)
 
 export const listHealthScores = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) => ListInput.parse(raw ?? {}))
+  .validator((raw: unknown) => ListInput.parse(raw ?? {}))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { data: rows, error } = await context.supabase
