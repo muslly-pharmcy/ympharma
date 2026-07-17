@@ -1,14 +1,17 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-export interface InsightRow {
+export interface InsightSummary {
   id: string;
   insight_type: string;
   summary: string;
-  recommendation: Record<string, unknown>;
   confidence: number;
   agent_name: string | null;
   created_at: string;
+}
+
+export interface ExecutiveSummary extends InsightSummary {
+  priorities: string[];
 }
 
 async function ensureAdmin(ctx: {
@@ -26,8 +29,10 @@ async function ensureAdmin(ctx: {
 export const businessInsights = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<{
-    executive: InsightRow | null;
-    byType: Record<string, InsightRow[]>;
+    executive: ExecutiveSummary | null;
+    financial: InsightSummary[];
+    sales: InsightSummary[];
+    market: InsightSummary[];
   }> => {
     await ensureAdmin(context);
     const { supabaseAdmin } = await import(
@@ -41,24 +46,39 @@ export const businessInsights = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(80);
 
-    const rows = ((data ?? []) as InsightRow[]).map((r) => ({
+    const rows = (data ?? []) as Array<{
+      id: string;
+      insight_type: string;
+      summary: string;
+      recommendation: unknown;
+      confidence: number;
+      agent_name: string | null;
+      created_at: string;
+    }>;
+
+    const toSummary = (r: (typeof rows)[number]): InsightSummary => ({
       id: r.id,
       insight_type: r.insight_type,
       summary: r.summary,
-      recommendation: (r.recommendation ?? {}) as Record<string, unknown>,
       confidence: Number(r.confidence ?? 0),
       agent_name: r.agent_name,
       created_at: r.created_at,
-    }));
+    });
 
-    const executive = rows.find((r) => r.insight_type === "EXECUTIVE") ?? null;
-    const byType: Record<string, InsightRow[]> = {
-      FINANCIAL: [],
-      SALES: [],
-      MARKET: [],
-    };
-    for (const r of rows) {
-      if (byType[r.insight_type]) byType[r.insight_type].push(r);
+    const execRow = rows.find((r) => r.insight_type === "EXECUTIVE") ?? null;
+    let executive: ExecutiveSummary | null = null;
+    if (execRow) {
+      const rec = (execRow.recommendation ?? {}) as { priorities?: unknown };
+      const priorities = Array.isArray(rec.priorities)
+        ? rec.priorities.filter((p): p is string => typeof p === "string")
+        : [];
+      executive = { ...toSummary(execRow), priorities };
     }
-    return { executive, byType };
+
+    return {
+      executive,
+      financial: rows.filter((r) => r.insight_type === "FINANCIAL").map(toSummary),
+      sales: rows.filter((r) => r.insight_type === "SALES").map(toSummary),
+      market: rows.filter((r) => r.insight_type === "MARKET").map(toSummary),
+    };
   });

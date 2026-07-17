@@ -36,7 +36,14 @@ export const Route = createFileRoute("/api/public/security/sweep")({
         const errCount = errs.data?.length ?? 0;
         const identCount = ident.data?.length ?? 0;
 
-        const inserts: Array<Record<string, unknown>> = [];
+        const inserts: Array<{
+          event_type: string;
+          severity: string;
+          source: string;
+          details: Record<string, unknown>;
+          risk_score: number;
+          action_taken: string;
+        }> = [];
         const engine = new SecurityEngine();
 
         if (errCount > 50) {

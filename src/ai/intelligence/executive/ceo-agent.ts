@@ -29,8 +29,8 @@ export class CEOAgent extends BaseAgent {
     await supabaseAdmin.from("ai_business_insights").insert({
       insight_type: "EXECUTIVE",
       summary: `تم تحليل ${data?.length ?? 0} مؤشر خلال 24 ساعة.`,
-      recommendation: { priorities },
-      metrics: { total: data?.length ?? 0 },
+      recommendation: { priorities } as never,
+      metrics: { total: data?.length ?? 0 } as never,
       confidence: 0.95,
       agent_name: this.name,
     });

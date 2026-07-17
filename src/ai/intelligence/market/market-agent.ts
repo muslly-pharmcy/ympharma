@@ -30,8 +30,8 @@ export class MarketAgent extends BaseAgent {
       recommendation: {
         action: opportunities > 0 ? "PROMOTE_EXPIRING" : "NO_ACTION",
         channel: "whatsapp",
-      },
-      metrics: { opportunities },
+      } as never,
+      metrics: { opportunities } as never,
       confidence: 0.8,
       agent_name: this.name,
     });
