@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as YemenDebugRouteImport } from './routes/yemen-debug'
+import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TrustRouteImport } from './routes/trust'
 import { Route as TrackRouteImport } from './routes/track'
@@ -211,6 +212,11 @@ import { Route as ApiPublicHooksAgentsBiRouteImport } from './routes/api/public/
 const YemenDebugRoute = YemenDebugRouteImport.update({
   id: '/yemen-debug',
   path: '/yemen-debug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
@@ -1367,6 +1373,7 @@ export interface FileRoutesByFullPath {
   '/track': typeof TrackRoute
   '/trust': typeof TrustRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/welcome': typeof WelcomeRoute
   '/yemen-debug': typeof YemenDebugRoute
   '/admin-agent-runs': typeof AuthenticatedAdminAgentRunsRoute
   '/admin-agent-universe': typeof AuthenticatedAdminAgentUniverseRoute
@@ -1566,6 +1573,7 @@ export interface FileRoutesByTo {
   '/track': typeof TrackRoute
   '/trust': typeof TrustRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/welcome': typeof WelcomeRoute
   '/yemen-debug': typeof YemenDebugRoute
   '/admin-agent-runs': typeof AuthenticatedAdminAgentRunsRoute
   '/admin-agent-universe': typeof AuthenticatedAdminAgentUniverseRoute
@@ -1767,6 +1775,7 @@ export interface FileRoutesById {
   '/track': typeof TrackRoute
   '/trust': typeof TrustRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/welcome': typeof WelcomeRoute
   '/yemen-debug': typeof YemenDebugRoute
   '/_authenticated/admin-agent-runs': typeof AuthenticatedAdminAgentRunsRoute
   '/_authenticated/admin-agent-universe': typeof AuthenticatedAdminAgentUniverseRoute
@@ -1968,6 +1977,7 @@ export interface FileRouteTypes {
     | '/track'
     | '/trust'
     | '/unsubscribe'
+    | '/welcome'
     | '/yemen-debug'
     | '/admin-agent-runs'
     | '/admin-agent-universe'
@@ -2167,6 +2177,7 @@ export interface FileRouteTypes {
     | '/track'
     | '/trust'
     | '/unsubscribe'
+    | '/welcome'
     | '/yemen-debug'
     | '/admin-agent-runs'
     | '/admin-agent-universe'
@@ -2367,6 +2378,7 @@ export interface FileRouteTypes {
     | '/track'
     | '/trust'
     | '/unsubscribe'
+    | '/welcome'
     | '/yemen-debug'
     | '/_authenticated/admin-agent-runs'
     | '/_authenticated/admin-agent-universe'
@@ -2568,6 +2580,7 @@ export interface RootRouteChildren {
   TrackRoute: typeof TrackRoute
   TrustRoute: typeof TrustRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
+  WelcomeRoute: typeof WelcomeRoute
   YemenDebugRoute: typeof YemenDebugRoute
   DoctorJoinRoute: typeof DoctorJoinRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
@@ -2651,6 +2664,13 @@ declare module '@tanstack/react-router' {
       path: '/yemen-debug'
       fullPath: '/yemen-debug'
       preLoaderRoute: typeof YemenDebugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/unsubscribe': {
@@ -4256,6 +4276,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrackRoute: TrackRoute,
   TrustRoute: TrustRoute,
   UnsubscribeRoute: UnsubscribeRoute,
+  WelcomeRoute: WelcomeRoute,
   YemenDebugRoute: YemenDebugRoute,
   DoctorJoinRoute: DoctorJoinRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
