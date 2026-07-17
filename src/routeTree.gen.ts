@@ -129,6 +129,7 @@ import { Route as AuthenticatedAdminBusinessIntelRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminAuditRouteImport } from './routes/_authenticated/admin-audit'
 import { Route as AuthenticatedAdminAlertSettingsRouteImport } from './routes/_authenticated/admin-alert-settings'
 import { Route as AuthenticatedAdminAiCopilotRouteImport } from './routes/_authenticated/admin-ai-copilot'
+import { Route as AuthenticatedAdminAiCommandRouteImport } from './routes/_authenticated/admin-ai-command'
 import { Route as AuthenticatedAdminAiBrainRouteImport } from './routes/_authenticated/admin-ai-brain'
 import { Route as AuthenticatedAdminAgentUniverseRouteImport } from './routes/_authenticated/admin-agent-universe'
 import { Route as AuthenticatedAdminAgentRunsRouteImport } from './routes/_authenticated/admin-agent-runs'
@@ -197,6 +198,7 @@ import { Route as ApiPublicAnalyticsIngestRouteImport } from './routes/api/publi
 import { Route as ApiPublicAiWorldHealthRouteImport } from './routes/api/public/ai/world-health'
 import { Route as ApiPublicAiSunTickRouteImport } from './routes/api/public/ai/sun-tick'
 import { Route as ApiPublicAiRankingTickRouteImport } from './routes/api/public/ai/ranking-tick'
+import { Route as ApiPublicAiOrchestratorTickRouteImport } from './routes/api/public/ai/orchestrator-tick'
 import { Route as ApiPublicAiContentTickRouteImport } from './routes/api/public/ai/content-tick'
 import { Route as ApiPublicAiBusinessTickRouteImport } from './routes/api/public/ai/business-tick'
 import { Route as AuthenticatedPharmacistPrescriptionReviewIdRouteImport } from './routes/_authenticated/pharmacist/prescription-review.$id'
@@ -837,6 +839,12 @@ const AuthenticatedAdminAiCopilotRoute =
     path: '/admin-ai-copilot',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminAiCommandRoute =
+  AuthenticatedAdminAiCommandRouteImport.update({
+    id: '/admin-ai-command',
+    path: '/admin-ai-command',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminAiBrainRoute =
   AuthenticatedAdminAiBrainRouteImport.update({
     id: '/admin-ai-brain',
@@ -1227,6 +1235,12 @@ const ApiPublicAiRankingTickRoute = ApiPublicAiRankingTickRouteImport.update({
   path: '/api/public/ai/ranking-tick',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAiOrchestratorTickRoute =
+  ApiPublicAiOrchestratorTickRouteImport.update({
+    id: '/api/public/ai/orchestrator-tick',
+    path: '/api/public/ai/orchestrator-tick',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicAiContentTickRoute = ApiPublicAiContentTickRouteImport.update({
   id: '/api/public/ai/content-tick',
   path: '/api/public/ai/content-tick',
@@ -1404,6 +1418,7 @@ export interface FileRoutesByFullPath {
   '/admin-agent-runs': typeof AuthenticatedAdminAgentRunsRoute
   '/admin-agent-universe': typeof AuthenticatedAdminAgentUniverseRoute
   '/admin-ai-brain': typeof AuthenticatedAdminAiBrainRoute
+  '/admin-ai-command': typeof AuthenticatedAdminAiCommandRoute
   '/admin-ai-copilot': typeof AuthenticatedAdminAiCopilotRoute
   '/admin-alert-settings': typeof AuthenticatedAdminAlertSettingsRoute
   '/admin-audit': typeof AuthenticatedAdminAuditRoute
@@ -1458,6 +1473,7 @@ export interface FileRoutesByFullPath {
   '/pharmacist/prescription-review/$id': typeof AuthenticatedPharmacistPrescriptionReviewIdRoute
   '/api/public/ai/business-tick': typeof ApiPublicAiBusinessTickRoute
   '/api/public/ai/content-tick': typeof ApiPublicAiContentTickRoute
+  '/api/public/ai/orchestrator-tick': typeof ApiPublicAiOrchestratorTickRoute
   '/api/public/ai/ranking-tick': typeof ApiPublicAiRankingTickRoute
   '/api/public/ai/sun-tick': typeof ApiPublicAiSunTickRoute
   '/api/public/ai/world-health': typeof ApiPublicAiWorldHealthRoute
@@ -1608,6 +1624,7 @@ export interface FileRoutesByTo {
   '/admin-agent-runs': typeof AuthenticatedAdminAgentRunsRoute
   '/admin-agent-universe': typeof AuthenticatedAdminAgentUniverseRoute
   '/admin-ai-brain': typeof AuthenticatedAdminAiBrainRoute
+  '/admin-ai-command': typeof AuthenticatedAdminAiCommandRoute
   '/admin-ai-copilot': typeof AuthenticatedAdminAiCopilotRoute
   '/admin-alert-settings': typeof AuthenticatedAdminAlertSettingsRoute
   '/admin-audit': typeof AuthenticatedAdminAuditRoute
@@ -1662,6 +1679,7 @@ export interface FileRoutesByTo {
   '/pharmacist/prescription-review/$id': typeof AuthenticatedPharmacistPrescriptionReviewIdRoute
   '/api/public/ai/business-tick': typeof ApiPublicAiBusinessTickRoute
   '/api/public/ai/content-tick': typeof ApiPublicAiContentTickRoute
+  '/api/public/ai/orchestrator-tick': typeof ApiPublicAiOrchestratorTickRoute
   '/api/public/ai/ranking-tick': typeof ApiPublicAiRankingTickRoute
   '/api/public/ai/sun-tick': typeof ApiPublicAiSunTickRoute
   '/api/public/ai/world-health': typeof ApiPublicAiWorldHealthRoute
@@ -1814,6 +1832,7 @@ export interface FileRoutesById {
   '/_authenticated/admin-agent-runs': typeof AuthenticatedAdminAgentRunsRoute
   '/_authenticated/admin-agent-universe': typeof AuthenticatedAdminAgentUniverseRoute
   '/_authenticated/admin-ai-brain': typeof AuthenticatedAdminAiBrainRoute
+  '/_authenticated/admin-ai-command': typeof AuthenticatedAdminAiCommandRoute
   '/_authenticated/admin-ai-copilot': typeof AuthenticatedAdminAiCopilotRoute
   '/_authenticated/admin-alert-settings': typeof AuthenticatedAdminAlertSettingsRoute
   '/_authenticated/admin-audit': typeof AuthenticatedAdminAuditRoute
@@ -1868,6 +1887,7 @@ export interface FileRoutesById {
   '/_authenticated/pharmacist/prescription-review/$id': typeof AuthenticatedPharmacistPrescriptionReviewIdRoute
   '/api/public/ai/business-tick': typeof ApiPublicAiBusinessTickRoute
   '/api/public/ai/content-tick': typeof ApiPublicAiContentTickRoute
+  '/api/public/ai/orchestrator-tick': typeof ApiPublicAiOrchestratorTickRoute
   '/api/public/ai/ranking-tick': typeof ApiPublicAiRankingTickRoute
   '/api/public/ai/sun-tick': typeof ApiPublicAiSunTickRoute
   '/api/public/ai/world-health': typeof ApiPublicAiWorldHealthRoute
@@ -2020,6 +2040,7 @@ export interface FileRouteTypes {
     | '/admin-agent-runs'
     | '/admin-agent-universe'
     | '/admin-ai-brain'
+    | '/admin-ai-command'
     | '/admin-ai-copilot'
     | '/admin-alert-settings'
     | '/admin-audit'
@@ -2074,6 +2095,7 @@ export interface FileRouteTypes {
     | '/pharmacist/prescription-review/$id'
     | '/api/public/ai/business-tick'
     | '/api/public/ai/content-tick'
+    | '/api/public/ai/orchestrator-tick'
     | '/api/public/ai/ranking-tick'
     | '/api/public/ai/sun-tick'
     | '/api/public/ai/world-health'
@@ -2224,6 +2246,7 @@ export interface FileRouteTypes {
     | '/admin-agent-runs'
     | '/admin-agent-universe'
     | '/admin-ai-brain'
+    | '/admin-ai-command'
     | '/admin-ai-copilot'
     | '/admin-alert-settings'
     | '/admin-audit'
@@ -2278,6 +2301,7 @@ export interface FileRouteTypes {
     | '/pharmacist/prescription-review/$id'
     | '/api/public/ai/business-tick'
     | '/api/public/ai/content-tick'
+    | '/api/public/ai/orchestrator-tick'
     | '/api/public/ai/ranking-tick'
     | '/api/public/ai/sun-tick'
     | '/api/public/ai/world-health'
@@ -2429,6 +2453,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin-agent-runs'
     | '/_authenticated/admin-agent-universe'
     | '/_authenticated/admin-ai-brain'
+    | '/_authenticated/admin-ai-command'
     | '/_authenticated/admin-ai-copilot'
     | '/_authenticated/admin-alert-settings'
     | '/_authenticated/admin-audit'
@@ -2483,6 +2508,7 @@ export interface FileRouteTypes {
     | '/_authenticated/pharmacist/prescription-review/$id'
     | '/api/public/ai/business-tick'
     | '/api/public/ai/content-tick'
+    | '/api/public/ai/orchestrator-tick'
     | '/api/public/ai/ranking-tick'
     | '/api/public/ai/sun-tick'
     | '/api/public/ai/world-health'
@@ -2650,6 +2676,7 @@ export interface RootRouteChildren {
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicAiBusinessTickRoute: typeof ApiPublicAiBusinessTickRoute
   ApiPublicAiContentTickRoute: typeof ApiPublicAiContentTickRoute
+  ApiPublicAiOrchestratorTickRoute: typeof ApiPublicAiOrchestratorTickRoute
   ApiPublicAiRankingTickRoute: typeof ApiPublicAiRankingTickRoute
   ApiPublicAiSunTickRoute: typeof ApiPublicAiSunTickRoute
   ApiPublicAiWorldHealthRoute: typeof ApiPublicAiWorldHealthRoute
@@ -3549,6 +3576,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAiCopilotRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin-ai-command': {
+      id: '/_authenticated/admin-ai-command'
+      path: '/admin-ai-command'
+      fullPath: '/admin-ai-command'
+      preLoaderRoute: typeof AuthenticatedAdminAiCommandRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin-ai-brain': {
       id: '/_authenticated/admin-ai-brain'
       path: '/admin-ai-brain'
@@ -4025,6 +4059,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAiRankingTickRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/ai/orchestrator-tick': {
+      id: '/api/public/ai/orchestrator-tick'
+      path: '/api/public/ai/orchestrator-tick'
+      fullPath: '/api/public/ai/orchestrator-tick'
+      preLoaderRoute: typeof ApiPublicAiOrchestratorTickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/ai/content-tick': {
       id: '/api/public/ai/content-tick'
       path: '/api/public/ai/content-tick'
@@ -4150,6 +4191,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminAgentRunsRoute: typeof AuthenticatedAdminAgentRunsRoute
   AuthenticatedAdminAgentUniverseRoute: typeof AuthenticatedAdminAgentUniverseRoute
   AuthenticatedAdminAiBrainRoute: typeof AuthenticatedAdminAiBrainRoute
+  AuthenticatedAdminAiCommandRoute: typeof AuthenticatedAdminAiCommandRoute
   AuthenticatedAdminAiCopilotRoute: typeof AuthenticatedAdminAiCopilotRoute
   AuthenticatedAdminAlertSettingsRoute: typeof AuthenticatedAdminAlertSettingsRoute
   AuthenticatedAdminAuditRoute: typeof AuthenticatedAdminAuditRoute
@@ -4187,6 +4229,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminAgentRunsRoute: AuthenticatedAdminAgentRunsRoute,
   AuthenticatedAdminAgentUniverseRoute: AuthenticatedAdminAgentUniverseRoute,
   AuthenticatedAdminAiBrainRoute: AuthenticatedAdminAiBrainRoute,
+  AuthenticatedAdminAiCommandRoute: AuthenticatedAdminAiCommandRoute,
   AuthenticatedAdminAiCopilotRoute: AuthenticatedAdminAiCopilotRoute,
   AuthenticatedAdminAlertSettingsRoute: AuthenticatedAdminAlertSettingsRoute,
   AuthenticatedAdminAuditRoute: AuthenticatedAdminAuditRoute,
@@ -4402,6 +4445,7 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicAiBusinessTickRoute: ApiPublicAiBusinessTickRoute,
   ApiPublicAiContentTickRoute: ApiPublicAiContentTickRoute,
+  ApiPublicAiOrchestratorTickRoute: ApiPublicAiOrchestratorTickRoute,
   ApiPublicAiRankingTickRoute: ApiPublicAiRankingTickRoute,
   ApiPublicAiSunTickRoute: ApiPublicAiSunTickRoute,
   ApiPublicAiWorldHealthRoute: ApiPublicAiWorldHealthRoute,

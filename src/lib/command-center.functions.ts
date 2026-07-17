@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { JsonValue } from "@/ai/core/approval-types";
 
 /**
  * AI Command Center — read-only aggregation over the existing AI tables.
