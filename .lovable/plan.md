@@ -1,35 +1,30 @@
-## الوضع الحالي
+## المطلوب
 
-الملف `src/modules/ai-brain/components/SovereignEngineDashboard.tsx` يحتوي فعلاً على:
-- ✅ `REAL_TOOL_REGISTRY` بالأدوات الثمانية الحقيقية مع ربط `realCodes` بمخرجات `decide()`
-- ✅ أزرار الحالات المزمنة (سكري / ضغط / حامل) عبر `toggleChronic`
-- ✅ ربط زر الإطلاق بـ `useServerFn(executeNeuralInference)` الحقيقي
-- ✅ إبراز الأدوات النشطة عبر `dispatchedTools` مع `animate-pulse`
+تحديث كامل لـ `src/modules/ai-brain/components/SovereignEngineDashboard.tsx` لدمج نظام الإشعارات الترويجية العائمة داخل نفس اللوحة، مع إبقاء التكامل الحقيقي مع الـ Server Function وتوسيع النبض النيوني.
 
-## التحديثات المقترحة (تحسين بصري فقط)
+## التغييرات
 
-سأرقّي طبقة الأنيمايشن والتفاعل دون تغيير أي منطق تشغيلي أو استدعاءات backend:
+**ملف واحد فقط**: `src/modules/ai-brain/components/SovereignEngineDashboard.tsx`
 
-1. **نبض متوهج حقيقي للأدوات النشطة**  
-   - استبدال `animate-pulse` العام بتوهج `ring` مزدوج + `shadow` أخضر/فوشيا نابض مخصص عبر Tailwind arbitrary keyframes.
-   - إضافة مؤشر نقطة حية (dot ping) بجانب شارة "نشط الآن".
+1. **PROMOTIONAL_CAMPAIGNS**: إضافة ثابت بالحملات الثلاث (رعاية طفلك / سلامة الضغط والسكري / صيف عدن).
+2. **useEffect + setTimeout(3s)**: بعد 3 ثوانٍ من التحميل تُظهر إشعاراً عائماً في الزاوية السفلية اليسرى مع اختيار حملة عشوائية.
+3. **بدون localStorage**: يظهر كل زيارة (حسب اختيارك).
+4. **بطاقة الإشعار العائمة**: `fixed bottom-6 left-6 z-50`، إطار فوشيا نيوني، Bell نابض، زرّان (تجاهل / اشتركي الآن بأيقونة قلب)، مع `animate-in slide-in-from-bottom fade-in duration-500`.
+5. **خلفية نيونية للّوحة**: إضافة دائرتَي `blur-3xl` (إحداهما إمرلد أعلى-يمين، والأخرى فوشيا أسفل-يسار) كطبقة زخرفية `pointer-events-none`.
+6. **ترقيات النبض للأدوات النشطة**: الحفاظ على `sovereign-glow` النابض + إضافة `scale-[1.02]` للبطاقة المفعّلة و`animate-ping` لنقطة الحالة.
+7. **الحفاظ على العقود الحقيقية**:
+   - يبقى الاستدعاء عبر `useServerFn(executeNeuralInference)` مع بنية `{ data: { userInput, district, patient: { chronicConditions, pregnant } } }`.
+   - لن نستبدله بـ `SuperBrainSovereign.executeNeuralInference(...)` الوارد في المخطط لأن التوقيع الحقيقي مختلف (server-only + بارامترات مختلفة).
+   - يبقى ربط `dispatchedTools` عبر `realCodes` (المخطط يفترض تطابق `tool.code` مع `dispatched` وهذا غير صحيح في محرّكنا).
+8. **الوصولية والأمان البصري**: `aria-pressed` على أزرار الحالات، `aria-busy` على زر الإطلاق، `aria-live="polite"` على بطاقة الإشعار، زر إغلاق بـ `aria-label`.
+9. **بدون `alert()`**: زر "اشتركي الآن" يستخدم `toast.success(...)` بدل `alert` (لأن `alert` ممنوع في SSR ويعطي تجربة رديئة).
 
-2. **تمييز فئات الأدوات بالألوان**  
-   - كل فئة (طبية / لوجستية / أمومة / تطوير / نمو) تحصل على tint خاص بها في الحالة الخاملة، ويتحول إلى إشعاع أخضر عند التنشيط.
+## ما لن يتغيّر
 
-3. **حالة التحميل المتقدمة**  
-   - أثناء `isLoading` تُومض جميع بطاقات الأدوات بموجة تسلسلية (stagger) للإيحاء بمسح الشبكة العصبية.
+- `brain.functions.ts`, `SuperBrainSovereign.ts`, `domain/types.ts`, أي migration.
+- المسار `/admin-ai-brain` وحماية `_authenticated`.
+- بقية مكوّنات الصفحة الرئيسية.
 
-4. **مؤشر عدّاد الأدوات المفعّلة**  
-   - شارة أعلى بطاقة السجل تعرض `X / 8 أدوات نشطة` بعد كل استنتاج.
+## ملاحظة مهمة على الموقع
 
-5. **تحسينات وصولية طفيفة**  
-   - `aria-pressed` على أزرار الحالات المزمنة، `aria-busy` على زر الإطلاق أثناء التنفيذ.
-
-## نطاق التغيير
-
-- ملف واحد فقط: `src/modules/ai-brain/components/SovereignEngineDashboard.tsx`.
-- لا تعديل في `brain.functions.ts` ولا في `SuperBrainSovereign.ts` ولا في migrations.
-- لا تغيير في العقود (props/return types) أو أسماء الأدوات.
-
-هل أمضي بهذا التحسين البصري، أم تريد إعادة كتابة كاملة بمواصفات مختلفة (لون/شكل/تخطيط جديد)؟
+الإشعارات ستظهر داخل لوحة `/admin-ai-brain` فقط (وهي محمية للأدمن). لن يراها زوار الموقع العاديون. إن أردت لاحقاً نقلها للصفحة الرئيسية سنستخرجها إلى مكوّن مستقل — لكن ذلك خارج نطاق هذا الطلب.
