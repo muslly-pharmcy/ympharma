@@ -29,6 +29,7 @@ function SunCorePage() {
   const listDecisions = useServerFn(sunListDecisions);
   const listAgents = useServerFn(sunListAgents);
   const stats = useServerFn(sunStats);
+  const bridgeStats = useServerFn(sunBridgeStats);
 
   const decisionsQ = useSuspenseQuery({
     queryKey: ["sun", "decisions"],
@@ -43,6 +44,11 @@ function SunCorePage() {
   const statsQ = useSuspenseQuery({
     queryKey: ["sun", "stats"],
     queryFn: () => stats(),
+    refetchInterval: 15_000,
+  });
+  const bridgeQ = useSuspenseQuery({
+    queryKey: ["sun", "bridge"],
+    queryFn: () => bridgeStats(),
     refetchInterval: 15_000,
   });
 
