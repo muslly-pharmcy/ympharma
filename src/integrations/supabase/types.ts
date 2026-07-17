@@ -768,6 +768,39 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_business_insights: {
+        Row: {
+          agent_name: string | null
+          confidence: number
+          created_at: string
+          id: string
+          insight_type: string
+          metrics: Json
+          recommendation: Json
+          summary: string
+        }
+        Insert: {
+          agent_name?: string | null
+          confidence?: number
+          created_at?: string
+          id?: string
+          insight_type: string
+          metrics?: Json
+          recommendation?: Json
+          summary: string
+        }
+        Update: {
+          agent_name?: string | null
+          confidence?: number
+          created_at?: string
+          id?: string
+          insight_type?: string
+          metrics?: Json
+          recommendation?: Json
+          summary?: string
+        }
+        Relationships: []
+      }
       ai_decisions: {
         Row: {
           action: Json | null
