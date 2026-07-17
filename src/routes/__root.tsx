@@ -33,6 +33,7 @@ import { AiChatWidget } from "../components/ai-chat-widget";
 import { SwUpdateBanner } from "../components/sw-update-banner";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { InstallPrompt } from "../components/InstallPrompt";
+import { SovereignQuickLauncher } from "../components/sovereign-quick-launcher";
 
 function NotFoundComponent() {
   return (
