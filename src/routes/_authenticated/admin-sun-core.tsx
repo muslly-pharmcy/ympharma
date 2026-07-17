@@ -1,12 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useState } from "react";
 import {
   sunListAgents,
   sunListDecisions,
   sunStats,
 } from "@/ai/sun-core/sun.functions";
 import { sunBridgeStats } from "@/lib/sun-bridge.functions";
+import {
+  submitAiFeedback,
+  listRecentAiDecisions,
+} from "@/lib/ai-feedback.functions";
+import { listAgentMemory, listMemoryAgents } from "@/lib/sun-memory.functions";
+import { neuralSearch, neuralStatus } from "@/lib/ai-neural.functions";
 
 export const Route = createFileRoute("/_authenticated/admin-sun-core")({
   head: () => ({
