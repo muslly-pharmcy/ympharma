@@ -1,19 +1,29 @@
 import { useState } from "react";
-import { createFileRoute, ErrorComponent, useRouter } from "@tanstack/react-router";
-import { Brain, Heart, Cpu, Users, Layers, Settings, UserCheck } from "lucide-react";
+import { createFileRoute, ErrorComponent, useRouter, useSearch } from "@tanstack/react-router";
+import {
+  Brain, Heart, Zap, Users, Cpu, Flame, Thermometer, Activity,
+  Baby, Leaf, AlertCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AdminGate } from "@/components/admin/AdminGate";
 import { SovereignEngineDashboard } from "@/modules/ai-brain/components/SovereignEngineDashboard";
-import { MaternalCarePortal } from "@/modules/subscriptions/components/MaternalCarePortal";
+
+type Tab = "brain" | "fevers" | "chronic" | "maternal" | "kids" | "doctors" | "supplements" | "herbs";
+const TABS: Tab[] = ["brain", "fevers", "chronic", "maternal", "kids", "doctors", "supplements", "herbs"];
 
 export const Route = createFileRoute("/_authenticated/admin-sovereign")({
+  validateSearch: (s: Record<string, unknown>): { tab?: Tab } => {
+    const t = typeof s.tab === "string" && (TABS as string[]).includes(s.tab) ? (s.tab as Tab) : undefined;
+    return t ? { tab: t } : {};
+  },
   head: () => ({
     meta: [
       { title: "مركز القيادة السيادي — Al-Musalli AI-OS" },
-      { name: "description", content: "غرف تحكم موحّدة: المخ السيادي، بوابة الأمومة، شبكة الأطباء، والموردين واللوجستيات." },
+      { name: "description", content: "غرف تحكم موحّدة: المخ السيادي، الحميات، الأمومة، الأطفال، الأطباء، المكملات والأعشاب." },
       { name: "robots", content: "noindex" },
     ],
   }),
-  component: SovereignCommandCenter,
+  component: () => <AdminGate><SovereignCommandCenter /></AdminGate>,
   errorComponent: ({ error, reset }) => {
     const router = useRouter();
     return (
@@ -26,15 +36,50 @@ export const Route = createFileRoute("/_authenticated/admin-sovereign")({
   notFoundComponent: () => <div className="p-6">الصفحة غير موجودة</div>,
 });
 
-type Tab = "brain" | "maternal" | "doctors" | "suppliers";
-
 function SovereignCommandCenter() {
-  const [activeTab, setActiveTab] = useState<Tab>("brain");
+  const search = useSearch({ from: "/_authenticated/admin-sovereign" });
+  const [activeTab, setActiveTab] = useState<Tab>(search.tab ?? "brain");
+
+  // Fever / caloric calculator
+  const [weight, setWeight] = useState<number>(70);
+  const [feverType, setFeverType] = useState<string>("dengue");
+  const [caloricResult, setCaloricResult] = useState<number>(2100);
+  const calculateCaloricNeeds = () => {
+    const bmr = weight * 24;
+    const mult = feverType === "malaria" ? 1.3 : feverType === "dengue" ? 1.25 : 1.15;
+    setCaloricResult(Math.round(bmr * mult));
+  };
+
+  // Child dose calculator
+  const [childWeight, setChildWeight] = useState<number>(10);
+  const [paracetamolDose, setParacetamolDose] = useState<string>("100-150 ملغ (تقريباً 5.2 مل شراب)");
+  const calculateChildDose = (w: number) => {
+    setChildWeight(w);
+    const minDose = w * 10;
+    const maxDose = w * 15;
+    const mlDose = ((minDose + maxDose) / 2) * (5 / 120);
+    setParacetamolDose(`${minDose}-${maxDose} ملغ (تقريباً ${mlDose.toFixed(1)} مل شراب)`);
+  };
+
+  const tabBtn = (tab: Tab, icon: React.ReactNode, label: string, tone: string) => {
+    const active = activeTab === tab;
+    return (
+      <button
+        onClick={() => setActiveTab(tab)}
+        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition ${
+          active ? `${tone} border` : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
+        }`}
+      >
+        <div className="flex items-center gap-2.5">{icon}<span>{label}</span></div>
+        {active ? <span className="w-1.5 h-1.5 bg-current rounded-full animate-ping" /> : null}
+      </button>
+    );
+  };
 
   return (
     <div className="flex min-h-screen bg-slate-950 text-slate-100 font-sans" dir="rtl">
       {/* Sidebar */}
-      <aside className="w-64 bg-slate-900 border-l border-slate-800 flex flex-col justify-between p-4 z-20 shrink-0">
+      <aside className="w-72 bg-slate-900 border-l border-slate-800 flex flex-col justify-between p-4 z-20 shrink-0">
         <div className="space-y-6">
           <div className="flex items-center gap-3 px-2 py-3 border-b border-slate-800">
             <div className="p-2 bg-gradient-to-tr from-emerald-500 to-fuchsia-500 rounded-xl text-white">
@@ -48,153 +93,269 @@ function SovereignCommandCenter() {
             </div>
           </div>
 
-          <nav className="space-y-1">
-            <button
-              onClick={() => setActiveTab("brain")}
-              className={`w-full flex items-center justify-between px-3 py-3 rounded-xl text-xs font-bold transition-all duration-200 ${activeTab === "brain" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"}`}
-            >
-              <div className="flex items-center gap-2.5">
-                <Cpu className="w-4 h-4" />
-                <span>المخ السيادي والـ 800 أداة</span>
-              </div>
-              <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping" />
-            </button>
-
-            <button
-              onClick={() => setActiveTab("maternal")}
-              className={`w-full flex items-center justify-between px-3 py-3 rounded-xl text-xs font-bold transition-all duration-200 ${activeTab === "maternal" ? "bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/20" : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"}`}
-            >
-              <div className="flex items-center gap-2.5">
-                <Heart className="w-4 h-4" />
-                <span>بوابة اشتراكات الأمومة</span>
-              </div>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("doctors")}
-              className={`w-full flex items-center justify-between px-3 py-3 rounded-xl text-xs font-bold transition-all duration-200 ${activeTab === "doctors" ? "bg-blue-500/10 text-blue-400 border border-blue-500/20" : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"}`}
-            >
-              <div className="flex items-center gap-2.5">
-                <Users className="w-4 h-4" />
-                <span>شبكة الدكاترة والعيادات</span>
-              </div>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("suppliers")}
-              className={`w-full flex items-center justify-between px-3 py-3 rounded-xl text-xs font-bold transition-all duration-200 ${activeTab === "suppliers" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"}`}
-            >
-              <div className="flex items-center gap-2.5">
-                <Layers className="w-4 h-4" />
-                <span>الموردين واللوجستيات</span>
-              </div>
-            </button>
+          <nav className="space-y-1 overflow-y-auto max-h-[70vh]">
+            {tabBtn("brain", <Cpu className="w-4 h-4" />, "المخ السيادي والـ 800 أداة", "bg-emerald-500/10 text-emerald-400 border-emerald-500/20")}
+            {tabBtn("fevers", <Flame className="w-4 h-4" />, "الحميات والسعرات والتطبيبات", "bg-rose-500/10 text-rose-400 border-rose-500/20")}
+            {tabBtn("chronic", <Activity className="w-4 h-4" />, "قسم المريض المزمن", "bg-amber-500/10 text-amber-400 border-amber-500/20")}
+            {tabBtn("maternal", <Heart className="w-4 h-4" />, "قسم الأمهات ورعاية الحوامل", "bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20")}
+            {tabBtn("kids", <Baby className="w-4 h-4" />, "قسم الأطفال والرضع", "bg-blue-500/10 text-blue-400 border-blue-500/20")}
+            {tabBtn("doctors", <Users className="w-4 h-4" />, "شبكة الأطباء والعيادات", "bg-sky-500/10 text-sky-400 border-sky-500/20")}
+            {tabBtn("supplements", <Zap className="w-4 h-4" />, "المكملات الغذائية والفيتامينات", "bg-yellow-500/10 text-yellow-400 border-yellow-500/20")}
+            {tabBtn("herbs", <Leaf className="w-4 h-4" />, "الأعشاب الطبية والطب البديل", "bg-emerald-500/10 text-emerald-400 border-emerald-500/20")}
           </nav>
         </div>
 
-        <div className="border-t border-slate-800 pt-3 space-y-2">
-          <div className="flex items-center gap-2.5 px-2 text-slate-500">
-            <Settings className="w-4 h-4" />
-            <span className="text-[10px]">إصدار النظام: 5.0 Core</span>
-          </div>
+        <div className="border-t border-slate-800 pt-3 flex items-center justify-between text-[10px] text-slate-500">
+          <span>إصدار النظام: 5.2 Enterprise</span>
+          <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
         </div>
       </aside>
 
       {/* Main */}
       <main className="flex-1 overflow-y-auto p-8 relative">
         {activeTab === "brain" && <SovereignEngineDashboard />}
-        {activeTab === "maternal" && <MaternalCarePortal />}
 
-        {activeTab === "doctors" && (
-          <div className="max-w-6xl mx-auto p-6 bg-slate-950 text-slate-100 rounded-3xl border border-slate-900 shadow-2xl space-y-6">
+        {activeTab === "fevers" && (
+          <div className="max-w-6xl mx-auto p-6 bg-slate-950 rounded-3xl border border-slate-900 shadow-2xl space-y-6">
             <div className="flex justify-between items-center border-b border-slate-900 pb-4">
               <div>
-                <h2 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-sky-300">
-                  شبكة الأطباء والعيادات التفاعلية (Physician & Doctor Network)
+                <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-orange-300 flex items-center gap-2">
+                  <Thermometer className="w-6 h-6 text-rose-500" /> قسم الحميات والاحتياجات الغذائية والتطبيبات
                 </h2>
-                <p className="text-xs text-slate-400 mt-1">
-                  توجيه المرضى، فحص الروشتات الصادرة، ومطابقة التخصصات الطبية في اليمن.
-                </p>
+                <p className="text-xs text-slate-400 mt-1">حساب السعرات التلقائي للمرضى المصابين بالحمى في اليمن مع بروتوكولات الطبابة المعتمدة.</p>
               </div>
-              <span className="px-3 py-1 bg-blue-500/10 text-blue-400 rounded-lg text-[10px] font-bold border border-blue-500/20">
-                12 عيادة شريكة نشطة في عدن
-              </span>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-              <div className="p-4 bg-slate-900/40 border border-slate-900 rounded-2xl flex justify-between items-start">
-                <div className="space-y-1">
-                  <h4 className="font-bold text-sm text-slate-200 flex items-center gap-1.5">
-                    <UserCheck className="w-4 h-4 text-blue-400" /> د. سلطان بن علي الخالدي
-                  </h4>
-                  <p className="text-slate-400">استشاري أمراض الأطفال والرضع</p>
-                  <p className="text-[10px] text-slate-500">العيادة: مستشفى الصداقة - الشيخ عثمان</p>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="bg-slate-900/40 p-5 rounded-2xl border border-slate-900 space-y-4">
+                <h3 className="text-xs font-bold text-rose-400">حاسبة السعرات للمصابين بالحمى</h3>
+                <div>
+                  <label className="block text-[11px] text-slate-400 mb-1">الوزن الحالي (كجم):</label>
+                  <input type="number" value={weight} onChange={(e) => setWeight(Number(e.target.value))}
+                    className="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200" />
                 </div>
-                <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded text-[9px] font-bold">موثق</span>
+                <div>
+                  <label className="block text-[11px] text-slate-400 mb-1">نوع الحمى النشطة:</label>
+                  <select value={feverType} onChange={(e) => setFeverType(e.target.value)}
+                    className="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200">
+                    <option value="dengue">حمى الضنك (موجة الصيف في عدن والحديدة)</option>
+                    <option value="malaria">الملاريا (بحاجة لسعرات عالية)</option>
+                    <option value="typhoid">التيفوئيد (تتطلب غذاء ناعم وخفيف)</option>
+                  </select>
+                </div>
+                <button onClick={calculateCaloricNeeds}
+                  className="w-full py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition">
+                  احسب السعرات المطلوبة
+                </button>
+                <div className="p-3 bg-slate-950 border border-rose-500/10 rounded-xl text-center">
+                  <p className="text-[10px] text-slate-500">السعرات اليومية المقترحة للتعافي:</p>
+                  <p className="text-lg font-black text-rose-400">{caloricResult} سعرة حرارية</p>
+                </div>
               </div>
-
-              <div className="p-4 bg-slate-900/40 border border-slate-900 rounded-2xl flex justify-between items-start">
-                <div className="space-y-1">
-                  <h4 className="font-bold text-sm text-slate-200 flex items-center gap-1.5">
-                    <UserCheck className="w-4 h-4 text-blue-400" /> د. سحر محمد أحمد
-                  </h4>
-                  <p className="text-slate-400">أخصائية أمراض النساء والتوليد ومتابعة العقم</p>
-                  <p className="text-[10px] text-slate-500">العيادة: مستشفى بابل - كريتر</p>
+              <div className="lg:col-span-2 bg-slate-900/20 p-5 rounded-2xl border border-slate-900 space-y-4">
+                <h3 className="text-xs font-bold text-slate-300">نظام التطبيبات والبروتوكول العلاجي المعتمد</h3>
+                <div className="space-y-3 text-xs leading-relaxed text-slate-300">
+                  <div className="p-3 bg-slate-950 border border-slate-900 rounded-xl">
+                    <span className="font-bold text-rose-400 block mb-1">🏥 بروتوكول حمى الضنك (Dengue Fever):</span>
+                    <p>المخ يوجه بعدم صرف الأسبرين أو البروفين نهائياً لتجنب حدوث النزيف. يوصى بالباراسيتامول فقط مع تناول السوائل بكثافة (عصير الجوافة الطبيعي، ومحاليل الإرواء، وحساء الخضار).</p>
+                  </div>
+                  <div className="p-3 bg-slate-950 border border-slate-900 rounded-xl">
+                    <span className="font-bold text-orange-400 block mb-1">🍃 التطبيبات المنزلية والتقليدية لليمن:</span>
+                    <p>تناول مغلي الشعير الدافئ لتطهير الكلى وتخفيض حرارة الجسم الداعمة، واستخدام الكمادات الباردة على الرقبة وتحت الإبطين وتجنب وضعها مباشرة على الجبين.</p>
+                  </div>
                 </div>
-                <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded text-[9px] font-bold">موثق</span>
               </div>
             </div>
           </div>
         )}
 
-        {activeTab === "suppliers" && (
-          <div className="max-w-6xl mx-auto p-6 bg-slate-950 text-slate-100 rounded-3xl border border-slate-900 shadow-2xl space-y-6">
+        {activeTab === "chronic" && (
+          <div className="max-w-6xl mx-auto p-6 bg-slate-950 rounded-3xl border border-slate-900 shadow-2xl space-y-6">
             <div className="flex justify-between items-center border-b border-slate-900 pb-4">
               <div>
-                <h2 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-300">
-                  بوابة الموردين واللوجستيات والمخازن الذكية
+                <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-300 flex items-center gap-2">
+                  <Activity className="w-6 h-6 text-amber-500" /> قسم المريض المزمن والرعاية المستمرة
                 </h2>
-                <p className="text-xs text-slate-400 mt-1">
-                  مطابقة الفواتير بالـ AI، تتبع الصلاحية للرفوف، وحساب السيولة والديون.
-                </p>
+                <p className="text-xs text-slate-400 mt-1">تأمين جرعات مرضى السكري، الضغط، والقلب في اليمن بجدولة تكرار الصرف التلقائي.</p>
               </div>
-              <span className="px-3 py-1 bg-amber-500/10 text-amber-400 rounded-lg text-[10px] font-bold border border-amber-500/20">
-                نظام إدارة FEFO مفعل
-              </span>
             </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+              <div className="p-4 bg-slate-900/40 border border-slate-900 rounded-2xl space-y-2">
+                <span className="font-bold text-amber-400 text-sm block">🩸 رعاية مرضى السكري (Diabetes Panel)</span>
+                <p className="text-slate-400 leading-relaxed">جدولة وحفظ جرعات الإنسولين وحبوب الميتفورمين للعملاء مع التنبيه الفوري قبل نفاذ الأدوية بـ 5 أيام لضمان عدم حدوث صدمات سكر.</p>
+              </div>
+              <div className="p-4 bg-slate-900/40 border border-slate-900 rounded-2xl space-y-2">
+                <span className="font-bold text-rose-400 text-sm block">❤️ رعاية مرضى الضغط والقلب (Hypertension)</span>
+                <p className="text-slate-400 leading-relaxed">فحص تفاعل أدوية الضغط المزمنة (مثل حاصرات بيتا ومثبطات ACE) مع مسكنات الألم الشائعة للتأكد من سلامة الصرف الدائم.</p>
+              </div>
+              <div className="p-4 bg-slate-900/40 border border-slate-900 rounded-2xl space-y-2">
+                <span className="font-bold text-emerald-400 text-sm block">📦 التوصيل المجاني الدوري للمزمنين</span>
+                <p className="text-slate-400 leading-relaxed">صيدلية المصلي تؤمن إرسال العلاج الشهري لباب منزلك في المنصورة، كريتر، أو الشيخ عثمان مع فحص دوري مجاني للضغط والسكري.</p>
+              </div>
+            </div>
+          </div>
+        )}
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-              <div className="p-4 bg-slate-900/40 border border-slate-900 rounded-2xl space-y-1.5">
-                <div className="flex justify-between text-slate-400">
-                  <span>الشركة الموردة:</span>
-                  <span className="font-bold text-slate-200">الشركة اليمنية لصناعة الأدوية</span>
-                </div>
-                <div className="flex justify-between text-slate-400">
-                  <span>حالة الفاتورة الأخيرة:</span>
-                  <span className="text-emerald-400 font-bold">مطابقة ومقبولة بالـ AI</span>
+        {activeTab === "maternal" && (
+          <div className="max-w-6xl mx-auto p-6 bg-slate-950 rounded-3xl border border-slate-900 shadow-2xl space-y-6">
+            <div className="flex justify-between items-center border-b border-slate-900 pb-4">
+              <div>
+                <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-300 flex items-center gap-2">
+                  <Heart className="w-6 h-6 text-fuchsia-500" /> قسم رعاية الأمهات واشتراكات الحمل
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">جدول الرعاية الوقائية للحوامل، الفيتامينات الضرورية، وباقات تغذية الأطفال والرضع.</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs">
+              <div className="p-5 bg-slate-900/40 border border-slate-900 rounded-2xl space-y-3">
+                <h3 className="font-bold text-fuchsia-400 text-sm">مراحل دعم الحمل وفيتامينات النمو</h3>
+                <div className="space-y-2">
+                  <div className="p-3 bg-slate-950 rounded-xl border border-slate-900">
+                    <span className="font-bold text-slate-200">الأشهر الثلاثة الأولى (1-3):</span>
+                    <p className="text-slate-400 mt-1">التركيز على حمض الفوليك (Folic Acid 400mcg) لحماية الجنين من عيوب الأنبوب العصبي، ومكملات الحديد الخفيفة.</p>
+                  </div>
+                  <div className="p-3 bg-slate-950 rounded-xl border border-slate-900">
+                    <span className="font-bold text-slate-200">الأشهر الوسطى والأخيرة (4-9):</span>
+                    <p className="text-slate-400 mt-1">تأمين مكملات الكالسيوم لحفظ عظام الأم وبناء عظام الجنين، وحبوب الأوميغا 3 لدعم تطوير مخ وشبكية عين الطفل.</p>
+                  </div>
                 </div>
               </div>
-
-              <div className="p-4 bg-slate-900/40 border border-slate-900 rounded-2xl space-y-1.5">
-                <div className="flex justify-between text-slate-400">
-                  <span>الديون المستحقة للموردين:</span>
-                  <span className="font-bold text-rose-400">450,000 ر.ي</span>
+              <div className="p-5 bg-slate-900/40 border border-slate-900 rounded-2xl space-y-3 flex flex-col justify-between">
+                <div>
+                  <h3 className="font-bold text-fuchsia-400 text-sm">باقة الأمومة والرضع الشاملة بالواتساب</h3>
+                  <p className="text-slate-300 leading-relaxed mt-2">
+                    نظام تتبع ذكي يراقب استهلاك طفلك للحليب والحفاضات ويجهز الطلب دورياً للبيت تلقائياً مع إشعار تذكير لطيف للأم على الواتساب قبل النفاذ بثلاثة أيام، لتبقي مرتاحة البال والوجدان بالكامل.
+                  </p>
                 </div>
-                <div className="flex justify-between text-slate-400">
-                  <span>تاريخ السداد القادم:</span>
-                  <span className="font-mono">2026-08-01</span>
+                <div className="p-3 bg-fuchsia-500/5 border border-fuchsia-500/10 rounded-xl">
+                  <p className="text-fuchsia-400 font-bold">✓ ميزة حصرية:</p>
+                  <p className="text-slate-400 mt-1">حسم خاص بنسبة 10% لجميع الأمهات المسجلات في برنامج رعاية المصلي للطفولة في عدن وصنعاء.</p>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
 
-              <div className="p-4 bg-slate-900/40 border border-slate-900 rounded-2xl space-y-1.5">
-                <div className="flex justify-between text-slate-400">
-                  <span>إجمالي حركات الصندوق اليومية:</span>
-                  <span className="font-bold text-emerald-400">1,200,000 ر.ي</span>
+        {activeTab === "kids" && (
+          <div className="max-w-6xl mx-auto p-6 bg-slate-950 rounded-3xl border border-slate-900 shadow-2xl space-y-6">
+            <div className="flex justify-between items-center border-b border-slate-900 pb-4">
+              <div>
+                <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-300 flex items-center gap-2">
+                  <Baby className="w-6 h-6 text-blue-500" /> قسم طبابة الأطفال وجرعات الرضع الآمنة
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">حساب تلقائي لجرعات أدوية الأطفال وخافضات الحرارة حسب الوزن بدقة متناهية لمنع الأخطاء السمية.</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="bg-slate-900/40 p-5 rounded-2xl border border-slate-900 space-y-4">
+                <h3 className="text-xs font-bold text-blue-400">حاسبة جرعات الأطفال خافضة الحرارة</h3>
+                <div>
+                  <label className="block text-[11px] text-slate-400 mb-1">وزن الطفل الحالي (كجم):</label>
+                  <input type="number" value={childWeight}
+                    onChange={(e) => calculateChildDose(Number(e.target.value))}
+                    className="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200" />
                 </div>
-                <div className="flex justify-between text-slate-400">
-                  <span>الدفع الآجل من الصيدليات:</span>
-                  <span className="text-amber-400 font-bold">نشط تحت الرقابة</span>
+                <div className="p-3 bg-slate-950 border border-blue-500/10 rounded-xl text-center">
+                  <p className="text-[10px] text-slate-500">الجرعة المناسبة للباراسيتامول:</p>
+                  <p className="text-base font-black text-blue-400 mt-1">{paracetamolDose}</p>
                 </div>
+              </div>
+              <div className="lg:col-span-2 bg-slate-900/20 p-5 rounded-2xl border border-slate-900 space-y-4 text-xs leading-relaxed">
+                <h3 className="text-xs font-bold text-slate-300">ملاحظات الأمان الوقائي لجرعات الأطفال</h3>
+                <div className="space-y-3">
+                  <div className="p-3 bg-slate-950 border border-slate-900 rounded-xl flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                    <p className="text-slate-300">لا تعطي طفلك الإيبوبروفين (أدول/بروفين) إذا كان يعاني من القيء المستمر أو الجفاف أو اشتباه حمى الضنك، لتفادي إتلاف الكلى أو حدوث نزيف داخلي.</p>
+                  </div>
+                  <div className="p-3 bg-slate-950 border border-slate-900 rounded-xl flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                    <p className="text-slate-300">يجب تباعد جرعات الباراسيتامول (الخافض) بمقدار 4 إلى 6 ساعات على الأقل، وعدم تجاوز 4 جرعات خلال 24 ساعة حمايةً لكبد الرضيع من التلف التسممي.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "doctors" && (
+          <div className="max-w-6xl mx-auto p-6 bg-slate-950 rounded-3xl border border-slate-900 shadow-2xl space-y-6">
+            <div className="flex justify-between items-center border-b border-slate-900 pb-4">
+              <div>
+                <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-300 flex items-center gap-2">
+                  <Users className="w-6 h-6 text-sky-500" /> شبكة الأطباء الشركاء والتحويل السريع
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">تنسيق التحويلات الطبية، والتحقق من التخصصات الدقيقة للأطباء المعتمدين في عدن وصنعاء.</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="p-4 bg-slate-900/40 border border-slate-900 rounded-2xl flex justify-between items-start">
+                <div className="space-y-1">
+                  <h4 className="font-bold text-sm text-slate-200">د. سلطان بن علي الخالدي</h4>
+                  <p className="text-sky-400">استشاري أمراض الأطفال والرضع</p>
+                  <p className="text-[10px] text-slate-500">العيادة: مستشفى الصداقة - الشيخ عثمان، عدن</p>
+                </div>
+                <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 rounded text-[9px] font-black">موثق</span>
+              </div>
+              <div className="p-4 bg-slate-900/40 border border-slate-900 rounded-2xl flex justify-between items-start">
+                <div className="space-y-1">
+                  <h4 className="font-bold text-sm text-slate-200">د. سحر محمد أحمد</h4>
+                  <p className="text-sky-400">أخصائية أمراض النساء والتوليد والعقم</p>
+                  <p className="text-[10px] text-slate-500">العيادة: مستشفى بابل - كريتر، عدن</p>
+                </div>
+                <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 rounded text-[9px] font-black">موثق</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "supplements" && (
+          <div className="max-w-6xl mx-auto p-6 bg-slate-950 rounded-3xl border border-slate-900 shadow-2xl space-y-6">
+            <div className="flex justify-between items-center border-b border-slate-900 pb-4">
+              <div>
+                <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-300 flex items-center gap-2">
+                  <Zap className="w-6 h-6 text-yellow-500" /> قسم المكملات الغذائية والفيتامينات وحزم الرياضيين
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">دليل علمي لفوائد المكملات وجرعات الفيتامينات اليومية لتقوية المناعة ومستويات الطاقة.</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs leading-relaxed">
+              <div className="p-4 bg-slate-900/40 border border-slate-900 rounded-2xl space-y-2">
+                <span className="font-bold text-yellow-400 text-sm block">🌟 فيتامين د3 وتثبيت الكالسيوم</span>
+                <p className="text-slate-400">هام جداً لتقوية العظام والمناعة ومحاربة الكسل الصباحي والوهن الدائم. الجرعة القياسية اليومية للبالغين هي 1000-2000 وحدة دولية بعد وجبة تحتوي على دهون صحية.</p>
+              </div>
+              <div className="p-4 bg-slate-900/40 border border-slate-900 rounded-2xl space-y-2">
+                <span className="font-bold text-orange-400 text-sm block">⚡ مكملات أوميغا 3 وزيت السمك</span>
+                <p className="text-slate-400">مكمل جوهري لتعزيز صحة القلب والشرايين وخفض مستويات الدهون الثلاثية بالدم، ورفع درجة التركيز والحفظ الذهني للطلاب والباحثين.</p>
+              </div>
+              <div className="p-4 bg-slate-900/40 border border-slate-900 rounded-2xl space-y-2">
+                <span className="font-bold text-emerald-400 text-sm block">💪 حزم الزنك وفيتامين ج للمناعة</span>
+                <p className="text-slate-400">حزم متخصصة لمواجهة تقلبات الطقس والإنفلونزا في اليمن، تساعد في تقصير فترة المرض وتسريع التئام الجروح وتقوية بصيلات الشعر.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "herbs" && (
+          <div className="max-w-6xl mx-auto p-6 bg-slate-950 rounded-3xl border border-slate-900 shadow-2xl space-y-6">
+            <div className="flex justify-between items-center border-b border-slate-900 pb-4">
+              <div>
+                <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300 flex items-center gap-2">
+                  <Leaf className="w-6 h-6 text-emerald-500 animate-pulse" /> قسم الأعشاب الطبية والبدائل الطبيعية الآمنة
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">دليل التداوي بالأعشاب الطبيعية والبدائل العشبية الآمنة لتعزيز صحة جهاز الهضم والجسم.</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs leading-relaxed">
+              <div className="p-4 bg-slate-900/40 border border-slate-900 rounded-2xl space-y-2">
+                <span className="font-bold text-emerald-400 text-sm block">🌿 الزنجبيل والليمون للالتهاب والمغص</span>
+                <p className="text-slate-300">بديل طبيعي ممتاز لتخفيف آلام وتشنجات المعدة، وتهدئة التهابات الحلق والشعب الهوائية، ويساعد بفاعلية في تقليل الشعور بالغثيان لدى الحوامل.</p>
+              </div>
+              <div className="p-4 bg-slate-900/40 border border-slate-900 rounded-2xl space-y-2">
+                <span className="font-bold text-teal-400 text-sm block">🌱 البابونج البري والنعناع للمغص والهدوء</span>
+                <p className="text-slate-300">مشروب دافئ رائع لتهدئة القولون العصبي وتشنجات الأمعاء، ويساعد بامتياز على الاسترخاء والحد من مستويات التوتر والقلق لنوم هادئ وعميق.</p>
+              </div>
+              <div className="p-4 bg-slate-900/40 border border-slate-900 rounded-2xl space-y-2">
+                <span className="font-bold text-green-400 text-sm block">🌳 الحبة السوداء والعسل لتقوية المناعة</span>
+                <p className="text-slate-300">بروتوكول وقائي يمني شهير. ملعقة صغيرة من عسل السدر الطبيعي مع حبات سوداء مطحونة صباحاً تعمل كمضاد أكسدة قوي لتعزيز الدفاعات الطبيعية للجسم.</p>
               </div>
             </div>
           </div>
