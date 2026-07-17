@@ -177,6 +177,7 @@ import { Route as ApiPublicHealthFullCheckRouteImport } from './routes/api/publi
 import { Route as ApiPublicAnalyticsIngestRouteImport } from './routes/api/public/analytics/ingest'
 import { Route as AuthenticatedPharmacistPrescriptionReviewIdRouteImport } from './routes/_authenticated/pharmacist/prescription-review.$id'
 import { Route as AuthenticatedPharmacistInvoiceReviewIdRouteImport } from './routes/_authenticated/pharmacist/invoice-review.$id'
+import { Route as ApiPublicHooksWhatsappTwilioRouteImport } from './routes/api/public/hooks/whatsapp/twilio'
 import { Route as ApiPublicHooksWhatsappBrainRouteImport } from './routes/api/public/hooks/whatsapp/brain'
 import { Route as ApiPublicHooksAgentsWhatsappRouteImport } from './routes/api/public/hooks/agents/whatsapp'
 import { Route as ApiPublicHooksAgentsSalesRouteImport } from './routes/api/public/hooks/agents/sales'
@@ -1093,6 +1094,12 @@ const AuthenticatedPharmacistInvoiceReviewIdRoute =
     path: '/pharmacist/invoice-review/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicHooksWhatsappTwilioRoute =
+  ApiPublicHooksWhatsappTwilioRouteImport.update({
+    id: '/api/public/hooks/whatsapp/twilio',
+    path: '/api/public/hooks/whatsapp/twilio',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksWhatsappBrainRoute =
   ApiPublicHooksWhatsappBrainRouteImport.update({
     id: '/api/public/hooks/whatsapp/brain',
@@ -1328,6 +1335,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/agents/sales': typeof ApiPublicHooksAgentsSalesRoute
   '/api/public/hooks/agents/whatsapp': typeof ApiPublicHooksAgentsWhatsappRoute
   '/api/public/hooks/whatsapp/brain': typeof ApiPublicHooksWhatsappBrainRoute
+  '/api/public/hooks/whatsapp/twilio': typeof ApiPublicHooksWhatsappTwilioRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -1507,6 +1515,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/agents/sales': typeof ApiPublicHooksAgentsSalesRoute
   '/api/public/hooks/agents/whatsapp': typeof ApiPublicHooksAgentsWhatsappRoute
   '/api/public/hooks/whatsapp/brain': typeof ApiPublicHooksWhatsappBrainRoute
+  '/api/public/hooks/whatsapp/twilio': typeof ApiPublicHooksWhatsappTwilioRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -1688,6 +1697,7 @@ export interface FileRoutesById {
   '/api/public/hooks/agents/sales': typeof ApiPublicHooksAgentsSalesRoute
   '/api/public/hooks/agents/whatsapp': typeof ApiPublicHooksAgentsWhatsappRoute
   '/api/public/hooks/whatsapp/brain': typeof ApiPublicHooksWhatsappBrainRoute
+  '/api/public/hooks/whatsapp/twilio': typeof ApiPublicHooksWhatsappTwilioRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1869,6 +1879,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/agents/sales'
     | '/api/public/hooks/agents/whatsapp'
     | '/api/public/hooks/whatsapp/brain'
+    | '/api/public/hooks/whatsapp/twilio'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -2048,6 +2059,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/agents/sales'
     | '/api/public/hooks/agents/whatsapp'
     | '/api/public/hooks/whatsapp/brain'
+    | '/api/public/hooks/whatsapp/twilio'
   id:
     | '__root__'
     | '/'
@@ -2228,6 +2240,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/agents/sales'
     | '/api/public/hooks/agents/whatsapp'
     | '/api/public/hooks/whatsapp/brain'
+    | '/api/public/hooks/whatsapp/twilio'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -2379,6 +2392,7 @@ export interface RootRouteChildren {
   ApiPublicHooksAgentsSalesRoute: typeof ApiPublicHooksAgentsSalesRoute
   ApiPublicHooksAgentsWhatsappRoute: typeof ApiPublicHooksAgentsWhatsappRoute
   ApiPublicHooksWhatsappBrainRoute: typeof ApiPublicHooksWhatsappBrainRoute
+  ApiPublicHooksWhatsappTwilioRoute: typeof ApiPublicHooksWhatsappTwilioRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -3559,6 +3573,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPharmacistInvoiceReviewIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/hooks/whatsapp/twilio': {
+      id: '/api/public/hooks/whatsapp/twilio'
+      path: '/api/public/hooks/whatsapp/twilio'
+      fullPath: '/api/public/hooks/whatsapp/twilio'
+      preLoaderRoute: typeof ApiPublicHooksWhatsappTwilioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/whatsapp/brain': {
       id: '/api/public/hooks/whatsapp/brain'
       path: '/api/public/hooks/whatsapp/brain'
@@ -3901,7 +3922,18 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksAgentsSalesRoute: ApiPublicHooksAgentsSalesRoute,
   ApiPublicHooksAgentsWhatsappRoute: ApiPublicHooksAgentsWhatsappRoute,
   ApiPublicHooksWhatsappBrainRoute: ApiPublicHooksWhatsappBrainRoute,
+  ApiPublicHooksWhatsappTwilioRoute: ApiPublicHooksWhatsappTwilioRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
