@@ -3086,6 +3086,60 @@ export type Database = {
         }
         Relationships: []
       }
+      family_health_accounts: {
+        Row: {
+          accepted_at: string | null
+          access_level: string
+          active: boolean
+          created_at: string
+          id: string
+          invited_at: string
+          member_patient_id: string
+          owner_patient_id: string
+          relationship: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          access_level?: string
+          active?: boolean
+          created_at?: string
+          id?: string
+          invited_at?: string
+          member_patient_id: string
+          owner_patient_id: string
+          relationship: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          access_level?: string
+          active?: boolean
+          created_at?: string
+          id?: string
+          invited_at?: string
+          member_patient_id?: string
+          owner_patient_id?: string
+          relationship?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_health_accounts_member_patient_id_fkey"
+            columns: ["member_patient_id"]
+            isOneToOne: false
+            referencedRelation: "hc_patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "family_health_accounts_owner_patient_id_fkey"
+            columns: ["owner_patient_id"]
+            isOneToOne: false
+            referencedRelation: "hc_patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hc_appointments: {
         Row: {
           cancel_reason: string | null
@@ -5715,6 +5769,59 @@ export type Database = {
           },
         ]
       }
+      medical_vault_files: {
+        Row: {
+          created_at: string
+          encryption_status: boolean
+          file_type: string
+          id: string
+          metadata: Json
+          mime_type: string | null
+          patient_id: string
+          size_bytes: number | null
+          storage_path: string
+          title: string
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          encryption_status?: boolean
+          file_type: string
+          id?: string
+          metadata?: Json
+          mime_type?: string | null
+          patient_id: string
+          size_bytes?: number | null
+          storage_path: string
+          title: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          encryption_status?: boolean
+          file_type?: string
+          id?: string
+          metadata?: Json
+          mime_type?: string | null
+          patient_id?: string
+          size_bytes?: number | null
+          storage_path?: string
+          title?: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medical_vault_files_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "hc_patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string | null
@@ -6119,6 +6226,173 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      patient_consents: {
+        Row: {
+          active: boolean
+          created_at: string
+          expires_at: string | null
+          granted_to_id: string
+          granted_to_type: string
+          id: string
+          patient_id: string
+          revoked_at: string | null
+          scope: Json
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          expires_at?: string | null
+          granted_to_id: string
+          granted_to_type: string
+          id?: string
+          patient_id: string
+          revoked_at?: string | null
+          scope?: Json
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          expires_at?: string | null
+          granted_to_id?: string
+          granted_to_type?: string
+          id?: string
+          patient_id?: string
+          revoked_at?: string | null
+          scope?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_consents_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "hc_patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_health_events: {
+        Row: {
+          created_at: string
+          event_date: string
+          event_type: string
+          id: string
+          patient_id: string
+          payload: Json
+          source_id: string | null
+          source_table: string | null
+          summary: string
+        }
+        Insert: {
+          created_at?: string
+          event_date?: string
+          event_type: string
+          id?: string
+          patient_id: string
+          payload?: Json
+          source_id?: string | null
+          source_table?: string | null
+          summary: string
+        }
+        Update: {
+          created_at?: string
+          event_date?: string
+          event_type?: string
+          id?: string
+          patient_id?: string
+          payload?: Json
+          source_id?: string | null
+          source_table?: string | null
+          summary?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_health_events_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "hc_patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_medications: {
+        Row: {
+          active: boolean
+          created_at: string
+          dosage: string | null
+          end_date: string | null
+          frequency: string | null
+          id: string
+          medicine_entity_id: string | null
+          medicine_name: string
+          notes: string | null
+          patient_id: string
+          prescribed_by_doctor_id: string | null
+          route: string | null
+          source: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          dosage?: string | null
+          end_date?: string | null
+          frequency?: string | null
+          id?: string
+          medicine_entity_id?: string | null
+          medicine_name: string
+          notes?: string | null
+          patient_id: string
+          prescribed_by_doctor_id?: string | null
+          route?: string | null
+          source?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          dosage?: string | null
+          end_date?: string | null
+          frequency?: string | null
+          id?: string
+          medicine_entity_id?: string | null
+          medicine_name?: string
+          notes?: string | null
+          patient_id?: string
+          prescribed_by_doctor_id?: string | null
+          route?: string | null
+          source?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_medications_medicine_entity_id_fkey"
+            columns: ["medicine_entity_id"]
+            isOneToOne: false
+            referencedRelation: "medical_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_medications_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "hc_patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_medications_prescribed_by_doctor_id_fkey"
+            columns: ["prescribed_by_doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payment_transactions: {
         Row: {
@@ -9727,6 +10001,10 @@ export type Database = {
       }
       org_within_limit: {
         Args: { _current: number; _limit: string; _org_id: string }
+        Returns: boolean
+      }
+      patient_belongs_to_current_user: {
+        Args: { _patient_id: string }
         Returns: boolean
       }
       pharmacy_chronic_legacy_ids: { Args: never; Returns: Json }
