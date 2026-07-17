@@ -1,24 +1,25 @@
 import type { AIEvent } from "./types";
+import { AI_EVENTS } from "../events/event-types";
 
 /**
- * Deterministic router: maps event_type → agent name (or null when unknown).
+ * Deterministic router: event_type → agent name (or null when unmapped).
+ * Explicit `target_agent` on the event always wins.
  */
-export function routeEvent(event: AIEvent): string | null {
-  // Explicit override wins.
-  if (event.target_agent) return event.target_agent;
+const ROUTES: Record<string, string> = {
+  [AI_EVENTS.PRESCRIPTION_UPLOADED]: "pharmacist_agent",
+  [AI_EVENTS.STOCK_LOW]: "inventory_agent",
+  [AI_EVENTS.LOW_STOCK_PREDICTED]: "inventory_agent",
+  [AI_EVENTS.PURCHASE_RECOMMENDED]: "inventory_agent",
+  [AI_EVENTS.DEAD_STOCK_DETECTED]: "inventory_agent",
+  [AI_EVENTS.EXPIRY_WARNING]: "inventory_agent",
+  [AI_EVENTS.CUSTOMER_MESSAGE]: "customer_agent",
+  [AI_EVENTS.WHATSAPP_INBOUND]: "customer_agent",
+  [AI_EVENTS.ORDER_CREATED]: "sales_agent",
+  [AI_EVENTS.SALES_ORDER_CREATED]: "sales_agent",
+  [AI_EVENTS.ORDER_PAID]: "sales_agent",
+};
 
-  switch (event.event_type) {
-    case "PRESCRIPTION_UPLOADED":
-      return "pharmacist_agent";
-    case "STOCK_LOW":
-    case "LOW_STOCK_PREDICTED":
-    case "PURCHASE_RECOMMENDED":
-    case "DEAD_STOCK_DETECTED":
-      return "inventory_agent";
-    case "CUSTOMER_MESSAGE":
-    case "WHATSAPP_INBOUND":
-      return "customer_agent";
-    default:
-      return null;
-  }
+export function routeEvent(event: AIEvent): string | null {
+  if (event.target_agent) return event.target_agent;
+  return ROUTES[event.event_type] ?? null;
 }
