@@ -95,9 +95,11 @@ import { Route as AdminAgentInsightsRouteImport } from './routes/admin-agent-ins
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as HealthTipsIndexRouteImport } from './routes/health-tips/index'
 import { Route as TestFeaturesRouteImport } from './routes/test.features'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as PharmaciesSlugRouteImport } from './routes/pharmacies.$slug'
+import { Route as HealthTipsSlugRouteImport } from './routes/health-tips/$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as DoctorsSlugRouteImport } from './routes/doctors.$slug'
 import { Route as DoctorJoinRouteImport } from './routes/doctor.join'
@@ -110,6 +112,8 @@ import { Route as AuthenticatedAdminSovereignRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminSlackTestRouteImport } from './routes/_authenticated/admin-slack-test'
 import { Route as AuthenticatedAdminSecurityGuardianRouteImport } from './routes/_authenticated/admin-security-guardian'
 import { Route as AuthenticatedAdminSalesReportsRouteImport } from './routes/_authenticated/admin-sales-reports'
+import { Route as AuthenticatedAdminPushCampaignsRouteImport } from './routes/_authenticated/admin-push-campaigns'
+import { Route as AuthenticatedAdminMedicalContentRouteImport } from './routes/_authenticated/admin-medical-content'
 import { Route as AuthenticatedAdminMarketingCampaignsRouteImport } from './routes/_authenticated/admin-marketing-campaigns'
 import { Route as AuthenticatedAdminInventorySyncLogsRouteImport } from './routes/_authenticated/admin-inventory-sync-logs'
 import { Route as AuthenticatedAdminInventoryIntelRouteImport } from './routes/_authenticated/admin-inventory-intel'
@@ -637,6 +641,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HealthTipsIndexRoute = HealthTipsIndexRouteImport.update({
+  id: '/health-tips/',
+  path: '/health-tips/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TestFeaturesRoute = TestFeaturesRouteImport.update({
   id: '/test/features',
   path: '/test/features',
@@ -651,6 +660,11 @@ const PharmaciesSlugRoute = PharmaciesSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => PharmaciesRoute,
+} as any)
+const HealthTipsSlugRoute = HealthTipsSlugRouteImport.update({
+  id: '/health-tips/$slug',
+  path: '/health-tips/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
@@ -718,6 +732,18 @@ const AuthenticatedAdminSalesReportsRoute =
   AuthenticatedAdminSalesReportsRouteImport.update({
     id: '/admin-sales-reports',
     path: '/admin-sales-reports',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminPushCampaignsRoute =
+  AuthenticatedAdminPushCampaignsRouteImport.update({
+    id: '/admin-push-campaigns',
+    path: '/admin-push-campaigns',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminMedicalContentRoute =
+  AuthenticatedAdminMedicalContentRouteImport.update({
+    id: '/admin-medical-content',
+    path: '/admin-medical-content',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdminMarketingCampaignsRoute =
@@ -1342,6 +1368,8 @@ export interface FileRoutesByFullPath {
   '/admin-inventory-intel': typeof AuthenticatedAdminInventoryIntelRoute
   '/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
   '/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
+  '/admin-medical-content': typeof AuthenticatedAdminMedicalContentRoute
+  '/admin-push-campaigns': typeof AuthenticatedAdminPushCampaignsRoute
   '/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
   '/admin-security-guardian': typeof AuthenticatedAdminSecurityGuardianRoute
   '/admin-slack-test': typeof AuthenticatedAdminSlackTestRoute
@@ -1354,9 +1382,11 @@ export interface FileRoutesByFullPath {
   '/doctor/join': typeof DoctorJoinRoute
   '/doctors/$slug': typeof DoctorsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/health-tips/$slug': typeof HealthTipsSlugRoute
   '/pharmacies/$slug': typeof PharmaciesSlugRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
+  '/health-tips/': typeof HealthTipsIndexRoute
   '/admin/doctor-join-queue': typeof AuthenticatedAdminDoctorJoinQueueRoute
   '/doctor/dashboard': typeof AuthenticatedDoctorDashboardRoute
   '/doctor/practices': typeof AuthenticatedDoctorPracticesRoute
@@ -1535,6 +1565,8 @@ export interface FileRoutesByTo {
   '/admin-inventory-intel': typeof AuthenticatedAdminInventoryIntelRoute
   '/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
   '/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
+  '/admin-medical-content': typeof AuthenticatedAdminMedicalContentRoute
+  '/admin-push-campaigns': typeof AuthenticatedAdminPushCampaignsRoute
   '/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
   '/admin-security-guardian': typeof AuthenticatedAdminSecurityGuardianRoute
   '/admin-slack-test': typeof AuthenticatedAdminSlackTestRoute
@@ -1547,9 +1579,11 @@ export interface FileRoutesByTo {
   '/doctor/join': typeof DoctorJoinRoute
   '/doctors/$slug': typeof DoctorsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/health-tips/$slug': typeof HealthTipsSlugRoute
   '/pharmacies/$slug': typeof PharmaciesSlugRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
+  '/health-tips': typeof HealthTipsIndexRoute
   '/admin/doctor-join-queue': typeof AuthenticatedAdminDoctorJoinQueueRoute
   '/doctor/dashboard': typeof AuthenticatedDoctorDashboardRoute
   '/doctor/practices': typeof AuthenticatedDoctorPracticesRoute
@@ -1730,6 +1764,8 @@ export interface FileRoutesById {
   '/_authenticated/admin-inventory-intel': typeof AuthenticatedAdminInventoryIntelRoute
   '/_authenticated/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
   '/_authenticated/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
+  '/_authenticated/admin-medical-content': typeof AuthenticatedAdminMedicalContentRoute
+  '/_authenticated/admin-push-campaigns': typeof AuthenticatedAdminPushCampaignsRoute
   '/_authenticated/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
   '/_authenticated/admin-security-guardian': typeof AuthenticatedAdminSecurityGuardianRoute
   '/_authenticated/admin-slack-test': typeof AuthenticatedAdminSlackTestRoute
@@ -1742,9 +1778,11 @@ export interface FileRoutesById {
   '/doctor/join': typeof DoctorJoinRoute
   '/doctors/$slug': typeof DoctorsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/health-tips/$slug': typeof HealthTipsSlugRoute
   '/pharmacies/$slug': typeof PharmaciesSlugRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
+  '/health-tips/': typeof HealthTipsIndexRoute
   '/_authenticated/admin/doctor-join-queue': typeof AuthenticatedAdminDoctorJoinQueueRoute
   '/_authenticated/doctor/dashboard': typeof AuthenticatedDoctorDashboardRoute
   '/_authenticated/doctor/practices': typeof AuthenticatedDoctorPracticesRoute
@@ -1925,6 +1963,8 @@ export interface FileRouteTypes {
     | '/admin-inventory-intel'
     | '/admin-inventory-sync-logs'
     | '/admin-marketing-campaigns'
+    | '/admin-medical-content'
+    | '/admin-push-campaigns'
     | '/admin-sales-reports'
     | '/admin-security-guardian'
     | '/admin-slack-test'
@@ -1937,9 +1977,11 @@ export interface FileRouteTypes {
     | '/doctor/join'
     | '/doctors/$slug'
     | '/email/unsubscribe'
+    | '/health-tips/$slug'
     | '/pharmacies/$slug'
     | '/product/$id'
     | '/test/features'
+    | '/health-tips/'
     | '/admin/doctor-join-queue'
     | '/doctor/dashboard'
     | '/doctor/practices'
@@ -2118,6 +2160,8 @@ export interface FileRouteTypes {
     | '/admin-inventory-intel'
     | '/admin-inventory-sync-logs'
     | '/admin-marketing-campaigns'
+    | '/admin-medical-content'
+    | '/admin-push-campaigns'
     | '/admin-sales-reports'
     | '/admin-security-guardian'
     | '/admin-slack-test'
@@ -2130,9 +2174,11 @@ export interface FileRouteTypes {
     | '/doctor/join'
     | '/doctors/$slug'
     | '/email/unsubscribe'
+    | '/health-tips/$slug'
     | '/pharmacies/$slug'
     | '/product/$id'
     | '/test/features'
+    | '/health-tips'
     | '/admin/doctor-join-queue'
     | '/doctor/dashboard'
     | '/doctor/practices'
@@ -2312,6 +2358,8 @@ export interface FileRouteTypes {
     | '/_authenticated/admin-inventory-intel'
     | '/_authenticated/admin-inventory-sync-logs'
     | '/_authenticated/admin-marketing-campaigns'
+    | '/_authenticated/admin-medical-content'
+    | '/_authenticated/admin-push-campaigns'
     | '/_authenticated/admin-sales-reports'
     | '/_authenticated/admin-security-guardian'
     | '/_authenticated/admin-slack-test'
@@ -2324,9 +2372,11 @@ export interface FileRouteTypes {
     | '/doctor/join'
     | '/doctors/$slug'
     | '/email/unsubscribe'
+    | '/health-tips/$slug'
     | '/pharmacies/$slug'
     | '/product/$id'
     | '/test/features'
+    | '/health-tips/'
     | '/_authenticated/admin/doctor-join-queue'
     | '/_authenticated/doctor/dashboard'
     | '/_authenticated/doctor/practices'
@@ -2496,8 +2546,10 @@ export interface RootRouteChildren {
   YemenDebugRoute: typeof YemenDebugRoute
   DoctorJoinRoute: typeof DoctorJoinRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  HealthTipsSlugRoute: typeof HealthTipsSlugRoute
   ProductIdRoute: typeof ProductIdRoute
   TestFeaturesRoute: typeof TestFeaturesRoute
+  HealthTipsIndexRoute: typeof HealthTipsIndexRoute
   ApiInternalCollectFeedbackRoute: typeof ApiInternalCollectFeedbackRoute
   ApiPublicContactRoute: typeof ApiPublicContactRoute
   ApiPublicDoctorJoinRoute: typeof ApiPublicDoctorJoinRoute
@@ -3170,6 +3222,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/health-tips/': {
+      id: '/health-tips/'
+      path: '/health-tips'
+      fullPath: '/health-tips/'
+      preLoaderRoute: typeof HealthTipsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/test/features': {
       id: '/test/features'
       path: '/test/features'
@@ -3190,6 +3249,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/pharmacies/$slug'
       preLoaderRoute: typeof PharmaciesSlugRouteImport
       parentRoute: typeof PharmaciesRoute
+    }
+    '/health-tips/$slug': {
+      id: '/health-tips/$slug'
+      path: '/health-tips/$slug'
+      fullPath: '/health-tips/$slug'
+      preLoaderRoute: typeof HealthTipsSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/email/unsubscribe': {
       id: '/email/unsubscribe'
@@ -3273,6 +3339,20 @@ declare module '@tanstack/react-router' {
       path: '/admin-sales-reports'
       fullPath: '/admin-sales-reports'
       preLoaderRoute: typeof AuthenticatedAdminSalesReportsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin-push-campaigns': {
+      id: '/_authenticated/admin-push-campaigns'
+      path: '/admin-push-campaigns'
+      fullPath: '/admin-push-campaigns'
+      preLoaderRoute: typeof AuthenticatedAdminPushCampaignsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin-medical-content': {
+      id: '/_authenticated/admin-medical-content'
+      path: '/admin-medical-content'
+      fullPath: '/admin-medical-content'
+      preLoaderRoute: typeof AuthenticatedAdminMedicalContentRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin-marketing-campaigns': {
@@ -3929,6 +4009,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminInventoryIntelRoute: typeof AuthenticatedAdminInventoryIntelRoute
   AuthenticatedAdminInventorySyncLogsRoute: typeof AuthenticatedAdminInventorySyncLogsRoute
   AuthenticatedAdminMarketingCampaignsRoute: typeof AuthenticatedAdminMarketingCampaignsRoute
+  AuthenticatedAdminMedicalContentRoute: typeof AuthenticatedAdminMedicalContentRoute
+  AuthenticatedAdminPushCampaignsRoute: typeof AuthenticatedAdminPushCampaignsRoute
   AuthenticatedAdminSalesReportsRoute: typeof AuthenticatedAdminSalesReportsRoute
   AuthenticatedAdminSecurityGuardianRoute: typeof AuthenticatedAdminSecurityGuardianRoute
   AuthenticatedAdminSlackTestRoute: typeof AuthenticatedAdminSlackTestRoute
@@ -3965,6 +4047,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminInventorySyncLogsRoute,
   AuthenticatedAdminMarketingCampaignsRoute:
     AuthenticatedAdminMarketingCampaignsRoute,
+  AuthenticatedAdminMedicalContentRoute: AuthenticatedAdminMedicalContentRoute,
+  AuthenticatedAdminPushCampaignsRoute: AuthenticatedAdminPushCampaignsRoute,
   AuthenticatedAdminSalesReportsRoute: AuthenticatedAdminSalesReportsRoute,
   AuthenticatedAdminSecurityGuardianRoute:
     AuthenticatedAdminSecurityGuardianRoute,
@@ -4134,8 +4218,10 @@ const rootRouteChildren: RootRouteChildren = {
   YemenDebugRoute: YemenDebugRoute,
   DoctorJoinRoute: DoctorJoinRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  HealthTipsSlugRoute: HealthTipsSlugRoute,
   ProductIdRoute: ProductIdRoute,
   TestFeaturesRoute: TestFeaturesRoute,
+  HealthTipsIndexRoute: HealthTipsIndexRoute,
   ApiInternalCollectFeedbackRoute: ApiInternalCollectFeedbackRoute,
   ApiPublicContactRoute: ApiPublicContactRoute,
   ApiPublicDoctorJoinRoute: ApiPublicDoctorJoinRoute,
