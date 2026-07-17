@@ -1060,6 +1060,81 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_security_audit: {
+        Row: {
+          action: string
+          actor: string | null
+          actor_id: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          resource: string | null
+          result: string | null
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          resource?: string | null
+          result?: string | null
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          resource?: string | null
+          result?: string | null
+        }
+        Relationships: []
+      }
+      ai_security_events: {
+        Row: {
+          action_taken: string | null
+          actor_id: string | null
+          created_at: string
+          details: Json
+          event_type: string
+          id: string
+          resolved: boolean
+          resolved_at: string | null
+          risk_score: number
+          severity: string
+          source: string | null
+        }
+        Insert: {
+          action_taken?: string | null
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          event_type: string
+          id?: string
+          resolved?: boolean
+          resolved_at?: string | null
+          risk_score?: number
+          severity?: string
+          source?: string | null
+        }
+        Update: {
+          action_taken?: string | null
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          event_type?: string
+          id?: string
+          resolved?: boolean
+          resolved_at?: string | null
+          risk_score?: number
+          severity?: string
+          source?: string | null
+        }
+        Relationships: []
+      }
       ai_tool_events: {
         Row: {
           agent_id: string
