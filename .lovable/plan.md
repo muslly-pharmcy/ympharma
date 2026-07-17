@@ -1,146 +1,81 @@
-# PHASE 6 — Business Intelligence Galaxy + PHASE 7 — Titan Security Guardian
+## Phase 9 + Phase 10 (Web) + Aden Doctors Seed
 
-Both phases adapted to the actual codebase (`BaseAgent`, `EventBus`, `sun-tick`, existing tables) and Lovable Cloud rules. No fictional imports (`@/lib/supabase` → real `supabase` client / server publishable client where needed).
-
----
-
-## Phase 6 — Business Intelligence Galaxy
-
-### Migration (single call)
-```sql
-CREATE TABLE public.ai_business_insights (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  insight_type text NOT NULL,     -- FINANCIAL | SALES | MARKET | EXECUTIVE
-  summary text NOT NULL,
-  recommendation jsonb NOT NULL DEFAULT '{}'::jsonb,
-  metrics jsonb NOT NULL DEFAULT '{}'::jsonb,
-  confidence numeric NOT NULL DEFAULT 0,
-  agent_name text,
-  created_at timestamptz NOT NULL DEFAULT now()
-);
-GRANT SELECT, INSERT ON public.ai_business_insights TO authenticated;
-GRANT ALL ON public.ai_business_insights TO service_role;
-ALTER TABLE public.ai_business_insights ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "admins read" ON public.ai_business_insights FOR SELECT
-  TO authenticated USING (public.has_role(auth.uid(),'admin'));
-CREATE POLICY "service writes" ON public.ai_business_insights FOR INSERT
-  TO service_role WITH CHECK (true);
-CREATE INDEX ai_business_insights_type_idx ON public.ai_business_insights(insight_type, created_at DESC);
-```
-
-### New files
-```
-src/ai/intelligence/
-├── core/
-│   ├── metric-engine.ts        # queries real tables: orders, catalog_products, inv_stock_batches
-│   ├── intelligence-engine.ts  # rule-based insights over metrics
-│   └── insight-writer.ts       # inserts into ai_business_insights (server-only)
-├── finance/cfo-agent.ts        # extends BaseAgent, uses MetricEngine
-├── sales/
-│   ├── sales-agent.ts
-│   └── demand-predictor.ts     # weighted moving average over demand_forecasts/orders
-├── market/market-agent.ts
-└── executive/ceo-agent.ts      # aggregates other agents' latest insights
-```
-
-### Events (append to `src/ai/events/event-types.ts`)
-`DAILY_REPORT`, `SALES_DROP`, `PROFIT_CHANGE`, `GROWTH_OPPORTUNITY`, `FORECAST_READY`.
-
-### Registration & scheduling
-- Register the 4 BI agents in `src/ai/agents/register.ts`.
-- Add tool permissions rows for each (read-only against real tables).
-- Add `pg_cron` job `ai-daily-business-report` running every 6 hours → calls `POST /api/public/ai/business-tick` (new TSS server route, authenticates via anon `apikey`) which emits `DAILY_REPORT` through the EventBus.
-
-### Dashboard
-`src/routes/_authenticated/admin-business-intel.tsx` — Arabic RTL, teal palette:
-- Latest CEO summary card
-- Financial / Sales / Market insight columns (from `ai_business_insights`)
-- Demand forecast table (top 10 SKUs)
-Read via new server fn `businessInsights()` (admin-gated, uses `supabaseAdmin` only inside the handler).
+Three parallel work streams — all web-only, no mobile/desktop apps this round.
 
 ---
 
-## Phase 7 — Titan Security Guardian
+### 1. Phase 9 — Visitor Intelligence + AI Medical Content Engine
 
-### Migration
-```sql
-CREATE TABLE public.ai_security_events (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  event_type text NOT NULL,   -- LOGIN_FAILED, RLS_VIOLATION, ...
-  severity text NOT NULL DEFAULT 'medium',  -- low|medium|high|critical
-  source text,
-  actor_id uuid,
-  details jsonb NOT NULL DEFAULT '{}'::jsonb,
-  risk_score integer NOT NULL DEFAULT 0,
-  action_taken text,          -- ALLOW | REVIEW | BLOCK
-  resolved boolean NOT NULL DEFAULT false,
-  resolved_at timestamptz,
-  created_at timestamptz NOT NULL DEFAULT now()
-);
-CREATE TABLE public.ai_security_audit (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  actor text,
-  actor_id uuid,
-  action text NOT NULL,
-  resource text,
-  result text,
-  metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
-  created_at timestamptz NOT NULL DEFAULT now()
-);
--- grants + RLS: SELECT admin only, INSERT service_role only
-CREATE INDEX ai_security_events_type_idx ON public.ai_security_events(event_type, created_at DESC);
-CREATE INDEX ai_security_events_open_idx ON public.ai_security_events(resolved, severity);
-CREATE INDEX ai_security_audit_actor_idx ON public.ai_security_audit(actor_id, created_at DESC);
-```
-(Reuse existing `identity_audit_events` for auth events instead of duplicating.)
+**Database (one migration):**
+- `visitor_sessions` — visitor_token (uuid cookie), ip_hash (SHA-256), country, language, device, browser, pages_viewed jsonb, interests jsonb, first_visit, created_at, last_seen_at
+- `medical_posts` — title, slug, category, content (markdown), summary, language (ar/en), tags jsonb, ai_generated, approved, published_at, publish_date, cover_image_url
+- RLS: public SELECT on `medical_posts` where `approved=true`; `visitor_sessions` service_role only; admin can approve posts
 
-### New files
-```
-src/security/ai/
-├── core/
-│   ├── security-engine.ts      # calculateRisk() + analyze()
-│   ├── threat-detector.ts      # pattern rules (brute force, spikes)
-│   └── policy-engine.ts        # ALLOW/REVIEW/BLOCK matrix
-├── audit/audit-agent.ts        # server-only insert into ai_security_audit
-├── database/rls-monitor.ts     # scans query strings/JSON for dangerous keywords
-├── secrets/secret-guardian.ts  # regex scan for sk-*, service_role, apikey leaks
-└── events/security-events.ts   # SECURITY_EVENTS constants
-```
+**Server functions & routes:**
+- `src/lib/visitor.functions.ts` — `trackVisitor()` on page-load: hashes IP, reads `accept-language` + `user-agent`, upserts session. Country from `cf-ipcountry` / `x-vercel-ip-country` headers (free, no external API). **No city, no consent banner needed** (per user's chosen minimum profile).
+- `src/ai/content/medical-content-engine.ts` — generates a daily post via Lovable AI Gateway (Gemini 3 Flash) with weekly calendar rotation (Sun: awareness, Mon: heart, Tue: nutrition, Wed: dental, Thu: children, Fri: medication safety, Sat: fitness)
+- `src/routes/api/public/ai/content-tick.ts` — cron endpoint, generates + inserts pending post
+- `pg_cron` daily at 06:00 UTC
 
-### Wiring
-- `sun-tick` worker calls `SecurityEngine.analyze(event)` **before** dispatch; BLOCK short-circuits + inserts `ai_security_events` with `action_taken='BLOCK'`.
-- Register `GuardianAgent` (already exists) as consumer of `SECURITY_EVENTS.*` → routes high/critical to `operations_alerts_v14` for Slack.
-- `AuditAgent` records agent actions from `ai_actions` triggers (add trigger on INSERT).
-- Optional: nightly `pg_cron` `security-daily-sweep` → hits `/api/public/security/sweep` which scans last-24h `ai_actions`, `error_logs`, `identity_audit_events` for anomalies.
-
-### Dashboard
-`src/routes/_authenticated/admin-security-guardian.tsx` — 4 sections:
-1. Open security events (severity color-coded)
-2. Last 50 audit rows
-3. Risk heatmap (event_type × severity counts, 7d)
-4. Secret-scan results & RLS monitor summary
-
-Server fn `securityOverview()` (admin-only) with parallel `Promise.all` reads.
+**UI:**
+- `/admin-medical-content` — list pending/approved posts, approve/edit/reject
+- `/health-tips` public route — approved posts listing, RTL Arabic-first
+- `/health-tips/$slug` — single post with SEO head()
 
 ---
 
-## Technical Notes
+### 2. Phase 10 — Consent + Web Push + 72h Campaigns
 
-- All BaseAgents follow the existing pattern in `src/ai/agents/medical/pharmacist-agent.ts` (`success()` helper, `execute(event)` signature).
-- Real Supabase client imports:
-  - Agents run inside `sun-tick` handler → use dynamically-imported `supabaseAdmin` scoped to handler body.
-  - Dashboards → server fn with `requireSupabaseAuth` + `has_role` check, then `supabaseAdmin` for aggregation reads.
-- No new secrets required — all cron uses existing anon `apikey` pattern.
-- No changes to `pg_cron` auth model, no fictional `@/lib/supabase` path.
-- Type safety: return plain DTOs from all server fns; no `unknown` fields in returned objects (matches earlier serializer constraint).
+**Web Push (VAPID):**
+- Generate VAPID public/private keypair, store private via `secrets--generate_secret`, public as `VITE_VAPID_PUBLIC_KEY` in `.env`
+- Install `web-push` npm package
 
-## Deliverables
+**Database:**
+- `push_subscriptions` — user_id nullable, visitor_token, endpoint, p256dh, auth, user_agent, active, subscribed_at
+- `ai_campaigns` — name, frequency (`72_hours`|`weekly`|`daily`), content_type, target_rules jsonb, active
+- `campaign_deliveries` — campaign_id, subscription_id, sent_at, opened_at, clicked_at (dedupe key)
 
-1. One migration for Phase 6 tables.
-2. One migration for Phase 7 tables + `ai_actions` audit trigger.
-3. ~15 new source files across `src/ai/intelligence/` and `src/security/ai/`.
-4. Two new admin dashboards + two new server fn modules.
-5. Two new `/api/public/*` cron endpoints + two `pg_cron` schedules.
-6. Updated `src/ai/agents/register.ts` and `src/ai/bootstrap.ts`.
+**Client:**
+- `src/lib/push/register-sw.ts` + `public/sw.js` service worker
+- `PushOptInCard` component — appears after 20s or 3rd page-view (not intrusive), explains value, calls `Notification.requestPermission()`, subscribes with VAPID public key
+- Stores subscription via server function
 
-Estimated scope: ~800 LOC + 2 migrations. Executed as single pass; Phase 8 (Evolution Engine) follows on approval.
+**Server:**
+- `src/ai/engagement/notification-engine.ts` — sends via `web-push`, respects consent, logs deliveries, dedupes
+- `src/ai/engagement/campaign-engine.ts` — smart frequency (new visitor: 7d, active: 3d, customer: 2d) reading from `campaign_deliveries.sent_at`
+- `src/routes/api/public/engagement/dispatch.ts` — cron every 6h picks due subscribers + latest approved post + sends push
+- `pg_cron` every 6 hours
+
+**UI:**
+- `/admin-campaigns` — CRUD campaigns, view delivery stats (sent/opened/clicked)
+
+---
+
+### 3. Aden Doctors & Hospitals Seed
+
+**Migration (data seed via `INSERT` in migration since it's deterministic):**
+- 7 hospitals into `hc_locations`: عدن الألماني الدولي، الأمريكي الحديث، الوالي، صابر التخصصي، البريهي، الجمهوري التعليمي، + one placeholder for المصلي itself
+- Each with real phone (02-329700 etc.), address (المنصورة/كريتر), city="عدن", country="اليمن"
+- Emergency number `195` stored in `app_settings` as `emergency_hotline`
+- ~20 doctors into `hc_doctors` (from the list you provided): ناهد طاهر، عمر باقريب، عبد الفتاح السعيدي، قاسم الأصبحي، أمين السعدي، هدى باذيب، etc.
+- Link via `hc_doctor_locations` (each doctor → their listed hospitals)
+- Specialties in `hc_specialties`: تغذية علاجية، قلب وأوعية، عظام، مخ وأعصاب، باطنية وسكري، مسالك بولية، نساء وولادة
+- Link via `hc_doctor_specialties`
+
+**Note:** Doctor phone numbers explicitly NOT stored (per your source: "إدارة المستشفيات تمنع نشر أرقام الهواتف الشخصية"). Contact goes via hospital switchboard which is on the location row.
+
+---
+
+### Out of scope this round
+- Mobile apps (Android/iOS)
+- Desktop app (Electron)
+- Email/WhatsApp channels (already exist as separate systems)
+- Full geo-IP city detection + consent banner
+- Multi-language auto-translation of posts (posts written in AR/EN, user picks language per post)
+
+### Deliverables
+- 3 migrations (visitor+content, push+campaigns, Aden seed)
+- ~15 new TS files under `src/ai/engagement/`, `src/ai/content/`, `src/lib/`, `src/routes/api/public/`
+- 4 new admin routes + 2 public routes
+- 1 service worker + 1 opt-in component
+- 2 pg_cron jobs (content daily 06:00, dispatch every 6h)

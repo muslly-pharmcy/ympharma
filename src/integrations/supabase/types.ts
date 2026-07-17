@@ -5397,6 +5397,66 @@ export type Database = {
         }
         Relationships: []
       }
+      medical_posts: {
+        Row: {
+          ai_generated: boolean
+          approved: boolean
+          approved_at: string | null
+          approved_by: string | null
+          category: string
+          content: string
+          cover_image_url: string | null
+          created_at: string
+          id: string
+          language: string
+          publish_date: string
+          published_at: string | null
+          slug: string
+          summary: string | null
+          tags: Json
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          ai_generated?: boolean
+          approved?: boolean
+          approved_at?: string | null
+          approved_by?: string | null
+          category: string
+          content: string
+          cover_image_url?: string | null
+          created_at?: string
+          id?: string
+          language?: string
+          publish_date?: string
+          published_at?: string | null
+          slug: string
+          summary?: string | null
+          tags?: Json
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          ai_generated?: boolean
+          approved?: boolean
+          approved_at?: string | null
+          approved_by?: string | null
+          category?: string
+          content?: string
+          cover_image_url?: string | null
+          created_at?: string
+          id?: string
+          language?: string
+          publish_date?: string
+          published_at?: string | null
+          slug?: string
+          summary?: string | null
+          tags?: Json
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
@@ -7944,6 +8004,51 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      visitor_sessions: {
+        Row: {
+          browser: string | null
+          country: string | null
+          created_at: string
+          device: string | null
+          first_visit: boolean
+          id: string
+          interests: Json
+          ip_hash: string | null
+          language: string | null
+          last_seen_at: string
+          pages_viewed: Json
+          visitor_token: string
+        }
+        Insert: {
+          browser?: string | null
+          country?: string | null
+          created_at?: string
+          device?: string | null
+          first_visit?: boolean
+          id?: string
+          interests?: Json
+          ip_hash?: string | null
+          language?: string | null
+          last_seen_at?: string
+          pages_viewed?: Json
+          visitor_token: string
+        }
+        Update: {
+          browser?: string | null
+          country?: string | null
+          created_at?: string
+          device?: string | null
+          first_visit?: boolean
+          id?: string
+          interests?: Json
+          ip_hash?: string | null
+          language?: string | null
+          last_seen_at?: string
+          pages_viewed?: Json
+          visitor_token?: string
         }
         Relationships: []
       }
