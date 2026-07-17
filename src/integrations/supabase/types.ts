@@ -785,6 +785,74 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_feedback: {
+        Row: {
+          created_at: string
+          decision_id: string
+          feedback: Json
+          id: string
+          rating: number
+          submitted_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          decision_id: string
+          feedback?: Json
+          id?: string
+          rating: number
+          submitted_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          decision_id?: string
+          feedback?: Json
+          id?: string
+          rating?: number
+          submitted_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_feedback_decision_id_fkey"
+            columns: ["decision_id"]
+            isOneToOne: false
+            referencedRelation: "ai_decisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_memory: {
+        Row: {
+          agent_name: string
+          context: Json
+          created_at: string
+          expires_at: string | null
+          id: string
+          importance: number
+          memory_type: string
+          updated_at: string
+        }
+        Insert: {
+          agent_name: string
+          context?: Json
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          importance?: number
+          memory_type: string
+          updated_at?: string
+        }
+        Update: {
+          agent_name?: string
+          context?: Json
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          importance?: number
+          memory_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ai_neural_synaptic_log: {
         Row: {
           created_at: string
