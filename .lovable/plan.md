@@ -1,34 +1,31 @@
-## Twilio WhatsApp → SuperBrain Webhook (Adapted to TanStack Start)
+## Sovereign Command Center — 4-Tab Admin Shell
 
-Your stack does not use Supabase Edge Functions for app logic. The existing Meta Cloud API webhook lives at `src/routes/api/public/hooks/whatsapp/brain.ts`. I'll add a parallel Twilio endpoint that follows the same pattern and reuses the real `SuperBrainSovereign` engine and `wa_allowlist`.
+Turn the pasted `App.tsx` shell into a proper route in this TanStack Start app.
+
+### Where it lives
+- New route: `src/routes/_authenticated/admin-sovereign.tsx` (admin-only, gated by the existing `_authenticated` layout + role check pattern used by other admin pages).
+- No changes to `src/routes/__root.tsx` or the global layout.
 
 ### What I'll build
+1. **Fix the bugs in the pasted JSX** before shipping:
+   - Doctors button has a stray `</nav>` that closes the nav early — will restore correct tag order.
+   - Wire `activeTab` state exactly as pasted (4 tabs: brain / maternal / doctors / suppliers).
 
-1. **New public route** `src/routes/api/public/hooks/whatsapp/twilio.ts`
-   - `POST` handler parsing `application/x-www-form-urlencoded` (Twilio's format) via `request.formData()`.
-   - Extract `From` (strip `whatsapp:` prefix, keep E.164) and `Body`.
-   - Verify Twilio signature using `X-Twilio-Signature` header + `TWILIO_AUTH_TOKEN` (HMAC-SHA1 over URL + sorted POST params). Reject with 403 if invalid.
-   - Check sender against `public.wa_allowlist` (active = true) using `supabaseAdmin` (dynamic import inside handler). Silently 200 with empty TwiML if not allowed.
-   - Call the real engine: `executeNeuralInference({ patientId: from, message: body, district: allowlist.district ?? 'عدن' })` from `src/modules/ai-brain/services/executeNeuralInference.functions.ts` — invoke the underlying server logic directly (not the RPC stub).
-   - Format Arabic response mirroring the blueprint (decision, safety alternative, logistic branch/ETA, marketing trigger, speed).
-   - XML-escape the response body before embedding in TwiML.
-   - Return `<Response><Message>…</Message></Response>` with `Content-Type: text/xml`.
+2. **Tab content wiring:**
+   - `brain` → renders existing `SovereignEngineDashboard` from `@/modules/ai-brain/components/SovereignEngineDashboard`.
+   - `maternal` → `MaternalCarePortal` does NOT exist yet. I'll add a minimal placeholder component `src/modules/subscriptions/components/MaternalCarePortal.tsx` (static Arabic "Coming soon" card matching the dark theme) so the route compiles. Full portal is out of scope for this turn.
+   - `doctors` and `suppliers` → static demo cards exactly as pasted (sample doctors + supplier KPIs).
 
-2. **Secret**: add `TWILIO_AUTH_TOKEN` via `secrets--add_secret` (request from user during build).
+3. **Admin gate:** on mount, verify the caller has `admin` or `owner` role via existing `has_role` RPC; non-admins see an Arabic "unauthorized" card. Same pattern already used in `/admin-*` routes.
 
-3. **Docs**: append a short section to `docs/engineering/reports/` describing the Twilio webhook URL:
-   `https://ympharma.lovable.app/api/public/hooks/whatsapp/twilio` — to configure in Twilio Console → WhatsApp Sandbox / Sender → "When a message comes in".
+4. **RTL + dark theme** preserved from the paste (`bg-slate-950`, `dir="rtl"`, gradient logo, lucide icons).
 
-### What I will NOT do
+### Out of scope (say so explicitly)
+- No new database tables, RPCs, or migrations.
+- No real data for the doctors / suppliers tabs — they stay as the pasted mock cards. Wire real data in a follow-up turn.
+- `MaternalCarePortal` is a placeholder only.
 
-- Won't create `supabase/functions/whatsapp-brain/index.ts` — Deno edge functions aren't the runtime for app logic here, and they can't import from `src/` in this project.
-- Won't change the existing Meta webhook or the SuperBrain engine code.
-- Won't broaden `wa_allowlist` access.
+### Access
+After build: navigate to `/admin-sovereign` while signed in as an admin.
 
-### Technical notes
-
-- Signature check uses Node `crypto` (available under nodejs_compat): `HMAC-SHA1(authToken, fullUrl + concatenatedSortedParams)` → base64, compared timing-safe to the header.
-- Full URL must be the public URL Twilio called (reconstruct from `x-forwarded-proto` + `host` + pathname).
-- Allowlist lookup + engine call already exist; we're reusing them exactly like the Meta hook.
-
-Confirm and I'll implement, plus prompt you for the `TWILIO_AUTH_TOKEN` value.
+Confirm and I'll implement.
