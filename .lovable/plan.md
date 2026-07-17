@@ -1,73 +1,80 @@
-# ☀️ AI SUN CORE — Phase 1 Plan
+# 📦 PHOENIX PHASE 6A — Inventory Intelligence Core
 
-النواة الشمسية للمنظومة. نبني على ما هو **موجود فعلاً** (`agent_events` + `EventDispatcher` + `SuperBrainSovereign` + `event-consumer`) بدلاً من إعادة اختراع طبقة موازية.
+نبني على البنية الحقيقية الموجودة (`inv_stock_batches`, `inv_stock_movements`, `orders`, `ai_agents`, `agent_events`, ☀️ Sun Core) — بدون تكرار طبقات.
 
 ## المبدأ الحاكم
-- **لا نُنشئ جدول `ai_core_events` جديد** — عندنا `agent_events` يعمل مع DLQ و FIFO drain. تكرارُه يُنشئ ازدواجاً في مصدر الحقيقة.
-- **AI SUN CORE = طبقة تنسيق (Orchestrator)** فوق: Event Bus + SuperBrainSovereign + Agent Registry، وليست بديلاً لها.
-- كل قرار يُسجَّل في **ذاكرة عصبية** قابلة للاستعلام ليتعلّم النظام.
+- **الوكيل موجود**: `ai_agents.code = 'inventory'` مُسجّل مسبقاً في Sun Core مع `capabilities=[demand_forecast,restock_alert,stale_detect]`. سنستخدمه بدل إنشاء وكيل جديد.
+- **الأحداث موجودة**: `STOCK_RECEIVED / STOCK_MOVEMENT_CREATED / EXPIRY_ALERT_CREATED` مُشترَك بها الوكيل. Phase 6A تضيف حَسّاسات المخرجات فقط.
+- **بيانات المبيعات**: نقرأ من `orders` + الحركات، بدون طبقة `sales` وهمية.
 
-## المخرجات (Phase 1 فقط)
+## المخرجات
 
-### 1) Sun Engine — طبقة تنسيق مركزية
-`src/ai/sun-core/`
+### 1) Migration — 3 جداول (لا 4)
+- `inventory_health_scores`: `product_id`, `score` (0-100), `status` (healthy/warning/critical/dead), `availability_pct`, `velocity_daily`, `expiry_risk`, `days_of_cover`, `recommendation`, `computed_at`. **UNIQUE(product_id)** — تحديث مكاني بدل تراكم.
+- `demand_forecasts`: `product_id`, `horizon_days` (7/30), `expected_units`, `method` (moving_avg/weighted), `confidence`, `computed_at`. **UNIQUE(product_id, horizon_days)**.
+- `purchase_recommendations`: `product_id`, `recommended_qty`, `reason`, `urgency` (low/med/high/critical), `preferred_supplier_id` (FK اختياري)، `expected_stockout_at`, `status` (open/approved/dismissed/ordered), `created_at`, `resolved_at`.
+
+كل الجداول: GRANT للمدراء (SELECT) + service_role كامل + RLS + `has_role`.
+
+### 2) Module `src/modules/inventory-intelligence/`
 ```
-sun-engine.ts         → ingest(event) → classify → route → record
-event-router.ts       → يربط event_name بـ agent(s) عبر AgentRegistry
-decision-engine.ts    → يستدعي SuperBrainSovereign.decide() ويُطبّق guardrails
-memory-manager.ts     → يكتب/يقرأ neural_memory
-agent-registry.ts     → تسجيل الوكلاء (Pharmacist/Inventory/Revenue/Customer/Security) + capabilities
+domain/
+  stock-health.ts      → دوال حساب Score نقية (بدون I/O)
+  demand-model.ts      → MovingAverage 7/30 يوم
+  expiry-model.ts      → حساب مخاطر الانتهاء من دفعات inv_stock_batches
+server/
+  recompute.server.ts  → snapshot دورية لجميع المنتجات (batch)
+  intelligence.functions.ts → sunListHealth, sunListRecommendations, recomputeNow (admin)
+events/
+  index.ts             → LOW_STOCK_PREDICTED / PURCHASE_RECOMMENDED / DEAD_STOCK_DETECTED
 index.ts
 ```
-- **لا يستبدل** `event-consumer.ts` — بل يُستدعى منه كـ `handler` لأحداث مصنّفة `SUN_*` أو أحداث يقرر الـ router أنها تحتاج تحليلاً مركزياً.
 
-### 2) Neural Memory — ذاكرة القرارات
-جدولان جديدان (مع GRANTs + RLS):
-- `sun_decisions`: `event_id`, `event_name`, `agent_dispatched`, `decision`, `confidence`, `reasoning`, `outcome`, `latency_ms`, `created_at`
-- `sun_memory`: `scope` (customer/product/market/agent), `subject_id`, `key`, `value jsonb`, `weight`, `last_seen_at` — نموذج key-value مرن للتعلّم التراكمي.
+### 3) SQL RPC واحد: `inv_intel_snapshot()`
+دالة `SECURITY DEFINER` تحسب:
+- Availability = min(1, current_qty / target_qty)
+- Velocity = SUM(order_items في آخر 30 يوم) / 30
+- DaysOfCover = current_qty / velocity
+- ExpiryRisk = نسبة الكمية المنتهية خلال 90 يوم من `inv_stock_batches`
+- Score مركّب موزون → status + recommendation
+- UPSERT إلى `inventory_health_scores` + INSERT إلى `purchase_recommendations` عند `days_of_cover < 7`.
 
-استعلامات: `recall(scope, subject_id)`، `remember(scope, subject_id, key, value)`.
+### 4) Cron كل 6 ساعات
+`pg_cron` يستدعي `select public.inv_intel_snapshot();` مباشرة (SQL-only، لا حاجة لـ endpoint). ينشر `PURCHASE_RECOMMENDED` في `agent_events` → يمرّ عبر Sun Engine → يُرسَل للوكيل `inventory`.
 
-### 3) Agent Registry (جدول واحد)
-`ai_agents`: `code` (pharmacist/inventory/revenue/customer_galaxy/security_guardian), `capabilities jsonb`, `event_subscriptions text[]`, `enabled`, `health`. يُبذَر بالخمسة وكلاء المذكورين.
+### 5) لوحة `/admin-inventory-intel` تحت `_authenticated`
+- كروت: صحة عامة، منتجات حرجة، توصيات مفتوحة، مخزون راكد.
+- جدول Top-20 حسب Score (تصاعدي) مع action "توصية شراء".
+- زر "احسب الآن" (admin) → server fn ينادي `recomputeNow`.
 
-### 4) ربط بالبنية الحالية
-- `event-consumer.ts`: عند حدث غير معروف أو حدث مُعلَّم `sun:*` → ينادي `SunEngine.ingest(ev)` بدلاً من DLQ فوري.
-- `SuperBrainSovereign.decide()` يبقى قلب التفكير — Sun Engine يزوّده بـ `memory context` من `sun_memory` ويسجّل النتيجة في `sun_decisions`.
+### 6) اختبارات
+`src/__tests__/unit/inventory-intelligence/` — 4 اختبارات: moving-avg، expiry-risk، composite-score، recommendation-threshold.
 
-### 5) لوحة رصد (Read-only)
-مسار `/admin-sun-core` تحت `_authenticated`:
-- عدّاد أحداث/دقيقة، متوسط زمن القرار، آخر 50 قراراً، توزيع الوكلاء المُستدعَين، صحة كل وكيل.
-
-## ما هو خارج نطاق Phase 1 (يأتي لاحقاً)
-- 100/800 وكيل — نبدأ بـ 5 فقط.
-- Evolution Engine (تطوير ذاتي).
-- Market/Knowledge Planets.
-- n8n / WhatsApp / ERP orchestration أعمق (موجود بالفعل جزئياً).
+## خارج نطاق 6A (يأتي في 6B / 7)
+- Autonomous PO creation، اختيار مورد ذكي، Phase 7 Pharmacist Brain.
+- Seasonality models — نبدأ بـ Moving Average فقط.
 
 ## Technical Details
 
-**Migration واحدة** تُنشئ:
-```sql
-CREATE TABLE public.ai_agents (...);       -- + GRANT + RLS
-CREATE TABLE public.sun_decisions (...);   -- + GRANT + RLS (admin/service read)
-CREATE TABLE public.sun_memory (...);      -- + GRANT + RLS
--- Seed 5 agents
+**Composite Score (weighted):**
 ```
+score = 0.35*availability + 0.25*(1 - expiry_risk)
+      + 0.25*velocity_signal + 0.15*margin_signal
+```
+حيث `velocity_signal = clamp(days_of_cover/14, 0, 1)` و `margin_signal` من `products.price - products.cost` (إن وُجد، وإلا 0.5 محايد).
 
-**Server functions** (`src/ai/sun-core/*.functions.ts`):
-- `sunIngest({ eventId })` — يُستدعى من consumer، محمي بـ service_role internally.
-- `sunListDecisions({ limit })` — `requireSupabaseAuth` + admin check للوحة.
+**Recommendation urgency:**
+- `days_of_cover < 3` → critical
+- `< 7` → high
+- `< 14` → medium
+- expiry_risk > 0.3 & velocity < 1/day → dead_stock (dismiss buy, mark clearance)
 
-**تعديل واحد** على `src/routes/api/public/hooks/event-consumer.ts`:
-- في الـ `default` case: بدل رمي DLQ فوراً، جرّب `SunEngine.ingest(ev)` أولاً، وإن رجع `unhandled` → DLQ.
+**Events emitted:** بواسطة trigger على `purchase_recommendations` عند INSERT: يُدرج صفّاً في `agent_events` باسم `PURCHASE_RECOMMENDED` + `entity_id=recommendation.id`. Sun Engine يوجّه للوكيل `inventory` (سيحتاج إضافة الحدث لـ `event_subscriptions` وللـ `event-router`).
 
-**اختبارات**:
-- `src/__tests__/unit/ai-sun-core/sun-engine.test.ts` — ingest + routing + memory recall.
+**Verification:**
+- Migration + linter نظيف.
+- `bunx vitest run inventory-intelligence` أخضر.
+- `select public.inv_intel_snapshot();` يعبّئ الجداول.
+- `/admin-inventory-intel` يعرض بيانات حقيقية.
 
-## Verification
-- Migration تمرّ + linter نظيف.
-- `bunx vitest run` يمرّ.
-- `/admin-sun-core` يعرض قراراً واحداً على الأقل بعد dispatch حدث `TestEvent`.
-
-هل أنفّذ هذه الخطة؟
+هل أنفّذ؟
