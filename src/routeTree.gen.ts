@@ -119,6 +119,7 @@ import { Route as AuthenticatedAdminAuditRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminAlertSettingsRouteImport } from './routes/_authenticated/admin-alert-settings'
 import { Route as AuthenticatedAdminAiCopilotRouteImport } from './routes/_authenticated/admin-ai-copilot'
 import { Route as AuthenticatedAdminAiBrainRouteImport } from './routes/_authenticated/admin-ai-brain'
+import { Route as AuthenticatedAdminAgentUniverseRouteImport } from './routes/_authenticated/admin-agent-universe'
 import { Route as AuthenticatedAdminAgentRunsRouteImport } from './routes/_authenticated/admin-agent-runs'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/public/whatsapp-webhook'
@@ -178,6 +179,7 @@ import { Route as ApiPublicHooksAgentAlertsRouteImport } from './routes/api/publ
 import { Route as ApiPublicHealthQuickCheckRouteImport } from './routes/api/public/health.quick-check'
 import { Route as ApiPublicHealthFullCheckRouteImport } from './routes/api/public/health.full-check'
 import { Route as ApiPublicAnalyticsIngestRouteImport } from './routes/api/public/analytics/ingest'
+import { Route as ApiPublicAiWorldHealthRouteImport } from './routes/api/public/ai/world-health'
 import { Route as ApiPublicAiSunTickRouteImport } from './routes/api/public/ai/sun-tick'
 import { Route as AuthenticatedPharmacistPrescriptionReviewIdRouteImport } from './routes/_authenticated/pharmacist/prescription-review.$id'
 import { Route as AuthenticatedPharmacistInvoiceReviewIdRouteImport } from './routes/_authenticated/pharmacist/invoice-review.$id'
@@ -764,6 +766,12 @@ const AuthenticatedAdminAiBrainRoute =
     path: '/admin-ai-brain',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminAgentUniverseRoute =
+  AuthenticatedAdminAgentUniverseRouteImport.update({
+    id: '/admin-agent-universe',
+    path: '/admin-agent-universe',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminAgentRunsRoute =
   AuthenticatedAdminAgentRunsRouteImport.update({
     id: '/admin-agent-runs',
@@ -1104,6 +1112,11 @@ const ApiPublicAnalyticsIngestRoute =
     path: '/api/public/analytics/ingest',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicAiWorldHealthRoute = ApiPublicAiWorldHealthRouteImport.update({
+  id: '/api/public/ai/world-health',
+  path: '/api/public/ai/world-health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicAiSunTickRoute = ApiPublicAiSunTickRouteImport.update({
   id: '/api/public/ai/sun-tick',
   path: '/api/public/ai/sun-tick',
@@ -1271,6 +1284,7 @@ export interface FileRoutesByFullPath {
   '/unsubscribe': typeof UnsubscribeRoute
   '/yemen-debug': typeof YemenDebugRoute
   '/admin-agent-runs': typeof AuthenticatedAdminAgentRunsRoute
+  '/admin-agent-universe': typeof AuthenticatedAdminAgentUniverseRoute
   '/admin-ai-brain': typeof AuthenticatedAdminAiBrainRoute
   '/admin-ai-copilot': typeof AuthenticatedAdminAiCopilotRoute
   '/admin-alert-settings': typeof AuthenticatedAdminAlertSettingsRoute
@@ -1316,6 +1330,7 @@ export interface FileRoutesByFullPath {
   '/pharmacist/invoice-review/$id': typeof AuthenticatedPharmacistInvoiceReviewIdRoute
   '/pharmacist/prescription-review/$id': typeof AuthenticatedPharmacistPrescriptionReviewIdRoute
   '/api/public/ai/sun-tick': typeof ApiPublicAiSunTickRoute
+  '/api/public/ai/world-health': typeof ApiPublicAiWorldHealthRoute
   '/api/public/analytics/ingest': typeof ApiPublicAnalyticsIngestRoute
   '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
   '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
@@ -1455,6 +1470,7 @@ export interface FileRoutesByTo {
   '/unsubscribe': typeof UnsubscribeRoute
   '/yemen-debug': typeof YemenDebugRoute
   '/admin-agent-runs': typeof AuthenticatedAdminAgentRunsRoute
+  '/admin-agent-universe': typeof AuthenticatedAdminAgentUniverseRoute
   '/admin-ai-brain': typeof AuthenticatedAdminAiBrainRoute
   '/admin-ai-copilot': typeof AuthenticatedAdminAiCopilotRoute
   '/admin-alert-settings': typeof AuthenticatedAdminAlertSettingsRoute
@@ -1500,6 +1516,7 @@ export interface FileRoutesByTo {
   '/pharmacist/invoice-review/$id': typeof AuthenticatedPharmacistInvoiceReviewIdRoute
   '/pharmacist/prescription-review/$id': typeof AuthenticatedPharmacistPrescriptionReviewIdRoute
   '/api/public/ai/sun-tick': typeof ApiPublicAiSunTickRoute
+  '/api/public/ai/world-health': typeof ApiPublicAiWorldHealthRoute
   '/api/public/analytics/ingest': typeof ApiPublicAnalyticsIngestRoute
   '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
   '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
@@ -1641,6 +1658,7 @@ export interface FileRoutesById {
   '/unsubscribe': typeof UnsubscribeRoute
   '/yemen-debug': typeof YemenDebugRoute
   '/_authenticated/admin-agent-runs': typeof AuthenticatedAdminAgentRunsRoute
+  '/_authenticated/admin-agent-universe': typeof AuthenticatedAdminAgentUniverseRoute
   '/_authenticated/admin-ai-brain': typeof AuthenticatedAdminAiBrainRoute
   '/_authenticated/admin-ai-copilot': typeof AuthenticatedAdminAiCopilotRoute
   '/_authenticated/admin-alert-settings': typeof AuthenticatedAdminAlertSettingsRoute
@@ -1686,6 +1704,7 @@ export interface FileRoutesById {
   '/_authenticated/pharmacist/invoice-review/$id': typeof AuthenticatedPharmacistInvoiceReviewIdRoute
   '/_authenticated/pharmacist/prescription-review/$id': typeof AuthenticatedPharmacistPrescriptionReviewIdRoute
   '/api/public/ai/sun-tick': typeof ApiPublicAiSunTickRoute
+  '/api/public/ai/world-health': typeof ApiPublicAiWorldHealthRoute
   '/api/public/analytics/ingest': typeof ApiPublicAnalyticsIngestRoute
   '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
   '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
@@ -1827,6 +1846,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/yemen-debug'
     | '/admin-agent-runs'
+    | '/admin-agent-universe'
     | '/admin-ai-brain'
     | '/admin-ai-copilot'
     | '/admin-alert-settings'
@@ -1872,6 +1892,7 @@ export interface FileRouteTypes {
     | '/pharmacist/invoice-review/$id'
     | '/pharmacist/prescription-review/$id'
     | '/api/public/ai/sun-tick'
+    | '/api/public/ai/world-health'
     | '/api/public/analytics/ingest'
     | '/api/public/health/full-check'
     | '/api/public/health/quick-check'
@@ -2011,6 +2032,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/yemen-debug'
     | '/admin-agent-runs'
+    | '/admin-agent-universe'
     | '/admin-ai-brain'
     | '/admin-ai-copilot'
     | '/admin-alert-settings'
@@ -2056,6 +2078,7 @@ export interface FileRouteTypes {
     | '/pharmacist/invoice-review/$id'
     | '/pharmacist/prescription-review/$id'
     | '/api/public/ai/sun-tick'
+    | '/api/public/ai/world-health'
     | '/api/public/analytics/ingest'
     | '/api/public/health/full-check'
     | '/api/public/health/quick-check'
@@ -2196,6 +2219,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/yemen-debug'
     | '/_authenticated/admin-agent-runs'
+    | '/_authenticated/admin-agent-universe'
     | '/_authenticated/admin-ai-brain'
     | '/_authenticated/admin-ai-copilot'
     | '/_authenticated/admin-alert-settings'
@@ -2241,6 +2265,7 @@ export interface FileRouteTypes {
     | '/_authenticated/pharmacist/invoice-review/$id'
     | '/_authenticated/pharmacist/prescription-review/$id'
     | '/api/public/ai/sun-tick'
+    | '/api/public/ai/world-health'
     | '/api/public/analytics/ingest'
     | '/api/public/health/full-check'
     | '/api/public/health/quick-check'
@@ -2396,6 +2421,7 @@ export interface RootRouteChildren {
   ApiPublicWhatsappWebhookRoute: typeof ApiPublicWhatsappWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicAiSunTickRoute: typeof ApiPublicAiSunTickRoute
+  ApiPublicAiWorldHealthRoute: typeof ApiPublicAiWorldHealthRoute
   ApiPublicAnalyticsIngestRoute: typeof ApiPublicAnalyticsIngestRoute
   ApiPublicHooksAgentAlertsRoute: typeof ApiPublicHooksAgentAlertsRoute
   ApiPublicHooksAgentMaintenanceRoute: typeof ApiPublicHooksAgentMaintenanceRoute
@@ -3219,6 +3245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAiBrainRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin-agent-universe': {
+      id: '/_authenticated/admin-agent-universe'
+      path: '/admin-agent-universe'
+      fullPath: '/admin-agent-universe'
+      preLoaderRoute: typeof AuthenticatedAdminAgentUniverseRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin-agent-runs': {
       id: '/_authenticated/admin-agent-runs'
       path: '/admin-agent-runs'
@@ -3632,6 +3665,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAnalyticsIngestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/ai/world-health': {
+      id: '/api/public/ai/world-health'
+      path: '/api/public/ai/world-health'
+      fullPath: '/api/public/ai/world-health'
+      preLoaderRoute: typeof ApiPublicAiWorldHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/ai/sun-tick': {
       id: '/api/public/ai/sun-tick'
       path: '/api/public/ai/sun-tick'
@@ -3735,6 +3775,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminAgentRunsRoute: typeof AuthenticatedAdminAgentRunsRoute
+  AuthenticatedAdminAgentUniverseRoute: typeof AuthenticatedAdminAgentUniverseRoute
   AuthenticatedAdminAiBrainRoute: typeof AuthenticatedAdminAiBrainRoute
   AuthenticatedAdminAiCopilotRoute: typeof AuthenticatedAdminAiCopilotRoute
   AuthenticatedAdminAlertSettingsRoute: typeof AuthenticatedAdminAlertSettingsRoute
@@ -3766,6 +3807,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminAgentRunsRoute: AuthenticatedAdminAgentRunsRoute,
+  AuthenticatedAdminAgentUniverseRoute: AuthenticatedAdminAgentUniverseRoute,
   AuthenticatedAdminAiBrainRoute: AuthenticatedAdminAiBrainRoute,
   AuthenticatedAdminAiCopilotRoute: AuthenticatedAdminAiCopilotRoute,
   AuthenticatedAdminAlertSettingsRoute: AuthenticatedAdminAlertSettingsRoute,
@@ -3958,6 +4000,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicWhatsappWebhookRoute: ApiPublicWhatsappWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicAiSunTickRoute: ApiPublicAiSunTickRoute,
+  ApiPublicAiWorldHealthRoute: ApiPublicAiWorldHealthRoute,
   ApiPublicAnalyticsIngestRoute: ApiPublicAnalyticsIngestRoute,
   ApiPublicHooksAgentAlertsRoute: ApiPublicHooksAgentAlertsRoute,
   ApiPublicHooksAgentMaintenanceRoute: ApiPublicHooksAgentMaintenanceRoute,

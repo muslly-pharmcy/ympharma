@@ -660,6 +660,69 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_actions: {
+        Row: {
+          agent_name: string
+          approval_request_id: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          input: Json
+          latency_ms: number | null
+          output: Json | null
+          requires_approval: boolean
+          status: string
+          tool_name: string
+        }
+        Insert: {
+          agent_name: string
+          approval_request_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input?: Json
+          latency_ms?: number | null
+          output?: Json | null
+          requires_approval?: boolean
+          status?: string
+          tool_name: string
+        }
+        Update: {
+          agent_name?: string
+          approval_request_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input?: Json
+          latency_ms?: number | null
+          output?: Json | null
+          requires_approval?: boolean
+          status?: string
+          tool_name?: string
+        }
+        Relationships: []
+      }
+      ai_agent_permissions: {
+        Row: {
+          agent_name: string
+          created_at: string
+          id: string
+          permission: string
+        }
+        Insert: {
+          agent_name: string
+          created_at?: string
+          id?: string
+          permission: string
+        }
+        Update: {
+          agent_name?: string
+          created_at?: string
+          id?: string
+          permission?: string
+        }
+        Relationships: []
+      }
       ai_agents: {
         Row: {
           capabilities: Json
@@ -1006,6 +1069,30 @@ export type Database = {
           status?: string
           tool_name?: string
           user_phone?: string | null
+        }
+        Relationships: []
+      }
+      ai_world_health: {
+        Row: {
+          checked_at: string
+          id: string
+          metrics: Json
+          status: string
+          system_name: string
+        }
+        Insert: {
+          checked_at?: string
+          id?: string
+          metrics?: Json
+          status: string
+          system_name: string
+        }
+        Update: {
+          checked_at?: string
+          id?: string
+          metrics?: Json
+          status?: string
+          system_name?: string
         }
         Relationships: []
       }
