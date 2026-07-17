@@ -265,3 +265,52 @@
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* ============================================================
+   MUSLLY FUTURE MOTION 2026 — Glass Morphism 3.0 + AI Core
+   ============================================================ */
+@utility glass-3 {
+  background: color-mix(in oklab, white 8%, transparent);
+  backdrop-filter: blur(30px) saturate(140%);
+  border: 1px solid color-mix(in oklab, white 15%, transparent);
+  border-radius: 1.25rem;
+}
+@utility glass-3-dark {
+  background: color-mix(in oklab, var(--color-deep-space) 55%, transparent);
+  backdrop-filter: blur(28px) saturate(160%);
+  border: 1px solid color-mix(in oklab, var(--color-ai-cyan) 18%, transparent);
+  border-radius: 1.25rem;
+}
+@utility ai-glow {
+  box-shadow: var(--shadow-ai-glow);
+}
+@utility deep-space-bg {
+  background:
+    radial-gradient(ellipse at 20% 10%, color-mix(in oklab, var(--color-ai-cyan) 12%, transparent) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 90%, color-mix(in oklab, var(--color-neural-green) 10%, transparent) 0%, transparent 55%),
+    var(--color-deep-space);
+}
+@utility neural-grid-bg {
+  background-image:
+    linear-gradient(color-mix(in oklab, var(--color-ai-cyan) 8%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--color-ai-cyan) 8%, transparent) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+@keyframes ai-pulse {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.04); }
+}
+@keyframes neural-drift {
+  0% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(-12px) translateX(6px); }
+  100% { transform: translateY(0) translateX(0); }
+}
+@keyframes data-stream {
+  0% { transform: translateX(-100%); opacity: 0; }
+  10%, 90% { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+@utility animate-ai-pulse { animation: ai-pulse 3.2s ease-in-out infinite; }
+@utility animate-neural-drift { animation: neural-drift 6s ease-in-out infinite; }
+@utility animate-data-stream { animation: data-stream 2.8s linear infinite; }
