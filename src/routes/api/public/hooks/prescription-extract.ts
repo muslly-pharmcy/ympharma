@@ -1,18 +1,15 @@
 // Phase 7 — Public cron-triggered worker for prescription extractions.
-// Call schedule via pg_cron pointing at this URL. Auth: optional header
-// EXTRACT_WORKER_SECRET — if set in env, the request must match.
+// Auth: x-cron-secret header (standard). Called by pg_cron every minute.
 import { createFileRoute } from "@tanstack/react-router";
+import { verifyCronSecret } from "@/lib/cron-auth.server";
 
 export const Route = createFileRoute("/api/public/hooks/prescription-extract")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const secret = process.env.EXTRACT_WORKER_SECRET;
-        if (!secret) {
-          return new Response("worker secret not configured", { status: 503 });
-        }
-        const header = request.headers.get("x-worker-secret");
-        if (header !== secret) return new Response("forbidden", { status: 403 });
+        const unauth = verifyCronSecret(request);
+        if (unauth) return unauth;
+
         const url = new URL(request.url);
         const limit = Math.min(20, Math.max(1, Number(url.searchParams.get("limit") ?? "5")));
         try {
@@ -26,7 +23,7 @@ export const Route = createFileRoute("/api/public/hooks/prescription-extract")({
         }
       },
       GET: async () =>
-        Response.json({ ok: true, hint: "POST to run the extraction worker." }),
+        Response.json({ ok: true, hint: "POST with x-cron-secret to run the worker." }),
     },
   },
 });
