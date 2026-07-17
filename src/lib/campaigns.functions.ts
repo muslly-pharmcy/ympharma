@@ -1,64 +1,87 @@
-// Chronic-medication campaign management.
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
-async function assertAdmin(supabase: any, userId: string) {
-  const { data } = await supabase.from("user_roles").select("role")
-    .eq("user_id", userId).in("role", ["owner", "admin"]).maybeSingle();
-  if (!data) throw new Error("صلاحيات الأدمن مطلوبة");
+async function assertAdmin(ctx: { supabase: ReturnType<typeof Object>; userId: string }) {
+  const s = ctx.supabase as {
+    rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown }>;
+  };
+  const { data } = await s.rpc("has_role", { _user_id: ctx.userId, _role: "admin" });
+  if (!data) throw new Error("Forbidden");
 }
 
 export const listCampaigns = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAdmin(context.supabase, context.userId);
-    const { data, error } = await context.supabase.rpc("campaign_report");
-    if (error) throw new Error(error.message);
-    return (data as any[]) ?? [];
+    await assertAdmin(context);
+    const { data } = await context.supabase
+      .from("ai_campaigns")
+      .select("*")
+      .order("created_at", { ascending: false });
+    return { campaigns: data ?? [] };
   });
 
-const schema = z.object({
-  id: z.string().uuid().optional(),
-  slug: z.string().trim().min(2).max(60).regex(/^[a-z0-9-]+$/),
-  name: z.string().trim().min(2).max(120),
-  description: z.string().trim().max(1000).optional().nullable(),
-  condition_tag: z.string().trim().max(40).optional().nullable(),
-  discount_code: z.string().trim().max(40).optional().nullable(),
-  is_active: z.boolean().default(true),
+const CreateCampaign = z.object({
+  name: z.string().min(1).max(120),
+  description: z.string().max(500).optional(),
+  frequency: z.enum(["daily", "72_hours", "weekly"]),
+  content_type: z.string().max(50).default("medical_tip"),
 });
-
-export const upsertCampaign = createServerFn({ method: "POST" })
+export const createCampaign = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => schema.parse(d))
-  .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase, context.userId);
-    const payload: any = { ...data }; delete payload.id;
-    if (data.id) {
-      const { error } = await context.supabase.from("campaigns").update(payload).eq("id", data.id);
-      if (error) throw new Error(error.message);
-      return { id: data.id, ok: true };
-    }
-    const { data: row, error } = await context.supabase.from("campaigns").insert(payload).select("id").single();
+  .inputValidator((input: unknown) => CreateCampaign.parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { error, data: row } = await context.supabase
+      .from("ai_campaigns")
+      .insert({
+        name: data.name,
+        description: data.description ?? null,
+        frequency: data.frequency,
+        content_type: data.content_type,
+        active: true,
+      })
+      .select()
+      .maybeSingle();
     if (error) throw new Error(error.message);
-    return { id: (row as any).id, ok: true };
+    return { campaign: row };
   });
 
-export const deleteCampaign = createServerFn({ method: "POST" })
+const ToggleInput = z.object({ id: z.string().uuid(), active: z.boolean() });
+export const toggleCampaign = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
-  .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase, context.userId);
-    const { error } = await context.supabase.from("campaigns").delete().eq("id", data.id);
+  .inputValidator((input: unknown) => ToggleInput.parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase
+      .from("ai_campaigns")
+      .update({ active: data.active })
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
 
-export const fetchRevenueSeries = createServerFn({ method: "GET" })
+export const campaignStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ days: z.number().int().min(7).max(90).default(14) }).parse(d ?? {}))
-  .handler(async ({ data, context }) => {
-    const { data: res, error } = await context.supabase.rpc("admin_revenue_series", { _days: data.days });
-    if (error) throw new Error(error.message);
-    return res as any;
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const [{ count: subs }, { count: sent7d }, { count: clicked7d }] = await Promise.all([
+      context.supabase.from("push_subscriptions").select("id", { count: "exact", head: true }).eq("active", true),
+      context.supabase
+        .from("campaign_deliveries")
+        .select("id", { count: "exact", head: true })
+        .gte("sent_at", new Date(Date.now() - 7 * 86400_000).toISOString())
+        .eq("status", "sent"),
+      context.supabase
+        .from("campaign_deliveries")
+        .select("id", { count: "exact", head: true })
+        .gte("sent_at", new Date(Date.now() - 7 * 86400_000).toISOString())
+        .not("clicked_at", "is", null),
+    ]);
+    return {
+      activeSubscribers: subs ?? 0,
+      sent7d: sent7d ?? 0,
+      clicked7d: clicked7d ?? 0,
+      ctr7d: (sent7d ?? 0) > 0 ? ((clicked7d ?? 0) / (sent7d as number)) * 100 : 0,
+    };
   });
