@@ -1,31 +1,30 @@
-## Sovereign Command Center — 4-Tab Admin Shell
+## Note on `src/App.tsx`
+This project is TanStack Start (file-based routing). There is no `src/App.tsx` — the root shell lives in `src/routes/__root.tsx`. I'll wire the sidebar there instead so it applies globally.
 
-Turn the pasted `App.tsx` shell into a proper route in this TanStack Start app.
+## What I'll build
 
-### Where it lives
-- New route: `src/routes/_authenticated/admin-sovereign.tsx` (admin-only, gated by the existing `_authenticated` layout + role check pattern used by other admin pages).
-- No changes to `src/routes/__root.tsx` or the global layout.
+A one‑tap **Sovereign Quick Launcher**: a fixed floating button (bottom‑right, RTL‑aware) that opens a vertical sidebar sheet linking the 4 hubs.
 
-### What I'll build
-1. **Fix the bugs in the pasted JSX** before shipping:
-   - Doctors button has a stray `</nav>` that closes the nav early — will restore correct tag order.
-   - Wire `activeTab` state exactly as pasted (4 tabs: brain / maternal / doctors / suppliers).
+Links:
+1. 🧠 المخ والـ 800 أداة → `/admin-ai-brain`
+2. 🤰 باقات الأمومة → `/admin-sovereign` (tab: maternal)
+3. 🩺 شبكة الأطباء → `/admin-sovereign` (tab: doctors)
+4. 🏭 الموردون والمخازن → `/admin-sovereign` (tab: suppliers)
 
-2. **Tab content wiring:**
-   - `brain` → renders existing `SovereignEngineDashboard` from `@/modules/ai-brain/components/SovereignEngineDashboard`.
-   - `maternal` → `MaternalCarePortal` does NOT exist yet. I'll add a minimal placeholder component `src/modules/subscriptions/components/MaternalCarePortal.tsx` (static Arabic "Coming soon" card matching the dark theme) so the route compiles. Full portal is out of scope for this turn.
-   - `doctors` and `suppliers` → static demo cards exactly as pasted (sample doctors + supplier KPIs).
+Plus a shortcut to the unified `/admin-sovereign` command center at the top.
 
-3. **Admin gate:** on mount, verify the caller has `admin` or `owner` role via existing `has_role` RPC; non-admins see an Arabic "unauthorized" card. Same pattern already used in `/admin-*` routes.
+## Behavior
+- Visible **only to admins** (uses existing `useIsAdmin`/role check; hidden for public visitors so it doesn't clutter the storefront).
+- Fixed FAB, `z-50`, animated (framer‑motion), pulsing gold accent matching the golden‑mark brand.
+- Opens a right‑side `Sheet` (RTL) with the 4 large touch targets, icons, Arabic labels, and active‑route highlight.
+- Closes on navigation, on Escape, and on backdrop tap.
+- Keyboard shortcut: `Ctrl/Cmd + K` toggles it.
 
-4. **RTL + dark theme** preserved from the paste (`bg-slate-950`, `dir="rtl"`, gradient logo, lucide icons).
+## Files
+- **New**: `src/components/sovereign-quick-launcher.tsx` — FAB + Sheet, uses existing shadcn `Sheet`, `Button`, lucide icons, `Link` from `@tanstack/react-router`, and current admin‑detection hook.
+- **Edit**: `src/routes/__root.tsx` — mount `<SovereignQuickLauncher />` inside `RootComponent` next to `<AiChatWidget />`.
 
-### Out of scope (say so explicitly)
-- No new database tables, RPCs, or migrations.
-- No real data for the doctors / suppliers tabs — they stay as the pasted mock cards. Wire real data in a follow-up turn.
-- `MaternalCarePortal` is a placeholder only.
-
-### Access
-After build: navigate to `/admin-sovereign` while signed in as an admin.
-
-Confirm and I'll implement.
+## Non-goals
+- No changes to public site navigation, header, or storefront layout.
+- No new routes or backend changes; purely a presentational shortcut over existing routes.
+- The `/admin-sovereign` tabs already exist; the launcher just deep‑links to them (via a `?tab=` search param I'll read in that route if not already wired).
