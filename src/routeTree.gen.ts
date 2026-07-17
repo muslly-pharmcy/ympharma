@@ -190,6 +190,7 @@ import { Route as ApiPublicEngagementDispatchRouteImport } from './routes/api/pu
 import { Route as ApiPublicAnalyticsIngestRouteImport } from './routes/api/public/analytics/ingest'
 import { Route as ApiPublicAiWorldHealthRouteImport } from './routes/api/public/ai/world-health'
 import { Route as ApiPublicAiSunTickRouteImport } from './routes/api/public/ai/sun-tick'
+import { Route as ApiPublicAiRankingTickRouteImport } from './routes/api/public/ai/ranking-tick'
 import { Route as ApiPublicAiContentTickRouteImport } from './routes/api/public/ai/content-tick'
 import { Route as ApiPublicAiBusinessTickRouteImport } from './routes/api/public/ai/business-tick'
 import { Route as AuthenticatedPharmacistPrescriptionReviewIdRouteImport } from './routes/_authenticated/pharmacist/prescription-review.$id'
@@ -1184,6 +1185,11 @@ const ApiPublicAiSunTickRoute = ApiPublicAiSunTickRouteImport.update({
   path: '/api/public/ai/sun-tick',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAiRankingTickRoute = ApiPublicAiRankingTickRouteImport.update({
+  id: '/api/public/ai/ranking-tick',
+  path: '/api/public/ai/ranking-tick',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicAiContentTickRoute = ApiPublicAiContentTickRouteImport.update({
   id: '/api/public/ai/content-tick',
   path: '/api/public/ai/content-tick',
@@ -1409,6 +1415,7 @@ export interface FileRoutesByFullPath {
   '/pharmacist/prescription-review/$id': typeof AuthenticatedPharmacistPrescriptionReviewIdRoute
   '/api/public/ai/business-tick': typeof ApiPublicAiBusinessTickRoute
   '/api/public/ai/content-tick': typeof ApiPublicAiContentTickRoute
+  '/api/public/ai/ranking-tick': typeof ApiPublicAiRankingTickRoute
   '/api/public/ai/sun-tick': typeof ApiPublicAiSunTickRoute
   '/api/public/ai/world-health': typeof ApiPublicAiWorldHealthRoute
   '/api/public/analytics/ingest': typeof ApiPublicAnalyticsIngestRoute
@@ -1606,6 +1613,7 @@ export interface FileRoutesByTo {
   '/pharmacist/prescription-review/$id': typeof AuthenticatedPharmacistPrescriptionReviewIdRoute
   '/api/public/ai/business-tick': typeof ApiPublicAiBusinessTickRoute
   '/api/public/ai/content-tick': typeof ApiPublicAiContentTickRoute
+  '/api/public/ai/ranking-tick': typeof ApiPublicAiRankingTickRoute
   '/api/public/ai/sun-tick': typeof ApiPublicAiSunTickRoute
   '/api/public/ai/world-health': typeof ApiPublicAiWorldHealthRoute
   '/api/public/analytics/ingest': typeof ApiPublicAnalyticsIngestRoute
@@ -1805,6 +1813,7 @@ export interface FileRoutesById {
   '/_authenticated/pharmacist/prescription-review/$id': typeof AuthenticatedPharmacistPrescriptionReviewIdRoute
   '/api/public/ai/business-tick': typeof ApiPublicAiBusinessTickRoute
   '/api/public/ai/content-tick': typeof ApiPublicAiContentTickRoute
+  '/api/public/ai/ranking-tick': typeof ApiPublicAiRankingTickRoute
   '/api/public/ai/sun-tick': typeof ApiPublicAiSunTickRoute
   '/api/public/ai/world-health': typeof ApiPublicAiWorldHealthRoute
   '/api/public/analytics/ingest': typeof ApiPublicAnalyticsIngestRoute
@@ -2004,6 +2013,7 @@ export interface FileRouteTypes {
     | '/pharmacist/prescription-review/$id'
     | '/api/public/ai/business-tick'
     | '/api/public/ai/content-tick'
+    | '/api/public/ai/ranking-tick'
     | '/api/public/ai/sun-tick'
     | '/api/public/ai/world-health'
     | '/api/public/analytics/ingest'
@@ -2201,6 +2211,7 @@ export interface FileRouteTypes {
     | '/pharmacist/prescription-review/$id'
     | '/api/public/ai/business-tick'
     | '/api/public/ai/content-tick'
+    | '/api/public/ai/ranking-tick'
     | '/api/public/ai/sun-tick'
     | '/api/public/ai/world-health'
     | '/api/public/analytics/ingest'
@@ -2399,6 +2410,7 @@ export interface FileRouteTypes {
     | '/_authenticated/pharmacist/prescription-review/$id'
     | '/api/public/ai/business-tick'
     | '/api/public/ai/content-tick'
+    | '/api/public/ai/ranking-tick'
     | '/api/public/ai/sun-tick'
     | '/api/public/ai/world-health'
     | '/api/public/analytics/ingest'
@@ -2562,6 +2574,7 @@ export interface RootRouteChildren {
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicAiBusinessTickRoute: typeof ApiPublicAiBusinessTickRoute
   ApiPublicAiContentTickRoute: typeof ApiPublicAiContentTickRoute
+  ApiPublicAiRankingTickRoute: typeof ApiPublicAiRankingTickRoute
   ApiPublicAiSunTickRoute: typeof ApiPublicAiSunTickRoute
   ApiPublicAiWorldHealthRoute: typeof ApiPublicAiWorldHealthRoute
   ApiPublicAnalyticsIngestRoute: typeof ApiPublicAnalyticsIngestRoute
@@ -3887,6 +3900,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAiSunTickRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/ai/ranking-tick': {
+      id: '/api/public/ai/ranking-tick'
+      path: '/api/public/ai/ranking-tick'
+      fullPath: '/api/public/ai/ranking-tick'
+      preLoaderRoute: typeof ApiPublicAiRankingTickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/ai/content-tick': {
       id: '/api/public/ai/content-tick'
       path: '/api/public/ai/content-tick'
@@ -4234,6 +4254,7 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicAiBusinessTickRoute: ApiPublicAiBusinessTickRoute,
   ApiPublicAiContentTickRoute: ApiPublicAiContentTickRoute,
+  ApiPublicAiRankingTickRoute: ApiPublicAiRankingTickRoute,
   ApiPublicAiSunTickRoute: ApiPublicAiSunTickRoute,
   ApiPublicAiWorldHealthRoute: ApiPublicAiWorldHealthRoute,
   ApiPublicAnalyticsIngestRoute: ApiPublicAnalyticsIngestRoute,
