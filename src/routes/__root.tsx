@@ -194,6 +194,7 @@ function RootComponent() {
               </AnimatePresence>
             </ErrorBoundary>
             <AiChatWidget />
+            <SovereignQuickLauncher />
             <SwUpdateBanner />
             <InstallPrompt />
             <Toaster position="top-center" richColors />
