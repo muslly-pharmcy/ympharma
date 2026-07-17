@@ -20,7 +20,7 @@ export interface WorldSystem {
   system_name: string;
   status: string;
   checked_at: string;
-  metrics: unknown;
+  metrics: JsonValue;
 }
 
 export interface EventRow {
