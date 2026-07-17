@@ -303,6 +303,53 @@ export const SovereignEngineDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Floating promotional notification */}
+      {showNotification && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-6 left-6 z-50 max-w-sm p-5 bg-slate-900 border border-fuchsia-500/40 rounded-2xl shadow-2xl shadow-fuchsia-500/10 text-right font-sans animate-in slide-in-from-bottom-8 fade-in duration-500"
+          dir="rtl"
+        >
+          <div className="flex justify-between items-start mb-3 gap-3">
+            <div className="flex items-center gap-2 text-fuchsia-400 font-bold text-sm">
+              <div className="p-1.5 bg-fuchsia-500/10 rounded-lg">
+                <Bell className="w-4 h-4 animate-bounce" />
+              </div>
+              <h4>{currentPromo.title}</h4>
+            </div>
+            <button
+              type="button"
+              aria-label="إغلاق الإشعار"
+              onClick={() => setShowNotification(false)}
+              className="p-1 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-slate-300 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <p className="text-xs text-slate-300 leading-relaxed mb-4">{currentPromo.text}</p>
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setShowNotification(false)}
+              className="px-3 py-1.5 bg-slate-950 border border-slate-800 text-slate-400 hover:text-slate-200 text-[10px] font-bold rounded-lg transition-colors"
+            >
+              تجاهل
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                toast.success("تم توجيهك لبوابة الاشتراك السريعة الخاصة بصيدلية المصلي!");
+                setShowNotification(false);
+              }}
+              className="px-3 py-1.5 bg-fuchsia-600 hover:bg-fuchsia-500 text-white text-[10px] font-bold rounded-lg transition flex items-center gap-1 shadow-md shadow-fuchsia-600/20"
+            >
+              <Heart className="w-3.5 h-3.5 fill-current" /> اشتركي الآن
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
