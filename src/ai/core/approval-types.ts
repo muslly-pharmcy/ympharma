@@ -8,7 +8,7 @@ export interface ApprovalListItem {
   customer_message: string | null;
   ai_confidence: number | null;
   ai_risk_score: number | null;
-  payload: Record<string, unknown>;
+  payload: unknown;
   status: AgentApprovalStatus;
   created_at: string;
 }

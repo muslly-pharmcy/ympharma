@@ -146,6 +146,7 @@ import { Route as AuthenticatedPharmacistPrescriptionQueueRouteImport } from './
 import { Route as AuthenticatedPharmacistInvoiceUploadRouteImport } from './routes/_authenticated/pharmacist/invoice-upload'
 import { Route as AuthenticatedPharmacistInvoiceListRouteImport } from './routes/_authenticated/pharmacist/invoice-list'
 import { Route as AuthenticatedPharmacistDashboardRouteImport } from './routes/_authenticated/pharmacist/dashboard'
+import { Route as AuthenticatedMyHealthWalletRouteImport } from './routes/_authenticated/my-health.wallet'
 import { Route as AuthenticatedDoctorProfileRouteImport } from './routes/_authenticated/doctor/profile'
 import { Route as AuthenticatedDoctorPracticesRouteImport } from './routes/_authenticated/doctor/practices'
 import { Route as AuthenticatedDoctorDashboardRouteImport } from './routes/_authenticated/doctor/dashboard'
@@ -930,6 +931,12 @@ const AuthenticatedPharmacistDashboardRoute =
     path: '/pharmacist/dashboard',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedMyHealthWalletRoute =
+  AuthenticatedMyHealthWalletRouteImport.update({
+    id: '/wallet',
+    path: '/wallet',
+    getParentRoute: () => AuthenticatedMyHealthRoute,
+  } as any)
 const AuthenticatedDoctorProfileRoute =
   AuthenticatedDoctorProfileRouteImport.update({
     id: '/doctor/profile',
@@ -1416,7 +1423,7 @@ export interface FileRoutesByFullPath {
   '/admin-sun-core': typeof AuthenticatedAdminSunCoreRoute
   '/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
   '/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
-  '/my-health': typeof AuthenticatedMyHealthRoute
+  '/my-health': typeof AuthenticatedMyHealthRouteWithChildren
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/doctor/join': typeof DoctorJoinRoute
@@ -1432,6 +1439,7 @@ export interface FileRoutesByFullPath {
   '/doctor/dashboard': typeof AuthenticatedDoctorDashboardRoute
   '/doctor/practices': typeof AuthenticatedDoctorPracticesRoute
   '/doctor/profile': typeof AuthenticatedDoctorProfileRoute
+  '/my-health/wallet': typeof AuthenticatedMyHealthWalletRoute
   '/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/pharmacist/invoice-list': typeof AuthenticatedPharmacistInvoiceListRoute
   '/pharmacist/invoice-upload': typeof AuthenticatedPharmacistInvoiceUploadRoute
@@ -1619,7 +1627,7 @@ export interface FileRoutesByTo {
   '/admin-sun-core': typeof AuthenticatedAdminSunCoreRoute
   '/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
   '/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
-  '/my-health': typeof AuthenticatedMyHealthRoute
+  '/my-health': typeof AuthenticatedMyHealthRouteWithChildren
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/doctor/join': typeof DoctorJoinRoute
@@ -1635,6 +1643,7 @@ export interface FileRoutesByTo {
   '/doctor/dashboard': typeof AuthenticatedDoctorDashboardRoute
   '/doctor/practices': typeof AuthenticatedDoctorPracticesRoute
   '/doctor/profile': typeof AuthenticatedDoctorProfileRoute
+  '/my-health/wallet': typeof AuthenticatedMyHealthWalletRoute
   '/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/pharmacist/invoice-list': typeof AuthenticatedPharmacistInvoiceListRoute
   '/pharmacist/invoice-upload': typeof AuthenticatedPharmacistInvoiceUploadRoute
@@ -1824,7 +1833,7 @@ export interface FileRoutesById {
   '/_authenticated/admin-sun-core': typeof AuthenticatedAdminSunCoreRoute
   '/_authenticated/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
   '/_authenticated/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
-  '/_authenticated/my-health': typeof AuthenticatedMyHealthRoute
+  '/_authenticated/my-health': typeof AuthenticatedMyHealthRouteWithChildren
   '/_authenticated/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/doctor/join': typeof DoctorJoinRoute
@@ -1840,6 +1849,7 @@ export interface FileRoutesById {
   '/_authenticated/doctor/dashboard': typeof AuthenticatedDoctorDashboardRoute
   '/_authenticated/doctor/practices': typeof AuthenticatedDoctorPracticesRoute
   '/_authenticated/doctor/profile': typeof AuthenticatedDoctorProfileRoute
+  '/_authenticated/my-health/wallet': typeof AuthenticatedMyHealthWalletRoute
   '/_authenticated/pharmacist/dashboard': typeof AuthenticatedPharmacistDashboardRoute
   '/_authenticated/pharmacist/invoice-list': typeof AuthenticatedPharmacistInvoiceListRoute
   '/_authenticated/pharmacist/invoice-upload': typeof AuthenticatedPharmacistInvoiceUploadRoute
@@ -2045,6 +2055,7 @@ export interface FileRouteTypes {
     | '/doctor/dashboard'
     | '/doctor/practices'
     | '/doctor/profile'
+    | '/my-health/wallet'
     | '/pharmacist/dashboard'
     | '/pharmacist/invoice-list'
     | '/pharmacist/invoice-upload'
@@ -2248,6 +2259,7 @@ export interface FileRouteTypes {
     | '/doctor/dashboard'
     | '/doctor/practices'
     | '/doctor/profile'
+    | '/my-health/wallet'
     | '/pharmacist/dashboard'
     | '/pharmacist/invoice-list'
     | '/pharmacist/invoice-upload'
@@ -2452,6 +2464,7 @@ export interface FileRouteTypes {
     | '/_authenticated/doctor/dashboard'
     | '/_authenticated/doctor/practices'
     | '/_authenticated/doctor/profile'
+    | '/_authenticated/my-health/wallet'
     | '/_authenticated/pharmacist/dashboard'
     | '/_authenticated/pharmacist/invoice-list'
     | '/_authenticated/pharmacist/invoice-upload'
@@ -3655,6 +3668,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPharmacistDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/my-health/wallet': {
+      id: '/_authenticated/my-health/wallet'
+      path: '/wallet'
+      fullPath: '/my-health/wallet'
+      preLoaderRoute: typeof AuthenticatedMyHealthWalletRouteImport
+      parentRoute: typeof AuthenticatedMyHealthRoute
+    }
     '/_authenticated/doctor/profile': {
       id: '/_authenticated/doctor/profile'
       path: '/doctor/profile'
@@ -4113,6 +4133,19 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedMyHealthRouteChildren {
+  AuthenticatedMyHealthWalletRoute: typeof AuthenticatedMyHealthWalletRoute
+}
+
+const AuthenticatedMyHealthRouteChildren: AuthenticatedMyHealthRouteChildren = {
+  AuthenticatedMyHealthWalletRoute: AuthenticatedMyHealthWalletRoute,
+}
+
+const AuthenticatedMyHealthRouteWithChildren =
+  AuthenticatedMyHealthRoute._addFileChildren(
+    AuthenticatedMyHealthRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminAgentRunsRoute: typeof AuthenticatedAdminAgentRunsRoute
   AuthenticatedAdminAgentUniverseRoute: typeof AuthenticatedAdminAgentUniverseRoute
@@ -4136,7 +4169,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminSunCoreRoute: typeof AuthenticatedAdminSunCoreRoute
   AuthenticatedAdminSystemHealthRoute: typeof AuthenticatedAdminSystemHealthRoute
   AuthenticatedAdminUploadInventoryRoute: typeof AuthenticatedAdminUploadInventoryRoute
-  AuthenticatedMyHealthRoute: typeof AuthenticatedMyHealthRoute
+  AuthenticatedMyHealthRoute: typeof AuthenticatedMyHealthRouteWithChildren
   AuthenticatedUploadPrescriptionRoute: typeof AuthenticatedUploadPrescriptionRoute
   AuthenticatedAdminDoctorJoinQueueRoute: typeof AuthenticatedAdminDoctorJoinQueueRoute
   AuthenticatedDoctorDashboardRoute: typeof AuthenticatedDoctorDashboardRoute
@@ -4177,7 +4210,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminSystemHealthRoute: AuthenticatedAdminSystemHealthRoute,
   AuthenticatedAdminUploadInventoryRoute:
     AuthenticatedAdminUploadInventoryRoute,
-  AuthenticatedMyHealthRoute: AuthenticatedMyHealthRoute,
+  AuthenticatedMyHealthRoute: AuthenticatedMyHealthRouteWithChildren,
   AuthenticatedUploadPrescriptionRoute: AuthenticatedUploadPrescriptionRoute,
   AuthenticatedAdminDoctorJoinQueueRoute:
     AuthenticatedAdminDoctorJoinQueueRoute,
