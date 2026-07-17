@@ -73,11 +73,7 @@ async function handlePost(request: Request): Promise<Response> {
   const allowed = (allow as { is_active?: boolean } | null)?.is_active === true;
   const district = (allow as { district?: string } | null)?.district ?? "عدن";
 
-  // 2. Log inbound (best-effort).
-  await supabaseAdmin
-    .from("whatsapp_messages" as never)
-    .insert({ from_number: from, message_body: text, direction: "inbound" } as never)
-    .then(() => null, () => null);
+  // 2. (Inbound is captured inside ai_neural_synaptic_log.payload_transmitted.)
 
   if (!allowed) {
     await sendWhatsAppText(
