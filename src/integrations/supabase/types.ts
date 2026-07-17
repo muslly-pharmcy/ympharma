@@ -801,6 +801,53 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_campaigns: {
+        Row: {
+          active: boolean
+          content_type: string
+          created_at: string
+          description: string | null
+          frequency: string
+          id: string
+          name: string
+          post_id: string | null
+          target_rules: Json
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          content_type?: string
+          created_at?: string
+          description?: string | null
+          frequency?: string
+          id?: string
+          name: string
+          post_id?: string | null
+          target_rules?: Json
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          content_type?: string
+          created_at?: string
+          description?: string | null
+          frequency?: string
+          id?: string
+          name?: string
+          post_id?: string | null
+          target_rules?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_campaigns_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "medical_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_decisions: {
         Row: {
           action: Json | null
@@ -1876,6 +1923,64 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      campaign_deliveries: {
+        Row: {
+          campaign_id: string | null
+          clicked_at: string | null
+          error_message: string | null
+          id: string
+          opened_at: string | null
+          post_id: string | null
+          sent_at: string
+          status: string
+          subscription_id: string | null
+        }
+        Insert: {
+          campaign_id?: string | null
+          clicked_at?: string | null
+          error_message?: string | null
+          id?: string
+          opened_at?: string | null
+          post_id?: string | null
+          sent_at?: string
+          status?: string
+          subscription_id?: string | null
+        }
+        Update: {
+          campaign_id?: string | null
+          clicked_at?: string | null
+          error_message?: string | null
+          id?: string
+          opened_at?: string | null
+          post_id?: string | null
+          sent_at?: string
+          status?: string
+          subscription_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_deliveries_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ai_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_deliveries_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "medical_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_deliveries_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "push_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       campaigns: {
         Row: {
@@ -5397,6 +5502,66 @@ export type Database = {
         }
         Relationships: []
       }
+      medical_posts: {
+        Row: {
+          ai_generated: boolean
+          approved: boolean
+          approved_at: string | null
+          approved_by: string | null
+          category: string
+          content: string
+          cover_image_url: string | null
+          created_at: string
+          id: string
+          language: string
+          publish_date: string
+          published_at: string | null
+          slug: string
+          summary: string | null
+          tags: Json
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          ai_generated?: boolean
+          approved?: boolean
+          approved_at?: string | null
+          approved_by?: string | null
+          category: string
+          content: string
+          cover_image_url?: string | null
+          created_at?: string
+          id?: string
+          language?: string
+          publish_date?: string
+          published_at?: string | null
+          slug: string
+          summary?: string | null
+          tags?: Json
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          ai_generated?: boolean
+          approved?: boolean
+          approved_at?: string | null
+          approved_by?: string | null
+          category?: string
+          content?: string
+          cover_image_url?: string | null
+          created_at?: string
+          id?: string
+          language?: string
+          publish_date?: string
+          published_at?: string | null
+          slug?: string
+          summary?: string | null
+          tags?: Json
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
@@ -6860,6 +7025,51 @@ export type Database = {
           },
         ]
       }
+      push_subscriptions: {
+        Row: {
+          active: boolean
+          auth: string
+          endpoint: string
+          fail_count: number
+          id: string
+          last_success_at: string | null
+          p256dh: string
+          subscribed_at: string
+          unsubscribed_at: string | null
+          user_agent: string | null
+          user_id: string | null
+          visitor_token: string | null
+        }
+        Insert: {
+          active?: boolean
+          auth: string
+          endpoint: string
+          fail_count?: number
+          id?: string
+          last_success_at?: string | null
+          p256dh: string
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          visitor_token?: string | null
+        }
+        Update: {
+          active?: boolean
+          auth?: string
+          endpoint?: string
+          fail_count?: number
+          id?: string
+          last_success_at?: string | null
+          p256dh?: string
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          visitor_token?: string | null
+        }
+        Relationships: []
+      }
       rate_limit_buckets: {
         Row: {
           count: number
@@ -7944,6 +8154,51 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      visitor_sessions: {
+        Row: {
+          browser: string | null
+          country: string | null
+          created_at: string
+          device: string | null
+          first_visit: boolean
+          id: string
+          interests: Json
+          ip_hash: string | null
+          language: string | null
+          last_seen_at: string
+          pages_viewed: Json
+          visitor_token: string
+        }
+        Insert: {
+          browser?: string | null
+          country?: string | null
+          created_at?: string
+          device?: string | null
+          first_visit?: boolean
+          id?: string
+          interests?: Json
+          ip_hash?: string | null
+          language?: string | null
+          last_seen_at?: string
+          pages_viewed?: Json
+          visitor_token: string
+        }
+        Update: {
+          browser?: string | null
+          country?: string | null
+          created_at?: string
+          device?: string | null
+          first_visit?: boolean
+          id?: string
+          interests?: Json
+          ip_hash?: string | null
+          language?: string | null
+          last_seen_at?: string
+          pages_viewed?: Json
+          visitor_token?: string
         }
         Relationships: []
       }
