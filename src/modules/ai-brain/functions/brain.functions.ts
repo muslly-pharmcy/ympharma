@@ -29,8 +29,8 @@ export const executeNeuralInference = createServerFn({ method: "POST" })
       async findNearbyPharmacy(medicineHint, lat, lng, _district) {
         const { data: rows, error } = await supabase.rpc("pn_search_medicine_nearby", {
           _q: medicineHint,
-          _lat: lat ?? null,
-          _lng: lng ?? null,
+          _lat: lat,
+          _lng: lng,
           _radius_km: 25,
           _limit: 5,
         });
@@ -75,10 +75,10 @@ export const executeNeuralInference = createServerFn({ method: "POST" })
         is_safe: decision.isSafe,
         district: data.district,
         dispatched_tools: decision.dispatchedTools,
-        payload_transmitted: {
+        payload_transmitted: JSON.parse(JSON.stringify({
           input: { userInput: data.userInput, district: data.district, patient: data.patient ?? null },
           decision,
-        },
+        })),
         execution_time_ms: decision.executionSpeedMs,
       });
     } catch (err) {
