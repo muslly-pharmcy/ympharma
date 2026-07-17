@@ -81,7 +81,9 @@ export const Route = createFileRoute("/api/public/security/sweep")({
         }
 
         if (inserts.length) {
-          await supabaseAdmin.from("ai_security_events").insert(inserts);
+          await supabaseAdmin
+            .from("ai_security_events")
+            .insert(inserts as never);
         }
 
         return Response.json({
