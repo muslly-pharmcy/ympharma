@@ -48,7 +48,18 @@ export const SovereignEngineDashboard: React.FC = () => {
   const [chronicConditions, setChronicConditions] = useState<string[]>([]);
   const [decision, setDecision] = useState<BrainDecisionMatrix | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
+  const [currentPromo, setCurrentPromo] = useState(PROMOTIONAL_CAMPAIGNS[0]);
   const runInference = useServerFn(executeNeuralInference);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const pick = PROMOTIONAL_CAMPAIGNS[Math.floor(Math.random() * PROMOTIONAL_CAMPAIGNS.length)];
+      setCurrentPromo(pick);
+      setShowNotification(true);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const toggleChronic = (condition: string) => {
     setChronicConditions((prev) =>
