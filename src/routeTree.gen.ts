@@ -111,6 +111,7 @@ import { Route as AuthenticatedAdminSlackTestRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminSalesReportsRouteImport } from './routes/_authenticated/admin-sales-reports'
 import { Route as AuthenticatedAdminMarketingCampaignsRouteImport } from './routes/_authenticated/admin-marketing-campaigns'
 import { Route as AuthenticatedAdminInventorySyncLogsRouteImport } from './routes/_authenticated/admin-inventory-sync-logs'
+import { Route as AuthenticatedAdminInventoryIntelRouteImport } from './routes/_authenticated/admin-inventory-intel'
 import { Route as AuthenticatedAdminHealthRouteImport } from './routes/_authenticated/admin-health'
 import { Route as AuthenticatedAdminErrorExplainerRouteImport } from './routes/_authenticated/admin-error-explainer'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin-dashboard'
@@ -715,6 +716,12 @@ const AuthenticatedAdminInventorySyncLogsRoute =
     path: '/admin-inventory-sync-logs',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminInventoryIntelRoute =
+  AuthenticatedAdminInventoryIntelRouteImport.update({
+    id: '/admin-inventory-intel',
+    path: '/admin-inventory-intel',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminHealthRoute =
   AuthenticatedAdminHealthRouteImport.update({
     id: '/admin-health',
@@ -1265,6 +1272,7 @@ export interface FileRoutesByFullPath {
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin-error-explainer': typeof AuthenticatedAdminErrorExplainerRoute
   '/admin-health': typeof AuthenticatedAdminHealthRoute
+  '/admin-inventory-intel': typeof AuthenticatedAdminInventoryIntelRoute
   '/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
   '/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
   '/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
@@ -1447,6 +1455,7 @@ export interface FileRoutesByTo {
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin-error-explainer': typeof AuthenticatedAdminErrorExplainerRoute
   '/admin-health': typeof AuthenticatedAdminHealthRoute
+  '/admin-inventory-intel': typeof AuthenticatedAdminInventoryIntelRoute
   '/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
   '/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
   '/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
@@ -1631,6 +1640,7 @@ export interface FileRoutesById {
   '/_authenticated/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/admin-error-explainer': typeof AuthenticatedAdminErrorExplainerRoute
   '/_authenticated/admin-health': typeof AuthenticatedAdminHealthRoute
+  '/_authenticated/admin-inventory-intel': typeof AuthenticatedAdminInventoryIntelRoute
   '/_authenticated/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
   '/_authenticated/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
   '/_authenticated/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
@@ -1815,6 +1825,7 @@ export interface FileRouteTypes {
     | '/admin-dashboard'
     | '/admin-error-explainer'
     | '/admin-health'
+    | '/admin-inventory-intel'
     | '/admin-inventory-sync-logs'
     | '/admin-marketing-campaigns'
     | '/admin-sales-reports'
@@ -1997,6 +2008,7 @@ export interface FileRouteTypes {
     | '/admin-dashboard'
     | '/admin-error-explainer'
     | '/admin-health'
+    | '/admin-inventory-intel'
     | '/admin-inventory-sync-logs'
     | '/admin-marketing-campaigns'
     | '/admin-sales-reports'
@@ -2180,6 +2192,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin-dashboard'
     | '/_authenticated/admin-error-explainer'
     | '/_authenticated/admin-health'
+    | '/_authenticated/admin-inventory-intel'
     | '/_authenticated/admin-inventory-sync-logs'
     | '/_authenticated/admin-marketing-campaigns'
     | '/_authenticated/admin-sales-reports'
@@ -3137,6 +3150,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminInventorySyncLogsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin-inventory-intel': {
+      id: '/_authenticated/admin-inventory-intel'
+      path: '/admin-inventory-intel'
+      fullPath: '/admin-inventory-intel'
+      preLoaderRoute: typeof AuthenticatedAdminInventoryIntelRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin-health': {
       id: '/_authenticated/admin-health'
       path: '/admin-health'
@@ -3702,6 +3722,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
   AuthenticatedAdminErrorExplainerRoute: typeof AuthenticatedAdminErrorExplainerRoute
   AuthenticatedAdminHealthRoute: typeof AuthenticatedAdminHealthRoute
+  AuthenticatedAdminInventoryIntelRoute: typeof AuthenticatedAdminInventoryIntelRoute
   AuthenticatedAdminInventorySyncLogsRoute: typeof AuthenticatedAdminInventorySyncLogsRoute
   AuthenticatedAdminMarketingCampaignsRoute: typeof AuthenticatedAdminMarketingCampaignsRoute
   AuthenticatedAdminSalesReportsRoute: typeof AuthenticatedAdminSalesReportsRoute
@@ -3732,6 +3753,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
   AuthenticatedAdminErrorExplainerRoute: AuthenticatedAdminErrorExplainerRoute,
   AuthenticatedAdminHealthRoute: AuthenticatedAdminHealthRoute,
+  AuthenticatedAdminInventoryIntelRoute: AuthenticatedAdminInventoryIntelRoute,
   AuthenticatedAdminInventorySyncLogsRoute:
     AuthenticatedAdminInventorySyncLogsRoute,
   AuthenticatedAdminMarketingCampaignsRoute:
