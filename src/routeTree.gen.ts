@@ -27,6 +27,7 @@ import { Route as NetworkHealthRouteImport } from './routes/network-health'
 import { Route as MyNotificationsRouteImport } from './routes/my-notifications'
 import { Route as LoyaltyRouteImport } from './routes/loyalty'
 import { Route as InsuranceRouteImport } from './routes/insurance'
+import { Route as FindCareRouteImport } from './routes/find-care'
 import { Route as DoctorsRouteImport } from './routes/doctors'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ConditionsRouteImport } from './routes/conditions'
@@ -295,6 +296,11 @@ const LoyaltyRoute = LoyaltyRouteImport.update({
 const InsuranceRoute = InsuranceRouteImport.update({
   id: '/insurance',
   path: '/insurance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FindCareRoute = FindCareRouteImport.update({
+  id: '/find-care',
+  path: '/find-care',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DoctorsRoute = DoctorsRouteImport.update({
@@ -1343,6 +1349,7 @@ export interface FileRoutesByFullPath {
   '/conditions': typeof ConditionsRouteWithChildren
   '/contact': typeof ContactRoute
   '/doctors': typeof DoctorsRouteWithChildren
+  '/find-care': typeof FindCareRoute
   '/insurance': typeof InsuranceRoute
   '/loyalty': typeof LoyaltyRoute
   '/my-notifications': typeof MyNotificationsRoute
@@ -1541,6 +1548,7 @@ export interface FileRoutesByTo {
   '/conditions': typeof ConditionsRouteWithChildren
   '/contact': typeof ContactRoute
   '/doctors': typeof DoctorsRouteWithChildren
+  '/find-care': typeof FindCareRoute
   '/insurance': typeof InsuranceRoute
   '/loyalty': typeof LoyaltyRoute
   '/my-notifications': typeof MyNotificationsRoute
@@ -1741,6 +1749,7 @@ export interface FileRoutesById {
   '/conditions': typeof ConditionsRouteWithChildren
   '/contact': typeof ContactRoute
   '/doctors': typeof DoctorsRouteWithChildren
+  '/find-care': typeof FindCareRoute
   '/insurance': typeof InsuranceRoute
   '/loyalty': typeof LoyaltyRoute
   '/my-notifications': typeof MyNotificationsRoute
@@ -1941,6 +1950,7 @@ export interface FileRouteTypes {
     | '/conditions'
     | '/contact'
     | '/doctors'
+    | '/find-care'
     | '/insurance'
     | '/loyalty'
     | '/my-notifications'
@@ -2139,6 +2149,7 @@ export interface FileRouteTypes {
     | '/conditions'
     | '/contact'
     | '/doctors'
+    | '/find-care'
     | '/insurance'
     | '/loyalty'
     | '/my-notifications'
@@ -2338,6 +2349,7 @@ export interface FileRouteTypes {
     | '/conditions'
     | '/contact'
     | '/doctors'
+    | '/find-care'
     | '/insurance'
     | '/loyalty'
     | '/my-notifications'
@@ -2538,6 +2550,7 @@ export interface RootRouteChildren {
   ConditionsRoute: typeof ConditionsRouteWithChildren
   ContactRoute: typeof ContactRoute
   DoctorsRoute: typeof DoctorsRouteWithChildren
+  FindCareRoute: typeof FindCareRoute
   InsuranceRoute: typeof InsuranceRoute
   LoyaltyRoute: typeof LoyaltyRoute
   MyNotificationsRoute: typeof MyNotificationsRoute
@@ -2757,6 +2770,13 @@ declare module '@tanstack/react-router' {
       path: '/insurance'
       fullPath: '/insurance'
       preLoaderRoute: typeof InsuranceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/find-care': {
+      id: '/find-care'
+      path: '/find-care'
+      fullPath: '/find-care'
+      preLoaderRoute: typeof FindCareRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/doctors': {
@@ -4218,6 +4238,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConditionsRoute: ConditionsRouteWithChildren,
   ContactRoute: ContactRoute,
   DoctorsRoute: DoctorsRouteWithChildren,
+  FindCareRoute: FindCareRoute,
   InsuranceRoute: InsuranceRoute,
   LoyaltyRoute: LoyaltyRoute,
   MyNotificationsRoute: MyNotificationsRoute,
