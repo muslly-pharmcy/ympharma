@@ -7303,6 +7303,30 @@ export type Database = {
         }
         Relationships: []
       }
+      wa_allowlist: {
+        Row: {
+          created_at: string
+          district: string
+          is_active: boolean
+          label: string | null
+          phone: string
+        }
+        Insert: {
+          created_at?: string
+          district?: string
+          is_active?: boolean
+          label?: string | null
+          phone: string
+        }
+        Update: {
+          created_at?: string
+          district?: string
+          is_active?: boolean
+          label?: string | null
+          phone?: string
+        }
+        Relationships: []
+      }
       wh_locations: {
         Row: {
           code: string
