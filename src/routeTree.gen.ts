@@ -181,9 +181,12 @@ import { Route as ApiPublicHooksAgentMaintenanceRouteImport } from './routes/api
 import { Route as ApiPublicHooksAgentAlertsRouteImport } from './routes/api/public/hooks/agent-alerts'
 import { Route as ApiPublicHealthQuickCheckRouteImport } from './routes/api/public/health.quick-check'
 import { Route as ApiPublicHealthFullCheckRouteImport } from './routes/api/public/health.full-check'
+import { Route as ApiPublicEngagementTrackRouteImport } from './routes/api/public/engagement/track'
+import { Route as ApiPublicEngagementDispatchRouteImport } from './routes/api/public/engagement/dispatch'
 import { Route as ApiPublicAnalyticsIngestRouteImport } from './routes/api/public/analytics/ingest'
 import { Route as ApiPublicAiWorldHealthRouteImport } from './routes/api/public/ai/world-health'
 import { Route as ApiPublicAiSunTickRouteImport } from './routes/api/public/ai/sun-tick'
+import { Route as ApiPublicAiContentTickRouteImport } from './routes/api/public/ai/content-tick'
 import { Route as ApiPublicAiBusinessTickRouteImport } from './routes/api/public/ai/business-tick'
 import { Route as AuthenticatedPharmacistPrescriptionReviewIdRouteImport } from './routes/_authenticated/pharmacist/prescription-review.$id'
 import { Route as AuthenticatedPharmacistInvoiceReviewIdRouteImport } from './routes/_authenticated/pharmacist/invoice-review.$id'
@@ -1127,6 +1130,18 @@ const ApiPublicHealthFullCheckRoute =
     path: '/full-check',
     getParentRoute: () => ApiPublicHealthRoute,
   } as any)
+const ApiPublicEngagementTrackRoute =
+  ApiPublicEngagementTrackRouteImport.update({
+    id: '/api/public/engagement/track',
+    path: '/api/public/engagement/track',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicEngagementDispatchRoute =
+  ApiPublicEngagementDispatchRouteImport.update({
+    id: '/api/public/engagement/dispatch',
+    path: '/api/public/engagement/dispatch',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicAnalyticsIngestRoute =
   ApiPublicAnalyticsIngestRouteImport.update({
     id: '/api/public/analytics/ingest',
@@ -1141,6 +1156,11 @@ const ApiPublicAiWorldHealthRoute = ApiPublicAiWorldHealthRouteImport.update({
 const ApiPublicAiSunTickRoute = ApiPublicAiSunTickRouteImport.update({
   id: '/api/public/ai/sun-tick',
   path: '/api/public/ai/sun-tick',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicAiContentTickRoute = ApiPublicAiContentTickRouteImport.update({
+  id: '/api/public/ai/content-tick',
+  path: '/api/public/ai/content-tick',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicAiBusinessTickRoute = ApiPublicAiBusinessTickRouteImport.update({
@@ -1358,9 +1378,12 @@ export interface FileRoutesByFullPath {
   '/pharmacist/invoice-review/$id': typeof AuthenticatedPharmacistInvoiceReviewIdRoute
   '/pharmacist/prescription-review/$id': typeof AuthenticatedPharmacistPrescriptionReviewIdRoute
   '/api/public/ai/business-tick': typeof ApiPublicAiBusinessTickRoute
+  '/api/public/ai/content-tick': typeof ApiPublicAiContentTickRoute
   '/api/public/ai/sun-tick': typeof ApiPublicAiSunTickRoute
   '/api/public/ai/world-health': typeof ApiPublicAiWorldHealthRoute
   '/api/public/analytics/ingest': typeof ApiPublicAnalyticsIngestRoute
+  '/api/public/engagement/dispatch': typeof ApiPublicEngagementDispatchRoute
+  '/api/public/engagement/track': typeof ApiPublicEngagementTrackRoute
   '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
   '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
   '/api/public/hooks/agent-alerts': typeof ApiPublicHooksAgentAlertsRoute
@@ -1548,9 +1571,12 @@ export interface FileRoutesByTo {
   '/pharmacist/invoice-review/$id': typeof AuthenticatedPharmacistInvoiceReviewIdRoute
   '/pharmacist/prescription-review/$id': typeof AuthenticatedPharmacistPrescriptionReviewIdRoute
   '/api/public/ai/business-tick': typeof ApiPublicAiBusinessTickRoute
+  '/api/public/ai/content-tick': typeof ApiPublicAiContentTickRoute
   '/api/public/ai/sun-tick': typeof ApiPublicAiSunTickRoute
   '/api/public/ai/world-health': typeof ApiPublicAiWorldHealthRoute
   '/api/public/analytics/ingest': typeof ApiPublicAnalyticsIngestRoute
+  '/api/public/engagement/dispatch': typeof ApiPublicEngagementDispatchRoute
+  '/api/public/engagement/track': typeof ApiPublicEngagementTrackRoute
   '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
   '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
   '/api/public/hooks/agent-alerts': typeof ApiPublicHooksAgentAlertsRoute
@@ -1740,9 +1766,12 @@ export interface FileRoutesById {
   '/_authenticated/pharmacist/invoice-review/$id': typeof AuthenticatedPharmacistInvoiceReviewIdRoute
   '/_authenticated/pharmacist/prescription-review/$id': typeof AuthenticatedPharmacistPrescriptionReviewIdRoute
   '/api/public/ai/business-tick': typeof ApiPublicAiBusinessTickRoute
+  '/api/public/ai/content-tick': typeof ApiPublicAiContentTickRoute
   '/api/public/ai/sun-tick': typeof ApiPublicAiSunTickRoute
   '/api/public/ai/world-health': typeof ApiPublicAiWorldHealthRoute
   '/api/public/analytics/ingest': typeof ApiPublicAnalyticsIngestRoute
+  '/api/public/engagement/dispatch': typeof ApiPublicEngagementDispatchRoute
+  '/api/public/engagement/track': typeof ApiPublicEngagementTrackRoute
   '/api/public/health/full-check': typeof ApiPublicHealthFullCheckRoute
   '/api/public/health/quick-check': typeof ApiPublicHealthQuickCheckRoute
   '/api/public/hooks/agent-alerts': typeof ApiPublicHooksAgentAlertsRoute
@@ -1932,9 +1961,12 @@ export interface FileRouteTypes {
     | '/pharmacist/invoice-review/$id'
     | '/pharmacist/prescription-review/$id'
     | '/api/public/ai/business-tick'
+    | '/api/public/ai/content-tick'
     | '/api/public/ai/sun-tick'
     | '/api/public/ai/world-health'
     | '/api/public/analytics/ingest'
+    | '/api/public/engagement/dispatch'
+    | '/api/public/engagement/track'
     | '/api/public/health/full-check'
     | '/api/public/health/quick-check'
     | '/api/public/hooks/agent-alerts'
@@ -2122,9 +2154,12 @@ export interface FileRouteTypes {
     | '/pharmacist/invoice-review/$id'
     | '/pharmacist/prescription-review/$id'
     | '/api/public/ai/business-tick'
+    | '/api/public/ai/content-tick'
     | '/api/public/ai/sun-tick'
     | '/api/public/ai/world-health'
     | '/api/public/analytics/ingest'
+    | '/api/public/engagement/dispatch'
+    | '/api/public/engagement/track'
     | '/api/public/health/full-check'
     | '/api/public/health/quick-check'
     | '/api/public/hooks/agent-alerts'
@@ -2313,9 +2348,12 @@ export interface FileRouteTypes {
     | '/_authenticated/pharmacist/invoice-review/$id'
     | '/_authenticated/pharmacist/prescription-review/$id'
     | '/api/public/ai/business-tick'
+    | '/api/public/ai/content-tick'
     | '/api/public/ai/sun-tick'
     | '/api/public/ai/world-health'
     | '/api/public/analytics/ingest'
+    | '/api/public/engagement/dispatch'
+    | '/api/public/engagement/track'
     | '/api/public/health/full-check'
     | '/api/public/health/quick-check'
     | '/api/public/hooks/agent-alerts'
@@ -2471,9 +2509,12 @@ export interface RootRouteChildren {
   ApiPublicWhatsappWebhookRoute: typeof ApiPublicWhatsappWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicAiBusinessTickRoute: typeof ApiPublicAiBusinessTickRoute
+  ApiPublicAiContentTickRoute: typeof ApiPublicAiContentTickRoute
   ApiPublicAiSunTickRoute: typeof ApiPublicAiSunTickRoute
   ApiPublicAiWorldHealthRoute: typeof ApiPublicAiWorldHealthRoute
   ApiPublicAnalyticsIngestRoute: typeof ApiPublicAnalyticsIngestRoute
+  ApiPublicEngagementDispatchRoute: typeof ApiPublicEngagementDispatchRoute
+  ApiPublicEngagementTrackRoute: typeof ApiPublicEngagementTrackRoute
   ApiPublicHooksAgentAlertsRoute: typeof ApiPublicHooksAgentAlertsRoute
   ApiPublicHooksAgentMaintenanceRoute: typeof ApiPublicHooksAgentMaintenanceRoute
   ApiPublicHooksAlertsWorkerRoute: typeof ApiPublicHooksAlertsWorkerRoute
@@ -3731,6 +3772,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHealthFullCheckRouteImport
       parentRoute: typeof ApiPublicHealthRoute
     }
+    '/api/public/engagement/track': {
+      id: '/api/public/engagement/track'
+      path: '/api/public/engagement/track'
+      fullPath: '/api/public/engagement/track'
+      preLoaderRoute: typeof ApiPublicEngagementTrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/engagement/dispatch': {
+      id: '/api/public/engagement/dispatch'
+      path: '/api/public/engagement/dispatch'
+      fullPath: '/api/public/engagement/dispatch'
+      preLoaderRoute: typeof ApiPublicEngagementDispatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/analytics/ingest': {
       id: '/api/public/analytics/ingest'
       path: '/api/public/analytics/ingest'
@@ -3750,6 +3805,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/ai/sun-tick'
       fullPath: '/api/public/ai/sun-tick'
       preLoaderRoute: typeof ApiPublicAiSunTickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/ai/content-tick': {
+      id: '/api/public/ai/content-tick'
+      path: '/api/public/ai/content-tick'
+      fullPath: '/api/public/ai/content-tick'
+      preLoaderRoute: typeof ApiPublicAiContentTickRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/ai/business-tick': {
@@ -4085,9 +4147,12 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicWhatsappWebhookRoute: ApiPublicWhatsappWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicAiBusinessTickRoute: ApiPublicAiBusinessTickRoute,
+  ApiPublicAiContentTickRoute: ApiPublicAiContentTickRoute,
   ApiPublicAiSunTickRoute: ApiPublicAiSunTickRoute,
   ApiPublicAiWorldHealthRoute: ApiPublicAiWorldHealthRoute,
   ApiPublicAnalyticsIngestRoute: ApiPublicAnalyticsIngestRoute,
+  ApiPublicEngagementDispatchRoute: ApiPublicEngagementDispatchRoute,
+  ApiPublicEngagementTrackRoute: ApiPublicEngagementTrackRoute,
   ApiPublicHooksAgentAlertsRoute: ApiPublicHooksAgentAlertsRoute,
   ApiPublicHooksAgentMaintenanceRoute: ApiPublicHooksAgentMaintenanceRoute,
   ApiPublicHooksAlertsWorkerRoute: ApiPublicHooksAlertsWorkerRoute,
@@ -4144,13 +4209,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
