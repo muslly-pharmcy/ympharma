@@ -6,6 +6,7 @@ import {
   sunListDecisions,
   sunStats,
 } from "@/ai/sun-core/sun.functions";
+import { sunBridgeStats } from "@/lib/sun-bridge.functions";
 
 export const Route = createFileRoute("/_authenticated/admin-sun-core")({
   head: () => ({
