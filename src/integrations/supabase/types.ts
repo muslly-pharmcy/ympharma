@@ -853,6 +853,45 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_neural_memory: {
+        Row: {
+          content: string
+          created_at: string
+          embedding: string | null
+          id: string
+          importance: number
+          memory_category: string
+          metadata: Json
+          model_version: string
+          owner_id: string | null
+          owner_type: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          importance?: number
+          memory_category: string
+          metadata?: Json
+          model_version?: string
+          owner_id?: string | null
+          owner_type: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          importance?: number
+          memory_category?: string
+          metadata?: Json
+          model_version?: string
+          owner_id?: string | null
+          owner_type?: string
+        }
+        Relationships: []
+      }
       ai_neural_synaptic_log: {
         Row: {
           created_at: string
@@ -8934,6 +8973,23 @@ export type Database = {
         Returns: boolean
       }
       marketing_queue_skip: { Args: { _id: string }; Returns: boolean }
+      match_ai_neural_memory: {
+        Args: {
+          filter_owner_type?: string
+          match_count?: number
+          query_embedding: string
+        }
+        Returns: {
+          content: string
+          created_at: string
+          id: string
+          memory_category: string
+          metadata: Json
+          owner_id: string
+          owner_type: string
+          similarity: number
+        }[]
+      }
       monitor_cron_failures: { Args: never; Returns: Json }
       move_to_dlq: {
         Args: {
