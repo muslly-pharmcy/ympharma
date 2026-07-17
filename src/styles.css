@@ -21,16 +21,30 @@
   --font-arabic: "Cairo", "Tajawal", ui-sans-serif, system-ui, sans-serif;
   --font-latin: "Montserrat Variable", "Montserrat", ui-sans-serif, system-ui, sans-serif;
 
-  /* Muslly Medical palette (additive; existing --primary tokens preserved) */
-  --color-medical-turquoise: oklch(0.68 0.11 200);
+  /* Muslly Medical Future Palette 2026 */
+  --color-medical-turquoise: oklch(0.67 0.11 199);       /* #00A8B5 */
   --color-medical-turquoise-deep: oklch(0.55 0.11 200);
-  --color-medical-turquoise-soft: oklch(0.94 0.03 200);
+  --color-medical-turquoise-soft: oklch(0.96 0.02 200);  /* #EAF4F6 */
+  --color-ai-cyan: oklch(0.86 0.13 209);                 /* #00E5FF */
+  --color-deep-space: oklch(0.19 0.025 230);             /* #061B24 */
+  --color-neural-green: oklch(0.79 0.16 155);            /* #20D98A */
   --color-medical-ink: oklch(0.42 0 0);
   --color-medical-surface: oklch(0.975 0.006 220);
   --color-medical-white: #ffffff;
 
   --shadow-medical-card: 0 4px 18px -6px color-mix(in oklab, var(--color-medical-turquoise) 22%, transparent);
   --shadow-medical-elevated: 0 18px 44px -18px color-mix(in oklab, var(--color-medical-turquoise-deep) 35%, transparent);
+  --shadow-ai-glow: 0 0 60px color-mix(in oklab, var(--color-ai-cyan) 45%, transparent), 0 0 120px color-mix(in oklab, var(--color-ai-cyan) 18%, transparent);
+  --radius-medical-card: 1rem;
+  --radius-medical-pill: 9999px;
+
+  /* Motion System 2026 */
+  --motion-fast: 150ms;
+  --motion-normal: 400ms;
+  --motion-smooth: 800ms;
+  --motion-cinematic: 1600ms;
+  --motion-ai: 2400ms;
+  --ease-ai: cubic-bezier(0.22, 1, 0.36, 1);
   --radius-medical-card: 1rem;
   --radius-medical-pill: 9999px;
 
@@ -73,10 +87,10 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.22 0.03 220);
 
-  /* Brand: medical teal (matches reference design #087d78 / #075e5b) */
-  --primary: oklch(0.54 0.09 190);
+  /* Brand: Medical Turquoise 2026 (#00A8B5) */
+  --primary: oklch(0.67 0.11 199);
   --primary-foreground: oklch(0.99 0 0);
-  --primary-deep: oklch(0.44 0.08 190);
+  --primary-deep: oklch(0.55 0.11 200);
 
   --secondary: oklch(0.96 0.012 190);
   --secondary-foreground: oklch(0.25 0.04 220);
@@ -251,3 +265,52 @@
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* ============================================================
+   MUSLLY FUTURE MOTION 2026 — Glass Morphism 3.0 + AI Core
+   ============================================================ */
+@utility glass-3 {
+  background: color-mix(in oklab, white 8%, transparent);
+  backdrop-filter: blur(30px) saturate(140%);
+  border: 1px solid color-mix(in oklab, white 15%, transparent);
+  border-radius: 1.25rem;
+}
+@utility glass-3-dark {
+  background: color-mix(in oklab, var(--color-deep-space) 55%, transparent);
+  backdrop-filter: blur(28px) saturate(160%);
+  border: 1px solid color-mix(in oklab, var(--color-ai-cyan) 18%, transparent);
+  border-radius: 1.25rem;
+}
+@utility ai-glow {
+  box-shadow: var(--shadow-ai-glow);
+}
+@utility deep-space-bg {
+  background:
+    radial-gradient(ellipse at 20% 10%, color-mix(in oklab, var(--color-ai-cyan) 12%, transparent) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 90%, color-mix(in oklab, var(--color-neural-green) 10%, transparent) 0%, transparent 55%),
+    var(--color-deep-space);
+}
+@utility neural-grid-bg {
+  background-image:
+    linear-gradient(color-mix(in oklab, var(--color-ai-cyan) 8%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--color-ai-cyan) 8%, transparent) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+@keyframes ai-pulse {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.04); }
+}
+@keyframes neural-drift {
+  0% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(-12px) translateX(6px); }
+  100% { transform: translateY(0) translateX(0); }
+}
+@keyframes data-stream {
+  0% { transform: translateX(-100%); opacity: 0; }
+  10%, 90% { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+@utility animate-ai-pulse { animation: ai-pulse 3.2s ease-in-out infinite; }
+@utility animate-neural-drift { animation: neural-drift 6s ease-in-out infinite; }
+@utility animate-data-stream { animation: data-stream 2.8s linear infinite; }
