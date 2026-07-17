@@ -7,4 +7,4 @@ export {
   listOpenRecommendations,
   intelligenceStats,
   recomputeNow,
-} from "./server/intelligence.functions";
+} from "./intelligence.functions";

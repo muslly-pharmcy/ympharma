@@ -705,6 +705,86 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_decisions: {
+        Row: {
+          action: Json | null
+          agent_name: string | null
+          confidence: number | null
+          created_at: string | null
+          decision_type: string | null
+          event_id: string | null
+          id: string
+          reasoning: Json | null
+        }
+        Insert: {
+          action?: Json | null
+          agent_name?: string | null
+          confidence?: number | null
+          created_at?: string | null
+          decision_type?: string | null
+          event_id?: string | null
+          id?: string
+          reasoning?: Json | null
+        }
+        Update: {
+          action?: Json | null
+          agent_name?: string | null
+          confidence?: number | null
+          created_at?: string | null
+          decision_type?: string | null
+          event_id?: string | null
+          id?: string
+          reasoning?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_decisions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "ai_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_events: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          event_type: string
+          id: string
+          payload: Json
+          priority: string | null
+          processed_at: string | null
+          source: string
+          status: string | null
+          target_agent: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          event_type: string
+          id?: string
+          payload: Json
+          priority?: string | null
+          processed_at?: string | null
+          source: string
+          status?: string | null
+          target_agent?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          event_type?: string
+          id?: string
+          payload?: Json
+          priority?: string | null
+          processed_at?: string | null
+          source?: string
+          status?: string | null
+          target_agent?: string | null
+        }
+        Relationships: []
+      }
       ai_neural_synaptic_log: {
         Row: {
           created_at: string
