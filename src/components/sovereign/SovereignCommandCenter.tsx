@@ -35,46 +35,113 @@ export function SovereignCommandCenter({ initialTab = "brain" }: { initialTab?: 
     setParacetamolDose(`${minDose}-${maxDose} ملغ (تقريباً ${mlDose.toFixed(1)} مل شراب)`);
   };
 
-  const tabBtn = (tab: SovereignTab, icon: React.ReactNode, label: string, tone: string) => {
+  // Solar system palette — olive #005D4F core, planet accent per tab
+  const OLIVE = "#005D4F";
+  const PLANETS: Record<SovereignTab, { label: string; icon: React.ReactNode; from: string; to: string }> = {
+    brain:       { label: "المخ السيادي والـ 800 أداة",     icon: <Cpu className="w-4 h-4" />,        from: "#F5D76E", to: "#B8860B" },
+    fevers:      { label: "الحميات والسعرات والتطبيبات",   icon: <Flame className="w-4 h-4" />,      from: "#FF6B6B", to: "#8B0000" },
+    chronic:     { label: "قسم المريض المزمن",              icon: <Activity className="w-4 h-4" />,   from: "#F5A623", to: "#7C4A00" },
+    maternal:    { label: "قسم الأمهات ورعاية الحوامل",    icon: <Heart className="w-4 h-4" />,      from: "#F78DA7", to: "#8B1A4A" },
+    kids:        { label: "قسم الأطفال والرضع",             icon: <Baby className="w-4 h-4" />,       from: "#67B7F7", to: "#0B3D66" },
+    doctors:     { label: "شبكة الأطباء والعيادات",         icon: <Users className="w-4 h-4" />,      from: "#7ED6DF", to: "#005B6E" },
+    supplements: { label: "المكملات الغذائية والفيتامينات", icon: <Zap className="w-4 h-4" />,        from: "#F9E79F", to: "#7D6608" },
+    herbs:       { label: "الأعشاب الطبية والطب البديل",   icon: <Leaf className="w-4 h-4" />,       from: "#A8E063", to: "#1E5B1E" },
+  };
+
+  const [navFilter, setNavFilter] = useState("");
+  const filteredTabs = SOVEREIGN_TABS.filter((t) =>
+    !navFilter.trim() || PLANETS[t].label.includes(navFilter.trim()),
+  );
+
+  const tabBtn = (tab: SovereignTab) => {
     const active = activeTab === tab;
+    const p = PLANETS[tab];
     return (
       <button
+        key={tab}
         onClick={() => setActiveTab(tab)}
-        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition ${
-          active ? `${tone} border` : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
-        }`}
+        className="group w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition-all"
+        style={
+          active
+            ? { background: "rgba(0,93,79,0.28)", border: "1px solid rgba(212,175,55,0.45)", color: "#F5E6A8", boxShadow: "0 0 24px rgba(0,93,79,0.35)" }
+            : { color: "#9CB3AE", border: "1px solid transparent" }
+        }
       >
-        <div className="flex items-center gap-2.5">{icon}<span>{label}</span></div>
-        {active ? <span className="w-1.5 h-1.5 bg-current rounded-full animate-ping" /> : null}
+        <span className="flex items-center gap-2.5">
+          {/* Planet orb */}
+          <span
+            className="relative inline-flex w-6 h-6 items-center justify-center rounded-full shrink-0 transition-transform group-hover:scale-110"
+            style={{
+              background: `radial-gradient(circle at 30% 30%, ${p.from}, ${p.to})`,
+              boxShadow: active ? `0 0 12px ${p.from}` : `0 0 6px rgba(0,0,0,0.4)`,
+            }}
+          >
+            <span className="text-white/90">{p.icon}</span>
+            {active && (
+              <span
+                className="absolute inset-0 rounded-full border animate-ping"
+                style={{ borderColor: p.from, opacity: 0.4 }}
+              />
+            )}
+          </span>
+          <span>{p.label}</span>
+        </span>
+        {active && <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: p.from }} />}
       </button>
     );
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-100 font-sans" dir="rtl">
-      <aside className="w-72 bg-slate-900 border-l border-slate-800 flex flex-col justify-between p-4 z-20 shrink-0">
-        <div className="space-y-6">
-          <div className="flex items-center gap-3 px-2 py-3 border-b border-slate-800">
-            <div className="p-2 bg-gradient-to-tr from-emerald-500 to-fuchsia-500 rounded-xl text-white">
+    <div className="flex min-h-screen font-sans" dir="rtl"
+      style={{
+        background: "radial-gradient(ellipse at top left, #002B24 0%, #050b0a 55%, #000 100%)",
+        color: "#E6EFEC",
+      }}
+    >
+      <aside
+        className="w-72 flex flex-col justify-between p-4 z-20 shrink-0 backdrop-blur-xl"
+        style={{
+          background: "linear-gradient(180deg, rgba(0,93,79,0.18) 0%, rgba(0,20,17,0.85) 100%)",
+          borderLeft: `1px solid ${OLIVE}55`,
+        }}
+      >
+        <div className="space-y-5">
+          <div className="flex items-center gap-3 px-2 py-3" style={{ borderBottom: `1px solid ${OLIVE}44` }}>
+            <div
+              className="p-2 rounded-xl text-white shadow-lg"
+              style={{ background: `linear-gradient(135deg, ${OLIVE}, #D4AF37)` }}
+            >
               <Brain className="w-6 h-6 animate-pulse" />
             </div>
             <div>
-              <h2 className="text-sm font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-l from-emerald-400 to-fuchsia-400">
+              <h2 className="text-sm font-black tracking-wide"
+                style={{ color: "#F5E6A8", textShadow: `0 0 12px ${OLIVE}` }}>
                 Al-Musalli AI-OS
               </h2>
-              <p className="text-[9px] text-slate-500">منظومة الإدارة السيادية الفائقة</p>
+              <p className="text-[9px]" style={{ color: "#8FA8A3" }}>المجموعة الشمسية السيادية</p>
             </div>
           </div>
 
-          <nav className="space-y-1 overflow-y-auto max-h-[70vh]">
-            {tabBtn("brain", <Cpu className="w-4 h-4" />, "المخ السيادي والـ 800 أداة", "bg-emerald-500/10 text-emerald-400 border-emerald-500/20")}
-            {tabBtn("fevers", <Flame className="w-4 h-4" />, "الحميات والسعرات والتطبيبات", "bg-rose-500/10 text-rose-400 border-rose-500/20")}
-            {tabBtn("chronic", <Activity className="w-4 h-4" />, "قسم المريض المزمن", "bg-amber-500/10 text-amber-400 border-amber-500/20")}
-            {tabBtn("maternal", <Heart className="w-4 h-4" />, "قسم الأمهات ورعاية الحوامل", "bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20")}
-            {tabBtn("kids", <Baby className="w-4 h-4" />, "قسم الأطفال والرضع", "bg-blue-500/10 text-blue-400 border-blue-500/20")}
-            {tabBtn("doctors", <Users className="w-4 h-4" />, "شبكة الأطباء والعيادات", "bg-sky-500/10 text-sky-400 border-sky-500/20")}
-            {tabBtn("supplements", <Zap className="w-4 h-4" />, "المكملات الغذائية والفيتامينات", "bg-yellow-500/10 text-yellow-400 border-yellow-500/20")}
-            {tabBtn("herbs", <Leaf className="w-4 h-4" />, "الأعشاب الطبية والطب البديل", "bg-emerald-500/10 text-emerald-400 border-emerald-500/20")}
+          <div className="relative">
+            <input
+              value={navFilter}
+              onChange={(e) => setNavFilter(e.target.value)}
+              placeholder="ابحث في الكواكب…"
+              className="w-full text-xs px-3 py-2 rounded-lg outline-none placeholder:text-slate-500"
+              style={{
+                background: "rgba(0,0,0,0.4)",
+                border: `1px solid ${OLIVE}66`,
+                color: "#E6EFEC",
+              }}
+            />
+          </div>
+
+          <nav className="space-y-1 overflow-y-auto max-h-[65vh] pr-1">
+            {filteredTabs.length === 0 ? (
+              <p className="text-[10px] text-slate-500 text-center py-4">لا كوكب مطابق</p>
+            ) : (
+              filteredTabs.map((t) => tabBtn(t))
+            )}
           </nav>
         </div>
 
