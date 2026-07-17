@@ -22,7 +22,6 @@ export class OrderConnector implements AIConnector {
       "@/integrations/supabase/client.server"
     );
     await supabaseAdmin.from("agent_events").insert({
-      event_id: crypto.randomUUID(),
       event_name: "ORDER_ANALYSIS_REQUIRED",
       payload: (event.payload ?? {}) as never,
       source: "order_connector",
