@@ -1,12 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Cpu, Sparkles, ShieldCheck, Zap, Globe, Code2, Award, BarChart3,
-  RotateCw, Play, AlertCircle,
+  RotateCw, Play, AlertCircle, Bell, X, Heart,
 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { executeNeuralInference } from "../functions/brain.functions";
 import type { BrainDecisionMatrix } from "../domain/types";
+
+const PROMOTIONAL_CAMPAIGNS = [
+  { id: 1, title: "رعاية كاملة لطفلك 👶", text: "اشتركي الآن في باقة الأمومة الشهرية واحملي عبء التفكير عن كاهلك مع حسم 10% وتوصيل مجاني لبيتك بالمنصورة!" },
+  { id: 2, title: "مستعدون لسلامتك ❤️", text: "هل تعانين من الضغط أو السكري؟ المخ الذكي لصيدلية المصلي يدقق روشتتك طبياً ويقترح البدائل الأكثر أماناً بلمسة زر." },
+  { id: 3, title: "صيف عدن أكثر رطوبة ☀️", text: "وفرنا حزم العناية ببشرة الأطفال والترطيب الفائق ومكملات الطاقة الصيفية بخصومات خاصة لأول 100 طلب اليوم." },
+];
 
 // Blueprint tool cards mapped to the real dispatched codes emitted by decide().
 interface RegistryTool {
