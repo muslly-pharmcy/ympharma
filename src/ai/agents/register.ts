@@ -1,6 +1,7 @@
 import type { AgentRegistry } from "../core/agent-registry";
 import { PharmacistAgent } from "./medical/pharmacist-agent";
 import { PrescriptionAgent } from "./medical/prescription-agent";
+import { PatientCompanionAgent } from "./medical/patient-companion-agent";
 import { InteractionAgent } from "./medical/interaction-agent";
 import { InventoryAgent } from "./inventory/inventory-agent";
 import { ExpiryAgent } from "./inventory/expiry-agent";
