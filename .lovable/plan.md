@@ -1,80 +1,58 @@
-# 📦 PHOENIX PHASE 6A — Inventory Intelligence Core
 
-نبني على البنية الحقيقية الموجودة (`inv_stock_batches`, `inv_stock_movements`, `orders`, `ai_agents`, `agent_events`, ☀️ Sun Core) — بدون تكرار طبقات.
+## Plan — PHASE 1 (AI SUN CORE v1.0 blueprint) + Build Fix
 
-## المبدأ الحاكم
-- **الوكيل موجود**: `ai_agents.code = 'inventory'` مُسجّل مسبقاً في Sun Core مع `capabilities=[demand_forecast,restock_alert,stale_detect]`. سنستخدمه بدل إنشاء وكيل جديد.
-- **الأحداث موجودة**: `STOCK_RECEIVED / STOCK_MOVEMENT_CREATED / EXPIRY_ALERT_CREATED` مُشترَك بها الوكيل. Phase 6A تضيف حَسّاسات المخرجات فقط.
-- **بيانات المبيعات**: نقرأ من `orders` + الحركات، بدون طبقة `sales` وهمية.
+### 0) Build blocker (must land first)
+`src/modules/inventory-intelligence/index.ts` re-exports from `./server/intelligence.functions`. TanStack import-protection denies any client-reachable import under `**/server/**`. Fix in one edit:
 
-## المخرجات
+- Move `src/modules/inventory-intelligence/server/intelligence.functions.ts` → `src/modules/inventory-intelligence/intelligence.functions.ts` (kept as thin client-safe server-fn declarations; heavy helpers stay in a `*.server.ts` sibling and are `await import`ed inside handlers).
+- Update the `index.ts` barrel and the `/admin-inventory-intel` route import path.
+- Rerun `bun run build:dev` to confirm green.
 
-### 1) Migration — 3 جداول (لا 4)
-- `inventory_health_scores`: `product_id`, `score` (0-100), `status` (healthy/warning/critical/dead), `availability_pct`, `velocity_daily`, `expiry_risk`, `days_of_cover`, `recommendation`, `computed_at`. **UNIQUE(product_id)** — تحديث مكاني بدل تراكم.
-- `demand_forecasts`: `product_id`, `horizon_days` (7/30), `expected_units`, `method` (moving_avg/weighted), `confidence`, `computed_at`. **UNIQUE(product_id, horizon_days)**.
-- `purchase_recommendations`: `product_id`, `recommended_qty`, `reason`, `urgency` (low/med/high/critical), `preferred_supplier_id` (FK اختياري)، `expected_stockout_at`, `status` (open/approved/dismissed/ordered), `created_at`, `resolved_at`.
+While there, silence the deprecation warnings in the same touched file only: `.inputValidator(` → `.validator(` (no behavior change). Other files listed in the warning stay untouched this turn.
 
-كل الجداول: GRANT للمدراء (SELECT) + service_role كامل + RLS + `has_role`.
+### 1) New AI SUN CORE per blueprint (`src/ai/core/`)
+Create the blueprint layout **alongside** the existing `src/ai/sun-core/` (kept temporarily so nothing breaks), with the blueprint's schema and files:
 
-### 2) Module `src/modules/inventory-intelligence/`
 ```
-domain/
-  stock-health.ts      → دوال حساب Score نقية (بدون I/O)
-  demand-model.ts      → MovingAverage 7/30 يوم
-  expiry-model.ts      → حساب مخاطر الانتهاء من دفعات inv_stock_batches
-server/
-  recompute.server.ts  → snapshot دورية لجميع المنتجات (batch)
-  intelligence.functions.ts → sunListHealth, sunListRecommendations, recomputeNow (admin)
-events/
-  index.ts             → LOW_STOCK_PREDICTED / PURCHASE_RECOMMENDED / DEAD_STOCK_DETECTED
-index.ts
+supabase/migrations/xxxx_create_ai_sun_core.sql   -- ai_events, ai_decisions, extends ai_agents seed
+src/ai/core/
+  types.ts
+  event-bus.ts
+  agent-registry.ts
+  event-router.ts
+  decision-engine.ts
+  sun-engine.ts
+  index.ts
 ```
 
-### 3) SQL RPC واحد: `inv_intel_snapshot()`
-دالة `SECURITY DEFINER` تحسب:
-- Availability = min(1, current_qty / target_qty)
-- Velocity = SUM(order_items في آخر 30 يوم) / 30
-- DaysOfCover = current_qty / velocity
-- ExpiryRisk = نسبة الكمية المنتهية خلال 90 يوم من `inv_stock_batches`
-- Score مركّب موزون → status + recommendation
-- UPSERT إلى `inventory_health_scores` + INSERT إلى `purchase_recommendations` عند `days_of_cover < 7`.
+Migration contents (adapted to the real DB — `ai_agents` already exists, so use `ADD COLUMN IF NOT EXISTS` for `version` and don't recreate it; add `ai_events`, `ai_decisions` new tables with **GRANTs + RLS + admin-only policies** per project rules; seed missing agents with `ON CONFLICT DO NOTHING`).
 
-### 4) Cron كل 6 ساعات
-`pg_cron` يستدعي `select public.inv_intel_snapshot();` مباشرة (SQL-only، لا حاجة لـ endpoint). ينشر `PURCHASE_RECOMMENDED` في `agent_events` → يمرّ عبر Sun Engine → يُرسَل للوكيل `inventory`.
+TS files follow the blueprint shape but adjusted for our stack:
+- Import path `@/integrations/supabase/client` (not `@/lib/supabase`).
+- `AIAgent.execute` typed; `AgentRegistry`, `routeEvent`, `DecisionEngine`, `SunEngine.ignite()` as specified.
+- No auto-run `sun.ignite()` at import time — expose it via a `createServerFn` wrapper for the admin dashboard trigger (avoids running on every client bundle load and keeps secrets server-side).
 
-### 5) لوحة `/admin-inventory-intel` تحت `_authenticated`
-- كروت: صحة عامة، منتجات حرجة، توصيات مفتوحة، مخزون راكد.
-- جدول Top-20 حسب Score (تصاعدي) مع action "توصية شراء".
-- زر "احسب الآن" (admin) → server fn ينادي `recomputeNow`.
+### 2) Bridge to existing Phoenix `agent_events`
+A tiny adapter (`src/ai/core/phoenix-bridge.ts`, server-only via `.server.ts` naming) that:
+- Mirrors new `ai_events` inserts into `agent_events` (fire-and-forget) so existing consumers keep working.
+- Lets `event-consumer.ts` continue as-is; no behavior removed.
 
-### 6) اختبارات
-`src/__tests__/unit/inventory-intelligence/` — 4 اختبارات: moving-avg، expiry-risk، composite-score، recommendation-threshold.
+### 3) Deprecate old sun-core cleanly (no code deletion this turn)
+- Leave `src/ai/sun-core/*` and `/admin-sun-core` route intact.
+- Add a short `README.md` in `src/ai/sun-core/` marking it as **legacy** and pointing to `src/ai/core/`.
+- Migration of the dashboard + `event-consumer.ts` fallback to the new core is scheduled for **PHASE 1.2** (next turn) to keep this turn small and reviewable.
 
-## خارج نطاق 6A (يأتي في 6B / 7)
-- Autonomous PO creation، اختيار مورد ذكي، Phase 7 Pharmacist Brain.
-- Seasonality models — نبدأ بـ Moving Average فقط.
+### 4) Verification
+- `bun run build:dev` → must exit 0.
+- `bunx vitest run` for the two existing suites (sun-engine, inventory-intelligence) → still green.
+- One new unit test: `src/__tests__/unit/ai-core/router.test.ts` covering the 3 seeded routes + default null.
 
-## Technical Details
+### Out of scope (explicit)
+- Neural Memory expansion, new agents implementations, Automation Engine, Security Guardian, Intelligence Center, Evolution Engine — those are later phases per the blueprint order.
+- Deleting the legacy `sun-core` folder or its dashboard.
+- Touching unrelated `.inputValidator` deprecation warnings.
 
-**Composite Score (weighted):**
-```
-score = 0.35*availability + 0.25*(1 - expiry_risk)
-      + 0.25*velocity_signal + 0.15*margin_signal
-```
-حيث `velocity_signal = clamp(days_of_cover/14, 0, 1)` و `margin_signal` من `products.price - products.cost` (إن وُجد، وإلا 0.5 محايد).
-
-**Recommendation urgency:**
-- `days_of_cover < 3` → critical
-- `< 7` → high
-- `< 14` → medium
-- expiry_risk > 0.3 & velocity < 1/day → dead_stock (dismiss buy, mark clearance)
-
-**Events emitted:** بواسطة trigger على `purchase_recommendations` عند INSERT: يُدرج صفّاً في `agent_events` باسم `PURCHASE_RECOMMENDED` + `entity_id=recommendation.id`. Sun Engine يوجّه للوكيل `inventory` (سيحتاج إضافة الحدث لـ `event_subscriptions` وللـ `event-router`).
-
-**Verification:**
-- Migration + linter نظيف.
-- `bunx vitest run inventory-intelligence` أخضر.
-- `select public.inv_intel_snapshot();` يعبّئ الجداول.
-- `/admin-inventory-intel` يعرض بيانات حقيقية.
-
-هل أنفّذ؟
+### Technical notes
+- **Import protection**: no file under `src/ai/core/` may import `client.server` at module scope; admin-only privileged reads go through `createServerFn` + `requireSupabaseAuth` with role check, loading `supabaseAdmin` inside the handler via `await import(...)`.
+- **RLS**: `ai_events` / `ai_decisions` — `SELECT` for admins only (`has_role(auth.uid(),'admin')`), `INSERT` via `service_role` only. `GRANT SELECT` to `authenticated`, `GRANT ALL` to `service_role`, no `anon`.
+- **Estimated diff**: ~8 new files, 1 migration, 2 edits (barrel + route path). Small, reviewable.
