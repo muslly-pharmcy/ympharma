@@ -34,6 +34,8 @@ import { SwUpdateBanner } from "../components/sw-update-banner";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { InstallPrompt } from "../components/InstallPrompt";
 import { SovereignQuickLauncher } from "../components/sovereign-quick-launcher";
+import { VisitorTracker } from "../components/engagement/VisitorTracker";
+import { PushOptInCard } from "../components/engagement/PushOptInCard";
 
 function NotFoundComponent() {
   return (
@@ -197,6 +199,8 @@ function RootComponent() {
             <SovereignQuickLauncher />
             <SwUpdateBanner />
             <InstallPrompt />
+            <VisitorTracker />
+            <PushOptInCard />
             <Toaster position="top-center" richColors />
           </CartProvider>
         </I18nProvider>
