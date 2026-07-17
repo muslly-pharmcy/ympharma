@@ -1,99 +1,42 @@
+## Phase 11 — Patient Operating System (adapted, realistic scope)
 
-# Phase 9 + 10 — Adapted to Reality
+Phases 11–20 in the blueprint span months of work and duplicate a lot of what's already shipped (`hc_patients`, `hc_appointments`, `hc_doctors`, `insurance_claims`, `ins_companies`, `ins_patient_coverage`, `medical_entities`, `ai_agents`, `ai_events`, `sun_decisions`, `ai_learning_feedback`-equivalent tables, `provider_ranking_scores`, `telemedicine_sessions`, etc.).
 
-The blueprint proposes new tables (`health_providers`, `appointment_slots`, `provider_reviews`, `medical_organizations`, `patient_profiles`) that duplicate infrastructure already shipped in earlier phases. Building them as-is would fragment the data model. Below is a plan that delivers the same capabilities on top of what exists.
+I will NOT re-create parallel tables (`patients`, `medical_records`, `patient_medications`, `insurance_providers`, `insurance_claims` a second time). I'll extend what exists and ship Phase 11 end-to-end first. Later phases will be proposed after 11 lands.
 
-## Reuse map (do NOT recreate)
+### Scope for this turn (Phase 11 only)
 
-| Blueprint table | Existing table used instead |
-|---|---|
-| `health_providers` | `hc_doctors` + `hc_locations` + `pn_pharmacies` (unified via a `provider_directory` view) |
-| `appointment_slots` | `hc_doctor_availability` + `hc_appointments` (already scheduling-capable) |
-| `patient_profiles` | `hc_patients` + `customer_profiles` |
-| `provider_reviews` | `reviews` (already has 9 cols + 5 policies) |
-| `medical_organizations` | `organizations` + `hc_locations` |
+**Database (single migration, reusing existing tables):**
+1. `patient_medications` — links `hc_patients` → `medical_entities` (medicine), with dosage/frequency/start/end/active. RLS: patient reads own; doctor reads via existing appointment/consent relationship.
+2. `medical_vault_files` — `patient_id`, `file_type`, `storage_path`, `mime`, `size_bytes`, `uploaded_by`, `encryption_status`. Storage bucket `medical-vault` (private).
+3. `family_health_accounts` — `owner_patient_id`, `member_patient_id`, `relationship`, `access_level` (`read` | `manage`), `active`.
+4. `patient_health_events` — unified timeline row (`patient_id`, `event_type`, `event_date`, `source_table`, `source_id`, `summary`, `payload jsonb`). Populated by triggers on `hc_appointments`, `prescription_orders`, `insurance_claims`, `patient_medications`, `medical_vault_files`.
+5. `patient_consents` — `patient_id`, `granted_to_type`, `granted_to_id`, `scope jsonb`, `expires_at`, `active`. Used by future data-exchange phase; already needed for family access checks.
 
-## New tables (only what's genuinely missing)
+All tables get: GRANTs (authenticated + service_role), RLS enabled, policies scoped to `auth.uid()` via `hc_patients.user_id`, `updated_at` trigger.
 
-1. **`medical_entities`** — knowledge graph nodes (DISEASE / SYMPTOM / MEDICINE / PROCEDURE / LAB_TEST / SPECIALTY). Name (ar + en), synonyms, ICD/ATC codes when known, metadata JSONB, `embedding vector(768)` for semantic search via pgvector (already enabled).
-2. **`medical_relationships`** — typed edges (causes, treats, symptom_of, specialist_for, contraindicates, interacts_with) with confidence + evidence source.
-3. **`drug_interactions`** — pairwise ATC/name interaction table with severity + mechanism (seeded from a curated JSON, not scraped).
-4. **`telemedicine_sessions`** — session shell (doctor_id, patient_id, status, started/ended, join_token). No video provider yet — foundation only, as the blueprint states.
-5. **`provider_ranking_scores`** — precomputed nightly (score, level, factors JSONB) referencing `hc_doctors.id` / `pn_pharmacies.id`; keeps ranking off the hot path.
+**Code:**
+- `src/modules/patient-os/medications/medications.functions.ts` — list/add/stop medication (auth'd server fn).
+- `src/modules/patient-os/vault/vault.functions.ts` — signed upload URL + list files.
+- `src/modules/patient-os/timeline/timeline.functions.ts` — read unified timeline (joins events + latest 50).
+- `src/modules/patient-os/family/family.functions.ts` — invite/accept/revoke family link.
+- `src/ai/agents/health/patient-companion-agent.ts` — `BaseAgent` subclass; reads timeline + active meds, uses Lovable AI Gateway (Gemini flash) to produce recommendations, logs to `sun_decisions`.
+- Register agent in existing `AgentRegistry`; subscribe to new events on the existing `EventBus`: `PATIENT_MEDICATION_STARTED`, `PATIENT_VAULT_UPLOADED`, `PATIENT_TIMELINE_UPDATED`.
 
-All 5 tables get RLS + explicit `GRANT`s per project rules (public SELECT on entities/relationships/interactions; authenticated write via server functions only; telemedicine scoped to participants).
+**UI (single new route under existing auth gate):**
+- `src/routes/_authenticated/my-health.tsx` — three tabs (Timeline / Medications / Vault), Arabic RTL, uses existing `GlassCard` + medical palette. No new design system.
 
-## Code layout
+**What I'm deferring (needs its own turn each):**
+- Phase 12 exchange/FHIR/insurance-claims flow — insurance tables already exist; will build claim submission UI + consent-gated API in a follow-up.
+- Phase 13 autonomous hospital/pharmacy managers — extends existing agents rather than a new universe; will add one agent per turn.
+- Phase 14 AGHI "unified brain" — the existing `SunEngine` + `AgentCoordinator` (Phase 3) already fills this role; will add `ai_learning_feedback` loop + governance policy table in a focused turn.
+- Phases 15–20 (economy, IoT, zero-trust, simulation, research lab, final form) — will re-plan each against actual state when we get there. Not committing scaffolding I can't finish.
 
-```
-src/modules/medical-intelligence/
-├── knowledge-graph/
-│   ├── entities.functions.ts      # search + get entity + neighbors
-│   ├── relations.server.ts        # edge traversal helpers
-│   └── seed/                      # curated JSON seeds (Arabic medical taxonomy)
-├── drug-intelligence/
-│   ├── interactions.functions.ts  # checkInteractions(medicineIds[])
-│   └── safety.server.ts           # contraindication rules
-└── ranking/
-    └── ranker.server.ts           # provider score calculator
-```
+### What I need you to confirm
 
-```
-src/ai/agents/medical/
-├── clinical-research-agent.ts     # uses knowledge graph + Gemini for summaries
-├── provider-matching-agent.ts     # symptom → specialty → nearest hc_doctors
-├── drug-safety-agent.ts           # interaction + contraindication checks
-└── health-concierge-agent.ts      # top-level router
-```
+1. **OK to reuse `hc_patients` as the patient identity** (not create a new `patients` table)? Every existing appointment/prescription/claim already FKs to it.
+2. **Medical vault storage**: private Supabase bucket `medical-vault`, patient-scoped RLS on both bucket and metadata table — OK?
+3. **Companion agent LLM**: Gemini 2.5 Flash via Lovable AI Gateway (free tier), read-only recommendations, no auto-actions — OK?
+4. **UI scope**: single `/my-health` route this turn (no separate pages for family/vault yet — tabs) — OK?
 
-Each agent extends the existing `BaseAgent` in `src/ai/core/`.
-
-## Server functions & routes
-
-- `src/lib/knowledge-graph.functions.ts` — `searchEntities`, `getEntityWithNeighbors`, `symptomsToSpecialties`.
-- `src/lib/drug-safety.functions.ts` — `checkDrugInteractions`, `getDrugInfo`.
-- `src/lib/provider-matching.functions.ts` — `matchProvidersForSymptom`, `rankProvidersForSpecialty`.
-- `src/routes/api/public/ai/ranking-tick.ts` — nightly cron endpoint that refreshes `provider_ranking_scores`.
-
-## Public UI (Phase 9 marketplace surface)
-
-- `/find-care` — symptom / specialty search box → ranked doctors + nearby pharmacies (uses matching agent).
-- `/doctors/$id` — enriched profile (existing data + reviews + rank badge + booking CTA using existing `hc_appointments` flow).
-- Keep existing `/health-tips` etc. untouched.
-
-## Admin surfaces
-
-- `/_authenticated/admin-knowledge-graph` — browse entities, add/edit relationships, import seed batches.
-- `/_authenticated/admin-provider-ranking` — read-only leaderboard + manual re-rank trigger.
-
-## Cron
-
-- Nightly at 03:15 UTC: refresh `provider_ranking_scores` (calls ranking-tick).
-- Weekly Sunday 02:00 UTC: recompute entity embeddings for any rows where `embedding` is null (uses existing Lovable AI embeddings).
-
-## What is explicitly deferred (called out, not built)
-
-- **Real telemedicine video** — schema only; no WebRTC/Twilio wiring yet.
-- **Drug database at scale** — ships with a curated seed (~150 common meds in Yemen + top interactions). Full pharmacological DB requires a licensed data source; flag for the user.
-- **EMR / Patient OS** — the blueprint's Phase 11 territory; not started.
-- **Verification document workflow** for doctors — form + storage bucket exist via `hc_doctor_join_submissions`; no new columns added to organizations.
-
-## Execution order (single build turn)
-
-1. Migration: 5 new tables + view + RLS + GRANTs + indexes (incl. IVFFlat on `medical_entities.embedding`).
-2. Seed curated JSON (Arabic taxonomy: ~40 diseases, ~80 symptoms, ~150 meds, ~200 relationships, ~100 interactions) via a second migration (deterministic, per project rule — no seed server function).
-3. Server functions + agents + ranker.
-4. Cron scheduling via `supabase--insert`.
-5. Public UI (`/find-care`, `/doctors/$id` enrichment) + admin pages.
-6. Typecheck; smoke-test one query end-to-end.
-
-## Open questions
-
-Before I build, please confirm:
-
-1. **Scope confirmation** — OK to skip the parallel `health_providers` / `patient_profiles` / `medical_organizations` tables and use existing `hc_*` / `pn_*` / `organizations` / `hc_patients`? (Strongly recommend yes; otherwise we get two conflicting sources of truth.)
-2. **Seed language** — Arabic primary, English secondary in `medical_entities` (single row with both), or two rows per concept? I recommend one row with `name_ar` + `name_en` cols.
-3. **Public exposure** — should `/find-care` be public (SSR, indexable) or gated behind sign-in? Blueprint implies public.
-4. **Skip real video for now** — confirm telemedicine ships as schema + status tracking only in this phase.
-
-Answer these and I'll execute in one pass.
+Once you confirm, I ship Phase 11 in one build turn (migration + code + route + agent registration + typecheck).
