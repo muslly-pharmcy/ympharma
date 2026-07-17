@@ -3,6 +3,7 @@ import { requireCronAuth } from "@/middleware/cron-auth";
 import { drainPhoenixEvents } from "@/ai/core/phoenix-bridge";
 import { routeEvent } from "@/ai/core/event-router";
 import { registry } from "@/ai/bootstrap";
+import { DecisionEngine } from "@/ai/core/decision-engine";
 import type { AIEvent } from "@/ai/core/types";
 
 /**
@@ -11,7 +12,9 @@ import type { AIEvent } from "@/ai/core/types";
  * Cron-authenticated worker for the AI Sun Core.
  * 1. Drain unprocessed Phoenix agent_events → ai_events queue.
  * 2. Consume up to N pending ai_events, dispatch through the agent registry,
- *    log to ai_decisions, mark the event completed/failed.
+ *    log to ai_decisions, record experience in ai_memory, mark event completed/failed.
+ * 3. If AI_NEURAL_ENABLE=1, best-effort store the decision as a neural
+ *    memory (pgvector) for semantic recall. Failures never block the tick.
  *
  * Auth: `x-cron-secret` header (CRON_SECRET env). No PII returned.
  */
@@ -25,6 +28,20 @@ export const Route = createFileRoute("/api/public/ai/sun-tick")({
         const { supabaseAdmin } = await import(
           "@/integrations/supabase/client.server"
         );
+        const { MemoryManager } = await import(
+          "@/ai/memory/memory-manager.server"
+        );
+
+        const decisionEngine = new DecisionEngine();
+        const memory = new MemoryManager(supabaseAdmin);
+
+        const neuralEnabled = process.env.AI_NEURAL_ENABLE === "1";
+        const NeuralMemoryMod = neuralEnabled
+          ? await import("@/ai/memory/neural-memory.server").catch(() => null)
+          : null;
+        const neural = NeuralMemoryMod
+          ? new NeuralMemoryMod.NeuralMemory(supabaseAdmin)
+          : null;
 
         // 1) Bridge Phoenix → Sun
         const bridge = await drainPhoenixEvents(50);
@@ -47,6 +64,8 @@ export const Route = createFileRoute("/api/public/ai/sun-tick")({
         let processed = 0;
         let failed = 0;
         let skipped = 0;
+        let memories = 0;
+        let neuralStored = 0;
         const errors: string[] = [];
 
         for (const row of pending ?? []) {
@@ -61,7 +80,6 @@ export const Route = createFileRoute("/api/public/ai/sun-tick")({
 
           const agentName = routeEvent(event);
           if (!agentName) {
-            // Leave for a future registered agent — no update.
             skipped += 1;
             continue;
           }
@@ -84,17 +102,10 @@ export const Route = createFileRoute("/api/public/ai/sun-tick")({
               result?: unknown;
             };
 
-            await supabaseAdmin.from("ai_decisions").insert({
-              event_id: event.id,
-              agent_name: agentName,
-              decision_type: result?.type ?? "generic",
-              reasoning: {
-                latency_ms: Date.now() - started,
-                source: event.source,
-              },
-              action: (result?.result ?? result) as never,
-              confidence: result?.confidence ?? 0.5,
-            });
+            const decisionId = await decisionEngine.decideAndPersist(
+              supabaseAdmin,
+              { event, agentName, startedAt: started, result },
+            );
 
             await supabaseAdmin
               .from("ai_events")
@@ -103,6 +114,52 @@ export const Route = createFileRoute("/api/public/ai/sun-tick")({
                 processed_at: new Date().toISOString(),
               })
               .eq("id", event.id);
+
+            // Experience memory — never abort the tick on failure.
+            try {
+              await memory.remember({
+                agent: agentName,
+                type: "experience",
+                context: {
+                  event_type: event.event_type,
+                  decision_type: result?.type ?? "generic",
+                  decision_id: decisionId,
+                  event_id: event.id,
+                  latency_ms: Date.now() - started,
+                },
+                importance: Number(result?.confidence ?? 0.5),
+              });
+              memories += 1;
+            } catch (memErr) {
+              errors.push(
+                `mem ${event.id}: ${memErr instanceof Error ? memErr.message : String(memErr)}`,
+              );
+            }
+
+            // Optional neural memory — feature-flagged.
+            if (neural && decisionId) {
+              try {
+                const summary = `[${agentName}] ${event.event_type} → ${result?.type ?? "generic"} (confidence=${result?.confidence ?? 0.5})`;
+                await neural.store({
+                  owner_type: "agent",
+                  owner_id: null,
+                  category: "decision",
+                  content: summary,
+                  metadata: {
+                    agent: agentName,
+                    event_id: event.id,
+                    decision_id: decisionId,
+                    confidence: result?.confidence ?? 0.5,
+                  },
+                  importance: Number(result?.confidence ?? 0.5),
+                });
+                neuralStored += 1;
+              } catch (nErr) {
+                errors.push(
+                  `neural ${event.id}: ${nErr instanceof Error ? nErr.message : String(nErr)}`,
+                );
+              }
+            }
 
             processed += 1;
           } catch (err) {
@@ -126,6 +183,9 @@ export const Route = createFileRoute("/api/public/ai/sun-tick")({
           processed,
           failed,
           skipped,
+          memories,
+          neural_stored: neuralStored,
+          neural_enabled: neuralEnabled,
           errors: errors.slice(0, 20),
         });
       },

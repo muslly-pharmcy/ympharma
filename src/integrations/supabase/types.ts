@@ -785,6 +785,113 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_feedback: {
+        Row: {
+          created_at: string
+          decision_id: string
+          feedback: Json
+          id: string
+          rating: number
+          submitted_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          decision_id: string
+          feedback?: Json
+          id?: string
+          rating: number
+          submitted_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          decision_id?: string
+          feedback?: Json
+          id?: string
+          rating?: number
+          submitted_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_feedback_decision_id_fkey"
+            columns: ["decision_id"]
+            isOneToOne: false
+            referencedRelation: "ai_decisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_memory: {
+        Row: {
+          agent_name: string
+          context: Json
+          created_at: string
+          expires_at: string | null
+          id: string
+          importance: number
+          memory_type: string
+          updated_at: string
+        }
+        Insert: {
+          agent_name: string
+          context?: Json
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          importance?: number
+          memory_type: string
+          updated_at?: string
+        }
+        Update: {
+          agent_name?: string
+          context?: Json
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          importance?: number
+          memory_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ai_neural_memory: {
+        Row: {
+          content: string
+          created_at: string
+          embedding: string | null
+          id: string
+          importance: number
+          memory_category: string
+          metadata: Json
+          model_version: string
+          owner_id: string | null
+          owner_type: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          importance?: number
+          memory_category: string
+          metadata?: Json
+          model_version?: string
+          owner_id?: string | null
+          owner_type: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          importance?: number
+          memory_category?: string
+          metadata?: Json
+          model_version?: string
+          owner_id?: string | null
+          owner_type?: string
+        }
+        Relationships: []
+      }
       ai_neural_synaptic_log: {
         Row: {
           created_at: string
@@ -8866,6 +8973,23 @@ export type Database = {
         Returns: boolean
       }
       marketing_queue_skip: { Args: { _id: string }; Returns: boolean }
+      match_ai_neural_memory: {
+        Args: {
+          filter_owner_type?: string
+          match_count?: number
+          query_embedding: string
+        }
+        Returns: {
+          content: string
+          created_at: string
+          id: string
+          memory_category: string
+          metadata: Json
+          owner_id: string
+          owner_type: string
+          similarity: number
+        }[]
+      }
       monitor_cron_failures: { Args: never; Returns: Json }
       move_to_dlq: {
         Args: {
