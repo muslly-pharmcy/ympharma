@@ -1,68 +1,36 @@
-# WhatsApp Brain Integration — Meta Cloud API
+# Upgrade SovereignEngineDashboard to the new luxe UI
 
-Wire your WhatsApp number to `SuperBrainSovereign` through a public TanStack server route (not a Supabase edge function — this stack uses TanStack Start).
+Replace `src/modules/ai-brain/components/SovereignEngineDashboard.tsx` with the provided 4-column dashboard (inputs · results · tool registry) and adapt the two spots where the blueprint doesn't match the real code:
 
-## Endpoint
+## Adaptations
 
-`src/routes/api/public/hooks/whatsapp/brain.ts`
+1. **Server call**: blueprint uses static `SuperBrainSovereign.executeNeuralInference(userId, text, district)`. Our real fn is auth-protected and expects `{ data: { userInput, district, patient } }`. Use `useServerFn(executeNeuralInference)` and pass:
+   ```ts
+   { userInput, district, patient: {
+       chronicConditions: mappedConditions, // سكري→diabetes, ضغط→hypertension
+       pregnant: chronicConditions.includes("حامل"),
+   } }
+   ```
+   Show a toast on error instead of only `console.error`.
 
-- `GET` → Meta webhook verification (checks `hub.verify_token` against `WHATSAPP_VERIFY_TOKEN`, echoes `hub.challenge`).
-- `POST` → receives WhatsApp messages, runs the brain, replies via Graph API.
+2. **Tool registry codes**: blueprint invents `MED_AGENT_TOOL_001…`, but decisions dispatch our real codes (`MED_DRUG_SAFETY`, `LOG_PHARMACY_NEARBY`, etc.). Add a small `realCodes: string[]` field on each blueprint tool so the "نشط الآن" highlight matches when any real code fires. Mapping:
+   - فحص موانع الصرف → `MED_DRUG_SAFETY`
+   - البدائل → `MED_ALT_SUGGEST`
+   - التوجيه الجغرافي → `LOG_PHARMACY_NEARBY`, `GEO_DISTRICT_ROUTER`
+   - جرد FEFO → `COM_RESTOCK_ALERT` (closest real tool; keeps card meaningful)
+   - اشتراكات الأمومة → `MAT_CAMPAIGN_BUILDER`
+   - رسائل التذكير → `MAT_CAMPAIGN_BUILDER`
+   - ترميم الأكواد → *(no real code yet — stays dim; that's honest)*
+   - التخطيط التوسعي → `LOG_ETA_ESTIMATE`
 
-Under `/api/public/*` so Meta can reach it without auth (as required by webhooks). Security is enforced inside the handler.
+3. Keep the exact dark/emerald/fuchsia styling from the blueprint verbatim (user provided this specific luxe look for the admin console) — no semantic-token rewrite.
 
-## Handler flow (POST)
+## Files touched
 
-1. Parse Meta payload; extract `from` (E.164) and `text.body`.
-2. **Allowlist check**: look up `from` in a new `wa_allowlist` table. If not allowed → reply "غير مصرح" and stop.
-3. **Log inbound** into existing `whatsapp_messages`.
-4. Call the brain. Since `executeNeuralInference` requires `requireSupabaseAuth`, the route can't call it directly (no bearer). Instead:
-   - Import the pure `decide()` from `@/modules/ai-brain/services/SuperBrainSovereign`.
-   - Build a lightweight `BrainAdapter` using `supabaseAdmin` (loaded inside handler via `await import`) that calls `pn_search_medicine_nearby` and `search_medicines_public`.
-   - Manually insert the resulting decision into `ai_neural_synaptic_log` with `user_id = null` and `trigger_source = 'WHATSAPP_INBOUND'`.
-5. Format Arabic reply (safety / alt / logistic / marketing / speed).
-6. POST to `https://graph.facebook.com/v20.0/{PHONE_NUMBER_ID}/messages` with Bearer token.
-7. Log outbound + always return `200 {ok:true}` to Meta (never 500, to avoid retries loops); errors are logged internally.
+- `src/modules/ai-brain/components/SovereignEngineDashboard.tsx` — full replace.
+- No route changes (already mounted at `/admin-ai-brain`).
+- No DB / server / secret changes.
 
-## Database (one migration)
+## Verification
 
-```sql
-CREATE TABLE public.wa_allowlist (
-  phone text PRIMARY KEY,
-  label text,
-  district text DEFAULT 'عدن',
-  is_active boolean NOT NULL DEFAULT true,
-  created_at timestamptz NOT NULL DEFAULT now()
-);
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.wa_allowlist TO authenticated;
-GRANT ALL ON public.wa_allowlist TO service_role;
-ALTER TABLE public.wa_allowlist ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "admins manage wa allowlist"
-  ON public.wa_allowlist FOR ALL TO authenticated
-  USING (public.has_role(auth.uid(),'admin'))
-  WITH CHECK (public.has_role(auth.uid(),'admin'));
-```
-
-Allow `ai_neural_synaptic_log.user_id` to be nullable if it isn't already (webhook has no user).
-
-## Secrets (via `add_secret`)
-
-- `WHATSAPP_API_TOKEN` — Meta permanent access token
-- `WHATSAPP_PHONE_NUMBER_ID` — Meta phone number ID
-- `WHATSAPP_VERIFY_TOKEN` — a strong random string you also paste into Meta webhook config
-
-## After build
-
-1. You add your phone(s) to `wa_allowlist` from the admin (I'll add a tiny form at `/admin-hub` in a follow-up if you want, otherwise via SQL).
-2. In Meta developer console:
-   - Webhook URL: `https://ympharma.lovable.app/api/public/hooks/whatsapp/brain`
-   - Verify token: value of `WHATSAPP_VERIFY_TOKEN`
-   - Subscribe to `messages`.
-3. Send a WhatsApp message → get a brain response.
-
-## Out of scope for this slice
-
-- Admin UI for allowlist (SQL for now).
-- Twilio provider (deferred as you requested).
-- Media/voice messages (text only for now).
-- Rate limiting (allowlist is the first line).
+Build + tsgo. No test additions (pure UI).
