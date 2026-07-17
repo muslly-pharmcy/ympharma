@@ -1,36 +1,35 @@
-# Upgrade SovereignEngineDashboard to the new luxe UI
+## الوضع الحالي
 
-Replace `src/modules/ai-brain/components/SovereignEngineDashboard.tsx` with the provided 4-column dashboard (inputs · results · tool registry) and adapt the two spots where the blueprint doesn't match the real code:
+الملف `src/modules/ai-brain/components/SovereignEngineDashboard.tsx` يحتوي فعلاً على:
+- ✅ `REAL_TOOL_REGISTRY` بالأدوات الثمانية الحقيقية مع ربط `realCodes` بمخرجات `decide()`
+- ✅ أزرار الحالات المزمنة (سكري / ضغط / حامل) عبر `toggleChronic`
+- ✅ ربط زر الإطلاق بـ `useServerFn(executeNeuralInference)` الحقيقي
+- ✅ إبراز الأدوات النشطة عبر `dispatchedTools` مع `animate-pulse`
 
-## Adaptations
+## التحديثات المقترحة (تحسين بصري فقط)
 
-1. **Server call**: blueprint uses static `SuperBrainSovereign.executeNeuralInference(userId, text, district)`. Our real fn is auth-protected and expects `{ data: { userInput, district, patient } }`. Use `useServerFn(executeNeuralInference)` and pass:
-   ```ts
-   { userInput, district, patient: {
-       chronicConditions: mappedConditions, // سكري→diabetes, ضغط→hypertension
-       pregnant: chronicConditions.includes("حامل"),
-   } }
-   ```
-   Show a toast on error instead of only `console.error`.
+سأرقّي طبقة الأنيمايشن والتفاعل دون تغيير أي منطق تشغيلي أو استدعاءات backend:
 
-2. **Tool registry codes**: blueprint invents `MED_AGENT_TOOL_001…`, but decisions dispatch our real codes (`MED_DRUG_SAFETY`, `LOG_PHARMACY_NEARBY`, etc.). Add a small `realCodes: string[]` field on each blueprint tool so the "نشط الآن" highlight matches when any real code fires. Mapping:
-   - فحص موانع الصرف → `MED_DRUG_SAFETY`
-   - البدائل → `MED_ALT_SUGGEST`
-   - التوجيه الجغرافي → `LOG_PHARMACY_NEARBY`, `GEO_DISTRICT_ROUTER`
-   - جرد FEFO → `COM_RESTOCK_ALERT` (closest real tool; keeps card meaningful)
-   - اشتراكات الأمومة → `MAT_CAMPAIGN_BUILDER`
-   - رسائل التذكير → `MAT_CAMPAIGN_BUILDER`
-   - ترميم الأكواد → *(no real code yet — stays dim; that's honest)*
-   - التخطيط التوسعي → `LOG_ETA_ESTIMATE`
+1. **نبض متوهج حقيقي للأدوات النشطة**  
+   - استبدال `animate-pulse` العام بتوهج `ring` مزدوج + `shadow` أخضر/فوشيا نابض مخصص عبر Tailwind arbitrary keyframes.
+   - إضافة مؤشر نقطة حية (dot ping) بجانب شارة "نشط الآن".
 
-3. Keep the exact dark/emerald/fuchsia styling from the blueprint verbatim (user provided this specific luxe look for the admin console) — no semantic-token rewrite.
+2. **تمييز فئات الأدوات بالألوان**  
+   - كل فئة (طبية / لوجستية / أمومة / تطوير / نمو) تحصل على tint خاص بها في الحالة الخاملة، ويتحول إلى إشعاع أخضر عند التنشيط.
 
-## Files touched
+3. **حالة التحميل المتقدمة**  
+   - أثناء `isLoading` تُومض جميع بطاقات الأدوات بموجة تسلسلية (stagger) للإيحاء بمسح الشبكة العصبية.
 
-- `src/modules/ai-brain/components/SovereignEngineDashboard.tsx` — full replace.
-- No route changes (already mounted at `/admin-ai-brain`).
-- No DB / server / secret changes.
+4. **مؤشر عدّاد الأدوات المفعّلة**  
+   - شارة أعلى بطاقة السجل تعرض `X / 8 أدوات نشطة` بعد كل استنتاج.
 
-## Verification
+5. **تحسينات وصولية طفيفة**  
+   - `aria-pressed` على أزرار الحالات المزمنة، `aria-busy` على زر الإطلاق أثناء التنفيذ.
 
-Build + tsgo. No test additions (pure UI).
+## نطاق التغيير
+
+- ملف واحد فقط: `src/modules/ai-brain/components/SovereignEngineDashboard.tsx`.
+- لا تعديل في `brain.functions.ts` ولا في `SuperBrainSovereign.ts` ولا في migrations.
+- لا تغيير في العقود (props/return types) أو أسماء الأدوات.
+
+هل أمضي بهذا التحسين البصري، أم تريد إعادة كتابة كاملة بمواصفات مختلفة (لون/شكل/تخطيط جديد)؟
