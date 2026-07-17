@@ -1,8 +1,8 @@
 import type { AITool, AIToolContext, AIToolResult } from "../core/tool-interface";
 
 /**
- * WhatsappSendTool — MUTATING. Queues an outbound WhatsApp message
- * into the existing dispatch table for the WhatsApp brain worker to send.
+ * WhatsappSendTool — MUTATING. Queues an outbound WhatsApp dispatch row
+ * for the existing WhatsApp brain worker to send.
  */
 export class WhatsappSendTool implements AITool {
   name = "whatsapp_send";
@@ -15,7 +15,7 @@ export class WhatsappSendTool implements AITool {
       _approved?: boolean;
       to?: string;
       body?: string;
-      template?: string;
+      correlation_id?: string;
     };
     if (!payload._approved) return { ok: false, error: "APPROVAL_REQUIRED" };
     if (!payload.to || !payload.body) return { ok: false, error: "TO_AND_BODY_REQUIRED" };
@@ -25,11 +25,12 @@ export class WhatsappSendTool implements AITool {
     const { data, error } = await supabaseAdmin
       .from("whatsapp_notification_dispatch")
       .insert({
+        event_id: crypto.randomUUID(),
+        event_name: "AI_TOOL_DISPATCH",
         recipient_phone: payload.to,
-        message_body: payload.body,
-        template_name: payload.template ?? null,
+        rendered_body: payload.body,
         status: "queued",
-        source: "ai_tool",
+        correlation_id: payload.correlation_id ?? null,
       })
       .select("id")
       .single();
