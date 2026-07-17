@@ -26,6 +26,7 @@ import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as NetworkTestRouteImport } from './routes/network-test'
 import { Route as NetworkHealthRouteImport } from './routes/network-health'
 import { Route as MyNotificationsRouteImport } from './routes/my-notifications'
+import { Route as MedicinesRouteImport } from './routes/medicines'
 import { Route as LoyaltyRouteImport } from './routes/loyalty'
 import { Route as InsuranceRouteImport } from './routes/insurance'
 import { Route as FindCareRouteImport } from './routes/find-care'
@@ -101,6 +102,7 @@ import { Route as HealthTipsIndexRouteImport } from './routes/health-tips/index'
 import { Route as TestFeaturesRouteImport } from './routes/test.features'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as PharmaciesSlugRouteImport } from './routes/pharmacies.$slug'
+import { Route as MedicinesSlugRouteImport } from './routes/medicines.$slug'
 import { Route as HealthTipsSlugRouteImport } from './routes/health-tips/$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as DoctorsSlugRouteImport } from './routes/doctors.$slug'
@@ -293,6 +295,11 @@ const NetworkHealthRoute = NetworkHealthRouteImport.update({
 const MyNotificationsRoute = MyNotificationsRouteImport.update({
   id: '/my-notifications',
   path: '/my-notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MedicinesRoute = MedicinesRouteImport.update({
+  id: '/medicines',
+  path: '/medicines',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoyaltyRoute = LoyaltyRouteImport.update({
@@ -674,6 +681,11 @@ const PharmaciesSlugRoute = PharmaciesSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => PharmaciesRoute,
+} as any)
+const MedicinesSlugRoute = MedicinesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => MedicinesRoute,
 } as any)
 const HealthTipsSlugRoute = HealthTipsSlugRouteImport.update({
   id: '/health-tips/$slug',
@@ -1364,6 +1376,7 @@ export interface FileRoutesByFullPath {
   '/find-care': typeof FindCareRoute
   '/insurance': typeof InsuranceRoute
   '/loyalty': typeof LoyaltyRoute
+  '/medicines': typeof MedicinesRouteWithChildren
   '/my-notifications': typeof MyNotificationsRoute
   '/network-health': typeof NetworkHealthRoute
   '/network-test': typeof NetworkTestRoute
@@ -1410,6 +1423,7 @@ export interface FileRoutesByFullPath {
   '/doctors/$slug': typeof DoctorsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/health-tips/$slug': typeof HealthTipsSlugRoute
+  '/medicines/$slug': typeof MedicinesSlugRoute
   '/pharmacies/$slug': typeof PharmaciesSlugRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
@@ -1565,6 +1579,7 @@ export interface FileRoutesByTo {
   '/find-care': typeof FindCareRoute
   '/insurance': typeof InsuranceRoute
   '/loyalty': typeof LoyaltyRoute
+  '/medicines': typeof MedicinesRouteWithChildren
   '/my-notifications': typeof MyNotificationsRoute
   '/network-health': typeof NetworkHealthRoute
   '/network-test': typeof NetworkTestRoute
@@ -1611,6 +1626,7 @@ export interface FileRoutesByTo {
   '/doctors/$slug': typeof DoctorsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/health-tips/$slug': typeof HealthTipsSlugRoute
+  '/medicines/$slug': typeof MedicinesSlugRoute
   '/pharmacies/$slug': typeof PharmaciesSlugRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
@@ -1768,6 +1784,7 @@ export interface FileRoutesById {
   '/find-care': typeof FindCareRoute
   '/insurance': typeof InsuranceRoute
   '/loyalty': typeof LoyaltyRoute
+  '/medicines': typeof MedicinesRouteWithChildren
   '/my-notifications': typeof MyNotificationsRoute
   '/network-health': typeof NetworkHealthRoute
   '/network-test': typeof NetworkTestRoute
@@ -1814,6 +1831,7 @@ export interface FileRoutesById {
   '/doctors/$slug': typeof DoctorsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/health-tips/$slug': typeof HealthTipsSlugRoute
+  '/medicines/$slug': typeof MedicinesSlugRoute
   '/pharmacies/$slug': typeof PharmaciesSlugRoute
   '/product/$id': typeof ProductIdRoute
   '/test/features': typeof TestFeaturesRoute
@@ -1971,6 +1989,7 @@ export interface FileRouteTypes {
     | '/find-care'
     | '/insurance'
     | '/loyalty'
+    | '/medicines'
     | '/my-notifications'
     | '/network-health'
     | '/network-test'
@@ -2017,6 +2036,7 @@ export interface FileRouteTypes {
     | '/doctors/$slug'
     | '/email/unsubscribe'
     | '/health-tips/$slug'
+    | '/medicines/$slug'
     | '/pharmacies/$slug'
     | '/product/$id'
     | '/test/features'
@@ -2172,6 +2192,7 @@ export interface FileRouteTypes {
     | '/find-care'
     | '/insurance'
     | '/loyalty'
+    | '/medicines'
     | '/my-notifications'
     | '/network-health'
     | '/network-test'
@@ -2218,6 +2239,7 @@ export interface FileRouteTypes {
     | '/doctors/$slug'
     | '/email/unsubscribe'
     | '/health-tips/$slug'
+    | '/medicines/$slug'
     | '/pharmacies/$slug'
     | '/product/$id'
     | '/test/features'
@@ -2374,6 +2396,7 @@ export interface FileRouteTypes {
     | '/find-care'
     | '/insurance'
     | '/loyalty'
+    | '/medicines'
     | '/my-notifications'
     | '/network-health'
     | '/network-test'
@@ -2420,6 +2443,7 @@ export interface FileRouteTypes {
     | '/doctors/$slug'
     | '/email/unsubscribe'
     | '/health-tips/$slug'
+    | '/medicines/$slug'
     | '/pharmacies/$slug'
     | '/product/$id'
     | '/test/features'
@@ -2577,6 +2601,7 @@ export interface RootRouteChildren {
   FindCareRoute: typeof FindCareRoute
   InsuranceRoute: typeof InsuranceRoute
   LoyaltyRoute: typeof LoyaltyRoute
+  MedicinesRoute: typeof MedicinesRouteWithChildren
   MyNotificationsRoute: typeof MyNotificationsRoute
   NetworkHealthRoute: typeof NetworkHealthRoute
   NetworkTestRoute: typeof NetworkTestRoute
@@ -2788,6 +2813,13 @@ declare module '@tanstack/react-router' {
       path: '/my-notifications'
       fullPath: '/my-notifications'
       preLoaderRoute: typeof MyNotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/medicines': {
+      id: '/medicines'
+      path: '/medicines'
+      fullPath: '/medicines'
+      preLoaderRoute: typeof MedicinesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/loyalty': {
@@ -3314,6 +3346,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/pharmacies/$slug'
       preLoaderRoute: typeof PharmaciesSlugRouteImport
       parentRoute: typeof PharmaciesRoute
+    }
+    '/medicines/$slug': {
+      id: '/medicines/$slug'
+      path: '/$slug'
+      fullPath: '/medicines/$slug'
+      preLoaderRoute: typeof MedicinesSlugRouteImport
+      parentRoute: typeof MedicinesRoute
     }
     '/health-tips/$slug': {
       id: '/health-tips/$slug'
@@ -4184,6 +4223,18 @@ const DoctorsRouteChildren: DoctorsRouteChildren = {
 const DoctorsRouteWithChildren =
   DoctorsRoute._addFileChildren(DoctorsRouteChildren)
 
+interface MedicinesRouteChildren {
+  MedicinesSlugRoute: typeof MedicinesSlugRoute
+}
+
+const MedicinesRouteChildren: MedicinesRouteChildren = {
+  MedicinesSlugRoute: MedicinesSlugRoute,
+}
+
+const MedicinesRouteWithChildren = MedicinesRoute._addFileChildren(
+  MedicinesRouteChildren,
+)
+
 interface PharmaciesRouteChildren {
   PharmaciesSlugRoute: typeof PharmaciesSlugRoute
 }
@@ -4282,6 +4333,7 @@ const rootRouteChildren: RootRouteChildren = {
   FindCareRoute: FindCareRoute,
   InsuranceRoute: InsuranceRoute,
   LoyaltyRoute: LoyaltyRoute,
+  MedicinesRoute: MedicinesRouteWithChildren,
   MyNotificationsRoute: MyNotificationsRoute,
   NetworkHealthRoute: NetworkHealthRoute,
   NetworkTestRoute: NetworkTestRoute,
