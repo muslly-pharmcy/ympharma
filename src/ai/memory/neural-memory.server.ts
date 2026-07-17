@@ -31,7 +31,7 @@ export interface NeuralHit {
   owner_id: string | null;
   memory_category: string;
   content: string;
-  metadata: Record<string, unknown>;
+  metadata: Record<string, unknown> | null;
   similarity: number;
   created_at: string;
 }
