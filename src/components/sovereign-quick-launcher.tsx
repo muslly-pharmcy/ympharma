@@ -6,7 +6,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Brain, Baby, Stethoscope, Warehouse, LayoutDashboard, Sparkles, X } from "lucide-react";
+import { Brain, Baby, Stethoscope, LayoutDashboard, Sparkles, X, Flame, Activity, Heart, Zap, Leaf } from "lucide-react";
 import { assertCallerIsAdmin } from "@/components/admin/AdminGate";
 import { cn } from "@/lib/utils";
 
@@ -30,17 +30,42 @@ const HUBS: Hub[] = [
   {
     label: "المخ والـ 800 أداة",
     desc: "المخ السيادي والاستدلال العصبي",
-    to: "/admin-ai-brain",
+    to: "/admin-sovereign",
+    search: { tab: "brain" },
     icon: Brain,
     accent: "from-fuchsia-500/20 to-purple-500/10 border-fuchsia-500/40 text-fuchsia-200",
   },
   {
-    label: "باقات الأمومة",
-    desc: "بوابة العناية بالأم والطفل",
+    label: "الحميات والسعرات",
+    desc: "بروتوكولات الحمى والتغذية العلاجية",
+    to: "/admin-sovereign",
+    search: { tab: "fevers" },
+    icon: Flame,
+    accent: "from-rose-500/20 to-orange-500/10 border-rose-500/40 text-rose-200",
+  },
+  {
+    label: "المريض المزمن",
+    desc: "السكري والضغط والرعاية المستمرة",
+    to: "/admin-sovereign",
+    search: { tab: "chronic" },
+    icon: Activity,
+    accent: "from-amber-500/20 to-orange-500/10 border-amber-500/40 text-amber-200",
+  },
+  {
+    label: "الأمومة والحوامل",
+    desc: "باقات ومتابعة رعاية الأم",
     to: "/admin-sovereign",
     search: { tab: "maternal" },
-    icon: Baby,
+    icon: Heart,
     accent: "from-pink-500/20 to-rose-500/10 border-pink-500/40 text-pink-200",
+  },
+  {
+    label: "الأطفال والرضع",
+    desc: "حاسبة الجرعات وأمان الأدوية",
+    to: "/admin-sovereign",
+    search: { tab: "kids" },
+    icon: Baby,
+    accent: "from-blue-500/20 to-teal-500/10 border-blue-500/40 text-blue-200",
   },
   {
     label: "شبكة الأطباء",
@@ -48,15 +73,23 @@ const HUBS: Hub[] = [
     to: "/admin-sovereign",
     search: { tab: "doctors" },
     icon: Stethoscope,
-    accent: "from-emerald-500/20 to-teal-500/10 border-emerald-500/40 text-emerald-200",
+    accent: "from-sky-500/20 to-blue-500/10 border-sky-500/40 text-sky-200",
   },
   {
-    label: "الموردون والمخازن",
-    desc: "المخزون والإمداد اللوجستي",
+    label: "المكملات والفيتامينات",
+    desc: "دليل المكملات وحزم الرياضيين",
     to: "/admin-sovereign",
-    search: { tab: "suppliers" },
-    icon: Warehouse,
-    accent: "from-sky-500/20 to-cyan-500/10 border-sky-500/40 text-sky-200",
+    search: { tab: "supplements" },
+    icon: Zap,
+    accent: "from-yellow-500/20 to-amber-500/10 border-yellow-500/40 text-yellow-200",
+  },
+  {
+    label: "الأعشاب والطب البديل",
+    desc: "بروتوكولات علاجية طبيعية آمنة",
+    to: "/admin-sovereign",
+    search: { tab: "herbs" },
+    icon: Leaf,
+    accent: "from-emerald-500/20 to-teal-500/10 border-emerald-500/40 text-emerald-200",
   },
 ];
 
