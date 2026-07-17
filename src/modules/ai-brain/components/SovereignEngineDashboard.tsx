@@ -16,17 +16,18 @@ interface RegistryTool {
   category: string;
   description: string;
   realCodes: string[];
+  tint: string; // idle category tint
 }
 
 const REAL_TOOL_REGISTRY: RegistryTool[] = [
-  { code: "MED_AGENT_TOOL_001", name: "فحص وتدقيق موانع الصرف", icon: ShieldCheck, category: "الطبية", description: "تدقيق الحالات المزمنة وتعارض الأدوية", realCodes: ["MED_DRUG_SAFETY"] },
-  { code: "MED_AGENT_TOOL_002", name: "البدائل العلمية التلقائية", icon: Sparkles, category: "الطبية", description: "اقتراح المركبات المكافئة عند شح الصنف", realCodes: ["MED_ALT_SUGGEST"] },
-  { code: "LOG_AGENT_TOOL_003", name: "التوزيع والتوجيه الجغرافي", icon: Globe, category: "اللوجستية", description: "تحديد أقرب فرع يمتلك الدواء في اليمن", realCodes: ["LOG_PHARMACY_NEARBY", "GEO_DISTRICT_ROUTER"] },
-  { code: "LOG_AGENT_TOOL_009", name: "الجرد وتتبع الصلاحية FEFO", icon: BarChart3, category: "اللوجستية", description: "أولوية الصرف للباتشات الأقرب انتهاءً", realCodes: ["COM_RESTOCK_ALERT"] },
-  { code: "MAT_AGENT_TOOL_004", name: "أتمتة اشتراكات الأمومة والطفل", icon: Zap, category: "المرأة والطفل", description: "حساب دورات استهلاك الحليب والحفاضات", realCodes: ["MAT_CAMPAIGN_BUILDER"] },
-  { code: "MAT_AGENT_TOOL_011", name: "رسائل التذكير والرعاية الذكية", icon: Cpu, category: "المرأة والطفل", description: "إرسال الإشعارات الدورية للأمهات عبر الواتساب", realCodes: ["MAT_CAMPAIGN_BUILDER"] },
-  { code: "COD_AGENT_TOOL_001", name: "الترميم والتصحيح الذاتي للأكواد", icon: Code2, category: "التطوير", description: "فحص واستبدال الأكواد محلياً وسحابياً", realCodes: [] },
-  { code: "ATT_AGENT_TOOL_005", name: "التخطيط التوسعي والحملات", icon: Award, category: "النمو والانتشار", description: "دراسة السوق والمنافسين واكتساح فئات جديدة", realCodes: ["LOG_ETA_ESTIMATE"] },
+  { code: "MED_AGENT_TOOL_001", name: "فحص وتدقيق موانع الصرف", icon: ShieldCheck, category: "الطبية", description: "تدقيق الحالات المزمنة وتعارض الأدوية", realCodes: ["MED_DRUG_SAFETY"], tint: "text-sky-300/80 border-sky-500/10 bg-sky-500/5" },
+  { code: "MED_AGENT_TOOL_002", name: "البدائل العلمية التلقائية", icon: Sparkles, category: "الطبية", description: "اقتراح المركبات المكافئة عند شح الصنف", realCodes: ["MED_ALT_SUGGEST"], tint: "text-sky-300/80 border-sky-500/10 bg-sky-500/5" },
+  { code: "LOG_AGENT_TOOL_003", name: "التوزيع والتوجيه الجغرافي", icon: Globe, category: "اللوجستية", description: "تحديد أقرب فرع يمتلك الدواء في اليمن", realCodes: ["LOG_PHARMACY_NEARBY", "GEO_DISTRICT_ROUTER"], tint: "text-amber-300/80 border-amber-500/10 bg-amber-500/5" },
+  { code: "LOG_AGENT_TOOL_009", name: "الجرد وتتبع الصلاحية FEFO", icon: BarChart3, category: "اللوجستية", description: "أولوية الصرف للباتشات الأقرب انتهاءً", realCodes: ["COM_RESTOCK_ALERT"], tint: "text-amber-300/80 border-amber-500/10 bg-amber-500/5" },
+  { code: "MAT_AGENT_TOOL_004", name: "أتمتة اشتراكات الأمومة والطفل", icon: Zap, category: "المرأة والطفل", description: "حساب دورات استهلاك الحليب والحفاضات", realCodes: ["MAT_CAMPAIGN_BUILDER"], tint: "text-fuchsia-300/80 border-fuchsia-500/10 bg-fuchsia-500/5" },
+  { code: "MAT_AGENT_TOOL_011", name: "رسائل التذكير والرعاية الذكية", icon: Cpu, category: "المرأة والطفل", description: "إرسال الإشعارات الدورية للأمهات عبر الواتساب", realCodes: ["MAT_CAMPAIGN_BUILDER"], tint: "text-fuchsia-300/80 border-fuchsia-500/10 bg-fuchsia-500/5" },
+  { code: "COD_AGENT_TOOL_001", name: "الترميم والتصحيح الذاتي للأكواد", icon: Code2, category: "التطوير", description: "فحص واستبدال الأكواد محلياً وسحابياً", realCodes: [], tint: "text-slate-400 border-slate-500/10 bg-slate-500/5" },
+  { code: "ATT_AGENT_TOOL_005", name: "التخطيط التوسعي والحملات", icon: Award, category: "النمو والانتشار", description: "دراسة السوق والمنافسين واكتساح فئات جديدة", realCodes: ["LOG_ETA_ESTIMATE"], tint: "text-emerald-300/80 border-emerald-500/10 bg-emerald-500/5" },
 ];
 
 const CHRONIC_LABEL_TO_KEY: Record<string, "diabetes" | "hypertension" | "pregnant"> = {
@@ -77,9 +78,27 @@ export const SovereignEngineDashboard: React.FC = () => {
   };
 
   const dispatched = new Set(decision?.dispatchedTools ?? []);
+  const activeCount = REAL_TOOL_REGISTRY.filter((t) =>
+    t.realCodes.some((c) => dispatched.has(c)),
+  ).length;
 
   return (
     <div className="max-w-7xl mx-auto p-6 bg-slate-950 text-slate-100 rounded-3xl border border-slate-900 shadow-2xl font-sans" dir="rtl">
+      {/* Injected keyframes for the glowing neural pulse */}
+      <style>{`
+        @keyframes sovereign-glow {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.55), 0 0 22px 4px rgba(16,185,129,0.25); }
+          50%      { box-shadow: 0 0 0 6px rgba(16,185,129,0.05), 0 0 34px 10px rgba(217,70,239,0.35); }
+        }
+        @keyframes sovereign-scan {
+          0%   { opacity: 0.25; transform: translateY(4px); }
+          50%  { opacity: 0.9;  transform: translateY(0); }
+          100% { opacity: 0.25; transform: translateY(4px); }
+        }
+        .sovereign-glow  { animation: sovereign-glow 1.8s ease-in-out infinite; }
+        .sovereign-scan  { animation: sovereign-scan 1.4s ease-in-out infinite; }
+      `}</style>
+
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center border-b border-slate-900 pb-6 mb-8 gap-4">
         <div>
@@ -93,6 +112,7 @@ export const SovereignEngineDashboard: React.FC = () => {
         <button
           onClick={handleStartInference}
           disabled={isLoading}
+          aria-busy={isLoading}
           className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:from-slate-900 disabled:text-slate-600 text-white font-bold rounded-2xl text-xs transition flex items-center gap-2 shadow-lg shadow-emerald-600/10"
         >
           {isLoading ? <RotateCw className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
@@ -129,6 +149,7 @@ export const SovereignEngineDashboard: React.FC = () => {
                   <button
                     key={cond}
                     type="button"
+                    aria-pressed={active}
                     onClick={() => toggleChronic(cond)}
                     className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border transition ${active ? "bg-fuchsia-600/20 text-fuchsia-400 border-fuchsia-500/30" : "bg-slate-950 text-slate-400 border-slate-800 hover:text-slate-300"}`}
                   >
@@ -155,9 +176,9 @@ export const SovereignEngineDashboard: React.FC = () => {
               <Sparkles className="w-4 h-4 text-fuchsia-400" /> استنتاجات شريكك والقرارات التشغيلية
             </h3>
             {isLoading && (
-              <div className="text-center py-24 text-slate-500 animate-pulse text-xs">
+              <div className="text-center py-24 text-slate-500 text-xs">
                 <RotateCw className="w-12 h-12 text-emerald-400 mx-auto mb-4 animate-spin" />
-                <p>الدماغ يحفز الـ Webhook ويستعرض موانع الصرف وتوجيهات الفروع...</p>
+                <p className="sovereign-scan">الدماغ يحفز الـ Webhook ويستعرض موانع الصرف وتوجيهات الفروع...</p>
               </div>
             )}
             {!isLoading && !decision && (
@@ -213,29 +234,47 @@ export const SovereignEngineDashboard: React.FC = () => {
 
         {/* Tool Registry */}
         <div className="lg:col-span-1 bg-slate-900/40 border border-slate-900 p-6 rounded-2xl h-fit space-y-4">
-          <h3 className="text-xs font-bold text-slate-300 flex items-center gap-1.5 border-b border-slate-900 pb-3">
-            <Zap className="w-4 h-4 text-fuchsia-400" /> سجل الأدوات الثمانية الفعالة
-          </h3>
+          <div className="flex items-center justify-between border-b border-slate-900 pb-3">
+            <h3 className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+              <Zap className="w-4 h-4 text-fuchsia-400" /> سجل الأدوات الثمانية
+            </h3>
+            <span className={`text-[9px] font-black px-2 py-0.5 rounded-md border ${activeCount > 0 ? "text-emerald-300 border-emerald-500/30 bg-emerald-500/10" : "text-slate-500 border-slate-800 bg-slate-950"}`}>
+              {activeCount} / 8 نشطة
+            </span>
+          </div>
           <div className="space-y-3">
-            {REAL_TOOL_REGISTRY.map((tool) => {
+            {REAL_TOOL_REGISTRY.map((tool, idx) => {
               const ToolIcon = tool.icon;
               const isDispatched = tool.realCodes.some((c) => dispatched.has(c));
+              const baseCls = isDispatched
+                ? "bg-emerald-500/10 border-emerald-500/40 sovereign-glow"
+                : `${tool.tint} opacity-70 hover:opacity-100`;
+              const scanCls = isLoading ? "sovereign-scan" : "";
+              const scanDelay = isLoading ? { animationDelay: `${idx * 120}ms` } : undefined;
               return (
                 <div
                   key={tool.code}
-                  className={`p-3 rounded-xl border transition duration-300 flex items-start gap-3 ${isDispatched ? "bg-emerald-500/10 border-emerald-500/30 shadow-lg shadow-emerald-500/5 animate-pulse" : "bg-slate-950 border-slate-900 opacity-60"}`}
+                  style={scanDelay}
+                  className={`p-3 rounded-xl border transition duration-300 flex items-start gap-3 ${baseCls} ${scanCls}`}
                 >
-                  <div className={`p-2 rounded-lg shrink-0 ${isDispatched ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-900 text-slate-600"}`}>
+                  <div className={`p-2 rounded-lg shrink-0 ${isDispatched ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-900 text-slate-500"}`}>
                     <ToolIcon className="w-4 h-4" />
                   </div>
-                  <div className="space-y-0.5 text-right">
-                    <div className="flex items-center gap-1.5">
+                  <div className="space-y-0.5 text-right flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="text-[10px] font-bold text-slate-200">{tool.name}</span>
                       {isDispatched && (
-                        <span className="text-[8px] px-1 bg-emerald-500/20 text-emerald-400 rounded font-black">نشط الآن</span>
+                        <span className="text-[8px] px-1 bg-emerald-500/20 text-emerald-300 rounded font-black flex items-center gap-1">
+                          <span className="relative flex h-1.5 w-1.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400"></span>
+                          </span>
+                          نشط الآن
+                        </span>
                       )}
                     </div>
                     <p className="text-[9px] text-slate-500 leading-normal">{tool.description}</p>
+                    <span className="text-[8px] text-slate-600 font-mono">{tool.category}</span>
                   </div>
                 </div>
               );
