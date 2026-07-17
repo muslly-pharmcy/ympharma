@@ -121,6 +121,8 @@ function SunCorePage() {
             </div>
           </div>
         </Panel>
+
+        <Panel title="🤖 الوكلاء المسجَّلون">
           <div className="space-y-2">
             {agentsQ.data.map((a) => (
               <div
