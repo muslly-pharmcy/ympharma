@@ -87,10 +87,10 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.22 0.03 220);
 
-  /* Brand: medical teal (matches reference design #087d78 / #075e5b) */
-  --primary: oklch(0.54 0.09 190);
+  /* Brand: Medical Turquoise 2026 (#00A8B5) */
+  --primary: oklch(0.67 0.11 199);
   --primary-foreground: oklch(0.99 0 0);
-  --primary-deep: oklch(0.44 0.08 190);
+  --primary-deep: oklch(0.55 0.11 200);
 
   --secondary: oklch(0.96 0.012 190);
   --secondary-foreground: oklch(0.25 0.04 220);
