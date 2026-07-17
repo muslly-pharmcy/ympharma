@@ -31,10 +31,10 @@ export const Route = createFileRoute("/welcome")({
 });
 
 const nodes = [
-  { icon: Stethoscope, label: "الأطباء", labelEn: "Doctors", to: "/doctors" },
-  { icon: Pill, label: "الصيدليات", labelEn: "Pharmacies", to: "/pn-directory" },
-  { icon: Building2, label: "المستشفيات", labelEn: "Hospitals", to: "/find-care" },
-  { icon: Users, label: "المرضى", labelEn: "Patients", to: "/patient-portal" },
+  { icon: Stethoscope, label: "الأطباء", labelEn: "Doctors", to: "/doctors" as const },
+  { icon: Pill, label: "الصيدليات", labelEn: "Pharmacies", to: "/pharmacies" as const },
+  { icon: Building2, label: "المستشفيات", labelEn: "Hospitals", to: "/find-care" as const },
+  { icon: Users, label: "بحث ذكي", labelEn: "Smart Search", to: "/find-care" as const },
 ];
 
 function WelcomePage() {
