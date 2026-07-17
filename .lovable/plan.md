@@ -1,110 +1,146 @@
-## Scope
+# PHASE 6 — Business Intelligence Galaxy + PHASE 7 — Titan Security Guardian
 
-Build Phases 3, 4, and 5 of the AI Sun architecture on top of the existing `src/ai/core/`, `src/ai/agents/`, and `src/ai/memory/` foundation established in Phase 1.2 + 1.3 + 2.
-
-The blueprint is adapted to reality — the current codebase already has:
-- `src/ai/core/` (SunEngine, EventBus, AgentRegistry, DecisionEngine)
-- `src/ai/agents/base-agent.ts` + `pharmacist-agent.ts`
-- `src/ai/memory/memory-manager.server.ts` + `neural-memory.server.ts`
-- `agent_events`, `ai_events`, `ai_decisions`, `ai_memory`, `ai_neural_memory` tables
-- Sun tick worker at `src/routes/api/public/ai/sun-tick.ts`
-
-So I will extend, not duplicate.
+Both phases adapted to the actual codebase (`BaseAgent`, `EventBus`, `sun-tick`, existing tables) and Lovable Cloud rules. No fictional imports (`@/lib/supabase` → real `supabase` client / server publishable client where needed).
 
 ---
 
-## PHASE 3 — Agent Universe
+## Phase 6 — Business Intelligence Galaxy
 
-**New agents** (each extends existing `BaseAgent`, records to `ai_memory`):
-- `src/ai/agents/medical/prescription-agent.ts` — routes `PRESCRIPTION_UPLOADED` to review queue
-- `src/ai/agents/medical/interaction-agent.ts` — drug-interaction stub (Gemini-ready)
-- `src/ai/agents/inventory/inventory-agent.ts` — reads `STOCK_LOW`, decides reorder
-- `src/ai/agents/inventory/expiry-agent.ts` — hooks `inv_expiry_alerts`
-- `src/ai/agents/inventory/procurement-agent.ts` — recommendation stub
-- `src/ai/agents/customer/whatsapp-agent.ts` — reply intent classification
-- `src/ai/agents/customer/support-agent.ts` — escalation logic
-- `src/ai/agents/business/sales-agent.ts`, `marketing-agent.ts` — analytics stubs
-- `src/ai/agents/security/guardian-agent.ts` — anomaly log
+### Migration (single call)
+```sql
+CREATE TABLE public.ai_business_insights (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  insight_type text NOT NULL,     -- FINANCIAL | SALES | MARKET | EXECUTIVE
+  summary text NOT NULL,
+  recommendation jsonb NOT NULL DEFAULT '{}'::jsonb,
+  metrics jsonb NOT NULL DEFAULT '{}'::jsonb,
+  confidence numeric NOT NULL DEFAULT 0,
+  agent_name text,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+GRANT SELECT, INSERT ON public.ai_business_insights TO authenticated;
+GRANT ALL ON public.ai_business_insights TO service_role;
+ALTER TABLE public.ai_business_insights ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "admins read" ON public.ai_business_insights FOR SELECT
+  TO authenticated USING (public.has_role(auth.uid(),'admin'));
+CREATE POLICY "service writes" ON public.ai_business_insights FOR INSERT
+  TO service_role WITH CHECK (true);
+CREATE INDEX ai_business_insights_type_idx ON public.ai_business_insights(insight_type, created_at DESC);
+```
 
-**Reorganize** existing pharmacist agent into `medical/` folder; keep re-export shim for back-compat.
+### New files
+```
+src/ai/intelligence/
+├── core/
+│   ├── metric-engine.ts        # queries real tables: orders, catalog_products, inv_stock_batches
+│   ├── intelligence-engine.ts  # rule-based insights over metrics
+│   └── insight-writer.ts       # inserts into ai_business_insights (server-only)
+├── finance/cfo-agent.ts        # extends BaseAgent, uses MetricEngine
+├── sales/
+│   ├── sales-agent.ts
+│   └── demand-predictor.ts     # weighted moving average over demand_forecasts/orders
+├── market/market-agent.ts
+└── executive/ceo-agent.ts      # aggregates other agents' latest insights
+```
 
-**Registry**: `src/ai/agents/register.ts` centralizes `registry.register(...)` calls; sun-tick imports this.
+### Events (append to `src/ai/events/event-types.ts`)
+`DAILY_REPORT`, `SALES_DROP`, `PROFIT_CHANGE`, `GROWTH_OPPORTUNITY`, `FORECAST_READY`.
 
-**Permissions**: new migration for `ai_agent_permissions` table (agent_name, permission) + seed rows. Admin-only RLS.
+### Registration & scheduling
+- Register the 4 BI agents in `src/ai/agents/register.ts`.
+- Add tool permissions rows for each (read-only against real tables).
+- Add `pg_cron` job `ai-daily-business-report` running every 6 hours → calls `POST /api/public/ai/business-tick` (new TSS server route, authenticates via anon `apikey`) which emits `DAILY_REPORT` through the EventBus.
 
----
-
-## PHASE 4 — Tool Universe + Autonomous Actions
-
-**Tool framework** under `src/ai/tools/core/`:
-- `tool-interface.ts` — `AITool { name, description, permissions, execute }`
-- `tool-registry.ts` — Map-based registry
-- `tool-engine.ts` — resolves + executes with permission guard
-- `tool-permission.ts` — `canExecute(tool, grantedPermissions)`
-
-**First tools** (server-only, use `supabaseAdmin` loaded inside execute):
-- `pharmacy/product-search.tool.ts` — searches `catalog_products`
-- `pharmacy/prescription-check.tool.ts` — reads `prescription_extractions`
-- `pharmacy/drug-info.tool.ts` — Gemini via Lovable AI Gateway
-- `inventory/stock-query.tool.ts` — reads `branch_inventory`
-- `inventory/reorder.tool.ts` — writes `purchase_recommendations` (guarded, needs approval)
-- `inventory/expiry-scan.tool.ts` — reads `inv_expiry_alerts`
-- `customer/whatsapp-send.tool.ts` — reuses existing WhatsApp dispatch
-- `customer/notification.tool.ts` — inserts `notifications`
-
-**BaseAgent extension**: add `tools?: ToolEngine`, `useTool(name, input)`; sun-tick injects a shared ToolEngine.
-
-**Action ledger**: migration for `ai_actions` (agent_name, tool_name, input, output, status, requires_approval). ToolEngine writes every execution.
-
-**Autonomy guard**: mutation tools default `requires_approval=true`, land in `agent_approval_requests` (already exists) — never auto-execute without an admin `ai_actions.approve` grant.
-
----
-
-## PHASE 5 — World Integration Layer
-
-**Connector framework** under `src/ai/integration/core/`:
-- `connector-interface.ts` — `AIConnector { name, connect, health, handle }`
-- `connector-manager.ts` — register/broadcast
-- `health-monitor.ts` — pings each connector
-
-**Connectors**:
-- `whatsapp/whatsapp-connector.ts` — bridges to existing WhatsApp brain
-- `pharmacy/order-connector.ts` — listens for `ORDER_CREATED`, enqueues `ORDER_ANALYSIS_REQUIRED` into `agent_events`
-- `pharmacy/inventory-connector.ts` — reacts to `STOCK_LOW`
-- `pharmacy/customer-connector.ts` — customer profile enrichment
-- `n8n/n8n-bridge.ts` — POSTs to `N8N_WEBHOOK_URL` (already-configured secret)
-- `analytics/intelligence-connector.ts` — writes to `executive_reports`
-
-**Bootstrap**: `src/ai/integration/bootstrap.ts` registers all; called from sun-tick startup.
-
-**World health**: new migration for `ai_world_health` table. New server route `src/routes/api/public/ai/world-health.ts` (cron-secret guarded) — pg_cron runs every 5 min.
-
-**Admin UI** additions to `/admin-sun-core`:
-- Agent Universe tab — list registered agents, permissions, recent memories per agent
-- Tools tab — registry list, recent `ai_actions` with approve/reject
-- World tab — connector health table live from `ai_world_health`
+### Dashboard
+`src/routes/_authenticated/admin-business-intel.tsx` — Arabic RTL, teal palette:
+- Latest CEO summary card
+- Financial / Sales / Market insight columns (from `ai_business_insights`)
+- Demand forecast table (top 10 SKUs)
+Read via new server fn `businessInsights()` (admin-gated, uses `supabaseAdmin` only inside the handler).
 
 ---
 
-## Migrations (three, in order)
+## Phase 7 — Titan Security Guardian
 
-1. `ai_agent_permissions` + seed
-2. `ai_actions` (action ledger)
-3. `ai_world_health` + `run_world_health_check()` RPC + pg_cron schedule
+### Migration
+```sql
+CREATE TABLE public.ai_security_events (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_type text NOT NULL,   -- LOGIN_FAILED, RLS_VIOLATION, ...
+  severity text NOT NULL DEFAULT 'medium',  -- low|medium|high|critical
+  source text,
+  actor_id uuid,
+  details jsonb NOT NULL DEFAULT '{}'::jsonb,
+  risk_score integer NOT NULL DEFAULT 0,
+  action_taken text,          -- ALLOW | REVIEW | BLOCK
+  resolved boolean NOT NULL DEFAULT false,
+  resolved_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE public.ai_security_audit (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  actor text,
+  actor_id uuid,
+  action text NOT NULL,
+  resource text,
+  result text,
+  metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+-- grants + RLS: SELECT admin only, INSERT service_role only
+CREATE INDEX ai_security_events_type_idx ON public.ai_security_events(event_type, created_at DESC);
+CREATE INDEX ai_security_events_open_idx ON public.ai_security_events(resolved, severity);
+CREATE INDEX ai_security_audit_actor_idx ON public.ai_security_audit(actor_id, created_at DESC);
+```
+(Reuse existing `identity_audit_events` for auth events instead of duplicating.)
 
-All with GRANTs: `service_role` full, `authenticated` SELECT only.
+### New files
+```
+src/security/ai/
+├── core/
+│   ├── security-engine.ts      # calculateRisk() + analyze()
+│   ├── threat-detector.ts      # pattern rules (brute force, spikes)
+│   └── policy-engine.ts        # ALLOW/REVIEW/BLOCK matrix
+├── audit/audit-agent.ts        # server-only insert into ai_security_audit
+├── database/rls-monitor.ts     # scans query strings/JSON for dangerous keywords
+├── secrets/secret-guardian.ts  # regex scan for sk-*, service_role, apikey leaks
+└── events/security-events.ts   # SECURITY_EVENTS constants
+```
+
+### Wiring
+- `sun-tick` worker calls `SecurityEngine.analyze(event)` **before** dispatch; BLOCK short-circuits + inserts `ai_security_events` with `action_taken='BLOCK'`.
+- Register `GuardianAgent` (already exists) as consumer of `SECURITY_EVENTS.*` → routes high/critical to `operations_alerts_v14` for Slack.
+- `AuditAgent` records agent actions from `ai_actions` triggers (add trigger on INSERT).
+- Optional: nightly `pg_cron` `security-daily-sweep` → hits `/api/public/security/sweep` which scans last-24h `ai_actions`, `error_logs`, `identity_audit_events` for anomalies.
+
+### Dashboard
+`src/routes/_authenticated/admin-security-guardian.tsx` — 4 sections:
+1. Open security events (severity color-coded)
+2. Last 50 audit rows
+3. Risk heatmap (event_type × severity counts, 7d)
+4. Secret-scan results & RLS monitor summary
+
+Server fn `securityOverview()` (admin-only) with parallel `Promise.all` reads.
 
 ---
 
-## Out of Scope (Phase 6 later)
+## Technical Notes
 
-CFO/CEO agents, sales prediction ML, competitor analysis, growth engine.
+- All BaseAgents follow the existing pattern in `src/ai/agents/medical/pharmacist-agent.ts` (`success()` helper, `execute(event)` signature).
+- Real Supabase client imports:
+  - Agents run inside `sun-tick` handler → use dynamically-imported `supabaseAdmin` scoped to handler body.
+  - Dashboards → server fn with `requireSupabaseAuth` + `has_role` check, then `supabaseAdmin` for aggregation reads.
+- No new secrets required — all cron uses existing anon `apikey` pattern.
+- No changes to `pg_cron` auth model, no fictional `@/lib/supabase` path.
+- Type safety: return plain DTOs from all server fns; no `unknown` fields in returned objects (matches earlier serializer constraint).
 
----
+## Deliverables
 
-## Risks & Notes
+1. One migration for Phase 6 tables.
+2. One migration for Phase 7 tables + `ai_actions` audit trigger.
+3. ~15 new source files across `src/ai/intelligence/` and `src/security/ai/`.
+4. Two new admin dashboards + two new server fn modules.
+5. Two new `/api/public/*` cron endpoints + two `pg_cron` schedules.
+6. Updated `src/ai/agents/register.ts` and `src/ai/bootstrap.ts`.
 
-- Volume of new files (~30). I'll batch parallel writes.
-- Zero autonomous mutations without admin approval — all tools that write default to `requires_approval=true`.
-- No new secrets required; reuses `LOVABLE_API_KEY`, `N8N_WEBHOOK_URL`, `CRON_SECRET`.
-- Typecheck runs automatically after edits.
+Estimated scope: ~800 LOC + 2 migrations. Executed as single pass; Phase 8 (Evolution Engine) follows on approval.

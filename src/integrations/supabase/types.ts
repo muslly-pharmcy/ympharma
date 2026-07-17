@@ -768,6 +768,39 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_business_insights: {
+        Row: {
+          agent_name: string | null
+          confidence: number
+          created_at: string
+          id: string
+          insight_type: string
+          metrics: Json
+          recommendation: Json
+          summary: string
+        }
+        Insert: {
+          agent_name?: string | null
+          confidence?: number
+          created_at?: string
+          id?: string
+          insight_type: string
+          metrics?: Json
+          recommendation?: Json
+          summary: string
+        }
+        Update: {
+          agent_name?: string | null
+          confidence?: number
+          created_at?: string
+          id?: string
+          insight_type?: string
+          metrics?: Json
+          recommendation?: Json
+          summary?: string
+        }
+        Relationships: []
+      }
       ai_decisions: {
         Row: {
           action: Json | null
@@ -1024,6 +1057,81 @@ export type Database = {
           id?: string
           kind?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      ai_security_audit: {
+        Row: {
+          action: string
+          actor: string | null
+          actor_id: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          resource: string | null
+          result: string | null
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          resource?: string | null
+          result?: string | null
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          resource?: string | null
+          result?: string | null
+        }
+        Relationships: []
+      }
+      ai_security_events: {
+        Row: {
+          action_taken: string | null
+          actor_id: string | null
+          created_at: string
+          details: Json
+          event_type: string
+          id: string
+          resolved: boolean
+          resolved_at: string | null
+          risk_score: number
+          severity: string
+          source: string | null
+        }
+        Insert: {
+          action_taken?: string | null
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          event_type: string
+          id?: string
+          resolved?: boolean
+          resolved_at?: string | null
+          risk_score?: number
+          severity?: string
+          source?: string | null
+        }
+        Update: {
+          action_taken?: string | null
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          event_type?: string
+          id?: string
+          resolved?: boolean
+          resolved_at?: string | null
+          risk_score?: number
+          severity?: string
+          source?: string | null
         }
         Relationships: []
       }

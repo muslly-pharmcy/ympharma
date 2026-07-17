@@ -108,6 +108,7 @@ import { Route as AuthenticatedAdminSystemHealthRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminSunCoreRouteImport } from './routes/_authenticated/admin-sun-core'
 import { Route as AuthenticatedAdminSovereignRouteImport } from './routes/_authenticated/admin-sovereign'
 import { Route as AuthenticatedAdminSlackTestRouteImport } from './routes/_authenticated/admin-slack-test'
+import { Route as AuthenticatedAdminSecurityGuardianRouteImport } from './routes/_authenticated/admin-security-guardian'
 import { Route as AuthenticatedAdminSalesReportsRouteImport } from './routes/_authenticated/admin-sales-reports'
 import { Route as AuthenticatedAdminMarketingCampaignsRouteImport } from './routes/_authenticated/admin-marketing-campaigns'
 import { Route as AuthenticatedAdminInventorySyncLogsRouteImport } from './routes/_authenticated/admin-inventory-sync-logs'
@@ -115,6 +116,7 @@ import { Route as AuthenticatedAdminInventoryIntelRouteImport } from './routes/_
 import { Route as AuthenticatedAdminHealthRouteImport } from './routes/_authenticated/admin-health'
 import { Route as AuthenticatedAdminErrorExplainerRouteImport } from './routes/_authenticated/admin-error-explainer'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin-dashboard'
+import { Route as AuthenticatedAdminBusinessIntelRouteImport } from './routes/_authenticated/admin-business-intel'
 import { Route as AuthenticatedAdminAuditRouteImport } from './routes/_authenticated/admin-audit'
 import { Route as AuthenticatedAdminAlertSettingsRouteImport } from './routes/_authenticated/admin-alert-settings'
 import { Route as AuthenticatedAdminAiCopilotRouteImport } from './routes/_authenticated/admin-ai-copilot'
@@ -144,6 +146,7 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as ApiPublicSecuritySweepRouteImport } from './routes/api/public/security/sweep'
 import { Route as ApiPublicMonitoringHealthRouteImport } from './routes/api/public/monitoring/health'
 import { Route as ApiPublicHooksWhatsappRetryRouteImport } from './routes/api/public/hooks/whatsapp-retry'
 import { Route as ApiPublicHooksWeeklyExecReportRouteImport } from './routes/api/public/hooks/weekly-exec-report'
@@ -181,6 +184,7 @@ import { Route as ApiPublicHealthFullCheckRouteImport } from './routes/api/publi
 import { Route as ApiPublicAnalyticsIngestRouteImport } from './routes/api/public/analytics/ingest'
 import { Route as ApiPublicAiWorldHealthRouteImport } from './routes/api/public/ai/world-health'
 import { Route as ApiPublicAiSunTickRouteImport } from './routes/api/public/ai/sun-tick'
+import { Route as ApiPublicAiBusinessTickRouteImport } from './routes/api/public/ai/business-tick'
 import { Route as AuthenticatedPharmacistPrescriptionReviewIdRouteImport } from './routes/_authenticated/pharmacist/prescription-review.$id'
 import { Route as AuthenticatedPharmacistInvoiceReviewIdRouteImport } from './routes/_authenticated/pharmacist/invoice-review.$id'
 import { Route as ApiPublicHooksWhatsappTwilioRouteImport } from './routes/api/public/hooks/whatsapp/twilio'
@@ -701,6 +705,12 @@ const AuthenticatedAdminSlackTestRoute =
     path: '/admin-slack-test',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminSecurityGuardianRoute =
+  AuthenticatedAdminSecurityGuardianRouteImport.update({
+    id: '/admin-security-guardian',
+    path: '/admin-security-guardian',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminSalesReportsRoute =
   AuthenticatedAdminSalesReportsRouteImport.update({
     id: '/admin-sales-reports',
@@ -741,6 +751,12 @@ const AuthenticatedAdminDashboardRoute =
   AuthenticatedAdminDashboardRouteImport.update({
     id: '/admin-dashboard',
     path: '/admin-dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminBusinessIntelRoute =
+  AuthenticatedAdminBusinessIntelRouteImport.update({
+    id: '/admin-business-intel',
+    path: '/admin-business-intel',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdminAuditRoute = AuthenticatedAdminAuditRouteImport.update({
@@ -904,6 +920,11 @@ const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
 const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   id: '/lovable/email/auth/preview',
   path: '/lovable/email/auth/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicSecuritySweepRoute = ApiPublicSecuritySweepRouteImport.update({
+  id: '/api/public/security/sweep',
+  path: '/api/public/security/sweep',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicMonitoringHealthRoute =
@@ -1122,6 +1143,11 @@ const ApiPublicAiSunTickRoute = ApiPublicAiSunTickRouteImport.update({
   path: '/api/public/ai/sun-tick',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAiBusinessTickRoute = ApiPublicAiBusinessTickRouteImport.update({
+  id: '/api/public/ai/business-tick',
+  path: '/api/public/ai/business-tick',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedPharmacistPrescriptionReviewIdRoute =
   AuthenticatedPharmacistPrescriptionReviewIdRouteImport.update({
     id: '/pharmacist/prescription-review/$id',
@@ -1289,6 +1315,7 @@ export interface FileRoutesByFullPath {
   '/admin-ai-copilot': typeof AuthenticatedAdminAiCopilotRoute
   '/admin-alert-settings': typeof AuthenticatedAdminAlertSettingsRoute
   '/admin-audit': typeof AuthenticatedAdminAuditRoute
+  '/admin-business-intel': typeof AuthenticatedAdminBusinessIntelRoute
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin-error-explainer': typeof AuthenticatedAdminErrorExplainerRoute
   '/admin-health': typeof AuthenticatedAdminHealthRoute
@@ -1296,6 +1323,7 @@ export interface FileRoutesByFullPath {
   '/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
   '/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
   '/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
+  '/admin-security-guardian': typeof AuthenticatedAdminSecurityGuardianRoute
   '/admin-slack-test': typeof AuthenticatedAdminSlackTestRoute
   '/admin-sovereign': typeof AuthenticatedAdminSovereignRoute
   '/admin-sun-core': typeof AuthenticatedAdminSunCoreRoute
@@ -1329,6 +1357,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/pharmacist/invoice-review/$id': typeof AuthenticatedPharmacistInvoiceReviewIdRoute
   '/pharmacist/prescription-review/$id': typeof AuthenticatedPharmacistPrescriptionReviewIdRoute
+  '/api/public/ai/business-tick': typeof ApiPublicAiBusinessTickRoute
   '/api/public/ai/sun-tick': typeof ApiPublicAiSunTickRoute
   '/api/public/ai/world-health': typeof ApiPublicAiWorldHealthRoute
   '/api/public/analytics/ingest': typeof ApiPublicAnalyticsIngestRoute
@@ -1366,6 +1395,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
   '/api/public/hooks/whatsapp-retry': typeof ApiPublicHooksWhatsappRetryRoute
   '/api/public/monitoring/health': typeof ApiPublicMonitoringHealthRoute
+  '/api/public/security/sweep': typeof ApiPublicSecuritySweepRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -1475,6 +1505,7 @@ export interface FileRoutesByTo {
   '/admin-ai-copilot': typeof AuthenticatedAdminAiCopilotRoute
   '/admin-alert-settings': typeof AuthenticatedAdminAlertSettingsRoute
   '/admin-audit': typeof AuthenticatedAdminAuditRoute
+  '/admin-business-intel': typeof AuthenticatedAdminBusinessIntelRoute
   '/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin-error-explainer': typeof AuthenticatedAdminErrorExplainerRoute
   '/admin-health': typeof AuthenticatedAdminHealthRoute
@@ -1482,6 +1513,7 @@ export interface FileRoutesByTo {
   '/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
   '/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
   '/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
+  '/admin-security-guardian': typeof AuthenticatedAdminSecurityGuardianRoute
   '/admin-slack-test': typeof AuthenticatedAdminSlackTestRoute
   '/admin-sovereign': typeof AuthenticatedAdminSovereignRoute
   '/admin-sun-core': typeof AuthenticatedAdminSunCoreRoute
@@ -1515,6 +1547,7 @@ export interface FileRoutesByTo {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/pharmacist/invoice-review/$id': typeof AuthenticatedPharmacistInvoiceReviewIdRoute
   '/pharmacist/prescription-review/$id': typeof AuthenticatedPharmacistPrescriptionReviewIdRoute
+  '/api/public/ai/business-tick': typeof ApiPublicAiBusinessTickRoute
   '/api/public/ai/sun-tick': typeof ApiPublicAiSunTickRoute
   '/api/public/ai/world-health': typeof ApiPublicAiWorldHealthRoute
   '/api/public/analytics/ingest': typeof ApiPublicAnalyticsIngestRoute
@@ -1552,6 +1585,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
   '/api/public/hooks/whatsapp-retry': typeof ApiPublicHooksWhatsappRetryRoute
   '/api/public/monitoring/health': typeof ApiPublicMonitoringHealthRoute
+  '/api/public/security/sweep': typeof ApiPublicSecuritySweepRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -1663,6 +1697,7 @@ export interface FileRoutesById {
   '/_authenticated/admin-ai-copilot': typeof AuthenticatedAdminAiCopilotRoute
   '/_authenticated/admin-alert-settings': typeof AuthenticatedAdminAlertSettingsRoute
   '/_authenticated/admin-audit': typeof AuthenticatedAdminAuditRoute
+  '/_authenticated/admin-business-intel': typeof AuthenticatedAdminBusinessIntelRoute
   '/_authenticated/admin-dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/admin-error-explainer': typeof AuthenticatedAdminErrorExplainerRoute
   '/_authenticated/admin-health': typeof AuthenticatedAdminHealthRoute
@@ -1670,6 +1705,7 @@ export interface FileRoutesById {
   '/_authenticated/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
   '/_authenticated/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
   '/_authenticated/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
+  '/_authenticated/admin-security-guardian': typeof AuthenticatedAdminSecurityGuardianRoute
   '/_authenticated/admin-slack-test': typeof AuthenticatedAdminSlackTestRoute
   '/_authenticated/admin-sovereign': typeof AuthenticatedAdminSovereignRoute
   '/_authenticated/admin-sun-core': typeof AuthenticatedAdminSunCoreRoute
@@ -1703,6 +1739,7 @@ export interface FileRoutesById {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/pharmacist/invoice-review/$id': typeof AuthenticatedPharmacistInvoiceReviewIdRoute
   '/_authenticated/pharmacist/prescription-review/$id': typeof AuthenticatedPharmacistPrescriptionReviewIdRoute
+  '/api/public/ai/business-tick': typeof ApiPublicAiBusinessTickRoute
   '/api/public/ai/sun-tick': typeof ApiPublicAiSunTickRoute
   '/api/public/ai/world-health': typeof ApiPublicAiWorldHealthRoute
   '/api/public/analytics/ingest': typeof ApiPublicAnalyticsIngestRoute
@@ -1740,6 +1777,7 @@ export interface FileRoutesById {
   '/api/public/hooks/weekly-exec-report': typeof ApiPublicHooksWeeklyExecReportRoute
   '/api/public/hooks/whatsapp-retry': typeof ApiPublicHooksWhatsappRetryRoute
   '/api/public/monitoring/health': typeof ApiPublicMonitoringHealthRoute
+  '/api/public/security/sweep': typeof ApiPublicSecuritySweepRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -1851,6 +1889,7 @@ export interface FileRouteTypes {
     | '/admin-ai-copilot'
     | '/admin-alert-settings'
     | '/admin-audit'
+    | '/admin-business-intel'
     | '/admin-dashboard'
     | '/admin-error-explainer'
     | '/admin-health'
@@ -1858,6 +1897,7 @@ export interface FileRouteTypes {
     | '/admin-inventory-sync-logs'
     | '/admin-marketing-campaigns'
     | '/admin-sales-reports'
+    | '/admin-security-guardian'
     | '/admin-slack-test'
     | '/admin-sovereign'
     | '/admin-sun-core'
@@ -1891,6 +1931,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/pharmacist/invoice-review/$id'
     | '/pharmacist/prescription-review/$id'
+    | '/api/public/ai/business-tick'
     | '/api/public/ai/sun-tick'
     | '/api/public/ai/world-health'
     | '/api/public/analytics/ingest'
@@ -1928,6 +1969,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/weekly-exec-report'
     | '/api/public/hooks/whatsapp-retry'
     | '/api/public/monitoring/health'
+    | '/api/public/security/sweep'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -2037,6 +2079,7 @@ export interface FileRouteTypes {
     | '/admin-ai-copilot'
     | '/admin-alert-settings'
     | '/admin-audit'
+    | '/admin-business-intel'
     | '/admin-dashboard'
     | '/admin-error-explainer'
     | '/admin-health'
@@ -2044,6 +2087,7 @@ export interface FileRouteTypes {
     | '/admin-inventory-sync-logs'
     | '/admin-marketing-campaigns'
     | '/admin-sales-reports'
+    | '/admin-security-guardian'
     | '/admin-slack-test'
     | '/admin-sovereign'
     | '/admin-sun-core'
@@ -2077,6 +2121,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/pharmacist/invoice-review/$id'
     | '/pharmacist/prescription-review/$id'
+    | '/api/public/ai/business-tick'
     | '/api/public/ai/sun-tick'
     | '/api/public/ai/world-health'
     | '/api/public/analytics/ingest'
@@ -2114,6 +2159,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/weekly-exec-report'
     | '/api/public/hooks/whatsapp-retry'
     | '/api/public/monitoring/health'
+    | '/api/public/security/sweep'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -2224,6 +2270,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin-ai-copilot'
     | '/_authenticated/admin-alert-settings'
     | '/_authenticated/admin-audit'
+    | '/_authenticated/admin-business-intel'
     | '/_authenticated/admin-dashboard'
     | '/_authenticated/admin-error-explainer'
     | '/_authenticated/admin-health'
@@ -2231,6 +2278,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin-inventory-sync-logs'
     | '/_authenticated/admin-marketing-campaigns'
     | '/_authenticated/admin-sales-reports'
+    | '/_authenticated/admin-security-guardian'
     | '/_authenticated/admin-slack-test'
     | '/_authenticated/admin-sovereign'
     | '/_authenticated/admin-sun-core'
@@ -2264,6 +2312,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/_authenticated/pharmacist/invoice-review/$id'
     | '/_authenticated/pharmacist/prescription-review/$id'
+    | '/api/public/ai/business-tick'
     | '/api/public/ai/sun-tick'
     | '/api/public/ai/world-health'
     | '/api/public/analytics/ingest'
@@ -2301,6 +2350,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/weekly-exec-report'
     | '/api/public/hooks/whatsapp-retry'
     | '/api/public/monitoring/health'
+    | '/api/public/security/sweep'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -2420,6 +2470,7 @@ export interface RootRouteChildren {
   ApiPublicUptimeWebhookRoute: typeof ApiPublicUptimeWebhookRoute
   ApiPublicWhatsappWebhookRoute: typeof ApiPublicWhatsappWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicAiBusinessTickRoute: typeof ApiPublicAiBusinessTickRoute
   ApiPublicAiSunTickRoute: typeof ApiPublicAiSunTickRoute
   ApiPublicAiWorldHealthRoute: typeof ApiPublicAiWorldHealthRoute
   ApiPublicAnalyticsIngestRoute: typeof ApiPublicAnalyticsIngestRoute
@@ -2455,6 +2506,7 @@ export interface RootRouteChildren {
   ApiPublicHooksWeeklyExecReportRoute: typeof ApiPublicHooksWeeklyExecReportRoute
   ApiPublicHooksWhatsappRetryRoute: typeof ApiPublicHooksWhatsappRetryRoute
   ApiPublicMonitoringHealthRoute: typeof ApiPublicMonitoringHealthRoute
+  ApiPublicSecuritySweepRoute: typeof ApiPublicSecuritySweepRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -3168,6 +3220,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSlackTestRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin-security-guardian': {
+      id: '/_authenticated/admin-security-guardian'
+      path: '/admin-security-guardian'
+      fullPath: '/admin-security-guardian'
+      preLoaderRoute: typeof AuthenticatedAdminSecurityGuardianRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin-sales-reports': {
       id: '/_authenticated/admin-sales-reports'
       path: '/admin-sales-reports'
@@ -3215,6 +3274,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-dashboard'
       fullPath: '/admin-dashboard'
       preLoaderRoute: typeof AuthenticatedAdminDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin-business-intel': {
+      id: '/_authenticated/admin-business-intel'
+      path: '/admin-business-intel'
+      fullPath: '/admin-business-intel'
+      preLoaderRoute: typeof AuthenticatedAdminBusinessIntelRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin-audit': {
@@ -3418,6 +3484,13 @@ declare module '@tanstack/react-router' {
       path: '/lovable/email/auth/preview'
       fullPath: '/lovable/email/auth/preview'
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/security/sweep': {
+      id: '/api/public/security/sweep'
+      path: '/api/public/security/sweep'
+      fullPath: '/api/public/security/sweep'
+      preLoaderRoute: typeof ApiPublicSecuritySweepRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/monitoring/health': {
@@ -3679,6 +3752,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAiSunTickRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/ai/business-tick': {
+      id: '/api/public/ai/business-tick'
+      path: '/api/public/ai/business-tick'
+      fullPath: '/api/public/ai/business-tick'
+      preLoaderRoute: typeof ApiPublicAiBusinessTickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/pharmacist/prescription-review/$id': {
       id: '/_authenticated/pharmacist/prescription-review/$id'
       path: '/pharmacist/prescription-review/$id'
@@ -3780,6 +3860,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminAiCopilotRoute: typeof AuthenticatedAdminAiCopilotRoute
   AuthenticatedAdminAlertSettingsRoute: typeof AuthenticatedAdminAlertSettingsRoute
   AuthenticatedAdminAuditRoute: typeof AuthenticatedAdminAuditRoute
+  AuthenticatedAdminBusinessIntelRoute: typeof AuthenticatedAdminBusinessIntelRoute
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
   AuthenticatedAdminErrorExplainerRoute: typeof AuthenticatedAdminErrorExplainerRoute
   AuthenticatedAdminHealthRoute: typeof AuthenticatedAdminHealthRoute
@@ -3787,6 +3868,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminInventorySyncLogsRoute: typeof AuthenticatedAdminInventorySyncLogsRoute
   AuthenticatedAdminMarketingCampaignsRoute: typeof AuthenticatedAdminMarketingCampaignsRoute
   AuthenticatedAdminSalesReportsRoute: typeof AuthenticatedAdminSalesReportsRoute
+  AuthenticatedAdminSecurityGuardianRoute: typeof AuthenticatedAdminSecurityGuardianRoute
   AuthenticatedAdminSlackTestRoute: typeof AuthenticatedAdminSlackTestRoute
   AuthenticatedAdminSovereignRoute: typeof AuthenticatedAdminSovereignRoute
   AuthenticatedAdminSunCoreRoute: typeof AuthenticatedAdminSunCoreRoute
@@ -3812,6 +3894,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminAiCopilotRoute: AuthenticatedAdminAiCopilotRoute,
   AuthenticatedAdminAlertSettingsRoute: AuthenticatedAdminAlertSettingsRoute,
   AuthenticatedAdminAuditRoute: AuthenticatedAdminAuditRoute,
+  AuthenticatedAdminBusinessIntelRoute: AuthenticatedAdminBusinessIntelRoute,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
   AuthenticatedAdminErrorExplainerRoute: AuthenticatedAdminErrorExplainerRoute,
   AuthenticatedAdminHealthRoute: AuthenticatedAdminHealthRoute,
@@ -3821,6 +3904,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminMarketingCampaignsRoute:
     AuthenticatedAdminMarketingCampaignsRoute,
   AuthenticatedAdminSalesReportsRoute: AuthenticatedAdminSalesReportsRoute,
+  AuthenticatedAdminSecurityGuardianRoute:
+    AuthenticatedAdminSecurityGuardianRoute,
   AuthenticatedAdminSlackTestRoute: AuthenticatedAdminSlackTestRoute,
   AuthenticatedAdminSovereignRoute: AuthenticatedAdminSovereignRoute,
   AuthenticatedAdminSunCoreRoute: AuthenticatedAdminSunCoreRoute,
@@ -3999,6 +4084,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicUptimeWebhookRoute: ApiPublicUptimeWebhookRoute,
   ApiPublicWhatsappWebhookRoute: ApiPublicWhatsappWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicAiBusinessTickRoute: ApiPublicAiBusinessTickRoute,
   ApiPublicAiSunTickRoute: ApiPublicAiSunTickRoute,
   ApiPublicAiWorldHealthRoute: ApiPublicAiWorldHealthRoute,
   ApiPublicAnalyticsIngestRoute: ApiPublicAnalyticsIngestRoute,
@@ -4037,6 +4123,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksWeeklyExecReportRoute: ApiPublicHooksWeeklyExecReportRoute,
   ApiPublicHooksWhatsappRetryRoute: ApiPublicHooksWhatsappRetryRoute,
   ApiPublicMonitoringHealthRoute: ApiPublicMonitoringHealthRoute,
+  ApiPublicSecuritySweepRoute: ApiPublicSecuritySweepRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
