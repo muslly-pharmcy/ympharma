@@ -1,72 +1,31 @@
 
-# Plan — SuperBrainSovereign (تكييف واقعي)
+## Plan — Sovereign Engine Dashboard UI
 
-استبدال الـ blueprint الوهمي بنواة قرارات حقيقية مربوطة بقاعدة البيانات والوحدات القائمة.
+Backend already exists and is real (adapted in the prior turn): `executeNeuralInference` server function + `ai_neural_synaptic_log` table. This slice adds **only** the UI, wired to the real server function — no fictional 800-tool grid, no direct static class call.
 
-## 1. Migration — `ai_neural_synaptic_log`
+### What I'll build
 
-```sql
-CREATE TABLE public.ai_neural_synaptic_log (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  session_id uuid NOT NULL DEFAULT gen_random_uuid(),
-  user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
-  trigger_source text NOT NULL,
-  target_destination text NOT NULL,
-  decision_id text,
-  is_safe boolean,
-  district text,
-  dispatched_tools text[] DEFAULT '{}',
-  payload_transmitted jsonb NOT NULL,
-  execution_time_ms numeric(10,2) NOT NULL,
-  created_at timestamptz NOT NULL DEFAULT now()
-);
+1. **`src/modules/ai-brain/components/SovereignEngineDashboard.tsx`**
+   - Same visual layout as the blueprint (RTL, gradient header, inputs on the left, decision matrix on the right).
+   - Inputs: district (`عدن / صنعاء / تعز / المكلا / الحديدة`), free-text `userInput`, optional chronic-condition chips (`سكري / ضغط / حامل`) so the safety engine has real signal.
+   - "إطلاق" button calls the real server fn via `useServerFn(executeNeuralInference)` — **not** the removed static `SuperBrainSovereign.executeNeuralInference`.
+   - Renders `BrainDecisionMatrix`: safety badge, proposed action, alternative, logistic branch + distance/ETA, maternal marketing suggestion, dispatched-tools chips.
+   - Error state (Arabic message) when the fn throws; loading spinner while pending.
 
-GRANT SELECT, INSERT ON public.ai_neural_synaptic_log TO authenticated;
-GRANT ALL ON public.ai_neural_synaptic_log TO service_role;
-ALTER TABLE public.ai_neural_synaptic_log ENABLE ROW LEVEL SECURITY;
+2. **`src/routes/_authenticated/admin-ai-brain.tsx`**
+   - Protected route (server fn requires auth) with head() title/description.
+   - Renders `<SovereignEngineDashboard />`.
 
--- المستخدم يقرأ سجله فقط؛ الإدمن يقرأ الكل
-CREATE POLICY neural_log_self_read ON public.ai_neural_synaptic_log
-  FOR SELECT TO authenticated USING (user_id = auth.uid() OR public.has_role(auth.uid(),'admin'));
-CREATE POLICY neural_log_self_insert ON public.ai_neural_synaptic_log
-  FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid() OR user_id IS NULL);
+3. **Export** the component from `src/modules/ai-brain/index.ts`.
 
-CREATE INDEX ON public.ai_neural_synaptic_log (user_id, created_at DESC);
-CREATE INDEX ON public.ai_neural_synaptic_log (district, created_at DESC);
-```
+### Deliberately NOT doing
+- No `generate800ToolsDirectory()` — that's fiction. If you want a tool catalog view, we surface the real `TOOL_REGISTRY` (8 curated tools) as a small side panel instead. **Say the word and I'll add it.**
+- No direct `supabase.from('ai_neural_synaptic_log').insert` from the browser — the server fn already logs with the authenticated context (respects RLS + `user_id`).
+- No changes to backend, migration, or types.
 
-## 2. Module scaffold `src/modules/ai-brain/`
+### Acceptance
+- `tsgo` clean, `bun run build:dev` = 0.
+- `check-imports.ts` passes (component imports only the server fn, no `client.server`).
+- Route reachable at `/admin-ai-brain` for signed-in users; unauthenticated → redirected by the `_authenticated` gate.
 
-- `services/SuperBrainSovereign.ts` — نواة نقية (لا imports للـ supabase). تصدير:
-  - `type CognitiveTool`, `type BrainDecisionMatrix`.
-  - `TOOL_REGISTRY`: قائمة **مختصرة** بالأدوات الفعلية المتوفرة في المشروع (drug-safety, pharmacy-nearby, prescription-review, maternal-campaign, geo-router, restock-alert…) — لا 800 وهمية.
-  - `decide(input)` نقي (بدون I/O) يُرجع `BrainDecisionMatrix` بناءً على:
-    - **Drug safety**: يستعلم عن تداخلات من `catalog_products` + قاعدة مبسّطة للحالات المزمنة (سكري/ضغط) — إذا وُجد تعارض → `isSafe=false` + `alternativeSuggested` من `search_medicines_public`.
-    - **Geo routing**: يستدعي `pn_search_medicine_nearby(lat,lng,name)` لاختيار أقرب فرع + ETA تقديري.
-    - **Maternal marketing**: إذا الكلمات المفتاحية (حليب/أطفال/بشرة) → يبني رسالة عربية موحّدة، لكن **لا يرسل** — يُرجع اقتراحاً فقط.
-- `functions/brain.functions.ts` — `createServerFn` `executeNeuralInference` مع `requireSupabaseAuth`:
-  1. يستدعي `SuperBrainSovereign.decide` مع حقن adapter يقرأ Supabase.
-  2. يسجّل النتيجة في `ai_neural_synaptic_log` عبر `context.supabase`.
-  3. يُرجع `BrainDecisionMatrix`.
-- `domain/types.ts` — أنواع مشتركة.
-- `index.ts` — re-exports نظيفة.
-
-## 3. Tests
-`src/__tests__/unit/ai-brain/decide.test.ts`:
-- سلامة دوائية: مريض سكري + سؤال عن ديكلوفيناك → `isSafe=false`.
-- توجيه: عدن → فرع عدن أولاً.
-- تسويق أمومة: كلمة "حليب" → `marketingAction.isTriggered=true`.
-- بدون أمومة → `marketingAction=null`.
-
-## 4. غير مشمول (متعمّد)
-- لا توليد لـ 800 أداة وهمية.
-- لا واجهة admin (backend فقط).
-- لا إرسال فعلي لحملات؛ فقط اقتراح.
-- لا تعديل على `catalog_products` / `pn_*` — قراءة فقط.
-
-## 5. بوابة القبول
-1. `tsgo` نظيف.
-2. `bun run build:dev` = 0.
-3. `check-imports.ts` يمرّ (لا استيراد لـ `client.server` من ملف يصله client).
-4. اختبارات الوحدة الأربع تنجح.
-5. Migration مُطبّقة و RLS مفعّل و GRANTs موجودة.
+Confirm and I'll build it. Want the 8-tool `TOOL_REGISTRY` side panel included?
