@@ -660,6 +660,51 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_agents: {
+        Row: {
+          capabilities: Json
+          category: string
+          code: string
+          created_at: string
+          enabled: boolean
+          event_subscriptions: string[]
+          health: string
+          id: string
+          last_dispatched_at: string | null
+          metadata: Json
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          capabilities?: Json
+          category: string
+          code: string
+          created_at?: string
+          enabled?: boolean
+          event_subscriptions?: string[]
+          health?: string
+          id?: string
+          last_dispatched_at?: string | null
+          metadata?: Json
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          capabilities?: Json
+          category?: string
+          code?: string
+          created_at?: string
+          enabled?: boolean
+          event_subscriptions?: string[]
+          health?: string
+          id?: string
+          last_dispatched_at?: string | null
+          metadata?: Json
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ai_neural_synaptic_log: {
         Row: {
           created_at: string
@@ -6753,6 +6798,81 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sun_decisions: {
+        Row: {
+          agent_dispatched: string | null
+          confidence: number | null
+          created_at: string
+          decision: Json
+          event_id: string | null
+          event_name: string
+          id: string
+          latency_ms: number | null
+          outcome: string
+          reasoning: string | null
+        }
+        Insert: {
+          agent_dispatched?: string | null
+          confidence?: number | null
+          created_at?: string
+          decision?: Json
+          event_id?: string | null
+          event_name: string
+          id?: string
+          latency_ms?: number | null
+          outcome?: string
+          reasoning?: string | null
+        }
+        Update: {
+          agent_dispatched?: string | null
+          confidence?: number | null
+          created_at?: string
+          decision?: Json
+          event_id?: string | null
+          event_name?: string
+          id?: string
+          latency_ms?: number | null
+          outcome?: string
+          reasoning?: string | null
+        }
+        Relationships: []
+      }
+      sun_memory: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          last_seen_at: string
+          scope: string
+          subject_id: string
+          updated_at: string
+          value: Json
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          last_seen_at?: string
+          scope: string
+          subject_id: string
+          updated_at?: string
+          value?: Json
+          weight?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          last_seen_at?: string
+          scope?: string
+          subject_id?: string
+          updated_at?: string
+          value?: Json
+          weight?: number
+        }
+        Relationships: []
       }
       sup_supplier_products: {
         Row: {

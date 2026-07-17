@@ -196,9 +196,24 @@ export async function handleEvent(
       return { ok: true, note: "refill-acknowledged" };
     }
 
-    default:
-      // Unknown event — route to DLQ immediately instead of burning retries.
+    default: {
+      // ☀️ Sun Core fallback — try central orchestration before DLQ.
+      try {
+        const { ingestEvent } = await import("@/ai/sun-core/sun-engine.server");
+        const res = await ingestEvent(supabaseAdmin, {
+          id: ev.id,
+          event_name: ev.event_name,
+          entity_type: ev.entity_type,
+          entity_id: ev.entity_id,
+          payload: ev.payload,
+        });
+        if (res.handled) return { ok: true, note: `sun:${res.note}` };
+      } catch (err) {
+        console.error("[event-consumer] sun-core ingest failed", err);
+      }
+      // Unknown & unroutable — send to DLQ.
       return { ok: false, error: `unknown_event:${ev.event_name}`, dlqNow: true };
+    }
   }
 }
 

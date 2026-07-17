@@ -1,94 +1,73 @@
-## هدف التدقيق
+# ☀️ AI SUN CORE — Phase 1 Plan
 
-تنفيذ بروتوكول التحقّق (Enterprise Verification) على المستودع الحالي كما هو، بدون كتابة أي إصلاح كود. كل نتيجة مربوطة بملف + رقم سطر أو بصف SQL من قاعدة البيانات الحيّة. أي معيار لا يوجد له دليل → يُكتب `NOT VERIFIED` (بدل التخمين).
+النواة الشمسية للمنظومة. نبني على ما هو **موجود فعلاً** (`agent_events` + `EventDispatcher` + `SuperBrainSovereign` + `event-consumer`) بدلاً من إعادة اختراع طبقة موازية.
 
-بسبب حجم المستودع (156 دالة SECURITY DEFINER، ~160 جدول، عشرات المسارات، ~50 وحدة)، تنفيذ المراحل الثماني كاملة في جولة واحدة يستهلك رصيداً غير مبرر ويكرر جزئياً تقارير `docs/engineering/reports/PHOENIX-*` و`TITANUS-*` الموجودة. لذلك الخطة تبدأ بالمراحل ذات الأثر الأعلى، مع أبواب لتوسيع النطاق بأمر لاحق.
+## المبدأ الحاكم
+- **لا نُنشئ جدول `ai_core_events` جديد** — عندنا `agent_events` يعمل مع DLQ و FIFO drain. تكرارُه يُنشئ ازدواجاً في مصدر الحقيقة.
+- **AI SUN CORE = طبقة تنسيق (Orchestrator)** فوق: Event Bus + SuperBrainSovereign + Agent Registry، وليست بديلاً لها.
+- كل قرار يُسجَّل في **ذاكرة عصبية** قابلة للاستعلام ليتعلّم النظام.
 
-## نطاق الجولة الحالية (Waves)
+## المخرجات (Phase 1 فقط)
 
-Wave A — المراحل الحرجة (تُنفَّذ الآن بعد الموافقة):
-- Phase 0: Inventory
-- Phase 2: Database Verification
-- Phase 3: Security (OWASP + RLS + Definer + Isolation)
-- Phase 5: Healthcare Domain (Doctors/Pharmacies/Prescriptions/Invoices/Inventory)
+### 1) Sun Engine — طبقة تنسيق مركزية
+`src/ai/sun-core/`
+```
+sun-engine.ts         → ingest(event) → classify → route → record
+event-router.ts       → يربط event_name بـ agent(s) عبر AgentRegistry
+decision-engine.ts    → يستدعي SuperBrainSovereign.decide() ويُطبّق guardrails
+memory-manager.ts     → يكتب/يقرأ neural_memory
+agent-registry.ts     → تسجيل الوكلاء (Pharmacist/Inventory/Revenue/Customer/Security) + capabilities
+index.ts
+```
+- **لا يستبدل** `event-consumer.ts` — بل يُستدعى منه كـ `handler` لأحداث مصنّفة `SUN_*` أو أحداث يقرر الـ router أنها تحتاج تحليلاً مركزياً.
 
-Wave B — يُطلق بأمر منفصل بعد مراجعة Wave A:
-- Phase 1: Architecture
-- Phase 4: Performance
-- Phase 6: AI safety
-- Phase 7: Frontend/RTL/SEO
-- Phase 8: DX (lint/typecheck/tests)
+### 2) Neural Memory — ذاكرة القرارات
+جدولان جديدان (مع GRANTs + RLS):
+- `sun_decisions`: `event_id`, `event_name`, `agent_dispatched`, `decision`, `confidence`, `reasoning`, `outcome`, `latency_ms`, `created_at`
+- `sun_memory`: `scope` (customer/product/market/agent), `subject_id`, `key`, `value jsonb`, `weight`, `last_seen_at` — نموذج key-value مرن للتعلّم التراكمي.
 
-## المخرج
+استعلامات: `recall(scope, subject_id)`، `remember(scope, subject_id, key, value)`.
 
-ملف واحد: `docs/engineering/reports/AUDIT-2026-07-17.md`
-بنية كل نتيجة (حرفياً كما في التوجيه):
+### 3) Agent Registry (جدول واحد)
+`ai_agents`: `code` (pharmacist/inventory/revenue/customer_galaxy/security_guardian), `capabilities jsonb`, `event_subscriptions text[]`, `enabled`, `health`. يُبذَر بالخمسة وكلاء المذكورين.
 
-```text
-ID: AUDIT-<PHASE>-<NNN>
-Severity: P0 | P1 | P2 | P3
-Confidence: %
-Evidence: <SQL row | file:line | grep hit>
-Files: <path>
-Exact Lines: <a-b>
-Root Cause:
-Business Impact:
-Technical Impact:
-Security Impact:
-Suggested Fix: <نصي فقط — لن يُطبَّق>
-Estimated Complexity: S | M | L
-Regression Risk: Low | Med | High
-Dependencies: <IDs>
+### 4) ربط بالبنية الحالية
+- `event-consumer.ts`: عند حدث غير معروف أو حدث مُعلَّم `sun:*` → ينادي `SunEngine.ingest(ev)` بدلاً من DLQ فوري.
+- `SuperBrainSovereign.decide()` يبقى قلب التفكير — Sun Engine يزوّده بـ `memory context` من `sun_memory` ويسجّل النتيجة في `sun_decisions`.
+
+### 5) لوحة رصد (Read-only)
+مسار `/admin-sun-core` تحت `_authenticated`:
+- عدّاد أحداث/دقيقة، متوسط زمن القرار، آخر 50 قراراً، توزيع الوكلاء المُستدعَين، صحة كل وكيل.
+
+## ما هو خارج نطاق Phase 1 (يأتي لاحقاً)
+- 100/800 وكيل — نبدأ بـ 5 فقط.
+- Evolution Engine (تطوير ذاتي).
+- Market/Knowledge Planets.
+- n8n / WhatsApp / ERP orchestration أعمق (موجود بالفعل جزئياً).
+
+## Technical Details
+
+**Migration واحدة** تُنشئ:
+```sql
+CREATE TABLE public.ai_agents (...);       -- + GRANT + RLS
+CREATE TABLE public.sun_decisions (...);   -- + GRANT + RLS (admin/service read)
+CREATE TABLE public.sun_memory (...);      -- + GRANT + RLS
+-- Seed 5 agents
 ```
 
-بعد قائمة النتائج، يُضاف قسم:
-Critical Path • Quick Wins • High ROI • Long-Term Refactor • Technical Debt • Scalability Roadmap • Production Readiness.
+**Server functions** (`src/ai/sun-core/*.functions.ts`):
+- `sunIngest({ eventId })` — يُستدعى من consumer، محمي بـ service_role internally.
+- `sunListDecisions({ limit })` — `requireSupabaseAuth` + admin check للوحة.
 
-## قواعد التحقّق (Evidence-Only)
+**تعديل واحد** على `src/routes/api/public/hooks/event-consumer.ts`:
+- في الـ `default` case: بدل رمي DLQ فوراً، جرّب `SunEngine.ingest(ev)` أولاً، وإن رجع `unhandled` → DLQ.
 
-- كل ادّعاء SQL يُثبَت عبر `supabase--read_query` أو `supabase--linter`، مع نسخ صف الدليل حرفياً.
-- كل ادّعاء كود يُثبَت بمسار وأرقام أسطر مقروءة عبر `code--view` أو `rg -n`.
-- ادّعاءات الأمان تُقارن أيضاً مع `security--get_scan_results` قبل تصنيفها.
-- إذا فشل الدليل: تُكتب `NOT VERIFIED` بدل الاستنتاج.
-- لا يُشغَّل أي `supabase--migration` ولا أي تعديل ملفات في هذه الجولة.
+**اختبارات**:
+- `src/__tests__/unit/ai-sun-core/sun-engine.test.ts` — ingest + routing + memory recall.
 
-## أدوات لكل مرحلة
+## Verification
+- Migration تمرّ + linter نظيف.
+- `bunx vitest run` يمرّ.
+- `/admin-sun-core` يعرض قراراً واحداً على الأقل بعد dispatch حدث `TestEvent`.
 
-- Phase 0 Inventory: `rg --files src`, `ls supabase/migrations`, `psql \dt public.*`, `psql \df public.*`, قراءة `src/routeTree.gen.ts` لعدّ المسارات.
-- Phase 2 Database:
-  - `supabase--linter`
-  - `select ... from pg_policies` (كل السياسات بصياغتها)
-  - `pg_proc` للتحقّق من `search_path` و`security_definer`
-  - `information_schema.role_table_grants` للتحقّق من GRANT/REVOKE
-  - `pg_constraint` (FK/CHECK)، `pg_indexes`
-  - `cron.job` (الجداول المجدولة)
-- Phase 3 Security:
-  - قراءة كل `src/routes/api/public/**` — التحقّق من توقيع كل webhook + rate limit + input validation.
-  - قراءة كل `*.functions.ts` — التحقّق من `.middleware([requireSupabaseAuth])` وفحص الصلاحيات قبل استخدام `supabaseAdmin`.
-  - فحص `has_role` / RBAC (منع الاعتماد على `profiles.role` أو `localStorage`).
-  - فحص عزل `organization_id` / `branch_id` في السياسات.
-  - CSP/CORS من `src/routes/__root.tsx` + هيدرز التطبيق.
-  - `security--get_scan_results` للمقارنة مع ما تم تجاهله سابقاً.
-- Phase 5 Healthcare:
-  - جداول `hc_*`, `pn_*`, `prescription_*`, `invoice_*`, `inv_*`, `catalog_*` — للتحقق من RLS لكل جمهور (owner / patient / pharmacist / public).
-  - مسارات `/pharmacies`, `/doctor/*`, `/pharmacist/*`, `/prescription*` — التحقّق من قناة القراءة (`requireSupabaseAuth` مقابل publishable client).
-  - وحدات `src/modules/product-intelligence/`, `invoice-intake/`, `prescription-*` — تتبع OCR → تخزين → عرض.
-
-## غير مشمول (سيُكتب `NOT VERIFIED` أو يُؤجَّل)
-
-- قياسات Lighthouse/LCP/CLS/INP (بحاجة تشغيل متصفح — تُنفَّذ فقط لو طلبت Wave B).
-- تدقيق كل واحدة من الـ 156 دالة SECURITY DEFINER — سيُغطَّى بجدول واحد مبني من `pg_proc` مع تمييز أي دالة `search_path IS NULL` أو `EXECUTE TO PUBLIC` كنتيجة، بدون فتح جسم كل دالة (إلا P0).
-- أي ادّعاء أداء بلا قياس رقمي.
-
-## التقدير
-
-- استعلامات القراءة: ~30 استعلام SQL.
-- قراءات الملفات: ~60-90 ملف (routes + functions + middleware + core).
-- الحجم المتوقع للتقرير: 40-80 نتيجة موثّقة، ~2000-4000 سطر Markdown.
-
-## بعد الجولة
-
-سأقدّم في نهاية Wave A:
-1. قائمة P0 (إن وُجدت) مرتّبة حسب الأثر.
-2. اقتراح Wave B مع نطاقها المحدد.
-3. أنتظر أمر GO منفصل قبل أي إصلاح كود (وفق نص التوجيه: "Never generate fixes before proving the problem exists" — الإصلاح يبقى نصياً في `Suggested Fix`).
+هل أنفّذ هذه الخطة؟

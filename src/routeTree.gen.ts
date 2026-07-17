@@ -105,6 +105,7 @@ import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
 import { Route as AuthenticatedUploadPrescriptionRouteImport } from './routes/_authenticated/upload-prescription'
 import { Route as AuthenticatedAdminUploadInventoryRouteImport } from './routes/_authenticated/admin-upload-inventory'
 import { Route as AuthenticatedAdminSystemHealthRouteImport } from './routes/_authenticated/admin-system-health'
+import { Route as AuthenticatedAdminSunCoreRouteImport } from './routes/_authenticated/admin-sun-core'
 import { Route as AuthenticatedAdminSovereignRouteImport } from './routes/_authenticated/admin-sovereign'
 import { Route as AuthenticatedAdminSlackTestRouteImport } from './routes/_authenticated/admin-slack-test'
 import { Route as AuthenticatedAdminSalesReportsRouteImport } from './routes/_authenticated/admin-sales-reports'
@@ -676,6 +677,12 @@ const AuthenticatedAdminSystemHealthRoute =
   AuthenticatedAdminSystemHealthRouteImport.update({
     id: '/admin-system-health',
     path: '/admin-system-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminSunCoreRoute =
+  AuthenticatedAdminSunCoreRouteImport.update({
+    id: '/admin-sun-core',
+    path: '/admin-sun-core',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdminSovereignRoute =
@@ -1263,6 +1270,7 @@ export interface FileRoutesByFullPath {
   '/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
   '/admin-slack-test': typeof AuthenticatedAdminSlackTestRoute
   '/admin-sovereign': typeof AuthenticatedAdminSovereignRoute
+  '/admin-sun-core': typeof AuthenticatedAdminSunCoreRoute
   '/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
   '/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
@@ -1444,6 +1452,7 @@ export interface FileRoutesByTo {
   '/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
   '/admin-slack-test': typeof AuthenticatedAdminSlackTestRoute
   '/admin-sovereign': typeof AuthenticatedAdminSovereignRoute
+  '/admin-sun-core': typeof AuthenticatedAdminSunCoreRoute
   '/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
   '/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
@@ -1627,6 +1636,7 @@ export interface FileRoutesById {
   '/_authenticated/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
   '/_authenticated/admin-slack-test': typeof AuthenticatedAdminSlackTestRoute
   '/_authenticated/admin-sovereign': typeof AuthenticatedAdminSovereignRoute
+  '/_authenticated/admin-sun-core': typeof AuthenticatedAdminSunCoreRoute
   '/_authenticated/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
   '/_authenticated/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
   '/_authenticated/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
@@ -1810,6 +1820,7 @@ export interface FileRouteTypes {
     | '/admin-sales-reports'
     | '/admin-slack-test'
     | '/admin-sovereign'
+    | '/admin-sun-core'
     | '/admin-system-health'
     | '/admin-upload-inventory'
     | '/upload-prescription'
@@ -1991,6 +2002,7 @@ export interface FileRouteTypes {
     | '/admin-sales-reports'
     | '/admin-slack-test'
     | '/admin-sovereign'
+    | '/admin-sun-core'
     | '/admin-system-health'
     | '/admin-upload-inventory'
     | '/upload-prescription'
@@ -2173,6 +2185,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin-sales-reports'
     | '/_authenticated/admin-slack-test'
     | '/_authenticated/admin-sovereign'
+    | '/_authenticated/admin-sun-core'
     | '/_authenticated/admin-system-health'
     | '/_authenticated/admin-upload-inventory'
     | '/_authenticated/upload-prescription'
@@ -3082,6 +3095,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSystemHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin-sun-core': {
+      id: '/_authenticated/admin-sun-core'
+      path: '/admin-sun-core'
+      fullPath: '/admin-sun-core'
+      preLoaderRoute: typeof AuthenticatedAdminSunCoreRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin-sovereign': {
       id: '/_authenticated/admin-sovereign'
       path: '/admin-sovereign'
@@ -3687,6 +3707,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminSalesReportsRoute: typeof AuthenticatedAdminSalesReportsRoute
   AuthenticatedAdminSlackTestRoute: typeof AuthenticatedAdminSlackTestRoute
   AuthenticatedAdminSovereignRoute: typeof AuthenticatedAdminSovereignRoute
+  AuthenticatedAdminSunCoreRoute: typeof AuthenticatedAdminSunCoreRoute
   AuthenticatedAdminSystemHealthRoute: typeof AuthenticatedAdminSystemHealthRoute
   AuthenticatedAdminUploadInventoryRoute: typeof AuthenticatedAdminUploadInventoryRoute
   AuthenticatedUploadPrescriptionRoute: typeof AuthenticatedUploadPrescriptionRoute
@@ -3718,6 +3739,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminSalesReportsRoute: AuthenticatedAdminSalesReportsRoute,
   AuthenticatedAdminSlackTestRoute: AuthenticatedAdminSlackTestRoute,
   AuthenticatedAdminSovereignRoute: AuthenticatedAdminSovereignRoute,
+  AuthenticatedAdminSunCoreRoute: AuthenticatedAdminSunCoreRoute,
   AuthenticatedAdminSystemHealthRoute: AuthenticatedAdminSystemHealthRoute,
   AuthenticatedAdminUploadInventoryRoute:
     AuthenticatedAdminUploadInventoryRoute,
@@ -3949,13 +3971,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
