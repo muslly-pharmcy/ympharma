@@ -9752,6 +9752,15 @@ export type Database = {
         Args: { _branch_id: string; _user_id: string }
         Returns: boolean
       }
+      has_consent: {
+        Args: {
+          _grantee_id: string
+          _grantee_type: string
+          _patient_id: string
+          _scope: string
+        }
+        Returns: boolean
+      }
       has_org_permission: {
         Args: {
           _branch_id?: string

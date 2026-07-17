@@ -1,104 +1,91 @@
 
-# MUSLLY AI OS — Consolidation Plan (adapted from Phases 27-35)
+# Wave A — Gap-Fill Execution Plan (revised)
 
-Scope: absorb the Phase 27-35 blueprint into the **existing** codebase without duplication. Three sequenced waves; each wave ships independently and passes typecheck before the next starts.
+**Key discovery:** Both target tables already exist with the right schemas:
+- `agent_approval_requests` (22 cols, admin-only RLS, action_type check includes `create_order`/`inventory_change`/`transfer`/`price_change`/`refund`)
+- `patient_consents` (10 cols, matches proposed v2 exactly — `granted_to_type` supports doctor/hospital/pharmacy/organization/family)
 
----
-
-## Wave B — Unification (no new features)
-
-Goal: eliminate the three parallel AI stacks so future work has one home.
-
-Current duplication:
-- `src/ai/` (SunEngine, EventBus, AgentRegistry, agents/*, memory/*, tools/*)
-- `src/ai/sun-core/` (older duplicate of the same)
-- `src/modules/ai-brain/` (SuperBrainSovereign — pure decision core)
-
-Actions:
-1. Declare **`src/ai/`** the canonical root. Deprecate `src/ai/sun-core/` by re-exporting from `src/ai/core/*` and marking the folder `@deprecated` in a README.
-2. Keep `src/modules/ai-brain/SuperBrainSovereign` as a **pure specialty agent** (drug-safety + geo routing). Wrap it as `BrainAgent` under `src/ai/agents/brain-agent.ts` and register in `bootstrap.ts`. Delete no files — only add the adapter.
-3. Publish `docs/engineering/reports/AI-UNIFICATION-MAP.md`: table mapping every existing agent/service to its canonical path, with call-site counts from `rg`.
-4. Verify: `bunx tsgo` clean; `/admin-agent-universe` still lists all agents.
-
-No DB migration. No new tables. No behavior change.
+**Result: zero new tables. Wave A becomes pure code + one small RPC.**
 
 ---
 
-## Wave A — Gap-Fill (real missing pieces)
+## A1. Approval Gate (~2 files + 1 UI tab)
 
-Goal: build only what genuinely does not exist. Reuse existing tables where possible.
+### New helper: `src/ai/core/approval-gate.server.ts`
+Server-only. Two functions:
+- `requestApproval({ agentId, actionType, payload, customerMessage?, correlationId? })` → inserts into `agent_approval_requests`, returns `{ id, status: 'pending' }`. Uses `supabaseAdmin` (called from a `requireSupabaseAuth`-gated fn only).
+- `executeIfApproved(id, executor)` → checks status; if `approved`, calls `executor(payload)` and stamps a row in `ai_security_audit` via existing `AuditAgent`.
 
-### A1. AI Approval Workflow (wire the existing table)
-- `agent_approval_requests` exists but is not enforced. Add `src/ai/core/approval-gate.ts`:
-  - `requireApproval(agentName, action, payload)` → inserts row, returns pending id.
-  - `executeIfApproved(id)` runs the deferred action.
-- Retrofit **only** write-capable agents (Inventory purchase draft, Campaign dispatch) to route through the gate. Read/insights agents (CFO, BiSales) untouched.
-- Admin UI: extend `/admin-agent-universe` with an "Approvals" tab (list pending, Approve/Reject buttons, calls a `createServerFn` gated by `has_role('admin')`).
+### New server fns: `src/lib/approvals.functions.ts`
+- `listPendingApprovals()` — admin-only, returns pending rows ordered by created_at.
+- `decideApproval({ id, decision: 'approved'|'rejected', note? })` — admin-only, verifies role via `has_role`, updates row, logs to `ai_security_audit`.
 
-### A2. Patient Consent Management (new, small)
-- New table `patient_consents_v2` (the existing `patient_consents` is scoped to hc_patients self; the new one is provider-grant-based):
-  - `patient_id`, `grantee_type` (doctor|pharmacy|hospital), `grantee_id`, `scopes jsonb`, `expires_at`, `revoked_at`.
-- RLS: patient owns rows; grantee reads own via security-definer `has_consent(patient_id, grantee_id, scope)`.
-- Server fns: `grantConsent`, `revokeConsent`, `listMyConsents`, `listGrantsForMe`.
-- UI: tab in `/my-health` → "من يستطيع الوصول إلى بياناتي".
+### UI: extend `/admin-agent-universe`
+Add a new "Approvals" tab that lists pending items (agent, action_type, payload preview, customer_message, ai_confidence) with Approve / Reject buttons.
 
-### A3. Digital Health Wallet (aggregation view, not new storage)
-- No new storage — data already lives in `patient_medications`, `medical_vault_files`, `hc_appointments`, `prescription_extractions`, `insurance_claims`, `ins_patient_coverage`.
-- Add `src/lib/health-wallet.functions.ts` with `getMyWallet()` returning a unified DTO.
-- New route `/my-health/wallet` with tabs: ID card, Coverage, Medications, Vault, Appointments, Emergency Card.
-- Emergency Card = printable/QR view backed by a **public** signed short-lived token (no auth), exposing only blood type / allergies / emergency contact (opt-in flag).
+### Wire-through (minimal, non-breaking)
+Retrofit **only** these existing agents to route writes through the gate:
+- `ProcurementAgent` → `action_type: 'inventory_change'` when it wants to create a real purchase order.
+- `WhatsappAgent` → `action_type: 'create_order'` when confidence < 0.9 or number not in `wa_allowlist`.
 
-No touch to organizations, multi-tenant, Hospital OS, Marketplace, Digital Twin, Multi-language beyond what already exists.
+All other agents untouched.
 
 ---
 
-## Wave C — Controlled AI Employees (highest risk, last)
+## A2. Patient Consent Management (0 migrations, code only)
 
-Goal: promote 3 existing read-only agents to **draft-generating** employees. **Never** direct-execute; always through Wave A's approval gate.
+Use existing `public.patient_consents` table verbatim. Add:
 
-Selected agents:
-1. **InventoryAgent** → generates `purchase_recommendations` drafts (already has table). Approval gate required before draft becomes an order.
-2. **CFOAgent** → generates weekly financial digest into `ai_business_insights` (already exists). No write outside that table.
-3. **PharmacyAgent** (WhatsApp customer replies) → responses auto-send **only** when confidence ≥ 0.9 AND the target number is in `wa_allowlist`; otherwise queued for human review.
+### RPC: `has_consent(_patient_id uuid, _grantee_type text, _grantee_id uuid, _scope text)`
+Security-definer, checks `active AND (expires_at IS NULL OR expires_at > now()) AND revoked_at IS NULL AND scope ? _scope`. Migration is tiny (just this one function) — safe to include.
 
-Guardrails (non-negotiable):
-- Every autonomous write goes through `approval-gate.ts` OR is scoped to insight-only tables.
-- All actions logged to `ai_security_audit` via existing `AuditAgent`.
-- Kill switch: `app_settings` key `ai.autonomy.enabled` (default `false`); reading via `isFlagEnabled()` blocks execution when off.
-- Admin panel `/admin-agent-universe` gains an "Autonomy" toggle + per-agent enable/disable.
+### Server fns: `src/lib/patient-consent.functions.ts`
+- `grantConsent({ grantee_type, grantee_id, scopes: string[], expires_at? })` — patient owns; verifies caller is patient via `patient_belongs_to_current_user`.
+- `revokeConsent({ id })` — sets `active=false`, `revoked_at=now()`.
+- `listMyConsents()` — returns patient's active grants.
 
-Explicitly out of scope for this wave:
-- AI CEO/Marketing/Sales "employees" that create campaigns or reply on social channels.
-- Anything that spends money, sends SMS/email at scale, or writes to insurance/billing tables.
+### UI: `src/routes/_authenticated/my-health.tsx` → new tab "الأذونات"
+Table of active consents + form to grant a new one (grantee type dropdown + ID input + scope multi-select from `["medications","vault","appointments","allergies","emergency"]` + optional expiry).
 
 ---
 
-## Explicit Non-Goals (rejected from the blueprint)
+## A3. Digital Health Wallet (0 migrations, aggregation)
 
-Refused as either fictional, duplicative, or out of realistic scope:
-- New `src/ai-brain/` folder (duplicates `src/ai/`).
-- New tables `ai_agents`, `ai_memory`, `ai_events`, `ai_decisions`, `ai_knowledge_nodes/links` — **already exist**.
-- Hospital OS, Global Marketplace, Digital Twin, Blockchain audit, Mobile Super App — these are products, not phases.
-- Multi-tenant "Global" architecture — the `organizations` layer already ships; no rebuild.
-- Voice Medical Assistant / Multi-language expansion beyond current AR/EN — no user demand signal.
+### Server fn: `src/lib/health-wallet.functions.ts` → `getMyWallet()`
+Requires auth. Reads existing tables scoped to `hc_patients.user_id = auth.uid()`:
+- Identity: name/dob/gender from `hc_patients`
+- Medications: `patient_medications`
+- Vault files: `medical_vault_files`
+- Appointments: `hc_appointments` (upcoming)
+- Coverage: `ins_patient_coverage`
+- Emergency: allergies + emergency_contact from `hc_patients.metadata`
 
----
+Returns unified DTO. All existing RLS applies.
 
-## Sequencing & Gates
+### UI: `src/routes/_authenticated/my-health.wallet.tsx`
+Tabs: Identity | Coverage | Medications | Vault | Appointments | Consents (from A2) | Emergency Card. Uses Titans/medical design tokens.
 
-| Wave | Est. turns | Gate to next wave |
-|---|---|---|
-| B — Unify | 1-2 | Typecheck clean + unification map committed |
-| A — Gap-Fill | 3-4 | Approval gate + consent + wallet routes live; RLS verified |
-| C — Employees | 2-3 | Kill switch tested; audit rows appear; human approval loop demoed end-to-end |
-
-Total: ~7 turns of real work vs ~40+ if the blueprint were executed literally.
+### Emergency Card
+Printable/QR view rendered **inside the authenticated route** only. Public emergency-card sharing deferred to a later phase (needs signed-token infra + explicit patient opt-in workflow; not blocking anything today).
 
 ---
 
-## Technical notes
+## Sequencing (this turn)
 
-- All new server fns use `createServerFn` + `requireSupabaseAuth`; admin actions verify role via `context.supabase.rpc('has_role', ...)` before importing `supabaseAdmin`.
-- All new tables get GRANTs in the same migration, RLS on, policies scoped to `auth.uid()`.
-- No new AI providers — reuse Lovable AI Gateway (Gemini for embeddings/chat).
-- No changes to `src/integrations/supabase/*` generated files.
+1. Migration: `has_consent` RPC only (10 lines).
+2. Create 4 code files (`approval-gate.server.ts`, `approvals.functions.ts`, `patient-consent.functions.ts`, `health-wallet.functions.ts`).
+3. Create `src/routes/_authenticated/my-health.wallet.tsx`.
+4. Extend `/admin-agent-universe` with Approvals tab (inline, no new route).
+5. Wire `ProcurementAgent` + `WhatsappAgent` conservatively (behind feature flag `ai.autonomy.enabled` default off — so behavior is unchanged until admin flips it).
+6. Typecheck.
+
+Gate to Wave C: pending approvals show up in admin UI, consent grant + revoke round-trips, wallet page renders for a test patient.
+
+---
+
+## Explicit non-goals for this wave
+- No new AI tables.
+- No `src/modules/ai/` duplicate folder.
+- No public emergency-card token endpoint.
+- No changes to non-write agents.
+- No changes to existing 156 SECURITY DEFINER functions beyond the one new `has_consent`.
