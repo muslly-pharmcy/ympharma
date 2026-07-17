@@ -107,6 +107,7 @@ import { Route as DoctorsSlugRouteImport } from './routes/doctors.$slug'
 import { Route as DoctorJoinRouteImport } from './routes/doctor.join'
 import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
 import { Route as AuthenticatedUploadPrescriptionRouteImport } from './routes/_authenticated/upload-prescription'
+import { Route as AuthenticatedMyHealthRouteImport } from './routes/_authenticated/my-health'
 import { Route as AuthenticatedAdminUploadInventoryRouteImport } from './routes/_authenticated/admin-upload-inventory'
 import { Route as AuthenticatedAdminSystemHealthRouteImport } from './routes/_authenticated/admin-system-health'
 import { Route as AuthenticatedAdminSunCoreRouteImport } from './routes/_authenticated/admin-sun-core'
@@ -705,6 +706,11 @@ const AuthenticatedUploadPrescriptionRoute =
     path: '/upload-prescription',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedMyHealthRoute = AuthenticatedMyHealthRouteImport.update({
+  id: '/my-health',
+  path: '/my-health',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminUploadInventoryRoute =
   AuthenticatedAdminUploadInventoryRouteImport.update({
     id: '/admin-upload-inventory',
@@ -1397,6 +1403,7 @@ export interface FileRoutesByFullPath {
   '/admin-sun-core': typeof AuthenticatedAdminSunCoreRoute
   '/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
   '/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
+  '/my-health': typeof AuthenticatedMyHealthRoute
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/doctor/join': typeof DoctorJoinRoute
@@ -1597,6 +1604,7 @@ export interface FileRoutesByTo {
   '/admin-sun-core': typeof AuthenticatedAdminSunCoreRoute
   '/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
   '/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
+  '/my-health': typeof AuthenticatedMyHealthRoute
   '/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/doctor/join': typeof DoctorJoinRoute
@@ -1799,6 +1807,7 @@ export interface FileRoutesById {
   '/_authenticated/admin-sun-core': typeof AuthenticatedAdminSunCoreRoute
   '/_authenticated/admin-system-health': typeof AuthenticatedAdminSystemHealthRoute
   '/_authenticated/admin-upload-inventory': typeof AuthenticatedAdminUploadInventoryRoute
+  '/_authenticated/my-health': typeof AuthenticatedMyHealthRoute
   '/_authenticated/upload-prescription': typeof AuthenticatedUploadPrescriptionRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/doctor/join': typeof DoctorJoinRoute
@@ -2001,6 +2010,7 @@ export interface FileRouteTypes {
     | '/admin-sun-core'
     | '/admin-system-health'
     | '/admin-upload-inventory'
+    | '/my-health'
     | '/upload-prescription'
     | '/conditions/$slug'
     | '/doctor/join'
@@ -2201,6 +2211,7 @@ export interface FileRouteTypes {
     | '/admin-sun-core'
     | '/admin-system-health'
     | '/admin-upload-inventory'
+    | '/my-health'
     | '/upload-prescription'
     | '/conditions/$slug'
     | '/doctor/join'
@@ -2402,6 +2413,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin-sun-core'
     | '/_authenticated/admin-system-health'
     | '/_authenticated/admin-upload-inventory'
+    | '/_authenticated/my-health'
     | '/_authenticated/upload-prescription'
     | '/conditions/$slug'
     | '/doctor/join'
@@ -3345,6 +3357,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUploadPrescriptionRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/my-health': {
+      id: '/_authenticated/my-health'
+      path: '/my-health'
+      fullPath: '/my-health'
+      preLoaderRoute: typeof AuthenticatedMyHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin-upload-inventory': {
       id: '/_authenticated/admin-upload-inventory'
       path: '/admin-upload-inventory'
@@ -4078,6 +4097,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminSunCoreRoute: typeof AuthenticatedAdminSunCoreRoute
   AuthenticatedAdminSystemHealthRoute: typeof AuthenticatedAdminSystemHealthRoute
   AuthenticatedAdminUploadInventoryRoute: typeof AuthenticatedAdminUploadInventoryRoute
+  AuthenticatedMyHealthRoute: typeof AuthenticatedMyHealthRoute
   AuthenticatedUploadPrescriptionRoute: typeof AuthenticatedUploadPrescriptionRoute
   AuthenticatedAdminDoctorJoinQueueRoute: typeof AuthenticatedAdminDoctorJoinQueueRoute
   AuthenticatedDoctorDashboardRoute: typeof AuthenticatedDoctorDashboardRoute
@@ -4118,6 +4138,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminSystemHealthRoute: AuthenticatedAdminSystemHealthRoute,
   AuthenticatedAdminUploadInventoryRoute:
     AuthenticatedAdminUploadInventoryRoute,
+  AuthenticatedMyHealthRoute: AuthenticatedMyHealthRoute,
   AuthenticatedUploadPrescriptionRoute: AuthenticatedUploadPrescriptionRoute,
   AuthenticatedAdminDoctorJoinQueueRoute:
     AuthenticatedAdminDoctorJoinQueueRoute,
