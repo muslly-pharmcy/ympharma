@@ -27,6 +27,7 @@ export class WhatsappSendTool implements AITool {
       .insert({
         event_id: crypto.randomUUID(),
         event_name: "AI_TOOL_DISPATCH",
+        template_id: "ai_tool_dispatch",
         recipient_phone: payload.to,
         rendered_body: payload.body,
         status: "queued",
