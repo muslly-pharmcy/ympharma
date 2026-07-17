@@ -660,6 +660,51 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_neural_synaptic_log: {
+        Row: {
+          created_at: string
+          decision_id: string | null
+          dispatched_tools: string[]
+          district: string | null
+          execution_time_ms: number
+          id: string
+          is_safe: boolean | null
+          payload_transmitted: Json
+          session_id: string
+          target_destination: string
+          trigger_source: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          decision_id?: string | null
+          dispatched_tools?: string[]
+          district?: string | null
+          execution_time_ms: number
+          id?: string
+          is_safe?: boolean | null
+          payload_transmitted: Json
+          session_id?: string
+          target_destination: string
+          trigger_source: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          decision_id?: string | null
+          dispatched_tools?: string[]
+          district?: string | null
+          execution_time_ms?: number
+          id?: string
+          is_safe?: boolean | null
+          payload_transmitted?: Json
+          session_id?: string
+          target_destination?: string
+          trigger_source?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       ai_safety_logs: {
         Row: {
           context: string | null
