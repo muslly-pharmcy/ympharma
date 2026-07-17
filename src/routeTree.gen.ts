@@ -119,6 +119,7 @@ import { Route as AuthenticatedAdminAuditRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminAlertSettingsRouteImport } from './routes/_authenticated/admin-alert-settings'
 import { Route as AuthenticatedAdminAiCopilotRouteImport } from './routes/_authenticated/admin-ai-copilot'
 import { Route as AuthenticatedAdminAiBrainRouteImport } from './routes/_authenticated/admin-ai-brain'
+import { Route as AuthenticatedAdminAgentUniverseRouteImport } from './routes/_authenticated/admin-agent-universe'
 import { Route as AuthenticatedAdminAgentRunsRouteImport } from './routes/_authenticated/admin-agent-runs'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/public/whatsapp-webhook'
@@ -765,6 +766,12 @@ const AuthenticatedAdminAiBrainRoute =
     path: '/admin-ai-brain',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminAgentUniverseRoute =
+  AuthenticatedAdminAgentUniverseRouteImport.update({
+    id: '/admin-agent-universe',
+    path: '/admin-agent-universe',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminAgentRunsRoute =
   AuthenticatedAdminAgentRunsRouteImport.update({
     id: '/admin-agent-runs',
@@ -1277,6 +1284,7 @@ export interface FileRoutesByFullPath {
   '/unsubscribe': typeof UnsubscribeRoute
   '/yemen-debug': typeof YemenDebugRoute
   '/admin-agent-runs': typeof AuthenticatedAdminAgentRunsRoute
+  '/admin-agent-universe': typeof AuthenticatedAdminAgentUniverseRoute
   '/admin-ai-brain': typeof AuthenticatedAdminAiBrainRoute
   '/admin-ai-copilot': typeof AuthenticatedAdminAiCopilotRoute
   '/admin-alert-settings': typeof AuthenticatedAdminAlertSettingsRoute
@@ -1462,6 +1470,7 @@ export interface FileRoutesByTo {
   '/unsubscribe': typeof UnsubscribeRoute
   '/yemen-debug': typeof YemenDebugRoute
   '/admin-agent-runs': typeof AuthenticatedAdminAgentRunsRoute
+  '/admin-agent-universe': typeof AuthenticatedAdminAgentUniverseRoute
   '/admin-ai-brain': typeof AuthenticatedAdminAiBrainRoute
   '/admin-ai-copilot': typeof AuthenticatedAdminAiCopilotRoute
   '/admin-alert-settings': typeof AuthenticatedAdminAlertSettingsRoute
@@ -1649,6 +1658,7 @@ export interface FileRoutesById {
   '/unsubscribe': typeof UnsubscribeRoute
   '/yemen-debug': typeof YemenDebugRoute
   '/_authenticated/admin-agent-runs': typeof AuthenticatedAdminAgentRunsRoute
+  '/_authenticated/admin-agent-universe': typeof AuthenticatedAdminAgentUniverseRoute
   '/_authenticated/admin-ai-brain': typeof AuthenticatedAdminAiBrainRoute
   '/_authenticated/admin-ai-copilot': typeof AuthenticatedAdminAiCopilotRoute
   '/_authenticated/admin-alert-settings': typeof AuthenticatedAdminAlertSettingsRoute
@@ -1836,6 +1846,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/yemen-debug'
     | '/admin-agent-runs'
+    | '/admin-agent-universe'
     | '/admin-ai-brain'
     | '/admin-ai-copilot'
     | '/admin-alert-settings'
@@ -2021,6 +2032,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/yemen-debug'
     | '/admin-agent-runs'
+    | '/admin-agent-universe'
     | '/admin-ai-brain'
     | '/admin-ai-copilot'
     | '/admin-alert-settings'
@@ -2207,6 +2219,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/yemen-debug'
     | '/_authenticated/admin-agent-runs'
+    | '/_authenticated/admin-agent-universe'
     | '/_authenticated/admin-ai-brain'
     | '/_authenticated/admin-ai-copilot'
     | '/_authenticated/admin-alert-settings'
@@ -3232,6 +3245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAiBrainRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin-agent-universe': {
+      id: '/_authenticated/admin-agent-universe'
+      path: '/admin-agent-universe'
+      fullPath: '/admin-agent-universe'
+      preLoaderRoute: typeof AuthenticatedAdminAgentUniverseRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin-agent-runs': {
       id: '/_authenticated/admin-agent-runs'
       path: '/admin-agent-runs'
@@ -3755,6 +3775,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminAgentRunsRoute: typeof AuthenticatedAdminAgentRunsRoute
+  AuthenticatedAdminAgentUniverseRoute: typeof AuthenticatedAdminAgentUniverseRoute
   AuthenticatedAdminAiBrainRoute: typeof AuthenticatedAdminAiBrainRoute
   AuthenticatedAdminAiCopilotRoute: typeof AuthenticatedAdminAiCopilotRoute
   AuthenticatedAdminAlertSettingsRoute: typeof AuthenticatedAdminAlertSettingsRoute
@@ -3786,6 +3807,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminAgentRunsRoute: AuthenticatedAdminAgentRunsRoute,
+  AuthenticatedAdminAgentUniverseRoute: AuthenticatedAdminAgentUniverseRoute,
   AuthenticatedAdminAiBrainRoute: AuthenticatedAdminAiBrainRoute,
   AuthenticatedAdminAiCopilotRoute: AuthenticatedAdminAiCopilotRoute,
   AuthenticatedAdminAlertSettingsRoute: AuthenticatedAdminAlertSettingsRoute,

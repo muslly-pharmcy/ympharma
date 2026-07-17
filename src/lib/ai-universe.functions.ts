@@ -36,13 +36,13 @@ export const universeStats = createServerFn({ method: "GET" })
     ]);
 
     // Roll world-health rows into latest-per-system.
-    const latest = new Map<string, { system_name: string; status: string; metrics: unknown; checked_at: string }>();
+    const latest = new Map<string, { system_name: string; status: string; metrics: Record<string, unknown> | null; checked_at: string }>();
     for (const r of worldRes.data ?? []) {
       if (!latest.has(r.system_name as string)) {
         latest.set(r.system_name as string, {
           system_name: r.system_name as string,
           status: r.status as string,
-          metrics: r.metrics,
+          metrics: (r.metrics ?? null) as Record<string, unknown> | null,
           checked_at: r.checked_at as string,
         });
       }
