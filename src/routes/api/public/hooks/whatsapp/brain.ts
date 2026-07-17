@@ -144,13 +144,9 @@ async function handlePost(request: Request): Promise<Response> {
     } as never)
     .then(() => null, () => null);
 
-  // 5. Reply + log outbound.
+  // 5. Reply.
   const reply = formatArabicReply(decision);
   await sendWhatsAppText(phoneNumberId, token, from, reply);
-  await supabaseAdmin
-    .from("whatsapp_messages" as never)
-    .insert({ from_number: from, message_body: reply, direction: "outbound" } as never)
-    .then(() => null, () => null);
 
   return Response.json({ ok: true, decisionId: decision.decisionId });
 }
