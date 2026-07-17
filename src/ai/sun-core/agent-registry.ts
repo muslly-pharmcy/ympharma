@@ -33,6 +33,9 @@ export const AGENT_REGISTRY: readonly SunAgentSpec[] = [
       "EXPIRY_ALERT_CREATED",
       "TRANSFER_CREATED",
       "TRANSFER_COMPLETED",
+      "PURCHASE_RECOMMENDED",
+      "LOW_STOCK_PREDICTED",
+      "DEAD_STOCK_DETECTED",
     ],
   },
   {
