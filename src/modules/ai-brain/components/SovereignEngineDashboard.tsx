@@ -1,12 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Cpu, Sparkles, ShieldCheck, Zap, Globe, Code2, Award, BarChart3,
-  RotateCw, Play, AlertCircle,
+  RotateCw, Play, AlertCircle, Bell, X, Heart,
 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { executeNeuralInference } from "../functions/brain.functions";
 import type { BrainDecisionMatrix } from "../domain/types";
+
+const PROMOTIONAL_CAMPAIGNS = [
+  { id: 1, title: "رعاية كاملة لطفلك 👶", text: "اشتركي الآن في باقة الأمومة الشهرية واحملي عبء التفكير عن كاهلك مع حسم 10% وتوصيل مجاني لبيتك بالمنصورة!" },
+  { id: 2, title: "مستعدون لسلامتك ❤️", text: "هل تعانين من الضغط أو السكري؟ المخ الذكي لصيدلية المصلي يدقق روشتتك طبياً ويقترح البدائل الأكثر أماناً بلمسة زر." },
+  { id: 3, title: "صيف عدن أكثر رطوبة ☀️", text: "وفرنا حزم العناية ببشرة الأطفال والترطيب الفائق ومكملات الطاقة الصيفية بخصومات خاصة لأول 100 طلب اليوم." },
+];
 
 // Blueprint tool cards mapped to the real dispatched codes emitted by decide().
 interface RegistryTool {
@@ -42,7 +48,18 @@ export const SovereignEngineDashboard: React.FC = () => {
   const [chronicConditions, setChronicConditions] = useState<string[]>([]);
   const [decision, setDecision] = useState<BrainDecisionMatrix | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
+  const [currentPromo, setCurrentPromo] = useState(PROMOTIONAL_CAMPAIGNS[0]);
   const runInference = useServerFn(executeNeuralInference);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const pick = PROMOTIONAL_CAMPAIGNS[Math.floor(Math.random() * PROMOTIONAL_CAMPAIGNS.length)];
+      setCurrentPromo(pick);
+      setShowNotification(true);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const toggleChronic = (condition: string) => {
     setChronicConditions((prev) =>
@@ -83,7 +100,11 @@ export const SovereignEngineDashboard: React.FC = () => {
   ).length;
 
   return (
-    <div className="max-w-7xl mx-auto p-6 bg-slate-950 text-slate-100 rounded-3xl border border-slate-900 shadow-2xl font-sans" dir="rtl">
+    <div className="max-w-7xl mx-auto p-6 bg-slate-950 text-slate-100 rounded-3xl border border-slate-900 shadow-2xl font-sans relative overflow-hidden" dir="rtl">
+      {/* Neon background glow layers */}
+      <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -left-24 w-96 h-96 bg-fuchsia-500/10 rounded-full blur-3xl" />
+
       {/* Injected keyframes for the glowing neural pulse */}
       <style>{`
         @keyframes sovereign-glow {
@@ -282,6 +303,53 @@ export const SovereignEngineDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Floating promotional notification */}
+      {showNotification && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-6 left-6 z-50 max-w-sm p-5 bg-slate-900 border border-fuchsia-500/40 rounded-2xl shadow-2xl shadow-fuchsia-500/10 text-right font-sans animate-in slide-in-from-bottom-8 fade-in duration-500"
+          dir="rtl"
+        >
+          <div className="flex justify-between items-start mb-3 gap-3">
+            <div className="flex items-center gap-2 text-fuchsia-400 font-bold text-sm">
+              <div className="p-1.5 bg-fuchsia-500/10 rounded-lg">
+                <Bell className="w-4 h-4 animate-bounce" />
+              </div>
+              <h4>{currentPromo.title}</h4>
+            </div>
+            <button
+              type="button"
+              aria-label="إغلاق الإشعار"
+              onClick={() => setShowNotification(false)}
+              className="p-1 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-slate-300 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <p className="text-xs text-slate-300 leading-relaxed mb-4">{currentPromo.text}</p>
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setShowNotification(false)}
+              className="px-3 py-1.5 bg-slate-950 border border-slate-800 text-slate-400 hover:text-slate-200 text-[10px] font-bold rounded-lg transition-colors"
+            >
+              تجاهل
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                toast.success("تم توجيهك لبوابة الاشتراك السريعة الخاصة بصيدلية المصلي!");
+                setShowNotification(false);
+              }}
+              className="px-3 py-1.5 bg-fuchsia-600 hover:bg-fuchsia-500 text-white text-[10px] font-bold rounded-lg transition flex items-center gap-1 shadow-md shadow-fuchsia-600/20"
+            >
+              <Heart className="w-3.5 h-3.5 fill-current" /> اشتركي الآن
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
