@@ -99,3 +99,25 @@ Additional checks:
 - No signature / return-type changes.
 - No changes to the 173 already-safe functions.
 - No revocation from `authenticated` (previously closed in SEC-P1-003).
+
+## 7. Accepted anon-exposed SECURITY DEFINER functions (keep-list)
+
+Post-audit re-verification (2026-07-18) confirms exactly 4 functions remain
+executable by `anon`, all intentional. Linter warnings
+`SUPA_anon_security_definer_function_executable` for these are **accepted risk**
+and should be filtered from future audits, not revoked.
+
+| Function | Justification |
+|---|---|
+| `search_medicines_public(_q, _limit)` | Anonymous medicine search box on the public catalog; read-only, returns published catalog columns. |
+| `pn_search_medicine_nearby(...)` | Anonymous geo lookup for `/find-care`; read-only, returns public pharmacy + distance. |
+| `pn_get_pharmacy_public(_slug)` | Anonymous public pharmacy profile page; read-only, public-profile columns only. |
+| `pn_list_pharmacy_products(_slug, _q, _limit, _offset)` | Anonymous public pharmacy catalog listing; read-only. |
+
+All four are `SECURITY DEFINER` solely to bypass the caller's RLS for the
+public columns they project; none write, none accept privileged parameters,
+and all have `search_path = public, pg_temp` pinned and are owned by `postgres`.
+
+Any new `SECURITY DEFINER` function added to `public` that becomes anon-callable
+must either be added to this keep-list with a written justification or have
+anon `EXECUTE` revoked in the same migration.
