@@ -1,9 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { requireCronAuth } from "@/middleware/cron-auth";
 
 export const Route = createFileRoute("/api/public/ai/ranking-tick")({
   server: {
     handlers: {
-      POST: async () => {
+      POST: async ({ request }) => {
+        const denied = requireCronAuth(request);
+        if (denied) {
+          console.warn("[ranking-tick] unauthorized cron attempt", {
+            ip: request.headers.get("x-forwarded-for") ?? "unknown",
+            ua: request.headers.get("user-agent") ?? "unknown",
+          });
+          return denied;
+        }
         try {
           const { refreshDoctorRankings } = await import(
             "@/modules/medical-intelligence/ranking/ranker.server"
