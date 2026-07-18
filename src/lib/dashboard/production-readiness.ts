@@ -45,17 +45,17 @@ export const getProductionReadinessSnapshot = createServerFn({ method: "POST" })
     const integrations = await checkAllIntegrations();
     const intSummary = summarizeIntegrations(integrations);
 
-    // Cron freshness (from ai_world_health high-water marks + cron.job_run_details)
+    // Cron freshness (from ai_world_health high-water marks)
     const { data: worldHealth } = await supabase
       .from("ai_world_health")
-      .select("system_name, updated_at, healthy")
-      .order("updated_at", { ascending: false })
+      .select("system_name, checked_at, status")
+      .order("checked_at", { ascending: false })
       .limit(20);
 
-    const cron = (worldHealth ?? []).map((r) => ({
-      name: r.system_name as string,
-      lastRun: (r.updated_at as string) ?? null,
-      ok: (r.healthy as boolean) ?? true,
+    const cron = ((worldHealth ?? []) as Array<{ system_name: string; checked_at: string; status: string }>).map((r) => ({
+      name: r.system_name,
+      lastRun: r.checked_at ?? null,
+      ok: r.status === "ok" || r.status === "healthy",
     }));
 
     // Recent errors (last hour)

@@ -26,7 +26,7 @@ function ReadinessPage() {
   const fetchSnapshot = useServerFn(getProductionReadinessSnapshot);
   const { data, isLoading, error } = useQuery({
     queryKey: ["production-readiness"],
-    queryFn: () => fetchSnapshot({ data: {} }),
+    queryFn: () => fetchSnapshot(),
     refetchInterval: 30_000,
   });
 
