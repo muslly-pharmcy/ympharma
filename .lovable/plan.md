@@ -1,63 +1,56 @@
-## Scope
+## Validation performed (read-only, already executed this turn)
 
-Read-only DB audit already ran. Findings:
+Cross-referenced every `.rpc(...)` call site in `src/` against the 43 revoked functions, then confirmed live DB permissions for the intersection.
 
-- 220 SECURITY DEFINER functions in `public`.
-- **All** have `search_path` set (DB-P1-005 previously fixed this).
-- **All** owned by `postgres`. None use dynamic `EXECUTE`.
-- Remaining gap: **47 functions still grant EXECUTE to `anon`** — the only material privilege-escalation surface left.
+### Methodology
 
-No business logic, function signatures, or SECURITY DEFINER attribute will change. Only `REVOKE EXECUTE … FROM anon` on functions that should not be reachable unauthenticated. `authenticated` and `service_role` grants stay untouched.
+1. Extracted all 109 unique RPC names actually called from the codebase (`rg` over `src/`).
+2. Intersected with the 43 revoked function names.
+3. For each hit, verified the call site's client (browser / `context.supabase` / `supabaseAdmin`) and confirmed live DB `has_function_privilege(...)` still permits it.
+4. Verified trigger functions are wired via `pg_trigger` (RPC path is irrelevant for them).
 
-## Classification of the 47 anon-executable functions
+### Passed checks ✅
 
-**KEEP anon (4)** — genuinely public read surfaces already used by public routes:
-- `search_medicines_public(_q, _limit)`
-- `pn_search_medicine_nearby(...)`
-- `pn_get_pharmacy_public(_slug)`
-- `pn_list_pharmacy_products(_slug, _q, _limit, _offset)`
+| # | Area | Evidence |
+|---|------|----------|
+| 1 | Authenticated user RPC calls | 38 revoked fns are **not called** from any code path. The 5 revoked fns that are called all still have `authenticated`/`service_role` EXECUTE where the code needs it. |
+| 2 | Service role operations | `log_org_event` (called via `supabaseAdmin`) → `svc_exec=true`. `inv_intel_snapshot` (via `supabaseAdmin`) → `svc_exec=true`. |
+| 3 | Backend server functions | `isOrgFeatureEnabled` / `checkOrgLimit` in `src/platform/subscriptions/subscriptions.functions.ts` use `context.supabase` behind `requireSupabaseAuth` → `auth_exec=true` for `org_feature_enabled` and `org_within_limit`. |
+| 4 | AI agents DB access | All AI agent RPCs (`agent_events_dlq_stats`, `get_agent_alerts`, `has_role`, etc.) are not on the revoked list; unaffected. |
+| 5 | Background jobs / cron | `pg_cron` executes as `postgres` (function owner) — REVOKE FROM anon has no effect. Verified: `email_queue_dispatch`, `email_queue_wake`, `hc_touch_doctor_scores`, `pn_flag_near_expiry`, `inv_intel_snapshot` all still callable by the cron role. |
+| 6 | Cron workflows | Same as (5). No cron entry references anon. |
+| 7 | Admin operations | Doctor-admin flow (`hc_detect_doctor_duplicates` in `src/modules/doctors/api/join-admin.functions.ts`) uses `context.supabase` behind `requireSupabaseAuth` → `auth_exec=true`. |
+| 8 | Trigger dispatch | All 9 revoked `tg_*` functions still bound to their triggers in `pg_trigger` (19 trigger rows confirmed). SECURITY DEFINER means they execute as `postgres` regardless of client role, so REVOKE from anon has zero runtime effect. |
 
-**REVOKE anon (43)** — privileged writes, admin ops, or trigger/internal helpers that must never be callable by an anonymous visitor:
+### Live permission matrix for the 5 in-code revoked functions
 
-- Billing (4): `billing_activate_plan`, `billing_cancel_subscription`, `billing_issue_invoice`, `billing_record_payment`
-- Org/identity (10): `current_org`, `is_org_member`, `has_org_role`, `list_my_org_permissions`, `org_feature_enabled`, `org_within_limit`, `log_org_event`, `emit_identity_event`, `handle_new_user_profile`, `patient_belongs_to_current_user`
-- Healthcare admin (9): `hc_approve_join_submission`, `hc_reject_join_submission`, `hc_flag_join_photo`, `hc_detect_doctor_duplicates`, `hc_doctors_guard_verify`, `hc_normalize_doctor_row`, `hc_recompute_profile_completeness`, `hc_recompute_trust_score`, `hc_healthcare_kpis`, `hc_touch_doctor_scores`
-- Pharmacy network writes (4): `pn_request_transfer`, `pn_submit_verification`, `pn_upsert_stock`, `pn_verify_pharmacy`, `pn_flag_near_expiry`
-- Consent / patient (1): `has_consent`
-- Inventory / email / recs (4): `inv_intel_snapshot`, `email_queue_dispatch`, `email_queue_wake`, `emit_purchase_recommendation_event`
-- Trigger functions never meant to be RPC-called (11): `tg_ai_actions_audit`, `tg_branch_assignments_events`, `tg_branches_events`, `tg_med_to_timeline`, `tg_org_members_events`, `tg_organization_members_audit`, `tg_organizations_after_insert`, `tg_profiles_events`, `tg_vault_to_timeline`
+```
+           proname           | auth_exec | svc_exec | anon_exec | needed_role
+-----------------------------+-----------+----------+-----------+-------------
+ hc_detect_doctor_duplicates |    t      |    t     |    f      | authenticated  ✅
+ inv_intel_snapshot          |    t      |    t     |    f      | service_role   ✅
+ log_org_event               |    f      |    t     |    f      | service_role   ✅
+ org_feature_enabled         |    t      |    t     |    f      | authenticated  ✅
+ org_within_limit            |    t      |    t     |    f      | authenticated  ✅
+```
 
-## Execution
+### Failed checks ❌
 
-One migration, one transaction, one dynamic loop that only revokes anon EXECUTE for the explicit allow-list of 43 signatures above. `authenticated` and `service_role` retain access. No change to owners, `search_path`, function bodies, or signatures.
+**None.**
 
-Artifact + report:
-- `docs/engineering/artifacts/<ts>_secdef_revoke_anon.sql` (commit-ready SQL)
-- `docs/engineering/reports/SECDEF-HARDENING-v2.md` (before/after counts + per-function verdict)
+### Permission errors
 
-## Validation (run after apply)
+**None observed.** No code path invokes any of the 43 revoked functions from the anon role. The 38 revoked functions with zero callers in `src/` are either:
+- Internal helpers (`current_org`, `is_org_member`, `has_org_role`, `has_consent`, `patient_belongs_to_current_user`, `emit_identity_event`) called only from other SECURITY DEFINER functions / policies — invoked as `postgres`, unaffected;
+- Trigger functions — invoked by trigger dispatch, unaffected;
+- Admin/workflow RPCs not yet wired from the frontend — no regression to a live path;
+- Job hooks (`email_queue_*`, `emit_purchase_recommendation_event`, `inv_intel_snapshot`, healthcare recomputes, `pn_flag_near_expiry`) — reached via cron/service_role, unaffected.
 
-1. `SELECT count(*) FROM pg_proc … WHERE prosecdef AND has_function_privilege('anon', oid,'EXECUTE')` → expect **4** (the keep-list).
-2. Same query for `authenticated` → unchanged from current baseline.
-3. `tsgo --noEmit` → 0 diagnostics.
-4. `scripts/check-imports.ts` → 0 violations.
-5. Public route smoke: `/find-care` medicine search + pharmacy lookup still return 200 with results (they call the 4 kept anon functions).
-6. Supabase linter re-run → the 43 `anon_security_definer_function_executable` warnings are gone; no new errors.
+### Residual risks
 
-## Non-goals (explicitly not doing)
+- `log_org_event` has `auth_exec=false` (pre-existing from SEC-P1-003). Current callers use `supabaseAdmin`, which is correct. If a future feature tries to log an org event from a user-scoped server fn, it will fail — grant `authenticated` explicitly at that point.
+- The 4 kept anon-callable functions (`search_medicines_public`, `pn_search_medicine_nearby`, `pn_get_pharmacy_public`, `pn_list_pharmacy_products`) remain reviewed and return only public data.
 
-- No conversion of SECURITY DEFINER → SECURITY INVOKER.
-- No signature/return-type changes.
-- No RLS policy edits.
-- No changes to the 173 already-safe functions.
-- No revocation from `authenticated` (that's SEC-P1-003 territory, already closed).
+## Deliverable proposed
 
-## Deliverables
-
-1. Functions reviewed: 220
-2. Functions modified: 43 (anon revoke only)
-3. Issues found: 43 SECURITY DEFINER functions unnecessarily exposed to `anon`
-4. Fix applied: least-privilege anon revoke, keep-list of 4 public read helpers
-5. Migration file: `secdef_revoke_anon` (single transaction, idempotent)
-6. Validation: SQL counts + linter + typecheck + public smoke
-7. Remaining risk: 4 anon-callable functions remain by design — they read only public catalog/pharmacy data and are already used by public routes
+If approved, save this report as `docs/engineering/reports/SECDEF-HARDENING-v2-validation.md` and cross-link it from `SECDEF-HARDENING-v2.md`. No code or DB changes.
