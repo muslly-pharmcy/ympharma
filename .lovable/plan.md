@@ -1,87 +1,53 @@
-## Reality Check — قبل التنفيذ
+## Phase 3 — Batched Execution Plan (13 features)
 
-المخطط الذي أرسلته (Phases 45.2 → 47) يعيد بناء 90% مما هو موجود فعلاً في المشروع، ويحتوي على أخطاء تقنية ستكسر الـ Build فوراً. لن أطبقه حرفياً. هذا موقف مطابق لما فعلته في Waves السابقة عند رفض `src/ai-brain/` و`ai_agents` المكررة.
+Note: `docs/engineering/` currently contains `ENGINEERING_CONTRACT.md`, `PROJECT_STATE.yaml`, and `plans/phase-3.yaml`. The referenced `STANDARDS.md`, `SECURITY.md`, and `ARCHITECTURE.md` do **not** exist — I'll follow existing project conventions (already internalized) instead of blocking on missing docs. `PROJECT_STATE.yaml` will not be modified (per contract).
 
-### ما هو موجود فعلاً وسيتم إسقاطه من المخطط
+### Execution order (4 batches, stop-on-fail)
 
-| مقترح في المخطط | موجود فعلاً |
-|---|---|
-| `ai_events`, `ai_memory`, `ai_decisions`, `ai_agents`, `ai_audit_logs` | 5/5 موجودة بـ RLS |
-| `ai_publish_event` RPC | موجود عبر `EventBus` (`src/ai/core/event-bus.ts`) — RPC مكرر يتجاوز الـ Bus |
-| `ai_store_memory` / `ai_search_memory` | موجود بأفضل شكل: `MemoryManager` + `NeuralMemory` بـ pgvector |
-| `BrainEngine`, `AgentRegistry`, `BaseAgent`, `BrainRouter`, `DecisionEngine` | موجودة كاملة في `src/ai/core/` و`src/ai/agents/` |
-| `PharmacistAgent`, `PrescriptionAgent`, `CustomerAgent`, `InventoryAgent`, `CEOAgent`, `MarketingAgent`, `DoctorAgent`, `HospitalAgent`, `WhatsAppAgent`, `BrainAgent` | 13 وكيلاً مسجّلاً فعلاً في `src/ai/agents/register.ts` |
-| `AICommandCenter` UI | 3 لوحات موجودة: `/admin-agent-universe`, `/admin-sun-core`, `/admin-sovereign` |
-| `agent_approval_requests` + Decision Engine | شُحن الآن في Wave A |
-| `doctor_profiles`, `hospital_profiles` | `hc_doctors` (45 عمود) و`hc_locations` أغنى بكثير |
-| `ai_learning_feedback` | `ai_feedback` و`confidence_calibration_log` موجودان |
-| `ai_workflows`, `ai_tasks` | تُغطى بـ `agent_events` + `agent_events_dlq` + جدولة `pg_cron` الموجودة |
+Each batch ends with `bunx tsgo --noEmit` then `bun run build`. If a gate fails, HALT and report — nothing after that batch runs.
 
-### أخطاء تقنية في المخطط (لن تُنفَّذ كما هي)
+**Batch A — Foundations (no runtime risk)**
+1. `DEV-P3-003` — `.vscode/settings.json`, `.vscode/extensions.json`, `scripts/dev-setup.sh`
+2. `DOC-P4-001` — `README.md` (update), `docs/deployment.md`, `docs/security.md`
+3. `RISK-P3-005` — `docs/engineering/risk-register.md`
 
-1. **`export async function POST(request)`** — نمط Next.js/Remix؛ TanStack Start يستخدم `createFileRoute({ server: { handlers: { POST } } })`. الملفان `api.ai.brain.ts` و`api.whatsapp.webhook.ts` سيفشلان في الـ Build.
-2. **`import {supabase} from "@/lib/supabase"`** — المسار غير موجود؛ الصحيح `@/integrations/supabase/client` (مُدار).
-3. **RLS باستخدام `auth.jwt()->>'role' IN ('admin','owner')`** — يخالف قواعد المشروع الصريحة (تخزين الأدوار في جدول منفصل + `has_role()`). سيسمح لأي user_metadata مزوّر بالوصول. الأمن الحالي يستخدم `has_role()` بشكل صحيح.
-4. **`ai_publish_event(...)` SECURITY DEFINER + بدون REVOKE من PUBLIC** — سيولّد تحذير Linter الذي نحاول إغلاقه في SEC-P1-003.
-5. **الوكلاء الجدد كلها ترجع نصوصاً ثابتة (`return { success: true, message: "..." }`)** — لا قيمة إنتاجية، مجرد demoware.
-6. **`api.whatsapp.webhook.ts` بدون تحقق توقيع Twilio/Meta** — بينما الموجود حالياً (`src/ai/integration/whatsapp/`) يتحقق من التوقيع.
+**Batch B — Observability & reliability libs (server-only, no schema)**
+4. `REL-P3-001` — `src/lib/workers/retry-config.ts`, `src/lib/workers/base-worker.ts`
+5. `QOS-P3-002` — `src/lib/monitoring/api-monitor.ts`, `src/lib/middleware/response-time.ts`
+6. `INT-P3-006` — `src/lib/health-checks/integrations.ts`, `src/routes/api/public/health.full-check.ts`
+7. `EFF-P4-004` — `src/lib/workers/optimization.ts`, `src/lib/workers/scheduler.ts`
 
----
+**Batch C — DB + audit (single migration, additive only)**
+8. `AUDIT-P2-003` — migration for `admin_audit_log` (table + GRANT + RLS + `has_role('admin')` policy), `src/lib/audit/audit-log.ts`, `src/lib/middleware/audit-middleware.ts`
+9. `DB-P3-004` — migration adding `CREATE INDEX CONCURRENTLY IF NOT EXISTS` for hot-path columns identified from `supabase--slow_queries` (read-only probe first)
 
-## المقترح — نُطبّق فقط الفجوة الحقيقية
+**Batch D — UX, tests, scaling**
+10. `PERF-P2-001` — `admin-dashboard.tsx` (lazy-load heavy panels via `React.lazy` + `Suspense`), `vite.config.ts` (manualChunks for admin bundle)
+11. `TEST-P4-002` — add focused unit tests under `src/lib/__tests__/` for retry-config, api-monitor, audit-log, integrations health; keep `vitest.config.ts` change minimal (coverage thresholds only)
+12. `SCALE-P4-003` — `src/lib/config/scaling.ts`, `docker-compose.scale.yml`
+13. `REPORT-P4-005` — `src/lib/dashboard/production-readiness.ts` (aggregates health + integrations + audit + cron), `src/routes/_authenticated/admin-production-readiness.tsx`
 
-هدفك المُعلن في السطر الأخير: **"يكون آلياً بدون تدخل المبرمج كاختبار للأوركسترا"**. هذا هو الشيء الوحيد غير الموجود فعلاً. نبنيه فوق البنية القائمة.
+### Guardrails
+- No changes to `PROJECT_STATE.yaml`, generated Supabase files, or `src/pages/`.
+- No new secrets, no new cron jobs, no destructive SQL. `AUDIT` and `DB` migrations are additive (`IF NOT EXISTS`).
+- New admin route lives under `_authenticated/` and enforces `has_role('admin'|'owner')` server-side (no client-only gating).
+- `/api/public/health.full-check` returns only booleans + latency ms — no PII, no secrets, no version leaks.
+- Retry/backoff defaults: max 5, exp base 500ms, cap 30s, jitter — matches existing DLQ patterns.
+- Reuses existing infra (`alert_settings`, `ai_world_health`, `agent_runs`, `error_logs`) — no duplicate tables.
 
-### 1) Orchestrator Tick — دورة كاملة تلقائية
+### Final report format (returned once at end)
+```
+STATUS: SUCCESS | PARTIAL | FAILED
+FILES CHANGED: <full list, grouped by feature>
+VALIDATION: <per-batch tsgo + build result>
+OUT_OF_SCOPE_CANDIDATES: <e.g. DB-P3-004 indexes needing prod EXPLAIN before merge>
+TRACE: <one-line per feature>
+```
 
-ملف جديد: `src/routes/api/public/ai/orchestrator-tick.ts`
+### What I will NOT do (and why)
+- Won't fabricate `STANDARDS.md` / `SECURITY.md` / `ARCHITECTURE.md` — not in the plan's file list.
+- Won't touch `PROJECT_STATE.yaml` — contract forbids it.
+- Won't add coverage-blocking thresholds that would fail current CI (start at reporting only).
+- Won't add indexes speculatively — will run `supabase--slow_queries` + `supabase--read_query` on `pg_stat_user_indexes` first and only add indexes justified by real hot paths; the rest go to `OUT_OF_SCOPE_CANDIDATES`.
 
-- يُستدعى من `pg_cron` كل 5 دقائق
-- يقرأ آخر الأحداث الحقيقية من الجداول القائمة:
-  - `inv_stock_batches` → إن وُجد low-stock ⇒ ينشر `STOCK_LOW` على EventBus
-  - `prescription_files` (uploaded آخر 5 دقائق) ⇒ ينشر `PRESCRIPTION_UPLOADED`
-  - `orders` (created) ⇒ ينشر `ORDER_CREATED`
-- كل حدث يذهب إلى `BrainEngine.execute()` الموجود → يستدعي الوكيل المناسب من الـ Registry الموجود
-- كل قرار يُسجَّل في `ai_decisions` (موجود)
-- أي إجراء تنفيذي عالي المخاطر يمر عبر `approval-gate.server.ts` الذي شُحن للتوّ (لن يُنفَّذ تلقائياً)
-- تسجّل كل دورة في `agent_runs` (موجود)
-
-### 2) AI Command Center — دمج بلا تكرار
-
-ملف جديد: `src/routes/_authenticated/admin-ai-command.tsx`
-
-- صفحة واحدة تجمع البيانات الحقيقية من الجداول الموجودة:
-  - Brain Status: من `ai_world_health` + آخر تشغيل من `agent_runs`
-  - Agents Grid: من `ai_agents` (12 صفاً موجودة) + آخر نشاط لكلٍّ منها
-  - Event Stream: آخر 20 صفاً من `ai_events`
-  - Decision Timeline: آخر 20 من `ai_decisions`
-  - Predictions Panel: من `demand_forecasts` + `inv_expiry_alerts` (بيانات حقيقية)
-  - Approvals Queue: يعيد استخدام مكوّن `ApprovalsPanel` من Wave A
-- لا تكرار لأي جدول أو منطق. مجرد Read-through DTO عبر server function جديدة `getCommandCenterSnapshot`.
-
-### 3) الجدولة
-
-عبر `supabase--insert` (لا migration): تسجيل cron كل 5 دقائق يضرب `orchestrator-tick`.
-
-### 4) ما لن يُنفَّذ من المخطط (مع السبب)
-
-- ❌ `ai_workflows`, `ai_tasks`, `doctor_profiles`, `hospital_profiles`, `ai_learning_feedback` — مكرر.
-- ❌ RPCs المكررة (`ai_publish_event`, `ai_store_memory`, `ai_search_memory`, `ai_create_decision`, `ai_get_agent`) — الطبقة الموجودة أنظف وأكثر أماناً.
-- ❌ ملف `202607170008_ai_rls.sql` — يستخدم `auth.jwt()->>'role'` (خرق أمني).
-- ❌ الوكلاء الجدد الفارغين (Pharmacy/Prescription/Customer/Inventory/CEO/Marketing/Doctor/Hospital) — النسخ الحقيقية موجودة تحت `src/ai/agents/`.
-- ❌ `api.whatsapp.webhook.ts` جديد — الموجود مع توقيع Meta/Twilio يجب ألا يُستبدل بنسخة بلا توقيع.
-
-### الملفات التي ستُلمَس فعلاً
-
-| ملف | نوع |
-|---|---|
-| `src/routes/api/public/ai/orchestrator-tick.ts` | جديد |
-| `src/lib/command-center.functions.ts` | جديد (server fn قراءة فقط) |
-| `src/routes/_authenticated/admin-ai-command.tsx` | جديد |
-| `supabase--insert` لجدولة cron | Data change |
-
-بعد التطبيق سيكون لديك **أول Autonomous Loop حقيقي** يُشغّل الأوركسترا كل 5 دقائق على البيانات الفعلية، وصفحة قيادة واحدة توضح ماذا يحدث.
-
----
-
-هل أُنفّذ هذا المقترح المُكيَّف، أم تريدني بدلاً منه أن أُنفّذ المخطط حرفياً كما أرسلته (مع علمك بأنه سيكسر الـ Build ويضاعف الجداول ويفتح ثغرة RLS)؟
+Approve to switch to build mode and execute Batch A → D in order.
