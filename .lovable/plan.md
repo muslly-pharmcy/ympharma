@@ -1,69 +1,63 @@
+## Scope
 
-# Verified Audit — Read-Only Pass
+Read-only DB audit already ran. Findings:
 
-Scope: **A + Minimal**. Zero code edits, zero migrations, zero destructive commands. Deliverable is a single fact-based report with prioritized findings.
+- 220 SECURITY DEFINER functions in `public`.
+- **All** have `search_path` set (DB-P1-005 previously fixed this).
+- **All** owned by `postgres`. None use dynamic `EXECUTE`.
+- Remaining gap: **47 functions still grant EXECUTE to `anon`** — the only material privilege-escalation surface left.
 
-## What I will run (read-only)
+No business logic, function signatures, or SECURITY DEFINER attribute will change. Only `REVOKE EXECUTE … FROM anon` on functions that should not be reachable unauthenticated. `authenticated` and `service_role` grants stay untouched.
 
-1. **Build & Types**
-   - `bunx tsgo --noEmit` — full TypeScript check
-   - `bun run build` (if safe) — surface bundler errors only; no deploy
-   - `bunx eslint .` — lint findings (count + top rules)
+## Classification of the 47 anon-executable functions
 
-2. **Import graph guards**
-   - `bun scripts/check-imports.ts` — verify no `client.server` leaks into client bundle
-   - Grep for known risk patterns: `process.env` at module scope, `supabaseAdmin` in `.functions.ts`, `VITE_*` secrets
+**KEEP anon (4)** — genuinely public read surfaces already used by public routes:
+- `search_medicines_public(_q, _limit)`
+- `pn_search_medicine_nearby(...)`
+- `pn_get_pharmacy_public(_slug)`
+- `pn_list_pharmacy_products(_slug, _q, _limit, _offset)`
 
-3. **Database health (read-only)**
-   - `supabase--linter` — RLS gaps, permissive policies, exposed columns
-   - `supabase--read_query` for:
-     - Tables in `public` with RLS disabled
-     - Tables with `USING (true)` policies
-     - `SECURITY DEFINER` functions missing `search_path`
-     - `pg_cron` jobs + last 20 `cron.job_run_details` (fail rate, 401s)
-     - Unindexed FKs on hot tables (`ai_events`, `ai_decisions`, `agent_runs`, `orders`, `prescription_files`)
-   - `supabase--slow_queries` — top 20 by total time
+**REVOKE anon (43)** — privileged writes, admin ops, or trigger/internal helpers that must never be callable by an anonymous visitor:
 
-4. **Runtime signals**
-   - `error_logs` last 24h — grouped by message
-   - `ai_world_health` current status per system
-   - `agent_runs` failure rate last 24h
-   - `operations_alerts` open items
+- Billing (4): `billing_activate_plan`, `billing_cancel_subscription`, `billing_issue_invoice`, `billing_record_payment`
+- Org/identity (10): `current_org`, `is_org_member`, `has_org_role`, `list_my_org_permissions`, `org_feature_enabled`, `org_within_limit`, `log_org_event`, `emit_identity_event`, `handle_new_user_profile`, `patient_belongs_to_current_user`
+- Healthcare admin (9): `hc_approve_join_submission`, `hc_reject_join_submission`, `hc_flag_join_photo`, `hc_detect_doctor_duplicates`, `hc_doctors_guard_verify`, `hc_normalize_doctor_row`, `hc_recompute_profile_completeness`, `hc_recompute_trust_score`, `hc_healthcare_kpis`, `hc_touch_doctor_scores`
+- Pharmacy network writes (4): `pn_request_transfer`, `pn_submit_verification`, `pn_upsert_stock`, `pn_verify_pharmacy`, `pn_flag_near_expiry`
+- Consent / patient (1): `has_consent`
+- Inventory / email / recs (4): `inv_intel_snapshot`, `email_queue_dispatch`, `email_queue_wake`, `emit_purchase_recommendation_event`
+- Trigger functions never meant to be RPC-called (11): `tg_ai_actions_audit`, `tg_branch_assignments_events`, `tg_branches_events`, `tg_med_to_timeline`, `tg_org_members_events`, `tg_organization_members_audit`, `tg_organizations_after_insert`, `tg_profiles_events`, `tg_vault_to_timeline`
 
-5. **Security scan**
-   - `security--get_scan_results` — surface only; no fixes
+## Execution
 
-6. **Route & integration inventory**
-   - Count routes under `src/routes/` vs `_authenticated/`
-   - Public `/api/public/*` endpoints — verify each has auth/signature check declared (grep, not exec)
-   - Cross-check `docs/engineering/reports/route-audit-v2.md` for drift
+One migration, one transaction, one dynamic loop that only revokes anon EXECUTE for the explicit allow-list of 43 signatures above. `authenticated` and `service_role` retain access. No change to owners, `search_path`, function bodies, or signatures.
 
-## Deliverable
+Artifact + report:
+- `docs/engineering/artifacts/<ts>_secdef_revoke_anon.sql` (commit-ready SQL)
+- `docs/engineering/reports/SECDEF-HARDENING-v2.md` (before/after counts + per-function verdict)
 
-One file: `docs/engineering/reports/AUDIT-2026-07-18.md` containing:
+## Validation (run after apply)
 
-```text
-1. Executive summary (health score /100 with math shown)
-2. P0 blockers (verified — with evidence line/query result)
-3. P1 issues (verified)
-4. P2 / tech debt (verified)
-5. Unverified suspicions (explicitly labeled, not asserted)
-6. Deltas vs previous audits (AUDIT-2026-07-17, route-audit-v2)
-7. Recommended next scope (does NOT execute)
-```
+1. `SELECT count(*) FROM pg_proc … WHERE prosecdef AND has_function_privilege('anon', oid,'EXECUTE')` → expect **4** (the keep-list).
+2. Same query for `authenticated` → unchanged from current baseline.
+3. `tsgo --noEmit` → 0 diagnostics.
+4. `scripts/check-imports.ts` → 0 violations.
+5. Public route smoke: `/find-care` medicine search + pharmacy lookup still return 200 with results (they call the 4 kept anon functions).
+6. Supabase linter re-run → the 43 `anon_security_definer_function_executable` warnings are gone; no new errors.
 
-## Explicit non-goals this turn
+## Non-goals (explicitly not doing)
 
-- No migrations
-- No file edits beyond writing the single report file
-- No cron changes, no secret rotation, no RLS changes
-- No "self-healing loop" — the directive's continuous SCAN→FIX→REPEAT is refused; each fix must be its own reviewed turn
-- No claims of "Production Ready" — the report ends with a score and gaps, not a verdict
+- No conversion of SECURITY DEFINER → SECURITY INVOKER.
+- No signature/return-type changes.
+- No RLS policy edits.
+- No changes to the 173 already-safe functions.
+- No revocation from `authenticated` (that's SEC-P1-003 territory, already closed).
 
-## Guardrails from prior turns
+## Deliverables
 
-- Every current-state claim in the report is backed by a tool call output quoted inline
-- Anything I cannot verify is placed under "Unverified suspicions", not asserted as fact
-- No new tables, no new agents, no new dashboards proposed inside the audit itself
-
-After you approve, I switch to build mode only to write the single markdown report.
+1. Functions reviewed: 220
+2. Functions modified: 43 (anon revoke only)
+3. Issues found: 43 SECURITY DEFINER functions unnecessarily exposed to `anon`
+4. Fix applied: least-privilege anon revoke, keep-list of 4 public read helpers
+5. Migration file: `secdef_revoke_anon` (single transaction, idempotent)
+6. Validation: SQL counts + linter + typecheck + public smoke
+7. Remaining risk: 4 anon-callable functions remain by design — they read only public catalog/pharmacy data and are already used by public routes
