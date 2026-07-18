@@ -1,56 +1,54 @@
-## Validation performed (read-only, already executed this turn)
+## Security Post-Hardening Audit — Read-Only Findings
 
-Cross-referenced every `.rpc(...)` call site in `src/` against the 43 revoked functions, then confirmed live DB permissions for the intersection.
+Sources: Supabase linter (166 issues, all `warn`), security scan (166 findings, all `warn`), `pg_policies`, `pg_class` privilege checks, `rg` sweep of `src/routes/api/public/*`.
 
-### Methodology
+Overall posture: **no P0 unauthenticated privileged endpoints, no RLS-disabled public tables, no permissive-anon write policies except one intentional one.** Remaining risk is dominated by exposed `SECURITY DEFINER` functions and shared-key auth boundaries.
 
-1. Extracted all 109 unique RPC names actually called from the codebase (`rg` over `src/`).
-2. Intersected with the 43 revoked function names.
-3. For each hit, verified the call site's client (browser / `context.supabase` / `supabaseAdmin`) and confirmed live DB `has_function_privilege(...)` still permits it.
-4. Verified trigger functions are wired via `pg_trigger` (RPC path is irrelevant for them).
+---
 
-### Passed checks ✅
+### P0 — Critical
+None confirmed by this audit. All cron/hook endpoints under `src/routes/api/public/hooks/**` and `src/routes/api/public/ai/**` gate on `verifyCronSecret` / `requireCronAuth`. All 176 public tables have RLS enabled.
 
-| # | Area | Evidence |
-|---|------|----------|
-| 1 | Authenticated user RPC calls | 38 revoked fns are **not called** from any code path. The 5 revoked fns that are called all still have `authenticated`/`service_role` EXECUTE where the code needs it. |
-| 2 | Service role operations | `log_org_event` (called via `supabaseAdmin`) → `svc_exec=true`. `inv_intel_snapshot` (via `supabaseAdmin`) → `svc_exec=true`. |
-| 3 | Backend server functions | `isOrgFeatureEnabled` / `checkOrgLimit` in `src/platform/subscriptions/subscriptions.functions.ts` use `context.supabase` behind `requireSupabaseAuth` → `auth_exec=true` for `org_feature_enabled` and `org_within_limit`. |
-| 4 | AI agents DB access | All AI agent RPCs (`agent_events_dlq_stats`, `get_agent_alerts`, `has_role`, etc.) are not on the revoked list; unaffected. |
-| 5 | Background jobs / cron | `pg_cron` executes as `postgres` (function owner) — REVOKE FROM anon has no effect. Verified: `email_queue_dispatch`, `email_queue_wake`, `hc_touch_doctor_scores`, `pn_flag_near_expiry`, `inv_intel_snapshot` all still callable by the cron role. |
-| 6 | Cron workflows | Same as (5). No cron entry references anon. |
-| 7 | Admin operations | Doctor-admin flow (`hc_detect_doctor_duplicates` in `src/modules/doctors/api/join-admin.functions.ts`) uses `context.supabase` behind `requireSupabaseAuth` → `auth_exec=true`. |
-| 8 | Trigger dispatch | All 9 revoked `tg_*` functions still bound to their triggers in `pg_trigger` (19 trigger rows confirmed). SECURITY DEFINER means they execute as `postgres` regardless of client role, so REVOKE from anon has zero runtime effect. |
+---
 
-### Live permission matrix for the 5 in-code revoked functions
+### P1 — High
 
-```
-           proname           | auth_exec | svc_exec | anon_exec | needed_role
------------------------------+-----------+----------+-----------+-------------
- hc_detect_doctor_duplicates |    t      |    t     |    f      | authenticated  ✅
- inv_intel_snapshot          |    t      |    t     |    f      | service_role   ✅
- log_org_event               |    f      |    t     |    f      | service_role   ✅
- org_feature_enabled         |    t      |    t     |    f      | authenticated  ✅
- org_within_limit            |    t      |    t     |    f      | authenticated  ✅
-```
+| # | Finding | Location | Recommended next action |
+|---|---|---|---|
+| 1 | 4 `SECURITY DEFINER` functions in `public` are still callable by role `anon` (`SUPA_anon_security_definer_function_executable` × 4) | Supabase linter items 3–6; DB `public` schema | Identify the 4 functions; keep `EXECUTE TO anon` only for `search_medicines_public`, `pn_search_medicine_nearby`, `pn_get_pharmacy_public`, `pn_list_pharmacy_products`; revoke on any other match. |
+| 2 | Two shared-secret auth helpers used inconsistently (`verifyCronSecret` for legacy hooks, `requireCronAuth` for AI/security/engagement) — divergence risk if one is deprecated | `src/lib/cron-auth.server.ts`, `src/middleware/cron-auth.ts` | Consolidate to one helper; confirm both perform constant-time compare and read the same env (`CRON_SECRET`). |
+| 3 | Unauthenticated public POST endpoints accept writes with no rate limit visible: `analytics/ingest.ts`, `engagement/track.ts`, `contact.ts`, `doctor-join.ts`, `hooks/social-callback.ts` | those files under `src/routes/api/public/` | Add IP-based rate limit (pattern from `log-error.ts`) + Zod schema + max-body size; ensure inserts land only in write-restricted anon-INSERT policies. |
 
-### Failed checks ❌
+---
 
-**None.**
+### P2 — Medium
 
-### Permission errors
+| # | Finding | Location | Recommended next action |
+|---|---|---|---|
+| 4 | ~150 `SECURITY DEFINER` functions callable by role `authenticated` (`SUPA_authenticated_security_definer_function_executable`) | Supabase linter | Cross-check against `src/` RPC call sites (109 unique); revoke `EXECUTE TO authenticated` on any function only invoked by triggers, cron, or service_role. |
+| 5 | 9 RLS policies use `USING/WITH CHECK true` — all currently scoped to `service_role` except `push_subscriptions.anyone can subscribe` (anon INSERT) | `pg_policies` result above | Add a `WITH CHECK` on `push_subscriptions` (validate `endpoint` format, cap payload size) or move ingest behind a signed server function. |
+| 6 | Every `public` table has default `GRANT ... TO anon` for INSERT/UPDATE/DELETE — RLS is the sole barrier | database-wide (privilege check confirmed) | Adopt an explicit `REVOKE ALL FROM anon` + narrow re-grants baseline; add a migration lint rule enforcing GRANT-least-privilege on new tables. |
+| 7 | Extension installed in `public` schema (`SUPA_extension_in_public`) | Supabase linter item 1 | Move extension to its own schema (`extensions`) when a maintenance window allows; low exploit value but blocks a future clean migration. |
 
-**None observed.** No code path invokes any of the 43 revoked functions from the anon role. The 38 revoked functions with zero callers in `src/` are either:
-- Internal helpers (`current_org`, `is_org_member`, `has_org_role`, `has_consent`, `patient_belongs_to_current_user`, `emit_identity_event`) called only from other SECURITY DEFINER functions / policies — invoked as `postgres`, unaffected;
-- Trigger functions — invoked by trigger dispatch, unaffected;
-- Admin/workflow RPCs not yet wired from the frontend — no regression to a live path;
-- Job hooks (`email_queue_*`, `emit_purchase_recommendation_event`, `inv_intel_snapshot`, healthcare recomputes, `pn_flag_near_expiry`) — reached via cron/service_role, unaffected.
+---
 
-### Residual risks
+### P3 — Low
 
-- `log_org_event` has `auth_exec=false` (pre-existing from SEC-P1-003). Current callers use `supabaseAdmin`, which is correct. If a future feature tries to log an org event from a user-scoped server fn, it will fail — grant `authenticated` explicitly at that point.
-- The 4 kept anon-callable functions (`search_medicines_public`, `pn_search_medicine_nearby`, `pn_get_pharmacy_public`, `pn_list_pharmacy_products`) remain reviewed and return only public data.
+| # | Finding | Location | Recommended next action |
+|---|---|---|---|
+| 8 | `whatsapp-webhook.ts` / `uptime-webhook.ts` do HMAC compare — verify they use `timingSafeEqual` on equal-length buffers only (already partially present) | `src/routes/api/public/whatsapp-webhook.ts`, `uptime-webhook.ts` | Add length guard before compare; confirm signature envelope covers the raw body, not the parsed JSON. |
+| 9 | Health endpoints exposed publicly (`health.ts`, `monitoring/health.ts`) — potentially fingerprintable | those files | Trim response to `{ok:true}` for anon; gate detailed diagnostics behind `requireCronAuth`. |
+| 10 | Secrets exposure risk — `test-alert.ts` returns `slack_url_prefix: url.slice(0,40)` | `src/routes/api/public/hooks/test-alert.ts` | Remove the prefix disclosure once WhatsApp/Slack delivery is verified; endpoint is cron-auth'd but the string still lands in logs. |
 
-## Deliverable proposed
+---
 
-If approved, save this report as `docs/engineering/reports/SECDEF-HARDENING-v2-validation.md` and cross-link it from `SECDEF-HARDENING-v2.md`. No code or DB changes.
+### Confirmed Clean
+- RLS enabled on all 176 public tables.
+- No `SECURITY DEFINER` function is missing `search_path` (previous hardening still holds).
+- No anon `INSERT/UPDATE/DELETE` policy exists outside `push_subscriptions.anyone can subscribe`.
+- Cron/webhook endpoints all import a verified auth helper (spot-checked 40 files).
+
+---
+
+### No Code Changes Requested
+This is a read-only audit. To act on any finding, ask to switch to build mode and specify which items (e.g. "fix P1 #1 and P2 #5").
