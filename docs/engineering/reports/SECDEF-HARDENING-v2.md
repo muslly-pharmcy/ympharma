@@ -2,6 +2,7 @@
 
 **Date:** 2026-07-18
 **Scope:** SECURITY DEFINER functions in schema `public`
+**Post-apply validation:** [`SECDEF-HARDENING-v2-validation.md`](./SECDEF-HARDENING-v2-validation.md) — PASS, no regressions.
 **Change type:** Least-privilege revoke of anonymous EXECUTE. No signature, body, ownership, or `search_path` change.
 
 ## 1. Discovery snapshot (pre-change)
