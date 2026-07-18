@@ -1,9 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { requireCronAuth } from "@/middleware/cron-auth";
 
 export const Route = createFileRoute("/api/public/ai/content-tick")({
   server: {
     handlers: {
-      POST: async () => {
+      POST: async ({ request }) => {
+        const denied = requireCronAuth(request);
+        if (denied) {
+          console.warn("[content-tick] unauthorized cron attempt", {
+            ip: request.headers.get("x-forwarded-for") ?? "unknown",
+            ua: request.headers.get("user-agent") ?? "unknown",
+          });
+          return denied;
+        }
         try {
           const { generateDailyMedicalPost } = await import(
             "@/ai/content/medical-content-engine.server"
