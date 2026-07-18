@@ -1,53 +1,69 @@
-## Phase 3 — Batched Execution Plan (13 features)
 
-Note: `docs/engineering/` currently contains `ENGINEERING_CONTRACT.md`, `PROJECT_STATE.yaml`, and `plans/phase-3.yaml`. The referenced `STANDARDS.md`, `SECURITY.md`, and `ARCHITECTURE.md` do **not** exist — I'll follow existing project conventions (already internalized) instead of blocking on missing docs. `PROJECT_STATE.yaml` will not be modified (per contract).
+# Verified Audit — Read-Only Pass
 
-### Execution order (4 batches, stop-on-fail)
+Scope: **A + Minimal**. Zero code edits, zero migrations, zero destructive commands. Deliverable is a single fact-based report with prioritized findings.
 
-Each batch ends with `bunx tsgo --noEmit` then `bun run build`. If a gate fails, HALT and report — nothing after that batch runs.
+## What I will run (read-only)
 
-**Batch A — Foundations (no runtime risk)**
-1. `DEV-P3-003` — `.vscode/settings.json`, `.vscode/extensions.json`, `scripts/dev-setup.sh`
-2. `DOC-P4-001` — `README.md` (update), `docs/deployment.md`, `docs/security.md`
-3. `RISK-P3-005` — `docs/engineering/risk-register.md`
+1. **Build & Types**
+   - `bunx tsgo --noEmit` — full TypeScript check
+   - `bun run build` (if safe) — surface bundler errors only; no deploy
+   - `bunx eslint .` — lint findings (count + top rules)
 
-**Batch B — Observability & reliability libs (server-only, no schema)**
-4. `REL-P3-001` — `src/lib/workers/retry-config.ts`, `src/lib/workers/base-worker.ts`
-5. `QOS-P3-002` — `src/lib/monitoring/api-monitor.ts`, `src/lib/middleware/response-time.ts`
-6. `INT-P3-006` — `src/lib/health-checks/integrations.ts`, `src/routes/api/public/health.full-check.ts`
-7. `EFF-P4-004` — `src/lib/workers/optimization.ts`, `src/lib/workers/scheduler.ts`
+2. **Import graph guards**
+   - `bun scripts/check-imports.ts` — verify no `client.server` leaks into client bundle
+   - Grep for known risk patterns: `process.env` at module scope, `supabaseAdmin` in `.functions.ts`, `VITE_*` secrets
 
-**Batch C — DB + audit (single migration, additive only)**
-8. `AUDIT-P2-003` — migration for `admin_audit_log` (table + GRANT + RLS + `has_role('admin')` policy), `src/lib/audit/audit-log.ts`, `src/lib/middleware/audit-middleware.ts`
-9. `DB-P3-004` — migration adding `CREATE INDEX CONCURRENTLY IF NOT EXISTS` for hot-path columns identified from `supabase--slow_queries` (read-only probe first)
+3. **Database health (read-only)**
+   - `supabase--linter` — RLS gaps, permissive policies, exposed columns
+   - `supabase--read_query` for:
+     - Tables in `public` with RLS disabled
+     - Tables with `USING (true)` policies
+     - `SECURITY DEFINER` functions missing `search_path`
+     - `pg_cron` jobs + last 20 `cron.job_run_details` (fail rate, 401s)
+     - Unindexed FKs on hot tables (`ai_events`, `ai_decisions`, `agent_runs`, `orders`, `prescription_files`)
+   - `supabase--slow_queries` — top 20 by total time
 
-**Batch D — UX, tests, scaling**
-10. `PERF-P2-001` — `admin-dashboard.tsx` (lazy-load heavy panels via `React.lazy` + `Suspense`), `vite.config.ts` (manualChunks for admin bundle)
-11. `TEST-P4-002` — add focused unit tests under `src/lib/__tests__/` for retry-config, api-monitor, audit-log, integrations health; keep `vitest.config.ts` change minimal (coverage thresholds only)
-12. `SCALE-P4-003` — `src/lib/config/scaling.ts`, `docker-compose.scale.yml`
-13. `REPORT-P4-005` — `src/lib/dashboard/production-readiness.ts` (aggregates health + integrations + audit + cron), `src/routes/_authenticated/admin-production-readiness.tsx`
+4. **Runtime signals**
+   - `error_logs` last 24h — grouped by message
+   - `ai_world_health` current status per system
+   - `agent_runs` failure rate last 24h
+   - `operations_alerts` open items
 
-### Guardrails
-- No changes to `PROJECT_STATE.yaml`, generated Supabase files, or `src/pages/`.
-- No new secrets, no new cron jobs, no destructive SQL. `AUDIT` and `DB` migrations are additive (`IF NOT EXISTS`).
-- New admin route lives under `_authenticated/` and enforces `has_role('admin'|'owner')` server-side (no client-only gating).
-- `/api/public/health.full-check` returns only booleans + latency ms — no PII, no secrets, no version leaks.
-- Retry/backoff defaults: max 5, exp base 500ms, cap 30s, jitter — matches existing DLQ patterns.
-- Reuses existing infra (`alert_settings`, `ai_world_health`, `agent_runs`, `error_logs`) — no duplicate tables.
+5. **Security scan**
+   - `security--get_scan_results` — surface only; no fixes
 
-### Final report format (returned once at end)
+6. **Route & integration inventory**
+   - Count routes under `src/routes/` vs `_authenticated/`
+   - Public `/api/public/*` endpoints — verify each has auth/signature check declared (grep, not exec)
+   - Cross-check `docs/engineering/reports/route-audit-v2.md` for drift
+
+## Deliverable
+
+One file: `docs/engineering/reports/AUDIT-2026-07-18.md` containing:
+
+```text
+1. Executive summary (health score /100 with math shown)
+2. P0 blockers (verified — with evidence line/query result)
+3. P1 issues (verified)
+4. P2 / tech debt (verified)
+5. Unverified suspicions (explicitly labeled, not asserted)
+6. Deltas vs previous audits (AUDIT-2026-07-17, route-audit-v2)
+7. Recommended next scope (does NOT execute)
 ```
-STATUS: SUCCESS | PARTIAL | FAILED
-FILES CHANGED: <full list, grouped by feature>
-VALIDATION: <per-batch tsgo + build result>
-OUT_OF_SCOPE_CANDIDATES: <e.g. DB-P3-004 indexes needing prod EXPLAIN before merge>
-TRACE: <one-line per feature>
-```
 
-### What I will NOT do (and why)
-- Won't fabricate `STANDARDS.md` / `SECURITY.md` / `ARCHITECTURE.md` — not in the plan's file list.
-- Won't touch `PROJECT_STATE.yaml` — contract forbids it.
-- Won't add coverage-blocking thresholds that would fail current CI (start at reporting only).
-- Won't add indexes speculatively — will run `supabase--slow_queries` + `supabase--read_query` on `pg_stat_user_indexes` first and only add indexes justified by real hot paths; the rest go to `OUT_OF_SCOPE_CANDIDATES`.
+## Explicit non-goals this turn
 
-Approve to switch to build mode and execute Batch A → D in order.
+- No migrations
+- No file edits beyond writing the single report file
+- No cron changes, no secret rotation, no RLS changes
+- No "self-healing loop" — the directive's continuous SCAN→FIX→REPEAT is refused; each fix must be its own reviewed turn
+- No claims of "Production Ready" — the report ends with a score and gaps, not a verdict
+
+## Guardrails from prior turns
+
+- Every current-state claim in the report is backed by a tool call output quoted inline
+- Anything I cannot verify is placed under "Unverified suspicions", not asserted as fact
+- No new tables, no new agents, no new dashboards proposed inside the audit itself
+
+After you approve, I switch to build mode only to write the single markdown report.
