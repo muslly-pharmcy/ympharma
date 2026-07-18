@@ -118,6 +118,7 @@ import { Route as AuthenticatedAdminSlackTestRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminSecurityGuardianRouteImport } from './routes/_authenticated/admin-security-guardian'
 import { Route as AuthenticatedAdminSalesReportsRouteImport } from './routes/_authenticated/admin-sales-reports'
 import { Route as AuthenticatedAdminPushCampaignsRouteImport } from './routes/_authenticated/admin-push-campaigns'
+import { Route as AuthenticatedAdminProductionReadinessRouteImport } from './routes/_authenticated/admin-production-readiness'
 import { Route as AuthenticatedAdminMedicalContentRouteImport } from './routes/_authenticated/admin-medical-content'
 import { Route as AuthenticatedAdminMarketingCampaignsRouteImport } from './routes/_authenticated/admin-marketing-campaigns'
 import { Route as AuthenticatedAdminInventorySyncLogsRouteImport } from './routes/_authenticated/admin-inventory-sync-logs'
@@ -772,6 +773,12 @@ const AuthenticatedAdminPushCampaignsRoute =
   AuthenticatedAdminPushCampaignsRouteImport.update({
     id: '/admin-push-campaigns',
     path: '/admin-push-campaigns',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminProductionReadinessRoute =
+  AuthenticatedAdminProductionReadinessRouteImport.update({
+    id: '/admin-production-readiness',
+    path: '/admin-production-readiness',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdminMedicalContentRoute =
@@ -1430,6 +1437,7 @@ export interface FileRoutesByFullPath {
   '/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
   '/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
   '/admin-medical-content': typeof AuthenticatedAdminMedicalContentRoute
+  '/admin-production-readiness': typeof AuthenticatedAdminProductionReadinessRoute
   '/admin-push-campaigns': typeof AuthenticatedAdminPushCampaignsRoute
   '/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
   '/admin-security-guardian': typeof AuthenticatedAdminSecurityGuardianRoute
@@ -1636,6 +1644,7 @@ export interface FileRoutesByTo {
   '/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
   '/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
   '/admin-medical-content': typeof AuthenticatedAdminMedicalContentRoute
+  '/admin-production-readiness': typeof AuthenticatedAdminProductionReadinessRoute
   '/admin-push-campaigns': typeof AuthenticatedAdminPushCampaignsRoute
   '/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
   '/admin-security-guardian': typeof AuthenticatedAdminSecurityGuardianRoute
@@ -1844,6 +1853,7 @@ export interface FileRoutesById {
   '/_authenticated/admin-inventory-sync-logs': typeof AuthenticatedAdminInventorySyncLogsRoute
   '/_authenticated/admin-marketing-campaigns': typeof AuthenticatedAdminMarketingCampaignsRoute
   '/_authenticated/admin-medical-content': typeof AuthenticatedAdminMedicalContentRoute
+  '/_authenticated/admin-production-readiness': typeof AuthenticatedAdminProductionReadinessRoute
   '/_authenticated/admin-push-campaigns': typeof AuthenticatedAdminPushCampaignsRoute
   '/_authenticated/admin-sales-reports': typeof AuthenticatedAdminSalesReportsRoute
   '/_authenticated/admin-security-guardian': typeof AuthenticatedAdminSecurityGuardianRoute
@@ -2052,6 +2062,7 @@ export interface FileRouteTypes {
     | '/admin-inventory-sync-logs'
     | '/admin-marketing-campaigns'
     | '/admin-medical-content'
+    | '/admin-production-readiness'
     | '/admin-push-campaigns'
     | '/admin-sales-reports'
     | '/admin-security-guardian'
@@ -2258,6 +2269,7 @@ export interface FileRouteTypes {
     | '/admin-inventory-sync-logs'
     | '/admin-marketing-campaigns'
     | '/admin-medical-content'
+    | '/admin-production-readiness'
     | '/admin-push-campaigns'
     | '/admin-sales-reports'
     | '/admin-security-guardian'
@@ -2465,6 +2477,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin-inventory-sync-logs'
     | '/_authenticated/admin-marketing-campaigns'
     | '/_authenticated/admin-medical-content'
+    | '/_authenticated/admin-production-readiness'
     | '/_authenticated/admin-push-campaigns'
     | '/_authenticated/admin-sales-reports'
     | '/_authenticated/admin-security-guardian'
@@ -3499,6 +3512,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPushCampaignsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin-production-readiness': {
+      id: '/_authenticated/admin-production-readiness'
+      path: '/admin-production-readiness'
+      fullPath: '/admin-production-readiness'
+      preLoaderRoute: typeof AuthenticatedAdminProductionReadinessRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin-medical-content': {
       id: '/_authenticated/admin-medical-content'
       path: '/admin-medical-content'
@@ -4203,6 +4223,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminInventorySyncLogsRoute: typeof AuthenticatedAdminInventorySyncLogsRoute
   AuthenticatedAdminMarketingCampaignsRoute: typeof AuthenticatedAdminMarketingCampaignsRoute
   AuthenticatedAdminMedicalContentRoute: typeof AuthenticatedAdminMedicalContentRoute
+  AuthenticatedAdminProductionReadinessRoute: typeof AuthenticatedAdminProductionReadinessRoute
   AuthenticatedAdminPushCampaignsRoute: typeof AuthenticatedAdminPushCampaignsRoute
   AuthenticatedAdminSalesReportsRoute: typeof AuthenticatedAdminSalesReportsRoute
   AuthenticatedAdminSecurityGuardianRoute: typeof AuthenticatedAdminSecurityGuardianRoute
@@ -4243,6 +4264,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminMarketingCampaignsRoute:
     AuthenticatedAdminMarketingCampaignsRoute,
   AuthenticatedAdminMedicalContentRoute: AuthenticatedAdminMedicalContentRoute,
+  AuthenticatedAdminProductionReadinessRoute:
+    AuthenticatedAdminProductionReadinessRoute,
   AuthenticatedAdminPushCampaignsRoute: AuthenticatedAdminPushCampaignsRoute,
   AuthenticatedAdminSalesReportsRoute: AuthenticatedAdminSalesReportsRoute,
   AuthenticatedAdminSecurityGuardianRoute:
