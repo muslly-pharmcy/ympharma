@@ -6,7 +6,7 @@
 //
 // Auth: x-cron-secret. Schedule recommendation: every 15 minutes.
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyCronSecret } from "@/lib/cron-auth.server";
+import { requireCronAuth as verifyCronSecret } from "@/middleware/cron-auth";
 
 const MAX_ATTEMPTS = 5;
 const BATCH_LIMIT = 25;

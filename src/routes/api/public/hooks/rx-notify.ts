@@ -11,7 +11,7 @@
 // contains at least one phone number.
 
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyCronSecret } from "@/lib/cron-auth.server";
+import { requireCronAuth as verifyCronSecret } from "@/middleware/cron-auth";
 
 type Setting = { key: string; value: unknown };
 

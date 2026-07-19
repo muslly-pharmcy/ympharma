@@ -2,7 +2,7 @@
 // polluting alert_dedupe or operations_alerts_v14.
 // Auth: x-cron-secret. Remove when no longer needed.
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyCronSecret } from "@/lib/cron-auth.server";
+import { requireCronAuth as verifyCronSecret } from "@/middleware/cron-auth";
 import { sendSlack, sendSms, sendWhatsApp } from "@/lib/alert-dispatch.server";
 
 const REPORT_URL = "https://muslly.com/admin-agent-runs";

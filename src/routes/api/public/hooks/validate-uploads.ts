@@ -4,7 +4,7 @@
 
 import { createFileRoute } from "@tanstack/react-router";
 import { validateStorageObject } from "@/lib/upload-validation.functions";
-import { verifyCronSecret } from "@/lib/cron-auth.server";
+import { requireCronAuth as verifyCronSecret } from "@/middleware/cron-auth";
 
 export const Route = createFileRoute("/api/public/hooks/validate-uploads")({
   server: {

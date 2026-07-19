@@ -6,7 +6,7 @@
 // F-07: drafts inserted one-by-one to guarantee correct decision↔post linkage
 //       (no positional-array assumption).
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyCronSecret } from "@/lib/cron-auth.server";
+import { requireCronAuth as verifyCronSecret } from "@/middleware/cron-auth";
 
 const PUBLISH_CONCURRENCY = 3;
 

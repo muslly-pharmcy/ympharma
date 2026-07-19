@@ -2,7 +2,7 @@
 // alerts via email + Slack + SMS + WhatsApp, with dedupe via alert_dedupe + operations_alerts_v14.
 // Schedule: every 30 minutes. Auth: x-cron-secret.
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyCronSecret } from "@/lib/cron-auth.server";
+import { requireCronAuth as verifyCronSecret } from "@/middleware/cron-auth";
 import { sendSlack, sendSms, sendWhatsApp, severityAtLeast } from "@/lib/alert-dispatch.server";
 
 const REPORT_URL = "https://muslly.com/admin-agent-runs";

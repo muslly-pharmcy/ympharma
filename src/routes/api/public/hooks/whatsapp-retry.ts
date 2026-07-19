@@ -4,7 +4,7 @@
 // attempts / next_retry_at / status. Exponential backoff: 5m, 15m, 45m.
 
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyCronSecret } from "@/lib/cron-auth.server";
+import { requireCronAuth as verifyCronSecret } from "@/middleware/cron-auth";
 
 const MAX_ATTEMPTS = 3;
 const BACKOFF_MIN = [5, 15, 45]; // minutes per attempt #

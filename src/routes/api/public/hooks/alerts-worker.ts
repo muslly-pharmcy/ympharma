@@ -9,7 +9,7 @@
 // via the service role.
 
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyCronSecret } from "@/lib/cron-auth.server";
+import { requireCronAuth as verifyCronSecret } from "@/middleware/cron-auth";
 
 const MAX_BATCH = 25;
 const MAX_ATTEMPTS = 4;

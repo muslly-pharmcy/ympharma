@@ -16,7 +16,7 @@
 //   );
 
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyCronSecret } from "@/lib/cron-auth.server";
+import { requireCronAuth as verifyCronSecret } from "@/middleware/cron-auth";
 
 const STALE_WINDOW_MIN = Number(process.env.WA_STALE_WINDOW_MIN ?? 30);
 const GRACE_SECONDS = 30;

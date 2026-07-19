@@ -2,7 +2,7 @@
 // raises a deduped operations_alerts_v14 row per fingerprint that crosses the threshold.
 // Read-only on error_logs (no auto-resolution). Auth: x-cron-secret.
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyCronSecret } from "@/lib/cron-auth.server";
+import { requireCronAuth as verifyCronSecret } from "@/middleware/cron-auth";
 import { hourlyCronExpired, expiredResponse } from "@/lib/hourly-guard";
 
 const SPIKE_THRESHOLD = 5; // distinct rows per signature within the hour

@@ -3,7 +3,7 @@
 // Does NOT delete data; deletion stays with the dedicated validate-uploads-12h job.
 // Auth: x-cron-secret.
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyCronSecret } from "@/lib/cron-auth.server";
+import { requireCronAuth as verifyCronSecret } from "@/middleware/cron-auth";
 import { hourlyCronExpired, expiredResponse } from "@/lib/hourly-guard";
 
 export const Route = createFileRoute("/api/public/hooks/hourly-validation-audit")({

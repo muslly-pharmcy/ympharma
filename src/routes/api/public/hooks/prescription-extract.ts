@@ -1,7 +1,7 @@
 // Phase 7 — Public cron-triggered worker for prescription extractions.
 // Auth: x-cron-secret header (standard). Called by pg_cron every minute.
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyCronSecret } from "@/lib/cron-auth.server";
+import { requireCronAuth as verifyCronSecret } from "@/middleware/cron-auth";
 
 export const Route = createFileRoute("/api/public/hooks/prescription-extract")({
   server: {

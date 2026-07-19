@@ -1,7 +1,7 @@
 // Full health-check endpoint — protected by CRON_SECRET (server-only) to match
 // the rest of the cron/hook authentication pattern.
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyCronSecret } from "@/lib/cron-auth.server";
+import { requireCronAuth as verifyCronSecret } from "@/middleware/cron-auth";
 
 export const Route = createFileRoute("/api/public/health/full-check")({
   server: {
