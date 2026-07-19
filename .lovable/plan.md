@@ -1,48 +1,111 @@
-## P1 #1 — SECURITY DEFINER anon EXECUTE exposure
 
-### Verification (read-only, just executed)
+# P1 #3 — Public POST Endpoint Security Analysis (READ-ONLY)
 
-Live query against `pg_proc` / `has_function_privilege('anon', …, 'EXECUTE')` for every `SECURITY DEFINER` function in `public`:
+Scope: 5 endpoints under `src/routes/api/public/**`. No modifications.
 
-```
-pn_get_pharmacy_public
-pn_list_pharmacy_products
-pn_search_medicine_nearby
-search_medicines_public
-```
+## Shared baseline
+- All live under `/api/public/*` → **published-site auth bypass is intentional**; each handler is responsible for its own guardrails.
+- **No app-level rate limiting exists** (`no-backend-rate-limiting` policy — no primitive available). No IP throttling, no per-session quota, no CAPTCHA anywhere.
+- All 5 use **Zod validation** with bounded fields.
+- Writes use `supabaseAdmin` (service role) → RLS bypassed; validation + auth are the only gate.
 
-Exactly **4 rows**, and every one matches the intentional keep-list from `SECDEF-HARDENING-v2.md` (public catalog / pharmacy discovery reads used by anonymous visitors on `/find-care` and the medicine search box).
+---
 
-### Analysis
+## 1. `analytics/ingest.ts`
 
-- Linter warnings (`SUPA_anon_security_definer_function_executable × 4`) are informational for these four — they are documented as anon-callable by design.
-- No unexpected function is exposed to `anon`.
-- All four are read-only, return only public catalog data, and have `search_path` pinned + `postgres` ownership (verified in the prior hardening report).
+| Aspect | State |
+|---|---|
+| Auth | None (anonymous by design — visitor analytics) |
+| Rate limit | None |
+| Input validation | Zod: ≤50 events, name ≤64, path ≤512, props scalar-only |
+| Payload cap | **20 KB hard cap** (checked pre-parse) |
+| DB write | None currently (only `console.log`) |
+| Abuse scenarios | Log-flooding / cost inflation via edge invocation spam; noisy console |
+| **Risk** | **LOW** (no DB write, size-capped) |
+| Minimal fix | Defer until endpoint starts writing to DB; then add per-IP token bucket or drop to `204` faster. |
 
-### Recommended action
+---
 
-**No code or SQL change.** The finding is already at its target state. To close it cleanly and stop it re-surfacing in future audits:
+## 2. `engagement/track.ts`
 
-1. Add a short "accepted risk" note to `docs/engineering/reports/SECDEF-HARDENING-v2.md` listing the 4 keep-list functions with a one-line justification each.
-2. Mark the 4 corresponding linter items as "ignored — intended" via `security--manage_security_finding` so the scanner stops flagging them (keeps the signal clean for real regressions).
+| Aspect | State |
+|---|---|
+| Auth | None (open pixel-style tracker) |
+| Rate limit | None |
+| Input validation | Zod: `deliveryId` uuid, `event` enum |
+| Payload cap | None explicit (Zod rejects extras, but no size guard) |
+| DB write | `campaign_deliveries.update ... .is(field, null)` — first-write-wins, idempotent |
+| Abuse scenarios | Attacker who guesses/enumerates delivery UUIDs can falsify open/click metrics; unlimited request volume |
+| **Risk** | **MEDIUM** — UUIDs are unguessable in practice but metric-poisoning is possible with leaked IDs; no size guard |
+| Minimal fix | Add ~2 KB `request.text()` cap; consider signing `deliveryId` in outbound links (HMAC token) so only recipients can hit `track`. |
 
-That is the entire change for P1 #1 — pure documentation + scanner state, no DB migration, no code edits, no permission change.
+---
 
-### Validation plan
+## 3. `contact.ts`
 
-- Re-run the same `pg_proc` query after the note is added → expect the same 4 rows.
-- Re-run `supabase--linter` → the 4 items should be gone from the active list once marked ignored.
-- No TS / build / RPC surface touched, so no typecheck or runtime regression risk.
+| Aspect | State |
+|---|---|
+| Auth | None (public form) |
+| Rate limit | None |
+| Input validation | Zod: name 2–100, email ≤255, message 10–1000 |
+| Payload cap | None explicit (relies on Zod field caps → effectively ~1.5 KB) |
+| DB write | `contact_messages.insert` with hashed IP + UA |
+| Abuse scenarios | Spam floods → inbox pollution + storage growth; no CAPTCHA; email field is not validated to be reachable |
+| **Risk** | **MEDIUM-HIGH** — cheapest DoS vector: unlimited inserts into ops-visible table |
+| Minimal fix | Add per-IP-hash cooldown via DB check (e.g. reject if same `ip_hash` inserted in last 60 s); OR add hCaptcha/Turnstile; OR read-only honeypot field. |
 
-### After this
+---
 
-Stop and wait for approval before touching P1 #2 (`verifyCronSecret` vs `requireCronAuth` consolidation), per your "one finding at a time" rule.
+## 4. `doctor-join.ts`
 
-### Files that would change
+| Aspect | State |
+|---|---|
+| Auth | None |
+| Rate limit | None |
+| Input validation | Zod: strict field bounds; `photo_data_url` capped at **2.5 MB** as base64 string |
+| Payload cap | None on outer body (Zod field cap ≈ 2.5 MB effective) |
+| DB write | `contact_messages.insert` (folded structured payload into `message`) |
+| Abuse scenarios | Same as `contact` plus **2.5 MB payload × N** — bandwidth + DB row bloat (though `message` is truncated to 1000 chars, the request is fully parsed first); fake doctor submissions |
+| **Risk** | **HIGH** — largest attack surface: big payload + no rate limit + writes to ops table |
+| Minimal fix | Add outer `request.text()` cap (~3 MB) with early 413; per-IP cooldown; reject if `has_photo=true` and photo missing MIME `image/*` prefix; verify via manual review queue before publishing. |
 
-- `docs/engineering/reports/SECDEF-HARDENING-v2.md` (append "Accepted anon-exposed functions" subsection)
-- Scanner state only (via `security--manage_security_finding`), no source files.
+---
 
-### Remaining risk for this finding
+## 5. `hooks/social-callback.ts`
 
-None beyond the accepted 4 public read helpers. Any future `SECURITY DEFINER` function added to `public` will re-trigger the linter unless it also lands on the documented keep-list, which is the desired behavior.
+| Aspect | State |
+|---|---|
+| Auth | **HMAC-SHA256** over raw body via `verifyN8nSignature` (constant-time expected) |
+| Rate limit | None |
+| Input validation | Zod discriminated union; strict per-event schema |
+| Payload cap | None explicit |
+| DB write | `social_posts` update + `social_post_attempts` insert (**including rejected calls with `hmacValid=false`**) |
+| Abuse scenarios | **Log-table flooding**: unauthenticated attacker can spam requests with any `post_id` in JSON; each rejection still inserts a row into `social_post_attempts` (bloat + cost). Also: HMAC helper trust — must be timing-safe + length-guarded. |
+| **Risk** | **MEDIUM** — auth is correct for happy path, but rejection logging is unauthenticated write amplification |
+| Minimal fix | (a) Only log rejected callbacks when `post_id` exists AND is valid uuid AND resolves to a real post; (b) add raw-body size cap (~64 KB); (c) confirm `verifyN8nSignature` uses `timingSafeEqual` with length guard (tracked separately in P1 audit). |
+
+---
+
+## Summary matrix
+
+| # | Endpoint | Auth | Rate limit | Size cap | DB write | Risk |
+|---|---|---|---|---|---|---|
+| 1 | analytics/ingest | none | none | 20 KB ✅ | no | **LOW** |
+| 2 | engagement/track | none | none | none | yes (idempotent) | **MEDIUM** |
+| 3 | contact | none | none | none | yes | **MEDIUM-HIGH** |
+| 4 | doctor-join | none | none | none (2.5 MB field) | yes | **HIGH** |
+| 5 | hooks/social-callback | HMAC ✅ | none | none | yes (even on reject) | **MEDIUM** |
+
+## Cross-cutting gaps
+- No shared abuse-protection primitive. Per `no-backend-rate-limiting` policy, real rate limiting requires user confirmation before ad-hoc implementation.
+- No outer `request.text()`/`request.json()` size guard on 4 of 5 endpoints (only `analytics/ingest` has one).
+- Rejected-request DB writes on `social-callback` are an amplification vector.
+
+## Recommended execution order (when approved)
+1. **doctor-join** — add 3 MB body cap + IP-hash cooldown (highest-impact, smallest change).
+2. **contact** — add IP-hash cooldown (60 s) reusing existing `ip_hash` column.
+3. **social-callback** — validate `post_id` shape before rejected-attempt insert; add 64 KB raw cap.
+4. **engagement/track** — 2 KB body cap; consider HMAC-signed delivery tokens (larger design change — defer).
+5. **analytics/ingest** — no action until it starts persisting.
+
+Await your GO on which items to implement (any subset). Nothing has been modified.
