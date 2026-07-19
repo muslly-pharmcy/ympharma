@@ -9214,6 +9214,22 @@ export type Database = {
       }
     }
     Views: {
+      ai_decisions_unified: {
+        Row: {
+          agent_code: string | null
+          confidence: number | null
+          created_at: string | null
+          decision: Json | null
+          event_id: string | null
+          event_name: string | null
+          id: string | null
+          latency_ms: number | null
+          outcome: string | null
+          reasoning: string | null
+          source: string | null
+        }
+        Relationships: []
+      }
       audit_logs_unified: {
         Row: {
           details: Json | null
