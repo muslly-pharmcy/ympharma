@@ -54,20 +54,23 @@ export const Route = createFileRoute("/api/public/hooks/hourly-self-heal")({
             else summary.reservations_expired = expired?.length ?? 0;
           } catch (e) { summary.errors.push(`reservations-block: ${(e as Error).message}`); }
 
-          // 3) Re-queue low-retry DLQ items
+          // 3) DLQ replay — re-insert eligible rows into agent_events and
+          //    mark them resolved. Bounded by DLQ_BATCH; rows with
+          //    retry_count>=5 are skipped so poison messages don't loop.
           try {
-            const { data: dlq } = await supabaseAdmin
+            const { DLQReplayEngine } = await import("@/core/dlq/DLQReplayEngine");
+            const { data: eligible } = await supabaseAdmin
               .from("agent_events_dlq")
               .select("id")
               .lt("retry_count", 5)
               .is("resolved_at", null)
+              .order("failed_at", { ascending: true })
               .limit(DLQ_BATCH);
-            for (const row of dlq ?? []) {
-              const { error: upErr } = await supabaseAdmin
-                .from("agent_events_dlq")
-                .update({ retry_count: ((row as { retry_count?: number }).retry_count ?? 0) + 1 })
-                .eq("id", row.id);
-              if (!upErr) summary.dlq_requeued += 1;
+            const engine = new DLQReplayEngine("cron:hourly-self-heal");
+            for (const row of eligible ?? []) {
+              const res = await engine.replayOne(row.id);
+              if (res.ok) summary.dlq_requeued += 1;
+              else summary.errors.push(`dlq ${row.id}: ${res.error}`);
             }
           } catch (e) { summary.errors.push(`dlq-block: ${(e as Error).message}`); }
 
