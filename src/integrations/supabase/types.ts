@@ -933,6 +933,7 @@ export type Database = {
       }
       ai_events: {
         Row: {
+          correlation_id: string | null
           created_at: string | null
           error_message: string | null
           event_type: string
@@ -941,10 +942,12 @@ export type Database = {
           priority: string | null
           processed_at: string | null
           source: string
+          source_event_id: string | null
           status: string | null
           target_agent: string | null
         }
         Insert: {
+          correlation_id?: string | null
           created_at?: string | null
           error_message?: string | null
           event_type: string
@@ -953,10 +956,12 @@ export type Database = {
           priority?: string | null
           processed_at?: string | null
           source: string
+          source_event_id?: string | null
           status?: string | null
           target_agent?: string | null
         }
         Update: {
+          correlation_id?: string | null
           created_at?: string | null
           error_message?: string | null
           event_type?: string
@@ -965,6 +970,7 @@ export type Database = {
           priority?: string | null
           processed_at?: string | null
           source?: string
+          source_event_id?: string | null
           status?: string | null
           target_agent?: string | null
         }
