@@ -1,7 +1,7 @@
 // Daily retention sweep — runs apply_retention_policies() and cleanup_idempotency_keys().
 // Auth: x-cron-secret. Idempotent; safe to run multiple times per day.
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyCronSecret } from "@/lib/cron-auth.server";
+import { requireCronAuth as verifyCronSecret } from "@/middleware/cron-auth";
 
 export const Route = createFileRoute("/api/public/hooks/retention-sweep")({
   server: {

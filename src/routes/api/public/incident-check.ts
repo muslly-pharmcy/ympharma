@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { dispatchOpenIncidentAlerts } from "@/lib/incident-alerts.functions";
-import { verifyCronSecret } from "@/lib/cron-auth.server";
+import { requireCronAuth as verifyCronSecret } from "@/middleware/cron-auth";
 
 /**
  * Called periodically by pg_cron (or external scheduler) to dispatch

@@ -4,7 +4,7 @@
 //  3) re-queue agent_events_dlq items under retry_count<5 by clearing failed_at
 // Auth: x-cron-secret.
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyCronSecret } from "@/lib/cron-auth.server";
+import { requireCronAuth as verifyCronSecret } from "@/middleware/cron-auth";
 import { hourlyCronExpired, expiredResponse } from "@/lib/hourly-guard";
 
 const SOCIAL_BATCH = 10;

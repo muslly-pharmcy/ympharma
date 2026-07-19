@@ -1,7 +1,7 @@
 // src/routes/api/public/hooks/dlq-alerts.ts
 // DLQ ALERTS — uses real agent_events_dlq columns + operations_alerts_v14
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyCronSecret } from "@/lib/cron-auth.server";
+import { requireCronAuth as verifyCronSecret } from "@/middleware/cron-auth";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function runDlqAlertCheck(supabaseAdmin: any) {

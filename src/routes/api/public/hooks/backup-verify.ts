@@ -1,7 +1,7 @@
 // Daily backup verification hook — invoked by pg_cron via pg_net.
 // Auth: x-cron-secret. Persists run history and alerts on integrity failures.
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyCronSecret } from "@/lib/cron-auth.server";
+import { requireCronAuth as verifyCronSecret } from "@/middleware/cron-auth";
 import { withObservability } from "@/core/observability/withObservability";
 import { BackupVerificationService } from "@/core/backup/BackupVerificationService";
 import { logger } from "@/core/observability/Logger";

@@ -3,7 +3,7 @@
 // Each step is independent and never blocks the others (P3-GATE-05).
 // Protected by the shared CRON_SECRET.
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyCronSecret } from "@/lib/cron-auth.server";
+import { requireCronAuth as verifyCronSecret } from "@/middleware/cron-auth";
 
 export const Route = createFileRoute("/api/public/hooks/agent-maintenance")({
   server: {

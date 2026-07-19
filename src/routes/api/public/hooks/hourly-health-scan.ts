@@ -2,7 +2,7 @@
 // raises a deduped operations_alerts_v14 row when degraded/failed.
 // Auth: x-cron-secret. End-date: see HOURLY_CRON_END_AT.
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyCronSecret } from "@/lib/cron-auth.server";
+import { requireCronAuth as verifyCronSecret } from "@/middleware/cron-auth";
 import { hourlyCronExpired, expiredResponse } from "@/lib/hourly-guard";
 
 export const Route = createFileRoute("/api/public/hooks/hourly-health-scan")({

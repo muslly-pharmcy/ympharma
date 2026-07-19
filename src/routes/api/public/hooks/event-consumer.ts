@@ -9,7 +9,7 @@
 // side-effects per event. Today the consumer's job is just to drain.
 
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyCronSecret } from "@/lib/cron-auth.server";
+import { requireCronAuth as verifyCronSecret } from "@/middleware/cron-auth";
 
 type ClaimedEvent = {
   id: string;

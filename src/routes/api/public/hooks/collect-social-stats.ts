@@ -2,7 +2,7 @@
 // n8n then calls /api/public/hooks/social-callback with event=stats (HMAC-signed) per post.
 // Protected by the project's shared CRON_SECRET (x-cron-secret header).
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyCronSecret } from "@/lib/cron-auth.server";
+import { requireCronAuth as verifyCronSecret } from "@/middleware/cron-auth";
 
 export const Route = createFileRoute("/api/public/hooks/collect-social-stats")({
   server: {

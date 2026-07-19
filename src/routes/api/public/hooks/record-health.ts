@@ -2,7 +2,7 @@
 // Schedule recommendation: every 5 minutes.
 // Auth: x-cron-secret (verifyCronSecret).
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyCronSecret } from "@/lib/cron-auth.server";
+import { requireCronAuth as verifyCronSecret } from "@/middleware/cron-auth";
 
 export const Route = createFileRoute("/api/public/hooks/record-health")({
   server: {
