@@ -1,111 +1,109 @@
 
-# P1 #3 — Public POST Endpoint Security Analysis (READ-ONLY)
+# TITANUS AI BRAIN — Read-Only Architecture Audit
 
-Scope: 5 endpoints under `src/routes/api/public/**`. No modifications.
+Scope: discovery only. No code, DB, permission, or workflow changes. Evidence gathered from `src/ai/**`, `src/modules/ai-brain/**`, `src/security/ai/**`, cron catalog, and live queries against `ai_agents`, `ai_events`, `ai_decisions`, `sun_decisions`.
 
-## Shared baseline
-- All live under `/api/public/*` → **published-site auth bypass is intentional**; each handler is responsible for its own guardrails.
-- **No app-level rate limiting exists** (`no-backend-rate-limiting` policy — no primitive available). No IP throttling, no per-session quota, no CAPTCHA anywhere.
-- All 5 use **Zod validation** with bounded fields.
-- Writes use `supabaseAdmin` (service role) → RLS bypassed; validation + auth are the only gate.
+## 1. AI Architecture Map
+
+Two parallel brains coexist:
+
+```text
+                    ┌──────────────────────────────┐
+  events ─────────► │  src/ai/core (Event Bus v1)  │──► ai_events / ai_decisions
+                    │  register.ts → 13 agents     │
+                    └──────────────────────────────┘
+                    ┌──────────────────────────────┐
+  cron (1 min) ───► │  src/ai/sun-core (Sun Engine)│──► sun_decisions / sun_memory
+                    │  event-router → 7 DB agents  │    ai_memory / ai_neural_memory
+                    └──────────────────────────────┘
+  extra layer:       src/modules/ai-brain (SuperBrainSovereign, decide())
+  security layer:    src/security/ai (guardian, RLS monitor, secret guardian)
+```
+
+- Orchestration cron: `ai-sun-tick` (every minute), `ai-orchestrator-tick` (every 5 min), `run-all-agents-12h`, plus 42 other jobs (45 total, all `active=true`).
+- Tools registry: 8 tools (`pharmacy/*`, `inventory/*`, `customer/*`) via `src/ai/tools/register.ts` — separate from `ai/core` agent registry.
+- Memory stack: `ai_memory`, `ai_neural_memory`, `ai_neural_synaptic_log`, `sun_memory`, plus pgvector store (from earlier phases).
+
+## 2. Current Active AI Components
+
+- **Registered in code (`src/ai/agents/register.ts`)** — 13 agents: pharmacist_agent, prescription_agent, interaction_agent, patient_companion_agent, inventory_agent, expiry_agent, procurement_agent, customer_agent, support_agent, sales_agent, marketing_agent, guardian_agent, brain_agent.
+- **Registered in DB (`ai_agents`)** — 7 rows, all `enabled=true`, `health=healthy`: pharmacist, pharmacist_agent, customer_agent, customer_galaxy, inventory, revenue, security_guardian.
+- **Tools active** — 8 (product-search, prescription-check, drug-info, stock-query, reorder, expiry-scan, whatsapp-send, notification).
+- **Cron active** — 45 jobs including sun/orchestrator/business/content/ranking ticks, backups, health, retention, engagement, WhatsApp retry.
+- **UI surfaces** — `/admin-ai-command`, `/admin-ai-brain`, `/admin-sovereign`, `/admin-agent-runs`, `/admin-production-readiness`.
+
+## 3. Inactive / Disconnected Components
+
+- `ai_events` table: **0 rows in any status** — the Event Bus in `src/ai/core/event-bus.ts` is instantiated but nothing publishes. Sun engine bypasses it and reads a different event source.
+- `ai_decisions`: **0 rows in last 7 days** — Decision Engine's `decideAndPersist()` path is not being exercised by the live sun-tick loop, which writes to `sun_decisions` instead.
+- Code-side agents not present in `ai_agents` DB: prescription_agent, interaction_agent, patient_companion_agent, expiry_agent, procurement_agent, support_agent, sales_agent, marketing_agent, guardian_agent, brain_agent (10 of 13) — invisible to `/admin-ai-command`.
+- DB-side agents not present in code registry: `pharmacist` (naked), `customer_galaxy`, `inventory` (naked), `revenue`, `security_guardian` — dispatchable by sun engine but no executor class to run them.
+- `SuperBrainSovereign` (`src/modules/ai-brain`) wrapped as `BrainAgent` but has no event subscription; only reachable via manual dashboard call.
+- Tool registry (`src/ai/tools/register.ts`) is not wired into agent `.execute()` — tools are addressable but agents do not call the registry.
+
+## 4. Broken Connections
+
+1. **Event Bus vs Sun Engine split** — `EventBus.publish()` writes `ai_events`; sun-tick reads a different event feed and writes `sun_decisions`. Producers and consumers never meet.
+2. **Agent naming drift** — code names use `_agent` suffix; DB rows use bare names. Router (`event-router.ts`) maps to code names; sun engine updates DB rows by code name → `last_dispatched_at` never changes (all `nil`).
+3. **Duplicate agents** — `pharmacist` + `pharmacist_agent`; `customer_agent` + `customer_galaxy`. Same event routes to two rows / two implementations.
+4. **Decision persistence divergence** — `ai_decisions` (used by dashboards) vs `sun_decisions` (used by engine). Dashboards under-report activity.
+5. **Tools ↔ agents unwired** — agents don't dispatch through `ToolRegistry`, so permission guards and `ai_tool_events` telemetry are dormant.
+6. **`last_dispatched_at` = null everywhere** — no evidence the sun engine ever wrote to `ai_agents` in production despite cron running per minute; likely silent failure or unmatched `code` filter.
+
+## 5. Security Concerns
+
+- Prior SECDEF hardening (v2) is intact; no new anon-executable functions observed. Auditable via `docs/engineering/reports/SECDEF-HARDENING-v2.md`.
+- `ai_events`, `ai_decisions`, `sun_decisions` policies: 1 policy each — need re-verification that only `service_role` writes (deferred to Phase 6 of activation).
+- `BrainAgent` / `decide()` accepts free-text `userInput` — no PII redaction wired in this path (`AISafetyGuard`/`PIIRedactor` exist under `src/core/ai-safety/` but not invoked from sun-tick).
+
+## 6. Performance Concerns
+
+- 45 active cron jobs, several at `* * * * *` (sun-tick, event-consumer-tick, staff-alerts, rx-notify) with no observed decisions — silent no-op loops burning DB round-trips.
+- `sun_decisions` inserts one row per agent per event, unbounded — no retention policy visible in `retention_policies` for this table (needs verification).
+- No composite index audit performed on `ai_events(status, created_at)` in this pass.
+
+## 7. Missing Infrastructure
+
+- Unified event contract between publishers (routes, triggers) and consumers (sun-tick, event-consumer-tick).
+- Agent-name canonicalization (code ↔ DB).
+- Tool dispatch inside agent `.execute()` bodies.
+- Feedback / self-learning loop: `agent_feedback_events` and `confidence_calibration_log` tables exist but no writer.
+- Brand asset inventory: only `almusalli-golden-mark.png` + `almusalli-golden-og.jpeg` + `almosly-logo.png` present under `src/assets/`; email templates, PDF reports, WhatsApp templates were not verified for logo usage in this read-only pass.
+
+## 8. AI Activation Readiness Score
+
+**48 / 100**
+
+| Dimension | Score | Notes |
+|---|---|---|
+| Registry & agents | 6/15 | 13 in code, 7 in DB, 10 unmatched |
+| Event flow | 3/15 | Bus empty, sun path opaque |
+| Decision persistence | 4/10 | Two tables, dashboards misaligned |
+| Memory & knowledge | 8/10 | Tables + pgvector present, writers wired |
+| Tools | 4/10 | Registered but not dispatched by agents |
+| Cron & automation | 8/10 | Comprehensive but noisy |
+| Security | 8/10 | SECDEF v2 clean; PII path gap |
+| Observability | 4/10 | `agent_runs` populated, decisions not |
+| Brand integration | 3/10 | Assets exist; template usage unverified |
+
+## 9. Recommended Activation Roadmap (proposal only)
+
+1. **Canonicalize agent naming** — pick one convention, add compatibility view; align `ai_agents.code` with `register.ts`.
+2. **Unify event flow** — pick `ai_events` as the single bus; retire sun-engine's private queue OR add an adapter so sun-tick reads `ai_events`.
+3. **Unify decision store** — write to `ai_decisions` from sun-tick (or make `sun_decisions` a materialized view over it).
+4. **Wire tools into agents** — invoke `ToolRegistry` from each agent `.execute()`; enforce `tool-permission`.
+5. **Enable feedback loop** — populate `agent_feedback_events` from user-visible outcomes; nightly rollup into `confidence_calibration_log`.
+6. **Inject `AISafetyGuard`** on any agent that consumes user input (`brain_agent`, `customer_agent`, `support_agent`).
+7. **Cron rationalization** — audit `*_tick` jobs writing zero rows; consolidate or lower cadence.
+8. **Brand pass** — verify logo in email templates, PDF, WhatsApp templates, admin chrome; document a single brand-guidelines file.
+
+## 10. Priority Order
+
+- **P0 Critical** — (1) agent-name drift, (2) event bus vs sun-engine split. Both block any real activation; every downstream metric is wrong until fixed.
+- **P1 High** — (3) decision-store unification, (4) tools ↔ agents wiring, (6) AI safety guard on user-input paths.
+- **P2 Medium** — (5) feedback / self-learning wiring, (7) cron rationalization, retention on `sun_decisions`.
+- **P3 Low** — (8) brand consistency audit across templates, dashboard copy alignment, dead-code removal in `src/modules/ai-brain` if superseded.
 
 ---
 
-## 1. `analytics/ingest.ts`
-
-| Aspect | State |
-|---|---|
-| Auth | None (anonymous by design — visitor analytics) |
-| Rate limit | None |
-| Input validation | Zod: ≤50 events, name ≤64, path ≤512, props scalar-only |
-| Payload cap | **20 KB hard cap** (checked pre-parse) |
-| DB write | None currently (only `console.log`) |
-| Abuse scenarios | Log-flooding / cost inflation via edge invocation spam; noisy console |
-| **Risk** | **LOW** (no DB write, size-capped) |
-| Minimal fix | Defer until endpoint starts writing to DB; then add per-IP token bucket or drop to `204` faster. |
-
----
-
-## 2. `engagement/track.ts`
-
-| Aspect | State |
-|---|---|
-| Auth | None (open pixel-style tracker) |
-| Rate limit | None |
-| Input validation | Zod: `deliveryId` uuid, `event` enum |
-| Payload cap | None explicit (Zod rejects extras, but no size guard) |
-| DB write | `campaign_deliveries.update ... .is(field, null)` — first-write-wins, idempotent |
-| Abuse scenarios | Attacker who guesses/enumerates delivery UUIDs can falsify open/click metrics; unlimited request volume |
-| **Risk** | **MEDIUM** — UUIDs are unguessable in practice but metric-poisoning is possible with leaked IDs; no size guard |
-| Minimal fix | Add ~2 KB `request.text()` cap; consider signing `deliveryId` in outbound links (HMAC token) so only recipients can hit `track`. |
-
----
-
-## 3. `contact.ts`
-
-| Aspect | State |
-|---|---|
-| Auth | None (public form) |
-| Rate limit | None |
-| Input validation | Zod: name 2–100, email ≤255, message 10–1000 |
-| Payload cap | None explicit (relies on Zod field caps → effectively ~1.5 KB) |
-| DB write | `contact_messages.insert` with hashed IP + UA |
-| Abuse scenarios | Spam floods → inbox pollution + storage growth; no CAPTCHA; email field is not validated to be reachable |
-| **Risk** | **MEDIUM-HIGH** — cheapest DoS vector: unlimited inserts into ops-visible table |
-| Minimal fix | Add per-IP-hash cooldown via DB check (e.g. reject if same `ip_hash` inserted in last 60 s); OR add hCaptcha/Turnstile; OR read-only honeypot field. |
-
----
-
-## 4. `doctor-join.ts`
-
-| Aspect | State |
-|---|---|
-| Auth | None |
-| Rate limit | None |
-| Input validation | Zod: strict field bounds; `photo_data_url` capped at **2.5 MB** as base64 string |
-| Payload cap | None on outer body (Zod field cap ≈ 2.5 MB effective) |
-| DB write | `contact_messages.insert` (folded structured payload into `message`) |
-| Abuse scenarios | Same as `contact` plus **2.5 MB payload × N** — bandwidth + DB row bloat (though `message` is truncated to 1000 chars, the request is fully parsed first); fake doctor submissions |
-| **Risk** | **HIGH** — largest attack surface: big payload + no rate limit + writes to ops table |
-| Minimal fix | Add outer `request.text()` cap (~3 MB) with early 413; per-IP cooldown; reject if `has_photo=true` and photo missing MIME `image/*` prefix; verify via manual review queue before publishing. |
-
----
-
-## 5. `hooks/social-callback.ts`
-
-| Aspect | State |
-|---|---|
-| Auth | **HMAC-SHA256** over raw body via `verifyN8nSignature` (constant-time expected) |
-| Rate limit | None |
-| Input validation | Zod discriminated union; strict per-event schema |
-| Payload cap | None explicit |
-| DB write | `social_posts` update + `social_post_attempts` insert (**including rejected calls with `hmacValid=false`**) |
-| Abuse scenarios | **Log-table flooding**: unauthenticated attacker can spam requests with any `post_id` in JSON; each rejection still inserts a row into `social_post_attempts` (bloat + cost). Also: HMAC helper trust — must be timing-safe + length-guarded. |
-| **Risk** | **MEDIUM** — auth is correct for happy path, but rejection logging is unauthenticated write amplification |
-| Minimal fix | (a) Only log rejected callbacks when `post_id` exists AND is valid uuid AND resolves to a real post; (b) add raw-body size cap (~64 KB); (c) confirm `verifyN8nSignature` uses `timingSafeEqual` with length guard (tracked separately in P1 audit). |
-
----
-
-## Summary matrix
-
-| # | Endpoint | Auth | Rate limit | Size cap | DB write | Risk |
-|---|---|---|---|---|---|---|
-| 1 | analytics/ingest | none | none | 20 KB ✅ | no | **LOW** |
-| 2 | engagement/track | none | none | none | yes (idempotent) | **MEDIUM** |
-| 3 | contact | none | none | none | yes | **MEDIUM-HIGH** |
-| 4 | doctor-join | none | none | none (2.5 MB field) | yes | **HIGH** |
-| 5 | hooks/social-callback | HMAC ✅ | none | none | yes (even on reject) | **MEDIUM** |
-
-## Cross-cutting gaps
-- No shared abuse-protection primitive. Per `no-backend-rate-limiting` policy, real rate limiting requires user confirmation before ad-hoc implementation.
-- No outer `request.text()`/`request.json()` size guard on 4 of 5 endpoints (only `analytics/ingest` has one).
-- Rejected-request DB writes on `social-callback` are an amplification vector.
-
-## Recommended execution order (when approved)
-1. **doctor-join** — add 3 MB body cap + IP-hash cooldown (highest-impact, smallest change).
-2. **contact** — add IP-hash cooldown (60 s) reusing existing `ip_hash` column.
-3. **social-callback** — validate `post_id` shape before rejected-attempt insert; add 64 KB raw cap.
-4. **engagement/track** — 2 KB body cap; consider HMAC-signed delivery tokens (larger design change — defer).
-5. **analytics/ingest** — no action until it starts persisting.
-
-Await your GO on which items to implement (any subset). Nothing has been modified.
+Next step (awaiting your GO): tell me which priority to open first. Recommended start is **P0 #1 — agent-name canonicalization plan** (still read-only until you approve implementation).
