@@ -6,6 +6,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { verifyN8nSignature } from "@/lib/n8n-callback-auth.server";
+import { readTextWithLimit } from "@/lib/public-endpoint-guard.server";
+
+// Callbacks are small JSON documents; cap raw body at 32 KB.
+const MAX_BODY_BYTES = 32 * 1024;
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const payloadSchema = z.discriminatedUnion("event", [
   z.object({
@@ -63,18 +69,28 @@ export const Route = createFileRoute("/api/public/hooks/social-callback")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const raw = await request.text();
+        const read = await readTextWithLimit(request, MAX_BODY_BYTES);
+        if (read.oversize) {
+          return new Response(JSON.stringify({ ok: false, error: "payload_too_large" }), {
+            status: 413,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        const raw = read.text;
         const sigHeader = request.headers.get("x-n8n-signature");
         const hmacValid = verifyN8nSignature(raw, sigHeader);
 
         if (!hmacValid) {
-          // Try to extract post_id for logging even on rejection
+          // Try to extract post_id for logging even on rejection — but only log
+          // when it's a well-formed UUID we can bind to social_post_attempts.
           let postIdForLog: string | null = null;
           let parsedPayload: unknown = raw.slice(0, 1000);
           try {
             const parsed = JSON.parse(raw);
             parsedPayload = parsed;
-            if (typeof parsed?.post_id === "string") postIdForLog = parsed.post_id;
+            if (typeof parsed?.post_id === "string" && UUID_RE.test(parsed.post_id)) {
+              postIdForLog = parsed.post_id;
+            }
           } catch {
             // not JSON
           }

@@ -1,6 +1,12 @@
 // Public doctor-join intake. Writes structured payload into contact_messages (no schema change).
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
+import {
+  checkCooldown,
+  extractIp,
+  hashIp,
+  readTextWithLimit,
+} from "@/lib/public-endpoint-guard.server";
 
 const schema = z.object({
   full_name: z.string().trim().min(3).max(120),
@@ -15,18 +21,37 @@ const schema = z.object({
   photo_data_url: z.string().max(2_500_000).optional().or(z.literal("")),
 });
 
-async function hashIp(ip: string | null): Promise<string | null> {
-  if (!ip) return null;
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(ip));
-  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 32);
-}
+// Photo data URL alone can approach 2.5 MB — cap the whole body at ~3 MB.
+const MAX_BODY_BYTES = 3 * 1024 * 1024;
+// 3 submissions / 15 minutes per IP.
+const COOLDOWN_LIMIT = 3;
+const COOLDOWN_WINDOW_MS = 15 * 60 * 1000;
 
 export const Route = createFileRoute("/api/public/doctor-join")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const ip = extractIp(request);
+        const ipHash = await hashIp(ip);
+
+        const cooldown = checkCooldown(ipHash, COOLDOWN_LIMIT, COOLDOWN_WINDOW_MS);
+        if (!cooldown.allowed) {
+          return Response.json(
+            { error: "rate_limited" },
+            {
+              status: 429,
+              headers: { "Retry-After": String(cooldown.retryAfter) },
+            },
+          );
+        }
+
+        const read = await readTextWithLimit(request, MAX_BODY_BYTES);
+        if (read.oversize) {
+          return Response.json({ error: "payload_too_large" }, { status: 413 });
+        }
+
         let body: unknown;
-        try { body = await request.json(); } catch { return Response.json({ error: "invalid_json" }, { status: 400 }); }
+        try { body = JSON.parse(read.text); } catch { return Response.json({ error: "invalid_json" }, { status: 400 }); }
         const parsed = schema.safeParse(body);
         if (!parsed.success) {
           return Response.json({ error: "validation", issues: parsed.error.issues }, { status: 400 });
@@ -56,17 +81,12 @@ export const Route = createFileRoute("/api/public/doctor-join")({
 
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          const ip =
-            request.headers.get("cf-connecting-ip") ??
-            request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-            null;
-          const ip_hash = await hashIp(ip);
           const user_agent = request.headers.get("user-agent")?.slice(0, 500) ?? null;
           const { error } = await supabaseAdmin.from("contact_messages").insert({
             name: d.full_name,
             email: d.email || "no-email@doctor-join.local",
             message: messageText.slice(0, 1000),
-            ip_hash,
+            ip_hash: ipHash,
             user_agent,
           } as never);
           if (error) {
