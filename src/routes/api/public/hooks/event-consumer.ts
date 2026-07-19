@@ -258,7 +258,17 @@ export const Route = createFileRoute("/api/public/hooks/event-consumer")({
           let failed = 0;
           let dlqMoved = 0;
 
+          const { mirrorTerminalEvent } = await import("@/lib/ai-events-mirror.server");
+
           for (const ev of events) {
+            const mirrorBase = {
+              agentEventId: ev.id,
+              eventType: ev.event_name,
+              source: ev.source,
+              entityType: ev.entity_type,
+              entityId: ev.entity_id,
+              payload: ev.payload,
+            };
             try {
               const res = await handleEvent(ev, supabaseAdmin);
               if (res.ok) {
@@ -269,9 +279,11 @@ export const Route = createFileRoute("/api/public/hooks/event-consumer")({
                 if (mkErr) {
                   failed += 1;
                   outcomes.push({ id: ev.id, event_name: ev.event_name, ok: false, note: `mark_failed:${mkErr.message}` });
+                  await mirrorTerminalEvent(supabaseAdmin, { ...mirrorBase, outcome: "failed", note: `mark_failed:${mkErr.message}`, errorMessage: mkErr.message });
                 } else {
                   succeeded += 1;
                   outcomes.push({ id: ev.id, event_name: ev.event_name, ok: true, note: res.note });
+                  await mirrorTerminalEvent(supabaseAdmin, { ...mirrorBase, outcome: "completed", note: res.note });
                 }
               } else {
                 const maxRetries = res.dlqNow ? 1 : MAX_RETRIES;
@@ -282,6 +294,7 @@ export const Route = createFileRoute("/api/public/hooks/event-consumer")({
                 failed += 1;
                 if ((failRes as { moved_to_dlq?: boolean } | null)?.moved_to_dlq) dlqMoved += 1;
                 outcomes.push({ id: ev.id, event_name: ev.event_name, ok: false, note: res.error });
+                await mirrorTerminalEvent(supabaseAdmin, { ...mirrorBase, outcome: "failed", note: res.error, errorMessage: res.error });
               }
 
             } catch (e) {
@@ -292,6 +305,7 @@ export const Route = createFileRoute("/api/public/hooks/event-consumer")({
               );
               failed += 1;
               outcomes.push({ id: ev.id, event_name: ev.event_name, ok: false, note: `exception:${errMsg}` });
+              await mirrorTerminalEvent(supabaseAdmin, { ...mirrorBase, outcome: "failed", note: `exception:${errMsg}`, errorMessage: errMsg });
             }
           }
 
