@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAI } from '@/context/AIContext'
 import { Send, Bot, User, Loader2, Sparkles, Trash2 } from 'lucide-react'
@@ -17,14 +17,14 @@ export default function AIChat() {
     {
       id: 'welcome',
       role: 'assistant',
-      content: 'مرحباً! أنا MUSLLY AI، المخ الصناعي لمنصة التشغيل الصحية الوطنية. كيف يمكنني مساعدتك اليوم؟
+      content: `مرحباً! أنا MUSLLY AI، المخ الصناعي لمنصة التشغيل الصحية الوطنية. كيف يمكنني مساعدتك اليوم؟
 
 يمكنني:
 • مراجعة الوصفات الطبية
 • التحقق من التداخلات الدوائية
 • إدارة المخزون
 • تحليل البيانات المالية
-• والمزيد...',
+• والمزيد...`,
       timestamp: new Date().toISOString(),
       agent: 'AI SUN',
     },
@@ -55,154 +55,124 @@ export default function AIChat() {
 
     try {
       const response = await sendMessage(input)
-
-      const aiMessage: Message = {
+      const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: response,
+        content: response.content,
         timestamp: new Date().toISOString(),
-        agent: activeAgent?.nameAr || 'AI SUN',
+        agent: activeAgent?.name || 'AI SUN',
       }
-
-      setMessages(prev => [...prev, aiMessage])
-    } catch {
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'عذراً، حدث خطأ في معالجة طلبك. يرجى المحاولة مرة أخرى.',
-        timestamp: new Date().toISOString(),
-      }
-      setMessages(prev => [...prev, errorMessage])
-    }
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
+      setMessages(prev => [...prev, assistantMessage])
+    } catch (error) {
+      console.error('AI Chat Error:', error)
     }
   }
 
   const clearChat = () => {
-    setMessages([{
-      id: 'welcome',
-      role: 'assistant',
-      content: 'تم مسح المحادثة. كيف يمكنني مساعدتك؟',
-      timestamp: new Date().toISOString(),
-      agent: 'AI SUN',
-    }])
+    setMessages([messages[0]])
   }
 
   return (
-    <div className="h-[calc(100vh-64px)] flex flex-col bg-background">
-      {/* Chat Header */}
-      <div className="glass-panel border-b border-gray-200/50 px-4 md:px-8 py-4">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h2 className="font-bold text-gray-900">المحادثة الذكية</h2>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-xs text-gray-500">
-                  {activeAgent ? activeAgent.nameAr : 'AI SUN'} نشط
-                </span>
-              </div>
-            </div>
+    <div className="flex flex-col h-[calc(100vh-80px)] max-w-4xl mx-auto p-4">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <Bot className="w-6 h-6 text-primary" />
           </div>
-          <button
-            onClick={clearChat}
-            className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-            title="مسح المحادثة"
-          >
-            <Trash2 className="w-5 h-5" />
-          </button>
+          <div>
+            <h1 className="text-xl font-bold">مساعد MUSLLY AI</h1>
+            <p className="text-sm text-muted-foreground">متصل بالوحدة: {activeAgent?.name || 'AI SUN'}</p>
+          </div>
         </div>
+        <button
+          onClick={clearChat}
+          className="p-2 hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
+          title="مسح المحادثة"
+        >
+          <Trash2 className="w-5 h-5" />
+        </button>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6">
-        <div className="max-w-4xl mx-auto space-y-4">
-          <AnimatePresence>
-            {messages.map(message => (
-              <motion.div
-                key={message.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
-              >
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
-                  message.role === 'user' 
-                    ? 'bg-primary text-white' 
-                    : 'bg-gold/10 text-gold'
-                }`}>
-                  {message.role === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
-                </div>
-                <div className={`max-w-[80%] ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
-                  <div className={`p-4 rounded-2xl ${
-                    message.role === 'user'
-                      ? 'bg-primary text-white rounded-tr-sm'
-                      : 'bg-white border border-gray-100 rounded-tl-sm shadow-sm'
-                  }`}>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
-                  </div>
-                  <div className="flex items-center gap-2 mt-1 px-1">
-                    <span className="text-[10px] text-gray-400">
-                      {new Date(message.timestamp).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                    {message.agent && (
-                      <span className="text-[10px] text-gold font-medium">{message.agent}</span>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-
-          {isProcessing && (
+      <div className="flex-1 overflow-y-auto mb-4 space-y-4 pr-2 custom-scrollbar">
+        <AnimatePresence initial={false}>
+          {messages.map((message) => (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex items-center gap-3"
+              key={message.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <div className="w-8 h-8 rounded-xl bg-gold/10 flex items-center justify-center">
-                <Bot className="w-4 h-4 text-gold" />
-              </div>
-              <div className="flex items-center gap-2 p-3 bg-white border border-gray-100 rounded-2xl rounded-tl-sm">
-                <Loader2 className="w-4 h-4 text-gold animate-spin" />
-                <span className="text-sm text-gray-500">جاري التفكير...</span>
+              <div
+                className={`max-w-[80%] p-4 rounded-2xl ${
+                  message.role === 'user'
+                    ? 'bg-primary text-primary-foreground rounded-tr-none'
+                    : 'bg-card border rounded-tl-none shadow-sm'
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  {message.role === 'assistant' ? (
+                    <Bot className="w-4 h-4" />
+                  ) : (
+                    <User className="w-4 h-4" />
+                  )}
+                  <span className="text-[10px] opacity-70">
+                    {message.agent || (message.role === 'user' ? 'أنت' : 'AI')} • {new Date(message.timestamp).toLocaleTimeString('ar-YE', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+                <div className="whitespace-pre-wrap leading-relaxed text-sm">
+                  {message.content}
+                </div>
               </div>
             </motion.div>
-          )}
-
-          <div ref={messagesEndRef} />
-        </div>
+          ))}
+        </AnimatePresence>
+        {isProcessing && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex justify-start"
+          >
+            <div className="bg-card border p-4 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-3">
+              <Loader2 className="w-4 h-4 animate-spin text-primary" />
+              <span className="text-sm text-muted-foreground italic">جاري التفكير...</span>
+            </div>
+          </motion.div>
+        )}
+        <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="glass-panel border-t border-gray-200/50 px-4 md:px-8 py-4">
-        <div className="max-w-4xl mx-auto flex gap-3">
-          <div className="flex-1 relative">
-            <textarea
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="اكتب رسالتك هنا... (مثال: مراجعة وصفة طبية، حالة المخزون، تقرير مالي)"
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none text-right"
-              rows={1}
-              style={{ minHeight: '48px', maxHeight: '120px' }}
-            />
+      <div className="relative">
+        <div className="absolute -top-12 left-0 right-0 flex justify-center pointer-events-none">
+          <div className="bg-background/80 backdrop-blur-sm border px-3 py-1 rounded-full text-[10px] text-muted-foreground flex items-center gap-2 shadow-sm">
+            <Sparkles className="w-3 h-3 text-yellow-500" />
+            يعمل بواسطة MUSLLY AI SUN Core
           </div>
+        </div>
+        <div className="flex gap-2 p-2 bg-card border rounded-xl shadow-lg">
+          <textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault()
+                handleSend()
+              }
+            }}
+            placeholder="اكتب رسالتك هنا..."
+            className="flex-1 bg-transparent border-none focus:ring-0 resize-none py-2 px-3 text-sm min-h-[44px] max-h-32 custom-scrollbar"
+            rows={1}
+          />
           <button
             onClick={handleSend}
             disabled={!input.trim() || isProcessing}
-            className="px-6 py-3 bg-primary text-white rounded-xl font-medium hover:bg-primary-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="p-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 disabled:opacity-50 transition-all shadow-md flex items-center justify-center"
           >
-            <Send className="w-4 h-4" />
-            <span className="hidden sm:inline">إرسال</span>
+            {isProcessing ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Send className="w-5 h-5" />
+            )}
           </button>
         </div>
       </div>

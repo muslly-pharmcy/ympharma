@@ -13,11 +13,12 @@
   }
 
   * {
-    @apply border-border;
+    border-color: #e5e7eb;
   }
 
   body {
-    @apply bg-background text-gray-900 font-arabic antialiased;
+    background-color: #F4F7F6;
+    @apply text-gray-900 antialiased;
     overflow-x: hidden;
   }
 
