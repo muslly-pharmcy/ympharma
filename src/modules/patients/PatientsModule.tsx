@@ -1,31 +1,24 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useServerFn } from '@tanstack/react-start'
 import { motion } from 'framer-motion'
 import { Search, User, Heart, AlertTriangle, FileText, Plus } from 'lucide-react'
-import { supabase } from '@/integrations/supabase/client'
-import type { Patient } from '@/types'
+import { listModulePatients } from '@/lib/modules.functions'
+import { Skeleton } from '@/components/skeletons/Skeleton'
 
 export function PatientsModule() {
-  const [patients, setPatients] = useState<Patient[]>([])
   const [searchQuery, setSearchQuery] = useState('')
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetchPatients()
-  }, [])
-
-  const fetchPatients = async () => {
-    setLoading(true)
-    const { data, error } = await (supabase as any).from('patients').select('*').limit(100)
-    if (!error && data) {
-      setPatients(data as Patient[])
-    }
-    setLoading(false)
-  }
-
-  const filteredPatients = patients.filter(p => 
-    p.nameAr?.includes(searchQuery) || 
+  const fetchPatients = useServerFn(listModulePatients)
+  const { data, isLoading } = useQuery({
+    queryKey: ['module', 'patients'],
+    queryFn: () => fetchPatients(),
+    staleTime: 30_000,
+  })
+  const patients = data?.items ?? []
+  const filtered = patients.filter((p) =>
+    p.nameAr?.includes(searchQuery) ||
     p.name?.includes(searchQuery) ||
-    p.allergies?.some(a => a.includes(searchQuery))
+    p.allergies?.some((a) => a.includes(searchQuery)),
   )
 
   return (
@@ -37,7 +30,7 @@ export function PatientsModule() {
             <input
               type="text"
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="ابحث عن مريض، حساسية، أو مرض مزمن..."
               className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 text-right"
             />
@@ -50,17 +43,15 @@ export function PatientsModule() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {loading ? (
-          <div className="col-span-full text-center py-12">
-            <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto" />
-          </div>
-        ) : filteredPatients.length === 0 ? (
+        {isLoading ? (
+          Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-40" />)
+        ) : filtered.length === 0 ? (
           <div className="col-span-full text-center py-12 text-gray-500">
             <User className="w-12 h-12 mx-auto mb-3 text-gray-300" />
             <p>لا يوجد مرضى</p>
           </div>
         ) : (
-          filteredPatients.map((patient, i) => (
+          filtered.map((patient, i) => (
             <motion.div
               key={patient.id}
               initial={{ opacity: 0, y: 20 }}
@@ -83,8 +74,7 @@ export function PatientsModule() {
                   </div>
                 </div>
               </div>
-
-              {patient.allergies && patient.allergies.length > 0 && (
+              {patient.allergies.length > 0 && (
                 <div className="mt-3 flex flex-wrap gap-1">
                   {patient.allergies.map((allergy, idx) => (
                     <span key={idx} className="px-2 py-1 bg-red-50 text-red-600 text-xs rounded-full">
@@ -94,22 +84,18 @@ export function PatientsModule() {
                   ))}
                 </div>
               )}
-
-              {patient.chronicDiseases && patient.chronicDiseases.length > 0 && (
+              {patient.chronicDiseases.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1">
-                  {patient.chronicDiseases.map((disease, idx) => (
-                    <span key={idx} className="px-2 py-1 bg-amber-50 text-amber-600 text-xs rounded-full">
-                      {disease}
-                    </span>
+                  {patient.chronicDiseases.map((d, idx) => (
+                    <span key={idx} className="px-2 py-1 bg-amber-50 text-amber-600 text-xs rounded-full">{d}</span>
                   ))}
                 </div>
               )}
-
               <div className="mt-4 flex gap-2">
                 <button className="flex-1 py-2 bg-primary text-white rounded-xl text-sm font-medium hover:bg-primary-600 transition-colors">
                   السجل الطبي
                 </button>
-                <button className="px-3 py-2 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors">
+                <button className="px-3 py-2 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors" aria-label="ملف">
                   <FileText className="w-4 h-4" />
                 </button>
               </div>
