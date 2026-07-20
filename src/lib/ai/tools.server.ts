@@ -1,5 +1,7 @@
 // AI Tool Registry — narrow, read-only tools invoked by agents.
 // Each tool is server-only, org-scoped, and returns compact JSON-serializable data.
+// Table types for our newly created domain tables aren't in the generated
+// Supabase types yet, so we cast the admin client through `any` here.
 import type { Actor } from '../session.server'
 
 export interface ToolContext {
@@ -22,20 +24,21 @@ export interface ToolDefinition {
 
 async function admin() {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-  return supabaseAdmin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return supabaseAdmin as any
 }
 
 const TOOLS: Record<string, ToolDefinition> = {
   search_products: {
     key: 'search_products',
-    description: 'Search catalog products by name (case-insensitive). Input: { query: string }',
+    description: 'Search catalog products by name. Input: { query: string }',
     execute: async ({ actor }, input) => {
       const q = String(input.query ?? '').trim()
       if (!q) return { ok: false, error: 'query is required' }
       const sb = await admin()
       const { data, error } = await sb
-        .from('cat_products')
-        .select('id, name, sku, active')
+        .from('catalog_products')
+        .select('id, name, sku, status')
         .eq('organization_id', actor.organizationId)
         .ilike('name', `%${q}%`)
         .limit(15)
@@ -45,16 +48,18 @@ const TOOLS: Record<string, ToolDefinition> = {
   },
   get_product_stock: {
     key: 'get_product_stock',
-    description: 'Return on-hand stock per warehouse for a product. Input: { product_id: string }',
+    description: 'Return on-hand stock per batch for a product. Input: { product_id: string }',
     execute: async ({ actor }, input) => {
       const pid = String(input.product_id ?? '').trim()
       if (!pid) return { ok: false, error: 'product_id is required' }
       const sb = await admin()
       const { data, error } = await sb
-        .from('inv_stock_levels')
-        .select('warehouse_id, quantity_on_hand, quantity_reserved')
+        .from('inv_stock_batches')
+        .select('warehouse_id, qty_on_hand, qty_reserved, expiry_date')
         .eq('organization_id', actor.organizationId)
         .eq('product_id', pid)
+        .gt('qty_on_hand', 0)
+        .order('expiry_date', { ascending: true })
         .limit(20)
       if (error) return { ok: false, error: error.message }
       return { ok: true, data }
@@ -62,21 +67,25 @@ const TOOLS: Record<string, ToolDefinition> = {
   },
   list_low_stock: {
     key: 'list_low_stock',
-    description: 'List products at or below reorder point. Input: { limit?: number }',
+    description: 'List products whose total on-hand is at or below a threshold. Input: { threshold?: number }',
     execute: async ({ actor }, input) => {
-      const limit = Math.min(Number(input.limit ?? 20), 50)
+      const threshold = Math.max(Number(input.threshold ?? 10), 0)
       const sb = await admin()
       const { data, error } = await sb
-        .from('inv_stock_levels')
-        .select('product_id, warehouse_id, quantity_on_hand, reorder_point')
+        .from('inv_stock_batches')
+        .select('product_id, qty_on_hand')
         .eq('organization_id', actor.organizationId)
-        .order('quantity_on_hand', { ascending: true })
-        .limit(limit)
       if (error) return { ok: false, error: error.message }
-      const low = (data ?? []).filter((r: { quantity_on_hand: number; reorder_point: number | null }) =>
-        r.reorder_point != null && r.quantity_on_hand <= r.reorder_point,
-      )
-      return { ok: true, data: low }
+      const totals = new Map<string, number>()
+      for (const r of (data ?? []) as Array<{ product_id: string; qty_on_hand: number }>) {
+        totals.set(r.product_id, (totals.get(r.product_id) ?? 0) + Number(r.qty_on_hand ?? 0))
+      }
+      const low = Array.from(totals.entries())
+        .filter(([, q]) => q <= threshold)
+        .sort((a, b) => a[1] - b[1])
+        .slice(0, 25)
+        .map(([product_id, total_on_hand]) => ({ product_id, total_on_hand }))
+      return { ok: true, data: { threshold, count: low.length, items: low } }
     },
   },
   list_expiring_soon: {
@@ -87,30 +96,34 @@ const TOOLS: Record<string, ToolDefinition> = {
       const sb = await admin()
       const cutoff = new Date(Date.now() + days * 86400 * 1000).toISOString().slice(0, 10)
       const { data, error } = await sb
-        .from('inv_batches')
-        .select('id, product_id, lot_number, expiry_date, quantity_available')
+        .from('inv_stock_batches')
+        .select('id, product_id, batch_number, expiry_date, qty_on_hand')
         .eq('organization_id', actor.organizationId)
+        .not('expiry_date', 'is', null)
         .lte('expiry_date', cutoff)
-        .gt('quantity_available', 0)
+        .gt('qty_on_hand', 0)
         .order('expiry_date', { ascending: true })
         .limit(50)
       if (error) return { ok: false, error: error.message }
-      return { ok: true, data }
+      return { ok: true, data: { horizon_days: days, count: (data ?? []).length, items: data } }
     },
   },
   ops_snapshot: {
     key: 'ops_snapshot',
-    description: 'Return a snapshot of open POs, active prescriptions, and pending claims for the org.',
+    description: 'Snapshot of open POs, active prescriptions, and pending claims for the org.',
     execute: async ({ actor }) => {
       const sb = await admin()
       const org = actor.organizationId
       const [po, rx, cl] = await Promise.all([
-        sb.from('pur_purchase_orders').select('id,status', { count: 'exact', head: false })
-          .eq('organization_id', org).in('status', ['draft', 'submitted', 'approved', 'received_partial']).limit(50),
-        sb.from('hc_prescriptions').select('id,status', { count: 'exact', head: false })
-          .eq('organization_id', org).in('status', ['submitted', 'validated', 'approved']).limit(50),
-        sb.from('insv2_claims').select('id,status', { count: 'exact', head: false })
-          .eq('organization_id', org).in('status', ['submitted', 'in_review']).limit(50),
+        sb.from('purchase_orders').select('id, status')
+          .eq('organization_id', org)
+          .in('status', ['draft', 'submitted', 'approved', 'received_partial']).limit(100),
+        sb.from('hc_prescriptions').select('id, status')
+          .eq('organization_id', org)
+          .in('status', ['submitted', 'validated', 'approved']).limit(100),
+        sb.from('insv2_claims').select('id, status')
+          .eq('organization_id', org)
+          .in('status', ['submitted', 'in_review']).limit(100),
       ])
       return {
         ok: true,
