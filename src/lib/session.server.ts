@@ -100,3 +100,69 @@ export function requireRole(actor: Actor, roles: string[]) {
   const has = actor.roles.some((r) => roles.includes(r)) || roles.includes(actor.orgRole)
   if (!has) throw new UnauthorizedError(`Missing required role: ${roles.join('|')}`)
 }
+
+// -------------------- RBAC permission matrix --------------------
+// Role-derived permissions. Owner/admin (app_role) get everything.
+// Org roles (organization_members.role) map to a per-resource permission set.
+// This is intentionally simple; a full policy engine ships in Phase 2.6+.
+export type Permission =
+  | 'catalog.read' | 'catalog.write'
+  | 'inventory.read' | 'inventory.write'
+  | 'warehouse.read' | 'warehouse.write'
+  | 'supplier.read' | 'supplier.write'
+  | 'purchase.read' | 'purchase.write'
+  | 'doctor.read' | 'doctor.write'
+  | 'patient.read' | 'patient.write'
+  | 'prescription.read' | 'prescription.write'
+  | 'ai.execute'
+  | 'system.admin'
+
+const ALL: Permission[] = [
+  'catalog.read','catalog.write','inventory.read','inventory.write',
+  'warehouse.read','warehouse.write','supplier.read','supplier.write',
+  'purchase.read','purchase.write','doctor.read','doctor.write',
+  'patient.read','patient.write','prescription.read','prescription.write',
+  'ai.execute','system.admin',
+]
+
+const ORG_ROLE_PERMISSIONS: Record<string, Permission[]> = {
+  owner: ALL,
+  admin: ALL.filter((p) => p !== 'system.admin'),
+  manager: [
+    'catalog.read','catalog.write','inventory.read','inventory.write',
+    'warehouse.read','warehouse.write','supplier.read','supplier.write',
+    'purchase.read','purchase.write','doctor.read','patient.read',
+    'prescription.read','ai.execute',
+  ],
+  pharmacist: [
+    'catalog.read','inventory.read','inventory.write','warehouse.read',
+    'supplier.read','purchase.read','patient.read','patient.write',
+    'prescription.read','prescription.write','ai.execute',
+  ],
+  staff: [
+    'catalog.read','inventory.read','warehouse.read','supplier.read',
+    'purchase.read','patient.read','prescription.read',
+  ],
+  viewer: [
+    'catalog.read','inventory.read','warehouse.read','supplier.read',
+    'purchase.read','patient.read','prescription.read','doctor.read',
+  ],
+}
+
+export function actorPermissions(actor: Actor): Set<Permission> {
+  // app_role 'admin' or 'superadmin' = full access
+  if (actor.roles.includes('admin') || actor.roles.includes('superadmin')) {
+    return new Set(ALL)
+  }
+  return new Set(ORG_ROLE_PERMISSIONS[actor.orgRole] ?? [])
+}
+
+export function hasPermission(actor: Actor, permission: Permission): boolean {
+  return actorPermissions(actor).has(permission)
+}
+
+export function requirePermission(actor: Actor, permission: Permission) {
+  if (!hasPermission(actor, permission)) {
+    throw new UnauthorizedError(`Missing permission: ${permission}`)
+  }
+}
