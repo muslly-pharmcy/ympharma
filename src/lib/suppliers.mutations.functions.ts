@@ -12,7 +12,7 @@ export const createSupplier = createServerFn({ method: 'POST' })
     const { getActor, requireOrg } = await import('./session.server')
     const { withIdempotency, newCorrelationId } = await import('./idempotency.server')
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-    const actor = getActor()
+    const actor = await getActor()
     requireOrg(actor, data.organizationId)
     const correlation = data.correlationId ?? newCorrelationId('supplier')
 
@@ -50,7 +50,7 @@ export const updateSupplier = createServerFn({ method: 'POST' })
     const { getActor } = await import('./session.server')
     const { newCorrelationId } = await import('./idempotency.server')
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-    const actor = getActor()
+    const actor = await getActor()
     const correlation = data.correlationId ?? newCorrelationId('supplier')
 
     const { data: existing, error: fetchErr } = await supabaseAdmin

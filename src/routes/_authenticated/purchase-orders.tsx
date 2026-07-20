@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { listPurchaseOrders } from '@/lib/purchasing.functions'
 import { FileText } from 'lucide-react'
 
-export const Route = createFileRoute('/purchase-orders')({
+export const Route = createFileRoute('/_authenticated/purchase-orders')({
   head: () => ({
     meta: [
       { title: 'أوامر الشراء — MUSLLY AI OS' },

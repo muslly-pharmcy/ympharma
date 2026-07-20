@@ -11,7 +11,7 @@ const searchSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
 })
 
-export const Route = createFileRoute('/catalog/')({
+export const Route = createFileRoute('/_authenticated/catalog/')({
   validateSearch: (raw) => searchSchema.parse(raw),
   head: () => ({
     meta: [
