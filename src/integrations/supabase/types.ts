@@ -3367,6 +3367,230 @@ export type Database = {
           },
         ]
       }
+      hc_dispense_items: {
+        Row: {
+          barcode_value: string | null
+          barcode_verified: boolean
+          batch_allocations: Json
+          created_at: string
+          dispense_id: string
+          id: string
+          medication_name: string
+          notes: string | null
+          prescription_item_id: string | null
+          product_id: string | null
+          qty_dispensed: number
+          qty_requested: number
+          reservation_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          barcode_value?: string | null
+          barcode_verified?: boolean
+          batch_allocations?: Json
+          created_at?: string
+          dispense_id: string
+          id?: string
+          medication_name: string
+          notes?: string | null
+          prescription_item_id?: string | null
+          product_id?: string | null
+          qty_dispensed?: number
+          qty_requested: number
+          reservation_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          barcode_value?: string | null
+          barcode_verified?: boolean
+          batch_allocations?: Json
+          created_at?: string
+          dispense_id?: string
+          id?: string
+          medication_name?: string
+          notes?: string | null
+          prescription_item_id?: string | null
+          product_id?: string | null
+          qty_dispensed?: number
+          qty_requested?: number
+          reservation_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hc_dispense_items_dispense_id_fkey"
+            columns: ["dispense_id"]
+            isOneToOne: false
+            referencedRelation: "hc_dispenses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hc_dispense_items_prescription_item_id_fkey"
+            columns: ["prescription_item_id"]
+            isOneToOne: false
+            referencedRelation: "hc_prescription_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hc_dispense_returns: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          dispense_id: string
+          dispense_item_id: string | null
+          id: string
+          qty: number
+          reason: string
+          updated_at: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          dispense_id: string
+          dispense_item_id?: string | null
+          id?: string
+          qty: number
+          reason: string
+          updated_at?: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          dispense_id?: string
+          dispense_item_id?: string | null
+          id?: string
+          qty?: number
+          reason?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hc_dispense_returns_dispense_id_fkey"
+            columns: ["dispense_id"]
+            isOneToOne: false
+            referencedRelation: "hc_dispenses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hc_dispense_returns_dispense_item_id_fkey"
+            columns: ["dispense_item_id"]
+            isOneToOne: false
+            referencedRelation: "hc_dispense_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hc_dispense_status_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          dispense_id: string
+          from_status: string | null
+          id: string
+          reason: string | null
+          to_status: string
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          dispense_id: string
+          from_status?: string | null
+          id?: string
+          reason?: string | null
+          to_status: string
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          dispense_id?: string
+          from_status?: string | null
+          id?: string
+          reason?: string | null
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hc_dispense_status_history_dispense_id_fkey"
+            columns: ["dispense_id"]
+            isOneToOne: false
+            referencedRelation: "hc_dispenses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hc_dispenses: {
+        Row: {
+          branch_id: string | null
+          correlation_id: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          dispense_no: string | null
+          dispensed_by: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          patient_id: string
+          prepared_by: string | null
+          prescription_id: string
+          status: string
+          updated_at: string
+          verified_by: string | null
+        }
+        Insert: {
+          branch_id?: string | null
+          correlation_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          dispense_no?: string | null
+          dispensed_by?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          patient_id: string
+          prepared_by?: string | null
+          prescription_id: string
+          status?: string
+          updated_at?: string
+          verified_by?: string | null
+        }
+        Update: {
+          branch_id?: string | null
+          correlation_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          dispense_no?: string | null
+          dispensed_by?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          patient_id?: string
+          prepared_by?: string | null
+          prescription_id?: string
+          status?: string
+          updated_at?: string
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hc_dispenses_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "hc_patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hc_dispenses_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "hc_prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hc_doctor_availability: {
         Row: {
           created_at: string
