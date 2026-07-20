@@ -55,7 +55,7 @@ describe('promotion rule engine', () => {
     ], { cart: [{ productId: 'x', qty: 1, unitPrice: 100 }] })
     expect(r.applied).toHaveLength(1)
     expect(r.applied[0].code).toBe('A')
-    expect(r.skipped.find((s) => s.code === 'B')?.reason).toBe('not_stackable')
+    expect((r.skipped.find((s) => s.code === 'B') ?? { reason: '' }).reason).toBe('not_stackable')
   })
 
   it('stackable promotions stack in priority order', () => {

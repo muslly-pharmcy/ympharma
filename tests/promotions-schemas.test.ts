@@ -29,14 +29,14 @@ describe('promotion command schemas', () => {
   })
 
   it('createCoupon requires at least one code', () => {
-    expect(() => createCouponInput.parse({ name: 'X', codes: [], idempotencyKey: 'abcdef' })).toThrow()
-    const c = createCouponInput.parse({ name: 'X', codes: [{ code: 'ABC10' }], idempotencyKey: 'abcdef' })
+    expect(() => createCouponInput.parse({ name: 'XX', codes: [], idempotencyKey: 'abcdef' })).toThrow()
+    const c = createCouponInput.parse({ name: 'XX', codes: [{ code: 'ABC10' }], idempotencyKey: 'abcdef' })
     expect(c.codes[0].code).toBe('ABC10')
     expect(c.mode).toBe('multi')
   })
 
   it('redeemCoupon requires non-negative discount and idem key', () => {
-    expect(() => redeemCouponInput.parse({ code: 'X', discountAmount: -1, idempotencyKey: 'abcdef' })).toThrow()
-    expect(redeemCouponInput.parse({ code: 'X', discountAmount: 25, idempotencyKey: 'abcdef' }).discountAmount).toBe(25)
+    expect(() => redeemCouponInput.parse({ code: 'ABC', discountAmount: -1, idempotencyKey: 'abcdef' })).toThrow()
+    expect(redeemCouponInput.parse({ code: 'ABC', discountAmount: 25, idempotencyKey: 'abcdef' }).discountAmount).toBe(25)
   })
 })
