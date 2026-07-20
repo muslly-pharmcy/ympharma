@@ -27,9 +27,13 @@ import { Route as AuthenticatedCatalogIndexRouteImport } from './routes/_authent
 import { Route as AuthenticatedCatalogProductIdRouteImport } from './routes/_authenticated/catalog.$productId'
 import { Route as AuthenticatedDispensesDispenseIdRouteImport } from './routes/_authenticated/dispenses.$dispenseId'
 import { Route as AuthenticatedDoctorsDoctorIdRouteImport } from './routes/_authenticated/doctors.$doctorId'
+import { Route as AuthenticatedInsuranceIndexRouteImport } from './routes/_authenticated/insurance.index'
+import { Route as AuthenticatedInsuranceClaimsRouteImport } from './routes/_authenticated/insurance.claims'
+import { Route as AuthenticatedInsuranceCoverageRouteImport } from './routes/_authenticated/insurance.coverage'
 import { Route as AuthenticatedPatientsPatientIdRouteImport } from './routes/_authenticated/patients.$patientId'
 import { Route as AuthenticatedPrescriptionsPrescriptionIdRouteImport } from './routes/_authenticated/prescriptions.$prescriptionId'
 import { Route as AuthenticatedPurchaseOrdersIdRouteImport } from './routes/_authenticated/purchase-orders.$id'
+import { Route as AuthenticatedInsuranceClaimsClaimIdRouteImport } from './routes/_authenticated/insurance.claims_.$claimId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -126,6 +130,24 @@ const AuthenticatedDoctorsDoctorIdRoute =
     path: '/$doctorId',
     getParentRoute: () => AuthenticatedDoctorsRoute,
   } as any)
+const AuthenticatedInsuranceIndexRoute =
+  AuthenticatedInsuranceIndexRouteImport.update({
+    id: '/insurance/',
+    path: '/insurance/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedInsuranceClaimsRoute =
+  AuthenticatedInsuranceClaimsRouteImport.update({
+    id: '/insurance/claims',
+    path: '/insurance/claims',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedInsuranceCoverageRoute =
+  AuthenticatedInsuranceCoverageRouteImport.update({
+    id: '/insurance/coverage',
+    path: '/insurance/coverage',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPatientsPatientIdRoute =
   AuthenticatedPatientsPatientIdRouteImport.update({
     id: '/$patientId',
@@ -143,6 +165,12 @@ const AuthenticatedPurchaseOrdersIdRoute =
     id: '/$id',
     path: '/$id',
     getParentRoute: () => AuthenticatedPurchaseOrdersRoute,
+  } as any)
+const AuthenticatedInsuranceClaimsClaimIdRoute =
+  AuthenticatedInsuranceClaimsClaimIdRouteImport.update({
+    id: '/insurance/claims_/$claimId',
+    path: '/insurance/claims/$claimId',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -162,10 +190,14 @@ export interface FileRoutesByFullPath {
   '/catalog/$productId': typeof AuthenticatedCatalogProductIdRoute
   '/dispenses/$dispenseId': typeof AuthenticatedDispensesDispenseIdRoute
   '/doctors/$doctorId': typeof AuthenticatedDoctorsDoctorIdRoute
+  '/insurance/claims': typeof AuthenticatedInsuranceClaimsRoute
+  '/insurance/coverage': typeof AuthenticatedInsuranceCoverageRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
   '/catalog/': typeof AuthenticatedCatalogIndexRoute
+  '/insurance/': typeof AuthenticatedInsuranceIndexRoute
+  '/insurance/claims/$claimId': typeof AuthenticatedInsuranceClaimsClaimIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -184,10 +216,14 @@ export interface FileRoutesByTo {
   '/catalog/$productId': typeof AuthenticatedCatalogProductIdRoute
   '/dispenses/$dispenseId': typeof AuthenticatedDispensesDispenseIdRoute
   '/doctors/$doctorId': typeof AuthenticatedDoctorsDoctorIdRoute
+  '/insurance/claims': typeof AuthenticatedInsuranceClaimsRoute
+  '/insurance/coverage': typeof AuthenticatedInsuranceCoverageRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
   '/catalog': typeof AuthenticatedCatalogIndexRoute
+  '/insurance': typeof AuthenticatedInsuranceIndexRoute
+  '/insurance/claims/$claimId': typeof AuthenticatedInsuranceClaimsClaimIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -208,10 +244,14 @@ export interface FileRoutesById {
   '/_authenticated/catalog/$productId': typeof AuthenticatedCatalogProductIdRoute
   '/_authenticated/dispenses/$dispenseId': typeof AuthenticatedDispensesDispenseIdRoute
   '/_authenticated/doctors/$doctorId': typeof AuthenticatedDoctorsDoctorIdRoute
+  '/_authenticated/insurance/claims': typeof AuthenticatedInsuranceClaimsRoute
+  '/_authenticated/insurance/coverage': typeof AuthenticatedInsuranceCoverageRoute
   '/_authenticated/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/_authenticated/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/_authenticated/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
   '/_authenticated/catalog/': typeof AuthenticatedCatalogIndexRoute
+  '/_authenticated/insurance/': typeof AuthenticatedInsuranceIndexRoute
+  '/_authenticated/insurance/claims_/$claimId': typeof AuthenticatedInsuranceClaimsClaimIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -232,10 +272,14 @@ export interface FileRouteTypes {
     | '/catalog/$productId'
     | '/dispenses/$dispenseId'
     | '/doctors/$doctorId'
+    | '/insurance/claims'
+    | '/insurance/coverage'
     | '/patients/$patientId'
     | '/prescriptions/$prescriptionId'
     | '/purchase-orders/$id'
     | '/catalog/'
+    | '/insurance/'
+    | '/insurance/claims/$claimId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -254,10 +298,14 @@ export interface FileRouteTypes {
     | '/catalog/$productId'
     | '/dispenses/$dispenseId'
     | '/doctors/$doctorId'
+    | '/insurance/claims'
+    | '/insurance/coverage'
     | '/patients/$patientId'
     | '/prescriptions/$prescriptionId'
     | '/purchase-orders/$id'
     | '/catalog'
+    | '/insurance'
+    | '/insurance/claims/$claimId'
   id:
     | '__root__'
     | '/'
@@ -277,10 +325,14 @@ export interface FileRouteTypes {
     | '/_authenticated/catalog/$productId'
     | '/_authenticated/dispenses/$dispenseId'
     | '/_authenticated/doctors/$doctorId'
+    | '/_authenticated/insurance/claims'
+    | '/_authenticated/insurance/coverage'
     | '/_authenticated/patients/$patientId'
     | '/_authenticated/prescriptions/$prescriptionId'
     | '/_authenticated/purchase-orders/$id'
     | '/_authenticated/catalog/'
+    | '/_authenticated/insurance/'
+    | '/_authenticated/insurance/claims_/$claimId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -421,6 +473,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDoctorsDoctorIdRouteImport
       parentRoute: typeof AuthenticatedDoctorsRoute
     }
+    '/_authenticated/insurance/': {
+      id: '/_authenticated/insurance/'
+      path: '/insurance'
+      fullPath: '/insurance/'
+      preLoaderRoute: typeof AuthenticatedInsuranceIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/insurance/claims': {
+      id: '/_authenticated/insurance/claims'
+      path: '/insurance/claims'
+      fullPath: '/insurance/claims'
+      preLoaderRoute: typeof AuthenticatedInsuranceClaimsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/insurance/coverage': {
+      id: '/_authenticated/insurance/coverage'
+      path: '/insurance/coverage'
+      fullPath: '/insurance/coverage'
+      preLoaderRoute: typeof AuthenticatedInsuranceCoverageRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/patients/$patientId': {
       id: '/_authenticated/patients/$patientId'
       path: '/$patientId'
@@ -441,6 +514,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/purchase-orders/$id'
       preLoaderRoute: typeof AuthenticatedPurchaseOrdersIdRouteImport
       parentRoute: typeof AuthenticatedPurchaseOrdersRoute
+    }
+    '/_authenticated/insurance/claims_/$claimId': {
+      id: '/_authenticated/insurance/claims_/$claimId'
+      path: '/insurance/claims/$claimId'
+      fullPath: '/insurance/claims/$claimId'
+      preLoaderRoute: typeof AuthenticatedInsuranceClaimsClaimIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
@@ -522,7 +602,11 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSuppliersRoute: typeof AuthenticatedSuppliersRoute
   AuthenticatedWarehousesRoute: typeof AuthenticatedWarehousesRoute
   AuthenticatedCatalogProductIdRoute: typeof AuthenticatedCatalogProductIdRoute
+  AuthenticatedInsuranceClaimsRoute: typeof AuthenticatedInsuranceClaimsRoute
+  AuthenticatedInsuranceCoverageRoute: typeof AuthenticatedInsuranceCoverageRoute
   AuthenticatedCatalogIndexRoute: typeof AuthenticatedCatalogIndexRoute
+  AuthenticatedInsuranceIndexRoute: typeof AuthenticatedInsuranceIndexRoute
+  AuthenticatedInsuranceClaimsClaimIdRoute: typeof AuthenticatedInsuranceClaimsClaimIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -535,7 +619,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSuppliersRoute: AuthenticatedSuppliersRoute,
   AuthenticatedWarehousesRoute: AuthenticatedWarehousesRoute,
   AuthenticatedCatalogProductIdRoute: AuthenticatedCatalogProductIdRoute,
+  AuthenticatedInsuranceClaimsRoute: AuthenticatedInsuranceClaimsRoute,
+  AuthenticatedInsuranceCoverageRoute: AuthenticatedInsuranceCoverageRoute,
   AuthenticatedCatalogIndexRoute: AuthenticatedCatalogIndexRoute,
+  AuthenticatedInsuranceIndexRoute: AuthenticatedInsuranceIndexRoute,
+  AuthenticatedInsuranceClaimsClaimIdRoute:
+    AuthenticatedInsuranceClaimsClaimIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

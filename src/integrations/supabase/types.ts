@@ -4963,6 +4963,678 @@ export type Database = {
         }
         Relationships: []
       }
+      insv2_authorizations: {
+        Row: {
+          approved_amount: number | null
+          created_at: string
+          created_by: string | null
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          metadata: Json
+          notes: string | null
+          organization_id: string
+          patient_id: string
+          plan_id: string
+          prescription_id: string | null
+          reason: string | null
+          reference: string | null
+          status: string
+          updated_at: string
+          valid_from: string | null
+          valid_to: string | null
+        }
+        Insert: {
+          approved_amount?: number | null
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          organization_id: string
+          patient_id: string
+          plan_id: string
+          prescription_id?: string | null
+          reason?: string | null
+          reference?: string | null
+          status?: string
+          updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
+        }
+        Update: {
+          approved_amount?: number | null
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          organization_id?: string
+          patient_id?: string
+          plan_id?: string
+          prescription_id?: string | null
+          reason?: string | null
+          reference?: string | null
+          status?: string
+          updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insv2_authorizations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insv2_authorizations_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "hc_patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insv2_authorizations_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "insv2_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insv2_authorizations_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "hc_prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      insv2_claim_items: {
+        Row: {
+          allowed_amount: number
+          billed_amount: number
+          claim_id: string
+          coinsurance_amount: number
+          copay_amount: number
+          created_at: string
+          deductible_amount: number
+          description: string
+          dispense_item_id: string | null
+          id: string
+          notes: string | null
+          paid_amount: number
+          product_id: string | null
+          quantity: number
+          reason_code: string | null
+          unit_billed: number
+          updated_at: string
+        }
+        Insert: {
+          allowed_amount?: number
+          billed_amount?: number
+          claim_id: string
+          coinsurance_amount?: number
+          copay_amount?: number
+          created_at?: string
+          deductible_amount?: number
+          description: string
+          dispense_item_id?: string | null
+          id?: string
+          notes?: string | null
+          paid_amount?: number
+          product_id?: string | null
+          quantity?: number
+          reason_code?: string | null
+          unit_billed?: number
+          updated_at?: string
+        }
+        Update: {
+          allowed_amount?: number
+          billed_amount?: number
+          claim_id?: string
+          coinsurance_amount?: number
+          copay_amount?: number
+          created_at?: string
+          deductible_amount?: number
+          description?: string
+          dispense_item_id?: string | null
+          id?: string
+          notes?: string | null
+          paid_amount?: number
+          product_id?: string | null
+          quantity?: number
+          reason_code?: string | null
+          unit_billed?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insv2_claim_items_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "insv2_claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insv2_claim_items_dispense_item_id_fkey"
+            columns: ["dispense_item_id"]
+            isOneToOne: false
+            referencedRelation: "hc_dispense_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insv2_claim_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      insv2_claim_status_history: {
+        Row: {
+          changed_by: string | null
+          claim_id: string
+          created_at: string
+          from_status: string | null
+          id: string
+          reason: string | null
+          to_status: string
+        }
+        Insert: {
+          changed_by?: string | null
+          claim_id: string
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          reason?: string | null
+          to_status: string
+        }
+        Update: {
+          changed_by?: string | null
+          claim_id?: string
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          reason?: string | null
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insv2_claim_status_history_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "insv2_claims"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      insv2_claims: {
+        Row: {
+          adjudicated_at: string | null
+          authorization_id: string | null
+          branch_id: string | null
+          claim_no: string | null
+          correlation_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          diagnosis: string | null
+          dispense_id: string | null
+          id: string
+          metadata: Json
+          notes: string | null
+          organization_id: string
+          paid_at: string | null
+          patient_id: string
+          plan_id: string
+          prescription_id: string | null
+          provider_id: string
+          reject_reason: string | null
+          status: string
+          submitted_at: string | null
+          total_allowed: number
+          total_billed: number
+          total_copay: number
+          total_deductible: number
+          total_paid: number
+          updated_at: string
+        }
+        Insert: {
+          adjudicated_at?: string | null
+          authorization_id?: string | null
+          branch_id?: string | null
+          claim_no?: string | null
+          correlation_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          diagnosis?: string | null
+          dispense_id?: string | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          organization_id: string
+          paid_at?: string | null
+          patient_id: string
+          plan_id: string
+          prescription_id?: string | null
+          provider_id: string
+          reject_reason?: string | null
+          status?: string
+          submitted_at?: string | null
+          total_allowed?: number
+          total_billed?: number
+          total_copay?: number
+          total_deductible?: number
+          total_paid?: number
+          updated_at?: string
+        }
+        Update: {
+          adjudicated_at?: string | null
+          authorization_id?: string | null
+          branch_id?: string | null
+          claim_no?: string | null
+          correlation_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          diagnosis?: string | null
+          dispense_id?: string | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          organization_id?: string
+          paid_at?: string | null
+          patient_id?: string
+          plan_id?: string
+          prescription_id?: string | null
+          provider_id?: string
+          reject_reason?: string | null
+          status?: string
+          submitted_at?: string | null
+          total_allowed?: number
+          total_billed?: number
+          total_copay?: number
+          total_deductible?: number
+          total_paid?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insv2_claims_authorization_id_fkey"
+            columns: ["authorization_id"]
+            isOneToOne: false
+            referencedRelation: "insv2_authorizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insv2_claims_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insv2_claims_dispense_id_fkey"
+            columns: ["dispense_id"]
+            isOneToOne: false
+            referencedRelation: "hc_dispenses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insv2_claims_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insv2_claims_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "hc_patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insv2_claims_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "insv2_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insv2_claims_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "hc_prescriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insv2_claims_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "insv2_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      insv2_patient_insurance: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          group_number: string | null
+          holder_name: string | null
+          holder_relation: string | null
+          id: string
+          metadata: Json
+          notes: string | null
+          organization_id: string
+          patient_id: string
+          plan_id: string
+          policy_number: string
+          priority: string
+          status: string
+          updated_at: string
+          valid_from: string | null
+          valid_to: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          group_number?: string | null
+          holder_name?: string | null
+          holder_relation?: string | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          organization_id: string
+          patient_id: string
+          plan_id: string
+          policy_number: string
+          priority?: string
+          status?: string
+          updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          group_number?: string | null
+          holder_name?: string | null
+          holder_relation?: string | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          organization_id?: string
+          patient_id?: string
+          plan_id?: string
+          policy_number?: string
+          priority?: string
+          status?: string
+          updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insv2_patient_insurance_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insv2_patient_insurance_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "hc_patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insv2_patient_insurance_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "insv2_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      insv2_payment_responses: {
+        Row: {
+          amount: number
+          claim_id: string
+          created_at: string
+          id: string
+          method: string | null
+          notes: string | null
+          raw_payload: Json
+          received_at: string
+          recorded_by: string | null
+          reference: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          claim_id: string
+          created_at?: string
+          id?: string
+          method?: string | null
+          notes?: string | null
+          raw_payload?: Json
+          received_at?: string
+          recorded_by?: string | null
+          reference?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          claim_id?: string
+          created_at?: string
+          id?: string
+          method?: string | null
+          notes?: string | null
+          raw_payload?: Json
+          received_at?: string
+          recorded_by?: string | null
+          reference?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insv2_payment_responses_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "insv2_claims"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      insv2_plans: {
+        Row: {
+          code: string
+          copay_percent: number
+          coverage_percent: number
+          created_at: string
+          created_by: string | null
+          deductible: number
+          effective_from: string | null
+          effective_to: string | null
+          formulary_ref: string | null
+          id: string
+          is_active: boolean
+          metadata: Json
+          name: string
+          organization_id: string
+          provider_id: string
+          tier: string | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          copay_percent?: number
+          coverage_percent?: number
+          created_at?: string
+          created_by?: string | null
+          deductible?: number
+          effective_from?: string | null
+          effective_to?: string | null
+          formulary_ref?: string | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json
+          name: string
+          organization_id: string
+          provider_id: string
+          tier?: string | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          copay_percent?: number
+          coverage_percent?: number
+          created_at?: string
+          created_by?: string | null
+          deductible?: number
+          effective_from?: string | null
+          effective_to?: string | null
+          formulary_ref?: string | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json
+          name?: string
+          organization_id?: string
+          provider_id?: string
+          tier?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insv2_plans_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insv2_plans_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "insv2_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      insv2_policy_members: {
+        Row: {
+          created_at: string
+          dob: string | null
+          full_name: string
+          id: string
+          national_id: string | null
+          patient_insurance_id: string
+          relation: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dob?: string | null
+          full_name: string
+          id?: string
+          national_id?: string | null
+          patient_insurance_id: string
+          relation: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dob?: string | null
+          full_name?: string
+          id?: string
+          national_id?: string | null
+          patient_insurance_id?: string
+          relation?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insv2_policy_members_patient_insurance_id_fkey"
+            columns: ["patient_insurance_id"]
+            isOneToOne: false
+            referencedRelation: "insv2_patient_insurance"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      insv2_providers: {
+        Row: {
+          address: string | null
+          code: string
+          created_at: string
+          created_by: string | null
+          email: string | null
+          id: string
+          is_active: boolean
+          metadata: Json
+          name: string
+          name_en: string | null
+          notes: string | null
+          organization_id: string
+          phone: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          code: string
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json
+          name: string
+          name_en?: string | null
+          notes?: string | null
+          organization_id: string
+          phone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json
+          name?: string
+          name_en?: string | null
+          notes?: string | null
+          organization_id?: string
+          phone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insv2_providers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inv_expiry_alerts: {
         Row: {
           acknowledged_at: string | null
@@ -10857,6 +11529,8 @@ export type Database = {
         }
         Returns: undefined
       }
+      insv2_can_access_org: { Args: { _org: string }; Returns: boolean }
+      insv2_org_role: { Args: { _org: string }; Returns: string }
       inv_adjust_stock:
         | {
             Args: { _batch: string; _qty_delta: number; _reason: string }

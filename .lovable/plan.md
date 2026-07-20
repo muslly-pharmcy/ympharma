@@ -1,132 +1,147 @@
+# Phase 4 — Shipment C4: Insurance + Clinical Validation Framework
 
-# Phase 2.5 — Identity & Security Integration
+Accepting the split. C4A ships first as a full transactional insurance module. C4B lays the framework — engines behind interfaces with a safe null-provider — so a licensed drug database can be plugged in later without rewrites. No hand-authored clinical rules will be shipped as data.
 
-Goal: replace the `x-actor-*` demo bridge with real Supabase Auth **without changing any Shipment A/B business logic**. All 13 mutation server fns already funnel through `getActor()` — swapping that one function is the entire cutover.
+---
 
-## Reality check (before I code)
+## Shipment C4A — Insurance Platform
 
-Already present in the project:
-- `src/integrations/supabase/auth-middleware.ts` — generated `requireSupabaseAuth` middleware. Validates bearer JWT, injects `{ supabase, userId, claims }`.
-- `src/integrations/supabase/auth-attacher.ts` — generated `attachSupabaseAuth` client middleware.
-- DB tables: `organization_members` (org + role + branch_id), `user_roles` (app_role enum), `has_role()` security-definer function, `is_org_member()`, `has_org_permission()`.
-- `src/routes/login.tsx` — legacy demo login (to be replaced by Supabase auth page).
-- No `src/routes/_authenticated/` layout yet — the integration-managed one has not been scaffolded because no route required it.
-- `src/start.ts` — empty `createStart(() => ({}))`; **no bearer middleware registered** (that's why Shipment B needed the header bridge).
+### Database (migration, one shot)
 
-So the missing pieces are: register the attacher, wire a real auth page, gate the protected surface with a proper `_authenticated` layout, and rewrite `getActor()` to resolve identity from the Supabase claims + `organization_members` instead of from headers.
+New tables under `public`, with RLS, GRANTs, updated_at triggers, and org scoping via `organization_id`:
 
-## Scope
+- `insurance_providers` — payer directory (name, code, contact, active).
+- `insurance_plans` — plans per provider (name, tier, formulary_ref, effective range).
+- `patient_insurance` — patient ↔ plan link (policy_number, group_number, holder, primary/secondary, status).
+- `insurance_policy_members` — dependents on a policy (relation, dob).
+- `insurance_authorizations` — pre-auth records (status, reference, valid range, notes).
+- `insurance_claims` — claim header (patient_id, dispense_id, provider_id, plan_id, status, totals, submitted_at, adjudicated_at).
+- `insurance_claim_items` — per-line (product_id, qty, billed, allowed, copay, coinsurance, deductible, paid, reason_code).
+- `insurance_payment_responses` — payer remittances (claim_id, amount, method, reference, received_at, raw_payload jsonb).
 
-### 1. Auth wiring (foundation)
-- `src/start.ts` — append generated `attachSupabaseAuth` to `functionMiddleware`.
-- `src/routes/__root.tsx` — add root `supabase.auth.onAuthStateChange` subscriber (filter to `SIGNED_IN`/`SIGNED_OUT`/`USER_UPDATED`, invalidate router + queries per canonical pattern).
-- Root context — expose `{ auth: { user, session } }` via `createRootRouteWithContext` so `beforeLoad` can read it. `useAuth` hook reads it.
+Reuse existing `ins_companies` / `ins_patient_coverage` / `insurance_claims` where compatible — audit their columns and either extend or namespace new ones as `insv2_*`. Decision made in the migration itself based on schema read.
 
-### 2. Auth pages (public)
-- `src/routes/auth.tsx` — email/password sign-in + sign-up + Google OAuth button (via `lovable.auth.signInWithOAuth('google')`). Preserves `?redirect=` search param through every path (password sign-in nav, signup `emailRedirectTo`, OAuth `redirect_uri`). Zod-validated form with proper error surfaces.
-- `src/routes/reset-password.tsx` — recovery flow: reads `type=recovery` from hash, calls `updateUser({ password })`.
-- Delete legacy `src/routes/login.tsx` and `src/pages/Login.tsx`.
-- Configure Supabase auth via `supabase--configure_auth` (disable anon, no auto-confirm, HIBP on) and `supabase--configure_social_auth` for Google.
+Status machine on `insurance_claims`:
+`draft → submitted → in_review → approved | partially_approved | rejected → paid | closed` (cancelled terminal).
 
-### 3. Protected layout
-- `src/routes/_authenticated/route.tsx` — integration-managed shape: `ssr: false`, `beforeLoad` calls `supabase.auth.getUser()`, throws `redirect({ to: '/auth', search: { redirect: location.href } })` if no user.
-- Move `/purchase-orders`, `/purchase-orders/$id`, `/warehouses`, `/suppliers`, `/catalog`, `/catalog/$productId` under `_authenticated/` (rename files). Public landing at `/` stays public.
+### Domain layer (`src/domain/insurance/`)
 
-### 4. Session context on server (the real replacement)
-Rewrite `src/lib/session.server.ts` to a Supabase-backed resolver used by every mutation fn — no signature change, no call-site edits.
+- `schemas.ts` — Zod for providers, plans, coverage, claims, items, auth.
+- `commands.ts` — inputs for verify/create/submit/approve/reject/reconcile.
+- `state-machine.ts` — `ALLOWED_TRANSITIONS` for claim status, pure guard function + unit test.
+
+### Server layer
+
+- `src/lib/insurance.functions.ts` — reads: `listInsuranceProviders`, `listPlans`, `getCoverage`, `listClaims`, `getClaim`.
+- `src/lib/insurance.mutations.functions.ts` — writes: `verifyCoverage`, `createClaim`, `submitClaim`, `approveClaim`, `rejectClaim`, `reconcileClaim`, `recordPayment`, `createAuthorization`.
+- All mutations: `getActor()` → `requirePermission()` → idempotency key → org scoping → `audit()` → `emit_domain_event()`.
+
+### Permissions (extend `session.server.ts`)
+
+`insurance.read`, `insurance.write`, `insurance.approve`.
+- viewer/staff: read
+- pharmacist: read + write (claims, verify)
+- manager: + approve
+- admin/owner: all
+
+### Domain events
+
+`insurance.verified`, `insurance.claim.created|submitted|approved|rejected|paid`, `insurance.authorization.created`.
+
+### UI
+
+- `/_authenticated/insurance/index.tsx` — providers + plans list with search.
+- `/_authenticated/insurance/coverage.tsx` — patient coverage lookup + verify.
+- `/_authenticated/insurance/claims.tsx` — claims list with status filter.
+- `/_authenticated/insurance/claims.$claimId.tsx` — claim detail with state-driven actions, items table, authorization panel, payment responses timeline.
+
+Glassmorphism + RTL, matching C1/C2/C3.
+
+---
+
+## Shipment C4B — Clinical Validation Framework
+
+No clinical facts are shipped as data. The framework accepts pluggable providers; the default provider is a `NullProvider` that returns "no data available — pharmacist review required" for every check.
+
+### Provider interface (`src/domain/clinical/providers.ts`)
 
 ```ts
-// New shape (drop-in for existing getActor())
-export interface Actor {
-  userId: string
-  organizationId: string
-  branchId: string | null
-  roles: string[]         // app_role: admin/pharmacist/etc from user_roles
-  orgRole: string         // role in organization_members
-  correlationId: string   // per-request UUID
-  ip: string | null
-  userAgent: string | null
+export interface DrugKnowledgeProvider {
+  readonly id: string;
+  readonly source: 'null' | 'external';
+  getDrugInteractions(drugs: DrugRef[]): Promise<InteractionFinding[]>;
+  getContraindications(drug: DrugRef, patient: PatientContext): Promise<Finding[]>;
+  getDoseRecommendations(drug: DrugRef, patient: PatientContext): Promise<DoseFinding[]>;
+  getAllergyWarnings(drugs: DrugRef[], allergies: AllergyRef[]): Promise<Finding[]>;
+  getPregnancyWarnings(drug: DrugRef, patient: PatientContext): Promise<Finding[]>;
+  getRenalAdjustments(drug: DrugRef, renal: RenalStatus): Promise<DoseFinding[]>;
+  getHepaticAdjustments(drug: DrugRef, hepatic: HepaticStatus): Promise<DoseFinding[]>;
 }
 ```
 
-Two implementations, chosen at call-site by whether the fn uses `requireSupabaseAuth` middleware:
-- `resolveActor(context)` — pure Supabase path. Given the middleware context, queries `organization_members` (default active org for this user) + `user_roles` under RLS via `context.supabase`.
-- `resolveActorFromRequest()` — for the small number of call paths that don't use middleware; extracts bearer, validates via `supabase.auth.getUser()`, then queries membership.
+### Engines (`src/lib/clinical/`)
 
-**Cache**: in-request memo only. No cross-request policy cache in this shipment (avoids stale-permission bugs; policy engine is a separate phase).
+Each engine is a pure function that calls the injected provider and normalizes results to a common `Finding { severity, code, message, source, evidence_url? }`.
 
-### 5. Migrate all 13 mutation server fns
-Each currently does:
-```ts
-const actor = getActor()
-requireOrg(actor, data.organizationId)
-```
-Becomes:
-```ts
-// .middleware([requireSupabaseAuth]) added to the chain
-const actor = await resolveActor(context)
-requireOrg(actor, data.organizationId)
-```
-No business-logic changes. `catalog.mutations.functions.ts`, `inventory.mutations.functions.ts`, `suppliers.mutations.functions.ts`, `purchasing.functions.ts`.
+- `allergy-engine.ts` — cross-refs `patient_allergies` with drug ingredients from provider.
+- `interaction-engine.ts`
+- `contraindication-engine.ts`
+- `dose-engine.ts`
+- `pregnancy-engine.ts`
+- `renal-engine.ts`
+- `hepatic-engine.ts`
 
-### 6. Audit trail
-- Migration: `audit_events` table (`id, actor_user_id, organization_id, branch_id, action, resource_type, resource_id, ip, user_agent, correlation_id, payload jsonb, created_at`). RLS: org members read own-org rows; service_role writes.
-- Helper `audit(actor, action, resource, payload)` in `src/lib/audit.server.ts`, called once per mutation right after the RPC succeeds. Correlation ID threads through domain event + audit row.
+### Orchestrator (`src/lib/clinical/validator.server.ts`)
 
-### 7. Sign-in affordance
-- Update `Navbar` / whatever the top-bar is: show "Sign in" when signed-out, account menu + sign-out when signed-in, both driven by auth context (not local state).
-- Sign-out follows canonical 4-step hygiene: `cancelQueries` → `queryClient.clear()` → `supabase.auth.signOut()` → `navigate({ to: '/auth', replace: true })`.
+`validatePrescription(prescriptionId)` runs all engines in parallel, dedupes findings, persists to a new `clinical_findings` table (per prescription snapshot), returns aggregated warnings.
 
-### 8. End-to-end test
-- `tests/e2e-inventory-flow.test.ts` — Vitest + real Supabase client, using service-role to seed one org/user/warehouse/product, then hits the server fns through their HTTP boundary with a real signed-in session:
-  Login → Create PO → Approve → Receive (creates batch) → ReserveFEFO → Consume → Return → assert `audit_events` + `ai_events` rows exist with matching correlation_id.
-- Runs behind `SUPABASE_E2E=1` env gate so CI doesn't fail on projects without seeded fixtures.
+### Database (single migration)
 
-## Explicitly out of scope
+- `clinical_providers` — registered providers (id, name, source, active, config jsonb).
+- `clinical_findings` — per-prescription snapshot (prescription_id, engine, severity, code, message, source, evidence, created_at).
+- `clinical_review_decisions` — pharmacist ack/override (finding_id, decision, rationale, decided_by, decided_at).
 
-- **CSRF middleware, rate limiting, replay protection, session expiration policy, secure-cookie handling** — Supabase Auth already handles session lifecycle, cookie security, and refresh rotation. CSRF is a non-issue because we authenticate with Bearer tokens (not cookies) via the attacher. Rate limiting and replay protection deserve their own phase (Phase 2.6 — Edge Protection) with a proper reverse-proxy / Cloudflare Rules layer; hand-rolling them in server fns is theater. I'll flag this as `docs/engineering/PHASE-2.6-DEFERRED.md` rather than pretend it's shipped.
-- **Multi-org switcher UI**. `organization_members` supports many orgs per user; this shipment picks the first (or a `preferred_org_id` column if present) and defers the switcher UI. Chief chooses one now → I add the column.
-- **Full RBAC policy engine with permission cache**. `has_role()` + `has_org_permission()` already exist as SQL functions; call sites use them via RLS. A dedicated permission engine + cache is Phase 4 territory.
-- **Branch switcher UI**. `branchId` resolves to the actor's default branch from `branch_user_assignments` if present, else null.
+RLS: same org scoping; only `prescription.read` sees findings, only `prescription.write` records decisions.
 
-## Files touched
+### Provider registry
 
-Created:
-- `src/routes/auth.tsx`, `src/routes/reset-password.tsx`
-- `src/routes/_authenticated/route.tsx`
-- `src/lib/audit.server.ts`
-- `tests/e2e-inventory-flow.test.ts`
-- `docs/engineering/PHASE-2.6-DEFERRED.md`
+`src/lib/clinical/registry.server.ts` selects the active provider from `clinical_providers` or falls back to `NullProvider`. Zero external HTTP calls in default build.
 
-Moved (git-mv):
-- `catalog.tsx`, `catalog.$productId.tsx`, `warehouses.tsx`, `suppliers.tsx`, `purchase-orders.tsx`, `purchase-orders.$id.tsx` → `_authenticated/` subtree
+### UI integration
 
-Rewritten:
-- `src/lib/session.server.ts` (public API unchanged)
-- `src/start.ts`
-- `src/routes/__root.tsx` (context + auth listener)
-- All 4 mutation `.functions.ts` files (add middleware only)
+- On `/prescriptions/$prescriptionId`: "Clinical Validation" panel — button to run validation, findings table grouped by severity, per-finding acknowledge/override with rationale.
+- On dispense flow: warnings surfaced before "Prepare", never blocking — pharmacist decides.
 
-Deleted:
-- `src/routes/login.tsx`, `src/pages/Login.tsx`
+### Safety invariants (asserted in code + tests)
 
-Migration:
-- `audit_events` table + RLS + grants + updated_at trigger
-- (optional) `preferred_org_id` column on `profiles`
+1. No automatic rejection based on clinical findings — always advisory.
+2. `NullProvider` returned findings must be labeled `severity: 'unknown', source: 'null'`.
+3. All findings and decisions written to `audit_events` and emitted as domain events.
 
-## Acceptance criteria
+### Domain events
 
-1. `tsgo --noEmit` clean.
-2. SSR probes: `/` 200, `/auth` 200, `/_authenticated/catalog` redirects to `/auth` unauthenticated.
-3. Existing tests still pass.
-4. New e2e test (behind env gate) runs full inventory flow with a real signed-in user and asserts `audit_events` + `ai_events` rows.
-5. `getActor` code path is deleted; `grep -r "x-actor-user-id" src/` returns nothing.
-6. Manual smoke: sign up via `/auth` → land on `/catalog` → create warehouse/product/PO → approve/receive → check audit row via `supabase--read_query`.
+`clinical.validation.started|completed`, `clinical.finding.recorded`, `clinical.decision.ack|override`.
 
-## Questions before I execute
+---
 
-1. **Google OAuth** — do you want me to enable it now (needs you to add Google Client ID/Secret via `add_secret` when I prompt), or ship email/password only and add Google in a follow-up? Default recommendation: email/password now, Google in the next turn.
-2. **Multi-org**: for the initial cutover I'll pick the user's first `organization_members` row deterministically. OK to defer the switcher, or is there a specific org you want new users seeded into?
-3. **E2E test in CI**: run it against the live dev DB (fixtures cleaned up in `afterAll`), or skip in CI and keep it as a local-only smoke? I recommend local-only until you have a dedicated test project.
+## Tests
 
-Reply **"go 2.5"** to execute with defaults (email/password only, defer Google, defer switcher, e2e local-only), or tell me which of the three to change.
+- `tests/insurance-claim-state-machine.test.ts` — transition matrix.
+- `tests/clinical-null-provider.test.ts` — default provider returns unknown-severity findings.
+- `tests/clinical-validator.test.ts` — orchestrator dedupe + severity aggregation using an in-memory fake provider.
+
+## Acceptance
+
+- Insurance module transacts end-to-end with RBAC + RLS + audit + events.
+- Clinical framework exists, defaults to NullProvider, ships zero hand-authored medical facts.
+- Prescription detail page surfaces advisory findings; pharmacist retains final decision.
+- Typecheck + tests green.
+
+## Sequencing
+
+1. C4A migration (approval gate).
+2. C4A domain + server + UI + tests.
+3. C4B migration (approval gate).
+4. C4B framework + engines + UI hook + tests.
+
+Approve to proceed with step 1 (C4A migration).
