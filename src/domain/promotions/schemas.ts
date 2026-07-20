@@ -9,16 +9,11 @@ export type PromoTargetKind = 'include'|'exclude'
 export type PromoEntityKind = 'product'|'category'|'manufacturer'|'branch'|'loyalty_tier'
 export type EligibilityKind = 'first_purchase'|'customer'|'segment'|'loyalty_tier'|'all'
 
-export interface PromotionConfig {
-  // percentage: { percent: 10, apply_to?: 'cart'|'category'|'product' }
-  // fixed:      { amount: 50 }
-  // bogo:       { buy: 1, get: 1, target_product?: string, discount_percent?: 100 }
-  // free_shipping: {}
-  // free_gift:  { gift_product: string, qty?: 1 }
-  // category_discount: { category: string, percent: 15 }
-  // tier_discount: { tier: string, percent: 5 }
-  [k: string]: unknown
-}
+// JSON-safe config bag. Keys interpreted by kind:
+// percentage: { percent }; fixed: { amount }; bogo: { buy, get, discount_percent };
+// category_discount: { category, percent }; tier_discount: { tier, percent };
+// free_shipping: { shipping_cost }; free_gift: { gift_product, qty }.
+export type PromotionConfig = Record<string, string | number | boolean | null>
 
 export interface Promotion {
   id: string
