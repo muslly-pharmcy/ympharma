@@ -1,9 +1,3 @@
-import { createStartHandler, defaultRenderHandler } from '@tanstack/react-start'
-import { createRouter } from './router'
+import { createStart } from '@tanstack/react-start'
 
-const router = createRouter()
-
-export default createStartHandler({
-  createRouter,
-  renderHandler: defaultRenderHandler,
-})
+export const startInstance = createStart(() => ({}))
