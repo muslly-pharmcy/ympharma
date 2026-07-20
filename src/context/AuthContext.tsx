@@ -1,82 +1,55 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
-import type { User, UserRole } from '@/types'
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import type { Session, User } from '@supabase/supabase-js'
+import { supabase } from '@/integrations/supabase/client'
 
 interface AuthContextType {
   user: User | null
+  session: Session | null
   isAuthenticated: boolean
   isLoading: boolean
-  login: (email: string, password: string) => Promise<void>
-  logout: () => void
-  hasRole: (roles: UserRole[]) => boolean
+  signOut: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-// Demo user for development
-const demoUser: User = {
-  id: '1',
-  email: 'admin@mussly.ai',
-  name: 'مدير النظام',
-  role: 'super_admin',
-  avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
-  phone: '+967-777-000-000',
-  branchId: '1',
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Check for saved session
-    const saved = localStorage.getItem('mussly-user')
-    if (saved) {
-      setUser(JSON.parse(saved))
-    }
-    setIsLoading(false)
+    // Register listener FIRST so we don't miss the initial event
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
+      setSession(next)
+    })
+    // Then hydrate current session
+    void supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session)
+      setIsLoading(false)
+    })
+    return () => sub.subscription.unsubscribe()
   }, [])
 
-  const login = async (email: string, password: string) => {
-    setIsLoading(true)
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-
-    if (email === 'admin@mussly.ai' && password === 'admin') {
-      setUser(demoUser)
-      localStorage.setItem('mussly-user', JSON.stringify(demoUser))
-    } else {
-      throw new Error('بيانات الدخول غير صحيحة')
-    }
-    setIsLoading(false)
-  }
-
-  const logout = () => {
-    setUser(null)
-    localStorage.removeItem('mussly-user')
-  }
-
-  const hasRole = (roles: UserRole[]) => {
-    return user ? roles.includes(user.role) : false
+  const signOut = async () => {
+    await supabase.auth.signOut()
   }
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      isAuthenticated: !!user, 
-      isLoading, 
-      login, 
-      logout, 
-      hasRole 
-    }}>
+    <AuthContext.Provider
+      value={{
+        user: session?.user ?? null,
+        session,
+        isAuthenticated: !!session,
+        isLoading,
+        signOut,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext)
-  if (!context) throw new Error('useAuth must be used within AuthProvider')
-  return context
+  const ctx = useContext(AuthContext)
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
+  return ctx
 }
