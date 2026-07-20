@@ -65,7 +65,7 @@ export const updateSupplier = createServerFn({ method: 'POST' })
     const patch = Object.fromEntries(
       Object.entries(data.patch).filter(([, v]) => v !== undefined),
     )
-    const { error } = await supabaseAdmin.from('sup_suppliers').update(patch).eq('id', data.id)
+    const { error } = await supabaseAdmin.from('sup_suppliers').update(patch as never).eq('id', data.id)
     if (error) throw new Error(error.message)
 
     await supabaseAdmin.rpc('emit_domain_event', {

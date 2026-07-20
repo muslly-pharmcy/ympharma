@@ -75,7 +75,7 @@ export const updateProduct = createServerFn({ method: 'POST' })
       )
       const { error } = await supabaseAdmin
         .from('catalog_products')
-        .update(patch)
+        .update(patch as never)
         .eq('id', data.id)
       if (error) throw new Error(error.message)
 
