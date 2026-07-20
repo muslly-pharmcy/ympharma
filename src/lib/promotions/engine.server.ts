@@ -156,9 +156,11 @@ export function evaluatePromotions(
     .sort((a, b) => a.promotion.priority - b.promotion.priority)
 
   let stackedApplied = false
+  let stopStacking = false
   let runningSubtotal = subtotal
   for (const pw of sorted) {
     const p = pw.promotion
+    if (stopStacking) { skipped.push({ promotionId: p.id, code: p.code, reason: 'not_stackable' }); continue }
     if (!withinWindow(p, now)) { skipped.push({ promotionId: p.id, code: p.code, reason: 'out_of_window' }); continue }
     if (p.min_spend != null && subtotal < p.min_spend) { skipped.push({ promotionId: p.id, code: p.code, reason: 'below_min_spend' }); continue }
     if (p.usage_limit != null && p.usage_count >= p.usage_limit) { skipped.push({ promotionId: p.id, code: p.code, reason: 'exhausted' }); continue }
@@ -170,8 +172,8 @@ export function evaluatePromotions(
     applied.push(disc)
     runningSubtotal = Math.max(0, runningSubtotal - disc.amount)
     stackedApplied = true
-    // A non-stackable promotion consumes the slot; subsequent non-stackable ones are skipped.
-    if (!p.stackable) break
+    // A non-stackable promotion consumes the slot; all subsequent promotions are marked skipped.
+    if (!p.stackable) stopStacking = true
   }
 
   const discountTotal = Math.round(applied.reduce((s, a) => s + a.amount, 0) * 100) / 100
