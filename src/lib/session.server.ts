@@ -121,6 +121,7 @@ export type Permission =
   | 'campaign.read' | 'campaign.write'
   | 'segment.read' | 'segment.write'
   | 'ai.execute' | 'ai.loyalty.read' | 'ai.campaign.read'
+  | 'analytics.read' | 'analytics.export'
   | 'system.admin'
 
 const ALL: Permission[] = [
@@ -133,7 +134,8 @@ const ALL: Permission[] = [
   'customer.read','customer.write','customer.merge',
   'loyalty.read','loyalty.write','loyalty.adjust','loyalty.redeem',
   'campaign.read','campaign.write','segment.read','segment.write',
-  'ai.execute','ai.loyalty.read','ai.campaign.read','system.admin',
+  'ai.execute','ai.loyalty.read','ai.campaign.read',
+  'analytics.read','analytics.export','system.admin',
 ]
 
 const ORG_ROLE_PERMISSIONS: Record<string, Permission[]> = {
@@ -148,6 +150,7 @@ const ORG_ROLE_PERMISSIONS: Record<string, Permission[]> = {
     'customer.read','customer.write','customer.merge',
     'loyalty.read','loyalty.write','loyalty.adjust','loyalty.redeem',
     'campaign.read','campaign.write','segment.read','segment.write',
+    'analytics.read','analytics.export',
   ],
   pharmacist: [
     'catalog.read','inventory.read','inventory.write','warehouse.read',
