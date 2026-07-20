@@ -19,9 +19,11 @@ import { Route as AuthenticatedAiRuntimeRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated/customers'
 import { Route as AuthenticatedDispensesRouteImport } from './routes/_authenticated/dispenses'
 import { Route as AuthenticatedDoctorsRouteImport } from './routes/_authenticated/doctors'
+import { Route as AuthenticatedLoyaltyRouteImport } from './routes/_authenticated/loyalty'
 import { Route as AuthenticatedPatientsRouteImport } from './routes/_authenticated/patients'
 import { Route as AuthenticatedPrescriptionsRouteImport } from './routes/_authenticated/prescriptions'
 import { Route as AuthenticatedPurchaseOrdersRouteImport } from './routes/_authenticated/purchase-orders'
+import { Route as AuthenticatedRewardsRouteImport } from './routes/_authenticated/rewards'
 import { Route as AuthenticatedSuppliersRouteImport } from './routes/_authenticated/suppliers'
 import { Route as AuthenticatedWarehousesRouteImport } from './routes/_authenticated/warehouses'
 import { Route as PlanetPlanetIdRouteImport } from './routes/planet.$planetId'
@@ -33,6 +35,7 @@ import { Route as AuthenticatedDoctorsDoctorIdRouteImport } from './routes/_auth
 import { Route as AuthenticatedInsuranceIndexRouteImport } from './routes/_authenticated/insurance.index'
 import { Route as AuthenticatedInsuranceClaimsRouteImport } from './routes/_authenticated/insurance.claims'
 import { Route as AuthenticatedInsuranceCoverageRouteImport } from './routes/_authenticated/insurance.coverage'
+import { Route as AuthenticatedLoyaltyAccountIdRouteImport } from './routes/_authenticated/loyalty.$accountId'
 import { Route as AuthenticatedPatientsPatientIdRouteImport } from './routes/_authenticated/patients.$patientId'
 import { Route as AuthenticatedPrescriptionsPrescriptionIdRouteImport } from './routes/_authenticated/prescriptions.$prescriptionId'
 import { Route as AuthenticatedPurchaseOrdersIdRouteImport } from './routes/_authenticated/purchase-orders.$id'
@@ -87,6 +90,11 @@ const AuthenticatedDoctorsRoute = AuthenticatedDoctorsRouteImport.update({
   path: '/doctors',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedLoyaltyRoute = AuthenticatedLoyaltyRouteImport.update({
+  id: '/loyalty',
+  path: '/loyalty',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPatientsRoute = AuthenticatedPatientsRouteImport.update({
   id: '/patients',
   path: '/patients',
@@ -104,6 +112,11 @@ const AuthenticatedPurchaseOrdersRoute =
     path: '/purchase-orders',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedRewardsRoute = AuthenticatedRewardsRouteImport.update({
+  id: '/rewards',
+  path: '/rewards',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSuppliersRoute = AuthenticatedSuppliersRouteImport.update({
   id: '/suppliers',
   path: '/suppliers',
@@ -167,6 +180,12 @@ const AuthenticatedInsuranceCoverageRoute =
     path: '/insurance/coverage',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedLoyaltyAccountIdRoute =
+  AuthenticatedLoyaltyAccountIdRouteImport.update({
+    id: '/$accountId',
+    path: '/$accountId',
+    getParentRoute: () => AuthenticatedLoyaltyRoute,
+  } as any)
 const AuthenticatedPatientsPatientIdRoute =
   AuthenticatedPatientsPatientIdRouteImport.update({
     id: '/$patientId',
@@ -202,9 +221,11 @@ export interface FileRoutesByFullPath {
   '/customers': typeof AuthenticatedCustomersRouteWithChildren
   '/dispenses': typeof AuthenticatedDispensesRouteWithChildren
   '/doctors': typeof AuthenticatedDoctorsRouteWithChildren
+  '/loyalty': typeof AuthenticatedLoyaltyRouteWithChildren
   '/patients': typeof AuthenticatedPatientsRouteWithChildren
   '/prescriptions': typeof AuthenticatedPrescriptionsRouteWithChildren
   '/purchase-orders': typeof AuthenticatedPurchaseOrdersRouteWithChildren
+  '/rewards': typeof AuthenticatedRewardsRoute
   '/suppliers': typeof AuthenticatedSuppliersRoute
   '/warehouses': typeof AuthenticatedWarehousesRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
@@ -214,6 +235,7 @@ export interface FileRoutesByFullPath {
   '/doctors/$doctorId': typeof AuthenticatedDoctorsDoctorIdRoute
   '/insurance/claims': typeof AuthenticatedInsuranceClaimsRoute
   '/insurance/coverage': typeof AuthenticatedInsuranceCoverageRoute
+  '/loyalty/$accountId': typeof AuthenticatedLoyaltyAccountIdRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
@@ -231,9 +253,11 @@ export interface FileRoutesByTo {
   '/customers': typeof AuthenticatedCustomersRouteWithChildren
   '/dispenses': typeof AuthenticatedDispensesRouteWithChildren
   '/doctors': typeof AuthenticatedDoctorsRouteWithChildren
+  '/loyalty': typeof AuthenticatedLoyaltyRouteWithChildren
   '/patients': typeof AuthenticatedPatientsRouteWithChildren
   '/prescriptions': typeof AuthenticatedPrescriptionsRouteWithChildren
   '/purchase-orders': typeof AuthenticatedPurchaseOrdersRouteWithChildren
+  '/rewards': typeof AuthenticatedRewardsRoute
   '/suppliers': typeof AuthenticatedSuppliersRoute
   '/warehouses': typeof AuthenticatedWarehousesRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
@@ -243,6 +267,7 @@ export interface FileRoutesByTo {
   '/doctors/$doctorId': typeof AuthenticatedDoctorsDoctorIdRoute
   '/insurance/claims': typeof AuthenticatedInsuranceClaimsRoute
   '/insurance/coverage': typeof AuthenticatedInsuranceCoverageRoute
+  '/loyalty/$accountId': typeof AuthenticatedLoyaltyAccountIdRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
@@ -262,9 +287,11 @@ export interface FileRoutesById {
   '/_authenticated/customers': typeof AuthenticatedCustomersRouteWithChildren
   '/_authenticated/dispenses': typeof AuthenticatedDispensesRouteWithChildren
   '/_authenticated/doctors': typeof AuthenticatedDoctorsRouteWithChildren
+  '/_authenticated/loyalty': typeof AuthenticatedLoyaltyRouteWithChildren
   '/_authenticated/patients': typeof AuthenticatedPatientsRouteWithChildren
   '/_authenticated/prescriptions': typeof AuthenticatedPrescriptionsRouteWithChildren
   '/_authenticated/purchase-orders': typeof AuthenticatedPurchaseOrdersRouteWithChildren
+  '/_authenticated/rewards': typeof AuthenticatedRewardsRoute
   '/_authenticated/suppliers': typeof AuthenticatedSuppliersRoute
   '/_authenticated/warehouses': typeof AuthenticatedWarehousesRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
@@ -274,6 +301,7 @@ export interface FileRoutesById {
   '/_authenticated/doctors/$doctorId': typeof AuthenticatedDoctorsDoctorIdRoute
   '/_authenticated/insurance/claims': typeof AuthenticatedInsuranceClaimsRoute
   '/_authenticated/insurance/coverage': typeof AuthenticatedInsuranceCoverageRoute
+  '/_authenticated/loyalty/$accountId': typeof AuthenticatedLoyaltyAccountIdRoute
   '/_authenticated/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/_authenticated/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/_authenticated/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
@@ -293,9 +321,11 @@ export interface FileRouteTypes {
     | '/customers'
     | '/dispenses'
     | '/doctors'
+    | '/loyalty'
     | '/patients'
     | '/prescriptions'
     | '/purchase-orders'
+    | '/rewards'
     | '/suppliers'
     | '/warehouses'
     | '/planet/$planetId'
@@ -305,6 +335,7 @@ export interface FileRouteTypes {
     | '/doctors/$doctorId'
     | '/insurance/claims'
     | '/insurance/coverage'
+    | '/loyalty/$accountId'
     | '/patients/$patientId'
     | '/prescriptions/$prescriptionId'
     | '/purchase-orders/$id'
@@ -322,9 +353,11 @@ export interface FileRouteTypes {
     | '/customers'
     | '/dispenses'
     | '/doctors'
+    | '/loyalty'
     | '/patients'
     | '/prescriptions'
     | '/purchase-orders'
+    | '/rewards'
     | '/suppliers'
     | '/warehouses'
     | '/planet/$planetId'
@@ -334,6 +367,7 @@ export interface FileRouteTypes {
     | '/doctors/$doctorId'
     | '/insurance/claims'
     | '/insurance/coverage'
+    | '/loyalty/$accountId'
     | '/patients/$patientId'
     | '/prescriptions/$prescriptionId'
     | '/purchase-orders/$id'
@@ -352,9 +386,11 @@ export interface FileRouteTypes {
     | '/_authenticated/customers'
     | '/_authenticated/dispenses'
     | '/_authenticated/doctors'
+    | '/_authenticated/loyalty'
     | '/_authenticated/patients'
     | '/_authenticated/prescriptions'
     | '/_authenticated/purchase-orders'
+    | '/_authenticated/rewards'
     | '/_authenticated/suppliers'
     | '/_authenticated/warehouses'
     | '/planet/$planetId'
@@ -364,6 +400,7 @@ export interface FileRouteTypes {
     | '/_authenticated/doctors/$doctorId'
     | '/_authenticated/insurance/claims'
     | '/_authenticated/insurance/coverage'
+    | '/_authenticated/loyalty/$accountId'
     | '/_authenticated/patients/$patientId'
     | '/_authenticated/prescriptions/$prescriptionId'
     | '/_authenticated/purchase-orders/$id'
@@ -454,6 +491,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDoctorsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/loyalty': {
+      id: '/_authenticated/loyalty'
+      path: '/loyalty'
+      fullPath: '/loyalty'
+      preLoaderRoute: typeof AuthenticatedLoyaltyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/patients': {
       id: '/_authenticated/patients'
       path: '/patients'
@@ -473,6 +517,13 @@ declare module '@tanstack/react-router' {
       path: '/purchase-orders'
       fullPath: '/purchase-orders'
       preLoaderRoute: typeof AuthenticatedPurchaseOrdersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/rewards': {
+      id: '/_authenticated/rewards'
+      path: '/rewards'
+      fullPath: '/rewards'
+      preLoaderRoute: typeof AuthenticatedRewardsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/suppliers': {
@@ -552,6 +603,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInsuranceCoverageRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/loyalty/$accountId': {
+      id: '/_authenticated/loyalty/$accountId'
+      path: '/$accountId'
+      fullPath: '/loyalty/$accountId'
+      preLoaderRoute: typeof AuthenticatedLoyaltyAccountIdRouteImport
+      parentRoute: typeof AuthenticatedLoyaltyRoute
+    }
     '/_authenticated/patients/$patientId': {
       id: '/_authenticated/patients/$patientId'
       path: '/$patientId'
@@ -624,6 +682,17 @@ const AuthenticatedDoctorsRouteChildren: AuthenticatedDoctorsRouteChildren = {
 const AuthenticatedDoctorsRouteWithChildren =
   AuthenticatedDoctorsRoute._addFileChildren(AuthenticatedDoctorsRouteChildren)
 
+interface AuthenticatedLoyaltyRouteChildren {
+  AuthenticatedLoyaltyAccountIdRoute: typeof AuthenticatedLoyaltyAccountIdRoute
+}
+
+const AuthenticatedLoyaltyRouteChildren: AuthenticatedLoyaltyRouteChildren = {
+  AuthenticatedLoyaltyAccountIdRoute: AuthenticatedLoyaltyAccountIdRoute,
+}
+
+const AuthenticatedLoyaltyRouteWithChildren =
+  AuthenticatedLoyaltyRoute._addFileChildren(AuthenticatedLoyaltyRouteChildren)
+
 interface AuthenticatedPatientsRouteChildren {
   AuthenticatedPatientsPatientIdRoute: typeof AuthenticatedPatientsPatientIdRoute
 }
@@ -671,9 +740,11 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRouteWithChildren
   AuthenticatedDispensesRoute: typeof AuthenticatedDispensesRouteWithChildren
   AuthenticatedDoctorsRoute: typeof AuthenticatedDoctorsRouteWithChildren
+  AuthenticatedLoyaltyRoute: typeof AuthenticatedLoyaltyRouteWithChildren
   AuthenticatedPatientsRoute: typeof AuthenticatedPatientsRouteWithChildren
   AuthenticatedPrescriptionsRoute: typeof AuthenticatedPrescriptionsRouteWithChildren
   AuthenticatedPurchaseOrdersRoute: typeof AuthenticatedPurchaseOrdersRouteWithChildren
+  AuthenticatedRewardsRoute: typeof AuthenticatedRewardsRoute
   AuthenticatedSuppliersRoute: typeof AuthenticatedSuppliersRoute
   AuthenticatedWarehousesRoute: typeof AuthenticatedWarehousesRoute
   AuthenticatedCatalogProductIdRoute: typeof AuthenticatedCatalogProductIdRoute
@@ -689,10 +760,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCustomersRoute: AuthenticatedCustomersRouteWithChildren,
   AuthenticatedDispensesRoute: AuthenticatedDispensesRouteWithChildren,
   AuthenticatedDoctorsRoute: AuthenticatedDoctorsRouteWithChildren,
+  AuthenticatedLoyaltyRoute: AuthenticatedLoyaltyRouteWithChildren,
   AuthenticatedPatientsRoute: AuthenticatedPatientsRouteWithChildren,
   AuthenticatedPrescriptionsRoute: AuthenticatedPrescriptionsRouteWithChildren,
   AuthenticatedPurchaseOrdersRoute:
     AuthenticatedPurchaseOrdersRouteWithChildren,
+  AuthenticatedRewardsRoute: AuthenticatedRewardsRoute,
   AuthenticatedSuppliersRoute: AuthenticatedSuppliersRoute,
   AuthenticatedWarehousesRoute: AuthenticatedWarehousesRoute,
   AuthenticatedCatalogProductIdRoute: AuthenticatedCatalogProductIdRoute,

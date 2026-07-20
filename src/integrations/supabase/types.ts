@@ -2913,6 +2913,436 @@ export type Database = {
           },
         ]
       }
+      crm_loyalty_accounts: {
+        Row: {
+          created_at: string
+          current_tier_id: string | null
+          customer_id: string
+          id: string
+          metadata: Json
+          organization_id: string
+          points_balance: number
+          points_lifetime_earned: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_tier_id?: string | null
+          customer_id: string
+          id?: string
+          metadata?: Json
+          organization_id: string
+          points_balance?: number
+          points_lifetime_earned?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_tier_id?: string | null
+          customer_id?: string
+          id?: string
+          metadata?: Json
+          organization_id?: string
+          points_balance?: number
+          points_lifetime_earned?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_loyalty_accounts_current_tier_id_fkey"
+            columns: ["current_tier_id"]
+            isOneToOne: false
+            referencedRelation: "crm_loyalty_tiers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_loyalty_accounts_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "crm_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_loyalty_accounts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_loyalty_expirations: {
+        Row: {
+          account_id: string
+          created_at: string
+          customer_id: string
+          id: string
+          metadata: Json
+          organization_id: string
+          points: number
+          processed_at: string | null
+          scheduled_for: string
+          transaction_id: string | null
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          metadata?: Json
+          organization_id: string
+          points: number
+          processed_at?: string | null
+          scheduled_for: string
+          transaction_id?: string | null
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          metadata?: Json
+          organization_id?: string
+          points?: number
+          processed_at?: string | null
+          scheduled_for?: string
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_loyalty_expirations_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "crm_loyalty_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_loyalty_expirations_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "crm_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_loyalty_expirations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_loyalty_expirations_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "crm_loyalty_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_loyalty_rules: {
+        Row: {
+          config: Json
+          created_at: string
+          id: string
+          is_active: boolean
+          key: string
+          kind: string
+          name: string
+          organization_id: string
+          priority: number
+          updated_at: string
+          valid_from: string | null
+          valid_to: string | null
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          key: string
+          kind: string
+          name: string
+          organization_id: string
+          priority?: number
+          updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          key?: string
+          kind?: string
+          name?: string
+          organization_id?: string
+          priority?: number
+          updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_loyalty_rules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_loyalty_tiers: {
+        Row: {
+          code: string
+          color: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          min_lifetime_points: number
+          multiplier: number
+          name: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          color?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          min_lifetime_points?: number
+          multiplier?: number
+          name: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          color?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          min_lifetime_points?: number
+          multiplier?: number
+          name?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_loyalty_tiers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_loyalty_transactions: {
+        Row: {
+          account_id: string
+          correlation_id: string | null
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          id: string
+          kind: string
+          metadata: Json
+          organization_id: string
+          points: number
+          reason: string | null
+          source_ref: string | null
+        }
+        Insert: {
+          account_id: string
+          correlation_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          id?: string
+          kind: string
+          metadata?: Json
+          organization_id: string
+          points: number
+          reason?: string | null
+          source_ref?: string | null
+        }
+        Update: {
+          account_id?: string
+          correlation_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          id?: string
+          kind?: string
+          metadata?: Json
+          organization_id?: string
+          points?: number
+          reason?: string | null
+          source_ref?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_loyalty_transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "crm_loyalty_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_loyalty_transactions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "crm_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_loyalty_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_reward_catalog: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          metadata: Json
+          name: string
+          organization_id: string
+          points_cost: number
+          stock: number | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json
+          name: string
+          organization_id: string
+          points_cost: number
+          stock?: number | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json
+          name?: string
+          organization_id?: string
+          points_cost?: number
+          stock?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_reward_catalog_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_reward_redemptions: {
+        Row: {
+          account_id: string
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          id: string
+          metadata: Json
+          organization_id: string
+          points_spent: number
+          reward_id: string
+          status: string
+          transaction_id: string
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          id?: string
+          metadata?: Json
+          organization_id: string
+          points_spent: number
+          reward_id: string
+          status?: string
+          transaction_id: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          id?: string
+          metadata?: Json
+          organization_id?: string
+          points_spent?: number
+          reward_id?: string
+          status?: string
+          transaction_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_reward_redemptions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "crm_loyalty_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_reward_redemptions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "crm_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_reward_redemptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_reward_redemptions_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "crm_reward_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_reward_redemptions_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "crm_loyalty_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_channels: {
         Row: {
           channel: string
@@ -11592,6 +12022,31 @@ export type Database = {
       }
       create_backup: { Args: { _kind?: string }; Returns: string }
       create_scheduled_backup: { Args: { _kind: string }; Returns: string }
+      crm_loyalty_apply_txn: {
+        Args: {
+          p_account_id: string
+          p_correlation_id: string
+          p_created_by: string
+          p_kind: string
+          p_metadata: Json
+          p_points: number
+          p_reason: string
+          p_source_ref: string
+        }
+        Returns: {
+          new_balance: number
+          transaction_id: string
+        }[]
+      }
+      crm_loyalty_recompute_balance: {
+        Args: { p_account_id: string }
+        Returns: number
+      }
+      crm_loyalty_recompute_tier: {
+        Args: { p_account_id: string }
+        Returns: string
+      }
+      crm_loyalty_seed_tiers: { Args: { p_org: string }; Returns: undefined }
       cto_health: { Args: never; Returns: Json }
       current_inventory_write_mode: { Args: never; Returns: string }
       current_org: { Args: never; Returns: string }

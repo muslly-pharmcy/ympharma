@@ -117,7 +117,8 @@ export type Permission =
   | 'dispense.read' | 'dispense.write' | 'dispense.verify'
   | 'insurance.read' | 'insurance.write' | 'insurance.approve'
   | 'customer.read' | 'customer.write' | 'customer.merge'
-  | 'ai.execute'
+  | 'loyalty.read' | 'loyalty.write' | 'loyalty.adjust' | 'loyalty.redeem'
+  | 'ai.execute' | 'ai.loyalty.read'
   | 'system.admin'
 
 const ALL: Permission[] = [
@@ -128,7 +129,8 @@ const ALL: Permission[] = [
   'dispense.read','dispense.write','dispense.verify',
   'insurance.read','insurance.write','insurance.approve',
   'customer.read','customer.write','customer.merge',
-  'ai.execute','system.admin',
+  'loyalty.read','loyalty.write','loyalty.adjust','loyalty.redeem',
+  'ai.execute','ai.loyalty.read','system.admin',
 ]
 
 const ORG_ROLE_PERMISSIONS: Record<string, Permission[]> = {
@@ -138,27 +140,29 @@ const ORG_ROLE_PERMISSIONS: Record<string, Permission[]> = {
     'catalog.read','catalog.write','inventory.read','inventory.write',
     'warehouse.read','warehouse.write','supplier.read','supplier.write',
     'purchase.read','purchase.write','doctor.read','patient.read',
-    'prescription.read','dispense.read','dispense.verify','ai.execute',
+    'prescription.read','dispense.read','dispense.verify','ai.execute','ai.loyalty.read',
     'insurance.read','insurance.write','insurance.approve',
     'customer.read','customer.write','customer.merge',
+    'loyalty.read','loyalty.write','loyalty.adjust','loyalty.redeem',
   ],
   pharmacist: [
     'catalog.read','inventory.read','inventory.write','warehouse.read',
     'supplier.read','purchase.read','patient.read','patient.write',
     'prescription.read','prescription.write',
-    'dispense.read','dispense.write','dispense.verify','ai.execute',
+    'dispense.read','dispense.write','dispense.verify','ai.execute','ai.loyalty.read',
     'insurance.read','insurance.write',
     'customer.read','customer.write',
+    'loyalty.read','loyalty.write','loyalty.redeem',
   ],
   staff: [
     'catalog.read','inventory.read','warehouse.read','supplier.read',
     'purchase.read','patient.read','prescription.read','dispense.read',
-    'insurance.read','customer.read',
+    'insurance.read','customer.read','loyalty.read',
   ],
   viewer: [
     'catalog.read','inventory.read','warehouse.read','supplier.read',
     'purchase.read','patient.read','prescription.read','doctor.read',
-    'dispense.read','insurance.read','customer.read',
+    'dispense.read','insurance.read','customer.read','loyalty.read',
   ],
 }
 

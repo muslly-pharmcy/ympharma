@@ -135,6 +135,57 @@ const TOOLS: Record<string, ToolDefinition> = {
       }
     },
   },
+  get_loyalty_balance: {
+    key: 'get_loyalty_balance',
+    description: 'Return current loyalty balance/tier for a customer. Input: { customer_id: string }',
+    execute: async ({ actor }, input) => {
+      const cid = String(input.customer_id ?? '').trim()
+      if (!cid) return { ok: false, error: 'customer_id is required' }
+      const { hasPermission } = await import('../session.server')
+      if (!hasPermission(actor, 'ai.loyalty.read')) return { ok: false, error: 'permission denied' }
+      const sb = await admin()
+      const { data } = await sb.from('crm_loyalty_accounts')
+        .select('id, points_balance, points_lifetime_earned, status, tier:crm_loyalty_tiers(name, multiplier)')
+        .eq('organization_id', actor.organizationId).eq('customer_id', cid).maybeSingle()
+      return { ok: true, data: data ?? null }
+    },
+  },
+  customer_loyalty_history: {
+    key: 'customer_loyalty_history',
+    description: 'Return recent loyalty ledger entries for a customer. Input: { customer_id: string, limit?: number }',
+    execute: async ({ actor }, input) => {
+      const cid = String(input.customer_id ?? '').trim()
+      if (!cid) return { ok: false, error: 'customer_id is required' }
+      const { hasPermission } = await import('../session.server')
+      if (!hasPermission(actor, 'ai.loyalty.read')) return { ok: false, error: 'permission denied' }
+      const limit = Math.min(Math.max(Number(input.limit ?? 20), 1), 100)
+      const sb = await admin()
+      const { data } = await sb.from('crm_loyalty_transactions')
+        .select('id, kind, points, reason, created_at')
+        .eq('organization_id', actor.organizationId).eq('customer_id', cid)
+        .order('created_at', { ascending: false }).limit(limit)
+      return { ok: true, data: data ?? [] }
+    },
+  },
+  suggest_rewards: {
+    key: 'suggest_rewards',
+    description: 'Suggest rewards the customer can afford right now. Input: { customer_id: string }',
+    execute: async ({ actor }, input) => {
+      const cid = String(input.customer_id ?? '').trim()
+      if (!cid) return { ok: false, error: 'customer_id is required' }
+      const { hasPermission } = await import('../session.server')
+      if (!hasPermission(actor, 'ai.loyalty.read')) return { ok: false, error: 'permission denied' }
+      const sb = await admin()
+      const { data: acc } = await sb.from('crm_loyalty_accounts')
+        .select('points_balance').eq('organization_id', actor.organizationId).eq('customer_id', cid).maybeSingle()
+      const balance = Number(acc?.points_balance ?? 0)
+      const { data: rewards } = await sb.from('crm_reward_catalog')
+        .select('id, code, name, points_cost, stock')
+        .eq('organization_id', actor.organizationId).eq('is_active', true)
+        .lte('points_cost', balance).order('points_cost', { ascending: false }).limit(10)
+      return { ok: true, data: { balance, suggestions: rewards ?? [] } }
+    },
+  },
 }
 
 export function getTool(key: string): ToolDefinition | undefined {

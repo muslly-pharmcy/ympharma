@@ -114,10 +114,10 @@
 1. ✅ **Build #1 → Shipment C4B** (Clinical Framework)
 2. ✅ **Build #2 → Phase 5** (AI Runtime + أول 3 Agents) — `/ai-runtime`
 3. 🚧 **Build #3 → Phase 6** (CRM Core) — قيد التنفيذ، مقسمة إلى Shipments:
-   - **D1** — Customers foundation (`crm_customers`, addresses, contacts, tags) + `/customers`
-   - **D2** — Loyalty (`crm_loyalty_accounts/transactions/tiers/rules`) + `/loyalty`
-   - **D3** — Campaigns + Coupons (`crm_campaigns/audiences/messages/events`, `crm_coupons/redemptions`) + `/campaigns` `/coupons`
-   - **D4** — Segments + CRM AI tools (search_customers, customer_profile, loyalty_balance, ...) + `/segments`
+   - ✅ **D1** — Customers foundation (`crm_customers`, addresses, contacts, tags) + `/customers`
+   - ✅ **D2** — Loyalty Platform (ledger-based `crm_loyalty_*`, rewards, rules engine, tiers) + `/loyalty` `/loyalty/$accountId` `/rewards` + AI tools (`get_loyalty_balance`, `customer_loyalty_history`, `suggest_rewards`)
+   - **D3** — Campaigns & Customer Segmentation
+   - **D4** — Coupons & Promotions
 4. **Build #4 → Phase 7** (Executive Analytics)
 5. **Build #5 → Phase 8** (Finance)
 6. **Build #6 → Phase 9** (Automation)
