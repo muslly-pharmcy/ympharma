@@ -7,12 +7,13 @@ import {
   useRouter,
 } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useState } from 'react'
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
 import MainLayout from '@/layouts/MainLayout'
 import { AuthProvider } from '@/context/AuthContext'
 import { ThemeProvider } from '@/context/ThemeContext'
 import { AIProvider } from '@/context/AIContext'
+import { supabase } from '@/integrations/supabase/client'
 import appCss from '@/index.css?url'
 
 export const Route = createRootRoute({
@@ -66,6 +67,7 @@ function RootComponent() {
   )
   return (
     <QueryClientProvider client={queryClient}>
+      <AuthStateSync />
       <ThemeProvider>
         <AuthProvider>
           <AIProvider>
@@ -77,6 +79,22 @@ function RootComponent() {
       </ThemeProvider>
     </QueryClientProvider>
   )
+}
+
+// Wire Supabase auth events into the router + query cache exactly once.
+// Filter to identity transitions to avoid churn on TOKEN_REFRESHED / INITIAL_SESSION.
+function AuthStateSync() {
+  const router = useRouter()
+  const queryClient = useQueryClient()
+  useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event !== 'SIGNED_IN' && event !== 'SIGNED_OUT' && event !== 'USER_UPDATED') return
+      void router.invalidate()
+      if (event !== 'SIGNED_OUT') void queryClient.invalidateQueries()
+    })
+    return () => sub.subscription.unsubscribe()
+  }, [router, queryClient])
+  return null
 }
 
 function RootNotFound() {
