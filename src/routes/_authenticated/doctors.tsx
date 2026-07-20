@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Stethoscope, Plus, Search } from 'lucide-react'
 import { listDoctors } from '@/lib/doctors.functions'
 import { createDoctor } from '@/lib/doctors.mutations.functions'
-import { useAuth } from '@/context/AuthContext'
+import { getMyOrganization } from '@/lib/me.functions'
 
 export const Route = createFileRoute('/_authenticated/doctors')({
   head: () => ({
@@ -22,7 +22,8 @@ export const Route = createFileRoute('/_authenticated/doctors')({
 
 function DoctorsPage() {
   const router = useRouter()
-  const { organizationId } = useAuth()
+  const { data: me } = useQuery({ queryKey: ['me', 'org'], queryFn: () => getMyOrganization() })
+  const organizationId = me?.organizationId ?? null
   const [q, setQ] = useState('')
   const [showNew, setShowNew] = useState(false)
 
