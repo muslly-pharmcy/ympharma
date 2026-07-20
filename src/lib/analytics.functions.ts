@@ -78,7 +78,7 @@ export const getExecutiveKpis = createServerFn({ method: 'GET' }).handler(async 
     sb.from('crm_customers').select('id', { count: 'exact', head: true }).eq('organization_id', org).eq('status', 'active'),
     sb.from('crm_loyalty_transactions').select('points').eq('organization_id', org).eq('kind', 'earn').gte('created_at', d30),
     sb.from('crm_loyalty_transactions').select('points').eq('organization_id', org).eq('kind', 'redeem').gte('created_at', d30),
-    sb.from('crm_campaigns').select('id', { count: 'exact', head: true }).eq('organization_id', org).in('status', ['active', 'running', 'scheduled']),
+    sb.from('crm_campaigns').select('id', { count: 'exact', head: true }).eq('organization_id', org).in('status', ['running', 'scheduled']),
     sb.from('air_runs').select('id', { count: 'exact', head: true }).eq('organization_id', org).gte('created_at', d1),
     sb.from('inv_stock_batches').select('id', { count: 'exact', head: true }).eq('organization_id', org).lte('qty_on_hand', 10),
     sb.from('inv_stock_batches').select('id', { count: 'exact', head: true }).eq('organization_id', org).gt('qty_on_hand', 0).lte('expiry_date', in30),
