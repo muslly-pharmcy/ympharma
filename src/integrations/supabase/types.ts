@@ -3519,6 +3519,56 @@ export type Database = {
           },
         ]
       }
+      hc_doctor_licenses: {
+        Row: {
+          authority: string | null
+          country: string | null
+          created_at: string
+          doctor_id: string
+          document_url: string | null
+          id: string
+          license_number: string
+          status: string
+          updated_at: string
+          valid_from: string | null
+          valid_to: string | null
+        }
+        Insert: {
+          authority?: string | null
+          country?: string | null
+          created_at?: string
+          doctor_id: string
+          document_url?: string | null
+          id?: string
+          license_number: string
+          status?: string
+          updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
+        }
+        Update: {
+          authority?: string | null
+          country?: string | null
+          created_at?: string
+          doctor_id?: string
+          document_url?: string | null
+          id?: string
+          license_number?: string
+          status?: string
+          updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hc_doctor_licenses_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hc_doctor_locations: {
         Row: {
           created_at: string
@@ -3963,12 +4013,18 @@ export type Database = {
       }
       hc_patients: {
         Row: {
+          blood_type: string | null
           created_at: string
+          created_by: string | null
           date_of_birth: string | null
+          email: string | null
           full_name: string
           gender: string | null
           id: string
+          is_active: boolean
+          merged_into_id: string | null
           metadata: Json
+          mrn: string | null
           national_id_hash: string | null
           organization_id: string | null
           phone: string | null
@@ -3976,12 +4032,18 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          blood_type?: string | null
           created_at?: string
+          created_by?: string | null
           date_of_birth?: string | null
+          email?: string | null
           full_name: string
           gender?: string | null
           id?: string
+          is_active?: boolean
+          merged_into_id?: string | null
           metadata?: Json
+          mrn?: string | null
           national_id_hash?: string | null
           organization_id?: string | null
           phone?: string | null
@@ -3989,12 +4051,18 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          blood_type?: string | null
           created_at?: string
+          created_by?: string | null
           date_of_birth?: string | null
+          email?: string | null
           full_name?: string
           gender?: string | null
           id?: string
+          is_active?: boolean
+          merged_into_id?: string | null
           metadata?: Json
+          mrn?: string | null
           national_id_hash?: string | null
           organization_id?: string | null
           phone?: string | null
@@ -4002,6 +4070,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "hc_patients_merged_into_id_fkey"
+            columns: ["merged_into_id"]
+            isOneToOne: false
+            referencedRelation: "hc_patients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "hc_patients_organization_id_fkey"
             columns: ["organization_id"]
@@ -6410,6 +6485,100 @@ export type Database = {
         }
         Relationships: []
       }
+      patient_allergies: {
+        Row: {
+          allergen: string
+          created_at: string
+          id: string
+          notes: string | null
+          patient_id: string
+          reaction: string | null
+          recorded_at: string
+          recorded_by: string | null
+          severity: string
+          updated_at: string
+        }
+        Insert: {
+          allergen: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          patient_id: string
+          reaction?: string | null
+          recorded_at?: string
+          recorded_by?: string | null
+          severity?: string
+          updated_at?: string
+        }
+        Update: {
+          allergen?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          patient_id?: string
+          reaction?: string | null
+          recorded_at?: string
+          recorded_by?: string | null
+          severity?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_allergies_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "hc_patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_conditions: {
+        Row: {
+          condition_name: string
+          created_at: string
+          icd10: string | null
+          id: string
+          notes: string | null
+          onset_date: string | null
+          patient_id: string
+          recorded_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          condition_name: string
+          created_at?: string
+          icd10?: string | null
+          id?: string
+          notes?: string | null
+          onset_date?: string | null
+          patient_id: string
+          recorded_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          condition_name?: string
+          created_at?: string
+          icd10?: string | null
+          id?: string
+          notes?: string | null
+          onset_date?: string | null
+          patient_id?: string
+          recorded_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_conditions_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "hc_patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patient_consents: {
         Row: {
           active: boolean
@@ -6450,6 +6619,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "patient_consents_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "hc_patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_emergency_contacts: {
+        Row: {
+          created_at: string
+          id: string
+          is_primary: boolean
+          name: string
+          patient_id: string
+          phone: string
+          relation: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          name: string
+          patient_id: string
+          phone: string
+          relation?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          name?: string
+          patient_id?: string
+          phone?: string
+          relation?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_emergency_contacts_patient_id_fkey"
             columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "hc_patients"
@@ -10065,6 +10275,7 @@ export type Database = {
       generate_agent_actions: { Args: never; Returns: number }
       generate_invoice_number: { Args: never; Returns: string }
       generate_marketing_campaigns: { Args: never; Returns: Json }
+      generate_mrn: { Args: { p_org: string }; Returns: string }
       get_agent_alerts: {
         Args: never
         Returns: {
