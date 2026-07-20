@@ -4464,6 +4464,72 @@ export type Database = {
           },
         ]
       }
+      inv_reservations: {
+        Row: {
+          actor_user_id: string | null
+          allocations: Json
+          consumed_at: string | null
+          correlation_id: string | null
+          created_at: string
+          id: string
+          organization_id: string
+          product_id: string
+          qty: number
+          ref_id: string | null
+          ref_type: string | null
+          released_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          allocations?: Json
+          consumed_at?: string | null
+          correlation_id?: string | null
+          created_at?: string
+          id?: string
+          organization_id: string
+          product_id: string
+          qty: number
+          ref_id?: string | null
+          ref_type?: string | null
+          released_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          allocations?: Json
+          consumed_at?: string | null
+          correlation_id?: string | null
+          created_at?: string
+          id?: string
+          organization_id?: string
+          product_id?: string
+          qty?: number
+          ref_id?: string | null
+          ref_type?: string | null
+          released_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_reservations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_reservations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inv_stock_batches: {
         Row: {
           batch_no: string | null
@@ -4913,6 +4979,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      inventory_idempotency: {
+        Row: {
+          actor_id: string | null
+          command: string
+          created_at: string
+          key: string
+          response: Json
+        }
+        Insert: {
+          actor_id?: string | null
+          command: string
+          created_at?: string
+          key: string
+          response: Json
+        }
+        Update: {
+          actor_id?: string | null
+          command?: string
+          created_at?: string
+          key?: string
+          response?: Json
+        }
+        Relationships: []
       }
       inventory_manual_adjustments: {
         Row: {
@@ -7491,6 +7581,145 @@ export type Database = {
         }
         Relationships: []
       }
+      purchase_order_lines: {
+        Row: {
+          batch_no: string | null
+          created_at: string
+          expiry_date: string | null
+          id: string
+          line_no: number
+          metadata: Json
+          po_id: string
+          product_id: string
+          qty_ordered: number
+          qty_received: number
+          unit_cost: number
+          updated_at: string
+        }
+        Insert: {
+          batch_no?: string | null
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          line_no: number
+          metadata?: Json
+          po_id: string
+          product_id: string
+          qty_ordered: number
+          qty_received?: number
+          unit_cost?: number
+          updated_at?: string
+        }
+        Update: {
+          batch_no?: string | null
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          line_no?: number
+          metadata?: Json
+          po_id?: string
+          product_id?: string
+          qty_ordered?: number
+          qty_received?: number
+          unit_cost?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_order_lines_po_id_fkey"
+            columns: ["po_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_order_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_orders: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          code: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          metadata: Json
+          notes: string | null
+          organization_id: string
+          received_at: string | null
+          status: Database["public"]["Enums"]["po_status"]
+          supplier_id: string
+          total_amount: number
+          updated_at: string
+          warehouse_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          code: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          organization_id: string
+          received_at?: string | null
+          status?: Database["public"]["Enums"]["po_status"]
+          supplier_id: string
+          total_amount?: number
+          updated_at?: string
+          warehouse_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          organization_id?: string
+          received_at?: string | null
+          status?: Database["public"]["Enums"]["po_status"]
+          supplier_id?: string
+          total_amount?: number
+          updated_at?: string
+          warehouse_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_orders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "sup_suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "wh_warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       purchase_recommendations: {
         Row: {
           created_at: string
@@ -9942,11 +10171,30 @@ export type Database = {
         }
         Returns: undefined
       }
-      inv_adjust_stock: {
-        Args: { _batch: string; _qty_delta: number; _reason: string }
-        Returns: string
+      inv_adjust_stock:
+        | {
+            Args: { _batch: string; _qty_delta: number; _reason: string }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_actor: string
+              p_batch: string
+              p_correlation: string
+              p_delta: number
+              p_reason: string
+            }
+            Returns: string
+          }
+      inv_consume_reservation: {
+        Args: { p_actor: string; p_correlation: string; p_reservation: string }
+        Returns: undefined
       }
       inv_dispatch_transfer: { Args: { _transfer: string }; Returns: undefined }
+      inv_emit: {
+        Args: { p_correlation: string; p_payload: Json; p_type: string }
+        Returns: undefined
+      }
       inv_emit_event: {
         Args: {
           _entity_id: string
@@ -9964,25 +10212,82 @@ export type Database = {
           recommendations_created: number
         }[]
       }
-      inv_receive_stock: {
+      inv_receive_stock:
+        | {
+            Args: {
+              _batch_no?: string
+              _cost?: number
+              _expiry?: string
+              _org: string
+              _product: string
+              _qty: number
+              _reason?: string
+              _supplier?: string
+              _warehouse: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_actor: string
+              p_batch: string
+              p_correlation: string
+              p_cost: number
+              p_expiry: string
+              p_org: string
+              p_product: string
+              p_qty: number
+              p_supplier: string
+              p_warehouse: string
+            }
+            Returns: string
+          }
+      inv_receive_transfer: { Args: { _transfer: string }; Returns: undefined }
+      inv_release_reservation: {
+        Args: { p_actor: string; p_correlation: string; p_reservation: string }
+        Returns: undefined
+      }
+      inv_reserve_fefo: {
         Args: {
-          _batch_no?: string
-          _cost?: number
-          _expiry?: string
-          _org: string
-          _product: string
-          _qty: number
-          _reason?: string
-          _supplier?: string
-          _warehouse: string
+          p_actor: string
+          p_allow_partial?: boolean
+          p_correlation: string
+          p_org: string
+          p_product: string
+          p_qty: number
+          p_ref_id: string
+          p_ref_type: string
         }
         Returns: string
       }
-      inv_receive_transfer: { Args: { _transfer: string }; Returns: undefined }
       inv_reserve_for_transfer: { Args: { _transfer: string }; Returns: number }
+      inv_return_stock: {
+        Args: {
+          p_actor: string
+          p_correlation: string
+          p_org: string
+          p_product: string
+          p_qty: number
+          p_reason: string
+          p_warehouse: string
+        }
+        Returns: string
+      }
       inv_scan_expiry: {
         Args: { _horizon_days?: number; _org: string }
         Returns: number
+      }
+      inv_transfer_stock: {
+        Args: {
+          p_actor: string
+          p_correlation: string
+          p_from_warehouse: string
+          p_org: string
+          p_product: string
+          p_qty: number
+          p_to_warehouse: string
+        }
+        Returns: string
       }
       inventory_intel: { Args: never; Returns: Json }
       inventory_pilot_report: { Args: never; Returns: Json }
@@ -10182,6 +10487,10 @@ export type Database = {
           _pharmacy_id: string
           _reviewer_notes?: string
         }
+        Returns: undefined
+      }
+      po_receive: {
+        Args: { p_actor: string; p_correlation: string; p_po: string }
         Returns: undefined
       }
       prescription_file_count: {
@@ -10446,6 +10755,7 @@ export type Database = {
         | "rejected"
         | "cancelled"
       pn_verification_status: "pending" | "verified" | "rejected"
+      po_status: "draft" | "submitted" | "approved" | "received" | "cancelled"
       sup_status: "active" | "inactive" | "suspended"
       therapeutic_category:
         | "diabetes"
@@ -10777,6 +11087,7 @@ export const Constants = {
         "cancelled",
       ],
       pn_verification_status: ["pending", "verified", "rejected"],
+      po_status: ["draft", "submitted", "approved", "received", "cancelled"],
       sup_status: ["active", "inactive", "suspended"],
       therapeutic_category: [
         "diabetes",
