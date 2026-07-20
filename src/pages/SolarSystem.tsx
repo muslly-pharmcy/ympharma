@@ -5,6 +5,7 @@ import PlanetCard from '@/shared/components/PlanetCard'
 import { getActivePlanets } from '@/data/planets'
 import { Sparkles, TrendingUp, Users, Package, Box } from 'lucide-react'
 import LoadingSpinner from '@/shared/components/LoadingSpinner'
+import { CosmicSearch } from '@/components/ai/CosmicSearch'
 
 const SolarSystem3D = lazy(() => import('@/shared/3d/SolarSystem3D'))
 
@@ -61,6 +62,18 @@ export default function SolarSystem() {
             <span className="text-sm text-primary font-medium">النظام يعمل بكامل طاقته</span>
           </div>
         </motion.div>
+
+        {/* Cosmic AI Search — read-only bridge over catalog_products */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.15 }}
+          className="mb-10"
+        >
+          <CosmicSearch />
+        </motion.div>
+
+
 
         {/* Quick Stats */}
         <motion.div 
