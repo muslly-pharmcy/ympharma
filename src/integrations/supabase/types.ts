@@ -4086,6 +4086,212 @@ export type Database = {
           },
         ]
       }
+      hc_prescription_items: {
+        Row: {
+          created_at: string
+          dose: string | null
+          duration_days: number | null
+          form: string | null
+          frequency: string | null
+          id: string
+          instructions: string | null
+          medication_name: string
+          prescription_id: string
+          product_id: string | null
+          quantity: number
+          route: string | null
+          strength: string | null
+        }
+        Insert: {
+          created_at?: string
+          dose?: string | null
+          duration_days?: number | null
+          form?: string | null
+          frequency?: string | null
+          id?: string
+          instructions?: string | null
+          medication_name: string
+          prescription_id: string
+          product_id?: string | null
+          quantity?: number
+          route?: string | null
+          strength?: string | null
+        }
+        Update: {
+          created_at?: string
+          dose?: string | null
+          duration_days?: number | null
+          form?: string | null
+          frequency?: string | null
+          id?: string
+          instructions?: string | null
+          medication_name?: string
+          prescription_id?: string
+          product_id?: string | null
+          quantity?: number
+          route?: string | null
+          strength?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hc_prescription_items_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "hc_prescriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hc_prescription_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hc_prescription_notes: {
+        Row: {
+          author_id: string | null
+          body: string
+          created_at: string
+          id: string
+          prescription_id: string
+        }
+        Insert: {
+          author_id?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          prescription_id: string
+        }
+        Update: {
+          author_id?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          prescription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hc_prescription_notes_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "hc_prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hc_prescription_status_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          from_status: string | null
+          id: string
+          prescription_id: string
+          reason: string | null
+          to_status: string
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          prescription_id: string
+          reason?: string | null
+          to_status: string
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          prescription_id?: string
+          reason?: string | null
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hc_prescription_status_history_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "hc_prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hc_prescriptions: {
+        Row: {
+          branch_id: string | null
+          created_at: string
+          created_by: string | null
+          diagnosis: string | null
+          doctor_id: string | null
+          external_doctor_name: string | null
+          id: string
+          issued_at: string
+          notes: string | null
+          organization_id: string
+          patient_id: string
+          prescription_no: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          diagnosis?: string | null
+          doctor_id?: string | null
+          external_doctor_name?: string | null
+          id?: string
+          issued_at?: string
+          notes?: string | null
+          organization_id: string
+          patient_id: string
+          prescription_no?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          diagnosis?: string | null
+          doctor_id?: string | null
+          external_doctor_name?: string | null
+          id?: string
+          issued_at?: string
+          notes?: string | null
+          organization_id?: string
+          patient_id?: string
+          prescription_no?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hc_prescriptions_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hc_prescriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hc_prescriptions_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "hc_patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hc_specialties: {
         Row: {
           code: string
