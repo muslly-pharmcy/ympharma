@@ -111,9 +111,9 @@
 ## استراتيجية التنفيذ
 كل Build لاحق ينفّذ **مرحلة واحدة فقط**، بالترتيب المقترح:
 
-1. **Build #1 → Shipment C4B** (Clinical Framework)
-2. **Build #2 → Phase 5** (AI Runtime + أول 3 Agents)
-3. **Build #3 → Phase 6** (CRM Core)
+1. ✅ **Build #1 → Shipment C4B** (Clinical Framework)
+2. ✅ **Build #2 → Phase 5** (AI Runtime + أول 3 Agents) — `/ai-runtime`
+3. **Build #3 → Phase 6** (CRM Core) — التالي
 4. **Build #4 → Phase 7** (Executive Analytics)
 5. **Build #5 → Phase 8** (Finance)
 6. **Build #6 → Phase 9** (Automation)
