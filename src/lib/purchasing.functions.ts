@@ -56,7 +56,7 @@ export const createPurchaseOrder = createServerFn({ method: 'POST' })
   .inputValidator((raw: unknown): CreatePurchaseOrderInput => createPurchaseOrderInput.parse(raw))
   .handler(async ({ data }) => {
     const { getActor, requireOrg, withIdempotency, newCorrelationId, supabaseAdmin } = await loadDeps()
-    const actor = getActor()
+    const actor = await getActor()
     requireOrg(actor, data.organizationId)
     const correlation = data.correlationId ?? newCorrelationId('po')
 
@@ -109,7 +109,7 @@ export const updatePurchaseOrder = createServerFn({ method: 'POST' })
   .inputValidator((raw: unknown): UpdatePurchaseOrderInput => updatePurchaseOrderInput.parse(raw))
   .handler(async ({ data }) => {
     const { getActor, newCorrelationId, supabaseAdmin } = await loadDeps()
-    const actor = getActor()
+    const actor = await getActor()
     const correlation = data.correlationId ?? newCorrelationId('po')
 
     const { data: existing, error: fetchErr } = await supabaseAdmin
@@ -144,7 +144,7 @@ async function transitionPO(
   extraColumns: Record<string, unknown> = {},
 ) {
   const { getActor, newCorrelationId, supabaseAdmin } = await loadDeps()
-  const actor = getActor()
+  const actor = await getActor()
   const correlation = data.correlationId ?? newCorrelationId('po')
 
   const { data: existing, error: fetchErr } = await supabaseAdmin
@@ -181,7 +181,7 @@ export const approvePurchaseOrder = createServerFn({ method: 'POST' })
   .inputValidator((raw: unknown): PurchaseOrderIdInput => purchaseOrderIdInput.parse(raw))
   .handler(async ({ data }) => {
     const { getActor } = await import('./session.server')
-    const actor = getActor()
+    const actor = await getActor()
     return transitionPO(data, ['submitted'], 'approved', 'PurchaseOrderApproved', {
       approved_by: actor.userId,
       approved_at: new Date().toISOString(),
@@ -198,7 +198,7 @@ export const receivePurchaseOrder = createServerFn({ method: 'POST' })
   .inputValidator((raw: unknown): PurchaseOrderIdInput => purchaseOrderIdInput.parse(raw))
   .handler(async ({ data }) => {
     const { getActor, newCorrelationId, supabaseAdmin } = await loadDeps()
-    const actor = getActor()
+    const actor = await getActor()
     const correlation = data.correlationId ?? newCorrelationId('po')
     const { error } = await (supabaseAdmin.rpc as unknown as (name: string, args: unknown) => Promise<{ data: unknown; error: { message: string } | null }>)('po_receive', {
       p_po: data.id,
