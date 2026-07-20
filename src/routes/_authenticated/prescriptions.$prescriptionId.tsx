@@ -91,6 +91,10 @@ function PrescriptionDetailPage() {
         </section>
       )}
 
+      <ClinicalWarningsPanel prescriptionId={rx.id} />
+
+
+
       <section className="glass-panel rounded-2xl p-6">
         <h2 className="mb-4 text-lg font-semibold">الأدوية ({items.length})</h2>
         {items.length === 0 ? (
