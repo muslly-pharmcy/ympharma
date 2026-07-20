@@ -116,6 +116,7 @@ export type Permission =
   | 'prescription.read' | 'prescription.write'
   | 'dispense.read' | 'dispense.write' | 'dispense.verify'
   | 'insurance.read' | 'insurance.write' | 'insurance.approve'
+  | 'customer.read' | 'customer.write' | 'customer.merge'
   | 'ai.execute'
   | 'system.admin'
 
@@ -126,6 +127,7 @@ const ALL: Permission[] = [
   'patient.read','patient.write','prescription.read','prescription.write',
   'dispense.read','dispense.write','dispense.verify',
   'insurance.read','insurance.write','insurance.approve',
+  'customer.read','customer.write','customer.merge',
   'ai.execute','system.admin',
 ]
 
