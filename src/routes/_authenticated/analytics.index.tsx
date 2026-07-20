@@ -23,16 +23,6 @@ export const Route = createFileRoute('/_authenticated/analytics/')({
     { property: 'og:title', content: 'التحليلات التنفيذية — MUSLLY' },
     { property: 'og:description', content: 'ذكاء أعمال في الوقت الحقيقي لعمليات الصيدلية.' },
   ] }),
-  loader: async ({ context }) => {
-    await Promise.all([
-      context.queryClient.ensureQueryData(kpisQuery),
-      context.queryClient.ensureQueryData(dispSeriesQuery),
-      context.queryClient.ensureQueryData(custSeriesQuery),
-      context.queryClient.ensureQueryData(campaignsQuery),
-      context.queryClient.ensureQueryData(inventoryQuery),
-      context.queryClient.ensureQueryData(aiQuery),
-    ])
-  },
   component: AnalyticsPage,
 })
 
@@ -243,7 +233,8 @@ function CampaignsTable({ campaigns }: { campaigns: CampaignPerf[] }) {
   )
 }
 
-function ExportBtn<T extends Record<string, unknown>>({ rows, name }: { rows: T[]; name: string }) {
+function ExportBtn({ rows, name }: { rows: ReadonlyArray<Record<string, unknown>> | ReadonlyArray<unknown>; name: string }) {
+  const list = rows as ReadonlyArray<Record<string, unknown>>
   const onClick = () => {
     if (!rows.length) return
     const headers = Object.keys(rows[0]!)
