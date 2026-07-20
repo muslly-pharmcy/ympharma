@@ -17,6 +17,7 @@ import { Route as MissionControlRouteImport } from './routes/mission-control'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedDoctorsRouteImport } from './routes/_authenticated/doctors'
 import { Route as AuthenticatedPatientsRouteImport } from './routes/_authenticated/patients'
+import { Route as AuthenticatedPrescriptionsRouteImport } from './routes/_authenticated/prescriptions'
 import { Route as AuthenticatedPurchaseOrdersRouteImport } from './routes/_authenticated/purchase-orders'
 import { Route as AuthenticatedSuppliersRouteImport } from './routes/_authenticated/suppliers'
 import { Route as AuthenticatedWarehousesRouteImport } from './routes/_authenticated/warehouses'
@@ -25,6 +26,7 @@ import { Route as AuthenticatedCatalogIndexRouteImport } from './routes/_authent
 import { Route as AuthenticatedCatalogProductIdRouteImport } from './routes/_authenticated/catalog.$productId'
 import { Route as AuthenticatedDoctorsDoctorIdRouteImport } from './routes/_authenticated/doctors.$doctorId'
 import { Route as AuthenticatedPatientsPatientIdRouteImport } from './routes/_authenticated/patients.$patientId'
+import { Route as AuthenticatedPrescriptionsPrescriptionIdRouteImport } from './routes/_authenticated/prescriptions.$prescriptionId'
 import { Route as AuthenticatedPurchaseOrdersIdRouteImport } from './routes/_authenticated/purchase-orders.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -66,6 +68,12 @@ const AuthenticatedPatientsRoute = AuthenticatedPatientsRouteImport.update({
   path: '/patients',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPrescriptionsRoute =
+  AuthenticatedPrescriptionsRouteImport.update({
+    id: '/prescriptions',
+    path: '/prescriptions',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPurchaseOrdersRoute =
   AuthenticatedPurchaseOrdersRouteImport.update({
     id: '/purchase-orders',
@@ -111,6 +119,12 @@ const AuthenticatedPatientsPatientIdRoute =
     path: '/$patientId',
     getParentRoute: () => AuthenticatedPatientsRoute,
   } as any)
+const AuthenticatedPrescriptionsPrescriptionIdRoute =
+  AuthenticatedPrescriptionsPrescriptionIdRouteImport.update({
+    id: '/$prescriptionId',
+    path: '/$prescriptionId',
+    getParentRoute: () => AuthenticatedPrescriptionsRoute,
+  } as any)
 const AuthenticatedPurchaseOrdersIdRoute =
   AuthenticatedPurchaseOrdersIdRouteImport.update({
     id: '/$id',
@@ -126,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/doctors': typeof AuthenticatedDoctorsRouteWithChildren
   '/patients': typeof AuthenticatedPatientsRouteWithChildren
+  '/prescriptions': typeof AuthenticatedPrescriptionsRouteWithChildren
   '/purchase-orders': typeof AuthenticatedPurchaseOrdersRouteWithChildren
   '/suppliers': typeof AuthenticatedSuppliersRoute
   '/warehouses': typeof AuthenticatedWarehousesRoute
@@ -133,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/catalog/$productId': typeof AuthenticatedCatalogProductIdRoute
   '/doctors/$doctorId': typeof AuthenticatedDoctorsDoctorIdRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
+  '/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
   '/catalog/': typeof AuthenticatedCatalogIndexRoute
 }
@@ -144,6 +160,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/doctors': typeof AuthenticatedDoctorsRouteWithChildren
   '/patients': typeof AuthenticatedPatientsRouteWithChildren
+  '/prescriptions': typeof AuthenticatedPrescriptionsRouteWithChildren
   '/purchase-orders': typeof AuthenticatedPurchaseOrdersRouteWithChildren
   '/suppliers': typeof AuthenticatedSuppliersRoute
   '/warehouses': typeof AuthenticatedWarehousesRoute
@@ -151,6 +168,7 @@ export interface FileRoutesByTo {
   '/catalog/$productId': typeof AuthenticatedCatalogProductIdRoute
   '/doctors/$doctorId': typeof AuthenticatedDoctorsDoctorIdRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
+  '/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
   '/catalog': typeof AuthenticatedCatalogIndexRoute
 }
@@ -164,6 +182,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/doctors': typeof AuthenticatedDoctorsRouteWithChildren
   '/_authenticated/patients': typeof AuthenticatedPatientsRouteWithChildren
+  '/_authenticated/prescriptions': typeof AuthenticatedPrescriptionsRouteWithChildren
   '/_authenticated/purchase-orders': typeof AuthenticatedPurchaseOrdersRouteWithChildren
   '/_authenticated/suppliers': typeof AuthenticatedSuppliersRoute
   '/_authenticated/warehouses': typeof AuthenticatedWarehousesRoute
@@ -171,6 +190,7 @@ export interface FileRoutesById {
   '/_authenticated/catalog/$productId': typeof AuthenticatedCatalogProductIdRoute
   '/_authenticated/doctors/$doctorId': typeof AuthenticatedDoctorsDoctorIdRoute
   '/_authenticated/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
+  '/_authenticated/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/_authenticated/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
   '/_authenticated/catalog/': typeof AuthenticatedCatalogIndexRoute
 }
@@ -184,6 +204,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/doctors'
     | '/patients'
+    | '/prescriptions'
     | '/purchase-orders'
     | '/suppliers'
     | '/warehouses'
@@ -191,6 +212,7 @@ export interface FileRouteTypes {
     | '/catalog/$productId'
     | '/doctors/$doctorId'
     | '/patients/$patientId'
+    | '/prescriptions/$prescriptionId'
     | '/purchase-orders/$id'
     | '/catalog/'
   fileRoutesByTo: FileRoutesByTo
@@ -202,6 +224,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/doctors'
     | '/patients'
+    | '/prescriptions'
     | '/purchase-orders'
     | '/suppliers'
     | '/warehouses'
@@ -209,6 +232,7 @@ export interface FileRouteTypes {
     | '/catalog/$productId'
     | '/doctors/$doctorId'
     | '/patients/$patientId'
+    | '/prescriptions/$prescriptionId'
     | '/purchase-orders/$id'
     | '/catalog'
   id:
@@ -221,6 +245,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authenticated/doctors'
     | '/_authenticated/patients'
+    | '/_authenticated/prescriptions'
     | '/_authenticated/purchase-orders'
     | '/_authenticated/suppliers'
     | '/_authenticated/warehouses'
@@ -228,6 +253,7 @@ export interface FileRouteTypes {
     | '/_authenticated/catalog/$productId'
     | '/_authenticated/doctors/$doctorId'
     | '/_authenticated/patients/$patientId'
+    | '/_authenticated/prescriptions/$prescriptionId'
     | '/_authenticated/purchase-orders/$id'
     | '/_authenticated/catalog/'
   fileRoutesById: FileRoutesById
@@ -300,6 +326,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPatientsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/prescriptions': {
+      id: '/_authenticated/prescriptions'
+      path: '/prescriptions'
+      fullPath: '/prescriptions'
+      preLoaderRoute: typeof AuthenticatedPrescriptionsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/purchase-orders': {
       id: '/_authenticated/purchase-orders'
       path: '/purchase-orders'
@@ -356,6 +389,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPatientsPatientIdRouteImport
       parentRoute: typeof AuthenticatedPatientsRoute
     }
+    '/_authenticated/prescriptions/$prescriptionId': {
+      id: '/_authenticated/prescriptions/$prescriptionId'
+      path: '/$prescriptionId'
+      fullPath: '/prescriptions/$prescriptionId'
+      preLoaderRoute: typeof AuthenticatedPrescriptionsPrescriptionIdRouteImport
+      parentRoute: typeof AuthenticatedPrescriptionsRoute
+    }
     '/_authenticated/purchase-orders/$id': {
       id: '/_authenticated/purchase-orders/$id'
       path: '/$id'
@@ -390,6 +430,21 @@ const AuthenticatedPatientsRouteWithChildren =
     AuthenticatedPatientsRouteChildren,
   )
 
+interface AuthenticatedPrescriptionsRouteChildren {
+  AuthenticatedPrescriptionsPrescriptionIdRoute: typeof AuthenticatedPrescriptionsPrescriptionIdRoute
+}
+
+const AuthenticatedPrescriptionsRouteChildren: AuthenticatedPrescriptionsRouteChildren =
+  {
+    AuthenticatedPrescriptionsPrescriptionIdRoute:
+      AuthenticatedPrescriptionsPrescriptionIdRoute,
+  }
+
+const AuthenticatedPrescriptionsRouteWithChildren =
+  AuthenticatedPrescriptionsRoute._addFileChildren(
+    AuthenticatedPrescriptionsRouteChildren,
+  )
+
 interface AuthenticatedPurchaseOrdersRouteChildren {
   AuthenticatedPurchaseOrdersIdRoute: typeof AuthenticatedPurchaseOrdersIdRoute
 }
@@ -407,6 +462,7 @@ const AuthenticatedPurchaseOrdersRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDoctorsRoute: typeof AuthenticatedDoctorsRouteWithChildren
   AuthenticatedPatientsRoute: typeof AuthenticatedPatientsRouteWithChildren
+  AuthenticatedPrescriptionsRoute: typeof AuthenticatedPrescriptionsRouteWithChildren
   AuthenticatedPurchaseOrdersRoute: typeof AuthenticatedPurchaseOrdersRouteWithChildren
   AuthenticatedSuppliersRoute: typeof AuthenticatedSuppliersRoute
   AuthenticatedWarehousesRoute: typeof AuthenticatedWarehousesRoute
@@ -417,6 +473,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDoctorsRoute: AuthenticatedDoctorsRouteWithChildren,
   AuthenticatedPatientsRoute: AuthenticatedPatientsRouteWithChildren,
+  AuthenticatedPrescriptionsRoute: AuthenticatedPrescriptionsRouteWithChildren,
   AuthenticatedPurchaseOrdersRoute:
     AuthenticatedPurchaseOrdersRouteWithChildren,
   AuthenticatedSuppliersRoute: AuthenticatedSuppliersRoute,
