@@ -18,7 +18,7 @@ export default function PlanetCard({ planet, index }: PlanetCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.08 }}
       whileHover={{ y: -4, scale: 1.02 }}
-      onClick={() => navigate(`/planet/${planet.id}`)}
+      onClick={() => navigate({ to: '/planet/$planetId', params: { planetId: planet.id } })}
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">

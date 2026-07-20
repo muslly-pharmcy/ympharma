@@ -58,7 +58,7 @@ export default function AIChat() {
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: response.content,
+        content: response,
         timestamp: new Date().toISOString(),
         agent: activeAgent?.name || 'AI SUN',
       }

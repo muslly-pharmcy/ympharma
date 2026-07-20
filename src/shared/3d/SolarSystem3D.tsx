@@ -111,7 +111,7 @@ function Planet3D({
       <mesh
         ref={meshRef}
         material={planetMaterial}
-        onClick={() => navigate(`/planet/${planetId}`)}
+        onClick={() => navigate({ to: '/planet/$planetId', params: { planetId } })}
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
         scale={hovered ? size * 1.3 : size}
@@ -132,7 +132,7 @@ function Planet3D({
             hovered ? 'bg-white shadow-lg scale-110' : 'bg-white/80'
           }`}
           style={{ color }}
-          onClick={() => navigate(`/planet/${planetId}`)}
+          onClick={() => navigate({ to: '/planet/$planetId', params: { planetId } })}
         >
           <span className="mr-1">{icon}</span>
           {name}
@@ -200,6 +200,7 @@ function ParticleField() {
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
+          args={[positions, 3]}
           count={count}
           array={positions}
           itemSize={3}
