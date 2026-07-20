@@ -33,7 +33,7 @@ export const createSupplier = createServerFn({ method: 'POST' })
         .single()
       if (error) throw new Error(error.message)
 
-      await supabaseAdmin.rpc('emit_domain_event', {
+      await supabaseAdmin.rpc('emit_domain_event' as never, {
         p_event_type: 'SupplierCreated',
         p_source: 'suppliers-mutations',
         p_payload: { supplier_id: row.id, organization_id: data.organizationId } as unknown as never,
@@ -68,7 +68,7 @@ export const updateSupplier = createServerFn({ method: 'POST' })
     const { error } = await supabaseAdmin.from('sup_suppliers').update(patch as never).eq('id', data.id)
     if (error) throw new Error(error.message)
 
-    await supabaseAdmin.rpc('emit_domain_event', {
+    await supabaseAdmin.rpc('emit_domain_event' as never, {
       p_event_type: 'SupplierUpdated',
       p_source: 'suppliers-mutations',
       p_payload: { supplier_id: data.id } as unknown as never,
