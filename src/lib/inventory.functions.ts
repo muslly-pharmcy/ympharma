@@ -1,19 +1,19 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
+import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
 import type { StockBatch, StockSummary, Warehouse } from '@/domain/inventory/schemas'
+
+// R1.1 — F-07 remediation: gate warehouse/stock reads behind Supabase Auth.
+// Tables are org-scoped (RLS: is_org_member). Anon reads always returned [];
+// now we require an authenticated session so RLS evaluates against a real
+// membership rather than silently degrading to empty results.
 
 const sel = (s: string): string => s
 
-// Warehouse and batch tables are org-scoped (RLS: is_org_member).
-// The publishable/anon key has no membership, so anon reads return [].
-// These server fns return empty arrays gracefully for now; Shipment B will
-// switch to requireSupabaseAuth once real Supabase Auth is wired in.
-
-export const listWarehouses = createServerFn({ method: 'GET' }).handler(
-  async (): Promise<Warehouse[]> => {
-    const { getPublicSupabase } = await import('./supabase-public.server')
-    const supabase = getPublicSupabase()
-    const { data, error } = await supabase
+export const listWarehouses = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<Warehouse[]> => {
+    const { data, error } = await context.supabase
       .from('wh_warehouses')
       .select(sel('*'))
       .eq('is_active', true)
@@ -23,17 +23,15 @@ export const listWarehouses = createServerFn({ method: 'GET' }).handler(
       return []
     }
     return (data ?? []) as unknown as Warehouse[]
-  },
-)
+  })
 
 export const getStockSummary = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) =>
     z.object({ productId: z.string().uuid() }).parse(raw),
   )
-  .handler(async ({ data }): Promise<StockSummary> => {
-    const { getPublicSupabase } = await import('./supabase-public.server')
-    const supabase = getPublicSupabase()
-    const { data: batches, error } = await supabase
+  .handler(async ({ data, context }): Promise<StockSummary> => {
+    const { data: batches, error } = await context.supabase
       .from('inv_stock_batches')
       .select(sel('qty_on_hand,qty_reserved,expiry_date'))
       .eq('product_id', data.productId)
@@ -48,7 +46,9 @@ export const getStockSummary = createServerFn({ method: 'GET' })
       }
     }
 
-    const rows = batches as unknown as Array<Pick<StockBatch, 'qty_on_hand' | 'qty_reserved' | 'expiry_date'>>
+    const rows = batches as unknown as Array<
+      Pick<StockBatch, 'qty_on_hand' | 'qty_reserved' | 'expiry_date'>
+    >
     const totalOnHand = rows.reduce((s, b) => s + Number(b.qty_on_hand ?? 0), 0)
     const totalReserved = rows.reduce((s, b) => s + Number(b.qty_reserved ?? 0), 0)
     const expiries = rows
