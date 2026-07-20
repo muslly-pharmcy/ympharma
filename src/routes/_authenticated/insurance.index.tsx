@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Shield, ArrowLeft } from 'lucide-react'
 import { listInsuranceProviders, listInsurancePlans } from '@/lib/insurance.functions'
 
-export const Route = createFileRoute('/_authenticated/insurance/index')({
+export const Route = createFileRoute('/_authenticated/insurance/')({
   head: () => ({ meta: [
     { title: 'التأمين — MUSLLY AI OS' },
     { name: 'description', content: 'إدارة شركات التأمين والخطط الطبية' },
