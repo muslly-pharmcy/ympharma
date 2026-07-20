@@ -9718,6 +9718,16 @@ export type Database = {
         }
         Returns: string
       }
+      emit_domain_event: {
+        Args: {
+          p_correlation_id?: string
+          p_event_type: string
+          p_payload?: Json
+          p_priority?: string
+          p_source: string
+        }
+        Returns: string
+      }
       emit_identity_event: {
         Args: {
           _actor: string

@@ -1,173 +1,158 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Package, AlertTriangle, Calendar, BarChart3, Search } from 'lucide-react'
-import { supabase } from '@/shared/services/supabase'
-import type { Product, InventoryItem } from '@/types'
+import { Package, AlertTriangle, Search } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
+import { listProducts } from '@/lib/catalog.functions'
 
+/**
+ * InventoryModule (Phase 3 Shipment A)
+ *
+ * Rewired from legacy `products` table onto the canonical `catalog_products`
+ * via the `listProducts` server function. Writes and batch-level details
+ * arrive in Shipment B.
+ */
 export function InventoryModule() {
-  const [products, setProducts] = useState<Product[]>([])
-  const [inventory, setInventory] = useState<InventoryItem[]>([])
   const [searchQuery, setSearchQuery] = useState('')
-  const [filter, setFilter] = useState<'all' | 'low' | 'expired'>('all')
-  const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(1)
 
-  useEffect(() => {
-    fetchInventoryData()
-  }, [filter])
+  const { data, isFetching } = useQuery({
+    queryKey: ['inventory-module', 'products', searchQuery, page],
+    queryFn: () =>
+      listProducts({
+        data: {
+          search: searchQuery || undefined,
+          page,
+          pageSize: 30,
+          publicOnly: true,
+        },
+      }),
+  })
 
-  const fetchInventoryData = async () => {
-    setLoading(true)
-
-    let productQuery = supabase.from('products').select('*').eq('is_active', true)
-
-    if (filter === 'low') {
-      productQuery = productQuery.lte('stock', 'min_stock')
-    }
-
-    const { data: productsData } = await productQuery
-    if (productsData) setProducts(productsData as Product[])
-
-    const { data: inventoryData } = await supabase
-      .from('inventory')
-      .select('*')
-      .order('expiry_date', { ascending: true })
-      .limit(100)
-
-    if (inventoryData) setInventory(inventoryData as InventoryItem[])
-
-    setLoading(false)
-  }
-
-  const filteredProducts = products.filter(p => 
-    p.nameAr.includes(searchQuery) || 
-    p.barcode?.includes(searchQuery) ||
-    p.sku?.includes(searchQuery)
-  )
-
-  const lowStockCount = products.filter(p => p.stock <= p.minStock).length
-  const expiredCount = inventory.filter(i => new Date(i.expiryDate) < new Date()).length
+  const products = data?.items ?? []
+  const total = data?.total ?? 0
 
   return (
     <div className="space-y-6">
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="glass-panel rounded-2xl p-5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-              <Package className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{products.length}</p>
-              <p className="text-xs text-gray-500">إجمالي المنتجات</p>
-            </div>
-          </div>
-        </div>
-        <div className="glass-panel rounded-2xl p-5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
-              <AlertTriangle className="w-5 h-5 text-amber-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-amber-600">{lowStockCount}</p>
-              <p className="text-xs text-gray-500">مخزون منخفض</p>
-            </div>
-          </div>
-        </div>
-        <div className="glass-panel rounded-2xl p-5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center">
-              <Calendar className="w-5 h-5 text-red-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-red-600">{expiredCount}</p>
-              <p className="text-xs text-gray-500">منتهي الصلاحية</p>
-            </div>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <StatCard
+          icon={<Package className="h-5 w-5 text-blue-600" />}
+          bg="bg-blue-50"
+          value={total}
+          label="إجمالي المنتجات"
+        />
+        <StatCard
+          icon={<AlertTriangle className="h-5 w-5 text-amber-600" />}
+          bg="bg-amber-50"
+          value={0}
+          label="مخزون منخفض (قريبًا)"
+          valueClass="text-amber-600"
+        />
+        <StatCard
+          icon={<Package className="h-5 w-5 text-emerald-600" />}
+          bg="bg-emerald-50"
+          value={products.length}
+          label="ظاهر في هذه الصفحة"
+          valueClass="text-emerald-600"
+        />
       </div>
 
-      {/* Filters */}
       <div className="glass-panel rounded-2xl p-4">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="ابحث عن منتج..."
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 text-right"
-            />
-          </div>
-          <div className="flex gap-2">
-            {(['all', 'low', 'expired'] as const).map(f => (
-              <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                  filter === f
-                    ? 'bg-primary text-white shadow-lg shadow-primary/25'
-                    : 'bg-white text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                {f === 'all' ? 'الكل' : f === 'low' ? 'منخفض' : 'منتهي'}
-              </button>
-            ))}
-          </div>
+        <div className="relative">
+          <Search className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => {
+              setPage(1)
+              setSearchQuery(e.target.value)
+            }}
+            placeholder="ابحث عن منتج..."
+            className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-4 pr-10 text-right focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
         </div>
       </div>
 
-      {/* Inventory Table */}
-      <div className="glass-panel rounded-2xl p-4 overflow-x-auto">
+      <div className="glass-panel overflow-x-auto rounded-2xl p-4">
+        {isFetching && (
+          <p className="pb-3 text-xs text-muted-foreground">جاري التحميل...</p>
+        )}
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-100">
-              <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">المنتج</th>
-              <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">الباركود</th>
-              <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">المخزون</th>
-              <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">الحد الأدنى</th>
-              <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">الحالة</th>
+              <th className="px-4 py-3 text-right text-sm font-medium text-gray-500">المنتج</th>
+              <th className="px-4 py-3 text-right text-sm font-medium text-gray-500">الباركود</th>
+              <th className="px-4 py-3 text-right text-sm font-medium text-gray-500">التركيز</th>
+              <th className="px-4 py-3 text-right text-sm font-medium text-gray-500">الحالة</th>
             </tr>
           </thead>
           <tbody>
-            {filteredProducts.map((product, i) => (
+            {products.length === 0 && !isFetching && (
+              <tr>
+                <td colSpan={4} className="py-8 text-center text-sm text-muted-foreground">
+                  لا توجد منتجات مطابقة.
+                </td>
+              </tr>
+            )}
+            {products.map((product, i) => (
               <motion.tr
                 key={product.id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: i * 0.03 }}
-                className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors"
+                transition={{ delay: i * 0.02 }}
+                className="border-b border-gray-50 transition-colors hover:bg-gray-50/50"
               >
-                <td className="py-3 px-4">
-                  <div>
-                    <p className="font-medium text-gray-900">{product.nameAr}</p>
-                    <p className="text-xs text-gray-500">{product.name}</p>
-                  </div>
+                <td className="px-4 py-3">
+                  <Link
+                    to="/catalog/$productId"
+                    params={{ productId: product.id }}
+                    className="block"
+                  >
+                    <p className="font-medium text-gray-900">{product.name_ar}</p>
+                    {product.brand && (
+                      <p className="text-xs text-gray-500">{product.brand}</p>
+                    )}
+                  </Link>
                 </td>
-                <td className="py-3 px-4 text-sm text-gray-600">{product.barcode}</td>
-                <td className="py-3 px-4">
-                  <span className={`font-bold ${
-                    product.stock <= product.minStock ? 'text-red-600' : 'text-green-600'
-                  }`}>
-                    {product.stock}
-                  </span>
+                <td className="px-4 py-3 text-sm text-gray-600">{product.barcode ?? '—'}</td>
+                <td className="px-4 py-3 text-sm text-gray-600">
+                  {product.strength ?? '—'}
                 </td>
-                <td className="py-3 px-4 text-sm text-gray-600">{product.minStock}</td>
-                <td className="py-3 px-4">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    product.stock <= product.minStock
-                      ? 'bg-red-50 text-red-600'
-                      : product.stock <= product.minStock * 2
-                        ? 'bg-amber-50 text-amber-600'
-                        : 'bg-green-50 text-green-600'
-                  }`}>
-                    {product.stock <= product.minStock ? 'منخفض' : product.stock <= product.minStock * 2 ? 'متوسط' : 'متوفر'}
+                <td className="px-4 py-3">
+                  <span className="rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-600">
+                    {product.status}
                   </span>
                 </td>
               </motion.tr>
             ))}
           </tbody>
         </table>
+      </div>
+    </div>
+  )
+}
+
+function StatCard({
+  icon,
+  bg,
+  value,
+  label,
+  valueClass = 'text-gray-900',
+}: {
+  icon: React.ReactNode
+  bg: string
+  value: number
+  label: string
+  valueClass?: string
+}) {
+  return (
+    <div className="glass-panel rounded-2xl p-5">
+      <div className="flex items-center gap-3">
+        <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${bg}`}>{icon}</div>
+        <div>
+          <p className={`text-2xl font-bold ${valueClass}`}>{value.toLocaleString('ar-EG')}</p>
+          <p className="text-xs text-gray-500">{label}</p>
+        </div>
       </div>
     </div>
   )
