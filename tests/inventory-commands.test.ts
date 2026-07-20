@@ -8,9 +8,9 @@ import {
 import { createPurchaseOrderInput } from '@/domain/purchasing/commands'
 
 describe('inventory command schemas', () => {
-  const org = '00000000-0000-0000-0000-000000000001'
-  const wh = '00000000-0000-0000-0000-000000000002'
-  const prod = '00000000-0000-0000-0000-000000000003'
+  const org = crypto.randomUUID()
+  const wh = crypto.randomUUID()
+  const prod = crypto.randomUUID()
 
   it('receiveStockInput requires positive qty', () => {
     expect(() =>
@@ -34,11 +34,12 @@ describe('inventory command schemas', () => {
   })
 
   it('adjustStockInput accepts negative deltas but requires reason', () => {
+    const batch = crypto.randomUUID()
     expect(() =>
-      adjustStockInput.parse({ batchId: org, delta: -5, reason: '' }),
+      adjustStockInput.parse({ batchId: batch, delta: -5, reason: '' }),
     ).toThrow()
     expect(
-      adjustStockInput.parse({ batchId: org, delta: -5, reason: 'damaged' }).delta,
+      adjustStockInput.parse({ batchId: batch, delta: -5, reason: 'damaged' }).delta,
     ).toBe(-5)
   })
 
@@ -65,8 +66,7 @@ describe('inventory command schemas', () => {
 })
 
 describe('purchase order command schemas', () => {
-  const org = '00000000-0000-0000-0000-000000000001'
-  it('rejects PO with zero lines', () => {
+  const org = crypto.randomUUID()
     expect(() =>
       createPurchaseOrderInput.parse({
         organizationId: org,
