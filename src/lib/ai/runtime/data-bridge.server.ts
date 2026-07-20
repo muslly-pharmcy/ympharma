@@ -9,7 +9,9 @@ export interface InventoryMatch {
   barcode: string | null
   strength: string | null
   status: string
+  requires_prescription: boolean
 }
+
 
 export interface InventoryContext {
   matches: InventoryMatch[]
@@ -34,7 +36,7 @@ export async function fetchInventoryContext(
   const like = `%${q.replace(/[%_]/g, '')}%`
   const { data, error } = await supabase
     .from('catalog_products')
-    .select('id,name_ar,brand,barcode,strength,status')
+    .select('id,name_ar,brand,barcode,strength,status,requires_prescription')
     .or(`name_ar.ilike.${like},brand.ilike.${like},barcode.ilike.${like}`)
     .eq('status', 'active')
     .limit(limit)

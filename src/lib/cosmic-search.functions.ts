@@ -21,6 +21,7 @@ export interface CosmicSearchResult {
     brand: string | null
     barcode: string | null
     strength: string | null
+    requires_prescription: boolean
   }>
   latencyMs: number
 }
@@ -60,6 +61,7 @@ export const cosmicSearch = createServerFn({ method: 'POST' })
         brand: m.brand,
         barcode: m.barcode,
         strength: m.strength,
+        requires_prescription: m.requires_prescription,
       })),
       latencyMs: Date.now() - t0,
     }
