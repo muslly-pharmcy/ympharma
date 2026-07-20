@@ -1,137 +1,152 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer base {
-  :root {
-    --color-primary: #005D4F;
-    --color-secondary: #0F766E;
-    --color-gold: #C9A227;
-    --color-background: #F4F7F6;
-    --color-surface: #FFFFFF;
-    --color-surface-dark: #1A1A2E;
-  }
-
-  * {
-    border-color: #e5e7eb;
-  }
-
-  body {
-    background-color: #F4F7F6;
-    @apply text-gray-900 antialiased;
-    overflow-x: hidden;
-  }
-
-  html {
-    scroll-behavior: smooth;
-  }
-
-  ::selection {
-    background-color: rgba(0, 93, 79, 0.2);
-    color: #005D4F;
-  }
+@theme {
+  --color-primary: #005D4F;
+  --color-primary-600: #024a3f;
+  --color-secondary: #0F766E;
+  --color-gold: #C9A227;
+  --color-gold-600: #a8871e;
+  --color-background: #F4F7F6;
+  --color-surface: #FFFFFF;
+  --color-surface-dark: #1A1A2E;
 }
 
-@layer components {
-  .glass-panel {
-    @apply bg-white/80 backdrop-blur-xl border border-white/20 shadow-lg;
-  }
+@custom-variant dark (&:where(.dark, .dark *));
 
-  .glass-panel-dark {
-    @apply bg-surface-dark/80 backdrop-blur-xl border border-white/10 shadow-lg;
-  }
+:root {
+  --color-primary: #005D4F;
+  --color-secondary: #0F766E;
+  --color-gold: #C9A227;
+  --color-background: #F4F7F6;
+  --color-surface: #FFFFFF;
+  --color-surface-dark: #1A1A2E;
+}
 
-  .gradient-primary {
-    background: linear-gradient(135deg, #005D4F 0%, #0F766E 50%, #C9A227 100%);
-  }
+* {
+  border-color: #e5e7eb;
+}
 
-  .gradient-glow {
-    background: radial-gradient(circle at center, rgba(201, 162, 39, 0.15) 0%, transparent 70%);
-  }
+body {
+  background-color: #F4F7F6;
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
 
-  .text-gradient {
-    @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, #005D4F, #0F766E, #C9A227);
-  }
+html {
+  scroll-behavior: smooth;
+}
 
-  .planet-card {
-    @apply relative overflow-hidden rounded-2xl bg-white/90 backdrop-blur-sm border border-gray-100 
-           shadow-sm hover:shadow-xl transition-all duration-500 cursor-pointer
-           hover:-translate-y-1 hover:border-primary/20;
-  }
+::selection {
+  background-color: rgba(0, 93, 79, 0.2);
+  color: #005D4F;
+}
 
-  .planet-card::before {
+@utility glass-panel {
+  @apply bg-white/80 backdrop-blur-xl border border-white/20 shadow-lg;
+}
+
+@utility glass-panel-dark {
+  @apply bg-surface-dark/80 backdrop-blur-xl border border-white/10 shadow-lg;
+}
+
+@utility gradient-primary {
+  background: linear-gradient(135deg, #005D4F 0%, #0F766E 50%, #C9A227 100%);
+}
+
+@utility gradient-glow {
+  background: radial-gradient(circle at center, rgba(201, 162, 39, 0.15) 0%, transparent 70%);
+}
+
+@utility text-gradient {
+  @apply bg-clip-text text-transparent;
+  background-image: linear-gradient(135deg, #005D4F, #0F766E, #C9A227);
+}
+
+@utility planet-card {
+  @apply relative overflow-hidden rounded-2xl bg-white/90 backdrop-blur-sm border border-gray-100 shadow-sm transition-all duration-500 cursor-pointer;
+  &:hover {
+    @apply shadow-xl -translate-y-1 border-primary/20;
+  }
+  &::before {
     content: '';
     @apply absolute inset-0 opacity-0 transition-opacity duration-500;
     background: linear-gradient(135deg, rgba(0, 93, 79, 0.05) 0%, rgba(201, 162, 39, 0.05) 100%);
   }
-
-  .planet-card:hover::before {
+  &:hover::before {
     @apply opacity-100;
-  }
-
-  .sun-glow {
-    box-shadow: 
-      0 0 60px rgba(201, 162, 39, 0.3),
-      0 0 120px rgba(201, 162, 39, 0.2),
-      0 0 180px rgba(201, 162, 39, 0.1);
-  }
-
-  .orbit-ring {
-    @apply absolute rounded-full border border-dashed border-primary/20;
-  }
-
-  .btn-primary {
-    @apply px-6 py-3 bg-primary text-white rounded-xl font-semibold
-           hover:bg-primary-600 transition-all duration-300
-           hover:shadow-lg hover:shadow-primary/25
-           active:scale-95;
-  }
-
-  .btn-gold {
-    @apply px-6 py-3 bg-gold text-white rounded-xl font-semibold
-           hover:bg-gold-600 transition-all duration-300
-           hover:shadow-lg hover:shadow-gold/25
-           active:scale-95;
-  }
-
-  .input-field {
-    @apply w-full px-4 py-3 bg-white border border-gray-200 rounded-xl
-           focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary
-           transition-all duration-300 text-right;
-  }
-
-  .section-title {
-    @apply text-2xl md:text-3xl font-bold text-gray-900 mb-2;
-  }
-
-  .section-subtitle {
-    @apply text-gray-500 text-sm md:text-base;
   }
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+@utility sun-glow {
+  box-shadow:
+    0 0 60px rgba(201, 162, 39, 0.3),
+    0 0 120px rgba(201, 162, 39, 0.2),
+    0 0 180px rgba(201, 162, 39, 0.1);
+}
 
-  .animate-delay-100 {
-    animation-delay: 100ms;
-  }
+@utility orbit-ring {
+  @apply absolute rounded-full border border-dashed border-primary/20;
+}
 
-  .animate-delay-200 {
-    animation-delay: 200ms;
+@utility btn-primary {
+  @apply px-6 py-3 bg-primary text-white rounded-xl font-semibold transition-all duration-300;
+  &:hover {
+    background-color: var(--color-primary-600);
+    @apply shadow-lg shadow-primary/25;
   }
+  &:active {
+    @apply scale-95;
+  }
+}
 
-  .animate-delay-300 {
-    animation-delay: 300ms;
+@utility btn-gold {
+  @apply px-6 py-3 bg-gold text-white rounded-xl font-semibold transition-all duration-300;
+  &:hover {
+    background-color: var(--color-gold-600);
+    @apply shadow-lg shadow-gold/25;
   }
+  &:active {
+    @apply scale-95;
+  }
+}
 
-  .animate-delay-500 {
-    animation-delay: 500ms;
+@utility input-field {
+  @apply w-full px-4 py-3 bg-white border border-gray-200 rounded-xl transition-all duration-300 text-right;
+  &:focus {
+    @apply outline-hidden ring-2 ring-primary/30 border-primary;
   }
+}
 
-  .animate-delay-1000 {
-    animation-delay: 1000ms;
-  }
+@utility section-title {
+  @apply text-2xl md:text-3xl font-bold text-gray-900 mb-2;
+}
+
+@utility section-subtitle {
+  @apply text-gray-500 text-sm md:text-base;
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+@utility animate-delay-100 {
+  animation-delay: 100ms;
+}
+
+@utility animate-delay-200 {
+  animation-delay: 200ms;
+}
+
+@utility animate-delay-300 {
+  animation-delay: 300ms;
+}
+
+@utility animate-delay-500 {
+  animation-delay: 500ms;
+}
+
+@utility animate-delay-1000 {
+  animation-delay: 1000ms;
 }
