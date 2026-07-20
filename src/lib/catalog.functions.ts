@@ -48,7 +48,7 @@ export const listProducts = createServerFn({ method: 'GET' })
       return { items: [], total: 0, page: data.page, pageSize: data.pageSize }
     }
     return {
-      items: (rows ?? []) as CatalogProduct[],
+      items: (rows ?? []) as unknown as CatalogProduct[],
       total: count ?? 0,
       page: data.page,
       pageSize: data.pageSize,
@@ -101,6 +101,6 @@ export const listCategories = createServerFn({ method: 'GET' }).handler(
       console.error('[listCategories]', error)
       return []
     }
-    return (data ?? []) as CatalogCategory[]
+    return (data ?? []) as unknown as CatalogCategory[]
   },
 )

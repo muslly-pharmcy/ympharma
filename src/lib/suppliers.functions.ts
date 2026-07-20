@@ -16,6 +16,6 @@ export const listSuppliers = createServerFn({ method: 'GET' }).handler(
       console.error('[listSuppliers]', error)
       return []
     }
-    return (data ?? []) as Supplier[]
+    return (data ?? []) as unknown as Supplier[]
   },
 )

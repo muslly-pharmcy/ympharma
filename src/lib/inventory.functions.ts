@@ -22,7 +22,7 @@ export const listWarehouses = createServerFn({ method: 'GET' }).handler(
       console.error('[listWarehouses]', error)
       return []
     }
-    return (data ?? []) as Warehouse[]
+    return (data ?? []) as unknown as Warehouse[]
   },
 )
 
