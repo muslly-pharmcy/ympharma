@@ -1299,6 +1299,154 @@ export type Database = {
         }
         Relationships: []
       }
+      air_agents: {
+        Row: {
+          allowed_tools: string[]
+          created_at: string
+          description: string | null
+          display_name: string
+          is_active: boolean
+          key: string
+          max_tokens: number
+          model: string
+          prompt_key: string
+          temperature: number
+          updated_at: string
+        }
+        Insert: {
+          allowed_tools?: string[]
+          created_at?: string
+          description?: string | null
+          display_name: string
+          is_active?: boolean
+          key: string
+          max_tokens?: number
+          model?: string
+          prompt_key: string
+          temperature?: number
+          updated_at?: string
+        }
+        Update: {
+          allowed_tools?: string[]
+          created_at?: string
+          description?: string | null
+          display_name?: string
+          is_active?: boolean
+          key?: string
+          max_tokens?: number
+          model?: string
+          prompt_key?: string
+          temperature?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "air_agents_prompt_key_fkey"
+            columns: ["prompt_key"]
+            isOneToOne: false
+            referencedRelation: "air_prompts"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
+      air_prompts: {
+        Row: {
+          created_at: string
+          description: string | null
+          key: string
+          metadata: Json
+          system_prompt: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          key: string
+          metadata?: Json
+          system_prompt: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          key?: string
+          metadata?: Json
+          system_prompt?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      air_runs: {
+        Row: {
+          actor_user_id: string
+          agent_key: string
+          completion_tokens: number | null
+          correlation_id: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          input: string
+          latency_ms: number | null
+          metadata: Json
+          model: string
+          organization_id: string
+          output: string | null
+          prompt_tokens: number | null
+          status: string
+          tools_used: string[]
+          total_tokens: number | null
+        }
+        Insert: {
+          actor_user_id: string
+          agent_key: string
+          completion_tokens?: number | null
+          correlation_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input: string
+          latency_ms?: number | null
+          metadata?: Json
+          model: string
+          organization_id: string
+          output?: string | null
+          prompt_tokens?: number | null
+          status?: string
+          tools_used?: string[]
+          total_tokens?: number | null
+        }
+        Update: {
+          actor_user_id?: string
+          agent_key?: string
+          completion_tokens?: number | null
+          correlation_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input?: string
+          latency_ms?: number | null
+          metadata?: Json
+          model?: string
+          organization_id?: string
+          output?: string | null
+          prompt_tokens?: number | null
+          status?: string
+          tools_used?: string[]
+          total_tokens?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "air_runs_agent_key_fkey"
+            columns: ["agent_key"]
+            isOneToOne: false
+            referencedRelation: "air_agents"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
       alert_dedupe: {
         Row: {
           alert_key: string

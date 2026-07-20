@@ -15,6 +15,7 @@ import { Route as AiChatRouteImport } from './routes/ai-chat'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as MissionControlRouteImport } from './routes/mission-control'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as AuthenticatedAiRuntimeRouteImport } from './routes/_authenticated/ai-runtime'
 import { Route as AuthenticatedDispensesRouteImport } from './routes/_authenticated/dispenses'
 import { Route as AuthenticatedDoctorsRouteImport } from './routes/_authenticated/doctors'
 import { Route as AuthenticatedPatientsRouteImport } from './routes/_authenticated/patients'
@@ -63,6 +64,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAiRuntimeRoute = AuthenticatedAiRuntimeRouteImport.update({
+  id: '/ai-runtime',
+  path: '/ai-runtime',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDispensesRoute = AuthenticatedDispensesRouteImport.update({
   id: '/dispenses',
@@ -179,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/mission-control': typeof MissionControlRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/ai-runtime': typeof AuthenticatedAiRuntimeRoute
   '/dispenses': typeof AuthenticatedDispensesRouteWithChildren
   '/doctors': typeof AuthenticatedDoctorsRouteWithChildren
   '/patients': typeof AuthenticatedPatientsRouteWithChildren
@@ -205,6 +212,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/mission-control': typeof MissionControlRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/ai-runtime': typeof AuthenticatedAiRuntimeRoute
   '/dispenses': typeof AuthenticatedDispensesRouteWithChildren
   '/doctors': typeof AuthenticatedDoctorsRouteWithChildren
   '/patients': typeof AuthenticatedPatientsRouteWithChildren
@@ -233,6 +241,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/mission-control': typeof MissionControlRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/ai-runtime': typeof AuthenticatedAiRuntimeRoute
   '/_authenticated/dispenses': typeof AuthenticatedDispensesRouteWithChildren
   '/_authenticated/doctors': typeof AuthenticatedDoctorsRouteWithChildren
   '/_authenticated/patients': typeof AuthenticatedPatientsRouteWithChildren
@@ -261,6 +270,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/mission-control'
     | '/reset-password'
+    | '/ai-runtime'
     | '/dispenses'
     | '/doctors'
     | '/patients'
@@ -287,6 +297,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/mission-control'
     | '/reset-password'
+    | '/ai-runtime'
     | '/dispenses'
     | '/doctors'
     | '/patients'
@@ -314,6 +325,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/mission-control'
     | '/reset-password'
+    | '/_authenticated/ai-runtime'
     | '/_authenticated/dispenses'
     | '/_authenticated/doctors'
     | '/_authenticated/patients'
@@ -388,6 +400,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/ai-runtime': {
+      id: '/_authenticated/ai-runtime'
+      path: '/ai-runtime'
+      fullPath: '/ai-runtime'
+      preLoaderRoute: typeof AuthenticatedAiRuntimeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dispenses': {
       id: '/_authenticated/dispenses'
@@ -594,6 +613,7 @@ const AuthenticatedPurchaseOrdersRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAiRuntimeRoute: typeof AuthenticatedAiRuntimeRoute
   AuthenticatedDispensesRoute: typeof AuthenticatedDispensesRouteWithChildren
   AuthenticatedDoctorsRoute: typeof AuthenticatedDoctorsRouteWithChildren
   AuthenticatedPatientsRoute: typeof AuthenticatedPatientsRouteWithChildren
@@ -610,6 +630,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAiRuntimeRoute: AuthenticatedAiRuntimeRoute,
   AuthenticatedDispensesRoute: AuthenticatedDispensesRouteWithChildren,
   AuthenticatedDoctorsRoute: AuthenticatedDoctorsRouteWithChildren,
   AuthenticatedPatientsRoute: AuthenticatedPatientsRouteWithChildren,
