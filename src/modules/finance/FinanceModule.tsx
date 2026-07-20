@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { TrendingUp, TrendingDown, DollarSign, PieChart, Calendar } from 'lucide-react'
-import { supabase } from '@/shared/services/supabase'
+import { supabase } from '@/integrations/supabase/client'
 import type { FinancialTransaction } from '@/types'
 
 export function FinanceModule() {

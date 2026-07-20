@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Search, Star, Phone, MapPin, Calendar, Stethoscope } from 'lucide-react'
-import { supabase } from '@/shared/services/supabase'
+import { supabase } from '@/integrations/supabase/client'
 import type { Doctor } from '@/types'
 
 export function DoctorsModule() {
