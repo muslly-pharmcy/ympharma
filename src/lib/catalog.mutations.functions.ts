@@ -39,7 +39,7 @@ export const createProduct = createServerFn({ method: 'POST' })
         .single()
       if (error) throw new Error(error.message)
 
-      await supabaseAdmin.rpc('emit_domain_event', {
+      await (supabaseAdmin.rpc as unknown as (name: string, args: unknown) => Promise<{ data: unknown; error: { message: string } | null }>)('emit_domain_event', {
         p_event_type: 'ProductCreated',
         p_source: 'catalog-mutations',
         p_payload: { product_id: row.id, organization_id: data.organizationId } as unknown as never,
@@ -79,7 +79,7 @@ export const updateProduct = createServerFn({ method: 'POST' })
         .eq('id', data.id)
       if (error) throw new Error(error.message)
 
-      await supabaseAdmin.rpc('emit_domain_event', {
+      await (supabaseAdmin.rpc as unknown as (name: string, args: unknown) => Promise<{ data: unknown; error: { message: string } | null }>)('emit_domain_event', {
         p_event_type: 'ProductUpdated',
         p_source: 'catalog-mutations',
         p_payload: { product_id: data.id, patch } as unknown as never,
@@ -115,7 +115,7 @@ export const archiveProduct = createServerFn({ method: 'POST' })
       .eq('id', data.id)
     if (error) throw new Error(error.message)
 
-    await supabaseAdmin.rpc('emit_domain_event', {
+    await (supabaseAdmin.rpc as unknown as (name: string, args: unknown) => Promise<{ data: unknown; error: { message: string } | null }>)('emit_domain_event', {
       p_event_type: 'ProductArchived',
       p_source: 'catalog-mutations',
       p_payload: { product_id: data.id } as unknown as never,

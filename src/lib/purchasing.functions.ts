@@ -94,7 +94,7 @@ export const createPurchaseOrder = createServerFn({ method: 'POST' })
         throw new Error(linesErr.message)
       }
 
-      await supabaseAdmin.rpc('emit_domain_event', {
+      await (supabaseAdmin.rpc as unknown as (name: string, args: unknown) => Promise<{ data: unknown; error: { message: string } | null }>)('emit_domain_event', {
         p_event_type: 'PurchaseOrderCreated',
         p_source: 'purchasing',
         p_payload: { po_id: po.id, lines: lineRows.length, total } as unknown as never,
@@ -126,7 +126,7 @@ export const updatePurchaseOrder = createServerFn({ method: 'POST' })
     )
     const { error } = await supabaseAdmin.from('purchase_orders').update(patch as never).eq('id', data.id)
     if (error) throw new Error(error.message)
-    await supabaseAdmin.rpc('emit_domain_event', {
+    await (supabaseAdmin.rpc as unknown as (name: string, args: unknown) => Promise<{ data: unknown; error: { message: string } | null }>)('emit_domain_event', {
       p_event_type: 'PurchaseOrderUpdated',
       p_source: 'purchasing',
       p_payload: { po_id: data.id, patch } as unknown as never,
@@ -163,7 +163,7 @@ async function transitionPO(
     .eq('id', data.id)
   if (error) throw new Error(error.message)
 
-  await supabaseAdmin.rpc('emit_domain_event', {
+  await (supabaseAdmin.rpc as unknown as (name: string, args: unknown) => Promise<{ data: unknown; error: { message: string } | null }>)('emit_domain_event', {
     p_event_type: event,
     p_source: 'purchasing',
     p_payload: { po_id: data.id } as unknown as never,
@@ -200,7 +200,7 @@ export const receivePurchaseOrder = createServerFn({ method: 'POST' })
     const { getActor, newCorrelationId, supabaseAdmin } = await loadDeps()
     const actor = getActor()
     const correlation = data.correlationId ?? newCorrelationId('po')
-    const { error } = await supabaseAdmin.rpc('po_receive', {
+    const { error } = await (supabaseAdmin.rpc as unknown as (name: string, args: unknown) => Promise<{ data: unknown; error: { message: string } | null }>)('po_receive', {
       p_po: data.id,
       p_actor: actor.userId,
       p_correlation: correlation,

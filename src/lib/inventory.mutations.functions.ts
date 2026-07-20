@@ -47,7 +47,7 @@ export const createWarehouse = createServerFn({ method: 'POST' })
         .single()
       if (error) throw new Error(error.message)
 
-      await supabaseAdmin.rpc('emit_domain_event', {
+      await (supabaseAdmin.rpc as unknown as (name: string, args: unknown) => Promise<{ data: unknown; error: { message: string } | null }>)('emit_domain_event', {
         p_event_type: 'WarehouseCreated',
         p_source: 'inventory-mutations',
         p_payload: { warehouse_id: row.id, organization_id: data.organizationId } as unknown as never,
@@ -82,7 +82,7 @@ export const updateWarehouse = createServerFn({ method: 'POST' })
     const { error } = await supabaseAdmin.from('wh_warehouses').update(patch as never).eq('id', data.id)
     if (error) throw new Error(error.message)
 
-    await supabaseAdmin.rpc('emit_domain_event', {
+    await (supabaseAdmin.rpc as unknown as (name: string, args: unknown) => Promise<{ data: unknown; error: { message: string } | null }>)('emit_domain_event', {
       p_event_type: 'WarehouseUpdated',
       p_source: 'inventory-mutations',
       p_payload: { warehouse_id: data.id, patch } as unknown as never,
@@ -105,7 +105,7 @@ export const receiveStock = createServerFn({ method: 'POST' })
     const correlation = data.correlationId ?? newCorrelationId('receive')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'receiveStock', async () => {
-      const { data: batchId, error } = await supabaseAdmin.rpc('inv_receive_stock', {
+      const { data: batchId, error } = await (supabaseAdmin.rpc as unknown as (name: string, args: unknown) => Promise<{ data: unknown; error: { message: string } | null }>)('inv_receive_stock', {
         p_org: data.organizationId,
         p_warehouse: data.warehouseId,
         p_product: data.productId,
@@ -132,7 +132,7 @@ export const adjustStock = createServerFn({ method: 'POST' })
     const correlation = data.correlationId ?? newCorrelationId('adjust')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'adjustStock', async () => {
-      const { data: movementId, error } = await supabaseAdmin.rpc('inv_adjust_stock', {
+      const { data: movementId, error } = await (supabaseAdmin.rpc as unknown as (name: string, args: unknown) => Promise<{ data: unknown; error: { message: string } | null }>)('inv_adjust_stock', {
         p_batch: data.batchId,
         p_delta: data.delta,
         p_reason: data.reason,
@@ -155,7 +155,7 @@ export const transferStock = createServerFn({ method: 'POST' })
     const correlation = data.correlationId ?? newCorrelationId('transfer')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'transferStock', async () => {
-      const { data: transferId, error } = await supabaseAdmin.rpc('inv_transfer_stock', {
+      const { data: transferId, error } = await (supabaseAdmin.rpc as unknown as (name: string, args: unknown) => Promise<{ data: unknown; error: { message: string } | null }>)('inv_transfer_stock', {
         p_org: data.organizationId,
         p_from_warehouse: data.fromWarehouseId,
         p_to_warehouse: data.toWarehouseId,
@@ -180,7 +180,7 @@ export const reserveStock = createServerFn({ method: 'POST' })
     const correlation = data.correlationId ?? newCorrelationId('reserve')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'reserveStock', async () => {
-      const { data: reservationId, error } = await supabaseAdmin.rpc('inv_reserve_fefo', {
+      const { data: reservationId, error } = await (supabaseAdmin.rpc as unknown as (name: string, args: unknown) => Promise<{ data: unknown; error: { message: string } | null }>)('inv_reserve_fefo', {
         p_org: data.organizationId,
         p_product: data.productId,
         p_qty: data.qty,
@@ -205,7 +205,7 @@ export const releaseReservation = createServerFn({ method: 'POST' })
     const correlation = data.correlationId ?? newCorrelationId('release')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'releaseReservation', async () => {
-      const { error } = await supabaseAdmin.rpc('inv_release_reservation', {
+      const { error } = await (supabaseAdmin.rpc as unknown as (name: string, args: unknown) => Promise<{ data: unknown; error: { message: string } | null }>)('inv_release_reservation', {
         p_reservation: data.reservationId,
         p_actor: actor.userId,
         p_correlation: correlation,
@@ -225,7 +225,7 @@ export const consumeReservation = createServerFn({ method: 'POST' })
     const correlation = data.correlationId ?? newCorrelationId('consume')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'consumeReservation', async () => {
-      const { error } = await supabaseAdmin.rpc('inv_consume_reservation', {
+      const { error } = await (supabaseAdmin.rpc as unknown as (name: string, args: unknown) => Promise<{ data: unknown; error: { message: string } | null }>)('inv_consume_reservation', {
         p_reservation: data.reservationId,
         p_actor: actor.userId,
         p_correlation: correlation,
@@ -246,7 +246,7 @@ export const returnStock = createServerFn({ method: 'POST' })
     const correlation = data.correlationId ?? newCorrelationId('return')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'returnStock', async () => {
-      const { data: batchId, error } = await supabaseAdmin.rpc('inv_return_stock', {
+      const { data: batchId, error } = await (supabaseAdmin.rpc as unknown as (name: string, args: unknown) => Promise<{ data: unknown; error: { message: string } | null }>)('inv_return_stock', {
         p_org: data.organizationId,
         p_warehouse: data.warehouseId,
         p_product: data.productId,
