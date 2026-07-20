@@ -105,7 +105,7 @@ export const receiveStock = createServerFn({ method: 'POST' })
     const correlation = data.correlationId ?? newCorrelationId('receive')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'receiveStock', async () => {
-      const { data: batchId, error } = await supabaseAdmin.rpc('inv_receive_stock' as never, {
+      const { data: batchId, error } = await supabaseAdmin.rpc('inv_receive_stock', {
         p_org: data.organizationId,
         p_warehouse: data.warehouseId,
         p_product: data.productId,
@@ -132,7 +132,7 @@ export const adjustStock = createServerFn({ method: 'POST' })
     const correlation = data.correlationId ?? newCorrelationId('adjust')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'adjustStock', async () => {
-      const { data: movementId, error } = await supabaseAdmin.rpc('inv_adjust_stock' as never, {
+      const { data: movementId, error } = await supabaseAdmin.rpc('inv_adjust_stock', {
         p_batch: data.batchId,
         p_delta: data.delta,
         p_reason: data.reason,
@@ -155,7 +155,7 @@ export const transferStock = createServerFn({ method: 'POST' })
     const correlation = data.correlationId ?? newCorrelationId('transfer')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'transferStock', async () => {
-      const { data: transferId, error } = await supabaseAdmin.rpc('inv_transfer_stock' as never, {
+      const { data: transferId, error } = await supabaseAdmin.rpc('inv_transfer_stock', {
         p_org: data.organizationId,
         p_from_warehouse: data.fromWarehouseId,
         p_to_warehouse: data.toWarehouseId,
@@ -180,7 +180,7 @@ export const reserveStock = createServerFn({ method: 'POST' })
     const correlation = data.correlationId ?? newCorrelationId('reserve')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'reserveStock', async () => {
-      const { data: reservationId, error } = await supabaseAdmin.rpc('inv_reserve_fefo' as never, {
+      const { data: reservationId, error } = await supabaseAdmin.rpc('inv_reserve_fefo', {
         p_org: data.organizationId,
         p_product: data.productId,
         p_qty: data.qty,
@@ -205,7 +205,7 @@ export const releaseReservation = createServerFn({ method: 'POST' })
     const correlation = data.correlationId ?? newCorrelationId('release')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'releaseReservation', async () => {
-      const { error } = await supabaseAdmin.rpc('inv_release_reservation' as never, {
+      const { error } = await supabaseAdmin.rpc('inv_release_reservation', {
         p_reservation: data.reservationId,
         p_actor: actor.userId,
         p_correlation: correlation,
@@ -225,7 +225,7 @@ export const consumeReservation = createServerFn({ method: 'POST' })
     const correlation = data.correlationId ?? newCorrelationId('consume')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'consumeReservation', async () => {
-      const { error } = await supabaseAdmin.rpc('inv_consume_reservation' as never, {
+      const { error } = await supabaseAdmin.rpc('inv_consume_reservation', {
         p_reservation: data.reservationId,
         p_actor: actor.userId,
         p_correlation: correlation,
@@ -246,7 +246,7 @@ export const returnStock = createServerFn({ method: 'POST' })
     const correlation = data.correlationId ?? newCorrelationId('return')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'returnStock', async () => {
-      const { data: batchId, error } = await supabaseAdmin.rpc('inv_return_stock' as never, {
+      const { data: batchId, error } = await supabaseAdmin.rpc('inv_return_stock', {
         p_org: data.organizationId,
         p_warehouse: data.warehouseId,
         p_product: data.productId,
