@@ -1,0 +1,17 @@
+{
+  "name": "MUSLLY AI OS — Pharmacy Operating System",
+  "short_name": "MUSLLY",
+  "description": "AI-native pharmacy operating system for medications, prescriptions, inventory, CRM and analytics.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#005D4F",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" },
+    { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "maskable" }
+  ]
+}
