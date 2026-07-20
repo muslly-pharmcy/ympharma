@@ -3,6 +3,7 @@
 // Callers ask for a tier; the router chooses the model. This is what keeps the Brain
 // model-agnostic: swapping a model = one row here.
 import type { ModelTier } from './types'
+export type { ModelTier } from './types'
 
 interface RoutingCandidate {
   model: string
