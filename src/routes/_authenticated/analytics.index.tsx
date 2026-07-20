@@ -236,11 +236,11 @@ function CampaignsTable({ campaigns }: { campaigns: CampaignPerf[] }) {
 function ExportBtn({ rows, name }: { rows: ReadonlyArray<Record<string, unknown>> | ReadonlyArray<unknown>; name: string }) {
   const list = rows as ReadonlyArray<Record<string, unknown>>
   const onClick = () => {
-    if (!rows.length) return
-    const headers = Object.keys(rows[0]!)
+    if (!list.length) return
+    const headers = Object.keys(list[0]!)
     const csv = [
       headers.join(','),
-      ...rows.map((r) => headers.map((h) => JSON.stringify(r[h] ?? '')).join(',')),
+      ...list.map((r) => headers.map((h) => JSON.stringify(r[h] ?? '')).join(',')),
     ].join('\n')
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
