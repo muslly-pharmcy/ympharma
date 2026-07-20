@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Search, Plus, Minus, ShoppingCart, Trash2, Package, AlertTriangle } from 'lucide-react'
-import { supabase } from '@/shared/services/supabase'
+import { supabase } from '@/integrations/supabase/client'
 import type { Product } from '@/types'
 import { useDebounce } from '@/shared/hooks/useDebounce'
 

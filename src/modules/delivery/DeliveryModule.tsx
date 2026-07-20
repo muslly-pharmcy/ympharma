@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Truck, MapPin, Clock, Phone, Package, Navigation } from 'lucide-react'
-import { supabase } from '@/shared/services/supabase'
+import { supabase } from '@/integrations/supabase/client'
 import type { Delivery, Order } from '@/types'
 
 export function DeliveryModule() {
