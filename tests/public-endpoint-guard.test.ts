@@ -17,10 +17,12 @@ function req(init: {
   if (init.contentLength !== undefined) {
     headers.set('content-length', String(init.contentLength))
   }
+  const method = init.method ?? 'POST'
+  const hasBody = method !== 'GET' && method !== 'HEAD'
   return new Request('https://example.test/api/public/x', {
-    method: init.method ?? 'POST',
+    method,
     headers,
-    body: init.body ?? '',
+    body: hasBody ? (init.body ?? '') : undefined,
   })
 }
 
