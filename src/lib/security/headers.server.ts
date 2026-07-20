@@ -3,7 +3,7 @@
 // CSP is Report-Only first: collect violations without breaking the app; flip to enforce
 // after a stable observation window with zero blocked-resource reports.
 import { createMiddleware } from '@tanstack/react-start'
-import { setResponseHeaders } from '@tanstack/react-start/server'
+import { setResponseHeader } from '@tanstack/react-start/server'
 
 function buildCsp(supabaseUrl: string | undefined): string {
   const supaOrigin = supabaseUrl ? new URL(supabaseUrl).origin : ''
@@ -34,7 +34,7 @@ function buildCsp(supabaseUrl: string | undefined): string {
 
 export const securityHeadersMiddleware = createMiddleware({ type: 'request' }).server(async ({ next }) => {
   const csp = buildCsp(process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL)
-  setResponseHeaders({
+  const headers: Record<string, string> = {
     // CSP in Report-Only mode: no enforcement, only violation reports (dev tools console).
     'Content-Security-Policy-Report-Only': csp,
     'X-Content-Type-Options': 'nosniff',
@@ -55,6 +55,10 @@ export const securityHeadersMiddleware = createMiddleware({ type: 'request' }).s
     'Cross-Origin-Resource-Policy': 'same-origin',
     // HSTS: safe to always send; browsers ignore over plain HTTP.
     'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-  })
+  }
+  for (const [name, value] of Object.entries(headers)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setResponseHeader(name as any, value)
+  }
   return next()
 })
