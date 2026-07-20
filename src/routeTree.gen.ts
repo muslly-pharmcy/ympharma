@@ -16,6 +16,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as MissionControlRouteImport } from './routes/mission-control'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAiRuntimeRouteImport } from './routes/_authenticated/ai-runtime'
+import { Route as AuthenticatedCampaignsRouteImport } from './routes/_authenticated/campaigns'
 import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated/customers'
 import { Route as AuthenticatedDispensesRouteImport } from './routes/_authenticated/dispenses'
 import { Route as AuthenticatedDoctorsRouteImport } from './routes/_authenticated/doctors'
@@ -24,9 +25,11 @@ import { Route as AuthenticatedPatientsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedPrescriptionsRouteImport } from './routes/_authenticated/prescriptions'
 import { Route as AuthenticatedPurchaseOrdersRouteImport } from './routes/_authenticated/purchase-orders'
 import { Route as AuthenticatedRewardsRouteImport } from './routes/_authenticated/rewards'
+import { Route as AuthenticatedSegmentsRouteImport } from './routes/_authenticated/segments'
 import { Route as AuthenticatedSuppliersRouteImport } from './routes/_authenticated/suppliers'
 import { Route as AuthenticatedWarehousesRouteImport } from './routes/_authenticated/warehouses'
 import { Route as PlanetPlanetIdRouteImport } from './routes/planet.$planetId'
+import { Route as AuthenticatedCampaignsIdRouteImport } from './routes/_authenticated/campaigns.$id'
 import { Route as AuthenticatedCatalogIndexRouteImport } from './routes/_authenticated/catalog.index'
 import { Route as AuthenticatedCatalogProductIdRouteImport } from './routes/_authenticated/catalog.$productId'
 import { Route as AuthenticatedCustomersCustomerIdRouteImport } from './routes/_authenticated/customers.$customerId'
@@ -75,6 +78,11 @@ const AuthenticatedAiRuntimeRoute = AuthenticatedAiRuntimeRouteImport.update({
   path: '/ai-runtime',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCampaignsRoute = AuthenticatedCampaignsRouteImport.update({
+  id: '/campaigns',
+  path: '/campaigns',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCustomersRoute = AuthenticatedCustomersRouteImport.update({
   id: '/customers',
   path: '/customers',
@@ -117,6 +125,11 @@ const AuthenticatedRewardsRoute = AuthenticatedRewardsRouteImport.update({
   path: '/rewards',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSegmentsRoute = AuthenticatedSegmentsRouteImport.update({
+  id: '/segments',
+  path: '/segments',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSuppliersRoute = AuthenticatedSuppliersRouteImport.update({
   id: '/suppliers',
   path: '/suppliers',
@@ -132,6 +145,12 @@ const PlanetPlanetIdRoute = PlanetPlanetIdRouteImport.update({
   path: '/planet/$planetId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedCampaignsIdRoute =
+  AuthenticatedCampaignsIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedCampaignsRoute,
+  } as any)
 const AuthenticatedCatalogIndexRoute =
   AuthenticatedCatalogIndexRouteImport.update({
     id: '/catalog/',
@@ -218,6 +237,7 @@ export interface FileRoutesByFullPath {
   '/mission-control': typeof MissionControlRoute
   '/reset-password': typeof ResetPasswordRoute
   '/ai-runtime': typeof AuthenticatedAiRuntimeRoute
+  '/campaigns': typeof AuthenticatedCampaignsRouteWithChildren
   '/customers': typeof AuthenticatedCustomersRouteWithChildren
   '/dispenses': typeof AuthenticatedDispensesRouteWithChildren
   '/doctors': typeof AuthenticatedDoctorsRouteWithChildren
@@ -226,9 +246,11 @@ export interface FileRoutesByFullPath {
   '/prescriptions': typeof AuthenticatedPrescriptionsRouteWithChildren
   '/purchase-orders': typeof AuthenticatedPurchaseOrdersRouteWithChildren
   '/rewards': typeof AuthenticatedRewardsRoute
+  '/segments': typeof AuthenticatedSegmentsRoute
   '/suppliers': typeof AuthenticatedSuppliersRoute
   '/warehouses': typeof AuthenticatedWarehousesRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
+  '/campaigns/$id': typeof AuthenticatedCampaignsIdRoute
   '/catalog/$productId': typeof AuthenticatedCatalogProductIdRoute
   '/customers/$customerId': typeof AuthenticatedCustomersCustomerIdRoute
   '/dispenses/$dispenseId': typeof AuthenticatedDispensesDispenseIdRoute
@@ -250,6 +272,7 @@ export interface FileRoutesByTo {
   '/mission-control': typeof MissionControlRoute
   '/reset-password': typeof ResetPasswordRoute
   '/ai-runtime': typeof AuthenticatedAiRuntimeRoute
+  '/campaigns': typeof AuthenticatedCampaignsRouteWithChildren
   '/customers': typeof AuthenticatedCustomersRouteWithChildren
   '/dispenses': typeof AuthenticatedDispensesRouteWithChildren
   '/doctors': typeof AuthenticatedDoctorsRouteWithChildren
@@ -258,9 +281,11 @@ export interface FileRoutesByTo {
   '/prescriptions': typeof AuthenticatedPrescriptionsRouteWithChildren
   '/purchase-orders': typeof AuthenticatedPurchaseOrdersRouteWithChildren
   '/rewards': typeof AuthenticatedRewardsRoute
+  '/segments': typeof AuthenticatedSegmentsRoute
   '/suppliers': typeof AuthenticatedSuppliersRoute
   '/warehouses': typeof AuthenticatedWarehousesRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
+  '/campaigns/$id': typeof AuthenticatedCampaignsIdRoute
   '/catalog/$productId': typeof AuthenticatedCatalogProductIdRoute
   '/customers/$customerId': typeof AuthenticatedCustomersCustomerIdRoute
   '/dispenses/$dispenseId': typeof AuthenticatedDispensesDispenseIdRoute
@@ -284,6 +309,7 @@ export interface FileRoutesById {
   '/mission-control': typeof MissionControlRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/ai-runtime': typeof AuthenticatedAiRuntimeRoute
+  '/_authenticated/campaigns': typeof AuthenticatedCampaignsRouteWithChildren
   '/_authenticated/customers': typeof AuthenticatedCustomersRouteWithChildren
   '/_authenticated/dispenses': typeof AuthenticatedDispensesRouteWithChildren
   '/_authenticated/doctors': typeof AuthenticatedDoctorsRouteWithChildren
@@ -292,9 +318,11 @@ export interface FileRoutesById {
   '/_authenticated/prescriptions': typeof AuthenticatedPrescriptionsRouteWithChildren
   '/_authenticated/purchase-orders': typeof AuthenticatedPurchaseOrdersRouteWithChildren
   '/_authenticated/rewards': typeof AuthenticatedRewardsRoute
+  '/_authenticated/segments': typeof AuthenticatedSegmentsRoute
   '/_authenticated/suppliers': typeof AuthenticatedSuppliersRoute
   '/_authenticated/warehouses': typeof AuthenticatedWarehousesRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
+  '/_authenticated/campaigns/$id': typeof AuthenticatedCampaignsIdRoute
   '/_authenticated/catalog/$productId': typeof AuthenticatedCatalogProductIdRoute
   '/_authenticated/customers/$customerId': typeof AuthenticatedCustomersCustomerIdRoute
   '/_authenticated/dispenses/$dispenseId': typeof AuthenticatedDispensesDispenseIdRoute
@@ -318,6 +346,7 @@ export interface FileRouteTypes {
     | '/mission-control'
     | '/reset-password'
     | '/ai-runtime'
+    | '/campaigns'
     | '/customers'
     | '/dispenses'
     | '/doctors'
@@ -326,9 +355,11 @@ export interface FileRouteTypes {
     | '/prescriptions'
     | '/purchase-orders'
     | '/rewards'
+    | '/segments'
     | '/suppliers'
     | '/warehouses'
     | '/planet/$planetId'
+    | '/campaigns/$id'
     | '/catalog/$productId'
     | '/customers/$customerId'
     | '/dispenses/$dispenseId'
@@ -350,6 +381,7 @@ export interface FileRouteTypes {
     | '/mission-control'
     | '/reset-password'
     | '/ai-runtime'
+    | '/campaigns'
     | '/customers'
     | '/dispenses'
     | '/doctors'
@@ -358,9 +390,11 @@ export interface FileRouteTypes {
     | '/prescriptions'
     | '/purchase-orders'
     | '/rewards'
+    | '/segments'
     | '/suppliers'
     | '/warehouses'
     | '/planet/$planetId'
+    | '/campaigns/$id'
     | '/catalog/$productId'
     | '/customers/$customerId'
     | '/dispenses/$dispenseId'
@@ -383,6 +417,7 @@ export interface FileRouteTypes {
     | '/mission-control'
     | '/reset-password'
     | '/_authenticated/ai-runtime'
+    | '/_authenticated/campaigns'
     | '/_authenticated/customers'
     | '/_authenticated/dispenses'
     | '/_authenticated/doctors'
@@ -391,9 +426,11 @@ export interface FileRouteTypes {
     | '/_authenticated/prescriptions'
     | '/_authenticated/purchase-orders'
     | '/_authenticated/rewards'
+    | '/_authenticated/segments'
     | '/_authenticated/suppliers'
     | '/_authenticated/warehouses'
     | '/planet/$planetId'
+    | '/_authenticated/campaigns/$id'
     | '/_authenticated/catalog/$productId'
     | '/_authenticated/customers/$customerId'
     | '/_authenticated/dispenses/$dispenseId'
@@ -470,6 +507,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAiRuntimeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/campaigns': {
+      id: '/_authenticated/campaigns'
+      path: '/campaigns'
+      fullPath: '/campaigns'
+      preLoaderRoute: typeof AuthenticatedCampaignsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/customers': {
       id: '/_authenticated/customers'
       path: '/customers'
@@ -526,6 +570,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRewardsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/segments': {
+      id: '/_authenticated/segments'
+      path: '/segments'
+      fullPath: '/segments'
+      preLoaderRoute: typeof AuthenticatedSegmentsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/suppliers': {
       id: '/_authenticated/suppliers'
       path: '/suppliers'
@@ -546,6 +597,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/planet/$planetId'
       preLoaderRoute: typeof PlanetPlanetIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/campaigns/$id': {
+      id: '/_authenticated/campaigns/$id'
+      path: '/$id'
+      fullPath: '/campaigns/$id'
+      preLoaderRoute: typeof AuthenticatedCampaignsIdRouteImport
+      parentRoute: typeof AuthenticatedCampaignsRoute
     }
     '/_authenticated/catalog/': {
       id: '/_authenticated/catalog/'
@@ -640,6 +698,20 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AuthenticatedCampaignsRouteChildren {
+  AuthenticatedCampaignsIdRoute: typeof AuthenticatedCampaignsIdRoute
+}
+
+const AuthenticatedCampaignsRouteChildren: AuthenticatedCampaignsRouteChildren =
+  {
+    AuthenticatedCampaignsIdRoute: AuthenticatedCampaignsIdRoute,
+  }
+
+const AuthenticatedCampaignsRouteWithChildren =
+  AuthenticatedCampaignsRoute._addFileChildren(
+    AuthenticatedCampaignsRouteChildren,
+  )
 
 interface AuthenticatedCustomersRouteChildren {
   AuthenticatedCustomersCustomerIdRoute: typeof AuthenticatedCustomersCustomerIdRoute
@@ -737,6 +809,7 @@ const AuthenticatedPurchaseOrdersRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAiRuntimeRoute: typeof AuthenticatedAiRuntimeRoute
+  AuthenticatedCampaignsRoute: typeof AuthenticatedCampaignsRouteWithChildren
   AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRouteWithChildren
   AuthenticatedDispensesRoute: typeof AuthenticatedDispensesRouteWithChildren
   AuthenticatedDoctorsRoute: typeof AuthenticatedDoctorsRouteWithChildren
@@ -745,6 +818,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPrescriptionsRoute: typeof AuthenticatedPrescriptionsRouteWithChildren
   AuthenticatedPurchaseOrdersRoute: typeof AuthenticatedPurchaseOrdersRouteWithChildren
   AuthenticatedRewardsRoute: typeof AuthenticatedRewardsRoute
+  AuthenticatedSegmentsRoute: typeof AuthenticatedSegmentsRoute
   AuthenticatedSuppliersRoute: typeof AuthenticatedSuppliersRoute
   AuthenticatedWarehousesRoute: typeof AuthenticatedWarehousesRoute
   AuthenticatedCatalogProductIdRoute: typeof AuthenticatedCatalogProductIdRoute
@@ -757,6 +831,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAiRuntimeRoute: AuthenticatedAiRuntimeRoute,
+  AuthenticatedCampaignsRoute: AuthenticatedCampaignsRouteWithChildren,
   AuthenticatedCustomersRoute: AuthenticatedCustomersRouteWithChildren,
   AuthenticatedDispensesRoute: AuthenticatedDispensesRouteWithChildren,
   AuthenticatedDoctorsRoute: AuthenticatedDoctorsRouteWithChildren,
@@ -766,6 +841,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPurchaseOrdersRoute:
     AuthenticatedPurchaseOrdersRouteWithChildren,
   AuthenticatedRewardsRoute: AuthenticatedRewardsRoute,
+  AuthenticatedSegmentsRoute: AuthenticatedSegmentsRoute,
   AuthenticatedSuppliersRoute: AuthenticatedSuppliersRoute,
   AuthenticatedWarehousesRoute: AuthenticatedWarehousesRoute,
   AuthenticatedCatalogProductIdRoute: AuthenticatedCatalogProductIdRoute,

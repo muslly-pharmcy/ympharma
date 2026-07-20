@@ -118,7 +118,9 @@ export type Permission =
   | 'insurance.read' | 'insurance.write' | 'insurance.approve'
   | 'customer.read' | 'customer.write' | 'customer.merge'
   | 'loyalty.read' | 'loyalty.write' | 'loyalty.adjust' | 'loyalty.redeem'
-  | 'ai.execute' | 'ai.loyalty.read'
+  | 'campaign.read' | 'campaign.write'
+  | 'segment.read' | 'segment.write'
+  | 'ai.execute' | 'ai.loyalty.read' | 'ai.campaign.read'
   | 'system.admin'
 
 const ALL: Permission[] = [
@@ -130,7 +132,8 @@ const ALL: Permission[] = [
   'insurance.read','insurance.write','insurance.approve',
   'customer.read','customer.write','customer.merge',
   'loyalty.read','loyalty.write','loyalty.adjust','loyalty.redeem',
-  'ai.execute','ai.loyalty.read','system.admin',
+  'campaign.read','campaign.write','segment.read','segment.write',
+  'ai.execute','ai.loyalty.read','ai.campaign.read','system.admin',
 ]
 
 const ORG_ROLE_PERMISSIONS: Record<string, Permission[]> = {
@@ -140,10 +143,11 @@ const ORG_ROLE_PERMISSIONS: Record<string, Permission[]> = {
     'catalog.read','catalog.write','inventory.read','inventory.write',
     'warehouse.read','warehouse.write','supplier.read','supplier.write',
     'purchase.read','purchase.write','doctor.read','patient.read',
-    'prescription.read','dispense.read','dispense.verify','ai.execute','ai.loyalty.read',
+    'prescription.read','dispense.read','dispense.verify','ai.execute','ai.loyalty.read','ai.campaign.read',
     'insurance.read','insurance.write','insurance.approve',
     'customer.read','customer.write','customer.merge',
     'loyalty.read','loyalty.write','loyalty.adjust','loyalty.redeem',
+    'campaign.read','campaign.write','segment.read','segment.write',
   ],
   pharmacist: [
     'catalog.read','inventory.read','inventory.write','warehouse.read',
@@ -153,16 +157,17 @@ const ORG_ROLE_PERMISSIONS: Record<string, Permission[]> = {
     'insurance.read','insurance.write',
     'customer.read','customer.write',
     'loyalty.read','loyalty.write','loyalty.redeem',
+    'campaign.read','segment.read',
   ],
   staff: [
     'catalog.read','inventory.read','warehouse.read','supplier.read',
     'purchase.read','patient.read','prescription.read','dispense.read',
-    'insurance.read','customer.read','loyalty.read',
+    'insurance.read','customer.read','loyalty.read','campaign.read','segment.read',
   ],
   viewer: [
     'catalog.read','inventory.read','warehouse.read','supplier.read',
     'purchase.read','patient.read','prescription.read','doctor.read',
-    'dispense.read','insurance.read','customer.read','loyalty.read',
+    'dispense.read','insurance.read','customer.read','loyalty.read','campaign.read','segment.read',
   ],
 }
 
