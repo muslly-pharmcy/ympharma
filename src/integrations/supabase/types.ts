@@ -3084,6 +3084,172 @@ export type Database = {
           },
         ]
       }
+      crm_coupon_codes: {
+        Row: {
+          branch_scope: string[] | null
+          code: string
+          coupon_id: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          organization_id: string
+          usage_count: number
+          usage_limit: number | null
+        }
+        Insert: {
+          branch_scope?: string[] | null
+          code: string
+          coupon_id: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          organization_id: string
+          usage_count?: number
+          usage_limit?: number | null
+        }
+        Update: {
+          branch_scope?: string[] | null
+          code?: string
+          coupon_id?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          organization_id?: string
+          usage_count?: number
+          usage_limit?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_coupon_codes_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "crm_coupons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_coupon_redemptions: {
+        Row: {
+          coupon_code_id: string
+          coupon_id: string
+          created_by: string | null
+          customer_id: string | null
+          discount_amount: number
+          id: string
+          order_ref: string | null
+          organization_id: string
+          redeemed_at: string
+        }
+        Insert: {
+          coupon_code_id: string
+          coupon_id: string
+          created_by?: string | null
+          customer_id?: string | null
+          discount_amount?: number
+          id?: string
+          order_ref?: string | null
+          organization_id: string
+          redeemed_at?: string
+        }
+        Update: {
+          coupon_code_id?: string
+          coupon_id?: string
+          created_by?: string | null
+          customer_id?: string | null
+          discount_amount?: number
+          id?: string
+          order_ref?: string | null
+          organization_id?: string
+          redeemed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_coupon_redemptions_coupon_code_id_fkey"
+            columns: ["coupon_code_id"]
+            isOneToOne: false
+            referencedRelation: "crm_coupon_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_coupon_redemptions_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "crm_coupons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_coupons: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          expires_at: string | null
+          global_limit: number | null
+          id: string
+          max_discount: number | null
+          min_spend: number | null
+          mode: string
+          name: string
+          organization_id: string
+          per_customer_limit: number | null
+          promotion_id: string | null
+          stackable: boolean
+          starts_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          global_limit?: number | null
+          id?: string
+          max_discount?: number | null
+          min_spend?: number | null
+          mode?: string
+          name: string
+          organization_id: string
+          per_customer_limit?: number | null
+          promotion_id?: string | null
+          stackable?: boolean
+          starts_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          global_limit?: number | null
+          id?: string
+          max_discount?: number | null
+          min_spend?: number | null
+          mode?: string
+          name?: string
+          organization_id?: string
+          per_customer_limit?: number | null
+          promotion_id?: string | null
+          stackable?: boolean
+          starts_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_coupons_promotion_id_fkey"
+            columns: ["promotion_id"]
+            isOneToOne: false
+            referencedRelation: "crm_promotions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_customer_addresses: {
         Row: {
           city: string | null
@@ -3580,6 +3746,198 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      crm_promotion_eligibility: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          organization_id: string
+          promotion_id: string
+          value: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          organization_id: string
+          promotion_id: string
+          value?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          organization_id?: string
+          promotion_id?: string
+          value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_promotion_eligibility_promotion_id_fkey"
+            columns: ["promotion_id"]
+            isOneToOne: false
+            referencedRelation: "crm_promotions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_promotion_redemptions: {
+        Row: {
+          coupon_code_id: string | null
+          created_by: string | null
+          currency: string
+          customer_id: string | null
+          discount_amount: number
+          id: string
+          metadata: Json
+          order_ref: string | null
+          organization_id: string
+          promotion_id: string
+          redeemed_at: string
+        }
+        Insert: {
+          coupon_code_id?: string | null
+          created_by?: string | null
+          currency?: string
+          customer_id?: string | null
+          discount_amount?: number
+          id?: string
+          metadata?: Json
+          order_ref?: string | null
+          organization_id: string
+          promotion_id: string
+          redeemed_at?: string
+        }
+        Update: {
+          coupon_code_id?: string | null
+          created_by?: string | null
+          currency?: string
+          customer_id?: string | null
+          discount_amount?: number
+          id?: string
+          metadata?: Json
+          order_ref?: string | null
+          organization_id?: string
+          promotion_id?: string
+          redeemed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_promotion_redemptions_promotion_id_fkey"
+            columns: ["promotion_id"]
+            isOneToOne: false
+            referencedRelation: "crm_promotions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_promotion_targets: {
+        Row: {
+          created_at: string
+          entity_kind: string
+          entity_ref: string
+          id: string
+          organization_id: string
+          promotion_id: string
+          target_kind: string
+        }
+        Insert: {
+          created_at?: string
+          entity_kind: string
+          entity_ref: string
+          id?: string
+          organization_id: string
+          promotion_id: string
+          target_kind: string
+        }
+        Update: {
+          created_at?: string
+          entity_kind?: string
+          entity_ref?: string
+          id?: string
+          organization_id?: string
+          promotion_id?: string
+          target_kind?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_promotion_targets_promotion_id_fkey"
+            columns: ["promotion_id"]
+            isOneToOne: false
+            referencedRelation: "crm_promotions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_promotions: {
+        Row: {
+          code: string
+          config: Json
+          created_at: string
+          created_by: string | null
+          description: string | null
+          expires_at: string | null
+          id: string
+          kind: string
+          max_discount: number | null
+          min_spend: number | null
+          name: string
+          organization_id: string
+          per_customer_limit: number | null
+          priority: number
+          stackable: boolean
+          starts_at: string | null
+          status: string
+          updated_at: string
+          usage_count: number
+          usage_limit: number | null
+        }
+        Insert: {
+          code: string
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          kind: string
+          max_discount?: number | null
+          min_spend?: number | null
+          name: string
+          organization_id: string
+          per_customer_limit?: number | null
+          priority?: number
+          stackable?: boolean
+          starts_at?: string | null
+          status?: string
+          updated_at?: string
+          usage_count?: number
+          usage_limit?: number | null
+        }
+        Update: {
+          code?: string
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          kind?: string
+          max_discount?: number | null
+          min_spend?: number | null
+          name?: string
+          organization_id?: string
+          per_customer_limit?: number | null
+          priority?: number
+          stackable?: boolean
+          starts_at?: string | null
+          status?: string
+          updated_at?: string
+          usage_count?: number
+          usage_limit?: number | null
+        }
+        Relationships: []
       }
       crm_reward_catalog: {
         Row: {
@@ -12541,6 +12899,21 @@ export type Database = {
           p_next: Database["public"]["Enums"]["crm_campaign_status"]
         }
         Returns: Database["public"]["Enums"]["crm_campaign_status"]
+      }
+      crm_coupon_redeem: {
+        Args: {
+          p_code: string
+          p_created_by: string
+          p_customer: string
+          p_discount: number
+          p_order_ref: string
+          p_org: string
+        }
+        Returns: {
+          coupon_id: string
+          promotion_id: string
+          redemption_id: string
+        }[]
       }
       crm_loyalty_apply_txn: {
         Args: {
