@@ -13,6 +13,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AiChatRouteImport } from './routes/ai-chat'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MissionControlRouteImport } from './routes/mission-control'
+import { Route as SuppliersRouteImport } from './routes/suppliers'
+import { Route as WarehousesRouteImport } from './routes/warehouses'
+import { Route as CatalogIndexRouteImport } from './routes/catalog.index'
+import { Route as CatalogProductIdRouteImport } from './routes/catalog.$productId'
 import { Route as PlanetPlanetIdRouteImport } from './routes/planet.$planetId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -35,6 +39,26 @@ const MissionControlRoute = MissionControlRouteImport.update({
   path: '/mission-control',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SuppliersRoute = SuppliersRouteImport.update({
+  id: '/suppliers',
+  path: '/suppliers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WarehousesRoute = WarehousesRouteImport.update({
+  id: '/warehouses',
+  path: '/warehouses',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatalogIndexRoute = CatalogIndexRouteImport.update({
+  id: '/catalog/',
+  path: '/catalog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatalogProductIdRoute = CatalogProductIdRouteImport.update({
+  id: '/catalog/$productId',
+  path: '/catalog/$productId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlanetPlanetIdRoute = PlanetPlanetIdRouteImport.update({
   id: '/planet/$planetId',
   path: '/planet/$planetId',
@@ -46,14 +70,22 @@ export interface FileRoutesByFullPath {
   '/ai-chat': typeof AiChatRoute
   '/login': typeof LoginRoute
   '/mission-control': typeof MissionControlRoute
+  '/suppliers': typeof SuppliersRoute
+  '/warehouses': typeof WarehousesRoute
+  '/catalog/$productId': typeof CatalogProductIdRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
+  '/catalog/': typeof CatalogIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/ai-chat': typeof AiChatRoute
   '/login': typeof LoginRoute
   '/mission-control': typeof MissionControlRoute
+  '/suppliers': typeof SuppliersRoute
+  '/warehouses': typeof WarehousesRoute
+  '/catalog/$productId': typeof CatalogProductIdRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
+  '/catalog': typeof CatalogIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -61,21 +93,46 @@ export interface FileRoutesById {
   '/ai-chat': typeof AiChatRoute
   '/login': typeof LoginRoute
   '/mission-control': typeof MissionControlRoute
+  '/suppliers': typeof SuppliersRoute
+  '/warehouses': typeof WarehousesRoute
+  '/catalog/$productId': typeof CatalogProductIdRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
+  '/catalog/': typeof CatalogIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/ai-chat' | '/login' | '/mission-control' | '/planet/$planetId'
+    | '/'
+    | '/ai-chat'
+    | '/login'
+    | '/mission-control'
+    | '/suppliers'
+    | '/warehouses'
+    | '/catalog/$productId'
+    | '/planet/$planetId'
+    | '/catalog/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/ai-chat' | '/login' | '/mission-control' | '/planet/$planetId'
+  to:
+    | '/'
+    | '/ai-chat'
+    | '/login'
+    | '/mission-control'
+    | '/suppliers'
+    | '/warehouses'
+    | '/catalog/$productId'
+    | '/planet/$planetId'
+    | '/catalog'
   id:
     | '__root__'
     | '/'
     | '/ai-chat'
     | '/login'
     | '/mission-control'
+    | '/suppliers'
+    | '/warehouses'
+    | '/catalog/$productId'
     | '/planet/$planetId'
+    | '/catalog/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -83,7 +140,11 @@ export interface RootRouteChildren {
   AiChatRoute: typeof AiChatRoute
   LoginRoute: typeof LoginRoute
   MissionControlRoute: typeof MissionControlRoute
+  SuppliersRoute: typeof SuppliersRoute
+  WarehousesRoute: typeof WarehousesRoute
+  CatalogProductIdRoute: typeof CatalogProductIdRoute
   PlanetPlanetIdRoute: typeof PlanetPlanetIdRoute
+  CatalogIndexRoute: typeof CatalogIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -116,6 +177,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionControlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/suppliers': {
+      id: '/suppliers'
+      path: '/suppliers'
+      fullPath: '/suppliers'
+      preLoaderRoute: typeof SuppliersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/warehouses': {
+      id: '/warehouses'
+      path: '/warehouses'
+      fullPath: '/warehouses'
+      preLoaderRoute: typeof WarehousesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/catalog/': {
+      id: '/catalog/'
+      path: '/catalog'
+      fullPath: '/catalog/'
+      preLoaderRoute: typeof CatalogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/catalog/$productId': {
+      id: '/catalog/$productId'
+      path: '/catalog/$productId'
+      fullPath: '/catalog/$productId'
+      preLoaderRoute: typeof CatalogProductIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/planet/$planetId': {
       id: '/planet/$planetId'
       path: '/planet/$planetId'
@@ -131,7 +220,11 @@ const rootRouteChildren: RootRouteChildren = {
   AiChatRoute: AiChatRoute,
   LoginRoute: LoginRoute,
   MissionControlRoute: MissionControlRoute,
+  SuppliersRoute: SuppliersRoute,
+  WarehousesRoute: WarehousesRoute,
+  CatalogProductIdRoute: CatalogProductIdRoute,
   PlanetPlanetIdRoute: PlanetPlanetIdRoute,
+  CatalogIndexRoute: CatalogIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
