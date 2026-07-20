@@ -60,10 +60,7 @@ export const listCoupons = createServerFn({ method: 'GET' })
 
 export const previewPromotion = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) => {
-    const { previewPromotionInput } = require('@/domain/promotions/commands') as typeof import('@/domain/promotions/commands')
-    return previewPromotionInput.parse(raw)
-  })
+  .inputValidator((raw: unknown): PreviewPromotionInput => previewPromotionInput.parse(raw))
   .handler(async ({ data, context }) => {
     const { evaluatePromotions } = await import('./promotions/engine.server')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
