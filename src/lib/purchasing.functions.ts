@@ -9,6 +9,8 @@ import {
   type UpdatePurchaseOrderInput,
 } from '@/domain/purchasing/commands'
 
+type RpcFn = (name: string, args: unknown) => Promise<{ data: unknown; error: { message: string } | null }>
+
 // -------------------- reads --------------------
 
 export const listPurchaseOrders = createServerFn({ method: 'GET' }).handler(async () => {
@@ -43,21 +45,23 @@ export const getPurchaseOrder = createServerFn({ method: 'GET' })
 // -------------------- writes --------------------
 
 async function loadDeps() {
-  const [{ getActor, requireOrg }, { withIdempotency, newCorrelationId }, { supabaseAdmin }] =
+  const [{ getActor, requireOrg, requirePermission }, { withIdempotency, newCorrelationId }, { supabaseAdmin }, { audit }] =
     await Promise.all([
       import('./session.server'),
       import('./idempotency.server'),
       import('@/integrations/supabase/client.server'),
+      import('./audit.server'),
     ])
-  return { getActor, requireOrg, withIdempotency, newCorrelationId, supabaseAdmin }
+  return { getActor, requireOrg, requirePermission, withIdempotency, newCorrelationId, supabaseAdmin, audit }
 }
 
 export const createPurchaseOrder = createServerFn({ method: 'POST' })
   .inputValidator((raw: unknown): CreatePurchaseOrderInput => createPurchaseOrderInput.parse(raw))
   .handler(async ({ data }) => {
-    const { getActor, requireOrg, withIdempotency, newCorrelationId, supabaseAdmin } = await loadDeps()
+    const { getActor, requireOrg, requirePermission, withIdempotency, newCorrelationId, supabaseAdmin, audit } = await loadDeps()
     const actor = await getActor()
     requireOrg(actor, data.organizationId)
+    requirePermission(actor, 'purchase.write')
     const correlation = data.correlationId ?? newCorrelationId('po')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'createPurchaseOrder', async () => {
@@ -94,13 +98,14 @@ export const createPurchaseOrder = createServerFn({ method: 'POST' })
         throw new Error(linesErr.message)
       }
 
-      await (supabaseAdmin.rpc as unknown as (name: string, args: unknown) => Promise<{ data: unknown; error: { message: string } | null }>)('emit_domain_event', {
+      await (supabaseAdmin.rpc as unknown as RpcFn)('emit_domain_event', {
         p_event_type: 'PurchaseOrderCreated',
         p_source: 'purchasing',
         p_payload: { po_id: po.id, lines: lineRows.length, total } as unknown as never,
         p_priority: 'normal',
         p_correlation_id: correlation,
       })
+      await audit(actor, { action: 'purchase.create', resourceType: 'purchase_order', resourceId: po.id, payload: { code: data.code, total, lines: lineRows.length } })
       return { id: po.id, correlationId: correlation }
     })
   })
@@ -108,8 +113,9 @@ export const createPurchaseOrder = createServerFn({ method: 'POST' })
 export const updatePurchaseOrder = createServerFn({ method: 'POST' })
   .inputValidator((raw: unknown): UpdatePurchaseOrderInput => updatePurchaseOrderInput.parse(raw))
   .handler(async ({ data }) => {
-    const { getActor, newCorrelationId, supabaseAdmin } = await loadDeps()
+    const { getActor, requirePermission, newCorrelationId, supabaseAdmin, audit } = await loadDeps()
     const actor = await getActor()
+    requirePermission(actor, 'purchase.write')
     const correlation = data.correlationId ?? newCorrelationId('po')
 
     const { data: existing, error: fetchErr } = await supabaseAdmin
@@ -126,13 +132,14 @@ export const updatePurchaseOrder = createServerFn({ method: 'POST' })
     )
     const { error } = await supabaseAdmin.from('purchase_orders').update(patch as never).eq('id', data.id)
     if (error) throw new Error(error.message)
-    await (supabaseAdmin.rpc as unknown as (name: string, args: unknown) => Promise<{ data: unknown; error: { message: string } | null }>)('emit_domain_event', {
+    await (supabaseAdmin.rpc as unknown as RpcFn)('emit_domain_event', {
       p_event_type: 'PurchaseOrderUpdated',
       p_source: 'purchasing',
       p_payload: { po_id: data.id, patch } as unknown as never,
       p_priority: 'normal',
       p_correlation_id: correlation,
     })
+    await audit(actor, { action: 'purchase.update', resourceType: 'purchase_order', resourceId: data.id, payload: { patch } })
     return { id: data.id, correlationId: correlation }
   })
 
@@ -143,8 +150,9 @@ async function transitionPO(
   event: string,
   extraColumns: Record<string, unknown> = {},
 ) {
-  const { getActor, newCorrelationId, supabaseAdmin } = await loadDeps()
+  const { getActor, requirePermission, newCorrelationId, supabaseAdmin, audit } = await loadDeps()
   const actor = await getActor()
+  requirePermission(actor, 'purchase.write')
   const correlation = data.correlationId ?? newCorrelationId('po')
 
   const { data: existing, error: fetchErr } = await supabaseAdmin
@@ -163,13 +171,14 @@ async function transitionPO(
     .eq('id', data.id)
   if (error) throw new Error(error.message)
 
-  await (supabaseAdmin.rpc as unknown as (name: string, args: unknown) => Promise<{ data: unknown; error: { message: string } | null }>)('emit_domain_event', {
+  await (supabaseAdmin.rpc as unknown as RpcFn)('emit_domain_event', {
     p_event_type: event,
     p_source: 'purchasing',
     p_payload: { po_id: data.id } as unknown as never,
     p_priority: 'normal',
     p_correlation_id: correlation,
   })
+  await audit(actor, { action: `purchase.${to}`, resourceType: 'purchase_order', resourceId: data.id })
   return { id: data.id, correlationId: correlation }
 }
 
@@ -197,14 +206,16 @@ export const cancelPurchaseOrder = createServerFn({ method: 'POST' })
 export const receivePurchaseOrder = createServerFn({ method: 'POST' })
   .inputValidator((raw: unknown): PurchaseOrderIdInput => purchaseOrderIdInput.parse(raw))
   .handler(async ({ data }) => {
-    const { getActor, newCorrelationId, supabaseAdmin } = await loadDeps()
+    const { getActor, requirePermission, newCorrelationId, supabaseAdmin, audit } = await loadDeps()
     const actor = await getActor()
+    requirePermission(actor, 'purchase.write')
     const correlation = data.correlationId ?? newCorrelationId('po')
-    const { error } = await (supabaseAdmin.rpc as unknown as (name: string, args: unknown) => Promise<{ data: unknown; error: { message: string } | null }>)('po_receive', {
+    const { error } = await (supabaseAdmin.rpc as unknown as RpcFn)('po_receive', {
       p_po: data.id,
       p_actor: actor.userId,
       p_correlation: correlation,
     })
     if (error) throw new Error(error.message)
+    await audit(actor, { action: 'purchase.receive', resourceType: 'purchase_order', resourceId: data.id })
     return { id: data.id, correlationId: correlation }
   })

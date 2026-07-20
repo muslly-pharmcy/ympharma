@@ -11,11 +11,13 @@ import {
 export const createProduct = createServerFn({ method: 'POST' })
   .inputValidator((raw: unknown): CreateProductInput => createProductInput.parse(raw))
   .handler(async ({ data }) => {
-    const { getActor, requireOrg } = await import('./session.server')
+    const { getActor, requireOrg, requirePermission } = await import('./session.server')
     const { withIdempotency, newCorrelationId } = await import('./idempotency.server')
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { audit } = await import('./audit.server')
     const actor = await getActor()
     requireOrg(actor, data.organizationId)
+    requirePermission(actor, 'catalog.write')
     const correlation = data.correlationId ?? newCorrelationId('product')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'createProduct', async () => {
@@ -46,6 +48,7 @@ export const createProduct = createServerFn({ method: 'POST' })
         p_priority: 'normal',
         p_correlation_id: correlation,
       })
+      await audit(actor, { action: 'catalog.product.create', resourceType: 'catalog_product', resourceId: row.id, payload: { name_ar: data.name_ar } })
       return { id: row.id, correlationId: correlation }
     })
   })
@@ -53,10 +56,12 @@ export const createProduct = createServerFn({ method: 'POST' })
 export const updateProduct = createServerFn({ method: 'POST' })
   .inputValidator((raw: unknown): UpdateProductInput => updateProductInput.parse(raw))
   .handler(async ({ data }) => {
-    const { getActor } = await import('./session.server')
+    const { getActor, requirePermission } = await import('./session.server')
     const { withIdempotency, newCorrelationId } = await import('./idempotency.server')
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { audit } = await import('./audit.server')
     const actor = await getActor()
+    requirePermission(actor, 'catalog.write')
     const correlation = data.correlationId ?? newCorrelationId('product')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'updateProduct', async () => {
@@ -86,6 +91,7 @@ export const updateProduct = createServerFn({ method: 'POST' })
         p_priority: 'normal',
         p_correlation_id: correlation,
       })
+      await audit(actor, { action: 'catalog.product.update', resourceType: 'catalog_product', resourceId: data.id, payload: { patch } })
       return { id: data.id, correlationId: correlation }
     })
   })
@@ -93,10 +99,12 @@ export const updateProduct = createServerFn({ method: 'POST' })
 export const archiveProduct = createServerFn({ method: 'POST' })
   .inputValidator((raw: unknown): ArchiveProductInput => archiveProductInput.parse(raw))
   .handler(async ({ data }) => {
-    const { getActor } = await import('./session.server')
+    const { getActor, requirePermission } = await import('./session.server')
     const { newCorrelationId } = await import('./idempotency.server')
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { audit } = await import('./audit.server')
     const actor = await getActor()
+    requirePermission(actor, 'catalog.write')
     const correlation = data.correlationId ?? newCorrelationId('product')
 
     const { data: existing, error: fetchErr } = await supabaseAdmin
@@ -122,5 +130,6 @@ export const archiveProduct = createServerFn({ method: 'POST' })
       p_priority: 'normal',
       p_correlation_id: correlation,
     })
+    await audit(actor, { action: 'catalog.product.archive', resourceType: 'catalog_product', resourceId: data.id })
     return { id: data.id, correlationId: correlation }
   })
