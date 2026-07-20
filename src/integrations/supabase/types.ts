@@ -1431,6 +1431,51 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_events: {
+        Row: {
+          action: string
+          actor_user_id: string
+          branch_id: string | null
+          correlation_id: string | null
+          created_at: string
+          id: string
+          ip: string | null
+          organization_id: string
+          payload: Json
+          resource_id: string | null
+          resource_type: string
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          actor_user_id: string
+          branch_id?: string | null
+          correlation_id?: string | null
+          created_at?: string
+          id?: string
+          ip?: string | null
+          organization_id: string
+          payload?: Json
+          resource_id?: string | null
+          resource_type: string
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string
+          branch_id?: string | null
+          correlation_id?: string | null
+          created_at?: string
+          id?: string
+          ip?: string | null
+          organization_id?: string
+          payload?: Json
+          resource_id?: string | null
+          resource_type?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       backup_verification_runs: {
         Row: {
           checked: number
