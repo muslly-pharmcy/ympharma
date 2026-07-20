@@ -13,11 +13,13 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AiChatRouteImport } from './routes/ai-chat'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MissionControlRouteImport } from './routes/mission-control'
+import { Route as PurchaseOrdersRouteImport } from './routes/purchase-orders'
 import { Route as SuppliersRouteImport } from './routes/suppliers'
 import { Route as WarehousesRouteImport } from './routes/warehouses'
 import { Route as CatalogIndexRouteImport } from './routes/catalog.index'
 import { Route as CatalogProductIdRouteImport } from './routes/catalog.$productId'
 import { Route as PlanetPlanetIdRouteImport } from './routes/planet.$planetId'
+import { Route as PurchaseOrdersIdRouteImport } from './routes/purchase-orders.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -37,6 +39,11 @@ const LoginRoute = LoginRouteImport.update({
 const MissionControlRoute = MissionControlRouteImport.update({
   id: '/mission-control',
   path: '/mission-control',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PurchaseOrdersRoute = PurchaseOrdersRouteImport.update({
+  id: '/purchase-orders',
+  path: '/purchase-orders',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SuppliersRoute = SuppliersRouteImport.update({
@@ -64,16 +71,23 @@ const PlanetPlanetIdRoute = PlanetPlanetIdRouteImport.update({
   path: '/planet/$planetId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PurchaseOrdersIdRoute = PurchaseOrdersIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => PurchaseOrdersRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/ai-chat': typeof AiChatRoute
   '/login': typeof LoginRoute
   '/mission-control': typeof MissionControlRoute
+  '/purchase-orders': typeof PurchaseOrdersRouteWithChildren
   '/suppliers': typeof SuppliersRoute
   '/warehouses': typeof WarehousesRoute
   '/catalog/$productId': typeof CatalogProductIdRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
+  '/purchase-orders/$id': typeof PurchaseOrdersIdRoute
   '/catalog/': typeof CatalogIndexRoute
 }
 export interface FileRoutesByTo {
@@ -81,10 +95,12 @@ export interface FileRoutesByTo {
   '/ai-chat': typeof AiChatRoute
   '/login': typeof LoginRoute
   '/mission-control': typeof MissionControlRoute
+  '/purchase-orders': typeof PurchaseOrdersRouteWithChildren
   '/suppliers': typeof SuppliersRoute
   '/warehouses': typeof WarehousesRoute
   '/catalog/$productId': typeof CatalogProductIdRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
+  '/purchase-orders/$id': typeof PurchaseOrdersIdRoute
   '/catalog': typeof CatalogIndexRoute
 }
 export interface FileRoutesById {
@@ -93,10 +109,12 @@ export interface FileRoutesById {
   '/ai-chat': typeof AiChatRoute
   '/login': typeof LoginRoute
   '/mission-control': typeof MissionControlRoute
+  '/purchase-orders': typeof PurchaseOrdersRouteWithChildren
   '/suppliers': typeof SuppliersRoute
   '/warehouses': typeof WarehousesRoute
   '/catalog/$productId': typeof CatalogProductIdRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
+  '/purchase-orders/$id': typeof PurchaseOrdersIdRoute
   '/catalog/': typeof CatalogIndexRoute
 }
 export interface FileRouteTypes {
@@ -106,10 +124,12 @@ export interface FileRouteTypes {
     | '/ai-chat'
     | '/login'
     | '/mission-control'
+    | '/purchase-orders'
     | '/suppliers'
     | '/warehouses'
     | '/catalog/$productId'
     | '/planet/$planetId'
+    | '/purchase-orders/$id'
     | '/catalog/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -117,10 +137,12 @@ export interface FileRouteTypes {
     | '/ai-chat'
     | '/login'
     | '/mission-control'
+    | '/purchase-orders'
     | '/suppliers'
     | '/warehouses'
     | '/catalog/$productId'
     | '/planet/$planetId'
+    | '/purchase-orders/$id'
     | '/catalog'
   id:
     | '__root__'
@@ -128,10 +150,12 @@ export interface FileRouteTypes {
     | '/ai-chat'
     | '/login'
     | '/mission-control'
+    | '/purchase-orders'
     | '/suppliers'
     | '/warehouses'
     | '/catalog/$productId'
     | '/planet/$planetId'
+    | '/purchase-orders/$id'
     | '/catalog/'
   fileRoutesById: FileRoutesById
 }
@@ -140,6 +164,7 @@ export interface RootRouteChildren {
   AiChatRoute: typeof AiChatRoute
   LoginRoute: typeof LoginRoute
   MissionControlRoute: typeof MissionControlRoute
+  PurchaseOrdersRoute: typeof PurchaseOrdersRouteWithChildren
   SuppliersRoute: typeof SuppliersRoute
   WarehousesRoute: typeof WarehousesRoute
   CatalogProductIdRoute: typeof CatalogProductIdRoute
@@ -177,6 +202,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionControlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/purchase-orders': {
+      id: '/purchase-orders'
+      path: '/purchase-orders'
+      fullPath: '/purchase-orders'
+      preLoaderRoute: typeof PurchaseOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/suppliers': {
       id: '/suppliers'
       path: '/suppliers'
@@ -212,14 +244,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlanetPlanetIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/purchase-orders/$id': {
+      id: '/purchase-orders/$id'
+      path: '/$id'
+      fullPath: '/purchase-orders/$id'
+      preLoaderRoute: typeof PurchaseOrdersIdRouteImport
+      parentRoute: typeof PurchaseOrdersRoute
+    }
   }
 }
+
+interface PurchaseOrdersRouteChildren {
+  PurchaseOrdersIdRoute: typeof PurchaseOrdersIdRoute
+}
+
+const PurchaseOrdersRouteChildren: PurchaseOrdersRouteChildren = {
+  PurchaseOrdersIdRoute: PurchaseOrdersIdRoute,
+}
+
+const PurchaseOrdersRouteWithChildren = PurchaseOrdersRoute._addFileChildren(
+  PurchaseOrdersRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AiChatRoute: AiChatRoute,
   LoginRoute: LoginRoute,
   MissionControlRoute: MissionControlRoute,
+  PurchaseOrdersRoute: PurchaseOrdersRouteWithChildren,
   SuppliersRoute: SuppliersRoute,
   WarehousesRoute: WarehousesRoute,
   CatalogProductIdRoute: CatalogProductIdRoute,
