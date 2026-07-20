@@ -53,7 +53,7 @@ export interface LoyaltyRule {
   key: string
   name: string
   kind: LoyaltyRuleKind
-  config: Record<string, unknown>
+  config: Record<string, string | number | boolean | null>
   priority: number
   is_active: boolean
   valid_from: string | null

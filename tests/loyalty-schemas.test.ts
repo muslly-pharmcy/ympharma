@@ -36,7 +36,7 @@ describe('loyalty command schemas', () => {
   })
 
   it('rule enforces kind enum', () => {
-    expect(() => upsertRuleInput.parse({ key: 'k', name: 'n', kind: 'nope', config: {} })).toThrow()
-    expect(upsertRuleInput.parse({ key: 'k', name: 'n', kind: 'spend_earn', config: { per_currency_unit: 10 } }).kind).toBe('spend_earn')
+    expect(() => upsertRuleInput.parse({ key: 'rule-key', name: 'Rule name', kind: 'nope', config: {} })).toThrow()
+    expect(upsertRuleInput.parse({ key: 'rule-key', name: 'Rule name', kind: 'spend_earn', config: { per_currency_unit: 10 } }).kind).toBe('spend_earn')
   })
 })
