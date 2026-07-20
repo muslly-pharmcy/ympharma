@@ -4,7 +4,7 @@ import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
 import { listCustomers } from '@/lib/customers.functions'
 import { createCustomer } from '@/lib/customers.mutations.functions'
-import { useAuth } from '@/context/AuthContext'
+
 
 export const Route = createFileRoute('/_authenticated/customers')({
   component: CustomersPage,
@@ -16,7 +16,6 @@ export const Route = createFileRoute('/_authenticated/customers')({
 })
 
 function CustomersPage() {
-  const { organizationId } = useAuth()
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState<'active' | 'archived' | 'all'>('active')
   const [showNew, setShowNew] = useState(false)
@@ -28,16 +27,12 @@ function CustomersPage() {
   })
   const create = useServerFn(createCustomer)
   const mut = useMutation({
-    mutationFn: async () => {
-      if (!organizationId) throw new Error('لا توجد مؤسسة نشطة')
-      return create({ data: {
-        organizationId,
-        full_name: form.full_name.trim(),
-        phone: form.phone.trim() || null,
-        email: form.email.trim() || null,
-        idempotencyKey: crypto.randomUUID(),
-      } })
-    },
+    mutationFn: async () => create({ data: {
+      full_name: form.full_name.trim(),
+      phone: form.phone.trim() || null,
+      email: form.email.trim() || null,
+      idempotencyKey: crypto.randomUUID(),
+    } }),
     onSuccess: () => {
       setShowNew(false)
       setForm({ full_name: '', phone: '', email: '' })
