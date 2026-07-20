@@ -24,7 +24,7 @@ export async function withIdempotency<T>(
     key,
     actor_id: actorId,
     command,
-    response: result as unknown as Record<string, unknown>,
+    response: (result ?? null) as unknown as never,
   })
   return result
 }
