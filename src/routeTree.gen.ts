@@ -15,12 +15,16 @@ import { Route as AiChatRouteImport } from './routes/ai-chat'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as MissionControlRouteImport } from './routes/mission-control'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as AuthenticatedDoctorsRouteImport } from './routes/_authenticated/doctors'
+import { Route as AuthenticatedPatientsRouteImport } from './routes/_authenticated/patients'
 import { Route as AuthenticatedPurchaseOrdersRouteImport } from './routes/_authenticated/purchase-orders'
 import { Route as AuthenticatedSuppliersRouteImport } from './routes/_authenticated/suppliers'
 import { Route as AuthenticatedWarehousesRouteImport } from './routes/_authenticated/warehouses'
 import { Route as PlanetPlanetIdRouteImport } from './routes/planet.$planetId'
 import { Route as AuthenticatedCatalogIndexRouteImport } from './routes/_authenticated/catalog.index'
 import { Route as AuthenticatedCatalogProductIdRouteImport } from './routes/_authenticated/catalog.$productId'
+import { Route as AuthenticatedDoctorsDoctorIdRouteImport } from './routes/_authenticated/doctors.$doctorId'
+import { Route as AuthenticatedPatientsPatientIdRouteImport } from './routes/_authenticated/patients.$patientId'
 import { Route as AuthenticatedPurchaseOrdersIdRouteImport } from './routes/_authenticated/purchase-orders.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -51,6 +55,16 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedDoctorsRoute = AuthenticatedDoctorsRouteImport.update({
+  id: '/doctors',
+  path: '/doctors',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPatientsRoute = AuthenticatedPatientsRouteImport.update({
+  id: '/patients',
+  path: '/patients',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPurchaseOrdersRoute =
   AuthenticatedPurchaseOrdersRouteImport.update({
@@ -85,6 +99,18 @@ const AuthenticatedCatalogProductIdRoute =
     path: '/catalog/$productId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDoctorsDoctorIdRoute =
+  AuthenticatedDoctorsDoctorIdRouteImport.update({
+    id: '/$doctorId',
+    path: '/$doctorId',
+    getParentRoute: () => AuthenticatedDoctorsRoute,
+  } as any)
+const AuthenticatedPatientsPatientIdRoute =
+  AuthenticatedPatientsPatientIdRouteImport.update({
+    id: '/$patientId',
+    path: '/$patientId',
+    getParentRoute: () => AuthenticatedPatientsRoute,
+  } as any)
 const AuthenticatedPurchaseOrdersIdRoute =
   AuthenticatedPurchaseOrdersIdRouteImport.update({
     id: '/$id',
@@ -98,11 +124,15 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/mission-control': typeof MissionControlRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/doctors': typeof AuthenticatedDoctorsRouteWithChildren
+  '/patients': typeof AuthenticatedPatientsRouteWithChildren
   '/purchase-orders': typeof AuthenticatedPurchaseOrdersRouteWithChildren
   '/suppliers': typeof AuthenticatedSuppliersRoute
   '/warehouses': typeof AuthenticatedWarehousesRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/catalog/$productId': typeof AuthenticatedCatalogProductIdRoute
+  '/doctors/$doctorId': typeof AuthenticatedDoctorsDoctorIdRoute
+  '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
   '/catalog/': typeof AuthenticatedCatalogIndexRoute
 }
@@ -112,11 +142,15 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/mission-control': typeof MissionControlRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/doctors': typeof AuthenticatedDoctorsRouteWithChildren
+  '/patients': typeof AuthenticatedPatientsRouteWithChildren
   '/purchase-orders': typeof AuthenticatedPurchaseOrdersRouteWithChildren
   '/suppliers': typeof AuthenticatedSuppliersRoute
   '/warehouses': typeof AuthenticatedWarehousesRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/catalog/$productId': typeof AuthenticatedCatalogProductIdRoute
+  '/doctors/$doctorId': typeof AuthenticatedDoctorsDoctorIdRoute
+  '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
   '/catalog': typeof AuthenticatedCatalogIndexRoute
 }
@@ -128,11 +162,15 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/mission-control': typeof MissionControlRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/doctors': typeof AuthenticatedDoctorsRouteWithChildren
+  '/_authenticated/patients': typeof AuthenticatedPatientsRouteWithChildren
   '/_authenticated/purchase-orders': typeof AuthenticatedPurchaseOrdersRouteWithChildren
   '/_authenticated/suppliers': typeof AuthenticatedSuppliersRoute
   '/_authenticated/warehouses': typeof AuthenticatedWarehousesRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/_authenticated/catalog/$productId': typeof AuthenticatedCatalogProductIdRoute
+  '/_authenticated/doctors/$doctorId': typeof AuthenticatedDoctorsDoctorIdRoute
+  '/_authenticated/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/_authenticated/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
   '/_authenticated/catalog/': typeof AuthenticatedCatalogIndexRoute
 }
@@ -144,11 +182,15 @@ export interface FileRouteTypes {
     | '/auth'
     | '/mission-control'
     | '/reset-password'
+    | '/doctors'
+    | '/patients'
     | '/purchase-orders'
     | '/suppliers'
     | '/warehouses'
     | '/planet/$planetId'
     | '/catalog/$productId'
+    | '/doctors/$doctorId'
+    | '/patients/$patientId'
     | '/purchase-orders/$id'
     | '/catalog/'
   fileRoutesByTo: FileRoutesByTo
@@ -158,11 +200,15 @@ export interface FileRouteTypes {
     | '/auth'
     | '/mission-control'
     | '/reset-password'
+    | '/doctors'
+    | '/patients'
     | '/purchase-orders'
     | '/suppliers'
     | '/warehouses'
     | '/planet/$planetId'
     | '/catalog/$productId'
+    | '/doctors/$doctorId'
+    | '/patients/$patientId'
     | '/purchase-orders/$id'
     | '/catalog'
   id:
@@ -173,11 +219,15 @@ export interface FileRouteTypes {
     | '/auth'
     | '/mission-control'
     | '/reset-password'
+    | '/_authenticated/doctors'
+    | '/_authenticated/patients'
     | '/_authenticated/purchase-orders'
     | '/_authenticated/suppliers'
     | '/_authenticated/warehouses'
     | '/planet/$planetId'
     | '/_authenticated/catalog/$productId'
+    | '/_authenticated/doctors/$doctorId'
+    | '/_authenticated/patients/$patientId'
     | '/_authenticated/purchase-orders/$id'
     | '/_authenticated/catalog/'
   fileRoutesById: FileRoutesById
@@ -236,6 +286,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/doctors': {
+      id: '/_authenticated/doctors'
+      path: '/doctors'
+      fullPath: '/doctors'
+      preLoaderRoute: typeof AuthenticatedDoctorsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/patients': {
+      id: '/_authenticated/patients'
+      path: '/patients'
+      fullPath: '/patients'
+      preLoaderRoute: typeof AuthenticatedPatientsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/purchase-orders': {
       id: '/_authenticated/purchase-orders'
       path: '/purchase-orders'
@@ -278,6 +342,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCatalogProductIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/doctors/$doctorId': {
+      id: '/_authenticated/doctors/$doctorId'
+      path: '/$doctorId'
+      fullPath: '/doctors/$doctorId'
+      preLoaderRoute: typeof AuthenticatedDoctorsDoctorIdRouteImport
+      parentRoute: typeof AuthenticatedDoctorsRoute
+    }
+    '/_authenticated/patients/$patientId': {
+      id: '/_authenticated/patients/$patientId'
+      path: '/$patientId'
+      fullPath: '/patients/$patientId'
+      preLoaderRoute: typeof AuthenticatedPatientsPatientIdRouteImport
+      parentRoute: typeof AuthenticatedPatientsRoute
+    }
     '/_authenticated/purchase-orders/$id': {
       id: '/_authenticated/purchase-orders/$id'
       path: '/$id'
@@ -287,6 +365,30 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AuthenticatedDoctorsRouteChildren {
+  AuthenticatedDoctorsDoctorIdRoute: typeof AuthenticatedDoctorsDoctorIdRoute
+}
+
+const AuthenticatedDoctorsRouteChildren: AuthenticatedDoctorsRouteChildren = {
+  AuthenticatedDoctorsDoctorIdRoute: AuthenticatedDoctorsDoctorIdRoute,
+}
+
+const AuthenticatedDoctorsRouteWithChildren =
+  AuthenticatedDoctorsRoute._addFileChildren(AuthenticatedDoctorsRouteChildren)
+
+interface AuthenticatedPatientsRouteChildren {
+  AuthenticatedPatientsPatientIdRoute: typeof AuthenticatedPatientsPatientIdRoute
+}
+
+const AuthenticatedPatientsRouteChildren: AuthenticatedPatientsRouteChildren = {
+  AuthenticatedPatientsPatientIdRoute: AuthenticatedPatientsPatientIdRoute,
+}
+
+const AuthenticatedPatientsRouteWithChildren =
+  AuthenticatedPatientsRoute._addFileChildren(
+    AuthenticatedPatientsRouteChildren,
+  )
 
 interface AuthenticatedPurchaseOrdersRouteChildren {
   AuthenticatedPurchaseOrdersIdRoute: typeof AuthenticatedPurchaseOrdersIdRoute
@@ -303,6 +405,8 @@ const AuthenticatedPurchaseOrdersRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedDoctorsRoute: typeof AuthenticatedDoctorsRouteWithChildren
+  AuthenticatedPatientsRoute: typeof AuthenticatedPatientsRouteWithChildren
   AuthenticatedPurchaseOrdersRoute: typeof AuthenticatedPurchaseOrdersRouteWithChildren
   AuthenticatedSuppliersRoute: typeof AuthenticatedSuppliersRoute
   AuthenticatedWarehousesRoute: typeof AuthenticatedWarehousesRoute
@@ -311,6 +415,8 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedDoctorsRoute: AuthenticatedDoctorsRouteWithChildren,
+  AuthenticatedPatientsRoute: AuthenticatedPatientsRouteWithChildren,
   AuthenticatedPurchaseOrdersRoute:
     AuthenticatedPurchaseOrdersRouteWithChildren,
   AuthenticatedSuppliersRoute: AuthenticatedSuppliersRoute,
