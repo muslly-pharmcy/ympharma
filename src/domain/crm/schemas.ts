@@ -11,7 +11,7 @@ export interface Customer {
   status: CustomerStatus
   merged_into_id: string | null
   notes: string | null
-  metadata: Record<string, unknown>
+  metadata: unknown
   created_by: string | null
   created_at: string
   updated_at: string

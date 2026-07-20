@@ -30,12 +30,11 @@ async function assertOwnedByOrg(table: string, id: string, orgId: string) {
 export const createCustomer = createServerFn({ method: 'POST' })
   .inputValidator((raw: unknown): CreateCustomerInput => createCustomerInput.parse(raw))
   .handler(async ({ data }) => {
-    const { getActor, requireOrg, requirePermission } = await import('./session.server')
+    const { getActor, requirePermission } = await import('./session.server')
     const { withIdempotency, newCorrelationId } = await import('./idempotency.server')
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
     const { audit } = await import('./audit.server')
     const actor = await getActor()
-    requireOrg(actor, data.organizationId)
     requirePermission(actor, 'customer.write')
     const correlation = data.correlationId ?? newCorrelationId('customer')
 
@@ -44,7 +43,7 @@ export const createCustomer = createServerFn({ method: 'POST' })
       const { data: row, error } = await (supabaseAdmin as any)
         .from('crm_customers')
         .insert({
-          organization_id: data.organizationId,
+          organization_id: actor.organizationId,
           full_name: data.full_name,
           phone: data.phone ?? null,
           email: data.email ?? null,
