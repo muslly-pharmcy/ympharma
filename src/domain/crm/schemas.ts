@@ -11,7 +11,7 @@ export interface Customer {
   status: CustomerStatus
   merged_into_id: string | null
   notes: string | null
-  metadata: unknown
+  // metadata is stored server-side but omitted from serialized payloads to keep them JSON-safe.
   created_by: string | null
   created_at: string
   updated_at: string
