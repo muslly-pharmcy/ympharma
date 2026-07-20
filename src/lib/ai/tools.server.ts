@@ -186,6 +186,51 @@ const TOOLS: Record<string, ToolDefinition> = {
       return { ok: true, data: { balance, suggestions: rewards ?? [] } }
     },
   },
+  campaign_statistics: {
+    key: 'campaign_statistics',
+    description: 'Aggregate campaign stats for the org. Input: { limit?: number }',
+    execute: async ({ actor }, input) => {
+      const { hasPermission } = await import('../session.server')
+      if (!hasPermission(actor, 'ai.campaign.read')) return { ok: false, error: 'permission denied' }
+      const limit = Math.min(Math.max(Number(input.limit ?? 20), 1), 100)
+      const sb = await admin()
+      const { data } = await sb.from('crm_campaigns')
+        .select('id, code, name, status, audience_size, sent_count, failed_count, channel, created_at')
+        .eq('organization_id', actor.organizationId).order('created_at', { ascending: false }).limit(limit)
+      return { ok: true, data: data ?? [] }
+    },
+  },
+  segment_preview: {
+    key: 'segment_preview',
+    description: 'Preview a segment (existing) by id. Input: { segment_id: string }',
+    execute: async ({ actor }, input) => {
+      const sid = String(input.segment_id ?? '').trim()
+      if (!sid) return { ok: false, error: 'segment_id is required' }
+      const { hasPermission } = await import('../session.server')
+      if (!hasPermission(actor, 'ai.campaign.read')) return { ok: false, error: 'permission denied' }
+      const sb = await admin()
+      const { data: seg } = await sb.from('crm_segments')
+        .select('id, name, member_count, last_recalculated_at')
+        .eq('organization_id', actor.organizationId).eq('id', sid).maybeSingle()
+      return { ok: true, data: seg ?? null }
+    },
+  },
+  recommend_campaign: {
+    key: 'recommend_campaign',
+    description: 'Suggest a channel + template angle for a segment based on its size and existing campaign history.',
+    execute: async ({ actor }, input) => {
+      const sid = String(input.segment_id ?? '').trim()
+      const { hasPermission } = await import('../session.server')
+      if (!hasPermission(actor, 'ai.campaign.read')) return { ok: false, error: 'permission denied' }
+      const sb = await admin()
+      const { data: seg } = await sb.from('crm_segments').select('member_count')
+        .eq('organization_id', actor.organizationId).eq('id', sid).maybeSingle()
+      const size = Number(seg?.member_count ?? 0)
+      const channel = size > 500 ? 'email' : size > 100 ? 'sms' : 'whatsapp'
+      const angle = size > 500 ? 'newsletter (email)' : size > 100 ? 'promo alert (sms)' : 'personal outreach (whatsapp)'
+      return { ok: true, data: { segment_size: size, recommended_channel: channel, angle } }
+    },
+  },
 }
 
 export function getTool(key: string): ToolDefinition | undefined {

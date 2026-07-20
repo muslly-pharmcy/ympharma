@@ -2712,6 +2712,378 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_campaign_events: {
+        Row: {
+          campaign_id: string
+          channel: Database["public"]["Enums"]["crm_campaign_channel"] | null
+          customer_id: string | null
+          id: string
+          kind: Database["public"]["Enums"]["crm_campaign_event_kind"]
+          metadata: Json
+          occurred_at: string
+          organization_id: string
+          provider_ref: string | null
+          recipient_id: string | null
+        }
+        Insert: {
+          campaign_id: string
+          channel?: Database["public"]["Enums"]["crm_campaign_channel"] | null
+          customer_id?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["crm_campaign_event_kind"]
+          metadata?: Json
+          occurred_at?: string
+          organization_id: string
+          provider_ref?: string | null
+          recipient_id?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          channel?: Database["public"]["Enums"]["crm_campaign_channel"] | null
+          customer_id?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["crm_campaign_event_kind"]
+          metadata?: Json
+          occurred_at?: string
+          organization_id?: string
+          provider_ref?: string | null
+          recipient_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_campaign_events_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "crm_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_campaign_events_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "crm_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_campaign_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_campaign_events_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "crm_campaign_recipients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_campaign_recipients: {
+        Row: {
+          address: string | null
+          campaign_id: string
+          channel: Database["public"]["Enums"]["crm_campaign_channel"]
+          created_at: string
+          customer_id: string
+          error: string | null
+          id: string
+          organization_id: string
+          sent_at: string | null
+          status: Database["public"]["Enums"]["crm_recipient_status"]
+        }
+        Insert: {
+          address?: string | null
+          campaign_id: string
+          channel: Database["public"]["Enums"]["crm_campaign_channel"]
+          created_at?: string
+          customer_id: string
+          error?: string | null
+          id?: string
+          organization_id: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["crm_recipient_status"]
+        }
+        Update: {
+          address?: string | null
+          campaign_id?: string
+          channel?: Database["public"]["Enums"]["crm_campaign_channel"]
+          created_at?: string
+          customer_id?: string
+          error?: string | null
+          id?: string
+          organization_id?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["crm_recipient_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_campaign_recipients_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "crm_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_campaign_recipients_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "crm_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_campaign_recipients_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_campaign_runs: {
+        Row: {
+          audience_size: number
+          campaign_id: string
+          error: string | null
+          failed_count: number
+          finished_at: string | null
+          id: string
+          metadata: Json
+          organization_id: string
+          sent_count: number
+          started_at: string
+          status: string
+        }
+        Insert: {
+          audience_size?: number
+          campaign_id: string
+          error?: string | null
+          failed_count?: number
+          finished_at?: string | null
+          id?: string
+          metadata?: Json
+          organization_id: string
+          sent_count?: number
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          audience_size?: number
+          campaign_id?: string
+          error?: string | null
+          failed_count?: number
+          finished_at?: string | null
+          id?: string
+          metadata?: Json
+          organization_id?: string
+          sent_count?: number
+          started_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_campaign_runs_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "crm_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_campaign_runs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_campaign_schedules: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          executed_at: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          run_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          executed_at?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          run_at: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          executed_at?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          run_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_campaign_schedules_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "crm_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_campaign_schedules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_campaigns: {
+        Row: {
+          audience_size: number
+          cancelled_at: string | null
+          channel: Database["public"]["Enums"]["crm_campaign_channel"]
+          code: string
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          delivered_count: number
+          description: string | null
+          failed_count: number
+          id: string
+          message_template: string
+          metadata: Json
+          name: string
+          organization_id: string
+          scheduled_at: string | null
+          segment_id: string | null
+          sent_count: number
+          started_at: string | null
+          status: Database["public"]["Enums"]["crm_campaign_status"]
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          audience_size?: number
+          cancelled_at?: string | null
+          channel: Database["public"]["Enums"]["crm_campaign_channel"]
+          code: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivered_count?: number
+          description?: string | null
+          failed_count?: number
+          id?: string
+          message_template?: string
+          metadata?: Json
+          name: string
+          organization_id: string
+          scheduled_at?: string | null
+          segment_id?: string | null
+          sent_count?: number
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["crm_campaign_status"]
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audience_size?: number
+          cancelled_at?: string | null
+          channel?: Database["public"]["Enums"]["crm_campaign_channel"]
+          code?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivered_count?: number
+          description?: string | null
+          failed_count?: number
+          id?: string
+          message_template?: string
+          metadata?: Json
+          name?: string
+          organization_id?: string
+          scheduled_at?: string | null
+          segment_id?: string | null
+          sent_count?: number
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["crm_campaign_status"]
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_campaigns_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_campaigns_segment_fk"
+            columns: ["segment_id"]
+            isOneToOne: false
+            referencedRelation: "crm_segments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_contact_preferences: {
+        Row: {
+          channel: Database["public"]["Enums"]["crm_campaign_channel"]
+          created_at: string
+          customer_id: string
+          id: string
+          opted_in: boolean
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          channel: Database["public"]["Enums"]["crm_campaign_channel"]
+          created_at?: string
+          customer_id: string
+          id?: string
+          opted_in?: boolean
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          channel?: Database["public"]["Enums"]["crm_campaign_channel"]
+          created_at?: string
+          customer_id?: string
+          id?: string
+          opted_in?: boolean
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_contact_preferences_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "crm_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_contact_preferences_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_customer_addresses: {
         Row: {
           city: string | null
@@ -3339,6 +3711,147 @@ export type Database = {
             columns: ["transaction_id"]
             isOneToOne: false
             referencedRelation: "crm_loyalty_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_segment_memberships: {
+        Row: {
+          added_at: string
+          customer_id: string
+          organization_id: string
+          segment_id: string
+        }
+        Insert: {
+          added_at?: string
+          customer_id: string
+          organization_id: string
+          segment_id: string
+        }
+        Update: {
+          added_at?: string
+          customer_id?: string
+          organization_id?: string
+          segment_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_segment_memberships_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "crm_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_segment_memberships_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_segment_memberships_segment_id_fkey"
+            columns: ["segment_id"]
+            isOneToOne: false
+            referencedRelation: "crm_segments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_segments: {
+        Row: {
+          code: string
+          combinator: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_dynamic: boolean
+          last_recalculated_at: string | null
+          member_count: number
+          name: string
+          organization_id: string
+          rules: Json
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          combinator?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_dynamic?: boolean
+          last_recalculated_at?: string | null
+          member_count?: number
+          name: string
+          organization_id: string
+          rules?: Json
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          combinator?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_dynamic?: boolean
+          last_recalculated_at?: string | null
+          member_count?: number
+          name?: string
+          organization_id?: string
+          rules?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_segments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_unsubscribes: {
+        Row: {
+          channel: Database["public"]["Enums"]["crm_campaign_channel"]
+          created_at: string
+          customer_id: string
+          id: string
+          organization_id: string
+          reason: string | null
+        }
+        Insert: {
+          channel: Database["public"]["Enums"]["crm_campaign_channel"]
+          created_at?: string
+          customer_id: string
+          id?: string
+          organization_id: string
+          reason?: string | null
+        }
+        Update: {
+          channel?: Database["public"]["Enums"]["crm_campaign_channel"]
+          created_at?: string
+          customer_id?: string
+          id?: string
+          organization_id?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_unsubscribes_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "crm_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_unsubscribes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -12022,6 +12535,13 @@ export type Database = {
       }
       create_backup: { Args: { _kind?: string }; Returns: string }
       create_scheduled_backup: { Args: { _kind: string }; Returns: string }
+      crm_campaign_transition: {
+        Args: {
+          p_id: string
+          p_next: Database["public"]["Enums"]["crm_campaign_status"]
+        }
+        Returns: Database["public"]["Enums"]["crm_campaign_status"]
+      }
       crm_loyalty_apply_txn: {
         Args: {
           p_account_id: string
@@ -12047,6 +12567,10 @@ export type Database = {
         Returns: string
       }
       crm_loyalty_seed_tiers: { Args: { p_org: string }; Returns: undefined }
+      crm_segment_recalc: {
+        Args: { p_customer_ids: string[]; p_segment_id: string }
+        Returns: number
+      }
       cto_health: { Args: never; Returns: Json }
       current_inventory_write_mode: { Args: never; Returns: string }
       current_org: { Args: never; Returns: string }
@@ -12822,6 +13346,29 @@ export type Database = {
         | "rejected"
         | "archived"
       classification_status: "pending" | "approved" | "rejected"
+      crm_campaign_channel: "whatsapp" | "sms" | "email" | "push" | "in_app"
+      crm_campaign_event_kind:
+        | "queued"
+        | "sent"
+        | "delivered"
+        | "opened"
+        | "clicked"
+        | "bounced"
+        | "failed"
+        | "unsubscribed"
+      crm_campaign_status:
+        | "draft"
+        | "scheduled"
+        | "running"
+        | "paused"
+        | "completed"
+        | "cancelled"
+      crm_recipient_status:
+        | "pending"
+        | "sent"
+        | "delivered"
+        | "failed"
+        | "skipped"
       hc_appointment_status:
         | "requested"
         | "confirmed"
@@ -13148,6 +13695,32 @@ export const Constants = {
         "archived",
       ],
       classification_status: ["pending", "approved", "rejected"],
+      crm_campaign_channel: ["whatsapp", "sms", "email", "push", "in_app"],
+      crm_campaign_event_kind: [
+        "queued",
+        "sent",
+        "delivered",
+        "opened",
+        "clicked",
+        "bounced",
+        "failed",
+        "unsubscribed",
+      ],
+      crm_campaign_status: [
+        "draft",
+        "scheduled",
+        "running",
+        "paused",
+        "completed",
+        "cancelled",
+      ],
+      crm_recipient_status: [
+        "pending",
+        "sent",
+        "delivered",
+        "failed",
+        "skipped",
+      ],
       hc_appointment_status: [
         "requested",
         "confirmed",
