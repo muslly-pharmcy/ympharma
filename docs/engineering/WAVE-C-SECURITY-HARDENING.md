@@ -1,96 +1,110 @@
 # Wave C — Enterprise Security Hardening
 
 ## Phase 1 — Shipped ✅
+See git history / previous doc revision.
 
-### 1. Security Headers (all responses)
-Applied via `securityHeadersMiddleware` in `src/lib/security/headers.server.ts`,
-registered globally in `src/start.ts` as `requestMiddleware`.
+## Phase 1.5 — CSP Modernization — Shipped ✅
 
-| Header | Value | Notes |
-|---|---|---|
-| `Content-Security-Policy-Report-Only` | Full directive set | **Report-Only** — does not block anything yet. Collect violations from browser DevTools → Console before switching to enforce. |
-| `X-Content-Type-Options` | `nosniff` | |
-| `Referrer-Policy` | `strict-origin-when-cross-origin` | |
-| `X-Frame-Options` | `DENY` | Clickjacking protection. |
-| `Permissions-Policy` | Locked: no camera/mic/USB/etc. `geolocation=(self)`, `payment=(self)`. | |
-| `Cross-Origin-Opener-Policy` | `same-origin` | |
-| `Cross-Origin-Resource-Policy` | `same-origin` | |
-| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains` | |
+### 1. Tightened CSP directives (still Report-Only)
+File: `src/lib/security/headers.server.ts`
+- Removed `https:` catch-alls from `img-src` and `connect-src`.
+- Explicit third-party allowlist (`THIRD_PARTY_HOSTS`):
+  - `https://ai.gateway.lovable.dev` — Lovable AI Gateway (connect-src)
+  - `https://fonts.googleapis.com` — Google Fonts stylesheets (style-src)
+  - `https://fonts.gstatic.com` — Google Fonts binaries (font-src)
+- Supabase origin + realtime WebSocket derived from env at request time.
+- `frame-ancestors 'none'`, `object-src 'none'`, `base-uri 'self'`, `form-action 'self'` — locked.
 
-CSP directives (Report-Only baseline):
-- `default-src 'self'`
-- `frame-ancestors 'none'`, `object-src 'none'`, `base-uri 'self'`, `form-action 'self'`
-- `img-src` allows Supabase storage + https/data/blob
-- `connect-src` allows Supabase REST + realtime WS
-- `style-src` / `script-src` include `'unsafe-inline'` for SSR hydration and Tailwind — tightened to nonces in Phase 1.5
+### 2. CSP violation reporting endpoint
+File: `src/routes/api/public/csp-report.ts` (POST)
+- Accepts legacy `application/csp-report` and Reporting API (`application/reports+json`).
+- Body cap: 16 KB, defensive JSON parse, logs via `console.warn` → visible in server-function logs.
+- Wave F (Observability) will persist + aggregate reports.
 
-### 2. Cookies / Session review
-- Supabase session is stored in `localStorage` (SPA pattern) — no server cookie surface today.
-- No custom app cookies set from server code. No cookie hardening gap.
-- Auth session lifecycle handled by `@supabase/supabase-js` (`autoRefreshToken: true`).
+CSP now emits:
+- `report-uri /api/public/csp-report` (legacy compatibility)
+- `report-to csp-endpoint` + `Report-To` header (modern Reporting API)
 
-### 3. Secret leakage audit
-- `LOVABLE_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY` — read only inside server-fn `.handler()` bodies (verified in `src/lib/ai/*.server.ts`, `src/integrations/supabase/client.server.ts`).
-- All `import.meta.env.VITE_*` reads are the publishable keys only.
-- No secrets logged (`grep -R "SERVICE_ROLE\|LOVABLE_API_KEY" src/` returns only defined reads inside handlers).
+### 3. Third-party resource inventory
+| Category | Host | Directive | Notes |
+|---|---|---|---|
+| Backend API | Supabase project origin | `connect-src`, `img-src` | Derived from `SUPABASE_URL` at request time. |
+| Realtime | Supabase WSS | `connect-src` | Same origin, `wss://` scheme. |
+| AI Gateway | `ai.gateway.lovable.dev` | `connect-src` | Server-to-server (rarely browser), whitelisted defensively. |
+| Fonts (CSS) | `fonts.googleapis.com` | `style-src` | Kept explicit; only active if a route adds a `<link rel=stylesheet>` to Google Fonts. |
+| Fonts (binary) | `fonts.gstatic.com` | `font-src` | Same as above. |
+| Assets | `data:`, `blob:` | `img-src`, `font-src`, `media-src`, `worker-src` | Required for icons, generated PDFs, canvas exports. |
 
-## Phase 1.5 — Next (CSP nonce migration)
-Move away from `'unsafe-inline'` for `script-src` by generating a per-request nonce
-in the middleware, injecting it into `<Scripts nonce={...}>`, and switching CSP
-to `script-src 'self' 'nonce-<value>'`. Keep Report-Only until the app renders
-cleanly with the nonce policy.
+Analytics, error trackers, tag managers, and marketing pixels are **not** currently loaded.
+If added later, they must be appended to `THIRD_PARTY_HOSTS` in the same PR.
 
-## Phase 2 — AI Security (audit checklist, not code)
-Verify against Wave I-Zero implementation:
-- ModelRouter — enforced tier caps: `src/lib/ai/runtime/model-router.ts`
-- Prompt-Injection filter — `SUSPECT` regex list in `safety-layer.server.ts` (expand to full list: role-swap, tool-hijack, exfiltration)
-- Tool permission — `capability-registry` gate `can_call_tools`, per-tool policy via `tool-registry`
-- Agent isolation — Kernel is single orchestrator; no agent→agent direct paths
-- Budget — `budget-engine` enforced pre-flight + settled post-flight
-- Human Approval — `PolicyRule.require: ['human_approval']` supported; no queue UI yet (gap)
-- Decision Records — `air_kernel_calls`, `air_runs`, `air_evaluations` immutable inserts
+### 4. Nonce deferral — engineering rationale
+Per-request `script-src 'nonce-<value>'` is the correct end state but is deferred
+until it can be shipped correctly. Reasons:
 
-**Known gaps to fix in a later shipment:** Approval queue UI + admin action to release/deny; expanded prompt-injection corpus; per-org tool allowlist override.
+1. **Framework plumbing.** TanStack Start's `<Scripts />` component renders the
+   SSR hydration bundle tags automatically. It does not currently expose a
+   documented per-request `nonce` prop that survives hydration without a script
+   attribute mismatch.
+2. **Hydration mismatch.** A nonce injected only at SSR would render one set of
+   `<script nonce="…">` tags server-side and a different (nonce-less) DOM
+   client-side, tripping React's hydration warning on every navigation.
+3. **`'unsafe-inline'` is inert under Report-Only.** The current policy does not
+   block anything; leaving `script-src 'self' 'unsafe-inline'` in place while
+   the rest of the policy tightens is safe.
 
-## Phase 3 — Database security posture
-Recent hardening (already shipped):
-- `hc_doctors`/`pn_pharmacies` self-verify blocked via triggers
-- `reviews` self-approve blocked
-- `organization_members` self-insert blocked
-- 156 SECURITY DEFINER functions locked with `search_path=public` + revoked `EXECUTE` from `PUBLIC`
-- 43 privileged functions revoked from `anon`
+**Path forward** (recorded, not shipped):
+- Option A — wait for framework-level nonce support in `<Scripts>`.
+- Option B — swap to hash-based `script-src` for the small number of inline
+  bootstrap scripts once we have a stable hash inventory.
+- Option C — Trusted Types (`require-trusted-types-for 'script'`) as a
+  compensating control; requires refactoring any DOM sinks (`innerHTML`,
+  `document.write`) — audit needed first.
 
-**Standing rules for future migrations** (already in constitution):
-- Every new `public.*` table → GRANT block + RLS enable + policies in the same migration
-- Tenant isolation: all mutation policies must scope by `organization_id` (use `has_role` for admin bypass)
-- No `USING (true)` policies in `public` schema
+We will not flip CSP from Report-Only to enforce until one of the three ships.
 
-## Phase 4 — API security
-- Rate limiting: backend has no primitive yet (documented). Ad-hoc IP-hash cooldowns on high-risk public endpoints already shipped (`public-endpoint-guard.server.ts`).
-- Payload limits: enforced on `doctor-join`, `contact`, `social-callback`
-- Validation: Zod at every `createServerFn().inputValidator()` boundary (verified across `src/lib/*.functions.ts`)
-- Idempotency: `idempotency-keys` table + `idempotency.server.ts` — applied to dispensing, purchasing, insurance claim submission
-- Replay protection: webhook endpoints use HMAC via `cron-auth.ts` (34 routes migrated)
-- Error sanitization: `classifyError` returns UI-safe copy; raw provider errors never surfaced
+### 5. Trusted Types
+Deferred. Recommend evaluating during Wave C.5 penetration audit; enabling it
+now (`require-trusted-types-for 'script'`) would break any third-party or
+generated code that assigns to `innerHTML`. No inventory of such sinks exists
+yet — audit first, enable second.
 
-## Wave C.5 — Enterprise Penetration Audit (report-only, no code)
-Deferred to next shipment. Will cover OWASP Top 10 + AI-specific abuse
-(prompt injection corpus, tool abuse, agent escape, secret leakage,
-supply-chain via `bun.lock` audit, tenant isolation red-team).
-
-## Files changed
-- `src/lib/security/headers.server.ts` — NEW
-- `src/start.ts` — registered `requestMiddleware`
-- `docs/engineering/WAVE-C-SECURITY-HARDENING.md` — NEW (this file)
-
-## Verification checklist
-- [ ] After next deploy, open DevTools → Network → any request → check response headers include `Content-Security-Policy-Report-Only`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `Strict-Transport-Security`.
-- [ ] Open DevTools → Console; navigate the app 5 min; capture any `[Report Only] Refused to load ...` lines → add source to CSP allowlist.
-- [ ] Confirm existing flows (auth, catalog, dispense, campaigns) render without regression — Report-Only cannot break them, but this validates no other middleware side-effect.
-- [ ] After 1 week of clean reports, switch header name to `Content-Security-Policy` (enforce mode).
+## Verification checklist (Phase 1.5)
+- [ ] After deploy: request any page → response includes `Content-Security-Policy-Report-Only`
+      with `report-uri /api/public/csp-report`, and `Report-To` JSON header.
+- [ ] Trigger a violation (e.g. inject `<img src="https://evil.example/1.png">` in DevTools
+      console) → verify a POST to `/api/public/csp-report` is fired, and server-function
+      logs contain a `[csp-report]` entry.
+- [ ] Navigate the app for a full session (auth → catalog → dispenses → campaigns → analytics);
+      DevTools Console should show zero `Refused to …` messages related to legitimate assets.
+      Any that appear → widen `THIRD_PARTY_HOSTS`, redeploy, re-verify.
 
 ## Regression risk
-- **Zero enforced changes.** CSP is Report-Only; other headers are additive and
-  match modern browser expectations. `X-Frame-Options: DENY` is the only
-  behavioral change — the app is not intended to be embedded in third-party
-  iframes, so this is safe.
+- **Zero enforced behavior change.** CSP remains Report-Only.
+- New public route `/api/public/csp-report` accepts POST only; body-capped; no
+  side effects beyond `console.warn`. Safe.
+
+## Files changed (Phase 1.5)
+- `src/lib/security/headers.server.ts` — tightened directives, added `report-to`/`report-uri`.
+- `src/routes/api/public/csp-report.ts` — NEW report sink.
+- `docs/engineering/WAVE-C-SECURITY-HARDENING.md` — updated (this file).
+
+## Constitution amendment — adopted
+> **No automatic fixes during security audits.**
+> During Wave C.5 and any future audit-scoped shipment, the agent must not
+> modify code as a side-effect of finding an issue. Deliverables are:
+> (a) evidence, (b) severity, (c) affected files, (d) proposed fix,
+> (e) regression analysis, (f) verification steps. Fixes ship only after
+> explicit `GO` in a follow-up turn.
+
+Add this to `docs/engineering/CONSTITUTION-v10.md` on next constitution revision.
+
+## Next: Wave C.5 — Enterprise Penetration Audit
+Report-only shipment covering:
+- Web: XSS, CSRF, Clickjacking, CSP bypass, Open Redirect, CORS, Session Fixation, Cookie Security
+- API: AuthN/AuthZ, Rate Limiting, Replay, Validation, Payload Limits
+- AI: Prompt Injection, Tool Injection, Agent Priv-Esc, Budget Bypass, Approval Queue Bypass, Decision Record Tampering
+- Database: RLS, SECURITY DEFINER, Tenant Isolation, RPC Exposure
+- Supply Chain: Dependencies, Secrets, Env Vars, Build Artifacts
+
+Await `GO` before starting.
