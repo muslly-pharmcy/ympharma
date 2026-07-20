@@ -1349,30 +1349,297 @@ export type Database = {
           },
         ]
       }
-      air_prompts: {
+      air_budgets: {
+        Row: {
+          consumed_cost_cents: number
+          consumed_tokens: number
+          cost_limit_cents: number | null
+          created_at: string
+          id: string
+          is_active: boolean
+          latency_ms_limit: number | null
+          organization_id: string
+          period: string
+          scope: string
+          token_limit: number | null
+          updated_at: string
+          window_start: string
+        }
+        Insert: {
+          consumed_cost_cents?: number
+          consumed_tokens?: number
+          cost_limit_cents?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          latency_ms_limit?: number | null
+          organization_id: string
+          period: string
+          scope: string
+          token_limit?: number | null
+          updated_at?: string
+          window_start?: string
+        }
+        Update: {
+          consumed_cost_cents?: number
+          consumed_tokens?: number
+          cost_limit_cents?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          latency_ms_limit?: number | null
+          organization_id?: string
+          period?: string
+          scope?: string
+          token_limit?: number | null
+          updated_at?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
+      air_capabilities: {
+        Row: {
+          agent_key: string
+          allowed_domains: string[]
+          can_approve: boolean
+          can_call_tools: boolean
+          can_execute: boolean
+          can_learn: boolean
+          can_read: boolean
+          can_write: boolean
+          created_at: string
+          id: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          agent_key: string
+          allowed_domains?: string[]
+          can_approve?: boolean
+          can_call_tools?: boolean
+          can_execute?: boolean
+          can_learn?: boolean
+          can_read?: boolean
+          can_write?: boolean
+          created_at?: string
+          id?: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          agent_key?: string
+          allowed_domains?: string[]
+          can_approve?: boolean
+          can_call_tools?: boolean
+          can_execute?: boolean
+          can_learn?: boolean
+          can_read?: boolean
+          can_write?: boolean
+          created_at?: string
+          id?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      air_evaluations: {
+        Row: {
+          cost_cents: number | null
+          created_at: string
+          feedback: Json
+          id: string
+          latency_ms: number | null
+          organization_id: string
+          quality: number | null
+          retries: number
+          run_id: string
+          success: boolean
+        }
+        Insert: {
+          cost_cents?: number | null
+          created_at?: string
+          feedback?: Json
+          id?: string
+          latency_ms?: number | null
+          organization_id: string
+          quality?: number | null
+          retries?: number
+          run_id: string
+          success?: boolean
+        }
+        Update: {
+          cost_cents?: number | null
+          created_at?: string
+          feedback?: Json
+          id?: string
+          latency_ms?: number | null
+          organization_id?: string
+          quality?: number | null
+          retries?: number
+          run_id?: string
+          success?: boolean
+        }
+        Relationships: []
+      }
+      air_kernel_calls: {
+        Row: {
+          allowed: boolean
+          correlation_id: string | null
+          created_at: string
+          decision: Json
+          denied_reason: string | null
+          from_agent: string | null
+          id: string
+          organization_id: string
+          policy_key: string | null
+          purpose: string
+          to_agent: string
+        }
+        Insert: {
+          allowed: boolean
+          correlation_id?: string | null
+          created_at?: string
+          decision?: Json
+          denied_reason?: string | null
+          from_agent?: string | null
+          id?: string
+          organization_id: string
+          policy_key?: string | null
+          purpose: string
+          to_agent: string
+        }
+        Update: {
+          allowed?: boolean
+          correlation_id?: string | null
+          created_at?: string
+          decision?: Json
+          denied_reason?: string | null
+          from_agent?: string | null
+          id?: string
+          organization_id?: string
+          policy_key?: string | null
+          purpose?: string
+          to_agent?: string
+        }
+        Relationships: []
+      }
+      air_memory_layers: {
+        Row: {
+          agent_key: string
+          content: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          importance: number
+          key: string | null
+          layer: string
+          organization_id: string
+        }
+        Insert: {
+          agent_key: string
+          content: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          importance?: number
+          key?: string | null
+          layer: string
+          organization_id: string
+        }
+        Update: {
+          agent_key?: string
+          content?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          importance?: number
+          key?: string | null
+          layer?: string
+          organization_id?: string
+        }
+        Relationships: []
+      }
+      air_policies: {
         Row: {
           created_at: string
+          id: string
+          is_active: boolean
+          key: string
+          organization_id: string
+          priority: number
+          rule: Json
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          key: string
+          organization_id: string
+          priority?: number
+          rule: Json
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          key?: string
+          organization_id?: string
+          priority?: number
+          rule?: Json
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      air_prompts: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
           description: string | null
+          evaluation_score: number | null
+          guardrails: Json
           key: string
           metadata: Json
+          output_schema: Json | null
+          rollback_version: number | null
+          status: string
           system_prompt: string
           updated_at: string
           version: number
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string
           description?: string | null
+          evaluation_score?: number | null
+          guardrails?: Json
           key: string
           metadata?: Json
+          output_schema?: Json | null
+          rollback_version?: number | null
+          status?: string
           system_prompt: string
           updated_at?: string
           version?: number
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string
           description?: string | null
+          evaluation_score?: number | null
+          guardrails?: Json
           key?: string
           metadata?: Json
+          output_schema?: Json | null
+          rollback_version?: number | null
+          status?: string
           system_prompt?: string
           updated_at?: string
           version?: number
