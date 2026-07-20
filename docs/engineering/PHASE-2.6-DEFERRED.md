@@ -24,3 +24,23 @@ audit finding until Phase 2.6 is scoped and executed.
 - RLS-enforced org isolation on every table touched by the mutation set.
 
 Rate limiting and CSRF are Phase 2.6. This document is the record.
+
+## Phase 2.5 delivered
+
+- Real Supabase-backed `getActor()` with JWT validation + org membership hydration
+- `_authenticated/` route gate (ssr:false, redirect to /auth)
+- `/auth` sign-in/sign-up/forgot-password + `/reset-password` pages
+- Root `onAuthStateChange` subscriber → router.invalidate() + query invalidate (SIGNED_IN/OUT/USER_UPDATED only)
+- Navbar signed-in/signed-out affordances + 4-step sign-out hygiene
+- `attachSupabaseAuth` bearer middleware wired in `src/start.ts`
+- `audit_events` table + `audit()` helper called after every mutation
+- RBAC permission matrix (`requirePermission`) enforced on 18 mutation server fns
+- Supabase auth: signup enabled, anonymous disabled, auto-confirm off, HIBP on
+
+## Still deferred to Phase 2.6
+
+- Rate limiting, CSRF (N/A with bearer), replay protection at edge, secure-headers middleware
+- E2E test with real signed-in session (recommend: dedicated test project)
+- Google OAuth (Supabase provider config + `lovable.auth.signInWithOAuth`)
+- Multi-org / branch switcher UI (session picks first active membership)
+- Session revocation UI (Supabase manages TTL + refresh)
