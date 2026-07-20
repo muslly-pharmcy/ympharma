@@ -11,7 +11,7 @@ export interface Patient {
   blood_type: string | null
   is_active: boolean
   merged_into_id: string | null
-  metadata: Record<string, unknown>
+  metadata: Record<string, string | number | boolean | null>
   created_at: string
   updated_at: string
 }
