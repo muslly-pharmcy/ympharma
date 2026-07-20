@@ -1,39 +1,16 @@
-import { createFileRoute, Link, notFound } from '@tanstack/react-router'
-import { useQuery, queryOptions } from '@tanstack/react-query'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
 import { getProduct } from '@/lib/catalog.functions'
 import { getStockSummary } from '@/lib/inventory.functions'
 import { ArrowRight, Package } from 'lucide-react'
-
-const productQuery = (id: string) =>
-  queryOptions({
-    queryKey: ['catalog', 'product', id],
-    queryFn: () => getProduct({ data: { id } }),
-  })
-
-const stockQuery = (id: string) =>
-  queryOptions({
-    queryKey: ['inventory', 'stock-summary', id],
-    queryFn: () => getStockSummary({ data: { productId: id } }),
-  })
+import type { CatalogBarcode } from '@/domain/catalog/schemas'
 
 export const Route = createFileRoute('/catalog/$productId')({
-  loader: async ({ context, params }) => {
-    const product = await context.queryClient.ensureQueryData(productQuery(params.productId))
-    if (!product) throw notFound()
-    void context.queryClient.ensureQueryData(stockQuery(params.productId))
-    return product
-  },
-  head: ({ loaderData }) => ({
-    meta: loaderData
-      ? [
-          { title: `${loaderData.product.name_ar} — MUSLLY AI OS` },
-          {
-            name: 'description',
-            content:
-              loaderData.product.description_ar ?? `تفاصيل ${loaderData.product.name_ar}`,
-          },
-        ]
-      : [{ title: 'المنتج غير موجود' }],
+  head: () => ({
+    meta: [
+      { title: 'تفاصيل المنتج — MUSLLY AI OS' },
+      { name: 'description', content: 'تفاصيل المنتج والمخزون والباركود.' },
+    ],
   }),
   component: ProductDetail,
   errorComponent: ({ error }) => (
@@ -42,7 +19,7 @@ export const Route = createFileRoute('/catalog/$productId')({
   notFoundComponent: () => (
     <div className="p-8 text-center">
       <p className="mb-4">المنتج غير موجود.</p>
-      <Link to="/catalog" className="text-primary underline">
+      <Link to="/catalog" search={{ page: 1 }} className="text-primary underline">
         العودة للكتالوج
       </Link>
     </div>
@@ -51,15 +28,36 @@ export const Route = createFileRoute('/catalog/$productId')({
 
 function ProductDetail() {
   const params = Route.useParams()
-  const { data } = useQuery(productQuery(params.productId))
-  const { data: stock } = useQuery(stockQuery(params.productId))
+  const { data, isLoading } = useQuery({
+    queryKey: ['catalog', 'product', params.productId],
+    queryFn: () => getProduct({ data: { id: params.productId } }),
+  })
+  const { data: stock } = useQuery({
+    queryKey: ['inventory', 'stock-summary', params.productId],
+    queryFn: () => getStockSummary({ data: { productId: params.productId } }),
+  })
 
-  if (!data) return null
+  if (isLoading) return <div className="p-8 text-center">جاري التحميل...</div>
+  if (!data) {
+    return (
+      <div className="p-8 text-center">
+        <p className="mb-4">المنتج غير موجود.</p>
+        <Link to="/catalog" search={{ page: 1 }} className="text-primary underline">
+          العودة للكتالوج
+        </Link>
+      </div>
+    )
+  }
   const { product, barcodes, media } = data
+  const barcodeRows = barcodes as unknown as CatalogBarcode[]
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-6">
-      <Link to="/catalog" className="flex items-center gap-2 text-sm text-primary">
+      <Link
+        to="/catalog"
+        search={{ page: 1 }}
+        className="flex items-center gap-2 text-sm text-primary"
+      >
         <ArrowRight className="h-4 w-4" />
         العودة للكتالوج
       </Link>
@@ -71,7 +69,9 @@ function ProductDetail() {
           </div>
           <div className="flex-1 space-y-2">
             <h1 className="text-2xl font-bold">{product.name_ar}</h1>
-            {product.name_en && <p className="text-sm text-muted-foreground">{product.name_en}</p>}
+            {product.name_en && (
+              <p className="text-sm text-muted-foreground">{product.name_en}</p>
+            )}
             <div className="flex flex-wrap gap-2 pt-2">
               {product.brand && (
                 <span className="rounded-full bg-primary/10 px-3 py-1 text-xs text-primary">
@@ -107,19 +107,22 @@ function ProductDetail() {
       {product.description_ar && (
         <section className="glass-panel rounded-2xl p-6">
           <h2 className="mb-3 text-lg font-semibold">الوصف</h2>
-          <p className="whitespace-pre-line text-sm text-gray-700">{product.description_ar}</p>
+          <p className="whitespace-pre-line text-sm text-gray-700">
+            {product.description_ar}
+          </p>
         </section>
       )}
 
       <section className="glass-panel rounded-2xl p-6">
         <h2 className="mb-3 text-lg font-semibold">الباركود</h2>
-        {barcodes.length === 0 ? (
+        {barcodeRows.length === 0 ? (
           <p className="text-sm text-muted-foreground">لا يوجد باركود مسجّل.</p>
         ) : (
           <ul className="space-y-1 text-sm">
-            {barcodes.map((b) => (
+            {barcodeRows.map((b) => (
               <li key={b.id} className="font-mono">
-                {b.barcode} {b.is_primary && <span className="text-xs text-primary">(أساسي)</span>}
+                {b.barcode}{' '}
+                {b.is_primary && <span className="text-xs text-primary">(أساسي)</span>}
               </li>
             ))}
           </ul>

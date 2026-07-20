@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
-import { useQuery, queryOptions } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { listProducts, listCategories } from '@/lib/catalog.functions'
 import { Package, Search } from 'lucide-react'
 import { z } from 'zod'
@@ -11,34 +11,8 @@ const searchSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
 })
 
-const productsQuery = (search: z.infer<typeof searchSchema>) =>
-  queryOptions({
-    queryKey: ['catalog', 'products', search],
-    queryFn: () =>
-      listProducts({
-        data: {
-          search: search.q,
-          categoryId: search.cat,
-          page: search.page,
-          pageSize: 24,
-          publicOnly: true,
-        },
-      }),
-  })
-
-const categoriesQuery = queryOptions({
-  queryKey: ['catalog', 'categories'],
-  queryFn: () => listCategories(),
-})
-
 export const Route = createFileRoute('/catalog/')({
   validateSearch: (raw) => searchSchema.parse(raw),
-  loaderDeps: ({ search }) => search,
-  loader: ({ context, deps }) =>
-    Promise.all([
-      context.queryClient.ensureQueryData(productsQuery(deps)),
-      context.queryClient.ensureQueryData(categoriesQuery),
-    ]),
   head: () => ({
     meta: [
       { title: 'كتالوج المنتجات — MUSLLY AI OS' },
@@ -56,15 +30,38 @@ export const Route = createFileRoute('/catalog/')({
 
 function CatalogPage() {
   const search = Route.useSearch()
-  const navigate = useNavigate({ from: '/catalog' })
+  const navigate = useNavigate()
   const [q, setQ] = useState(search.q ?? '')
 
-  const { data, isFetching } = useQuery(productsQuery(search))
-  const { data: categories = [] } = useQuery(categoriesQuery)
+  const { data, isFetching } = useQuery({
+    queryKey: ['catalog', 'products', search],
+    queryFn: () =>
+      listProducts({
+        data: {
+          search: search.q,
+          categoryId: search.cat,
+          page: search.page,
+          pageSize: 24,
+          publicOnly: true,
+        },
+      }),
+  })
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ['catalog', 'categories'],
+    queryFn: () => listCategories(),
+  })
 
   const products = data?.items ?? []
   const total = data?.total ?? 0
   const pages = Math.max(1, Math.ceil(total / 24))
+
+  const setSearch = (patch: Partial<z.infer<typeof searchSchema>>) => {
+    void navigate({
+      to: '/catalog',
+      search: { ...search, ...patch },
+    })
+  }
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
@@ -78,7 +75,7 @@ function CatalogPage() {
       <form
         onSubmit={(e) => {
           e.preventDefault()
-          void navigate({ search: (prev) => ({ ...prev, q: q || undefined, page: 1 }) })
+          setSearch({ q: q || undefined, page: 1 })
         }}
         className="glass-panel flex flex-col gap-3 rounded-2xl p-4 sm:flex-row"
       >
@@ -93,11 +90,7 @@ function CatalogPage() {
         </div>
         <select
           value={search.cat ?? ''}
-          onChange={(e) =>
-            void navigate({
-              search: (prev) => ({ ...prev, cat: e.target.value || undefined, page: 1 }),
-            })
-          }
+          onChange={(e) => setSearch({ cat: e.target.value || undefined, page: 1 })}
           className="rounded-xl border border-gray-200 bg-white px-3 py-2.5"
         >
           <option value="">كل الفئات</option>
@@ -152,7 +145,7 @@ function CatalogPage() {
           {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
             <button
               key={p}
-              onClick={() => void navigate({ search: (prev) => ({ ...prev, page: p }) })}
+              onClick={() => setSearch({ page: p })}
               className={`rounded-lg px-3 py-1.5 text-sm ${
                 p === search.page
                   ? 'bg-primary text-white'

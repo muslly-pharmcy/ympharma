@@ -1,15 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useQuery, queryOptions } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { listSuppliers } from '@/lib/suppliers.functions'
 import { Building2 } from 'lucide-react'
 
-const q = queryOptions({
-  queryKey: ['suppliers', 'list'],
-  queryFn: () => listSuppliers(),
-})
-
 export const Route = createFileRoute('/suppliers')({
-  loader: ({ context }) => context.queryClient.ensureQueryData(q),
   head: () => ({
     meta: [
       { title: 'الموردون — MUSLLY AI OS' },
@@ -24,7 +18,10 @@ export const Route = createFileRoute('/suppliers')({
 })
 
 function SuppliersPage() {
-  const { data: suppliers = [] } = useQuery(q)
+  const { data: suppliers = [] } = useQuery({
+    queryKey: ['suppliers', 'list'],
+    queryFn: () => listSuppliers(),
+  })
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-6">
       <h1 className="text-3xl font-bold">الموردون</h1>

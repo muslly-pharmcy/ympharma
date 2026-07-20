@@ -1,15 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useQuery, queryOptions } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { listWarehouses } from '@/lib/inventory.functions'
 import { Warehouse as WarehouseIcon } from 'lucide-react'
 
-const q = queryOptions({
-  queryKey: ['inventory', 'warehouses'],
-  queryFn: () => listWarehouses(),
-})
-
 export const Route = createFileRoute('/warehouses')({
-  loader: ({ context }) => context.queryClient.ensureQueryData(q),
   head: () => ({
     meta: [
       { title: 'المستودعات — MUSLLY AI OS' },
@@ -24,7 +18,10 @@ export const Route = createFileRoute('/warehouses')({
 })
 
 function WarehousesPage() {
-  const { data: warehouses = [] } = useQuery(q)
+  const { data: warehouses = [] } = useQuery({
+    queryKey: ['inventory', 'warehouses'],
+    queryFn: () => listWarehouses(),
+  })
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-6">
       <h1 className="text-3xl font-bold">المستودعات</h1>
@@ -51,9 +48,7 @@ function WarehousesPage() {
                 </div>
               </div>
               <p className="text-xs text-muted-foreground">النوع: {w.kind}</p>
-              {w.address && (
-                <p className="mt-1 text-xs text-muted-foreground">{w.address}</p>
-              )}
+              {w.address && <p className="mt-1 text-xs text-muted-foreground">{w.address}</p>}
             </div>
           ))}
         </div>
