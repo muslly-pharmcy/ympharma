@@ -46,6 +46,7 @@ import { Route as AuthenticatedPrescriptionsPrescriptionIdRouteImport } from './
 import { Route as AuthenticatedPromotionsIndexRouteImport } from './routes/_authenticated/promotions.index'
 import { Route as AuthenticatedPromotionsIdRouteImport } from './routes/_authenticated/promotions.$id'
 import { Route as AuthenticatedPurchaseOrdersIdRouteImport } from './routes/_authenticated/purchase-orders.$id'
+import { Route as ApiPublicCspReportRouteImport } from './routes/api/public/csp-report'
 import { Route as AuthenticatedInsuranceClaimsClaimIdRouteImport } from './routes/_authenticated/insurance.claims_.$claimId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -250,6 +251,11 @@ const AuthenticatedPurchaseOrdersIdRoute =
     path: '/$id',
     getParentRoute: () => AuthenticatedPurchaseOrdersRoute,
   } as any)
+const ApiPublicCspReportRoute = ApiPublicCspReportRouteImport.update({
+  id: '/api/public/csp-report',
+  path: '/api/public/csp-report',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedInsuranceClaimsClaimIdRoute =
   AuthenticatedInsuranceClaimsClaimIdRouteImport.update({
     id: '/insurance/claims_/$claimId',
@@ -290,6 +296,7 @@ export interface FileRoutesByFullPath {
   '/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/promotions/$id': typeof AuthenticatedPromotionsIdRoute
   '/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
+  '/api/public/csp-report': typeof ApiPublicCspReportRoute
   '/analytics/': typeof AuthenticatedAnalyticsIndexRoute
   '/catalog/': typeof AuthenticatedCatalogIndexRoute
   '/insurance/': typeof AuthenticatedInsuranceIndexRoute
@@ -329,6 +336,7 @@ export interface FileRoutesByTo {
   '/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/promotions/$id': typeof AuthenticatedPromotionsIdRoute
   '/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
+  '/api/public/csp-report': typeof ApiPublicCspReportRoute
   '/analytics': typeof AuthenticatedAnalyticsIndexRoute
   '/catalog': typeof AuthenticatedCatalogIndexRoute
   '/insurance': typeof AuthenticatedInsuranceIndexRoute
@@ -370,6 +378,7 @@ export interface FileRoutesById {
   '/_authenticated/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/_authenticated/promotions/$id': typeof AuthenticatedPromotionsIdRoute
   '/_authenticated/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
+  '/api/public/csp-report': typeof ApiPublicCspReportRoute
   '/_authenticated/analytics/': typeof AuthenticatedAnalyticsIndexRoute
   '/_authenticated/catalog/': typeof AuthenticatedCatalogIndexRoute
   '/_authenticated/insurance/': typeof AuthenticatedInsuranceIndexRoute
@@ -411,6 +420,7 @@ export interface FileRouteTypes {
     | '/prescriptions/$prescriptionId'
     | '/promotions/$id'
     | '/purchase-orders/$id'
+    | '/api/public/csp-report'
     | '/analytics/'
     | '/catalog/'
     | '/insurance/'
@@ -450,6 +460,7 @@ export interface FileRouteTypes {
     | '/prescriptions/$prescriptionId'
     | '/promotions/$id'
     | '/purchase-orders/$id'
+    | '/api/public/csp-report'
     | '/analytics'
     | '/catalog'
     | '/insurance'
@@ -490,6 +501,7 @@ export interface FileRouteTypes {
     | '/_authenticated/prescriptions/$prescriptionId'
     | '/_authenticated/promotions/$id'
     | '/_authenticated/purchase-orders/$id'
+    | '/api/public/csp-report'
     | '/_authenticated/analytics/'
     | '/_authenticated/catalog/'
     | '/_authenticated/insurance/'
@@ -505,6 +517,7 @@ export interface RootRouteChildren {
   MissionControlRoute: typeof MissionControlRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   PlanetPlanetIdRoute: typeof PlanetPlanetIdRoute
+  ApiPublicCspReportRoute: typeof ApiPublicCspReportRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -768,6 +781,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPurchaseOrdersIdRouteImport
       parentRoute: typeof AuthenticatedPurchaseOrdersRoute
     }
+    '/api/public/csp-report': {
+      id: '/api/public/csp-report'
+      path: '/api/public/csp-report'
+      fullPath: '/api/public/csp-report'
+      preLoaderRoute: typeof ApiPublicCspReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/insurance/claims_/$claimId': {
       id: '/_authenticated/insurance/claims_/$claimId'
       path: '/insurance/claims/$claimId'
@@ -951,6 +971,7 @@ const rootRouteChildren: RootRouteChildren = {
   MissionControlRoute: MissionControlRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   PlanetPlanetIdRoute: PlanetPlanetIdRoute,
+  ApiPublicCspReportRoute: ApiPublicCspReportRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
