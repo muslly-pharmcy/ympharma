@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AiChatRouteImport } from './routes/ai-chat'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MissionControlRouteImport } from './routes/mission-control'
+import { Route as PlanetPlanetIdRouteImport } from './routes/planet.$planetId'
 import { Route as PlanetsIdRouteImport } from './routes/planets.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -35,6 +36,11 @@ const MissionControlRoute = MissionControlRouteImport.update({
   path: '/mission-control',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlanetPlanetIdRoute = PlanetPlanetIdRouteImport.update({
+  id: '/planet/$planetId',
+  path: '/planet/$planetId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlanetsIdRoute = PlanetsIdRouteImport.update({
   id: '/planets/$id',
   path: '/planets/$id',
@@ -46,6 +52,7 @@ export interface FileRoutesByFullPath {
   '/ai-chat': typeof AiChatRoute
   '/login': typeof LoginRoute
   '/mission-control': typeof MissionControlRoute
+  '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/planets/$id': typeof PlanetsIdRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +60,7 @@ export interface FileRoutesByTo {
   '/ai-chat': typeof AiChatRoute
   '/login': typeof LoginRoute
   '/mission-control': typeof MissionControlRoute
+  '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/planets/$id': typeof PlanetsIdRoute
 }
 export interface FileRoutesById {
@@ -61,19 +69,33 @@ export interface FileRoutesById {
   '/ai-chat': typeof AiChatRoute
   '/login': typeof LoginRoute
   '/mission-control': typeof MissionControlRoute
+  '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/planets/$id': typeof PlanetsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/ai-chat' | '/login' | '/mission-control' | '/planets/$id'
+  fullPaths:
+    | '/'
+    | '/ai-chat'
+    | '/login'
+    | '/mission-control'
+    | '/planet/$planetId'
+    | '/planets/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/ai-chat' | '/login' | '/mission-control' | '/planets/$id'
+  to:
+    | '/'
+    | '/ai-chat'
+    | '/login'
+    | '/mission-control'
+    | '/planet/$planetId'
+    | '/planets/$id'
   id:
     | '__root__'
     | '/'
     | '/ai-chat'
     | '/login'
     | '/mission-control'
+    | '/planet/$planetId'
     | '/planets/$id'
   fileRoutesById: FileRoutesById
 }
@@ -82,6 +104,7 @@ export interface RootRouteChildren {
   AiChatRoute: typeof AiChatRoute
   LoginRoute: typeof LoginRoute
   MissionControlRoute: typeof MissionControlRoute
+  PlanetPlanetIdRoute: typeof PlanetPlanetIdRoute
   PlanetsIdRoute: typeof PlanetsIdRoute
 }
 
@@ -115,6 +138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionControlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/planet/$planetId': {
+      id: '/planet/$planetId'
+      path: '/planet/$planetId'
+      fullPath: '/planet/$planetId'
+      preLoaderRoute: typeof PlanetPlanetIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/planets/$id': {
       id: '/planets/$id'
       path: '/planets/$id'
@@ -130,6 +160,7 @@ const rootRouteChildren: RootRouteChildren = {
   AiChatRoute: AiChatRoute,
   LoginRoute: LoginRoute,
   MissionControlRoute: MissionControlRoute,
+  PlanetPlanetIdRoute: PlanetPlanetIdRoute,
   PlanetsIdRoute: PlanetsIdRoute,
 }
 export const routeTree = rootRouteImport
