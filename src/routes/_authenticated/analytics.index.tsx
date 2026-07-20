@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
 import { Suspense } from 'react'
+import { ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts'
 import {
   getExecutiveKpis, getDispensesSeries, getCustomersGrowth,
   getCampaignsSummary, getInventoryHealth, getAiUsage,
