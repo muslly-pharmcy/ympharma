@@ -118,27 +118,24 @@ function Card({ title, action, children }: { title: string; action?: React.React
 
 function ChartSkeleton() { return <div className="h-56 animate-pulse rounded-xl bg-white/5" /> }
 
-// Lazy-render recharts on the client only. Import inside the component to keep SSR clean.
 function LineChartLazy({ data, color }: { data: SeriesPoint[]; color: string }) {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const R = require('recharts') as typeof import('recharts')
   return (
     <div className="h-56 w-full">
-      <R.ResponsiveContainer width="100%" height="100%">
-        <R.AreaChart data={data} margin={{ left: 0, right: 8, top: 8, bottom: 0 }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={data} margin={{ left: 0, right: 8, top: 8, bottom: 0 }}>
           <defs>
             <linearGradient id={`g-${color}`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={color} stopOpacity={0.35} />
               <stop offset="100%" stopColor={color} stopOpacity={0} />
             </linearGradient>
           </defs>
-          <R.CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-          <R.XAxis dataKey="date" tick={{ fill: '#94a3b8', fontSize: 11 }} tickFormatter={(v: string) => v.slice(5)} />
-          <R.YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} width={30} allowDecimals={false} />
-          <R.Tooltip contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#e2e8f0' }} />
-          <R.Area type="monotone" dataKey="value" stroke={color} fill={`url(#g-${color})`} strokeWidth={2} />
-        </R.AreaChart>
-      </R.ResponsiveContainer>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+          <XAxis dataKey="date" tick={{ fill: '#94a3b8', fontSize: 11 }} tickFormatter={(v: string) => v.slice(5)} />
+          <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} width={30} allowDecimals={false} />
+          <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#e2e8f0' }} />
+          <Area type="monotone" dataKey="value" stroke={color} fill={`url(#g-${color})`} strokeWidth={2} />
+        </AreaChart>
+      </ResponsiveContainer>
     </div>
   )
 }
