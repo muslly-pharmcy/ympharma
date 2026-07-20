@@ -41,3 +41,73 @@ Root cause isolated to **deployment configuration** (H1). No application code ch
 ### Notes / follow-up backlog (do not fix in R0.1)
 
 - `client.ts:33-34` has a `process.env.*` fallback that is dead code in the browser bundle. Vite does not replace `process.env.SUPABASE_URL` for the client target, and there is no polyfill; the expression evaluates to `undefined`. Removing it would make the intent explicit but is **out of scope for R0.1** (would violate Rule 2 — one root cause per commit). File as a P3 cleanup ticket under Wave C.7 backlog.
+
+---
+
+## R0.2 — F-03 Public endpoint guard consolidation
+
+**Date:** 2026-07-20
+**Standalone commit:** yes (single root cause per Rule 2)
+**Constitutional rule invoked:** Rule 2 (One root cause per commit) + Rule 3 (Regression gate).
+
+### Root cause
+
+`/api/public/*` endpoints implemented their own body-size handling and had
+no shared rate limit, content-type allowlist, method allowlist, or
+correlation id. Only `csp-report` existed today, but any new public POST
+would inherit the same divergence.
+
+### Change scope
+
+- **New:** `src/lib/security/public-endpoint-guard.server.ts` — single
+  `guardPublicRequest(request, opts)` primitive enforcing:
+  1. Method allowlist (default `POST`).
+  2. Content-type prefix allowlist (default JSON + CSP report).
+  3. Body cap by both `content-length` header and read length (default 16 KB).
+  4. Per-IP sliding-window rate limit (default 30 / 60 s). IP is
+     SHA-256 hashed before use — raw IPs never touch logs.
+  5. Correlation id (`pub_…`) surfaced on every response via
+     `x-correlation-id` and in the structured admission log.
+- **Wired:** `src/routes/api/public/csp-report.ts` now delegates to the
+  guard (window kept at 60 s but ceiling raised to 120 to absorb bursty
+  browser reports during bad deploys).
+- **Tests:** `tests/public-endpoint-guard.test.ts` (5 cases):
+  accept-happy-path, 405 wrong method, 415 wrong content-type,
+  413 oversized declared body, 429 after rate-limit exhaustion with
+  `retry-after` header.
+
+### Verification
+
+- [x] `bunx vitest run tests/public-endpoint-guard.test.ts` → 5/5 pass.
+- [x] Full suite regression: 88/88 previously green tests still pass
+      after the guard lands (checked earlier in this shipment).
+- [x] `csp-report` response contract unchanged (still `204` on success);
+      only the failure envelope is new and only fires for abusive callers.
+- [ ] Post-rebuild smoke against preview (blocked on R0.1 rebuild):
+      POST 121× to `/api/public/csp-report` from same IP → observe 429
+      with `retry-after` and matching `x-correlation-id`.
+
+### Scope discipline
+
+- No F-01 or F-02 changes rode along. F-01 stays deployment-only.
+- Auth-less inventory functions (F-07) and `.env.example` (F-06) are
+  separate root causes and remain open in the release gate.
+- In-memory rate-limit store is intentional for R0.2; a shared KV / Redis
+  store is filed as a P2 follow-up under Wave C.7 backlog (not a blocker
+  for the current single Worker deploy topology).
+
+### Protected surface after R0.2
+
+| Route | Guarded | Notes |
+|---|---|---|
+| `POST /api/public/csp-report` | ✅ | 120 req / 60 s / ip-hash, 16 KB cap |
+
+No other `/api/public/*` routes exist today; the guard is the mandatory
+entry point for any future addition (documented in the module header).
+
+### Result
+
+F-03 root cause closed: the guard is implemented, wired, and tested.
+Status held at 🟢 **Guard shipped · pending post-rebuild smoke** until
+the R0.1 rebuild lets us execute the live 429 verification. Only then
+does F-03 move to ✅ Resolved.
