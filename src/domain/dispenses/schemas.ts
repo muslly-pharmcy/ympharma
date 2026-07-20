@@ -29,7 +29,7 @@ export interface DispenseItem {
   qty_requested: number
   qty_dispensed: number
   reservation_id: string | null
-  batch_allocations: unknown
+  batch_allocations: Array<Record<string, string | number | null>>
   barcode_verified: boolean
   barcode_value: string | null
   notes: string | null
