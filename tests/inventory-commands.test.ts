@@ -67,6 +67,7 @@ describe('inventory command schemas', () => {
 
 describe('purchase order command schemas', () => {
   const org = crypto.randomUUID()
+  it('rejects PO with zero lines', () => {
     expect(() =>
       createPurchaseOrderInput.parse({
         organizationId: org,
