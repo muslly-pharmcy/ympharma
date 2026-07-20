@@ -56,7 +56,7 @@ export const createCustomer = createServerFn({ method: 'POST' })
         .single()
       if (error) throw new Error(error.message)
 
-      await emit('CustomerCreated', { customer_id: row.id, organization_id: data.organizationId, code: row.code }, correlation)
+      await emit('CustomerCreated', { customer_id: row.id, organization_id: actor.organizationId, code: row.code }, correlation)
       await audit(actor, { action: 'customer.create', resourceType: 'customer', resourceId: row.id, payload: { code: row.code } })
       return { id: row.id as string, code: row.code as string, correlationId: correlation }
     })
