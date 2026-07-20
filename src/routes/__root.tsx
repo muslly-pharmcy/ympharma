@@ -8,13 +8,19 @@ import {
 } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import MainLayout from '@/layouts/MainLayout'
 import { AuthProvider } from '@/context/AuthContext'
 import { ThemeProvider } from '@/context/ThemeContext'
 import { AIProvider } from '@/context/AIContext'
 import { supabase } from '@/integrations/supabase/client'
 import { BottomNav } from '@/shared/components/BottomNav'
+import { ModuleErrorBoundary } from '@/components/errors/ErrorBoundary'
+import { ErrorScreen } from '@/components/errors/ErrorScreen'
+import { RouteSkeleton } from '@/components/skeletons/Skeleton'
+import { classifyError } from '@/lib/errors/classify'
+import { newCorrelationId } from '@/lib/errors/correlation'
+import { reportError } from '@/lib/errors/logger'
 import appCss from '@/index.css?url'
 
 export const Route = createRootRoute({
@@ -80,7 +86,11 @@ function RootComponent() {
         <AuthProvider>
           <AIProvider>
             <MainLayout>
-              <Outlet />
+              <ModuleErrorBoundary boundary="root:outlet" variant="page">
+                <Suspense fallback={<RouteSkeleton />}>
+                  <Outlet />
+                </Suspense>
+              </ModuleErrorBoundary>
             </MainLayout>
             <BottomNav />
           </AIProvider>
@@ -125,20 +135,21 @@ function RootNotFound() {
 
 function RootError({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter()
+  const classified = classifyError(error)
+  const correlationId = newCorrelationId('root')
+  reportError({ correlationId, classified, boundary: 'root' })
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-background p-6 text-center">
-      <h1 className="text-2xl font-bold text-destructive">حدث خطأ غير متوقع</h1>
-      <p className="max-w-lg text-sm text-muted-foreground">{error.message}</p>
-      <button
-        type="button"
-        onClick={() => {
+    <div className="min-h-dvh bg-background">
+      <ErrorScreen
+        classified={classified}
+        correlationId={correlationId}
+        boundary="root"
+        variant="page"
+        onRetry={() => {
           reset()
           void router.invalidate()
         }}
-        className="rounded-md bg-primary px-4 py-2 text-primary-foreground"
-      >
-        إعادة المحاولة
-      </button>
+      />
     </div>
   )
 }
