@@ -18,14 +18,13 @@
     "types": ["vite/client"],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@ai/*": ["src/ai/*"],
-      "@modules/*": ["src/modules/*"],
-      "@shared/*": ["src/shared/*"],
-      "@types/*": ["src/types/*"],
-      "@data/*": ["src/data/*"]
+      "@/*": ["./src/*"],
+      "@ai/*": ["./src/ai/*"],
+      "@modules/*": ["./src/modules/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@types/*": ["./src/types/*"],
+      "@data/*": ["./src/data/*"]
     }
   },
-  "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["src"]
 }
