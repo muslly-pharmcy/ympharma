@@ -2546,6 +2546,41 @@ export type Database = {
           },
         ]
       }
+      cart_items: {
+        Row: {
+          added_at: string
+          id: string
+          product_id: string
+          quantity: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          added_at?: string
+          id?: string
+          product_id: string
+          quantity?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          added_at?: string
+          id?: string
+          product_id?: string
+          quantity?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cart_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       catalog_ai_signals: {
         Row: {
           confidence: number | null
@@ -2830,6 +2865,7 @@ export type Database = {
           name_en: string | null
           organization_id: string | null
           owner_org_id: string | null
+          requires_prescription: boolean
           status: Database["public"]["Enums"]["catalog_status"]
           strength: string | null
           updated_at: string
@@ -2855,6 +2891,7 @@ export type Database = {
           name_en?: string | null
           organization_id?: string | null
           owner_org_id?: string | null
+          requires_prescription?: boolean
           status?: Database["public"]["Enums"]["catalog_status"]
           strength?: string | null
           updated_at?: string
@@ -2880,6 +2917,7 @@ export type Database = {
           name_en?: string | null
           organization_id?: string | null
           owner_org_id?: string | null
+          requires_prescription?: boolean
           status?: Database["public"]["Enums"]["catalog_status"]
           strength?: string | null
           updated_at?: string
