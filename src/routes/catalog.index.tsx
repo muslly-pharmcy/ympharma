@@ -1,0 +1,169 @@
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
+import { useQuery, queryOptions } from '@tanstack/react-query'
+import { listProducts, listCategories } from '@/lib/catalog.functions'
+import { Package, Search } from 'lucide-react'
+import { z } from 'zod'
+
+const searchSchema = z.object({
+  q: z.string().optional(),
+  cat: z.string().uuid().optional(),
+  page: z.coerce.number().int().min(1).default(1),
+})
+
+const productsQuery = (search: z.infer<typeof searchSchema>) =>
+  queryOptions({
+    queryKey: ['catalog', 'products', search],
+    queryFn: () =>
+      listProducts({
+        data: {
+          search: search.q,
+          categoryId: search.cat,
+          page: search.page,
+          pageSize: 24,
+          publicOnly: true,
+        },
+      }),
+  })
+
+const categoriesQuery = queryOptions({
+  queryKey: ['catalog', 'categories'],
+  queryFn: () => listCategories(),
+})
+
+export const Route = createFileRoute('/catalog/')({
+  validateSearch: (raw) => searchSchema.parse(raw),
+  loaderDeps: ({ search }) => search,
+  loader: ({ context, deps }) =>
+    Promise.all([
+      context.queryClient.ensureQueryData(productsQuery(deps)),
+      context.queryClient.ensureQueryData(categoriesQuery),
+    ]),
+  head: () => ({
+    meta: [
+      { title: 'كتالوج المنتجات — MUSLLY AI OS' },
+      { name: 'description', content: 'استعراض جميع منتجات الصيدلية مع البحث والتصفية.' },
+      { property: 'og:title', content: 'كتالوج المنتجات' },
+      { property: 'og:description', content: 'أساس بيانات المنتجات لنظام MUSLLY AI OS.' },
+    ],
+  }),
+  component: CatalogPage,
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-center text-red-600">فشل تحميل الكتالوج: {error.message}</div>
+  ),
+  notFoundComponent: () => <div className="p-8 text-center">غير موجود</div>,
+})
+
+function CatalogPage() {
+  const search = Route.useSearch()
+  const navigate = useNavigate({ from: '/catalog' })
+  const [q, setQ] = useState(search.q ?? '')
+
+  const { data, isFetching } = useQuery(productsQuery(search))
+  const { data: categories = [] } = useQuery(categoriesQuery)
+
+  const products = data?.items ?? []
+  const total = data?.total ?? 0
+  const pages = Math.max(1, Math.ceil(total / 24))
+
+  return (
+    <div className="mx-auto max-w-7xl space-y-6 p-6">
+      <header className="flex flex-col gap-2">
+        <h1 className="text-3xl font-bold">كتالوج المنتجات</h1>
+        <p className="text-sm text-muted-foreground">
+          إجمالي {total.toLocaleString('ar-EG')} منتج
+        </p>
+      </header>
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          void navigate({ search: (prev) => ({ ...prev, q: q || undefined, page: 1 }) })
+        }}
+        className="glass-panel flex flex-col gap-3 rounded-2xl p-4 sm:flex-row"
+      >
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="ابحث بالاسم أو الباركود أو المادة الفعالة..."
+            className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-4 pr-10 text-right focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
+        </div>
+        <select
+          value={search.cat ?? ''}
+          onChange={(e) =>
+            void navigate({
+              search: (prev) => ({ ...prev, cat: e.target.value || undefined, page: 1 }),
+            })
+          }
+          className="rounded-xl border border-gray-200 bg-white px-3 py-2.5"
+        >
+          <option value="">كل الفئات</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name_ar}
+            </option>
+          ))}
+        </select>
+        <button
+          type="submit"
+          className="rounded-xl bg-primary px-6 py-2.5 font-medium text-white shadow-lg shadow-primary/25"
+        >
+          بحث
+        </button>
+      </form>
+
+      {isFetching && <p className="text-sm text-muted-foreground">جاري التحميل...</p>}
+
+      {products.length === 0 ? (
+        <div className="glass-panel flex flex-col items-center gap-3 rounded-2xl p-12 text-center">
+          <Package className="h-12 w-12 text-gray-400" />
+          <p className="text-lg font-medium">لا توجد منتجات مطابقة</p>
+          <p className="text-sm text-muted-foreground">
+            جرّب توسيع البحث أو إضافة منتجات جديدة إلى الكتالوج.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {products.map((p) => (
+            <Link
+              key={p.id}
+              to="/catalog/$productId"
+              params={{ productId: p.id }}
+              className="glass-panel rounded-2xl p-4 transition hover:shadow-lg"
+            >
+              <div className="mb-3 flex h-24 items-center justify-center rounded-xl bg-primary/5">
+                <Package className="h-10 w-10 text-primary" />
+              </div>
+              <h3 className="line-clamp-2 font-semibold text-gray-900">{p.name_ar}</h3>
+              {p.brand && <p className="mt-1 text-xs text-gray-500">{p.brand}</p>}
+              {p.strength && (
+                <p className="mt-1 text-xs text-muted-foreground">{p.strength}</p>
+              )}
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {pages > 1 && (
+        <div className="flex justify-center gap-2">
+          {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
+            <button
+              key={p}
+              onClick={() => void navigate({ search: (prev) => ({ ...prev, page: p }) })}
+              className={`rounded-lg px-3 py-1.5 text-sm ${
+                p === search.page
+                  ? 'bg-primary text-white'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
