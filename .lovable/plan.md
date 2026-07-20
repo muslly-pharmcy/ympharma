@@ -113,7 +113,11 @@
 
 1. ✅ **Build #1 → Shipment C4B** (Clinical Framework)
 2. ✅ **Build #2 → Phase 5** (AI Runtime + أول 3 Agents) — `/ai-runtime`
-3. **Build #3 → Phase 6** (CRM Core) — التالي
+3. 🚧 **Build #3 → Phase 6** (CRM Core) — قيد التنفيذ، مقسمة إلى Shipments:
+   - **D1** — Customers foundation (`crm_customers`, addresses, contacts, tags) + `/customers`
+   - **D2** — Loyalty (`crm_loyalty_accounts/transactions/tiers/rules`) + `/loyalty`
+   - **D3** — Campaigns + Coupons (`crm_campaigns/audiences/messages/events`, `crm_coupons/redemptions`) + `/campaigns` `/coupons`
+   - **D4** — Segments + CRM AI tools (search_customers, customer_profile, loyalty_balance, ...) + `/segments`
 4. **Build #4 → Phase 7** (Executive Analytics)
 5. **Build #5 → Phase 8** (Finance)
 6. **Build #6 → Phase 9** (Automation)
@@ -121,4 +125,12 @@
 8. **Build #8 → Phase 11** (Mobile)
 9. **Build #9 → Phases 14 + 15 + 17** (Quality + DevOps + Production Gate)
 
-عند اعتماد هذه الخطة، ابدأ التالي بـ: **"Build #1 — Shipment C4B"**.
+### AI Runtime — تحسينات مؤجلة (قبل Phase الإنتاج النهائي)
+- Prompt Versioning & Rollback (تفعيل نسخة سابقة بضغطة)
+- Per-tool Permissions (بدل `ai.execute` واحد)
+- Conversation Memory (org+user، مع retention policy)
+- Evaluation Pipeline (thumbs up/down + human review)
+- Rate Limits & Quotas (per-org، per-user)
+- Streaming Responses (SSE عبر `streamText` + `useChat`)
+- PII Redaction (قبل الإرسال إلى النموذج)
+
