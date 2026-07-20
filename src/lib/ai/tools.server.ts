@@ -231,6 +231,65 @@ const TOOLS: Record<string, ToolDefinition> = {
       return { ok: true, data: { segment_size: size, recommended_channel: channel, angle } }
     },
   },
+  validate_coupon: {
+    key: 'validate_coupon',
+    description: 'Validate a coupon code without redeeming it. Input: { code: string }',
+    execute: async ({ actor }, input) => {
+      const code = String(input.code ?? '').trim().toUpperCase()
+      if (!code) return { ok: false, error: 'code required' }
+      const { hasPermission } = await import('../session.server')
+      if (!hasPermission(actor, 'campaign.read')) return { ok: false, error: 'permission denied' }
+      const sb = await admin()
+      const { data: cc } = await sb.from('crm_coupon_codes')
+        .select('id, code, usage_limit, usage_count, is_active, expires_at, coupon_id, crm_coupons(status, expires_at, starts_at, name)')
+        .eq('organization_id', actor.organizationId).eq('code', code).maybeSingle()
+      if (!cc) return { ok: true, data: { valid: false, reason: 'not_found' } }
+      const now = new Date()
+      if (!cc.is_active) return { ok: true, data: { valid: false, reason: 'inactive' } }
+      if (cc.expires_at && new Date(cc.expires_at) < now) return { ok: true, data: { valid: false, reason: 'expired' } }
+      if (cc.usage_limit != null && cc.usage_count >= cc.usage_limit) return { ok: true, data: { valid: false, reason: 'exhausted' } }
+      const coup = (cc as { crm_coupons?: { status: string; expires_at: string | null; starts_at: string | null; name: string } }).crm_coupons
+      if (coup && coup.status !== 'active') return { ok: true, data: { valid: false, reason: 'coupon_disabled' } }
+      return { ok: true, data: { valid: true, coupon: coup?.name ?? null } }
+    },
+  },
+  promotion_statistics: {
+    key: 'promotion_statistics',
+    description: 'Aggregate active promotions and recent redemption counts.',
+    execute: async ({ actor }) => {
+      const { hasPermission } = await import('../session.server')
+      if (!hasPermission(actor, 'campaign.read')) return { ok: false, error: 'permission denied' }
+      const sb = await admin()
+      const [{ data: promos }, { data: recent }] = await Promise.all([
+        sb.from('crm_promotions').select('id, code, kind, status, usage_count, usage_limit')
+          .eq('organization_id', actor.organizationId).order('usage_count', { ascending: false }).limit(20),
+        sb.from('crm_promotion_redemptions').select('promotion_id, discount_amount, redeemed_at')
+          .eq('organization_id', actor.organizationId).order('redeemed_at', { ascending: false }).limit(50),
+      ])
+      const totalDiscount = ((recent ?? []) as Array<{ discount_amount: number }>).reduce((s, r) => s + Number(r.discount_amount || 0), 0)
+      return { ok: true, data: { promotions: promos ?? [], recent_discount_total: Math.round(totalDiscount * 100) / 100, recent_count: (recent ?? []).length } }
+    },
+  },
+  suggest_promotions: {
+    key: 'suggest_promotions',
+    description: 'Suggest active promotions applicable to a category or a specific customer tier.',
+    execute: async ({ actor }, input) => {
+      const category = input.category ? String(input.category) : null
+      const tier = input.tier ? String(input.tier) : null
+      const { hasPermission } = await import('../session.server')
+      if (!hasPermission(actor, 'campaign.read')) return { ok: false, error: 'permission denied' }
+      const sb = await admin()
+      const { data } = await sb.from('crm_promotions').select('id, code, name, kind, config, priority, stackable')
+        .eq('organization_id', actor.organizationId).eq('status', 'active').order('priority', { ascending: true }).limit(15)
+      const rows = ((data ?? []) as Array<{ kind: string; config: Record<string, unknown>; code: string; name: string; priority: number; stackable: boolean }>)
+      const matches = rows.filter((p) => {
+        if (category && p.kind === 'category_discount') return String(p.config?.category ?? '') === category
+        if (tier && p.kind === 'tier_discount') return String(p.config?.tier ?? '') === tier
+        return true
+      })
+      return { ok: true, data: matches }
+    },
+  },
 }
 
 export function getTool(key: string): ToolDefinition | undefined {
