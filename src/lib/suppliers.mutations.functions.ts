@@ -9,11 +9,13 @@ import {
 export const createSupplier = createServerFn({ method: 'POST' })
   .inputValidator((raw: unknown): CreateSupplierInput => createSupplierInput.parse(raw))
   .handler(async ({ data }) => {
-    const { getActor, requireOrg } = await import('./session.server')
+    const { getActor, requireOrg, requirePermission } = await import('./session.server')
     const { withIdempotency, newCorrelationId } = await import('./idempotency.server')
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { audit } = await import('./audit.server')
     const actor = await getActor()
     requireOrg(actor, data.organizationId)
+    requirePermission(actor, 'supplier.write')
     const correlation = data.correlationId ?? newCorrelationId('supplier')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'createSupplier', async () => {
@@ -40,6 +42,7 @@ export const createSupplier = createServerFn({ method: 'POST' })
         p_priority: 'normal',
         p_correlation_id: correlation,
       })
+      await audit(actor, { action: 'supplier.create', resourceType: 'supplier', resourceId: row.id, payload: { name: data.name } })
       return { id: row.id, correlationId: correlation }
     })
   })
@@ -47,10 +50,12 @@ export const createSupplier = createServerFn({ method: 'POST' })
 export const updateSupplier = createServerFn({ method: 'POST' })
   .inputValidator((raw: unknown): UpdateSupplierInput => updateSupplierInput.parse(raw))
   .handler(async ({ data }) => {
-    const { getActor } = await import('./session.server')
+    const { getActor, requirePermission } = await import('./session.server')
     const { newCorrelationId } = await import('./idempotency.server')
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { audit } = await import('./audit.server')
     const actor = await getActor()
+    requirePermission(actor, 'supplier.write')
     const correlation = data.correlationId ?? newCorrelationId('supplier')
 
     const { data: existing, error: fetchErr } = await supabaseAdmin
@@ -75,5 +80,6 @@ export const updateSupplier = createServerFn({ method: 'POST' })
       p_priority: 'normal',
       p_correlation_id: correlation,
     })
+    await audit(actor, { action: 'supplier.update', resourceType: 'supplier', resourceId: data.id, payload: { patch } })
     return { id: data.id, correlationId: correlation }
   })
