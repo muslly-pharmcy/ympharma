@@ -1,11 +1,24 @@
 import { createRouter as createTanStackRouter } from '@tanstack/react-router'
 import { routeTree } from './routeTree.gen'
+import { RouteSkeleton } from '@/components/skeletons/Skeleton'
+import { ErrorScreen } from '@/components/errors/ErrorScreen'
+import { classifyError } from '@/lib/errors/classify'
+import { newCorrelationId } from '@/lib/errors/correlation'
+import { reportError } from '@/lib/errors/logger'
 
-function DefaultError({ error }: { error: Error }) {
+// Route-level default: classified error screen with retry (invalidate + reset).
+function DefaultRouteError({ error, reset }: { error: Error; reset: () => void }) {
+  const classified = classifyError(error)
+  const correlationId = newCorrelationId('route')
+  reportError({ correlationId, classified, boundary: 'route:default' })
   return (
-    <div className="p-6 text-center text-sm text-red-600">
-      {error.message || 'حدث خطأ أثناء تحميل هذه الصفحة.'}
-    </div>
+    <ErrorScreen
+      classified={classified}
+      correlationId={correlationId}
+      boundary="route:default"
+      variant="page"
+      onRetry={reset}
+    />
   )
 }
 
@@ -15,7 +28,10 @@ export function getRouter() {
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,
     scrollRestoration: true,
-    defaultErrorComponent: DefaultError,
+    defaultErrorComponent: DefaultRouteError,
+    defaultPendingComponent: () => <RouteSkeleton />,
+    defaultPendingMs: 200,
+    defaultPendingMinMs: 300,
   })
 }
 
@@ -27,4 +43,3 @@ declare module '@tanstack/react-router' {
     router: ReturnType<typeof getRouter>
   }
 }
-
