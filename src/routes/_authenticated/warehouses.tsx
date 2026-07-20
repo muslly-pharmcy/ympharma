@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { listWarehouses } from '@/lib/inventory.functions'
 import { Warehouse as WarehouseIcon } from 'lucide-react'
 
-export const Route = createFileRoute('/warehouses')({
+export const Route = createFileRoute('/_authenticated/warehouses')({
   head: () => ({
     meta: [
       { title: 'المستودعات — MUSLLY AI OS' },

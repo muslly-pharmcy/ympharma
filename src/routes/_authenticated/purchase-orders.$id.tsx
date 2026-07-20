@@ -4,7 +4,7 @@ import { getPurchaseOrder } from '@/lib/purchasing.functions'
 import { usePurchaseOrderMutations } from '@/hooks/mutations/inventory'
 import { ArrowRight } from 'lucide-react'
 
-export const Route = createFileRoute('/purchase-orders/$id')({
+export const Route = createFileRoute('/_authenticated/purchase-orders/$id')({
   head: () => ({
     meta: [{ title: 'تفاصيل أمر الشراء — MUSLLY AI OS' }],
   }),

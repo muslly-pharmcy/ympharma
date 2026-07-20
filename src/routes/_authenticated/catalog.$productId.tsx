@@ -5,7 +5,7 @@ import { getStockSummary } from '@/lib/inventory.functions'
 import { ArrowRight, Package } from 'lucide-react'
 import type { CatalogBarcode } from '@/domain/catalog/schemas'
 
-export const Route = createFileRoute('/catalog/$productId')({
+export const Route = createFileRoute('/_authenticated/catalog/$productId')({
   head: () => ({
     meta: [
       { title: 'تفاصيل المنتج — MUSLLY AI OS' },

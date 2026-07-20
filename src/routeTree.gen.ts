@@ -10,20 +10,26 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AiChatRouteImport } from './routes/ai-chat'
-import { Route as LoginRouteImport } from './routes/login'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as MissionControlRouteImport } from './routes/mission-control'
-import { Route as PurchaseOrdersRouteImport } from './routes/purchase-orders'
-import { Route as SuppliersRouteImport } from './routes/suppliers'
-import { Route as WarehousesRouteImport } from './routes/warehouses'
-import { Route as CatalogIndexRouteImport } from './routes/catalog.index'
-import { Route as CatalogProductIdRouteImport } from './routes/catalog.$productId'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as AuthenticatedPurchaseOrdersRouteImport } from './routes/_authenticated/purchase-orders'
+import { Route as AuthenticatedSuppliersRouteImport } from './routes/_authenticated/suppliers'
+import { Route as AuthenticatedWarehousesRouteImport } from './routes/_authenticated/warehouses'
 import { Route as PlanetPlanetIdRouteImport } from './routes/planet.$planetId'
-import { Route as PurchaseOrdersIdRouteImport } from './routes/purchase-orders.$id'
+import { Route as AuthenticatedCatalogIndexRouteImport } from './routes/_authenticated/catalog.index'
+import { Route as AuthenticatedCatalogProductIdRouteImport } from './routes/_authenticated/catalog.$productId'
+import { Route as AuthenticatedPurchaseOrdersIdRouteImport } from './routes/_authenticated/purchase-orders.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AiChatRoute = AiChatRouteImport.update({
@@ -31,9 +37,9 @@ const AiChatRoute = AiChatRouteImport.update({
   path: '/ai-chat',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MissionControlRoute = MissionControlRouteImport.update({
@@ -41,135 +47,149 @@ const MissionControlRoute = MissionControlRouteImport.update({
   path: '/mission-control',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PurchaseOrdersRoute = PurchaseOrdersRouteImport.update({
-  id: '/purchase-orders',
-  path: '/purchase-orders',
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SuppliersRoute = SuppliersRouteImport.update({
+const AuthenticatedPurchaseOrdersRoute =
+  AuthenticatedPurchaseOrdersRouteImport.update({
+    id: '/purchase-orders',
+    path: '/purchase-orders',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSuppliersRoute = AuthenticatedSuppliersRouteImport.update({
   id: '/suppliers',
   path: '/suppliers',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const WarehousesRoute = WarehousesRouteImport.update({
+const AuthenticatedWarehousesRoute = AuthenticatedWarehousesRouteImport.update({
   id: '/warehouses',
   path: '/warehouses',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CatalogIndexRoute = CatalogIndexRouteImport.update({
-  id: '/catalog/',
-  path: '/catalog/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CatalogProductIdRoute = CatalogProductIdRouteImport.update({
-  id: '/catalog/$productId',
-  path: '/catalog/$productId',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const PlanetPlanetIdRoute = PlanetPlanetIdRouteImport.update({
   id: '/planet/$planetId',
   path: '/planet/$planetId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PurchaseOrdersIdRoute = PurchaseOrdersIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => PurchaseOrdersRoute,
-} as any)
+const AuthenticatedCatalogIndexRoute =
+  AuthenticatedCatalogIndexRouteImport.update({
+    id: '/catalog/',
+    path: '/catalog/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedCatalogProductIdRoute =
+  AuthenticatedCatalogProductIdRouteImport.update({
+    id: '/catalog/$productId',
+    path: '/catalog/$productId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedPurchaseOrdersIdRoute =
+  AuthenticatedPurchaseOrdersIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedPurchaseOrdersRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/ai-chat': typeof AiChatRoute
-  '/login': typeof LoginRoute
+  '/auth': typeof AuthRoute
   '/mission-control': typeof MissionControlRoute
-  '/purchase-orders': typeof PurchaseOrdersRouteWithChildren
-  '/suppliers': typeof SuppliersRoute
-  '/warehouses': typeof WarehousesRoute
-  '/catalog/$productId': typeof CatalogProductIdRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/purchase-orders': typeof AuthenticatedPurchaseOrdersRouteWithChildren
+  '/suppliers': typeof AuthenticatedSuppliersRoute
+  '/warehouses': typeof AuthenticatedWarehousesRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
-  '/purchase-orders/$id': typeof PurchaseOrdersIdRoute
-  '/catalog/': typeof CatalogIndexRoute
+  '/catalog/$productId': typeof AuthenticatedCatalogProductIdRoute
+  '/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
+  '/catalog/': typeof AuthenticatedCatalogIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/ai-chat': typeof AiChatRoute
-  '/login': typeof LoginRoute
+  '/auth': typeof AuthRoute
   '/mission-control': typeof MissionControlRoute
-  '/purchase-orders': typeof PurchaseOrdersRouteWithChildren
-  '/suppliers': typeof SuppliersRoute
-  '/warehouses': typeof WarehousesRoute
-  '/catalog/$productId': typeof CatalogProductIdRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/purchase-orders': typeof AuthenticatedPurchaseOrdersRouteWithChildren
+  '/suppliers': typeof AuthenticatedSuppliersRoute
+  '/warehouses': typeof AuthenticatedWarehousesRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
-  '/purchase-orders/$id': typeof PurchaseOrdersIdRoute
-  '/catalog': typeof CatalogIndexRoute
+  '/catalog/$productId': typeof AuthenticatedCatalogProductIdRoute
+  '/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
+  '/catalog': typeof AuthenticatedCatalogIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/ai-chat': typeof AiChatRoute
-  '/login': typeof LoginRoute
+  '/auth': typeof AuthRoute
   '/mission-control': typeof MissionControlRoute
-  '/purchase-orders': typeof PurchaseOrdersRouteWithChildren
-  '/suppliers': typeof SuppliersRoute
-  '/warehouses': typeof WarehousesRoute
-  '/catalog/$productId': typeof CatalogProductIdRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/purchase-orders': typeof AuthenticatedPurchaseOrdersRouteWithChildren
+  '/_authenticated/suppliers': typeof AuthenticatedSuppliersRoute
+  '/_authenticated/warehouses': typeof AuthenticatedWarehousesRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
-  '/purchase-orders/$id': typeof PurchaseOrdersIdRoute
-  '/catalog/': typeof CatalogIndexRoute
+  '/_authenticated/catalog/$productId': typeof AuthenticatedCatalogProductIdRoute
+  '/_authenticated/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
+  '/_authenticated/catalog/': typeof AuthenticatedCatalogIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/ai-chat'
-    | '/login'
+    | '/auth'
     | '/mission-control'
+    | '/reset-password'
     | '/purchase-orders'
     | '/suppliers'
     | '/warehouses'
-    | '/catalog/$productId'
     | '/planet/$planetId'
+    | '/catalog/$productId'
     | '/purchase-orders/$id'
     | '/catalog/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/ai-chat'
-    | '/login'
+    | '/auth'
     | '/mission-control'
+    | '/reset-password'
     | '/purchase-orders'
     | '/suppliers'
     | '/warehouses'
-    | '/catalog/$productId'
     | '/planet/$planetId'
+    | '/catalog/$productId'
     | '/purchase-orders/$id'
     | '/catalog'
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/ai-chat'
-    | '/login'
+    | '/auth'
     | '/mission-control'
-    | '/purchase-orders'
-    | '/suppliers'
-    | '/warehouses'
-    | '/catalog/$productId'
+    | '/reset-password'
+    | '/_authenticated/purchase-orders'
+    | '/_authenticated/suppliers'
+    | '/_authenticated/warehouses'
     | '/planet/$planetId'
-    | '/purchase-orders/$id'
-    | '/catalog/'
+    | '/_authenticated/catalog/$productId'
+    | '/_authenticated/purchase-orders/$id'
+    | '/_authenticated/catalog/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AiChatRoute: typeof AiChatRoute
-  LoginRoute: typeof LoginRoute
+  AuthRoute: typeof AuthRoute
   MissionControlRoute: typeof MissionControlRoute
-  PurchaseOrdersRoute: typeof PurchaseOrdersRouteWithChildren
-  SuppliersRoute: typeof SuppliersRoute
-  WarehousesRoute: typeof WarehousesRoute
-  CatalogProductIdRoute: typeof CatalogProductIdRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   PlanetPlanetIdRoute: typeof PlanetPlanetIdRoute
-  CatalogIndexRoute: typeof CatalogIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -181,6 +201,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ai-chat': {
       id: '/ai-chat'
       path: '/ai-chat'
@@ -188,11 +215,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mission-control': {
@@ -202,40 +229,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionControlRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/purchase-orders': {
-      id: '/purchase-orders'
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/purchase-orders': {
+      id: '/_authenticated/purchase-orders'
       path: '/purchase-orders'
       fullPath: '/purchase-orders'
-      preLoaderRoute: typeof PurchaseOrdersRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedPurchaseOrdersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/suppliers': {
-      id: '/suppliers'
+    '/_authenticated/suppliers': {
+      id: '/_authenticated/suppliers'
       path: '/suppliers'
       fullPath: '/suppliers'
-      preLoaderRoute: typeof SuppliersRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedSuppliersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/warehouses': {
-      id: '/warehouses'
+    '/_authenticated/warehouses': {
+      id: '/_authenticated/warehouses'
       path: '/warehouses'
       fullPath: '/warehouses'
-      preLoaderRoute: typeof WarehousesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/catalog/': {
-      id: '/catalog/'
-      path: '/catalog'
-      fullPath: '/catalog/'
-      preLoaderRoute: typeof CatalogIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/catalog/$productId': {
-      id: '/catalog/$productId'
-      path: '/catalog/$productId'
-      fullPath: '/catalog/$productId'
-      preLoaderRoute: typeof CatalogProductIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedWarehousesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/planet/$planetId': {
       id: '/planet/$planetId'
@@ -244,39 +264,72 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlanetPlanetIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/purchase-orders/$id': {
-      id: '/purchase-orders/$id'
+    '/_authenticated/catalog/': {
+      id: '/_authenticated/catalog/'
+      path: '/catalog'
+      fullPath: '/catalog/'
+      preLoaderRoute: typeof AuthenticatedCatalogIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/catalog/$productId': {
+      id: '/_authenticated/catalog/$productId'
+      path: '/catalog/$productId'
+      fullPath: '/catalog/$productId'
+      preLoaderRoute: typeof AuthenticatedCatalogProductIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/purchase-orders/$id': {
+      id: '/_authenticated/purchase-orders/$id'
       path: '/$id'
       fullPath: '/purchase-orders/$id'
-      preLoaderRoute: typeof PurchaseOrdersIdRouteImport
-      parentRoute: typeof PurchaseOrdersRoute
+      preLoaderRoute: typeof AuthenticatedPurchaseOrdersIdRouteImport
+      parentRoute: typeof AuthenticatedPurchaseOrdersRoute
     }
   }
 }
 
-interface PurchaseOrdersRouteChildren {
-  PurchaseOrdersIdRoute: typeof PurchaseOrdersIdRoute
+interface AuthenticatedPurchaseOrdersRouteChildren {
+  AuthenticatedPurchaseOrdersIdRoute: typeof AuthenticatedPurchaseOrdersIdRoute
 }
 
-const PurchaseOrdersRouteChildren: PurchaseOrdersRouteChildren = {
-  PurchaseOrdersIdRoute: PurchaseOrdersIdRoute,
+const AuthenticatedPurchaseOrdersRouteChildren: AuthenticatedPurchaseOrdersRouteChildren =
+  {
+    AuthenticatedPurchaseOrdersIdRoute: AuthenticatedPurchaseOrdersIdRoute,
+  }
+
+const AuthenticatedPurchaseOrdersRouteWithChildren =
+  AuthenticatedPurchaseOrdersRoute._addFileChildren(
+    AuthenticatedPurchaseOrdersRouteChildren,
+  )
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedPurchaseOrdersRoute: typeof AuthenticatedPurchaseOrdersRouteWithChildren
+  AuthenticatedSuppliersRoute: typeof AuthenticatedSuppliersRoute
+  AuthenticatedWarehousesRoute: typeof AuthenticatedWarehousesRoute
+  AuthenticatedCatalogProductIdRoute: typeof AuthenticatedCatalogProductIdRoute
+  AuthenticatedCatalogIndexRoute: typeof AuthenticatedCatalogIndexRoute
 }
 
-const PurchaseOrdersRouteWithChildren = PurchaseOrdersRoute._addFileChildren(
-  PurchaseOrdersRouteChildren,
-)
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedPurchaseOrdersRoute:
+    AuthenticatedPurchaseOrdersRouteWithChildren,
+  AuthenticatedSuppliersRoute: AuthenticatedSuppliersRoute,
+  AuthenticatedWarehousesRoute: AuthenticatedWarehousesRoute,
+  AuthenticatedCatalogProductIdRoute: AuthenticatedCatalogProductIdRoute,
+  AuthenticatedCatalogIndexRoute: AuthenticatedCatalogIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AiChatRoute: AiChatRoute,
-  LoginRoute: LoginRoute,
+  AuthRoute: AuthRoute,
   MissionControlRoute: MissionControlRoute,
-  PurchaseOrdersRoute: PurchaseOrdersRouteWithChildren,
-  SuppliersRoute: SuppliersRoute,
-  WarehousesRoute: WarehousesRoute,
-  CatalogProductIdRoute: CatalogProductIdRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   PlanetPlanetIdRoute: PlanetPlanetIdRoute,
-  CatalogIndexRoute: CatalogIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

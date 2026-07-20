@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { listSuppliers } from '@/lib/suppliers.functions'
 import { Building2 } from 'lucide-react'
 
-export const Route = createFileRoute('/suppliers')({
+export const Route = createFileRoute('/_authenticated/suppliers')({
   head: () => ({
     meta: [
       { title: 'الموردون — MUSLLY AI OS' },
