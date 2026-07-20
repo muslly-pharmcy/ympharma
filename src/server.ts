@@ -1,14 +1,10 @@
-import { createServerFn } from '@tanstack/react-start'
+import {
+  createStartHandler,
+  defaultStreamHandler,
+} from '@tanstack/react-start/server'
 
-// Fix for SSR environments where fetch might not be globally available
-if (typeof globalThis.fetch === 'undefined') {
-  console.log('Global fetch not found, checking environment...')
-}
+const handler = createStartHandler(defaultStreamHandler)
 
-export const getServerTime = createServerFn({ method: 'GET' }).handler(
-  async () => new Date().toISOString(),
-)
-
-export default function server() {
-  console.log('MUSLLY AI OS Server Initialized')
+export default {
+  fetch: (request: Request) => handler(request),
 }
