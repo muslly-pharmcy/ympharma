@@ -14,6 +14,7 @@ import { AuthProvider } from '@/context/AuthContext'
 import { ThemeProvider } from '@/context/ThemeContext'
 import { AIProvider } from '@/context/AIContext'
 import { supabase } from '@/integrations/supabase/client'
+import { BottomNav } from '@/shared/components/BottomNav'
 import appCss from '@/index.css?url'
 
 export const Route = createRootRoute({
@@ -81,6 +82,7 @@ function RootComponent() {
             <MainLayout>
               <Outlet />
             </MainLayout>
+            <BottomNav />
           </AIProvider>
         </AuthProvider>
       </ThemeProvider>
