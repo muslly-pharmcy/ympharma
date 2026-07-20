@@ -2712,6 +2712,207 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_customer_addresses: {
+        Row: {
+          city: string | null
+          country: string | null
+          created_at: string
+          customer_id: string
+          id: string
+          is_default: boolean
+          kind: string
+          line1: string
+          line2: string | null
+          organization_id: string
+          postal_code: string | null
+          region: string | null
+          updated_at: string
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          customer_id: string
+          id?: string
+          is_default?: boolean
+          kind?: string
+          line1: string
+          line2?: string | null
+          organization_id: string
+          postal_code?: string | null
+          region?: string | null
+          updated_at?: string
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          customer_id?: string
+          id?: string
+          is_default?: boolean
+          kind?: string
+          line1?: string
+          line2?: string | null
+          organization_id?: string
+          postal_code?: string | null
+          region?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_customer_addresses_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "crm_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_customer_contacts: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          is_primary: boolean
+          kind: string
+          label: string | null
+          organization_id: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          is_primary?: boolean
+          kind: string
+          label?: string | null
+          organization_id: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          is_primary?: boolean
+          kind?: string
+          label?: string | null
+          organization_id?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_customer_contacts_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "crm_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_customer_tags: {
+        Row: {
+          color: string | null
+          created_at: string
+          customer_id: string
+          id: string
+          organization_id: string
+          tag: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          customer_id: string
+          id?: string
+          organization_id: string
+          tag: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          customer_id?: string
+          id?: string
+          organization_id?: string
+          tag?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_customer_tags_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "crm_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_customers: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          email: string | null
+          full_name: string
+          id: string
+          merged_into_id: string | null
+          metadata: Json
+          notes: string | null
+          organization_id: string
+          patient_id: string | null
+          phone: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          full_name: string
+          id?: string
+          merged_into_id?: string | null
+          metadata?: Json
+          notes?: string | null
+          organization_id: string
+          patient_id?: string | null
+          phone?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          merged_into_id?: string | null
+          metadata?: Json
+          notes?: string | null
+          organization_id?: string
+          patient_id?: string | null
+          phone?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_customers_merged_into_id_fkey"
+            columns: ["merged_into_id"]
+            isOneToOne: false
+            referencedRelation: "crm_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_customers_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "hc_patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_channels: {
         Row: {
           channel: string
