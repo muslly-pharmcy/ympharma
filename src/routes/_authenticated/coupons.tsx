@@ -22,7 +22,8 @@ function CouponsPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['coupons'] }),
   })
   const coupons = (q.data?.coupons ?? []).filter((c) => !filter || c.name.toLowerCase().includes(filter.toLowerCase()))
-  const codesByCoupon = new Map<string, typeof q.data.codes>()
+  type CodeRow = NonNullable<typeof q.data>['codes'][number]
+  const codesByCoupon = new Map<string, CodeRow[]>()
   for (const c of (q.data?.codes ?? [])) {
     const arr = codesByCoupon.get(c.coupon_id) ?? []; arr.push(c); codesByCoupon.set(c.coupon_id, arr)
   }

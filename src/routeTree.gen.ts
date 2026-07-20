@@ -17,6 +17,7 @@ import { Route as MissionControlRouteImport } from './routes/mission-control'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAiRuntimeRouteImport } from './routes/_authenticated/ai-runtime'
 import { Route as AuthenticatedCampaignsRouteImport } from './routes/_authenticated/campaigns'
+import { Route as AuthenticatedCouponsRouteImport } from './routes/_authenticated/coupons'
 import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated/customers'
 import { Route as AuthenticatedDispensesRouteImport } from './routes/_authenticated/dispenses'
 import { Route as AuthenticatedDoctorsRouteImport } from './routes/_authenticated/doctors'
@@ -41,6 +42,8 @@ import { Route as AuthenticatedInsuranceCoverageRouteImport } from './routes/_au
 import { Route as AuthenticatedLoyaltyAccountIdRouteImport } from './routes/_authenticated/loyalty.$accountId'
 import { Route as AuthenticatedPatientsPatientIdRouteImport } from './routes/_authenticated/patients.$patientId'
 import { Route as AuthenticatedPrescriptionsPrescriptionIdRouteImport } from './routes/_authenticated/prescriptions.$prescriptionId'
+import { Route as AuthenticatedPromotionsIndexRouteImport } from './routes/_authenticated/promotions.index'
+import { Route as AuthenticatedPromotionsIdRouteImport } from './routes/_authenticated/promotions.$id'
 import { Route as AuthenticatedPurchaseOrdersIdRouteImport } from './routes/_authenticated/purchase-orders.$id'
 import { Route as AuthenticatedInsuranceClaimsClaimIdRouteImport } from './routes/_authenticated/insurance.claims_.$claimId'
 
@@ -81,6 +84,11 @@ const AuthenticatedAiRuntimeRoute = AuthenticatedAiRuntimeRouteImport.update({
 const AuthenticatedCampaignsRoute = AuthenticatedCampaignsRouteImport.update({
   id: '/campaigns',
   path: '/campaigns',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCouponsRoute = AuthenticatedCouponsRouteImport.update({
+  id: '/coupons',
+  path: '/coupons',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCustomersRoute = AuthenticatedCustomersRouteImport.update({
@@ -217,6 +225,18 @@ const AuthenticatedPrescriptionsPrescriptionIdRoute =
     path: '/$prescriptionId',
     getParentRoute: () => AuthenticatedPrescriptionsRoute,
   } as any)
+const AuthenticatedPromotionsIndexRoute =
+  AuthenticatedPromotionsIndexRouteImport.update({
+    id: '/promotions/',
+    path: '/promotions/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedPromotionsIdRoute =
+  AuthenticatedPromotionsIdRouteImport.update({
+    id: '/promotions/$id',
+    path: '/promotions/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPurchaseOrdersIdRoute =
   AuthenticatedPurchaseOrdersIdRouteImport.update({
     id: '/$id',
@@ -238,6 +258,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/ai-runtime': typeof AuthenticatedAiRuntimeRoute
   '/campaigns': typeof AuthenticatedCampaignsRouteWithChildren
+  '/coupons': typeof AuthenticatedCouponsRoute
   '/customers': typeof AuthenticatedCustomersRouteWithChildren
   '/dispenses': typeof AuthenticatedDispensesRouteWithChildren
   '/doctors': typeof AuthenticatedDoctorsRouteWithChildren
@@ -260,9 +281,11 @@ export interface FileRoutesByFullPath {
   '/loyalty/$accountId': typeof AuthenticatedLoyaltyAccountIdRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
+  '/promotions/$id': typeof AuthenticatedPromotionsIdRoute
   '/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
   '/catalog/': typeof AuthenticatedCatalogIndexRoute
   '/insurance/': typeof AuthenticatedInsuranceIndexRoute
+  '/promotions/': typeof AuthenticatedPromotionsIndexRoute
   '/insurance/claims/$claimId': typeof AuthenticatedInsuranceClaimsClaimIdRoute
 }
 export interface FileRoutesByTo {
@@ -273,6 +296,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/ai-runtime': typeof AuthenticatedAiRuntimeRoute
   '/campaigns': typeof AuthenticatedCampaignsRouteWithChildren
+  '/coupons': typeof AuthenticatedCouponsRoute
   '/customers': typeof AuthenticatedCustomersRouteWithChildren
   '/dispenses': typeof AuthenticatedDispensesRouteWithChildren
   '/doctors': typeof AuthenticatedDoctorsRouteWithChildren
@@ -295,9 +319,11 @@ export interface FileRoutesByTo {
   '/loyalty/$accountId': typeof AuthenticatedLoyaltyAccountIdRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
+  '/promotions/$id': typeof AuthenticatedPromotionsIdRoute
   '/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
   '/catalog': typeof AuthenticatedCatalogIndexRoute
   '/insurance': typeof AuthenticatedInsuranceIndexRoute
+  '/promotions': typeof AuthenticatedPromotionsIndexRoute
   '/insurance/claims/$claimId': typeof AuthenticatedInsuranceClaimsClaimIdRoute
 }
 export interface FileRoutesById {
@@ -310,6 +336,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/ai-runtime': typeof AuthenticatedAiRuntimeRoute
   '/_authenticated/campaigns': typeof AuthenticatedCampaignsRouteWithChildren
+  '/_authenticated/coupons': typeof AuthenticatedCouponsRoute
   '/_authenticated/customers': typeof AuthenticatedCustomersRouteWithChildren
   '/_authenticated/dispenses': typeof AuthenticatedDispensesRouteWithChildren
   '/_authenticated/doctors': typeof AuthenticatedDoctorsRouteWithChildren
@@ -332,9 +359,11 @@ export interface FileRoutesById {
   '/_authenticated/loyalty/$accountId': typeof AuthenticatedLoyaltyAccountIdRoute
   '/_authenticated/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/_authenticated/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
+  '/_authenticated/promotions/$id': typeof AuthenticatedPromotionsIdRoute
   '/_authenticated/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
   '/_authenticated/catalog/': typeof AuthenticatedCatalogIndexRoute
   '/_authenticated/insurance/': typeof AuthenticatedInsuranceIndexRoute
+  '/_authenticated/promotions/': typeof AuthenticatedPromotionsIndexRoute
   '/_authenticated/insurance/claims_/$claimId': typeof AuthenticatedInsuranceClaimsClaimIdRoute
 }
 export interface FileRouteTypes {
@@ -347,6 +376,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/ai-runtime'
     | '/campaigns'
+    | '/coupons'
     | '/customers'
     | '/dispenses'
     | '/doctors'
@@ -369,9 +399,11 @@ export interface FileRouteTypes {
     | '/loyalty/$accountId'
     | '/patients/$patientId'
     | '/prescriptions/$prescriptionId'
+    | '/promotions/$id'
     | '/purchase-orders/$id'
     | '/catalog/'
     | '/insurance/'
+    | '/promotions/'
     | '/insurance/claims/$claimId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -382,6 +414,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/ai-runtime'
     | '/campaigns'
+    | '/coupons'
     | '/customers'
     | '/dispenses'
     | '/doctors'
@@ -404,9 +437,11 @@ export interface FileRouteTypes {
     | '/loyalty/$accountId'
     | '/patients/$patientId'
     | '/prescriptions/$prescriptionId'
+    | '/promotions/$id'
     | '/purchase-orders/$id'
     | '/catalog'
     | '/insurance'
+    | '/promotions'
     | '/insurance/claims/$claimId'
   id:
     | '__root__'
@@ -418,6 +453,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authenticated/ai-runtime'
     | '/_authenticated/campaigns'
+    | '/_authenticated/coupons'
     | '/_authenticated/customers'
     | '/_authenticated/dispenses'
     | '/_authenticated/doctors'
@@ -440,9 +476,11 @@ export interface FileRouteTypes {
     | '/_authenticated/loyalty/$accountId'
     | '/_authenticated/patients/$patientId'
     | '/_authenticated/prescriptions/$prescriptionId'
+    | '/_authenticated/promotions/$id'
     | '/_authenticated/purchase-orders/$id'
     | '/_authenticated/catalog/'
     | '/_authenticated/insurance/'
+    | '/_authenticated/promotions/'
     | '/_authenticated/insurance/claims_/$claimId'
   fileRoutesById: FileRoutesById
 }
@@ -512,6 +550,13 @@ declare module '@tanstack/react-router' {
       path: '/campaigns'
       fullPath: '/campaigns'
       preLoaderRoute: typeof AuthenticatedCampaignsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/coupons': {
+      id: '/_authenticated/coupons'
+      path: '/coupons'
+      fullPath: '/coupons'
+      preLoaderRoute: typeof AuthenticatedCouponsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/customers': {
@@ -682,6 +727,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPrescriptionsPrescriptionIdRouteImport
       parentRoute: typeof AuthenticatedPrescriptionsRoute
     }
+    '/_authenticated/promotions/': {
+      id: '/_authenticated/promotions/'
+      path: '/promotions'
+      fullPath: '/promotions/'
+      preLoaderRoute: typeof AuthenticatedPromotionsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/promotions/$id': {
+      id: '/_authenticated/promotions/$id'
+      path: '/promotions/$id'
+      fullPath: '/promotions/$id'
+      preLoaderRoute: typeof AuthenticatedPromotionsIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/purchase-orders/$id': {
       id: '/_authenticated/purchase-orders/$id'
       path: '/$id'
@@ -810,6 +869,7 @@ const AuthenticatedPurchaseOrdersRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAiRuntimeRoute: typeof AuthenticatedAiRuntimeRoute
   AuthenticatedCampaignsRoute: typeof AuthenticatedCampaignsRouteWithChildren
+  AuthenticatedCouponsRoute: typeof AuthenticatedCouponsRoute
   AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRouteWithChildren
   AuthenticatedDispensesRoute: typeof AuthenticatedDispensesRouteWithChildren
   AuthenticatedDoctorsRoute: typeof AuthenticatedDoctorsRouteWithChildren
@@ -824,14 +884,17 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCatalogProductIdRoute: typeof AuthenticatedCatalogProductIdRoute
   AuthenticatedInsuranceClaimsRoute: typeof AuthenticatedInsuranceClaimsRoute
   AuthenticatedInsuranceCoverageRoute: typeof AuthenticatedInsuranceCoverageRoute
+  AuthenticatedPromotionsIdRoute: typeof AuthenticatedPromotionsIdRoute
   AuthenticatedCatalogIndexRoute: typeof AuthenticatedCatalogIndexRoute
   AuthenticatedInsuranceIndexRoute: typeof AuthenticatedInsuranceIndexRoute
+  AuthenticatedPromotionsIndexRoute: typeof AuthenticatedPromotionsIndexRoute
   AuthenticatedInsuranceClaimsClaimIdRoute: typeof AuthenticatedInsuranceClaimsClaimIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAiRuntimeRoute: AuthenticatedAiRuntimeRoute,
   AuthenticatedCampaignsRoute: AuthenticatedCampaignsRouteWithChildren,
+  AuthenticatedCouponsRoute: AuthenticatedCouponsRoute,
   AuthenticatedCustomersRoute: AuthenticatedCustomersRouteWithChildren,
   AuthenticatedDispensesRoute: AuthenticatedDispensesRouteWithChildren,
   AuthenticatedDoctorsRoute: AuthenticatedDoctorsRouteWithChildren,
@@ -847,8 +910,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCatalogProductIdRoute: AuthenticatedCatalogProductIdRoute,
   AuthenticatedInsuranceClaimsRoute: AuthenticatedInsuranceClaimsRoute,
   AuthenticatedInsuranceCoverageRoute: AuthenticatedInsuranceCoverageRoute,
+  AuthenticatedPromotionsIdRoute: AuthenticatedPromotionsIdRoute,
   AuthenticatedCatalogIndexRoute: AuthenticatedCatalogIndexRoute,
   AuthenticatedInsuranceIndexRoute: AuthenticatedInsuranceIndexRoute,
+  AuthenticatedPromotionsIndexRoute: AuthenticatedPromotionsIndexRoute,
   AuthenticatedInsuranceClaimsClaimIdRoute:
     AuthenticatedInsuranceClaimsClaimIdRoute,
 }
