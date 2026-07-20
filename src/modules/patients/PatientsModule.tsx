@@ -15,7 +15,7 @@ export function PatientsModule() {
 
   const fetchPatients = async () => {
     setLoading(true)
-    const { data, error } = await supabase.from('patients').select('*').limit(100)
+    const { data, error } = await (supabase as any).from('patients').select('*').limit(100)
     if (!error && data) {
       setPatients(data as Patient[])
     }

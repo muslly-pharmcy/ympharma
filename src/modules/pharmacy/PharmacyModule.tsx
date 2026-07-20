@@ -26,7 +26,7 @@ export function PharmacyModule() {
 
     const { data, error } = await query.limit(50)
     if (!error && data) {
-      setProducts(data as Product[])
+      setProducts(data as unknown as Product[])
     }
     setLoading(false)
   }

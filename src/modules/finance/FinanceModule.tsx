@@ -15,7 +15,7 @@ export function FinanceModule() {
 
   const fetchTransactions = async () => {
     setLoading(true)
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('financial_transactions')
       .select('*')
       .order('created_at', { ascending: false })
