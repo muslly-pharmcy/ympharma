@@ -48,7 +48,7 @@ export const getStockSummary = createServerFn({ method: 'GET' })
       }
     }
 
-    const rows = batches as Array<Pick<StockBatch, 'qty_on_hand' | 'qty_reserved' | 'expiry_date'>>
+    const rows = batches as unknown as Array<Pick<StockBatch, 'qty_on_hand' | 'qty_reserved' | 'expiry_date'>>
     const totalOnHand = rows.reduce((s, b) => s + Number(b.qty_on_hand ?? 0), 0)
     const totalReserved = rows.reduce((s, b) => s + Number(b.qty_reserved ?? 0), 0)
     const expiries = rows

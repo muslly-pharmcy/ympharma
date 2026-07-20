@@ -81,7 +81,7 @@ export const getProduct = createServerFn({ method: 'GET' })
     ])
 
     return {
-      product: product as CatalogProduct,
+      product: product as unknown as CatalogProduct,
       barcodes: barcodes ?? [],
       media: media ?? [],
     }
