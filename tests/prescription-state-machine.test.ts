@@ -39,8 +39,8 @@ describe('prescription state machine', () => {
 })
 
 describe('prescription input schemas', () => {
-  const orgId = '00000000-0000-0000-0000-000000000001'
-  const patId = '00000000-0000-0000-0000-000000000002'
+  const orgId = '11111111-1111-4111-8111-111111111111'
+  const patId = '22222222-2222-4222-8222-222222222222'
 
   it('accepts a minimal create payload', () => {
     const parsed = createPrescriptionInput.parse({
