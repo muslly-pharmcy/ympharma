@@ -30,6 +30,7 @@ import { Route as AuthenticatedSegmentsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedSuppliersRouteImport } from './routes/_authenticated/suppliers'
 import { Route as AuthenticatedWarehousesRouteImport } from './routes/_authenticated/warehouses'
 import { Route as PlanetPlanetIdRouteImport } from './routes/planet.$planetId'
+import { Route as AuthenticatedAnalyticsIndexRouteImport } from './routes/_authenticated/analytics.index'
 import { Route as AuthenticatedCampaignsIdRouteImport } from './routes/_authenticated/campaigns.$id'
 import { Route as AuthenticatedCatalogIndexRouteImport } from './routes/_authenticated/catalog.index'
 import { Route as AuthenticatedCatalogProductIdRouteImport } from './routes/_authenticated/catalog.$productId'
@@ -153,6 +154,12 @@ const PlanetPlanetIdRoute = PlanetPlanetIdRouteImport.update({
   path: '/planet/$planetId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAnalyticsIndexRoute =
+  AuthenticatedAnalyticsIndexRouteImport.update({
+    id: '/analytics/',
+    path: '/analytics/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedCampaignsIdRoute =
   AuthenticatedCampaignsIdRouteImport.update({
     id: '/$id',
@@ -283,6 +290,7 @@ export interface FileRoutesByFullPath {
   '/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/promotions/$id': typeof AuthenticatedPromotionsIdRoute
   '/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
+  '/analytics/': typeof AuthenticatedAnalyticsIndexRoute
   '/catalog/': typeof AuthenticatedCatalogIndexRoute
   '/insurance/': typeof AuthenticatedInsuranceIndexRoute
   '/promotions/': typeof AuthenticatedPromotionsIndexRoute
@@ -321,6 +329,7 @@ export interface FileRoutesByTo {
   '/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/promotions/$id': typeof AuthenticatedPromotionsIdRoute
   '/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
+  '/analytics': typeof AuthenticatedAnalyticsIndexRoute
   '/catalog': typeof AuthenticatedCatalogIndexRoute
   '/insurance': typeof AuthenticatedInsuranceIndexRoute
   '/promotions': typeof AuthenticatedPromotionsIndexRoute
@@ -361,6 +370,7 @@ export interface FileRoutesById {
   '/_authenticated/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/_authenticated/promotions/$id': typeof AuthenticatedPromotionsIdRoute
   '/_authenticated/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
+  '/_authenticated/analytics/': typeof AuthenticatedAnalyticsIndexRoute
   '/_authenticated/catalog/': typeof AuthenticatedCatalogIndexRoute
   '/_authenticated/insurance/': typeof AuthenticatedInsuranceIndexRoute
   '/_authenticated/promotions/': typeof AuthenticatedPromotionsIndexRoute
@@ -401,6 +411,7 @@ export interface FileRouteTypes {
     | '/prescriptions/$prescriptionId'
     | '/promotions/$id'
     | '/purchase-orders/$id'
+    | '/analytics/'
     | '/catalog/'
     | '/insurance/'
     | '/promotions/'
@@ -439,6 +450,7 @@ export interface FileRouteTypes {
     | '/prescriptions/$prescriptionId'
     | '/promotions/$id'
     | '/purchase-orders/$id'
+    | '/analytics'
     | '/catalog'
     | '/insurance'
     | '/promotions'
@@ -478,6 +490,7 @@ export interface FileRouteTypes {
     | '/_authenticated/prescriptions/$prescriptionId'
     | '/_authenticated/promotions/$id'
     | '/_authenticated/purchase-orders/$id'
+    | '/_authenticated/analytics/'
     | '/_authenticated/catalog/'
     | '/_authenticated/insurance/'
     | '/_authenticated/promotions/'
@@ -642,6 +655,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/planet/$planetId'
       preLoaderRoute: typeof PlanetPlanetIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/analytics/': {
+      id: '/_authenticated/analytics/'
+      path: '/analytics'
+      fullPath: '/analytics/'
+      preLoaderRoute: typeof AuthenticatedAnalyticsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/campaigns/$id': {
       id: '/_authenticated/campaigns/$id'
@@ -885,6 +905,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInsuranceClaimsRoute: typeof AuthenticatedInsuranceClaimsRoute
   AuthenticatedInsuranceCoverageRoute: typeof AuthenticatedInsuranceCoverageRoute
   AuthenticatedPromotionsIdRoute: typeof AuthenticatedPromotionsIdRoute
+  AuthenticatedAnalyticsIndexRoute: typeof AuthenticatedAnalyticsIndexRoute
   AuthenticatedCatalogIndexRoute: typeof AuthenticatedCatalogIndexRoute
   AuthenticatedInsuranceIndexRoute: typeof AuthenticatedInsuranceIndexRoute
   AuthenticatedPromotionsIndexRoute: typeof AuthenticatedPromotionsIndexRoute
@@ -911,6 +932,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInsuranceClaimsRoute: AuthenticatedInsuranceClaimsRoute,
   AuthenticatedInsuranceCoverageRoute: AuthenticatedInsuranceCoverageRoute,
   AuthenticatedPromotionsIdRoute: AuthenticatedPromotionsIdRoute,
+  AuthenticatedAnalyticsIndexRoute: AuthenticatedAnalyticsIndexRoute,
   AuthenticatedCatalogIndexRoute: AuthenticatedCatalogIndexRoute,
   AuthenticatedInsuranceIndexRoute: AuthenticatedInsuranceIndexRoute,
   AuthenticatedPromotionsIndexRoute: AuthenticatedPromotionsIndexRoute,
@@ -933,13 +955,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

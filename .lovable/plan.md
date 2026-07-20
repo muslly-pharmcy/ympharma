@@ -1,136 +1,66 @@
-# TITANUS OMEGA AI PHARMACY OS — Master Roadmap (Plan)
+Chief — أوصي بتقسيم هذا الطلب الكبير إلى Shipment واحد قابل للشحن الآن (E1) بدلًا من ضخّ كل شيء دفعة واحدة. هذا يحافظ على الجودة ويوفّر نقطة تحقق حقيقية قبل التوسع.
 
-هذا هو المرجع الرسمي للمشروع. يبقى في Plan ويُستخدم كخريطة للتنفيذ. كل Build لاحق يُنفذ مرحلة واحدة فقط منه.
+## نطاق Shipment E1 — Analytics Foundation + Mobile Baseline
 
----
+### 1) Analytics Foundation (لبّ Phase 7)
+- **Migration**: Materialized Views للتقارير الثقيلة:
+  - `mv_sales_daily` (يوم × org × branch: إيراد، عدد طلبات، متوسط سلة)
+  - `mv_dispenses_daily` (صرف يومي، عدد وصفات)
+  - `mv_customers_growth` (عملاء جدد/نشطون شهريًا)
+  - `mv_loyalty_activity` (نقاط مكتسبة/مستبدلة)
+  - `mv_campaigns_perf` (إرسال، تسليم، فشل، تحويل)
+  - `mv_inventory_health` (منخفض/راكد/قريب انتهاء)
+- دالة `refresh_analytics_mvs()` + `pg_cron` كل 15 دقيقة.
+- RLS-safe views مقروءة عبر `has_role`.
 
-## ✅ Foundation (مكتمل)
-- React 19 + TanStack Start + SSR
-- Authentication / Authorization / RBAC / RLS
-- Audit Log + Domain Events + Idempotency
-- Catalog / Warehouses / Suppliers / Purchase Orders
-- Inventory Engine (FEFO, Reservations, Movements)
-- Patients / Doctors
-- Prescription Engine (state machine + notes + history)
-- Dispensing Engine (FEFO consume, barcodes, returns)
-- Insurance Platform C4A (providers, plans, coverage, claims lifecycle, payments) — server + UI
+### 2) Server Layer
+- `src/lib/analytics.functions.ts`: 
+  - `getExecutiveKpis()` — KPIs اليوم/الأسبوع/الشهر.
+  - `getSalesSeries({ range })` — سلاسل زمنية.
+  - `getInventoryHealth()`, `getCrmSummary()`, `getCampaignsSummary()`, `getAiUsageSummary()`.
+- كلها `requireSupabaseAuth` + `requirePermission('analytics.read')`.
+- إضافة `analytics.read` / `analytics.export` إلى RBAC.
 
----
+### 3) Executive Dashboard UI
+- `/analytics` (executive): بطاقات KPI + مخطط إيرادات + Top products + تنبيهات مخزون + أداء الحملات + استخدام AI.
+- `/analytics/sales`, `/analytics/inventory`, `/analytics/crm` (لوحات متخصصة).
+- تصدير CSV (client-side) — PDF/Excel مؤجل لـ E2.
+- استخدام `recharts` (خفيف، متوافق SSR).
 
-## 🚀 Phase 4 — Medical Platform (المتبقي)
+### 4) Mobile Baseline (Responsive)
+- مراجعة الصفحات المحمية لضبط breakpoints (390/412/768/1024).
+- استبدال الجداول الرئيسية بـ Card layout على `<md`:
+  - `/customers`, `/prescriptions`, `/dispenses`, `/promotions`, `/campaigns`, `/analytics`.
+- إضافة `<BottomNav>` للأجهزة `<md` مع الاختصارات الحرجة (Home / Rx / Dispenses / Analytics / Me).
+- Safe Area (iOS notch) عبر `env(safe-area-inset-*)` في `src/index.css`.
 
-### Shipment C4B — Clinical Validation Framework *(framework فقط، بدون قواعد يدوية)*
-- `DrugKnowledgeProvider` interface
-- Adapters: Allergy, Interaction, Dose, Contraindication, Pregnancy, Renal, Hepatic
-- `NullProvider` افتراضي + pluggable providers لاحقاً
-- Hook داخل Prescription/Dispense لعرض تحذيرات استشارية فقط
+### 5) PWA (Manifest-only في E1)
+- `public/manifest.webmanifest` + أيقونات + `theme-color` + `apple-touch-icon`.
+- **بدون** service worker في E1 (يتبع دستور Lovable PWA — نُفعّل offline في E2 فقط عند الطلب صراحةً).
+- اختبار Add-to-Home-Screen على Android/iOS.
 
-## 🚀 Phase 5 — AI Platform
-- AI Runtime: Prompt Registry، Tool Registry، Context Builder، Agent Runtime
-- Memory: Knowledge Graph، Embeddings، Semantic Search، Conversation Memory
-- Cost Tracking، Evaluation، Observability
-- Agents: CEO / Pharmacy / Doctor / Inventory / Warehouse / Supplier / Purchasing / Finance / Marketing / Support / Analytics / Executive Assistant
-- ميزات: OCR وصفات وفواتير، مطابقة أدوية، تطبيع أسماء، توقع طلب/انتهاء صلاحية، اقتراحات شراء، تقارير ذكية، مساعد سريري (استشاري)
+### 6) Tests
+- `tests/analytics-kpis.test.ts` — استعلامات KPI + الصلاحيات.
+- `tests/mobile-responsive.test.ts` (Playwright smoke على 390×844 و 412×915 و 768×1024).
 
-## 🚀 Phase 6 — CRM
-- Customer Profiles، Loyalty، Points، Memberships، Wallet، Coupons، Campaigns، Segmentation
-- Communication: WhatsApp / SMS / Email / Push / In-App
+## ما هو مؤجَّل صراحةً (لا يشمله E1)
+- **Integration Constitution الكامل** (Adapter/Outbox/Circuit Breaker/Distributed Tracing) — يستحق Shipment مستقل E2 بعد Phase 8.
+- **Capacitor / Native wrapping** — بعد ثبات PWA.
+- **PDF/Excel export** — مكتبات ثقيلة، تُضاف بعد قياس الاستخدام.
+- **Offline mode + Service Worker** — يتطلب سياسات cache دقيقة، Shipment مستقل.
+- Phase 8 (Finance) و Phase 9 (Hardening) و Phase 10 (External Integrations) — Shipments لاحقة.
 
-## 🚀 Phase 7 — Analytics
-- Executive Dashboard (Revenue، Profit، Purchases، Inventory، Prescriptions، Dispensing، Insurance، Clinical Warnings، AI Usage)
-- تقارير: Sales، Expiry، Dead/Fast/Slow Stock، Supplier Performance، Doctor/Patient Stats، Financial
+## تفاصيل تقنية (للمراجعة الهندسية)
+- MVs مع `CREATE UNIQUE INDEX` لدعم `REFRESH CONCURRENTLY`.
+- كل view يحمل `organization_id` للسماح بـ RLS عبر view-based policies أو استعلامات مصفّاة في server functions.
+- `analytics.functions.ts` يُرجع DTOs مُبسّطة (أرقام + strings) — لا كائنات معقدة.
+- Recharts داخل `<ClientOnly>` لتجنّب مشاكل SSR في TanStack Start.
+- Bottom nav مخفي على `md:hidden`، ولا يُعرَض في صفحات auth.
 
-## 🚀 Phase 8 — Finance
-- Cash Register، Expenses، Revenue، Refunds
-- Supplier Payments، Insurance Payments، VAT/Tax
-- Cost & Profit Analysis، Accounting Integration
+## معايير القبول
+- Typecheck + lint نظيفَان.
+- كل الاختبارات خضراء (وحدة + Playwright mobile).
+- Lighthouse Mobile ≥ 85 (Performance) على `/analytics` و `/customers`.
+- LCP < 2.5s على شبكة 3G محاكاة.
 
-## 🚀 Phase 9 — Automation
-- Auto POs / Reorder، Low Stock & Expiry Alerts
-- Daily / Weekly / Monthly AI Reports
-- Marketing & Supplier Automation
-- Background Workers، Scheduled Jobs، Webhooks
-
-## 🚀 Phase 10 — Enterprise
-- Multi-Tenant: Organizations / Branches / Departments
-- API Gateway، Feature Flags، Plugin System
-- Health Checks، Monitoring، Metrics، Distributed Logging
-- Queue Workers، Backup / Restore، DR
-
-## 🚀 Phase 11 — Mobile Ecosystem
-- Pharmacy / Doctor / Patient / Warehouse / Delivery apps
-
-## 🚀 Phase 12 — Integrations
-- Supabase، WhatsApp، Email، SMS، Payment Gateways
-- Barcode Scanners، Label Printers، OCR، External Drug DBs
-- Insurance APIs، ERP، Accounting
-
-## 🚀 Phase 13 — Security
-- MFA، SSO (Google / Microsoft)، Session/Device Management
-- CSRF، CSP، Rate Limiting، Secret Rotation، Encryption
-- Audit Trail، Compliance Logging
-
-## 🚀 Phase 14 — Quality
-- Unit / Integration / E2E / Load / Security / Accessibility / Performance
-
-## 🚀 Phase 15 — DevOps
-- Docker، GitHub Actions، CI/CD، Staging/Prod، Rollback، Blue/Green
-- Monitoring، Alerting، Log Aggregation
-
-## 🚀 Phase 16 — Documentation
-- API، Architecture، Database، Deployment، Operations، Admin، User، Developer guides
-
-## 🚀 Phase 17 — Production Readiness (Gate)
-- كل الوحدات الأساسية تعمل معاً
-- RBAC + RLS مطبقان بالكامل
-- كل العمليات الحساسة داخل Audit Log
-- كل Domain Events تعمل
-- اختبارات وحدة/تكامل ناجحة
-- اختبارات أداء/أمان مكتملة
-- خطة Backup/Restore
-- مراقبة وتنبيهات إنتاج
-
----
-
-## معايير معمارية ثابتة (تُطبق في كل Build)
-- **Stack:** TanStack Start (SSR) + Supabase + Tailwind v4 + shadcn
-- **Server-only logic** عبر `createServerFn` (لا edge functions للتطبيق الداخلي)
-- **Auth:** Supabase JWT + `requireSupabaseAuth`؛ الحماية عبر `_authenticated/`
-- **RBAC:** `requirePermission()` في كل mutation
-- **RLS:** إجبارية على كل جدول public + GRANTs صريحة
-- **Audit:** `audit()` بعد كل كتابة حسّاسة
-- **Idempotency:** `withIdempotency()` لكل mutation ذات أثر مالي/مخزني
-- **Domain Events:** `emit_domain_event()` بعد كل انتقال حالة
-- **Naming:** جداول جديدة تحمل namespace واضح لتجنب اصطدام الـ legacy
-- **UI:** RTL افتراضي، glassmorphism، ألوان Medical Future Palette 2026
-- **Tests:** state machines تُختبر قبل الإطلاق
-- **No hand-authored clinical rules** — كل شيء سريري خلف Provider Interface
-
----
-
-## استراتيجية التنفيذ
-كل Build لاحق ينفّذ **مرحلة واحدة فقط**، بالترتيب المقترح:
-
-1. ✅ **Build #1 → Shipment C4B** (Clinical Framework)
-2. ✅ **Build #2 → Phase 5** (AI Runtime + أول 3 Agents) — `/ai-runtime`
-3. 🚧 **Build #3 → Phase 6** (CRM Core) — قيد التنفيذ، مقسمة إلى Shipments:
-   - ✅ **D1** — Customers foundation (`crm_customers`, addresses, contacts, tags) + `/customers`
-   - ✅ **D2** — Loyalty Platform (ledger-based `crm_loyalty_*`, rewards, rules engine, tiers) + `/loyalty` `/loyalty/$accountId` `/rewards` + AI tools (`get_loyalty_balance`, `customer_loyalty_history`, `suggest_rewards`)
-   - **D3** — Campaigns & Customer Segmentation
-   - **D4** — Coupons & Promotions
-4. **Build #4 → Phase 7** (Executive Analytics)
-5. **Build #5 → Phase 8** (Finance)
-6. **Build #6 → Phase 9** (Automation)
-7. **Build #7 → Phases 10 + 13** (Enterprise + Security hardening)
-8. **Build #8 → Phase 11** (Mobile)
-9. **Build #9 → Phases 14 + 15 + 17** (Quality + DevOps + Production Gate)
-
-### AI Runtime — تحسينات مؤجلة (قبل Phase الإنتاج النهائي)
-- Prompt Versioning & Rollback (تفعيل نسخة سابقة بضغطة)
-- Per-tool Permissions (بدل `ai.execute` واحد)
-- Conversation Memory (org+user، مع retention policy)
-- Evaluation Pipeline (thumbs up/down + human review)
-- Rate Limits & Quotas (per-org، per-user)
-- Streaming Responses (SSE عبر `streamText` + `useChat`)
-- PII Redaction (قبل الإرسال إلى النموذج)
-
+هل توافق على E1 بهذا الشكل، أم تريد إضافة/حذف عناصر قبل البدء؟
