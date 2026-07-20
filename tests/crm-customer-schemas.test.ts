@@ -4,22 +4,21 @@ import {
   addAddressInput, addContactInput, addTagInput,
 } from '@/domain/crm/commands'
 
-const ORG = '00000000-0000-0000-0000-000000000001'
-const A = '00000000-0000-0000-0000-0000000000aa'
-const B = '00000000-0000-0000-0000-0000000000bb'
+const A = '11111111-1111-4111-8111-111111111111'
+const B = '22222222-2222-4222-8222-222222222222'
 
 describe('CRM command schemas', () => {
-  it('requires org + name + idempotency on create', () => {
+  it('requires name + idempotency on create', () => {
     expect(() => createCustomerInput.parse({})).toThrow()
     const ok = createCustomerInput.parse({
-      organizationId: ORG, full_name: 'أحمد', idempotencyKey: 'idem-1234',
+      full_name: 'أحمد', idempotencyKey: 'idem-1234',
     })
     expect(ok.full_name).toBe('أحمد')
   })
 
   it('rejects invalid email', () => {
     expect(() => createCustomerInput.parse({
-      organizationId: ORG, full_name: 'x', email: 'not-an-email', idempotencyKey: 'idem-1234',
+      full_name: 'x', email: 'not-an-email', idempotencyKey: 'idem-1234',
     })).toThrow()
   })
 
