@@ -26,9 +26,29 @@ const credentialsSchema = z.object({
   password: z.string().min(8, 'كلمة المرور يجب أن تكون 8 أحرف على الأقل'),
 })
 
+const DEFAULT_REDIRECT = '/catalog'
+
+// Accept only internal, single-slash paths. Reject:
+// - absolute URLs (http:, https:, javascript:, data:, mailto:, tel:, ...)
+// - protocol-relative (//host, /\host) that some browsers normalize to hosts
+// - control chars, whitespace, or excessive length that could smuggle URLs
+// - percent-encoded slashes / backslashes that decode into `//` or `/\`
 function safeRedirect(raw?: string): string {
-  if (!raw) return '/catalog'
-  if (!raw.startsWith('/') || raw.startsWith('//')) return '/catalog'
+  if (!raw || typeof raw !== 'string') return DEFAULT_REDIRECT
+  if (raw.length > 512) return DEFAULT_REDIRECT
+  if (/[\s\u0000-\u001f\u007f]/.test(raw)) return DEFAULT_REDIRECT
+
+  let decoded = raw
+  try {
+    // Decode once to catch %2f%2fevil.com and %5cevil.com style bypasses.
+    decoded = decodeURIComponent(raw)
+  } catch {
+    return DEFAULT_REDIRECT
+  }
+
+  if (!decoded.startsWith('/')) return DEFAULT_REDIRECT
+  if (decoded.startsWith('//') || decoded.startsWith('/\\')) return DEFAULT_REDIRECT
+  if (decoded.startsWith('/auth')) return DEFAULT_REDIRECT // avoid redirect loops
   return raw
 }
 

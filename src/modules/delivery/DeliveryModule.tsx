@@ -15,7 +15,7 @@ export function DeliveryModule() {
 
   const fetchDeliveries = async () => {
     setLoading(true)
-    let query = supabase.from('deliveries').select('*').order('created_at', { ascending: false })
+    let query = (supabase as any).from('deliveries').select('*').order('created_at', { ascending: false })
 
     if (status !== 'all') {
       query = query.eq('status', status)

@@ -16,7 +16,7 @@ export function DoctorsModule() {
 
   const fetchDoctors = async () => {
     setLoading(true)
-    let query = supabase.from('doctors').select('*').eq('is_active', true).eq('is_verified', true)
+    let query = (supabase as any).from('doctors').select('*').eq('is_active', true).eq('is_verified', true)
 
     if (specialty !== 'all') {
       query = query.eq('specialty', specialty)
