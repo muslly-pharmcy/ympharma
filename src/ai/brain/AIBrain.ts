@@ -228,7 +228,7 @@ export class AIBrain {
     const memories = this.memory.get(userId)!
     memories.push({
       id: Date.now().toString(),
-      type: 'quantum',
+      type: 'long',
       content: `${input} → ${JSON.stringify(result)}`,
       context: { version: '2.1' },
       importance: 0.9,

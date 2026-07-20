@@ -1,8 +1,8 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useAuth } from '@/context/AuthContext'
 import { useTheme } from '@/context/ThemeContext'
 import { useAI } from '@/context/AIContext'
-import { Sun, Moon, Bell, MessageSquare, LogOut, User, Shield } from 'lucide-react'
+import { Sun, Moon, Bell, MessageSquare, LogOut, Shield } from 'lucide-react'
 import { useState } from 'react'
 
 export default function Navbar() {
@@ -13,12 +13,11 @@ export default function Navbar() {
   const [showNotifications, setShowNotifications] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
 
-  const activeAgentsCount = agents.filter(a => a.status === 'active').length
+  const activeAgentsCount = agents.filter((a) => a.status === 'active').length
 
   return (
     <nav className="fixed top-0 right-0 left-0 z-50 h-16 glass-panel border-b border-gray-200/50">
       <div className="h-full px-4 md:px-6 flex items-center justify-between max-w-[1920px] mx-auto">
-        {/* Logo */}
         <Link to="/" className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
             <span className="text-white text-xl font-bold">م</span>
@@ -29,7 +28,6 @@ export default function Navbar() {
           </div>
         </Link>
 
-        {/* Center - Active Agents */}
         <div className="hidden lg:flex items-center gap-6">
           <div className="flex items-center gap-2 px-4 py-2 bg-primary/5 rounded-xl">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
@@ -37,8 +35,8 @@ export default function Navbar() {
               <span className="font-bold text-primary">{activeAgentsCount}</span> وكيل نشط
             </span>
           </div>
-          <Link 
-            to="/mission-control" 
+          <Link
+            to="/mission-control"
             className="flex items-center gap-2 px-4 py-2 bg-gold/10 rounded-xl hover:bg-gold/20 transition-colors"
           >
             <Shield className="w-4 h-4 text-gold" />
@@ -46,7 +44,6 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Right Actions */}
         <div className="flex items-center gap-2">
           <button
             onClick={toggleTheme}
@@ -75,15 +72,14 @@ export default function Navbar() {
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
           </button>
 
-          {/* Profile */}
           <div className="relative">
             <button
               onClick={() => setShowProfile(!showProfile)}
               className="flex items-center gap-2 p-1.5 pr-3 rounded-xl hover:bg-gray-100 transition-colors"
             >
-              <img 
-                src={user?.avatar || '/avatar.png'} 
-                alt={user?.name} 
+              <img
+                src={user?.avatar || '/avatar.png'}
+                alt={user?.name}
                 className="w-8 h-8 rounded-lg object-cover"
               />
               <span className="hidden md:block text-sm font-medium text-gray-700">{user?.name}</span>
@@ -99,7 +95,10 @@ export default function Navbar() {
                   </span>
                 </div>
                 <button
-                  onClick={() => { logout(); navigate('/login') }}
+                  onClick={() => {
+                    logout()
+                    navigate({ to: '/login' })
+                  }}
                   className="w-full flex items-center gap-2 px-4 py-2.5 text-red-600 hover:bg-red-50 transition-colors text-right"
                 >
                   <LogOut className="w-4 h-4" />

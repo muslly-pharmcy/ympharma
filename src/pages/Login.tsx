@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@tanstack/react-router'
 import { Eye, EyeOff, Lock, Mail, Sparkles } from 'lucide-react'
 
 export default function Login() {
@@ -20,7 +20,7 @@ export default function Login() {
 
     try {
       await login(email, password)
-      navigate('/')
+      navigate({ to: '/' })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'حدث خطأ غير متوقع')
     } finally {
