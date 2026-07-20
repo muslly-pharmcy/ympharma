@@ -76,7 +76,7 @@ export const getPatientCoverage = createServerFn({ method: 'POST' })
       .eq('patient_id', data.patientId)
       .order('priority')
     if (error) throw new Error(error.message)
-    return { coverage: (rows ?? []) as Array<PatientInsurance & { plan: unknown }> }
+    return { coverage: (rows ?? []) as Array<PatientInsurance & { plan: Record<string, unknown> | null }> }
   })
 
 // ----------------- claims list -----------------
