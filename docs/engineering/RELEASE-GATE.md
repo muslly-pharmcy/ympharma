@@ -9,7 +9,7 @@
 | ID | Title | Owner | Effort | Status |
 |---|---|---|---|---|
 | F-01 | Supabase env unresolved on `/` — **H1 confirmed** (deploy-time env not injected in stale bundle `index-DdUM4bbP.js`); awaiting rebuild verification (`WAVE-C7-REGRESSION-LOG.md` R0.1) | Backend + DevOps | S–M | 🟡 Verified root cause · pending rebuild |
-| F-03 | Public POST endpoints unmetered — shared guard not wired | Backend + Security | M | ⛔ Open |
+| F-03 | Public POST endpoints unmetered — shared guard landed (`src/lib/security/public-endpoint-guard.server.ts`) and wired to `csp-report`; 5/5 regression tests green | Backend + Security | M | 🟢 Guard shipped · pending post-rebuild smoke |
 | F-02 | `_authenticated` SSR decision record + minimal guard-rails | Backend | M | ⛔ Open |
 | F-07 | `inventory.functions.ts` missing `requireSupabaseAuth` | Backend + Security | S | ⛔ Open |
 | F-06 | `.env.example` rewrite to real contract | Docs + DevOps | XS | ⛔ Open |
