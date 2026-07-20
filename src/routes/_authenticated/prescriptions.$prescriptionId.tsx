@@ -8,6 +8,7 @@ import {
   addPrescriptionNote, updatePrescription,
 } from '@/lib/prescriptions.mutations.functions'
 import { ALLOWED_TRANSITIONS, type PrescriptionStatus } from '@/domain/prescriptions/schemas'
+import { ClinicalWarningsPanel } from '@/components/clinical/ClinicalWarningsPanel'
 
 export const Route = createFileRoute('/_authenticated/prescriptions/$prescriptionId')({
   head: () => ({ meta: [{ title: 'ملف الوصفة — MUSLLY AI OS' }] }),
@@ -90,6 +91,10 @@ function PrescriptionDetailPage() {
           <p className="text-sm text-gray-700 leading-relaxed">{rx.diagnosis}</p>
         </section>
       )}
+
+      <ClinicalWarningsPanel prescriptionId={rx.id} />
+
+
 
       <section className="glass-panel rounded-2xl p-6">
         <h2 className="mb-4 text-lg font-semibold">الأدوية ({items.length})</h2>

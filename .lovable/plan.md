@@ -1,147 +1,124 @@
-# Phase 4 — Shipment C4: Insurance + Clinical Validation Framework
+# TITANUS OMEGA AI PHARMACY OS — Master Roadmap (Plan)
 
-Accepting the split. C4A ships first as a full transactional insurance module. C4B lays the framework — engines behind interfaces with a safe null-provider — so a licensed drug database can be plugged in later without rewrites. No hand-authored clinical rules will be shipped as data.
-
----
-
-## Shipment C4A — Insurance Platform
-
-### Database (migration, one shot)
-
-New tables under `public`, with RLS, GRANTs, updated_at triggers, and org scoping via `organization_id`:
-
-- `insurance_providers` — payer directory (name, code, contact, active).
-- `insurance_plans` — plans per provider (name, tier, formulary_ref, effective range).
-- `patient_insurance` — patient ↔ plan link (policy_number, group_number, holder, primary/secondary, status).
-- `insurance_policy_members` — dependents on a policy (relation, dob).
-- `insurance_authorizations` — pre-auth records (status, reference, valid range, notes).
-- `insurance_claims` — claim header (patient_id, dispense_id, provider_id, plan_id, status, totals, submitted_at, adjudicated_at).
-- `insurance_claim_items` — per-line (product_id, qty, billed, allowed, copay, coinsurance, deductible, paid, reason_code).
-- `insurance_payment_responses` — payer remittances (claim_id, amount, method, reference, received_at, raw_payload jsonb).
-
-Reuse existing `ins_companies` / `ins_patient_coverage` / `insurance_claims` where compatible — audit their columns and either extend or namespace new ones as `insv2_*`. Decision made in the migration itself based on schema read.
-
-Status machine on `insurance_claims`:
-`draft → submitted → in_review → approved | partially_approved | rejected → paid | closed` (cancelled terminal).
-
-### Domain layer (`src/domain/insurance/`)
-
-- `schemas.ts` — Zod for providers, plans, coverage, claims, items, auth.
-- `commands.ts` — inputs for verify/create/submit/approve/reject/reconcile.
-- `state-machine.ts` — `ALLOWED_TRANSITIONS` for claim status, pure guard function + unit test.
-
-### Server layer
-
-- `src/lib/insurance.functions.ts` — reads: `listInsuranceProviders`, `listPlans`, `getCoverage`, `listClaims`, `getClaim`.
-- `src/lib/insurance.mutations.functions.ts` — writes: `verifyCoverage`, `createClaim`, `submitClaim`, `approveClaim`, `rejectClaim`, `reconcileClaim`, `recordPayment`, `createAuthorization`.
-- All mutations: `getActor()` → `requirePermission()` → idempotency key → org scoping → `audit()` → `emit_domain_event()`.
-
-### Permissions (extend `session.server.ts`)
-
-`insurance.read`, `insurance.write`, `insurance.approve`.
-- viewer/staff: read
-- pharmacist: read + write (claims, verify)
-- manager: + approve
-- admin/owner: all
-
-### Domain events
-
-`insurance.verified`, `insurance.claim.created|submitted|approved|rejected|paid`, `insurance.authorization.created`.
-
-### UI
-
-- `/_authenticated/insurance/index.tsx` — providers + plans list with search.
-- `/_authenticated/insurance/coverage.tsx` — patient coverage lookup + verify.
-- `/_authenticated/insurance/claims.tsx` — claims list with status filter.
-- `/_authenticated/insurance/claims.$claimId.tsx` — claim detail with state-driven actions, items table, authorization panel, payment responses timeline.
-
-Glassmorphism + RTL, matching C1/C2/C3.
+هذا هو المرجع الرسمي للمشروع. يبقى في Plan ويُستخدم كخريطة للتنفيذ. كل Build لاحق يُنفذ مرحلة واحدة فقط منه.
 
 ---
 
-## Shipment C4B — Clinical Validation Framework
-
-No clinical facts are shipped as data. The framework accepts pluggable providers; the default provider is a `NullProvider` that returns "no data available — pharmacist review required" for every check.
-
-### Provider interface (`src/domain/clinical/providers.ts`)
-
-```ts
-export interface DrugKnowledgeProvider {
-  readonly id: string;
-  readonly source: 'null' | 'external';
-  getDrugInteractions(drugs: DrugRef[]): Promise<InteractionFinding[]>;
-  getContraindications(drug: DrugRef, patient: PatientContext): Promise<Finding[]>;
-  getDoseRecommendations(drug: DrugRef, patient: PatientContext): Promise<DoseFinding[]>;
-  getAllergyWarnings(drugs: DrugRef[], allergies: AllergyRef[]): Promise<Finding[]>;
-  getPregnancyWarnings(drug: DrugRef, patient: PatientContext): Promise<Finding[]>;
-  getRenalAdjustments(drug: DrugRef, renal: RenalStatus): Promise<DoseFinding[]>;
-  getHepaticAdjustments(drug: DrugRef, hepatic: HepaticStatus): Promise<DoseFinding[]>;
-}
-```
-
-### Engines (`src/lib/clinical/`)
-
-Each engine is a pure function that calls the injected provider and normalizes results to a common `Finding { severity, code, message, source, evidence_url? }`.
-
-- `allergy-engine.ts` — cross-refs `patient_allergies` with drug ingredients from provider.
-- `interaction-engine.ts`
-- `contraindication-engine.ts`
-- `dose-engine.ts`
-- `pregnancy-engine.ts`
-- `renal-engine.ts`
-- `hepatic-engine.ts`
-
-### Orchestrator (`src/lib/clinical/validator.server.ts`)
-
-`validatePrescription(prescriptionId)` runs all engines in parallel, dedupes findings, persists to a new `clinical_findings` table (per prescription snapshot), returns aggregated warnings.
-
-### Database (single migration)
-
-- `clinical_providers` — registered providers (id, name, source, active, config jsonb).
-- `clinical_findings` — per-prescription snapshot (prescription_id, engine, severity, code, message, source, evidence, created_at).
-- `clinical_review_decisions` — pharmacist ack/override (finding_id, decision, rationale, decided_by, decided_at).
-
-RLS: same org scoping; only `prescription.read` sees findings, only `prescription.write` records decisions.
-
-### Provider registry
-
-`src/lib/clinical/registry.server.ts` selects the active provider from `clinical_providers` or falls back to `NullProvider`. Zero external HTTP calls in default build.
-
-### UI integration
-
-- On `/prescriptions/$prescriptionId`: "Clinical Validation" panel — button to run validation, findings table grouped by severity, per-finding acknowledge/override with rationale.
-- On dispense flow: warnings surfaced before "Prepare", never blocking — pharmacist decides.
-
-### Safety invariants (asserted in code + tests)
-
-1. No automatic rejection based on clinical findings — always advisory.
-2. `NullProvider` returned findings must be labeled `severity: 'unknown', source: 'null'`.
-3. All findings and decisions written to `audit_events` and emitted as domain events.
-
-### Domain events
-
-`clinical.validation.started|completed`, `clinical.finding.recorded`, `clinical.decision.ack|override`.
+## ✅ Foundation (مكتمل)
+- React 19 + TanStack Start + SSR
+- Authentication / Authorization / RBAC / RLS
+- Audit Log + Domain Events + Idempotency
+- Catalog / Warehouses / Suppliers / Purchase Orders
+- Inventory Engine (FEFO, Reservations, Movements)
+- Patients / Doctors
+- Prescription Engine (state machine + notes + history)
+- Dispensing Engine (FEFO consume, barcodes, returns)
+- Insurance Platform C4A (providers, plans, coverage, claims lifecycle, payments) — server + UI
 
 ---
 
-## Tests
+## 🚀 Phase 4 — Medical Platform (المتبقي)
 
-- `tests/insurance-claim-state-machine.test.ts` — transition matrix.
-- `tests/clinical-null-provider.test.ts` — default provider returns unknown-severity findings.
-- `tests/clinical-validator.test.ts` — orchestrator dedupe + severity aggregation using an in-memory fake provider.
+### Shipment C4B — Clinical Validation Framework *(framework فقط، بدون قواعد يدوية)*
+- `DrugKnowledgeProvider` interface
+- Adapters: Allergy, Interaction, Dose, Contraindication, Pregnancy, Renal, Hepatic
+- `NullProvider` افتراضي + pluggable providers لاحقاً
+- Hook داخل Prescription/Dispense لعرض تحذيرات استشارية فقط
 
-## Acceptance
+## 🚀 Phase 5 — AI Platform
+- AI Runtime: Prompt Registry، Tool Registry، Context Builder، Agent Runtime
+- Memory: Knowledge Graph، Embeddings، Semantic Search، Conversation Memory
+- Cost Tracking، Evaluation، Observability
+- Agents: CEO / Pharmacy / Doctor / Inventory / Warehouse / Supplier / Purchasing / Finance / Marketing / Support / Analytics / Executive Assistant
+- ميزات: OCR وصفات وفواتير، مطابقة أدوية، تطبيع أسماء، توقع طلب/انتهاء صلاحية، اقتراحات شراء، تقارير ذكية، مساعد سريري (استشاري)
 
-- Insurance module transacts end-to-end with RBAC + RLS + audit + events.
-- Clinical framework exists, defaults to NullProvider, ships zero hand-authored medical facts.
-- Prescription detail page surfaces advisory findings; pharmacist retains final decision.
-- Typecheck + tests green.
+## 🚀 Phase 6 — CRM
+- Customer Profiles، Loyalty، Points، Memberships، Wallet، Coupons، Campaigns، Segmentation
+- Communication: WhatsApp / SMS / Email / Push / In-App
 
-## Sequencing
+## 🚀 Phase 7 — Analytics
+- Executive Dashboard (Revenue، Profit، Purchases، Inventory، Prescriptions، Dispensing، Insurance، Clinical Warnings، AI Usage)
+- تقارير: Sales، Expiry، Dead/Fast/Slow Stock، Supplier Performance، Doctor/Patient Stats، Financial
 
-1. C4A migration (approval gate).
-2. C4A domain + server + UI + tests.
-3. C4B migration (approval gate).
-4. C4B framework + engines + UI hook + tests.
+## 🚀 Phase 8 — Finance
+- Cash Register، Expenses، Revenue، Refunds
+- Supplier Payments، Insurance Payments، VAT/Tax
+- Cost & Profit Analysis، Accounting Integration
 
-Approve to proceed with step 1 (C4A migration).
+## 🚀 Phase 9 — Automation
+- Auto POs / Reorder، Low Stock & Expiry Alerts
+- Daily / Weekly / Monthly AI Reports
+- Marketing & Supplier Automation
+- Background Workers، Scheduled Jobs، Webhooks
+
+## 🚀 Phase 10 — Enterprise
+- Multi-Tenant: Organizations / Branches / Departments
+- API Gateway، Feature Flags، Plugin System
+- Health Checks، Monitoring، Metrics، Distributed Logging
+- Queue Workers، Backup / Restore، DR
+
+## 🚀 Phase 11 — Mobile Ecosystem
+- Pharmacy / Doctor / Patient / Warehouse / Delivery apps
+
+## 🚀 Phase 12 — Integrations
+- Supabase، WhatsApp، Email، SMS، Payment Gateways
+- Barcode Scanners، Label Printers، OCR، External Drug DBs
+- Insurance APIs، ERP، Accounting
+
+## 🚀 Phase 13 — Security
+- MFA، SSO (Google / Microsoft)، Session/Device Management
+- CSRF، CSP، Rate Limiting، Secret Rotation، Encryption
+- Audit Trail، Compliance Logging
+
+## 🚀 Phase 14 — Quality
+- Unit / Integration / E2E / Load / Security / Accessibility / Performance
+
+## 🚀 Phase 15 — DevOps
+- Docker، GitHub Actions، CI/CD، Staging/Prod، Rollback، Blue/Green
+- Monitoring، Alerting، Log Aggregation
+
+## 🚀 Phase 16 — Documentation
+- API، Architecture، Database، Deployment، Operations، Admin، User، Developer guides
+
+## 🚀 Phase 17 — Production Readiness (Gate)
+- كل الوحدات الأساسية تعمل معاً
+- RBAC + RLS مطبقان بالكامل
+- كل العمليات الحساسة داخل Audit Log
+- كل Domain Events تعمل
+- اختبارات وحدة/تكامل ناجحة
+- اختبارات أداء/أمان مكتملة
+- خطة Backup/Restore
+- مراقبة وتنبيهات إنتاج
+
+---
+
+## معايير معمارية ثابتة (تُطبق في كل Build)
+- **Stack:** TanStack Start (SSR) + Supabase + Tailwind v4 + shadcn
+- **Server-only logic** عبر `createServerFn` (لا edge functions للتطبيق الداخلي)
+- **Auth:** Supabase JWT + `requireSupabaseAuth`؛ الحماية عبر `_authenticated/`
+- **RBAC:** `requirePermission()` في كل mutation
+- **RLS:** إجبارية على كل جدول public + GRANTs صريحة
+- **Audit:** `audit()` بعد كل كتابة حسّاسة
+- **Idempotency:** `withIdempotency()` لكل mutation ذات أثر مالي/مخزني
+- **Domain Events:** `emit_domain_event()` بعد كل انتقال حالة
+- **Naming:** جداول جديدة تحمل namespace واضح لتجنب اصطدام الـ legacy
+- **UI:** RTL افتراضي، glassmorphism، ألوان Medical Future Palette 2026
+- **Tests:** state machines تُختبر قبل الإطلاق
+- **No hand-authored clinical rules** — كل شيء سريري خلف Provider Interface
+
+---
+
+## استراتيجية التنفيذ
+كل Build لاحق ينفّذ **مرحلة واحدة فقط**، بالترتيب المقترح:
+
+1. **Build #1 → Shipment C4B** (Clinical Framework)
+2. **Build #2 → Phase 5** (AI Runtime + أول 3 Agents)
+3. **Build #3 → Phase 6** (CRM Core)
+4. **Build #4 → Phase 7** (Executive Analytics)
+5. **Build #5 → Phase 8** (Finance)
+6. **Build #6 → Phase 9** (Automation)
+7. **Build #7 → Phases 10 + 13** (Enterprise + Security hardening)
+8. **Build #8 → Phase 11** (Mobile)
+9. **Build #9 → Phases 14 + 15 + 17** (Quality + DevOps + Production Gate)
+
+عند اعتماد هذه الخطة، ابدأ التالي بـ: **"Build #1 — Shipment C4B"**.
