@@ -160,7 +160,7 @@ const ORG_ROLE_PERMISSIONS: Record<string, Permission[]> = {
     'insurance.read','insurance.write',
     'customer.read','customer.write',
     'loyalty.read','loyalty.write','loyalty.redeem',
-    'campaign.read','segment.read',
+    'campaign.read','segment.read','analytics.read',
   ],
   staff: [
     'catalog.read','inventory.read','warehouse.read','supplier.read',
