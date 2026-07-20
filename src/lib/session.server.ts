@@ -114,6 +114,7 @@ export type Permission =
   | 'doctor.read' | 'doctor.write'
   | 'patient.read' | 'patient.write'
   | 'prescription.read' | 'prescription.write'
+  | 'dispense.read' | 'dispense.write' | 'dispense.verify'
   | 'ai.execute'
   | 'system.admin'
 
@@ -122,6 +123,7 @@ const ALL: Permission[] = [
   'warehouse.read','warehouse.write','supplier.read','supplier.write',
   'purchase.read','purchase.write','doctor.read','doctor.write',
   'patient.read','patient.write','prescription.read','prescription.write',
+  'dispense.read','dispense.write','dispense.verify',
   'ai.execute','system.admin',
 ]
 
@@ -132,20 +134,22 @@ const ORG_ROLE_PERMISSIONS: Record<string, Permission[]> = {
     'catalog.read','catalog.write','inventory.read','inventory.write',
     'warehouse.read','warehouse.write','supplier.read','supplier.write',
     'purchase.read','purchase.write','doctor.read','patient.read',
-    'prescription.read','ai.execute',
+    'prescription.read','dispense.read','dispense.verify','ai.execute',
   ],
   pharmacist: [
     'catalog.read','inventory.read','inventory.write','warehouse.read',
     'supplier.read','purchase.read','patient.read','patient.write',
-    'prescription.read','prescription.write','ai.execute',
+    'prescription.read','prescription.write',
+    'dispense.read','dispense.write','dispense.verify','ai.execute',
   ],
   staff: [
     'catalog.read','inventory.read','warehouse.read','supplier.read',
-    'purchase.read','patient.read','prescription.read',
+    'purchase.read','patient.read','prescription.read','dispense.read',
   ],
   viewer: [
     'catalog.read','inventory.read','warehouse.read','supplier.read',
     'purchase.read','patient.read','prescription.read','doctor.read',
+    'dispense.read',
   ],
 }
 

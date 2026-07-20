@@ -15,6 +15,7 @@ import { Route as AiChatRouteImport } from './routes/ai-chat'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as MissionControlRouteImport } from './routes/mission-control'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as AuthenticatedDispensesRouteImport } from './routes/_authenticated/dispenses'
 import { Route as AuthenticatedDoctorsRouteImport } from './routes/_authenticated/doctors'
 import { Route as AuthenticatedPatientsRouteImport } from './routes/_authenticated/patients'
 import { Route as AuthenticatedPrescriptionsRouteImport } from './routes/_authenticated/prescriptions'
@@ -24,6 +25,7 @@ import { Route as AuthenticatedWarehousesRouteImport } from './routes/_authentic
 import { Route as PlanetPlanetIdRouteImport } from './routes/planet.$planetId'
 import { Route as AuthenticatedCatalogIndexRouteImport } from './routes/_authenticated/catalog.index'
 import { Route as AuthenticatedCatalogProductIdRouteImport } from './routes/_authenticated/catalog.$productId'
+import { Route as AuthenticatedDispensesDispenseIdRouteImport } from './routes/_authenticated/dispenses.$dispenseId'
 import { Route as AuthenticatedDoctorsDoctorIdRouteImport } from './routes/_authenticated/doctors.$doctorId'
 import { Route as AuthenticatedPatientsPatientIdRouteImport } from './routes/_authenticated/patients.$patientId'
 import { Route as AuthenticatedPrescriptionsPrescriptionIdRouteImport } from './routes/_authenticated/prescriptions.$prescriptionId'
@@ -57,6 +59,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedDispensesRoute = AuthenticatedDispensesRouteImport.update({
+  id: '/dispenses',
+  path: '/dispenses',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDoctorsRoute = AuthenticatedDoctorsRouteImport.update({
   id: '/doctors',
@@ -107,6 +114,12 @@ const AuthenticatedCatalogProductIdRoute =
     path: '/catalog/$productId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDispensesDispenseIdRoute =
+  AuthenticatedDispensesDispenseIdRouteImport.update({
+    id: '/$dispenseId',
+    path: '/$dispenseId',
+    getParentRoute: () => AuthenticatedDispensesRoute,
+  } as any)
 const AuthenticatedDoctorsDoctorIdRoute =
   AuthenticatedDoctorsDoctorIdRouteImport.update({
     id: '/$doctorId',
@@ -138,6 +151,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/mission-control': typeof MissionControlRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/dispenses': typeof AuthenticatedDispensesRouteWithChildren
   '/doctors': typeof AuthenticatedDoctorsRouteWithChildren
   '/patients': typeof AuthenticatedPatientsRouteWithChildren
   '/prescriptions': typeof AuthenticatedPrescriptionsRouteWithChildren
@@ -146,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/warehouses': typeof AuthenticatedWarehousesRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/catalog/$productId': typeof AuthenticatedCatalogProductIdRoute
+  '/dispenses/$dispenseId': typeof AuthenticatedDispensesDispenseIdRoute
   '/doctors/$doctorId': typeof AuthenticatedDoctorsDoctorIdRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
@@ -158,6 +173,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/mission-control': typeof MissionControlRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/dispenses': typeof AuthenticatedDispensesRouteWithChildren
   '/doctors': typeof AuthenticatedDoctorsRouteWithChildren
   '/patients': typeof AuthenticatedPatientsRouteWithChildren
   '/prescriptions': typeof AuthenticatedPrescriptionsRouteWithChildren
@@ -166,6 +182,7 @@ export interface FileRoutesByTo {
   '/warehouses': typeof AuthenticatedWarehousesRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/catalog/$productId': typeof AuthenticatedCatalogProductIdRoute
+  '/dispenses/$dispenseId': typeof AuthenticatedDispensesDispenseIdRoute
   '/doctors/$doctorId': typeof AuthenticatedDoctorsDoctorIdRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
@@ -180,6 +197,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/mission-control': typeof MissionControlRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/dispenses': typeof AuthenticatedDispensesRouteWithChildren
   '/_authenticated/doctors': typeof AuthenticatedDoctorsRouteWithChildren
   '/_authenticated/patients': typeof AuthenticatedPatientsRouteWithChildren
   '/_authenticated/prescriptions': typeof AuthenticatedPrescriptionsRouteWithChildren
@@ -188,6 +206,7 @@ export interface FileRoutesById {
   '/_authenticated/warehouses': typeof AuthenticatedWarehousesRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/_authenticated/catalog/$productId': typeof AuthenticatedCatalogProductIdRoute
+  '/_authenticated/dispenses/$dispenseId': typeof AuthenticatedDispensesDispenseIdRoute
   '/_authenticated/doctors/$doctorId': typeof AuthenticatedDoctorsDoctorIdRoute
   '/_authenticated/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/_authenticated/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
@@ -202,6 +221,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/mission-control'
     | '/reset-password'
+    | '/dispenses'
     | '/doctors'
     | '/patients'
     | '/prescriptions'
@@ -210,6 +230,7 @@ export interface FileRouteTypes {
     | '/warehouses'
     | '/planet/$planetId'
     | '/catalog/$productId'
+    | '/dispenses/$dispenseId'
     | '/doctors/$doctorId'
     | '/patients/$patientId'
     | '/prescriptions/$prescriptionId'
@@ -222,6 +243,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/mission-control'
     | '/reset-password'
+    | '/dispenses'
     | '/doctors'
     | '/patients'
     | '/prescriptions'
@@ -230,6 +252,7 @@ export interface FileRouteTypes {
     | '/warehouses'
     | '/planet/$planetId'
     | '/catalog/$productId'
+    | '/dispenses/$dispenseId'
     | '/doctors/$doctorId'
     | '/patients/$patientId'
     | '/prescriptions/$prescriptionId'
@@ -243,6 +266,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/mission-control'
     | '/reset-password'
+    | '/_authenticated/dispenses'
     | '/_authenticated/doctors'
     | '/_authenticated/patients'
     | '/_authenticated/prescriptions'
@@ -251,6 +275,7 @@ export interface FileRouteTypes {
     | '/_authenticated/warehouses'
     | '/planet/$planetId'
     | '/_authenticated/catalog/$productId'
+    | '/_authenticated/dispenses/$dispenseId'
     | '/_authenticated/doctors/$doctorId'
     | '/_authenticated/patients/$patientId'
     | '/_authenticated/prescriptions/$prescriptionId'
@@ -311,6 +336,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/dispenses': {
+      id: '/_authenticated/dispenses'
+      path: '/dispenses'
+      fullPath: '/dispenses'
+      preLoaderRoute: typeof AuthenticatedDispensesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/doctors': {
       id: '/_authenticated/doctors'
@@ -375,6 +407,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCatalogProductIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dispenses/$dispenseId': {
+      id: '/_authenticated/dispenses/$dispenseId'
+      path: '/$dispenseId'
+      fullPath: '/dispenses/$dispenseId'
+      preLoaderRoute: typeof AuthenticatedDispensesDispenseIdRouteImport
+      parentRoute: typeof AuthenticatedDispensesRoute
+    }
     '/_authenticated/doctors/$doctorId': {
       id: '/_authenticated/doctors/$doctorId'
       path: '/$doctorId'
@@ -405,6 +444,21 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AuthenticatedDispensesRouteChildren {
+  AuthenticatedDispensesDispenseIdRoute: typeof AuthenticatedDispensesDispenseIdRoute
+}
+
+const AuthenticatedDispensesRouteChildren: AuthenticatedDispensesRouteChildren =
+  {
+    AuthenticatedDispensesDispenseIdRoute:
+      AuthenticatedDispensesDispenseIdRoute,
+  }
+
+const AuthenticatedDispensesRouteWithChildren =
+  AuthenticatedDispensesRoute._addFileChildren(
+    AuthenticatedDispensesRouteChildren,
+  )
 
 interface AuthenticatedDoctorsRouteChildren {
   AuthenticatedDoctorsDoctorIdRoute: typeof AuthenticatedDoctorsDoctorIdRoute
@@ -460,6 +514,7 @@ const AuthenticatedPurchaseOrdersRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedDispensesRoute: typeof AuthenticatedDispensesRouteWithChildren
   AuthenticatedDoctorsRoute: typeof AuthenticatedDoctorsRouteWithChildren
   AuthenticatedPatientsRoute: typeof AuthenticatedPatientsRouteWithChildren
   AuthenticatedPrescriptionsRoute: typeof AuthenticatedPrescriptionsRouteWithChildren
@@ -471,6 +526,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedDispensesRoute: AuthenticatedDispensesRouteWithChildren,
   AuthenticatedDoctorsRoute: AuthenticatedDoctorsRouteWithChildren,
   AuthenticatedPatientsRoute: AuthenticatedPatientsRouteWithChildren,
   AuthenticatedPrescriptionsRoute: AuthenticatedPrescriptionsRouteWithChildren,
