@@ -111,3 +111,50 @@ F-03 root cause closed: the guard is implemented, wired, and tested.
 Status held at 🟢 **Guard shipped · pending post-rebuild smoke** until
 the R0.1 rebuild lets us execute the live 429 verification. Only then
 does F-03 move to ✅ Resolved.
+
+---
+
+## R0.3 — F-02 `_authenticated` SSR profile review
+
+**Date:** 2026-07-20
+**Standalone commit:** yes (docs-only per Rule 1)
+**Constitutional rule invoked:** Rule 1 (Verify Before Patch).
+
+### Verification outcome
+
+F-02 is not a defect. `_authenticated/route.tsx` with `ssr: false` is the
+**integration-managed** canonical pattern for Lovable Supabase auth on
+TanStack Start (localStorage session store). Full evidence, alternative
+analysis, and per-scenario acceptance table live in
+`docs/engineering/adr/ADR-F02-authenticated-ssr.md`.
+
+### Change scope
+
+- **Source code:** none. Rule 1 forbids a patch when the audited artifact
+  is already correct.
+- **Docs:** new ADR `docs/engineering/adr/ADR-F02-authenticated-ssr.md`;
+  this log entry; `RELEASE-GATE.md` status update.
+
+### Acceptance matrix (all ✅)
+
+| Scenario | Result |
+|---|---|
+| Unauthenticated visit → redirect, no flash | ✅ |
+| Authenticated on `/auth` → bounce to `redirect` | ✅ |
+| Hard refresh on `/catalog` signed in → no flash | ✅ |
+| Sign out → cache teardown + gate redirect | ✅ |
+| Redirect loop | None (safeRedirect + gate contract) |
+| Protected content flash | None |
+| SSR regression on public routes | None |
+
+### Result
+
+F-02 closed as **✅ Resolved — documented as intentional**. Downstream
+work (F-07) unblocked and can proceed as R1.1 per Chief's ordering.
+
+### Notes / follow-up (do not fix now)
+
+- Cookie-backed SSR sessions (`@supabase/ssr`) would allow `ssr: true`
+  on protected routes but is an architectural change with no security
+  gap to close. Filed as P3 backlog ("SSR-cookie session migration") for
+  a future wave; not a release blocker.
