@@ -18,15 +18,29 @@ const defaultTheme: Theme = {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    const saved = localStorage.getItem('mussly-theme')
-    return saved ? JSON.parse(saved) : defaultTheme
-  })
+  const [theme, setThemeState] = useState<Theme>(defaultTheme)
 
   const isDark = theme.mode === 'dark'
 
+  // Hydrate saved theme from localStorage on the client only, to avoid
+  // SSR crashes and hydration mismatches.
   useEffect(() => {
-    localStorage.setItem('mussly-theme', JSON.stringify(theme))
+    if (typeof window === 'undefined') return
+    try {
+      const saved = window.localStorage.getItem('mussly-theme')
+      if (saved) setThemeState(JSON.parse(saved) as Theme)
+    } catch {
+      // ignore corrupted storage
+    }
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      window.localStorage.setItem('mussly-theme', JSON.stringify(theme))
+    } catch {
+      // ignore quota / private-mode failures
+    }
     const root = document.documentElement
     if (isDark) {
       root.classList.add('dark')
