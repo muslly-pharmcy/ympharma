@@ -1,5 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
+import { previewPromotionInput, type PreviewPromotionInput } from '@/domain/promotions/commands'
 import type {
   Promotion, PromotionTarget, PromotionEligibility, Coupon, CouponCode,
 } from '@/domain/promotions/schemas'
