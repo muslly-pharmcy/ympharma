@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@tanstack/react-router'
 import { Cpu, Zap, Brain, Activity } from 'lucide-react'
 
 export default function SunCore() {
@@ -8,7 +8,7 @@ export default function SunCore() {
   return (
     <motion.div
       className="relative flex flex-col items-center justify-center cursor-pointer group"
-      onClick={() => navigate('/mission-control')}
+      onClick={() => navigate({ to: '/mission-control' })}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
     >

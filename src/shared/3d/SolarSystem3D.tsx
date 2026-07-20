@@ -2,7 +2,7 @@ import { useRef, useMemo, useEffect, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, Stars, Text, Html } from '@react-three/drei'
 import * as THREE from 'three'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@tanstack/react-router'
 import { getActivePlanets } from '@/data/planets'
 
 // Sun Component

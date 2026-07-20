@@ -1,24 +1,24 @@
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { getPlanetById } from '@/data/planets'
 import { ArrowRight, Home, Settings, BarChart3, FileText, Users } from 'lucide-react'
 import { useState, lazy, Suspense } from 'react'
 import LoadingSpinner from '@/shared/components/LoadingSpinner'
 
-// Lazy load all modules
-const PharmacyModule = lazy(() => import('@/modules/pharmacy/PharmacyModule'))
-const InventoryModule = lazy(() => import('@/modules/inventory/InventoryModule'))
-const DoctorsModule = lazy(() => import('@/modules/doctors/DoctorsModule'))
-const PatientsModule = lazy(() => import('@/modules/patients/PatientsModule'))
-const FinanceModule = lazy(() => import('@/modules/finance/FinanceModule'))
-const DeliveryModule = lazy(() => import('@/modules/delivery/DeliveryModule'))
-const ReportsModule = lazy(() => import('@/modules/reports/ReportsModule'))
-const MarketingModule = lazy(() => import('@/modules/marketing/MarketingModule'))
-const SecurityModule = lazy(() => import('@/modules/security/SecurityModule'))
-const EmergencyModule = lazy(() => import('@/modules/emergency/EmergencyModule'))
-const NationalModule = lazy(() => import('@/modules/national/NationalModule'))
-const LaboratoryModule = lazy(() => import('@/modules/laboratory/LaboratoryModule'))
-const InsuranceModule = lazy(() => import('@/modules/insurance/InsuranceModule'))
+// Lazy load all modules (named exports → normalize to default)
+const PharmacyModule = lazy(() => import('@/modules/pharmacy/PharmacyModule').then(m => ({ default: m.PharmacyModule })))
+const InventoryModule = lazy(() => import('@/modules/inventory/InventoryModule').then(m => ({ default: m.InventoryModule })))
+const DoctorsModule = lazy(() => import('@/modules/doctors/DoctorsModule').then(m => ({ default: m.DoctorsModule })))
+const PatientsModule = lazy(() => import('@/modules/patients/PatientsModule').then(m => ({ default: m.PatientsModule })))
+const FinanceModule = lazy(() => import('@/modules/finance/FinanceModule').then(m => ({ default: m.FinanceModule })))
+const DeliveryModule = lazy(() => import('@/modules/delivery/DeliveryModule').then(m => ({ default: m.DeliveryModule })))
+const ReportsModule = lazy(() => import('@/modules/reports/ReportsModule').then(m => ({ default: m.ReportsModule })))
+const MarketingModule = lazy(() => import('@/modules/marketing/MarketingModule').then(m => ({ default: m.MarketingModule })))
+const SecurityModule = lazy(() => import('@/modules/security/SecurityModule').then(m => ({ default: m.SecurityModule })))
+const EmergencyModule = lazy(() => import('@/modules/emergency/EmergencyModule').then(m => ({ default: m.EmergencyModule })))
+const NationalModule = lazy(() => import('@/modules/national/NationalModule').then(m => ({ default: m.NationalModule })))
+const LaboratoryModule = lazy(() => import('@/modules/laboratory/LaboratoryModule').then(m => ({ default: m.LaboratoryModule })))
+const InsuranceModule = lazy(() => import('@/modules/insurance/InsuranceModule').then(m => ({ default: m.InsuranceModule })))
 
 const tabs = [
   { id: 'overview', label: 'نظرة عامة', icon: Home },
@@ -28,7 +28,7 @@ const tabs = [
   { id: 'settings', label: 'الإعدادات', icon: Settings },
 ]
 
-const moduleMap: Record<string, React.LazyExoticComponent<React.FC>> = {
+const moduleMap: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
   pharmacy: PharmacyModule,
   inventory: InventoryModule,
   doctors: DoctorsModule,
@@ -48,7 +48,7 @@ const moduleMap: Record<string, React.LazyExoticComponent<React.FC>> = {
 }
 
 export default function PlanetPage() {
-  const { planetId } = useParams<{ planetId: string }>()
+  const { planetId } = useParams({ strict: false }) as { planetId?: string }
   const navigate = useNavigate()
   const planet = getPlanetById(planetId || '')
   const [activeTab, setActiveTab] = useState('overview')
@@ -59,7 +59,7 @@ export default function PlanetPage() {
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-300 mb-4">404</h1>
           <p className="text-gray-500 mb-6">الكوكب غير موجود</p>
-          <button onClick={() => navigate('/')} className="btn-primary">
+          <button onClick={() => navigate({ to: '/' })} className="btn-primary">
             العودة للرئيسية
           </button>
         </div>
@@ -71,16 +71,15 @@ export default function PlanetPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Planet Header */}
-      <motion.div 
+      <motion.div
         className="relative overflow-hidden"
         style={{ backgroundColor: `${planet.color}08` }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
         <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-8">
-          <button 
-            onClick={() => navigate('/')}
+          <button
+            onClick={() => navigate({ to: '/' })}
             className="flex items-center gap-2 text-gray-500 hover:text-primary transition-colors mb-4"
           >
             <ArrowRight className="w-4 h-4" />
@@ -88,7 +87,7 @@ export default function PlanetPage() {
           </button>
 
           <div className="flex items-center gap-4">
-            <div 
+            <div
               className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl"
               style={{ backgroundColor: `${planet.color}20` }}
             >
@@ -123,7 +122,6 @@ export default function PlanetPage() {
         </div>
       </motion.div>
 
-      {/* Tabs */}
       <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-6">
         <div className="flex gap-2 overflow-x-auto pb-2 mb-6">
           {tabs.map(tab => (

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@tanstack/react-router'
 import { ArrowLeft, AlertTriangle, Clock, CheckCircle } from 'lucide-react'
 import type { Planet } from '@/types'
 
