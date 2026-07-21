@@ -127,5 +127,10 @@
   },
   "resolutions": {
     "htmlparser2": "^10.1.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "entities": "4.5.0"
+    }
   }
 }
