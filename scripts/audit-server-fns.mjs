@@ -43,7 +43,7 @@ function classify(file) {
     const body = src.slice(bodyStart, bodyStart + 2000)
     const method = /method\s*:\s*['"](GET|POST|PUT|DELETE|PATCH)['"]/.exec(opts)?.[1] ?? 'POST'
     const middlewareAuth = /\.middleware\s*\(\s*\[[^\]]*requireSupabaseAuth[^\]]*\]/.test(chain)
-    const actorAuth = /getActor\s*\(\s*\)/.test(body)
+    const actorAuth = /getActor\s*\(\s*\)|loadActor\s*\(\s*\)/.test(body)
     const authed = middlewareAuth || actorAuth
     const authMode = middlewareAuth ? 'middleware' : actorAuth ? 'actor' : 'none'
     const validated = /\.inputValidator\s*\(/.test(chain)
