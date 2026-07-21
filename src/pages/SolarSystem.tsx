@@ -4,9 +4,11 @@ import { Link } from '@tanstack/react-router'
 import SunCore from '@/shared/components/SunCore'
 import PlanetCard from '@/shared/components/PlanetCard'
 import { getActivePlanets } from '@/data/planets'
-import { Sparkles, ScanLine, Pill, MessageCircle, Box } from 'lucide-react'
+import { Sparkles, ScanLine, Pill, MessageCircle, Box, Star, LayoutGrid } from 'lucide-react'
 import LoadingSpinner from '@/shared/components/LoadingSpinner'
 import { CosmicSearch } from '@/components/ai/CosmicSearch'
+import CategoriesGrid from '@/shared/components/home/CategoriesGrid'
+import TestimonialsSection from '@/shared/components/home/TestimonialsSection'
 import almoslyLogo from '@/assets/almosly-logo.png.asset.json'
 
 
