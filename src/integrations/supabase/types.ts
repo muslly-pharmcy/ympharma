@@ -10996,6 +10996,24 @@ export type Database = {
         }
         Relationships: []
       }
+      privileged_definer_functions: {
+        Row: {
+          created_at: string
+          function_signature: string
+          reason: string
+        }
+        Insert: {
+          created_at?: string
+          function_signature: string
+          reason: string
+        }
+        Update: {
+          created_at?: string
+          function_signature?: string
+          reason?: string
+        }
+        Relationships: []
+      }
       product_classifications: {
         Row: {
           active_ingredient: string | null
@@ -13448,6 +13466,16 @@ export type Database = {
           payload?: Json | null
           retry_count?: number | null
           source?: string | null
+        }
+        Relationships: []
+      }
+      v_privileged_definer_grants: {
+        Row: {
+          anon_can_execute: boolean | null
+          authenticated_can_execute: boolean | null
+          function_signature: string | null
+          is_security_definer: boolean | null
+          search_path_locked: boolean | null
         }
         Relationships: []
       }
