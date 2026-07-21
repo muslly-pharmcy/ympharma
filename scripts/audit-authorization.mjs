@@ -65,8 +65,11 @@ function classify(file) {
     else if (usesAnonPublishable) dataMode = 'anon-publishable'
     else dataMode = 'none'
 
-    const orgFilter = /organization_id\s*[:=]|\.eq\(\s*['"]organization_id['"]/.test(body)
-    const roleCheck = /has_role|hasRole|requireRole|is_admin|claims\.role|role\s*===\s*['"]admin['"]|['"]admin['"]\s*,\s*['"]moderator['"]|assertAdmin|ensureAdmin/.test(body)
+    // Tenant-scope signals: explicit org_id in query, requireOrg helper,
+    // actor.organizationId cross-check, or an assert*InOrg guard helper.
+    const orgFilter = /organization_id\s*[:=]|\.eq\(\s*['"]organization_id['"]|requireOrg\s*\(|actor\.organizationId|assert\w*InOrg\s*\(/.test(body)
+    // Role / permission signals: DB role helpers, RBAC calls, or capability guards.
+    const roleCheck = /has_role|hasRole|requireRole|requirePermission\s*\(|is_admin|claims\.role|role\s*===\s*['"]admin['"]|['"]admin['"]\s*,\s*['"]moderator['"]|assertAdmin|ensureAdmin|requireCapability/.test(body)
     const validated = /\.inputValidator\s*\(/.test(body.split('.handler')[0] ?? body)
 
     // Verdict:
