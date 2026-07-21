@@ -121,10 +121,13 @@ export function CosmicSearch() {
           </button>
         </div>
 
-        <div className="mt-3 flex items-center justify-between text-[11px] text-slate-500">
-          <span>Powered by MUSLLY AI · Lovable Cloud</span>
-          <span>لا يُخزَّن استعلامك ولا يُشارك مع أطراف خارجية.</span>
+        <div className="mt-3 flex items-center justify-center gap-2 text-[12px] text-slate-600">
+          <img src="/favicon.svg" alt="شعار صيدلية المصلي" className="h-5 w-5" />
+          <span className="font-semibold">صيدلية المصلي</span>
+          <span className="text-slate-400">·</span>
+          <span className="text-slate-500">Al-Musalli Pharmacy</span>
         </div>
+
 
         {/* Cart flash */}
         <AnimatePresence>
