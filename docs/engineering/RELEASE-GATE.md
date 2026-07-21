@@ -13,7 +13,7 @@
 | F-02 | `_authenticated` SSR decision record + minimal guard-rails — verified as integration-managed canonical pattern (see `adr/ADR-F02-authenticated-ssr.md`); 7/7 acceptance scenarios pass | Backend | M | ✅ Resolved (docs-only, Rule 1) |
 | F-07 | `inventory.functions.ts` missing `requireSupabaseAuth` | Backend + Security | S | ⛔ Open |
 | F-06 | `.env.example` rewrite to real contract | Docs + DevOps | XS | ⛔ Open |
-| F-04 (hide) | `SecurityModule` hidden behind debug flag | Frontend + Security | S | ⛔ Open |
+| F-04 (hide) | `SecurityModule` fake dashboard replaced with honest "in development" panel — no misleading counters/logs; points admins to real surfaces (`WAVE-C7-REGRESSION-LOG.md` R1.2) | Frontend + Security | S | ✅ Resolved |
 | F-12 (partial) | CI: `lint + tsgo + test` job on PR + `main` | DevOps | S | ⛔ Open |
 
 ## Non-blocking (may ship post-launch)

@@ -158,3 +158,45 @@ work (F-07) unblocked and can proceed as R1.1 per Chief's ordering.
   on protected routes but is an architectural change with no security
   gap to close. Filed as P3 backlog ("SSR-cookie session migration") for
   a future wave; not a release blocker.
+
+---
+
+## R1.2 — F-04 Fake Security Dashboard
+
+**Date:** 2026-07-21
+**Standalone commit:** yes (single file + docs)
+**Constitutional rule invoked:** Rule 1 (Verify Before Patch) + Rule 4 (Evidence Closure).
+**ID note:** discussed as "F-06" in-chat; the release gate row is **F-04 (hide)**. Same finding, correct ID recorded here.
+
+### Verification
+
+- Read `src/modules/security/SecurityModule.tsx` — confirmed **all** rendered values were hard-coded literals (`securityStatus`, `auditLogs`, `roles`, RLS policy list, "2,847 users", "0 threats"). Zero queries, zero server functions, zero props from a data source.
+- Grep for consumers: only mounted from `src/pages/PlanetPage.tsx` (`security` planet). No other importers, no tests depend on the fake shape.
+- No real telemetry backend is wired for this surface today (`audit_events` / `ai_security_events` / `error_logs` exist but no aggregation endpoint).
+
+### Change scope
+
+- **Source code:** `src/modules/security/SecurityModule.tsx` fully rewritten.
+  - Removes: fake status grid, fake user counts, fake audit logs, fake RLS policy claims, "no active threats" banner, tab UI hanging off empty state.
+  - Adds: amber "قيد التطوير" banner, three factual panels (RLS enabled on sensitive tables, Supabase Auth via Lovable, real audit lives in DB tables), link to real `/ai-runtime` surface. No `useState`, no counters.
+- **Docs:** this entry + `RELEASE-GATE.md` F-04 row flipped to ✅ Resolved.
+- **No DB / RLS / server-fn changes.**
+
+### Acceptance
+
+| Check | Result |
+|---|---|
+| No hard-coded counts / user totals rendered | ✅ |
+| No fabricated audit log entries rendered | ✅ |
+| No fabricated RLS policy list rendered | ✅ |
+| Honest "in development" disclosure visible above the fold | ✅ |
+| Admin pointer to a real observability surface (`/ai-runtime`) | ✅ |
+| No new imports of admin/service-role clients | ✅ |
+
+### Result
+
+F-04 closed as **✅ Resolved**. Follow-up (not this wave): wire the panel to
+`audit_events` / `ai_security_events` aggregations behind
+`requireSupabaseAuth` + admin role check when a real security-ops surface is
+prioritized.
+
