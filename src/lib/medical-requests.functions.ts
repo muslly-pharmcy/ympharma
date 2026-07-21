@@ -30,20 +30,23 @@ export const submitMedicalRequest = createServerFn({ method: 'POST' })
       throw new Error('تعذر إرسال الطلب. حاول مرة أخرى.')
     }
 
-    // Best-effort email notification to pharmacy admin
+    // Best-effort email notification via transactional_emails queue.
     try {
       const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
       await supabaseAdmin.rpc('enqueue_email', {
-        p_to: process.env.PHARMACY_INBOX_EMAIL ?? 'info@muslly.com',
-        p_subject: `طلب جديد — ${data.request_type} — ${data.full_name}`,
-        p_html: `<div dir="rtl" style="font-family:system-ui;line-height:1.7">
-          <h2>طلب جديد من موقع صيدلية المصلي</h2>
-          <p><b>الاسم:</b> ${escapeHtml(data.full_name)}</p>
-          <p><b>الهاتف:</b> ${escapeHtml(data.phone)}</p>
-          <p><b>نوع الطلب:</b> ${escapeHtml(data.request_type)}</p>
-          <p><b>ملاحظات:</b><br/>${escapeHtml(data.note ?? '—')}</p>
-        </div>`,
-        p_template_name: 'medical_request',
+        queue_name: 'transactional_emails',
+        payload: {
+          to: process.env.PHARMACY_INBOX_EMAIL ?? 'info@muslly.com',
+          subject: `طلب جديد — ${data.request_type} — ${data.full_name}`,
+          html: `<div dir="rtl" style="font-family:system-ui;line-height:1.7">
+            <h2>طلب جديد من موقع صيدلية المصلي</h2>
+            <p><b>الاسم:</b> ${escapeHtml(data.full_name)}</p>
+            <p><b>الهاتف:</b> ${escapeHtml(data.phone)}</p>
+            <p><b>نوع الطلب:</b> ${escapeHtml(data.request_type)}</p>
+            <p><b>ملاحظات:</b><br/>${escapeHtml(data.note ?? '—')}</p>
+          </div>`,
+          template_name: 'medical_request',
+        },
       })
     } catch (err) {
       console.warn('[submitMedicalRequest] email enqueue skipped', err)
