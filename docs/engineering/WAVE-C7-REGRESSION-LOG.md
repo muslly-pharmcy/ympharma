@@ -200,3 +200,98 @@ F-04 closed as **✅ Resolved**. Follow-up (not this wave): wire the panel to
 `requireSupabaseAuth` + admin role check when a real security-ops surface is
 prioritized.
 
+---
+
+## R1.3.2 — CRM cluster RLS enablement (Bucket B, groundwork for R1.3.3)
+
+**Date:** 2026-07-21
+**Standalone commit:** yes (migration + docs, no handler code)
+**Wave:** R1.3.2 — first tranche of R1.3.1 Bucket B follow-through.
+
+### Hypothesis verification (Rule 1)
+
+The R1.3.1 audit classified 35 handlers as "Replace with RLS" on the assumption
+that the target tables either had org-scoped RLS policies or that adding them
+would be trivial. Before writing any migration, verified the current schema
+state for the 13 CRM Bucket B tables.
+
+| Hyp. | Predicate | Evidence | Verdict |
+|---|---|---|---|
+| **H1** — Tables use `organization_id` as the tenant column. | `information_schema.columns` returns `organization_id` for all 13 tables. | Confirmed on `crm_customers`, `crm_customer_contacts/addresses/tags`, `crm_campaigns`, `crm_campaign_events`, `crm_segments`, `crm_loyalty_{accounts,transactions,rules,tiers}`, `crm_reward_{catalog,redemptions}`. | ✅ Confirmed |
+| **H2** — Org-scoped RLS policies already exist and reuse a shared helper. | `pg_policies` shows every table already carries policies keyed on `public.is_org_member(organization_id, auth.uid())` — a `STABLE SECURITY DEFINER` helper that checks `organization_members` for the active membership. | Confirmed. | ✅ Confirmed |
+| **H3** — Handlers use `supabaseAdmin` because RLS is misconfigured. | If false, the real gap is elsewhere. | RLS is enabled on all 13 tables (`pg_class.relrowsecurity = true`) and the policies are correct. `information_schema.role_table_grants` returned **zero** rows for `authenticated`/`service_role`/`anon` on any of the 13 tables. `has_table_privilege('authenticated', ...)` confirmed no privileges granted before the migration. | ❌ **Falsified — real root cause identified** |
+
+**Root cause (revised):** the handlers were forced to `supabaseAdmin` not
+because RLS was missing, but because **the tables were never granted to the
+Data API roles**. PostgREST/`authenticated` had no table-level privilege, so
+`context.supabase` returned a permission error and every author fell back to
+the service-role client. The R1.3.1 doc's Bucket B rationale ("org filter +
+role check duplicate what an RLS policy would enforce") holds — the policies
+exist and duplicate the code — but the concrete unblocker for R1.3.3 is
+GRANTs, not new policies.
+
+### Change scope
+
+- **Migration `20260721021144`:**
+  - `GRANT SELECT, INSERT, UPDATE, DELETE ON <table> TO authenticated` for
+    all 13 CRM Bucket B tables.
+  - `GRANT ALL ON <table> TO service_role` for the same 13 tables.
+  - No `anon` grants — every policy scopes on `auth.uid()` via
+    `is_org_member`, so `anon` reads would return zero rows regardless; not
+    granting keeps the least-privilege posture.
+  - Added `UPDATE` and `DELETE` policies on `crm_campaign_events` (previously
+    only `SELECT` + `INSERT`), keyed on the same `is_org_member` predicate
+    used by its existing pair. This closes a real gap — the audit noted the
+    table but the policy set was asymmetric — so R1.3.3 can migrate campaign
+    event mutations to `context.supabase` without hitting a "no policy for
+    UPDATE" error.
+- **Source code:** none in this wave. Handlers still use `supabaseAdmin`; the
+  cutover is R1.3.3.
+- **Docs:** this entry + follow-up backlog item recorded below.
+
+### Verification
+
+| Check | Query | Result |
+|---|---|---|
+| Grants present on all 13 tables | `has_table_privilege('authenticated', c.oid, 'SELECT'/'INSERT'/'UPDATE'/'DELETE')` | ✅ `true` for all 13 × 4 combinations |
+| Service role has full access | `has_table_privilege('service_role', c.oid, 'SELECT')` | ✅ `true` for all 13 |
+| Policy set complete on `crm_campaign_events` | `SELECT cmd, count(*) FROM pg_policies WHERE tablename='crm_campaign_events' GROUP BY cmd` | ✅ one row each for `SELECT`, `INSERT`, `UPDATE`, `DELETE` |
+| RLS still enabled | `pg_class.relrowsecurity` for all 13 | ✅ `true` for all 13 |
+| Linter warnings introduced | Post-migration linter output | 211 warnings — all pre-existing (`SECURITY DEFINER` public exec on legacy functions, `extension in public`). **Zero new warnings attributable to this migration.** |
+
+### Non-goals verified
+
+- No handler rewrites (R1.3.3).
+- No changes to `session.server.ts`, `idempotency.server.ts`, or the
+  `_authenticated/` route gate.
+- No Bucket C mutations touched (loyalty ledger, campaign send, etc. — those
+  stay on `supabaseAdmin` pending R1.3.4 service extraction).
+- No medical / supply / platform clusters (queued for R1.3.2b/c/d).
+
+### Result
+
+**R1.3.2 (CRM cluster) → ✅ Complete.** The 9 Bucket B handlers listed in
+`WAVE-R1.3.1-ADMIN-BYPASS-CLASSIFICATION.md` under `customers.functions.ts`,
+`customers.mutations.functions.ts`, `campaigns.functions.ts`, and
+`loyalty.functions.ts` are now unblocked for R1.3.3 cutover to
+`requireSupabaseAuth` + `context.supabase`.
+
+### Follow-up backlog (unchanged sequence)
+
+- **R1.3.2b — Medical cluster grants** (`hc_*`, `insv2_*`, `patient_*`
+  Bucket B tables). Same verification pattern.
+- **R1.3.2c — Supply cluster grants** (`catalog_*`, `inv_*`, `sup_*`,
+  `wh_*` Bucket B tables).
+- **R1.3.2d — Platform cluster grants** (`medical_*`, `cart_items`
+  Bucket B tables).
+- **R1.3.3 — Handler cutover.** For each Bucket B handler, add
+  `.middleware([requireSupabaseAuth])`, replace `supabaseAdmin` with
+  `context.supabase`, keep the existing `requirePermission` /
+  `actor.organizationId` guards as defence-in-depth. Regression test per
+  handler under two orgs to prove RLS blocks cross-tenant reads/writes.
+- **R1.3.4 — Bucket C service extraction** (54 handlers, dispenses/loyalty
+  ledger/insurance/purchasing/campaigns/promotions state machines).
+- **R1.3.5 — Bucket D repair.** Currently zero rows; keep on the tracker in
+  case future waves expose new candidates.
+- **R1.4 → R1.6** — contract, boundary, secrets audits. Queued.
+
