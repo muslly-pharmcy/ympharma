@@ -37,6 +37,7 @@ import { Route as AuthenticatedRewardsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedSbdmaImportRouteImport } from './routes/_authenticated/sbdma-import'
 import { Route as AuthenticatedSegmentsRouteImport } from './routes/_authenticated/segments'
 import { Route as AuthenticatedSuppliersRouteImport } from './routes/_authenticated/suppliers'
+import { Route as AuthenticatedVisionLabRouteImport } from './routes/_authenticated/vision-lab'
 import { Route as AuthenticatedWarehousesRouteImport } from './routes/_authenticated/warehouses'
 import { Route as PlanetPlanetIdRouteImport } from './routes/planet.$planetId'
 import { Route as ProductHandleRouteImport } from './routes/product.$handle'
@@ -208,6 +209,11 @@ const AuthenticatedSegmentsRoute = AuthenticatedSegmentsRouteImport.update({
 const AuthenticatedSuppliersRoute = AuthenticatedSuppliersRouteImport.update({
   id: '/suppliers',
   path: '/suppliers',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedVisionLabRoute = AuthenticatedVisionLabRouteImport.update({
+  id: '/vision-lab',
+  path: '/vision-lab',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedWarehousesRoute = AuthenticatedWarehousesRouteImport.update({
@@ -393,6 +399,7 @@ export interface FileRoutesByFullPath {
   '/sbdma-import': typeof AuthenticatedSbdmaImportRoute
   '/segments': typeof AuthenticatedSegmentsRoute
   '/suppliers': typeof AuthenticatedSuppliersRoute
+  '/vision-lab': typeof AuthenticatedVisionLabRoute
   '/warehouses': typeof AuthenticatedWarehousesRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/product/$handle': typeof ProductHandleRoute
@@ -449,6 +456,7 @@ export interface FileRoutesByTo {
   '/sbdma-import': typeof AuthenticatedSbdmaImportRoute
   '/segments': typeof AuthenticatedSegmentsRoute
   '/suppliers': typeof AuthenticatedSuppliersRoute
+  '/vision-lab': typeof AuthenticatedVisionLabRoute
   '/warehouses': typeof AuthenticatedWarehousesRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/product/$handle': typeof ProductHandleRoute
@@ -507,6 +515,7 @@ export interface FileRoutesById {
   '/_authenticated/sbdma-import': typeof AuthenticatedSbdmaImportRoute
   '/_authenticated/segments': typeof AuthenticatedSegmentsRoute
   '/_authenticated/suppliers': typeof AuthenticatedSuppliersRoute
+  '/_authenticated/vision-lab': typeof AuthenticatedVisionLabRoute
   '/_authenticated/warehouses': typeof AuthenticatedWarehousesRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/product/$handle': typeof ProductHandleRoute
@@ -565,6 +574,7 @@ export interface FileRouteTypes {
     | '/sbdma-import'
     | '/segments'
     | '/suppliers'
+    | '/vision-lab'
     | '/warehouses'
     | '/planet/$planetId'
     | '/product/$handle'
@@ -621,6 +631,7 @@ export interface FileRouteTypes {
     | '/sbdma-import'
     | '/segments'
     | '/suppliers'
+    | '/vision-lab'
     | '/warehouses'
     | '/planet/$planetId'
     | '/product/$handle'
@@ -678,6 +689,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sbdma-import'
     | '/_authenticated/segments'
     | '/_authenticated/suppliers'
+    | '/_authenticated/vision-lab'
     | '/_authenticated/warehouses'
     | '/planet/$planetId'
     | '/product/$handle'
@@ -924,6 +936,13 @@ declare module '@tanstack/react-router' {
       path: '/suppliers'
       fullPath: '/suppliers'
       preLoaderRoute: typeof AuthenticatedSuppliersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/vision-lab': {
+      id: '/_authenticated/vision-lab'
+      path: '/vision-lab'
+      fullPath: '/vision-lab'
+      preLoaderRoute: typeof AuthenticatedVisionLabRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/warehouses': {
@@ -1256,6 +1275,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSbdmaImportRoute: typeof AuthenticatedSbdmaImportRoute
   AuthenticatedSegmentsRoute: typeof AuthenticatedSegmentsRoute
   AuthenticatedSuppliersRoute: typeof AuthenticatedSuppliersRoute
+  AuthenticatedVisionLabRoute: typeof AuthenticatedVisionLabRoute
   AuthenticatedWarehousesRoute: typeof AuthenticatedWarehousesRoute
   AuthenticatedCatalogProductIdRoute: typeof AuthenticatedCatalogProductIdRoute
   AuthenticatedInsuranceClaimsRoute: typeof AuthenticatedInsuranceClaimsRoute
@@ -1288,6 +1308,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSbdmaImportRoute: AuthenticatedSbdmaImportRoute,
   AuthenticatedSegmentsRoute: AuthenticatedSegmentsRoute,
   AuthenticatedSuppliersRoute: AuthenticatedSuppliersRoute,
+  AuthenticatedVisionLabRoute: AuthenticatedVisionLabRoute,
   AuthenticatedWarehousesRoute: AuthenticatedWarehousesRoute,
   AuthenticatedCatalogProductIdRoute: AuthenticatedCatalogProductIdRoute,
   AuthenticatedInsuranceClaimsRoute: AuthenticatedInsuranceClaimsRoute,
