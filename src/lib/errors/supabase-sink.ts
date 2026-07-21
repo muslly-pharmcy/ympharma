@@ -81,6 +81,9 @@ export async function sendReportToSupabase(report: ErrorReport): Promise<void> {
       timestamp: report.timestamp,
     }
 
+    // Attach user_id when a session exists.
+    const { data: sess } = await supabase.auth.getUser()
+
     const payload = {
       level: 'error' as const,
       source: truncate(report.boundary, 100) ?? 'unknown',
@@ -91,9 +94,6 @@ export async function sendReportToSupabase(report: ErrorReport): Promise<void> {
       extra: extra as unknown as Record<string, never>,
       ...(sess?.user?.id ? { user_id: sess.user.id } : {}),
     }
-
-    // Attach user_id when a session exists.
-    const { data: sess } = await supabase.auth.getUser()
 
     // Enforce extra size cap (server-side check limits stringified length to 8000).
     const extraStr = JSON.stringify(payload.extra)
