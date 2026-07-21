@@ -96,6 +96,7 @@ export function ShopifyCartDrawer() {
                 <p className="text-gray-500 mb-2">سلة المتجر فارغة</p>
                 <Link
                   to="/shop"
+                  search={{ page: 1 }}
                   onClick={() => setIsOpen(false)}
                   className="text-primary font-medium hover:underline"
                 >
