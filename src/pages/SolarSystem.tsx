@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion'
 import { Suspense, lazy } from 'react'
+import { Link } from '@tanstack/react-router'
 import SunCore from '@/shared/components/SunCore'
 import PlanetCard from '@/shared/components/PlanetCard'
 import { getActivePlanets } from '@/data/planets'
-import { Sparkles, TrendingUp, Users, Package, Box } from 'lucide-react'
+import { Sparkles, ScanLine, Pill, MessageCircle, Box } from 'lucide-react'
 import LoadingSpinner from '@/shared/components/LoadingSpinner'
 import { CosmicSearch } from '@/components/ai/CosmicSearch'
 
@@ -12,12 +13,13 @@ const SolarSystem3D = lazy(() => import('@/shared/3d/SolarSystem3D'))
 export default function SolarSystem() {
   const planets = getActivePlanets()
 
-  const stats = [
-    { label: 'الطلبات اليوم', value: '156', change: '+12%', icon: TrendingUp, color: 'text-green-600', bg: 'bg-green-50' },
-    { label: 'العملاء النشطين', value: '2,847', change: '+5%', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'المنتجات', value: '4,521', change: '+23', icon: Package, color: 'text-purple-600', bg: 'bg-purple-50' },
-    { label: 'وكلاء الذكاء', value: '8', change: 'نشط', icon: Sparkles, color: 'text-gold', bg: 'bg-gold/10' },
+  const aiTools = [
+    { label: 'مسح الوصفة', desc: 'صوّر وصفتك', icon: ScanLine, color: 'text-blue-600', bg: 'bg-blue-50', to: '/vision-lab' },
+    { label: 'استشارة ذكية', desc: 'اسأل الصيدلي AI', icon: MessageCircle, color: 'text-green-600', bg: 'bg-green-50', to: '/ai-chat' },
+    { label: 'ابحث عن دواء', desc: 'كتالوج المنتجات', icon: Pill, color: 'text-purple-600', bg: 'bg-purple-50', to: '/shop' },
+    { label: 'تحليل ذكي', desc: 'وصفتك بلمسة', icon: Sparkles, color: 'text-gold', bg: 'bg-gold/10', to: '/ai-chat' },
   ]
+
 
   return (
     <div className="min-h-screen relative overflow-hidden">
