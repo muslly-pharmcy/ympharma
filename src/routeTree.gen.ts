@@ -33,6 +33,7 @@ import { Route as AuthenticatedSegmentsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedSuppliersRouteImport } from './routes/_authenticated/suppliers'
 import { Route as AuthenticatedWarehousesRouteImport } from './routes/_authenticated/warehouses'
 import { Route as PlanetPlanetIdRouteImport } from './routes/planet.$planetId'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as AuthenticatedAnalyticsIndexRouteImport } from './routes/_authenticated/analytics.index'
 import { Route as AuthenticatedCampaignsIdRouteImport } from './routes/_authenticated/campaigns.$id'
 import { Route as AuthenticatedCatalogIndexRouteImport } from './routes/_authenticated/catalog.index'
@@ -177,6 +178,11 @@ const PlanetPlanetIdRoute = PlanetPlanetIdRouteImport.update({
   path: '/planet/$planetId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAnalyticsIndexRoute =
   AuthenticatedAnalyticsIndexRouteImport.update({
     id: '/analytics/',
@@ -319,6 +325,7 @@ export interface FileRoutesByFullPath {
   '/suppliers': typeof AuthenticatedSuppliersRoute
   '/warehouses': typeof AuthenticatedWarehousesRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/campaigns/$id': typeof AuthenticatedCampaignsIdRoute
   '/catalog/$productId': typeof AuthenticatedCatalogProductIdRoute
   '/customers/$customerId': typeof AuthenticatedCustomersCustomerIdRoute
@@ -364,6 +371,7 @@ export interface FileRoutesByTo {
   '/suppliers': typeof AuthenticatedSuppliersRoute
   '/warehouses': typeof AuthenticatedWarehousesRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/campaigns/$id': typeof AuthenticatedCampaignsIdRoute
   '/catalog/$productId': typeof AuthenticatedCatalogProductIdRoute
   '/customers/$customerId': typeof AuthenticatedCustomersCustomerIdRoute
@@ -411,6 +419,7 @@ export interface FileRoutesById {
   '/_authenticated/suppliers': typeof AuthenticatedSuppliersRoute
   '/_authenticated/warehouses': typeof AuthenticatedWarehousesRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/_authenticated/campaigns/$id': typeof AuthenticatedCampaignsIdRoute
   '/_authenticated/catalog/$productId': typeof AuthenticatedCatalogProductIdRoute
   '/_authenticated/customers/$customerId': typeof AuthenticatedCustomersCustomerIdRoute
@@ -458,6 +467,7 @@ export interface FileRouteTypes {
     | '/suppliers'
     | '/warehouses'
     | '/planet/$planetId'
+    | '/.lovable/oauth/consent'
     | '/campaigns/$id'
     | '/catalog/$productId'
     | '/customers/$customerId'
@@ -503,6 +513,7 @@ export interface FileRouteTypes {
     | '/suppliers'
     | '/warehouses'
     | '/planet/$planetId'
+    | '/.lovable/oauth/consent'
     | '/campaigns/$id'
     | '/catalog/$productId'
     | '/customers/$customerId'
@@ -549,6 +560,7 @@ export interface FileRouteTypes {
     | '/_authenticated/suppliers'
     | '/_authenticated/warehouses'
     | '/planet/$planetId'
+    | '/.lovable/oauth/consent'
     | '/_authenticated/campaigns/$id'
     | '/_authenticated/catalog/$productId'
     | '/_authenticated/customers/$customerId'
@@ -579,6 +591,7 @@ export interface RootRouteChildren {
   MissionControlRoute: typeof MissionControlRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   PlanetPlanetIdRoute: typeof PlanetPlanetIdRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   ApiPublicCspReportRoute: typeof ApiPublicCspReportRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -752,6 +765,13 @@ declare module '@tanstack/react-router' {
       path: '/planet/$planetId'
       fullPath: '/planet/$planetId'
       preLoaderRoute: typeof PlanetPlanetIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/analytics/': {
@@ -1076,6 +1096,7 @@ const rootRouteChildren: RootRouteChildren = {
   MissionControlRoute: MissionControlRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   PlanetPlanetIdRoute: PlanetPlanetIdRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   ApiPublicCspReportRoute: ApiPublicCspReportRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
