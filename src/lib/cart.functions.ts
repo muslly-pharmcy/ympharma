@@ -22,6 +22,7 @@ export interface CartItemRow {
     strength: string | null
     barcode: string | null
     requires_prescription: boolean
+    sbdma_official_price: number | null
   } | null
 }
 
@@ -32,7 +33,7 @@ export const listCart = createServerFn({ method: 'GET' })
     const { data, error } = await supabase
       .from('cart_items')
       .select(
-        'id, product_id, quantity, added_at, updated_at, product:catalog_products(id, name_ar, brand, strength, barcode, requires_prescription)',
+        'id, product_id, quantity, added_at, updated_at, product:catalog_products(id, name_ar, brand, strength, barcode, requires_prescription, sbdma_official_price)',
       )
       .order('added_at', { ascending: false })
     if (error) throw new Error(error.message)
