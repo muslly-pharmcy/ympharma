@@ -38,10 +38,16 @@ function classify(file) {
     const name = m[1]
     const opts = m[2]
     const chain = m[3]
+    // Look at the full handler body to detect getActor() auth as well.
+    const bodyStart = m.index + m[0].length
+    const body = src.slice(bodyStart, bodyStart + 2000)
     const method = /method\s*:\s*['"](GET|POST|PUT|DELETE|PATCH)['"]/.exec(opts)?.[1] ?? 'POST'
-    const authed = /\.middleware\s*\(\s*\[[^\]]*requireSupabaseAuth[^\]]*\]/.test(chain)
+    const middlewareAuth = /\.middleware\s*\(\s*\[[^\]]*requireSupabaseAuth[^\]]*\]/.test(chain)
+    const actorAuth = /getActor\s*\(\s*\)/.test(body)
+    const authed = middlewareAuth || actorAuth
+    const authMode = middlewareAuth ? 'middleware' : actorAuth ? 'actor' : 'none'
     const validated = /\.inputValidator\s*\(/.test(chain)
-    fns.push({ name, method, authed, validated })
+    fns.push({ name, method, authed, authMode, validated })
   }
   return fns
 }
@@ -87,10 +93,10 @@ if (publicFns.length > 0) {
 
 md.push('## Full inventory')
 md.push('')
-md.push('| File | Function | Method | Auth | Validated |')
-md.push('|---|---|---|---|---|')
+md.push('| File | Function | Method | Auth | Mode | Validated |')
+md.push('|---|---|---|---|---|---|')
 for (const r of rows) {
-  md.push(`| \`${r.file}\` | \`${r.name}\` | ${r.method} | ${r.authed ? '✅' : '❌'} | ${r.validated ? '✅' : '—'} |`)
+  md.push(`| \`${r.file}\` | \`${r.name}\` | ${r.method} | ${r.authed ? '✅' : '❌'} | ${r.authMode} | ${r.validated ? '✅' : '—'} |`)
 }
 md.push('')
 

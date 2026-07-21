@@ -1,6 +1,6 @@
 # Server Function Auth Audit
 
-Generated: 2026-07-21T00:46:02.490Z
+Generated: 2026-07-21T00:46:28.220Z
 
 - Total server functions scanned: **154**
 - Protected by `requireSupabaseAuth`: **22/154**
