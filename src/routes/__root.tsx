@@ -7,7 +7,8 @@ import {
   useRouter,
 } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
-import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
+import { QueryClient, useQueryClient } from '@tanstack/react-query'
+import { AppQueryProvider } from '@/shared/components/AppQueryProvider'
 import { Suspense, useEffect, useState } from 'react'
 import MainLayout from '@/layouts/MainLayout'
 import { AuthProvider } from '@/context/AuthContext'
