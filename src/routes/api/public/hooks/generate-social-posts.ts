@@ -1,0 +1,78 @@
+import { createFileRoute } from '@tanstack/react-router'
+
+// Daily job: generate 5 medical/health tip posts using Lovable AI Gateway
+// and queue them into `social_posts` (facebook). Public hook, protected by
+// the Supabase anon `apikey` header used by pg_cron.
+export const Route = createFileRoute('/api/public/hooks/generate-social-posts')({
+  server: {
+    handlers: {
+      POST: async ({ request }) => {
+        const auth = request.headers.get('apikey') || request.headers.get('authorization') || ''
+        const expected = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY || ''
+        if (!expected || !auth.includes(expected.slice(-16))) {
+          return new Response('unauthorized', { status: 401 })
+        }
+
+        const key = process.env.LOVABLE_API_KEY
+        if (!key) return new Response('missing LOVABLE_API_KEY', { status: 500 })
+
+        const prompt = `أنت مسؤول المحتوى الطبي لصيدلية المصلي في عدن. أنشئ 5 منشورات قصيرة (كل منشور 2-3 جمل) لصفحة فيسبوك تحوي نصيحة صحية أو دوائية عملية للجمهور اليمني، بأسلوب ودّي ومهني. أرجع JSON فقط بالشكل التالي:
+{"posts":[{"caption":"...","hashtags":["#صحة","#صيدلية_المصلي"],"cta":"..."}]}`
+
+        let posts: Array<{ caption: string; hashtags: string[]; cta?: string }> = []
+        try {
+          const r = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${key}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              model: 'google/gemini-3-flash-preview',
+              messages: [
+                { role: 'system', content: 'You produce JSON only, no markdown fences.' },
+                { role: 'user', content: prompt },
+              ],
+              response_format: { type: 'json_object' },
+            }),
+          })
+          if (!r.ok) {
+            const body = await r.text()
+            console.error('[social-posts] gateway error', r.status, body)
+            return new Response(JSON.stringify({ ok: false, error: body }), { status: 502 })
+          }
+          const data = (await r.json()) as { choices?: Array<{ message?: { content?: string } }> }
+          const text = data.choices?.[0]?.message?.content ?? '{"posts":[]}'
+          const parsed = JSON.parse(text) as { posts?: typeof posts }
+          posts = Array.isArray(parsed.posts) ? parsed.posts.slice(0, 5) : []
+        } catch (e) {
+          console.error('[social-posts] parse failed', e)
+          return new Response(JSON.stringify({ ok: false, error: (e as Error).message }), { status: 500 })
+        }
+
+        if (posts.length === 0) {
+          return Response.json({ ok: true, inserted: 0, note: 'model returned no posts' })
+        }
+
+        const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+        const rows = posts.map((p, i) => ({
+          platform: 'facebook',
+          caption: p.caption,
+          hashtags: Array.isArray(p.hashtags) ? p.hashtags : [],
+          cta: p.cta ?? null,
+          status: 'pending',
+          scheduled_for: new Date(Date.now() + (i + 1) * 90 * 60_000).toISOString(),
+        }))
+        const { error, data } = await supabaseAdmin
+          .from('social_posts')
+          .insert(rows)
+          .select('id')
+        if (error) {
+          console.error('[social-posts] insert failed', error)
+          return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 500 })
+        }
+        return Response.json({ ok: true, inserted: data?.length ?? 0 })
+      },
+    },
+  },
+})
