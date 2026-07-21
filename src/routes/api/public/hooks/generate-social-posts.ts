@@ -1,17 +1,22 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { timingSafeEqual } from 'node:crypto'
 
 // Daily job: generate 5 medical/health tip posts using Lovable AI Gateway
 // and queue them into `social_posts` (facebook). Public hook, protected by
-// the Supabase anon `apikey` header used by pg_cron.
+// a shared CRON_SECRET header (never the public anon key).
 export const Route = createFileRoute('/api/public/hooks/generate-social-posts')({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const auth = request.headers.get('apikey') || request.headers.get('authorization') || ''
-        const expected = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY || ''
-        if (!expected || !auth.includes(expected.slice(-16))) {
+        const provided = request.headers.get('x-cron-secret') ?? ''
+        const expected = process.env.CRON_SECRET ?? ''
+        if (!expected) return new Response('cron secret not configured', { status: 500 })
+        const a = Buffer.from(provided)
+        const b = Buffer.from(expected)
+        if (a.length !== b.length || !timingSafeEqual(a, b)) {
           return new Response('unauthorized', { status: 401 })
         }
+
 
         const key = process.env.LOVABLE_API_KEY
         if (!key) return new Response('missing LOVABLE_API_KEY', { status: 500 })
