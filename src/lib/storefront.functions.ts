@@ -127,131 +127,48 @@ export interface PlacedOrder {
   payment_method_code: string
 }
 
-function generateOrderId(): string {
-  const d = new Date()
-  const yyyymmdd = `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, '0')}${String(d.getUTCDate()).padStart(2, '0')}`
-  const rand = Math.random().toString(36).slice(2, 8).toUpperCase()
-  return `ORD-${yyyymmdd}-${rand}`
-}
-
 export const placeOrder = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => placeOrderInput.parse(raw))
   .handler(async ({ data, context }): Promise<PlacedOrder> => {
-    const { supabase, userId } = context
-
-    // Load cart with prices.
-    const { data: cart, error: cartErr } = await supabase
-      .from('cart_items')
-      .select(
-        'id, product_id, quantity, product:catalog_products(id, name_ar, brand, strength, sbdma_official_price, requires_prescription, status, is_public)',
-      )
-    if (cartErr) throw new Error(cartErr.message)
-    const rows = (cart ?? []) as Array<{
-      id: string
-      product_id: string
-      quantity: number
-      product: {
-        id: string
-        name_ar: string
-        brand: string | null
-        strength: string | null
-        sbdma_official_price: number | null
-        requires_prescription: boolean
-        status: string
-        is_public: boolean
-      } | null
-    }>
-    if (rows.length === 0) throw new Error('السلة فارغة')
-
-    // Safety: block prescription items or unavailable products from checkout.
-    const blocked = rows.find(
-      (r) =>
-        !r.product ||
-        r.product.requires_prescription ||
-        !r.product.is_public ||
-        r.product.status !== 'approved',
+    // Delegates to the atomic FEFO checkout RPC (deducts stock,
+    // records movements, creates order + history, clears cart).
+    const { data: result, error } = await context.supabase.rpc(
+      'checkout_cart_fefo',
+      {
+        p_customer_name: data.customerName,
+        p_customer_phone: data.phone,
+        p_customer_address: data.address,
+        p_shipping_zone_id: data.shippingZoneId,
+        p_payment_method_code: data.paymentMethodCode,
+        p_notes: data.notes ?? null,
+      } as never,
     )
-    if (blocked) {
-      throw new Error(
-        `لا يمكن إتمام الطلب لوجود منتج غير متاح: ${blocked.product?.name_ar ?? '—'}`,
-      )
-    }
-
-    // Load shipping + payment method.
-    const [{ data: zone }, { data: method }] = await Promise.all([
-      supabase
-        .from('shipping_zones')
-        .select('id, fee, currency, name_ar, is_active')
-        .eq('id', data.shippingZoneId)
-        .maybeSingle(),
-      supabase
-        .from('payment_methods')
-        .select('code, requires_receipt, is_active, name_ar')
-        .eq('code', data.paymentMethodCode)
-        .maybeSingle(),
-    ])
-    if (!zone || !(zone as { is_active: boolean }).is_active) {
-      throw new Error('منطقة الشحن غير متاحة')
-    }
-    if (!method || !(method as { is_active: boolean }).is_active) {
-      throw new Error('طريقة الدفع غير متاحة')
-    }
-
-    const itemsSnapshot = rows.map((r) => {
-      const unit = Number(r.product?.sbdma_official_price ?? 0)
-      return {
-        product_id: r.product_id,
-        name_ar: r.product?.name_ar ?? '—',
-        brand: r.product?.brand ?? null,
-        strength: r.product?.strength ?? null,
-        quantity: r.quantity,
-        unit_price: unit,
-        line_total: Math.round(unit * r.quantity * 100) / 100,
+    if (error) {
+      const msg = error.message || ''
+      if (msg.includes('CART_EMPTY')) throw new Error('السلة فارغة')
+      if (msg.includes('INSUFFICIENT_STOCK')) {
+        throw new Error(msg.replace(/^.*INSUFFICIENT_STOCK:\s*/, 'المخزون غير كافٍ للمنتج: '))
       }
-    })
-    const subtotal = itemsSnapshot.reduce((s, i) => s + i.line_total, 0)
-    const shippingFee = Number((zone as { fee: number }).fee) || 0
-    const total = Math.round((subtotal + shippingFee) * 100) / 100
-    const orderId = generateOrderId()
-    const zoneName = (zone as { name_ar: string }).name_ar
-
-    const orderRow = {
-      id: orderId,
-      user_id: userId,
-      customer_name: data.customerName,
-      customer_phone: data.phone,
-      customer_address: `${zoneName} — ${data.address}`,
-      notes: data.notes ?? null,
-      items: itemsSnapshot,
-      subtotal,
-      shipping_fee: shippingFee,
-      total,
-      status: 'pending',
-      shipping_zone_id: data.shippingZoneId,
-      payment_method_code: data.paymentMethodCode,
-      payment_status:
-        (method as { requires_receipt: boolean }).requires_receipt ? 'awaiting_receipt' : 'pending',
+      if (msg.includes('PRODUCT_NOT_SELLABLE')) {
+        throw new Error(msg.replace(/^.*PRODUCT_NOT_SELLABLE:\s*/, 'المنتج غير متاح للبيع: '))
+      }
+      if (msg.includes('NO_ORG_MEMBERSHIP')) throw new Error('لا توجد منظمة نشطة مربوطة بحسابك')
+      if (msg.includes('SHIPPING_ZONE_UNAVAILABLE')) throw new Error('منطقة الشحن غير متاحة')
+      if (msg.includes('PAYMENT_METHOD_UNAVAILABLE')) throw new Error('طريقة الدفع غير متاحة')
+      throw new Error(msg || 'فشل إتمام الطلب')
     }
-    const { error: insErr } = await supabase.from('orders').insert(orderRow as never)
-    if (insErr) throw new Error(insErr.message)
-
-    // Clear cart.
-    await supabase.from('cart_items').delete().eq('user_id', userId)
-
-    // Best-effort history entry.
-    await supabase.from('order_status_history').insert({
-      order_id: orderId,
-      status: 'pending',
-      changed_by: userId,
-      note: 'تم إنشاء الطلب',
-    } as never)
-
+    const r = result as {
+      order_id: string
+      total: number
+      requires_receipt: boolean
+      payment_method_code: string
+    }
     return {
-      id: orderId,
-      total,
-      requires_receipt: (method as { requires_receipt: boolean }).requires_receipt,
-      payment_method_code: data.paymentMethodCode,
+      id: r.order_id,
+      total: Number(r.total),
+      requires_receipt: Boolean(r.requires_receipt),
+      payment_method_code: r.payment_method_code,
     }
   })
 

@@ -5,10 +5,11 @@ import { useTheme } from '@/context/ThemeContext'
 import { useAI } from '@/context/AIContext'
 import { supabase } from '@/integrations/supabase/client'
 import { listCart } from '@/lib/cart.functions'
+import { isCurrentUserAdmin } from '@/lib/admin-orders.functions'
 import { ShopifyCartDrawer } from '@/components/shopify/CartDrawer'
 import {
   Sun, Moon, Bell, MessageSquare, LogOut, Shield, LogIn,
-  Stethoscope, Database, Search, ShoppingCart, Store, Sparkles,
+  Stethoscope, Database, Search, ShoppingCart, Store, Sparkles, ClipboardList,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -30,6 +31,13 @@ export default function Navbar() {
     staleTime: 30_000,
   })
   const cartCount = cartItems?.reduce((n, it) => n + (it.quantity ?? 0), 0) ?? 0
+
+  const { data: isAdmin } = useQuery({
+    queryKey: ['is-admin'],
+    queryFn: () => isCurrentUserAdmin(),
+    enabled: isAuthenticated,
+    staleTime: 5 * 60_000,
+  })
 
   const displayName = (user?.user_metadata as { name?: string } | undefined)?.name ?? user?.email ?? ''
   const avatar =
@@ -140,6 +148,11 @@ export default function Navbar() {
                   </span>
                 )}
               </Link>
+              {isAdmin && (
+                <Link to="/admin-orders" className="p-2.5 rounded-xl hover:bg-gray-100 transition-colors" title="إدارة الطلبات">
+                  <ClipboardList className="w-5 h-5 text-gold" />
+                </Link>
+              )}
             </>
           )}
 
