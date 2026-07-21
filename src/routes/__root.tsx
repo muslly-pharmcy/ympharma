@@ -93,7 +93,7 @@ function RootComponent() {
       }),
   )
   return (
-    <QueryClientProvider client={queryClient}>
+    <AppQueryProvider client={queryClient}>
       <AuthStateSync />
       <GlobalErrorListeners />
       <OfflineBanner />
@@ -111,7 +111,7 @@ function RootComponent() {
           </AIProvider>
         </AuthProvider>
       </ThemeProvider>
-    </QueryClientProvider>
+    </AppQueryProvider>
   )
 }
 
