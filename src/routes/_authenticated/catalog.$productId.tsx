@@ -42,6 +42,13 @@ function ProductDetail() {
     queryKey: ['inventory', 'stock-summary', params.productId],
     queryFn: () => getStockSummary({ data: { productId: params.productId } }),
   })
+  const aiSummary = useServerFn(getProductAiSummary)
+  const [aiText, setAiText] = useState<string | null>(null)
+  const aiMutation = useMutation({
+    mutationFn: () => aiSummary({ data: { productId: params.productId } }),
+    onSuccess: (r) => setAiText(r.output ?? 'لا يوجد ملخص متاح.'),
+    onError: (e: Error) => toast.error(`تعذر توليد الملخص: ${e.message}`),
+  })
 
   if (isLoading) return <div className="p-8 text-center">جاري التحميل...</div>
   if (!data) {
