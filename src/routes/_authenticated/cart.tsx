@@ -1,13 +1,8 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useQuery, useMutation, useQueryClient, useSuspenseQuery, queryOptions } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
 import { ShoppingCart, Trash2, Plus, Minus, Lock } from 'lucide-react'
 import { listCart, removeFromCart, setCartQuantity } from '@/lib/cart.functions'
-
-const cartQuery = queryOptions({
-  queryKey: ['cart', 'items'],
-  queryFn: () => listCart(),
-})
 
 export const Route = createFileRoute('/_authenticated/cart')({
   head: () => ({
@@ -17,12 +12,14 @@ export const Route = createFileRoute('/_authenticated/cart')({
       { name: 'robots', content: 'noindex' },
     ],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(cartQuery),
   component: CartPage,
 })
 
 function CartPage() {
-  const { data: items } = useSuspenseQuery(cartQuery)
+  const { data: items = [], isLoading } = useQuery({
+    queryKey: ['cart', 'items'],
+    queryFn: () => listCart(),
+  })
   const qc = useQueryClient()
   const removeFn = useServerFn(removeFromCart)
   const setQtyFn = useServerFn(setCartQuantity)
