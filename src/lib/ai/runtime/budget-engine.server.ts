@@ -4,8 +4,8 @@ import type { BudgetRow } from './types'
 
 async function admin() {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return supabaseAdmin as any
+  // Typed client — proxy preserves SupabaseClient<Database> typing.
+  return supabaseAdmin
 }
 
 function windowStart(period: BudgetRow['period']): Date {

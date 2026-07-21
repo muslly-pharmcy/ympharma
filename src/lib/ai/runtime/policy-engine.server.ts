@@ -6,8 +6,8 @@ import type { Actor } from '../../session.server'
 
 async function admin() {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return supabaseAdmin as any
+  // Typed client — proxy preserves SupabaseClient<Database> typing.
+  return supabaseAdmin
 }
 
 // tiny cache: 30s per-org so repeated calls in one request are cheap.
