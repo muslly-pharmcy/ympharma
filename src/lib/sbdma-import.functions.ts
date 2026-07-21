@@ -86,10 +86,14 @@ function normalizeRow(r: SbdmaInputRow): SbdmaInputRow {
   }
 }
 
-async function assertAdmin(supabase: {
-  rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>
-}, userId: string): Promise<void> {
-  const { data, error } = await supabase.rpc('has_role', {
+async function assertAdmin(supabase: unknown, userId: string): Promise<void> {
+  const client = supabase as {
+    rpc: (fn: 'has_role', args: { _user_id: string; _role: 'admin' }) => Promise<{
+      data: boolean | null
+      error: { message: string } | null
+    }>
+  }
+  const { data, error } = await client.rpc('has_role', {
     _user_id: userId,
     _role: 'admin',
   })

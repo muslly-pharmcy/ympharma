@@ -27,6 +27,7 @@ import { Route as AuthenticatedPatientsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedPrescriptionsRouteImport } from './routes/_authenticated/prescriptions'
 import { Route as AuthenticatedPurchaseOrdersRouteImport } from './routes/_authenticated/purchase-orders'
 import { Route as AuthenticatedRewardsRouteImport } from './routes/_authenticated/rewards'
+import { Route as AuthenticatedSbdmaImportRouteImport } from './routes/_authenticated/sbdma-import'
 import { Route as AuthenticatedSegmentsRouteImport } from './routes/_authenticated/segments'
 import { Route as AuthenticatedSuppliersRouteImport } from './routes/_authenticated/suppliers'
 import { Route as AuthenticatedWarehousesRouteImport } from './routes/_authenticated/warehouses'
@@ -142,6 +143,12 @@ const AuthenticatedRewardsRoute = AuthenticatedRewardsRouteImport.update({
   path: '/rewards',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSbdmaImportRoute =
+  AuthenticatedSbdmaImportRouteImport.update({
+    id: '/sbdma-import',
+    path: '/sbdma-import',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSegmentsRoute = AuthenticatedSegmentsRouteImport.update({
   id: '/segments',
   path: '/segments',
@@ -288,6 +295,7 @@ export interface FileRoutesByFullPath {
   '/prescriptions': typeof AuthenticatedPrescriptionsRouteWithChildren
   '/purchase-orders': typeof AuthenticatedPurchaseOrdersRouteWithChildren
   '/rewards': typeof AuthenticatedRewardsRoute
+  '/sbdma-import': typeof AuthenticatedSbdmaImportRoute
   '/segments': typeof AuthenticatedSegmentsRoute
   '/suppliers': typeof AuthenticatedSuppliersRoute
   '/warehouses': typeof AuthenticatedWarehousesRoute
@@ -329,6 +337,7 @@ export interface FileRoutesByTo {
   '/prescriptions': typeof AuthenticatedPrescriptionsRouteWithChildren
   '/purchase-orders': typeof AuthenticatedPurchaseOrdersRouteWithChildren
   '/rewards': typeof AuthenticatedRewardsRoute
+  '/sbdma-import': typeof AuthenticatedSbdmaImportRoute
   '/segments': typeof AuthenticatedSegmentsRoute
   '/suppliers': typeof AuthenticatedSuppliersRoute
   '/warehouses': typeof AuthenticatedWarehousesRoute
@@ -372,6 +381,7 @@ export interface FileRoutesById {
   '/_authenticated/prescriptions': typeof AuthenticatedPrescriptionsRouteWithChildren
   '/_authenticated/purchase-orders': typeof AuthenticatedPurchaseOrdersRouteWithChildren
   '/_authenticated/rewards': typeof AuthenticatedRewardsRoute
+  '/_authenticated/sbdma-import': typeof AuthenticatedSbdmaImportRoute
   '/_authenticated/segments': typeof AuthenticatedSegmentsRoute
   '/_authenticated/suppliers': typeof AuthenticatedSuppliersRoute
   '/_authenticated/warehouses': typeof AuthenticatedWarehousesRoute
@@ -415,6 +425,7 @@ export interface FileRouteTypes {
     | '/prescriptions'
     | '/purchase-orders'
     | '/rewards'
+    | '/sbdma-import'
     | '/segments'
     | '/suppliers'
     | '/warehouses'
@@ -456,6 +467,7 @@ export interface FileRouteTypes {
     | '/prescriptions'
     | '/purchase-orders'
     | '/rewards'
+    | '/sbdma-import'
     | '/segments'
     | '/suppliers'
     | '/warehouses'
@@ -498,6 +510,7 @@ export interface FileRouteTypes {
     | '/_authenticated/prescriptions'
     | '/_authenticated/purchase-orders'
     | '/_authenticated/rewards'
+    | '/_authenticated/sbdma-import'
     | '/_authenticated/segments'
     | '/_authenticated/suppliers'
     | '/_authenticated/warehouses'
@@ -659,6 +672,13 @@ declare module '@tanstack/react-router' {
       path: '/rewards'
       fullPath: '/rewards'
       preLoaderRoute: typeof AuthenticatedRewardsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/sbdma-import': {
+      id: '/_authenticated/sbdma-import'
+      path: '/sbdma-import'
+      fullPath: '/sbdma-import'
+      preLoaderRoute: typeof AuthenticatedSbdmaImportRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/segments': {
@@ -939,6 +959,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPrescriptionsRoute: typeof AuthenticatedPrescriptionsRouteWithChildren
   AuthenticatedPurchaseOrdersRoute: typeof AuthenticatedPurchaseOrdersRouteWithChildren
   AuthenticatedRewardsRoute: typeof AuthenticatedRewardsRoute
+  AuthenticatedSbdmaImportRoute: typeof AuthenticatedSbdmaImportRoute
   AuthenticatedSegmentsRoute: typeof AuthenticatedSegmentsRoute
   AuthenticatedSuppliersRoute: typeof AuthenticatedSuppliersRoute
   AuthenticatedWarehousesRoute: typeof AuthenticatedWarehousesRoute
@@ -967,6 +988,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPurchaseOrdersRoute:
     AuthenticatedPurchaseOrdersRouteWithChildren,
   AuthenticatedRewardsRoute: AuthenticatedRewardsRoute,
+  AuthenticatedSbdmaImportRoute: AuthenticatedSbdmaImportRoute,
   AuthenticatedSegmentsRoute: AuthenticatedSegmentsRoute,
   AuthenticatedSuppliersRoute: AuthenticatedSuppliersRoute,
   AuthenticatedWarehousesRoute: AuthenticatedWarehousesRoute,
