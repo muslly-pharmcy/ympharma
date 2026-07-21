@@ -23,7 +23,7 @@ type OAuthApi = {
   ) => Promise<{ data: AuthorizationDetails | null; error: { message: string } | null }>;
 };
 
-function oauth(): OAuthApi {
+export function oauth(): OAuthApi {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (supabase.auth as any).oauth as OAuthApi;
 }
