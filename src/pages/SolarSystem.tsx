@@ -77,24 +77,28 @@ export default function SolarSystem() {
 
 
 
-        {/* Quick Stats */}
+        {/* AI Tools for Customers */}
         <motion.div 
           className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          {stats.map((stat, i) => (
-            <div key={i} className="glass-panel rounded-2xl p-4 text-center">
-              <div className={`w-10 h-10 ${stat.bg} rounded-xl flex items-center justify-center mx-auto mb-2`}>
-                <stat.icon className={`w-5 h-5 ${stat.color}`} />
+          {aiTools.map((tool, i) => (
+            <Link
+              key={i}
+              to={tool.to}
+              className="glass-panel rounded-2xl p-4 text-center hover:scale-[1.03] transition-transform cursor-pointer"
+            >
+              <div className={`w-11 h-11 ${tool.bg} rounded-xl flex items-center justify-center mx-auto mb-2`}>
+                <tool.icon className={`w-5 h-5 ${tool.color}`} />
               </div>
-              <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-              <p className="text-xs text-gray-500">{stat.label}</p>
-              <span className={`text-xs font-medium ${stat.color}`}>{stat.change}</span>
-            </div>
+              <p className="text-sm font-bold text-gray-900">{tool.label}</p>
+              <p className="text-xs text-gray-500 mt-1">{tool.desc}</p>
+            </Link>
           ))}
         </motion.div>
+
 
         {/* 3D Solar System */}
         <motion.div
