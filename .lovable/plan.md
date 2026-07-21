@@ -1,82 +1,55 @@
-# Aden Medical Galaxy — خطة تنفيذ محاذية للواقع
+# Track A + D — Reality-Adjusted Plan
 
-## ⚠️ Reality Check أولاً
+Chief, I have to push back on the two snippets you pasted before we commit them. Then here is what I will actually build.
 
-الكود اللي وصلني فيه مشاكل تمنع تشغيله كما هو — لازم أعدّله قبل التنفيذ:
+## What I am rejecting (and why)
 
-| المشكلة في الـ Blueprint | الواقع في مشروعك |
-|---|---|
-| `from '@tanstack/start'` | الصحيح: `@tanstack/react-start` |
-| `.validator()` | الصحيح: `.inputValidator()` |
-| `from '@/lib/supabase/server'` | غير موجود — عندنا `requireSupabaseAuth` middleware و`supabaseAdmin` |
-| `requireSupabaseAuth()` كدالة | هي **middleware** تُمرَّر عبر `.middleware([requireSupabaseAuth])` |
-| `CREATE TABLE medical_directory` | **مكرر** — عندنا `hc_doctors` (45 عمود) + `hc_locations` |
-| `CREATE TABLE suppliers_registry` | **مكرر** — عندنا `sup_suppliers` (12 عمود) + `sup_supplier_products` |
-| `'use client'` + `framer-motion` | غير مطلوب في TanStack Start؛ وframer-motion غير مثبّت |
-| `console.log` للنشر الفعلي | لا يوجد integration فعلي لفيسبوك/واتساب |
-| SQL بدون `GRANT` + RLS | ممنوع — كل جدول `public` يجب أن يأخذ GRANTs + RLS |
+**1. The pasted `Header.tsx` is broken.**
+- Every JSX tag body is empty (`<motion.header>` / `<div>` open with no children). Copy-pasting it would render nothing and break the build.
+- We already have a working `src/shared/components/Navbar.tsx` wired to `AuthContext`, `ThemeContext`, `AIContext`, sign-out flow, and a `/mission-control` link. Replacing it with a stub loses real functionality.
+- The "teal snake" logo file was never actually uploaded in this session (no image asset in the codebase, no upload in this turn). I will not fabricate a logo path.
 
-**الخلاصة:** لن أضيف جداول مكررة. سأبني على `hc_*` و`sup_*` و`catalog_products` الموجودة.
+**2. The pasted `security-scanner.ts` is theater, not an audit.**
+- It hard-codes 5 function names into an array and `console.log`s that each was "verified". It never opens a file, never parses AST, never checks middleware. It would give a green report even if every function was unprotected.
+- A real audit belongs at build time (ripgrep over `src/lib/*.functions.ts`), not as a runtime function shipped to users.
 
----
+## What I will build instead
 
-## الخطة (3 دفعات صغيرة قابلة للمراجعة)
+### Track A — Enhance the existing Navbar (no rewrite)
 
-### Batch 1 — SBDMA Fields + Directory Search (بدون جداول جديدة)
+Edit `src/shared/components/Navbar.tsx` only. Keep every current feature. Add a middle nav cluster (visible on `md:` and up, collapsed on mobile) with real routes we already ship:
 
-**Migration واحد:**
-- `ALTER TABLE catalog_products ADD COLUMN sbdma_official_price NUMERIC(10,2), agent_name TEXT, manufacturer_country TEXT` (كلها nullable، لا يكسر الموجود).
-- `CREATE INDEX` على `agent_name` و`sbdma_official_price`.
-- لا جداول جديدة.
+| Label | Route | Icon |
+|---|---|---|
+| الدليل الطبي | `/medical-directory` | `Stethoscope` |
+| هيئة الأدوية | `/sbdma-import` (admin gated by route) | `Database` |
+| الكتالوج | `/catalog` | `Search` |
+| السلة | `/cart` *(new tiny route, see below)* | `ShoppingCart` |
 
-**Server functions جديدة في `src/lib/medical-directory.functions.ts`:**
-- `searchAdenDirectory({ query, entityType?, district? })` — يبحث في `hc_doctors` + `hc_locations` (join على `hc_doctor_locations`). محمي بـ `requireSupabaseAuth` (RLS تعمل تلقائياً).
-- `findSuppliersByCompany({ companyName })` — يبحث في `sup_suppliers` + `sup_supplier_products`. محمي بـ auth.
-- `listProductsByAgent({ agentName })` — يقرأ من `catalog_products`.
+Cart badge count reads from `cart_items` via a small `useQuery` that calls existing `listCart` in `src/lib/cart.functions.ts` (already authenticated). No count shown when signed out.
 
-**استخدام صحيح:**
-```ts
-export const searchAdenDirectory = createServerFn({ method: 'GET' })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: { query: string }) => input)
-  .handler(async ({ data, context }) => {
-    return context.supabase.from('hc_doctors')...
-  });
-```
+**Logo:** until you upload the teal-snake artwork, keep the current gradient "م" mark. As soon as you drop the image into chat I will replace it in a one-line follow-up and swap the wordmark colors to match the logo's teal. No placeholder image will be invented.
 
-### Batch 2 — SBDMA Bulk Import (Admin only)
+### Track D — Real self-audit (build-time, not runtime)
 
-- Server route: `src/routes/api/public/sbdma-import.ts` — POST يستقبل ملف JSON. محمي بـ HMAC signature (وليس مفتوح للعامة).
-- بديل أبسط: صفحة `/admin-sbdma-import` تحت `_authenticated/` تسمح للـ admin برفع JSON، وتستدعي server fn `bulkUpsertSBDMAPrices` (تتحقق من `has_role(admin)` ثم تستخدم `supabaseAdmin` عبر `await import` داخل الـ handler).
-- تحديث `catalog_products` عبر `upsert` على مفتاح موجود (نحدد المفتاح: `name` غير كافٍ — نستخدم `barcode` من `catalog_barcodes` أو `sku`).
-- **سؤال مفتوح:** ما هو المفتاح الفريد الذي سنستخدمه للـ upsert؟ (سأسأل قبل التنفيذ).
+Add `scripts/audit-server-fns.mjs` + `docs/engineering/SERVER-FN-AUDIT.md`:
 
-### Batch 3 — Medical Assistant UI Widget
+- Script walks `src/lib/**/*.functions.ts`, parses each `createServerFn(...)` chain, and reports for every exported server fn:
+  - Has `.middleware([requireSupabaseAuth])`? yes/no
+  - Has `.inputValidator(...)`? yes/no
+  - Method (GET/POST)
+- Writes a Markdown table to `docs/engineering/SERVER-FN-AUDIT.md` with a summary line (`X/Y protected`) and lists any unauthenticated fns explicitly, so unprotected endpoints cannot hide behind a hard-coded whitelist.
+- Runnable with `node scripts/audit-server-fns.mjs`; no runtime shipping, no fake dashboard.
 
-- Component جديد: `src/components/medical/MedicalAssistantWidget.tsx` — بدون `'use client'` (TanStack Start SSR)، بدون framer-motion (نستخدم Tailwind transitions).
-- يستخدم الألوان الموجودة في design tokens (teal + nebula من phase 11B).
-- يستدعي server functions من Batch 1 عبر `useServerFn` + TanStack Query.
-- يُدمج في `__root.tsx` كـ floating widget يظهر فقط للمستخدمين المسجّلين.
+Deliverable in this turn: the script, one generated report, and the doc.
 
-### ما هو **مُستبعَد** من هذه الخطة (يحتاج قرار منفصل):
+## Out of scope this turn
 
-1. **WhatsApp Bot / Facebook Autopilot** — يتطلب:
-   - Meta Business API credentials (secret via `secrets--add_secret`).
-   - Webhook verification token.
-   - Rate limiting + moderation.
-   - قرر منفصل بعد Batch 1-3.
-2. **Seed data الحقيقي لأطباء عدن** — يحتاج مصدر موثّق (لا يمكنني اختراع أرقام هواتف). إمّا نبني UI لإدخال يدوي عبر admin، أو ننتظر ملف JSON منك.
-3. **Daily post cron** — سأضيفه بعد ما تربط حساب Meta فعلياً.
+- Tracks B (WhatsApp) and C (FB/IG autopilot) — I will not scaffold code paths for them until the keys land. Half-built social wiring would need to be reworked once we know which provider (Meta Cloud API vs UltraMsg) you actually pick.
+- No `/settings` change, no `_authenticated` route changes, no DB migration.
 
----
+## Confirm before I switch to build
 
-## الترتيب المقترح
-
-1. أبدأ بـ **Batch 1** فقط (migration + 3 server functions + اختبار عبر console).
-2. أعرضه للمراجعة → إذا OK، أنتقل لـ Batch 2.
-3. Batch 3 UI بعد ما نتحقق أن الـ backend يعمل.
-
-**سؤال قبل البدء:** ما مفتاح الـ upsert الذي تفضّله للـ SBDMA prices؟
-- (أ) `barcode` (عبر `catalog_barcodes`) — الأدق.
-- (ب) `sku` على `catalog_products`.
-- (ج) `name` + `manufacturer` — الأضعف لكن الأسهل.
+Two quick decisions:
+1. **Cart route** — OK to add a minimal `src/routes/_authenticated/cart.tsx` that lists `cart_items` (view only, remove-item button), so the navbar cart badge links somewhere real? Or skip the page and have the badge open a dropdown instead?
+2. **Logo** — do you want to (a) ship the navbar update now with current "م" mark and swap the logo later, or (b) wait until you upload the teal-snake PNG so we do it in one shipment?
