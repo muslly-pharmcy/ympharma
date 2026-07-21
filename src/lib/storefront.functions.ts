@@ -216,12 +216,12 @@ export const placeOrder = createServerFn({ method: 'POST' })
     const orderId = generateOrderId()
     const zoneName = (zone as { name_ar: string }).name_ar
 
-    const { error: insErr } = await supabase.from('orders').insert({
+    const orderRow = {
       id: orderId,
       user_id: userId,
       customer_name: data.customerName,
-      phone: data.phone,
-      address: `${zoneName} — ${data.address}`,
+      customer_phone: data.phone,
+      customer_address: `${zoneName} — ${data.address}`,
       notes: data.notes ?? null,
       items: itemsSnapshot,
       subtotal,
@@ -232,7 +232,8 @@ export const placeOrder = createServerFn({ method: 'POST' })
       payment_method_code: data.paymentMethodCode,
       payment_status:
         (method as { requires_receipt: boolean }).requires_receipt ? 'awaiting_receipt' : 'pending',
-    })
+    }
+    const { error: insErr } = await supabase.from('orders').insert(orderRow as never)
     if (insErr) throw new Error(insErr.message)
 
     // Clear cart.
@@ -244,7 +245,7 @@ export const placeOrder = createServerFn({ method: 'POST' })
       status: 'pending',
       changed_by: userId,
       note: 'تم إنشاء الطلب',
-    })
+    } as never)
 
     return {
       id: orderId,
@@ -287,7 +288,7 @@ export const listMyOrders = createServerFn({ method: 'GET' })
     const { data, error } = await context.supabase
       .from('orders')
       .select(
-        'id, status, payment_status, total, subtotal, shipping_fee, payment_method_code, payment_receipt_path, customer_name, phone, address, notes, items, created_at, updated_at',
+        'id, status, payment_status, total, subtotal, shipping_fee, payment_method_code, payment_receipt_path, customer_name, phone:customer_phone, address:customer_address, notes, items, created_at, updated_at',
       )
       .eq('user_id', context.userId)
       .order('created_at', { ascending: false })
@@ -303,20 +304,20 @@ export const getMyOrder = createServerFn({ method: 'GET' })
     const { data: order, error } = await context.supabase
       .from('orders')
       .select(
-        'id, status, payment_status, total, subtotal, shipping_fee, payment_method_code, payment_receipt_path, customer_name, phone, address, notes, items, created_at, updated_at, user_id',
+        'id, status, payment_status, total, subtotal, shipping_fee, payment_method_code, payment_receipt_path, customer_name, phone:customer_phone, address:customer_address, notes, items, created_at, updated_at, user_id',
       )
       .eq('id', data.id)
       .maybeSingle()
     if (error) throw new Error(error.message)
-    if (!order || (order as { user_id: string }).user_id !== context.userId) {
-      return null
-    }
+    const row = order as unknown as (MyOrderRow & { user_id: string | null }) | null
+    if (!row || row.user_id !== context.userId) return null
+
     const { data: history } = await context.supabase
       .from('order_status_history')
-      .select('id, status, note, changed_at')
+      .select('id, status, note, created_at')
       .eq('order_id', data.id)
-      .order('changed_at', { ascending: true })
-    return { order: order as unknown as MyOrderRow, history: history ?? [] }
+      .order('created_at', { ascending: true })
+    return { order: row as MyOrderRow, history: (history ?? []) as unknown as Array<{ id: string; status: string; note: string | null; created_at: string }> }
   })
 
 // ---------- Authenticated: attach payment receipt path ----------
