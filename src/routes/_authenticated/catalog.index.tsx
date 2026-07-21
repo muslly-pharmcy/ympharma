@@ -39,6 +39,20 @@ function CatalogPage() {
   const search = Route.useSearch()
   const navigate = useNavigate()
   const [q, setQ] = useState(search.q ?? '')
+  const deferredQ = useDeferredValue(q)
+
+  // Debounced URL sync as user types
+  useEffect(() => {
+    const trimmed = deferredQ.trim()
+    if ((search.q ?? '') === trimmed) return
+    const t = setTimeout(() => {
+      void navigate({
+        to: '/catalog',
+        search: { ...search, q: trimmed || undefined, page: 1 },
+      })
+    }, 350)
+    return () => clearTimeout(t)
+  }, [deferredQ, navigate, search])
 
   const { data, isFetching } = useQuery({
     queryKey: ['catalog', 'products', search],
@@ -59,7 +73,13 @@ function CatalogPage() {
     queryFn: () => listCategories(),
   })
 
-  const products = data?.items ?? []
+  const products = (data?.items ?? []) as Array<
+    (typeof data extends { items: infer T } ? T : never)[number] & {
+      primary_image_url?: string
+      sbdma_official_price?: number | string | null
+      manufacturer?: string | null
+    }
+  >
   const total = data?.total ?? 0
   const pages = Math.max(1, Math.ceil(total / 24))
 
@@ -79,13 +99,7 @@ function CatalogPage() {
         </p>
       </header>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          setSearch({ q: q || undefined, page: 1 })
-        }}
-        className="glass-panel flex flex-col gap-3 rounded-2xl p-4 sm:flex-row"
-      >
+      <div className="glass-panel flex flex-col gap-3 rounded-2xl p-4 sm:flex-row">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
           <input
@@ -107,19 +121,13 @@ function CatalogPage() {
             </option>
           ))}
         </select>
-        <button
-          type="submit"
-          className="rounded-xl bg-primary px-6 py-2.5 font-medium text-white shadow-lg shadow-primary/25"
-        >
-          بحث
-        </button>
-      </form>
+      </div>
 
       {isFetching && <p className="text-sm text-muted-foreground">جاري التحميل...</p>}
 
       {products.length === 0 ? (
         <div className="glass-panel flex flex-col items-center gap-3 rounded-2xl p-12 text-center">
-          <Package className="h-12 w-12 text-gray-400" />
+          <Pill className="h-12 w-12 text-gray-400" />
           <p className="text-lg font-medium">لا توجد منتجات مطابقة</p>
           <p className="text-sm text-muted-foreground">
             جرّب توسيع البحث أو إضافة منتجات جديدة إلى الكتالوج.
@@ -127,29 +135,50 @@ function CatalogPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {products.map((p) => (
-            <Link
-              key={p.id}
-              to="/catalog/$productId"
-              params={{ productId: p.id }}
-              className="glass-panel rounded-2xl p-4 transition hover:shadow-lg"
-            >
-              <div className="mb-3 flex h-24 items-center justify-center rounded-xl bg-primary/5">
-                <Package className="h-10 w-10 text-primary" />
-              </div>
-              <h3 className="line-clamp-2 font-semibold text-gray-900">{p.name_ar}</h3>
-              {p.brand && <p className="mt-1 text-xs text-gray-500">{p.brand}</p>}
-              {p.strength && (
-                <p className="mt-1 text-xs text-muted-foreground">{p.strength}</p>
-              )}
-            </Link>
-          ))}
+          {products.map((p) => {
+            const priceNum = p.sbdma_official_price != null ? Number(p.sbdma_official_price) : null
+            return (
+              <Link
+                key={p.id}
+                to="/catalog/$productId"
+                params={{ productId: p.id }}
+                className="glass-panel group flex flex-col rounded-2xl p-4 transition hover:shadow-lg"
+              >
+                <div className="mb-3 flex aspect-square items-center justify-center overflow-hidden rounded-xl bg-primary/5">
+                  {p.primary_image_url ? (
+                    <img
+                      src={p.primary_image_url}
+                      alt={p.name_ar}
+                      loading="lazy"
+                      className="h-full w-full object-contain transition group-hover:scale-105"
+                    />
+                  ) : (
+                    <Pill className="h-16 w-16 text-primary/40" />
+                  )}
+                </div>
+                <h3 className="line-clamp-2 font-semibold text-gray-900">{p.name_ar}</h3>
+                {p.brand && <p className="mt-0.5 text-xs text-gray-500">{p.brand}</p>}
+                {p.manufacturer && (
+                  <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
+                    {p.manufacturer}
+                  </p>
+                )}
+                <div className="mt-auto pt-3">
+                  {priceNum && priceNum > 0 ? (
+                    <p className="text-base font-bold text-primary">{YER.format(priceNum)}</p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">السعر غير محدد</p>
+                  )}
+                </div>
+              </Link>
+            )
+          })}
         </div>
       )}
 
       {pages > 1 && (
         <div className="flex justify-center gap-2">
-          {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
+          {Array.from({ length: Math.min(pages, 20) }, (_, i) => i + 1).map((p) => (
             <button
               key={p}
               onClick={() => setSearch({ page: p })}
