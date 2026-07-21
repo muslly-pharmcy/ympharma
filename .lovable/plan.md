@@ -1,70 +1,92 @@
 
-# Wave R1.3.1 — Admin Client Elimination Audit
+# Wave R1.3.2 — RLS Policy Migration for Bucket B (CRM Cluster First)
 
-## Scope
+## Context
 
-Read-only classification wave. **No code refactors, no RLS changes, no `supabaseAdmin` removals** — this wave only produces the decision matrix that R1.3.2+ will act on. Downstream waves (R1.4 contract audit, R1.5 domain boundaries, R1.6 secrets, then Tracks B/C) stay queued and are out of scope here.
+Wave R1.3.1 classified 91 admin-bypass server functions. Result:
 
-## Objective
+```
+Legitimate System Operations    2  (A — keep)
+Replace with RLS               35  (B — this wave targets these)
+Service Layer Required         54  (C — deferred to R1.3.4)
+Needs Redesign                  0
+```
 
-For each of the 90 functions flagged `admin-bypass (gated)` in `WAVE-R1.3-AUTHZ-AUDIT.md`, answer:
+Approved roadmap: **R1.3.2 → R1.3.5 → R1.4 → R1.5 → R1.6**, executed cluster-by-cluster with a migration + regression tests + verification report per step. Behaviour must not change; RLS becomes a defence-in-depth layer *underneath* the existing `requirePermission` / `actor.organizationId` guards.
 
-> Why does this handler need `supabaseAdmin` instead of `context.supabase` + RLS?
+## Scope of this wave
 
-and assign one of four verdicts.
+**Only Bucket B, CRM cluster.** Concretely, the 9 handlers below plus the RLS policies for the tables they touch:
 
-## Classification buckets
+- `campaigns.functions.ts` → `listCampaigns`, `getCampaign`, `listSegments`, `getSegment` (tables: `crm_campaigns`, `crm_campaign_events`, `crm_segments`)
+- `customers.functions.ts` → `listCustomers`, `getCustomer` (tables: `crm_customers`, `crm_customer_contacts`)
+- `customers.mutations.functions.ts` → `updateCustomer`, `addCustomerAddress`, `addCustomerContact`, `addCustomerTag`, `removeCustomerTag` (tables: `crm_customers`, `crm_customer_addresses`, `crm_customer_contacts`, `crm_customer_tags`)
+- `loyalty.functions.ts` reads on `crm_loyalty_accounts`, `crm_loyalty_transactions`, `crm_reward_catalog`, `crm_reward_redemptions`, `crm_loyalty_rules`, `crm_loyalty_tiers` — RLS SELECT policies land in this wave; the handler cutover ships in R1.3.3 alongside customers/campaigns.
 
-| Bucket | Meaning | Typical signals |
-|---|---|---|
-| **A — Keep (legitimate bypass)** | Must run above RLS by design. | Cron/queue workers, AI runtime writes to `ai_events`/`agent_runs`, audit writer, `getActor()` itself, session bootstrap, backfills. |
-| **B — Replace with RLS** | Ordinary CRUD scoped to `actor.organizationId`. RLS policy on the table already exists (or is trivial to add) and would enforce the same tenant/role rule the code enforces today. | Simple insert/update/delete with a single `requirePermission` + `requireOrg` before the write. |
-| **C — Service layer required** | Multi-step transactions, cross-table writes, cross-org aggregation, ledger/financial ops, or SECURITY DEFINER RPC candidates. RLS alone cannot express the invariant. | Dispense state-machine, loyalty ledger, insurance claim transitions, PO transitions, campaign send. |
-| **D — Redesign** | `supabaseAdmin` used without a real reason, duplicated permission logic, or checks after the write. | Handlers where the admin client is used only to skip writing a policy, or where the org check happens post-mutation. |
+**Out of scope** (queued): medical / supply / platform clusters, all Bucket C service-layer extractions, R1.4+ audits, WhatsApp / Meta integrations (still gated on secrets).
 
-## Method (per domain, in this order)
+## Plan
 
-Batch by domain file to keep review reviewable:
+### Step 1 — Verify current tenant column and existing policies
 
-1. `customers` + `loyalty` + `promotions` + `campaigns` (CRM cluster)
-2. `patients` + `doctors` + `prescriptions` + `dispenses` + `insurance` (medical cluster)
-3. `catalog` + `inventory` + `suppliers` + `purchasing` + `sbdma-import` (supply cluster)
-4. `ai` + `clinical` + `analytics` + `medical-directory` + `me` + `modules` + `cart` (platform cluster)
+Before writing SQL, query `pg_policies` and `information_schema.columns` for each target table to confirm:
 
-For each function in a batch:
+- The tenant column name is `organization_id` (not `org_id` / `tenant_id`).
+- Whether a `current_org()` helper already exists (used elsewhere in the schema).
+- Which policies exist today so the migration doesn't collide with them.
 
-- Read the whole handler (not just the analyzer slice) and the helpers it delegates to.
-- Query `supabase--read_query` for the target table's existing RLS policies and grants.
-- Record: bucket, one-line rationale, existing RLS policy (yes/no), required RLS policy if bucket B, invariant that blocks RLS if bucket C, redesign note if bucket D.
+No file edits in this step; findings feed the migration.
 
-## Deliverables
+### Step 2 — Migration: RLS policies for CRM Bucket B tables
 
-1. **`scripts/audit-admin-bypass.mjs`** — extends the R1.3 analyzer with per-function context (handler body length, delegated helpers, table names extracted from `.from('...')`, presence of `requirePermission`/`requireOrg` before vs after mutations). Deterministic, reruns cleanly.
-2. **`docs/engineering/WAVE-R1.3.1-ADMIN-BYPASS-CLASSIFICATION.md`** — executive summary + one table per domain cluster + one row per function with columns: `file · function · bucket (A/B/C/D) · target tables · has-RLS-today · rationale · follow-up`. Ends with the totals table the user asked for:
+One migration that, per table:
 
-   ```text
-   Legitimate System Operations   NN
-   Replace with RLS               NN
-   Service Layer Required         NN
-   Needs Redesign                 NN
-   ```
-3. **Follow-up backlog appended to the same doc**, sequenced but not executed:
-   - R1.3.2 — write missing RLS policies for bucket B tables (migration).
-   - R1.3.3 — migrate bucket B handlers to `context.supabase` (per-domain PRs).
-   - R1.3.4 — extract bucket C into `SECURITY DEFINER` RPCs or a `src/lib/services/` layer with explicit invariants + tests.
-   - R1.3.5 — redesign bucket D handlers.
+1. Ensures RLS is enabled.
+2. Creates a `SELECT`, `INSERT`, `UPDATE`, `DELETE` policy scoped to `organization_id = <current-org-of-auth.uid()>` and gated by the same role the current handler checks via `requirePermission` (using `public.has_role(auth.uid(), …)` where applicable, or a `SECURITY DEFINER` helper that reads the caller's `actor` org).
+3. Confirms `GRANT SELECT, INSERT, UPDATE, DELETE ON <table> TO authenticated` is present (add if missing).
 
-## Non-goals (explicit)
+Tables covered: `crm_campaigns`, `crm_campaign_events`, `crm_segments`, `crm_customers`, `crm_customer_contacts`, `crm_customer_addresses`, `crm_customer_tags`, `crm_loyalty_accounts`, `crm_loyalty_transactions`, `crm_loyalty_rules`, `crm_loyalty_tiers`, `crm_reward_catalog`, `crm_reward_redemptions`.
 
-- No migrations run in this wave.
-- No handler rewrites.
-- No changes to `session.server.ts`, `idempotency.server.ts`, or `_authenticated/route.tsx`.
-- No work on Tracks B/C (WhatsApp/Meta) — still gated on Lovable Secrets.
-- No R1.4/R1.5/R1.6 work — those remain queued per your ordering.
+No handler changes in this migration — policies land first so we can verify they match current behaviour before flipping any code.
+
+### Step 3 — Verification queries
+
+After the migration, run read-only checks:
+
+- `SELECT tablename, policyname, cmd, qual FROM pg_policies WHERE tablename LIKE 'crm\_%'` — confirm every target table has the expected 4 policies.
+- Simulated `SET LOCAL role authenticated; SET LOCAL request.jwt.claims …` probes against one row from a real org — confirm same-org rows return, other-org rows do not.
+
+### Step 4 — Verification report
+
+Append to `docs/engineering/WAVE-C7-REGRESSION-LOG.md` (existing regression log):
+
+- Migration ID + tables touched.
+- Policy diff (before/after).
+- Probe results.
+- Explicit statement: "No handler code changed in R1.3.2; cutover to `context.supabase` deferred to R1.3.3."
+
+### Step 5 — Follow-up ticket (not executed here)
+
+Open R1.3.3 tracking item covering the actual handler migration to `context.supabase` + `requireSupabaseAuth` for the 9 CRM Bucket B functions, plus a regression suite that hits each function under two orgs to prove RLS blocks cross-tenant reads/writes.
+
+## Technical notes
+
+- Role check inside RLS uses `public.has_role(auth.uid(), 'pharmacist'::app_role)` etc. — the existing helper. Do not invent a new one.
+- Organization scoping: today handlers read `actor.organizationId` from `getActor()`. RLS needs an equivalent. Preferred path: a `SECURITY DEFINER STABLE` helper `public.current_actor_org()` that reads `organization_members` for `auth.uid()` and returns the active org. If it already exists in the schema, reuse it; otherwise create it inside the same migration (with `search_path = public` and `REVOKE EXECUTE FROM PUBLIC; GRANT EXECUTE TO authenticated`).
+- Migration uses `DROP POLICY IF EXISTS` before `CREATE POLICY` so it is idempotent.
+- `SECURITY DEFINER` helpers created here fall under the R1.3-established hardening: explicit `search_path`, no `EXECUTE` to `anon`.
+
+## Non-goals
+
+- No handler rewrites (that is R1.3.3).
+- No changes to Bucket C mutation functions or `session.server.ts` / `idempotency.server.ts`.
+- No medical/supply/platform tables.
+- No new tests written in this wave beyond the SQL probes — behaviour is unchanged.
 
 ## Acceptance
 
-- The 90 admin-bypass functions from R1.3 are each assigned to exactly one bucket, with rationale.
-- Every bucket B row names the RLS policy that would replace the code check.
-- Every bucket C row names the invariant that RLS cannot express.
-- The classification script is idempotent (`node scripts/audit-admin-bypass.mjs` reproduces the doc).
+- Migration applied cleanly, idempotent on re-run.
+- `pg_policies` shows the expected 4 policies per CRM Bucket B table.
+- Same-org / cross-org probes behave as documented.
+- Regression log entry added.
+- R1.3.3 backlog item recorded.
