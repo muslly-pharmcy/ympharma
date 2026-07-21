@@ -87,6 +87,13 @@ export default function Navbar() {
             <Database className="w-4 h-4" />
             <span>هيئة الأدوية</span>
           </Link>
+          <Link
+            to="/vision-lab"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>مختبر الرؤية</span>
+          </Link>
           <div className="hidden lg:flex items-center gap-2 px-3 py-2 bg-primary/5 rounded-xl ml-2">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
             <span className="text-sm text-gray-600">
