@@ -21,7 +21,9 @@ import { RouteSkeleton } from '@/components/skeletons/Skeleton'
 import { classifyError } from '@/lib/errors/classify'
 import { newCorrelationId } from '@/lib/errors/correlation'
 import { reportError } from '@/lib/errors/logger'
+import almoslyLogo from '@/assets/almosly-logo.png.asset.json'
 import appCss from '@/index.css?url'
+
 
 export const Route = createRootRoute({
   head: () => ({
