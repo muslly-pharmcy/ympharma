@@ -8,10 +8,14 @@ async function admin() {
   return supabaseAdmin
 }
 
+// Default caps: allow execute + tool calls. Safety layer, budget engine, and
+// policy engine still gate every dispatch downstream; requiring an explicit
+// air_capabilities row per (org, agent) was the top cause of "AI Kernel dead"
+// in fresh orgs. Write/approve remain opt-in.
 const DEFAULT: Omit<CapabilityRow, 'agent_key'> = {
   can_read: true,
   can_write: false,
-  can_execute: false,
+  can_execute: true,
   can_call_tools: true,
   can_approve: false,
   can_learn: true,
