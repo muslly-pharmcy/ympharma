@@ -10,9 +10,11 @@ export const PHARMACY = {
   description:
     'صيدلية المصلي — رعاية دوائية موثوقة في عدن مع مساعد ذكاء صناعي، صرف الوصفات، وتوصيل الأدوية.',
   logo: almoslyLogo.url,
-  phone: '+967 777 000 000',
-  whatsapp: '+967777000000',
+  phone: '+967 782 878 280',
+  whatsapp: '+967782878280',
+  whatsappUrl: 'https://wa.me/967782878280',
   email: 'info@muslly.com',
+  facebookUrl: 'https://business.facebook.com/latest/home/?asset_id=1170639849472726&business_id=2157569191654292',
   addressAr: 'كريتر — عدن، اليمن',
   addressEn: 'Crater — Aden, Yemen',
   mapsUrl: 'https://maps.google.com/?q=Aden+Crater+Al+Musalli+Pharmacy',
