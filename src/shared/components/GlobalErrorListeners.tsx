@@ -9,11 +9,46 @@ import { sendReportToSupabase } from '@/lib/errors/supabase-sink'
 import { installErrorHealer } from '@/lib/errors/healer'
 
 /**
- * Global window error + unhandledrejection listeners.
- * Ensures runtime errors on iOS/Android also flow through the structured
- * reportError pipeline (console + registered hooks), not only React boundaries.
+ * Global runtime error observability + auto-healing.
+ * - Captures window.onerror and unhandledrejection (React boundaries only cover render).
+ * - Ships each report to public.error_logs (device info, stack, correlation id).
+ * - Installs the auto-healer: reinvalidates queries when network recovers, prompts
+ *   reload on stale bundles, notifies on auth loss.
  */
 export function GlobalErrorListeners() {
+  const queryClient = useQueryClient()
+  const navigate = useNavigate()
+
+  // Structured sink → public.error_logs (RLS-guarded insert with size caps).
+  useEffect(() => {
+    return registerErrorHook((report) => {
+      void sendReportToSupabase(report)
+    })
+  }, [])
+
+  // Auto-healer with app-specific recovery actions.
+  useEffect(() => {
+    installErrorHealer({
+      queryClient,
+      onChunkStale: () => {
+        toast.message('يتوفر تحديث للتطبيق', {
+          description: 'اضغط لإعادة التحميل والحصول على أحدث نسخة.',
+          action: {
+            label: 'تحديث',
+            onClick: () => {
+              if (typeof window !== 'undefined') window.location.reload()
+            },
+          },
+          duration: 10_000,
+        })
+      },
+      onAuthLost: () => {
+        toast.error('انتهت الجلسة — يرجى تسجيل الدخول من جديد')
+        void navigate({ to: '/auth' })
+      },
+    })
+  }, [queryClient, navigate])
+
   useEffect(() => {
     const onError = (event: ErrorEvent) => {
       try {
