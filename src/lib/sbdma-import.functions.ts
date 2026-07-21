@@ -269,7 +269,7 @@ export const analyzeSbdmaImport = createServerFn({ method: 'POST' })
     for (let i = 0; i < rowInserts.length; i += CHUNK) {
       const { error } = await supabaseAdmin
         .from('catalog_import_rows')
-        .insert(rowInserts.slice(i, i + CHUNK))
+        .insert(rowInserts.slice(i, i + CHUNK) as never)
       if (error) throw new Error(`row insert failed: ${error.message}`)
     }
 
@@ -344,7 +344,7 @@ export const commitSbdmaImport = createServerFn({ method: 'POST' })
             update.requires_prescription = payload.requires_prescription
           const { error } = await supabaseAdmin
             .from('catalog_products')
-            .update(update)
+            .update(update as never)
             .eq('id', row.matched_product_id)
           if (error) throw new Error(error.message)
           appliedUpdates++
@@ -364,7 +364,7 @@ export const commitSbdmaImport = createServerFn({ method: 'POST' })
             is_public: true,
             created_by: context.userId,
           }
-          const { error } = await supabaseAdmin.from('catalog_products').insert(insert)
+          const { error } = await supabaseAdmin.from('catalog_products').insert(insert as never)
           if (error) throw new Error(error.message)
           appliedInserts++
         }
