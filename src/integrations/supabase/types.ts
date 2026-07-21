@@ -2730,6 +2730,114 @@ export type Database = {
           },
         ]
       }
+      catalog_import_jobs: {
+        Row: {
+          ambiguous_count: number
+          committed_at: string | null
+          created_at: string
+          dry_run: boolean
+          error: string | null
+          id: string
+          invalid_count: number
+          matched_count: number
+          new_count: number
+          source_name: string
+          status: Database["public"]["Enums"]["catalog_import_status"]
+          total_rows: number
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          ambiguous_count?: number
+          committed_at?: string | null
+          created_at?: string
+          dry_run?: boolean
+          error?: string | null
+          id?: string
+          invalid_count?: number
+          matched_count?: number
+          new_count?: number
+          source_name: string
+          status?: Database["public"]["Enums"]["catalog_import_status"]
+          total_rows?: number
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          ambiguous_count?: number
+          committed_at?: string | null
+          created_at?: string
+          dry_run?: boolean
+          error?: string | null
+          id?: string
+          invalid_count?: number
+          matched_count?: number
+          new_count?: number
+          source_name?: string
+          status?: Database["public"]["Enums"]["catalog_import_status"]
+          total_rows?: number
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
+      catalog_import_rows: {
+        Row: {
+          applied: boolean
+          candidate_ids: string[]
+          confidence: number | null
+          created_at: string
+          decision: Database["public"]["Enums"]["catalog_import_decision"]
+          id: string
+          job_id: string
+          matched_product_id: string | null
+          payload: Json
+          reason: string | null
+          row_index: number
+        }
+        Insert: {
+          applied?: boolean
+          candidate_ids?: string[]
+          confidence?: number | null
+          created_at?: string
+          decision: Database["public"]["Enums"]["catalog_import_decision"]
+          id?: string
+          job_id: string
+          matched_product_id?: string | null
+          payload: Json
+          reason?: string | null
+          row_index: number
+        }
+        Update: {
+          applied?: boolean
+          candidate_ids?: string[]
+          confidence?: number | null
+          created_at?: string
+          decision?: Database["public"]["Enums"]["catalog_import_decision"]
+          id?: string
+          job_id?: string
+          matched_product_id?: string | null
+          payload?: Json
+          reason?: string | null
+          row_index?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_import_rows_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_import_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "catalog_import_rows_matched_product_id_fkey"
+            columns: ["matched_product_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       catalog_product_aliases: {
         Row: {
           alias: string
@@ -14024,6 +14132,13 @@ export type Database = {
         | "invoice"
         | "prescription"
       catalog_alias_source: "manual" | "ocr" | "ai" | "import"
+      catalog_import_decision: "matched" | "new" | "ambiguous" | "invalid"
+      catalog_import_status:
+        | "analyzing"
+        | "analyzed"
+        | "committing"
+        | "committed"
+        | "failed"
       catalog_media_kind: "primary" | "gallery" | "thumbnail" | "barcode"
       catalog_media_status: "pending" | "approved" | "rejected"
       catalog_status:
@@ -14372,6 +14487,14 @@ export const Constants = {
         "prescription",
       ],
       catalog_alias_source: ["manual", "ocr", "ai", "import"],
+      catalog_import_decision: ["matched", "new", "ambiguous", "invalid"],
+      catalog_import_status: [
+        "analyzing",
+        "analyzed",
+        "committing",
+        "committed",
+        "failed",
+      ],
       catalog_media_kind: ["primary", "gallery", "thumbnail", "barcode"],
       catalog_media_status: ["pending", "approved", "rejected"],
       catalog_status: [
