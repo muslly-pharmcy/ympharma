@@ -182,8 +182,9 @@ export default function Navbar() {
                   onClick={() => setShowProfile(!showProfile)}
                   className="flex items-center gap-2 p-1.5 pr-3 rounded-xl hover:bg-gray-100 transition-colors"
                 >
-                  <img src={avatar} alt={displayName} className="w-8 h-8 rounded-lg object-cover" />
-                  <span className="hidden md:block text-sm font-medium text-gray-700">{displayName}</span>
+                  <img src={avatar} alt={displayName} className="w-9 h-9 shrink-0 rounded-full object-cover ring-2 ring-primary/20 bg-white" />
+                  <span className="hidden md:block truncate max-w-[140px] text-sm font-medium text-gray-700">{displayName}</span>
+
                 </button>
 
                 {showProfile && (
