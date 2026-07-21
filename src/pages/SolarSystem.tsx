@@ -143,8 +143,33 @@ export default function SolarSystem() {
         </motion.div>
 
 
+        {/* Quick site search → /search */}
+        <motion.form
+          action="/search"
+          method="get"
+          className="mb-6 flex items-center gap-2 rounded-2xl border border-primary/15 bg-white/80 p-2 shadow-sm backdrop-blur"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.22 }}
+        >
+          <Search className="mx-2 h-5 w-5 text-primary" />
+          <input
+            type="text"
+            name="q"
+            placeholder="ابحث عن دواء، منتج، أو خدمة..."
+            className="flex-1 bg-transparent px-2 py-2 text-sm outline-none"
+          />
+          <button
+            type="submit"
+            className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white"
+          >
+            بحث
+          </button>
+        </motion.form>
+
         {/* Categories */}
         <CategoriesGrid />
+
 
 
 
