@@ -76,7 +76,7 @@ function CatalogPage() {
   })
 
   const products = (data?.items ?? []) as Array<
-    (typeof data extends { items: infer T } ? T : never)[number] & {
+    CatalogProduct & {
       primary_image_url?: string
       sbdma_official_price?: number | string | null
       manufacturer?: string | null
