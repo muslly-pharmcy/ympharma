@@ -8,6 +8,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadEnv } from "vite";
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/tanstack/vite";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -25,6 +26,7 @@ export default defineConfig({
     ssr: false,
   },
   vite: {
+    plugins: [mcpPlugin()],
     resolve: {
       // React Email's bundled htmlparser2 still imports the legacy
       // `entities/lib/decode.js` subpath. v6+ exposes the same modules under
