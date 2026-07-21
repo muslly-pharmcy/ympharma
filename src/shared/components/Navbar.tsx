@@ -5,9 +5,10 @@ import { useTheme } from '@/context/ThemeContext'
 import { useAI } from '@/context/AIContext'
 import { supabase } from '@/integrations/supabase/client'
 import { listCart } from '@/lib/cart.functions'
+import { ShopifyCartDrawer } from '@/components/shopify/CartDrawer'
 import {
   Sun, Moon, Bell, MessageSquare, LogOut, Shield, LogIn,
-  Stethoscope, Database, Search, ShoppingCart,
+  Stethoscope, Database, Search, ShoppingCart, Store,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -64,6 +65,13 @@ export default function Navbar() {
             <span>الدليل الطبي</span>
           </Link>
           <Link
+            to="/shop"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors"
+          >
+            <Store className="w-4 h-4" />
+            <span>المتجر</span>
+          </Link>
+          <Link
             to="/catalog"
             search={{ page: 1 }}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors"
@@ -102,13 +110,13 @@ export default function Navbar() {
             {isDark ? <Sun className="w-5 h-5 text-gold" /> : <Moon className="w-5 h-5 text-gray-600" />}
           </button>
 
-          {isAuthenticated ? (
+          {isAuthenticated && (
             <>
               <Link to="/ai-chat" className="p-2.5 rounded-xl hover:bg-gray-100 transition-colors relative" title="المحادثة الذكية">
                 <MessageSquare className="w-5 h-5 text-primary" />
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-gold text-white text-[10px] rounded-full flex items-center justify-center font-bold">AI</span>
               </Link>
-              <Link to="/cart" className="p-2.5 rounded-xl hover:bg-gray-100 transition-colors relative" title="السلة">
+              <Link to="/cart" className="p-2.5 rounded-xl hover:bg-gray-100 transition-colors relative" title="سلة الأدوية">
                 <ShoppingCart className="w-5 h-5 text-gray-700" />
                 {cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-primary text-white text-[10px] rounded-full flex items-center justify-center font-bold">
@@ -116,6 +124,15 @@ export default function Navbar() {
                   </span>
                 )}
               </Link>
+            </>
+          )}
+
+          <div className="relative" title="سلة المتجر">
+            <ShopifyCartDrawer />
+          </div>
+
+          {isAuthenticated ? (
+            <>
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
                 className="p-2.5 rounded-xl hover:bg-gray-100 transition-colors relative"
