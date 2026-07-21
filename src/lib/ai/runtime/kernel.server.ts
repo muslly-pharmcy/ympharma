@@ -56,8 +56,8 @@ export interface KernelDispatchResult {
 
 async function admin() {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return supabaseAdmin as any
+  // Typed client — proxy preserves SupabaseClient<Database> typing.
+  return supabaseAdmin
 }
 
 async function auditKernelCall(actor: Actor, call: KernelCall, allowed: boolean, extras: { policyKey?: string; deniedReason?: string; decision?: Record<string, unknown> }) {
