@@ -31,7 +31,7 @@ d('SECURITY DEFINER grant baseline', () => {
 
   it('no privileged function in the registry is anon-callable', () => {
     const rows = psql(`
-      SELECT function_signature
+      SELECT g.function_signature
       FROM public.v_privileged_definer_grants g
       JOIN public.privileged_definer_functions r
         ON r.function_signature = g.function_signature
