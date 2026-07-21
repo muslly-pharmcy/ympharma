@@ -31,18 +31,33 @@ async function admin() {
 const TOOLS: Record<string, ToolDefinition> = {
   search_products: {
     key: 'search_products',
-    description: 'Search catalog products by name. Input: { query: string }',
+    description:
+      'Search store_products (catalog + stock) by name, store_code, barcode, or supplier. Input: { query?: string, code?: string, supplier?: string, limit?: number }',
     execute: async ({ actor }, input) => {
       const q = String(input.query ?? '').trim()
-      if (!q) return { ok: false, error: 'query is required' }
+      const code = String(input.code ?? '').trim()
+      const supplier = String(input.supplier ?? '').trim()
+      if (!q && !code && !supplier) {
+        return { ok: false, error: 'query, code, or supplier is required' }
+      }
+      const limit = Math.min(Math.max(Number(input.limit ?? 15), 1), 50)
       const sb = await admin()
-      const term = `%${q.replace(/[,()*"']/g, ' ')}%`
-      const { data, error } = await sb
-        .from('catalog_products')
-        .select('id, name_ar, name_en, brand, sbdma_official_price, status')
+      let qb = sb
+        .from('store_products')
+        .select(
+          'id, name, name_ar, name_en, brand, store_code, barcode, price, stock_balance, supplier_name_text, pack_unit, image_url, requires_prescription',
+        )
         .eq('organization_id', actor.organizationId)
-        .or(`name_ar.ilike.${term},name_en.ilike.${term},brand.ilike.${term},generic_name.ilike.${term}`)
-        .limit(15)
+        .limit(limit)
+      if (code) qb = qb.eq('store_code', code)
+      if (supplier) qb = qb.ilike('supplier_name_text', `%${supplier}%`)
+      if (q) {
+        const term = `%${q.replace(/[,()*"']/g, ' ')}%`
+        qb = qb.or(
+          `name_ar.ilike.${term},name_en.ilike.${term},brand.ilike.${term},generic_name.ilike.${term},barcode.ilike.${term},store_code.ilike.${term}`,
+        )
+      }
+      const { data, error } = await qb
       if (error) return { ok: false, error: error.message }
       return { ok: true, data }
     },
