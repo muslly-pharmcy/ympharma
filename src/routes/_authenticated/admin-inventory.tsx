@@ -21,7 +21,7 @@ export const Route = createFileRoute('/_authenticated/admin-inventory')({
 })
 
 type Row = {
-  id: string
+  id: string | null
   name: string | null
   store_code: string | null
   barcode: string | null
@@ -95,23 +95,28 @@ function AdminInventoryPage() {
             {query.isLoading && (
               <tr><td colSpan={8} className="p-6 text-center">جاري التحميل…</td></tr>
             )}
-            {(query.data?.items ?? []).map((r: Row) => (
-              <ProductRow
-                key={r.id}
-                row={r}
-                onSavePrice={(price) => priceMut.mutateAsync({ data: { productId: r.id, price } })}
-                onSaveStock={(newBalance) => stockMut.mutateAsync({ data: { productId: r.id, newBalance, reason: 'admin manual' } })}
-                onUploadImage={async (file) => {
-                  const path = `${r.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
-                  const { error } = await supabase.storage.from('product-images').upload(path, file, {
-                    cacheControl: '3600',
-                    upsert: true,
-                  })
-                  if (error) throw new Error(error.message)
-                  await imageMut.mutateAsync({ data: { productId: r.id, storagePath: path, bucket: 'product-images' } })
-                }}
-              />
-            ))}
+            {(query.data?.items ?? []).map((r) => {
+              const row = r as Row
+              if (!row.id) return null
+              const id = row.id
+              return (
+                <ProductRow
+                  key={id}
+                  row={row}
+                  onSavePrice={(price) => priceMut.mutateAsync({ data: { productId: id, price } })}
+                  onSaveStock={(newBalance) => stockMut.mutateAsync({ data: { productId: id, newBalance, reason: 'admin manual' } })}
+                  onUploadImage={async (file) => {
+                    const path = `${id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
+                    const { error } = await supabase.storage.from('product-images').upload(path, file, {
+                      cacheControl: '3600',
+                      upsert: true,
+                    })
+                    if (error) throw new Error(error.message)
+                    await imageMut.mutateAsync({ data: { productId: id, storagePath: path, bucket: 'product-images' } })
+                  }}
+                />
+              )
+            })}
           </tbody>
         </table>
       </div>
