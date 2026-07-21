@@ -26,6 +26,7 @@ export default defineConfig({
     ssr: false,
   },
   vite: {
+    plugins: [mcpPlugin()],
     resolve: {
       // React Email's bundled htmlparser2 still imports the legacy
       // `entities/lib/decode.js` subpath. v6+ exposes the same modules under
