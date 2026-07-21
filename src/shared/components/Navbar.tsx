@@ -65,6 +65,13 @@ export default function Navbar() {
             <span>الدليل الطبي</span>
           </Link>
           <Link
+            to="/shop"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors"
+          >
+            <Store className="w-4 h-4" />
+            <span>المتجر</span>
+          </Link>
+          <Link
             to="/catalog"
             search={{ page: 1 }}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors"
