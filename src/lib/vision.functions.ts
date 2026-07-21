@@ -396,13 +396,6 @@ export const listProductsMissingImages = createServerFn({ method: 'GET' })
   .handler(async ({ context }) => {
     await assertAdmin(context.supabase, context.userId)
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-    const { data, error } = await supabaseAdmin.rpc('exec_sql' as never, {} as never).then(
-      () => ({ data: null as null, error: null as null }),
-      () => ({ data: null as null, error: null as null }),
-    )
-    // Fallback direct query — avoid RPC. Left join via NOT EXISTS.
-    void data
-    void error
     const { data: rows, error: qErr } = await supabaseAdmin
       .from('catalog_products')
       .select('id, name_ar, barcode, brand')
@@ -411,6 +404,7 @@ export const listProductsMissingImages = createServerFn({ method: 'GET' })
       .limit(200)
     if (qErr) throw new Error(qErr.message)
     // Filter to those without approved media.
+
     const ids = ((rows ?? []) as Array<{ id: string }>).map((r) => r.id)
     if (ids.length === 0) return []
     const { data: media } = await supabaseAdmin
