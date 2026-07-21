@@ -117,6 +117,22 @@ function ProductDetail() {
         <Stat label="الدُفعات" value={String(stock?.batches ?? 0)} />
       </section>
 
+      <section className="glass-panel rounded-2xl p-4">
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="font-semibold">شرح بالذكاء الاصطناعي</h2>
+          <button
+            onClick={() => aiMutation.mutate()}
+            disabled={aiMutation.isPending}
+            className="rounded-lg bg-primary px-4 py-2 text-sm text-white disabled:opacity-60"
+          >
+            {aiMutation.isPending ? 'جاري التوليد...' : 'اشرح بالذكاء الاصطناعي'}
+          </button>
+        </div>
+        {aiText && (
+          <p className="whitespace-pre-wrap text-sm leading-7 text-gray-700">{aiText}</p>
+        )}
+      </section>
+
       {product.description_ar && (
         <section className="glass-panel rounded-2xl p-6">
           <h2 className="mb-3 text-lg font-semibold">الوصف</h2>
