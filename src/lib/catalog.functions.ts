@@ -6,6 +6,8 @@ import {
   type CatalogProduct,
   type ListProductsResult,
 } from '@/domain/catalog/schemas'
+import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
+
 
 // Escape PostgREST `.or()` reserved chars in user search input.
 function escOr(v: string): string {
