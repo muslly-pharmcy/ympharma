@@ -47,8 +47,30 @@ export default function Navbar() {
           </div>
         </Link>
 
-        <div className="hidden lg:flex items-center gap-6">
-          <div className="flex items-center gap-2 px-4 py-2 bg-primary/5 rounded-xl">
+        <div className="hidden md:flex items-center gap-1 lg:gap-2">
+          <Link
+            to="/medical-directory"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors"
+          >
+            <Stethoscope className="w-4 h-4" />
+            <span>الدليل الطبي</span>
+          </Link>
+          <Link
+            to="/catalog"
+            search={{ page: 1 }}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors"
+          >
+            <Search className="w-4 h-4" />
+            <span>الكتالوج</span>
+          </Link>
+          <Link
+            to="/sbdma-import"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors"
+          >
+            <Database className="w-4 h-4" />
+            <span>هيئة الأدوية</span>
+          </Link>
+          <div className="hidden lg:flex items-center gap-2 px-3 py-2 bg-primary/5 rounded-xl ml-2">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
             <span className="text-sm text-gray-600">
               <span className="font-bold text-primary">{activeAgentsCount}</span> وكيل نشط
@@ -56,7 +78,7 @@ export default function Navbar() {
           </div>
           <Link
             to="/mission-control"
-            className="flex items-center gap-2 px-4 py-2 bg-gold/10 rounded-xl hover:bg-gold/20 transition-colors"
+            className="hidden lg:flex items-center gap-2 px-3 py-2 bg-gold/10 rounded-xl hover:bg-gold/20 transition-colors"
           >
             <Shield className="w-4 h-4 text-gold" />
             <span className="text-sm font-medium text-gold">مركز القيادة</span>
