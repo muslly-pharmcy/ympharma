@@ -22,12 +22,14 @@ import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } fr
 import { Route as AuthenticatedAiRuntimeRouteImport } from './routes/_authenticated/ai-runtime'
 import { Route as AuthenticatedCampaignsRouteImport } from './routes/_authenticated/campaigns'
 import { Route as AuthenticatedCartRouteImport } from './routes/_authenticated/cart'
+import { Route as AuthenticatedCheckoutRouteImport } from './routes/_authenticated/checkout'
 import { Route as AuthenticatedCouponsRouteImport } from './routes/_authenticated/coupons'
 import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated/customers'
 import { Route as AuthenticatedDispensesRouteImport } from './routes/_authenticated/dispenses'
 import { Route as AuthenticatedDoctorsRouteImport } from './routes/_authenticated/doctors'
 import { Route as AuthenticatedLoyaltyRouteImport } from './routes/_authenticated/loyalty'
 import { Route as AuthenticatedMedicalDirectoryRouteImport } from './routes/_authenticated/medical-directory'
+import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated/orders'
 import { Route as AuthenticatedPatientsRouteImport } from './routes/_authenticated/patients'
 import { Route as AuthenticatedPrescriptionsRouteImport } from './routes/_authenticated/prescriptions'
 import { Route as AuthenticatedPurchaseOrdersRouteImport } from './routes/_authenticated/purchase-orders'
@@ -38,6 +40,7 @@ import { Route as AuthenticatedSuppliersRouteImport } from './routes/_authentica
 import { Route as AuthenticatedWarehousesRouteImport } from './routes/_authenticated/warehouses'
 import { Route as PlanetPlanetIdRouteImport } from './routes/planet.$planetId'
 import { Route as ProductHandleRouteImport } from './routes/product.$handle'
+import { Route as ProductProductIdRouteImport } from './routes/product.$productId'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as AuthenticatedAnalyticsIndexRouteImport } from './routes/_authenticated/analytics.index'
@@ -51,6 +54,7 @@ import { Route as AuthenticatedInsuranceIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedInsuranceClaimsRouteImport } from './routes/_authenticated/insurance.claims'
 import { Route as AuthenticatedInsuranceCoverageRouteImport } from './routes/_authenticated/insurance.coverage'
 import { Route as AuthenticatedLoyaltyAccountIdRouteImport } from './routes/_authenticated/loyalty.$accountId'
+import { Route as AuthenticatedOrdersOrderIdRouteImport } from './routes/_authenticated/orders.$orderId'
 import { Route as AuthenticatedPatientsPatientIdRouteImport } from './routes/_authenticated/patients.$patientId'
 import { Route as AuthenticatedPrescriptionsPrescriptionIdRouteImport } from './routes/_authenticated/prescriptions.$prescriptionId'
 import { Route as AuthenticatedPromotionsIndexRouteImport } from './routes/_authenticated/promotions.index'
@@ -127,6 +131,11 @@ const AuthenticatedCartRoute = AuthenticatedCartRouteImport.update({
   path: '/cart',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCheckoutRoute = AuthenticatedCheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCouponsRoute = AuthenticatedCouponsRouteImport.update({
   id: '/coupons',
   path: '/coupons',
@@ -158,6 +167,11 @@ const AuthenticatedMedicalDirectoryRoute =
     path: '/medical-directory',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedOrdersRoute = AuthenticatedOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPatientsRoute = AuthenticatedPatientsRouteImport.update({
   id: '/patients',
   path: '/patients',
@@ -209,6 +223,11 @@ const PlanetPlanetIdRoute = PlanetPlanetIdRouteImport.update({
 const ProductHandleRoute = ProductHandleRouteImport.update({
   id: '/product/$handle',
   path: '/product/$handle',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductProductIdRoute = ProductProductIdRouteImport.update({
+  id: '/product/$productId',
+  path: '/product/$productId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
@@ -288,6 +307,12 @@ const AuthenticatedLoyaltyAccountIdRoute =
     path: '/$accountId',
     getParentRoute: () => AuthenticatedLoyaltyRoute,
   } as any)
+const AuthenticatedOrdersOrderIdRoute =
+  AuthenticatedOrdersOrderIdRouteImport.update({
+    id: '/$orderId',
+    path: '/$orderId',
+    getParentRoute: () => AuthenticatedOrdersRoute,
+  } as any)
 const AuthenticatedPatientsPatientIdRoute =
   AuthenticatedPatientsPatientIdRouteImport.update({
     id: '/$patientId',
@@ -353,12 +378,14 @@ export interface FileRoutesByFullPath {
   '/ai-runtime': typeof AuthenticatedAiRuntimeRoute
   '/campaigns': typeof AuthenticatedCampaignsRouteWithChildren
   '/cart': typeof AuthenticatedCartRoute
+  '/checkout': typeof AuthenticatedCheckoutRoute
   '/coupons': typeof AuthenticatedCouponsRoute
   '/customers': typeof AuthenticatedCustomersRouteWithChildren
   '/dispenses': typeof AuthenticatedDispensesRouteWithChildren
   '/doctors': typeof AuthenticatedDoctorsRouteWithChildren
   '/loyalty': typeof AuthenticatedLoyaltyRouteWithChildren
   '/medical-directory': typeof AuthenticatedMedicalDirectoryRoute
+  '/orders': typeof AuthenticatedOrdersRouteWithChildren
   '/patients': typeof AuthenticatedPatientsRouteWithChildren
   '/prescriptions': typeof AuthenticatedPrescriptionsRouteWithChildren
   '/purchase-orders': typeof AuthenticatedPurchaseOrdersRouteWithChildren
@@ -369,6 +396,7 @@ export interface FileRoutesByFullPath {
   '/warehouses': typeof AuthenticatedWarehousesRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/product/$handle': typeof ProductHandleRoute
+  '/product/$productId': typeof ProductProductIdRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/campaigns/$id': typeof AuthenticatedCampaignsIdRoute
@@ -379,6 +407,7 @@ export interface FileRoutesByFullPath {
   '/insurance/claims': typeof AuthenticatedInsuranceClaimsRoute
   '/insurance/coverage': typeof AuthenticatedInsuranceCoverageRoute
   '/loyalty/$accountId': typeof AuthenticatedLoyaltyAccountIdRoute
+  '/orders/$orderId': typeof AuthenticatedOrdersOrderIdRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/promotions/$id': typeof AuthenticatedPromotionsIdRoute
@@ -405,12 +434,14 @@ export interface FileRoutesByTo {
   '/ai-runtime': typeof AuthenticatedAiRuntimeRoute
   '/campaigns': typeof AuthenticatedCampaignsRouteWithChildren
   '/cart': typeof AuthenticatedCartRoute
+  '/checkout': typeof AuthenticatedCheckoutRoute
   '/coupons': typeof AuthenticatedCouponsRoute
   '/customers': typeof AuthenticatedCustomersRouteWithChildren
   '/dispenses': typeof AuthenticatedDispensesRouteWithChildren
   '/doctors': typeof AuthenticatedDoctorsRouteWithChildren
   '/loyalty': typeof AuthenticatedLoyaltyRouteWithChildren
   '/medical-directory': typeof AuthenticatedMedicalDirectoryRoute
+  '/orders': typeof AuthenticatedOrdersRouteWithChildren
   '/patients': typeof AuthenticatedPatientsRouteWithChildren
   '/prescriptions': typeof AuthenticatedPrescriptionsRouteWithChildren
   '/purchase-orders': typeof AuthenticatedPurchaseOrdersRouteWithChildren
@@ -421,6 +452,7 @@ export interface FileRoutesByTo {
   '/warehouses': typeof AuthenticatedWarehousesRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/product/$handle': typeof ProductHandleRoute
+  '/product/$productId': typeof ProductProductIdRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/campaigns/$id': typeof AuthenticatedCampaignsIdRoute
@@ -431,6 +463,7 @@ export interface FileRoutesByTo {
   '/insurance/claims': typeof AuthenticatedInsuranceClaimsRoute
   '/insurance/coverage': typeof AuthenticatedInsuranceCoverageRoute
   '/loyalty/$accountId': typeof AuthenticatedLoyaltyAccountIdRoute
+  '/orders/$orderId': typeof AuthenticatedOrdersOrderIdRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/promotions/$id': typeof AuthenticatedPromotionsIdRoute
@@ -459,12 +492,14 @@ export interface FileRoutesById {
   '/_authenticated/ai-runtime': typeof AuthenticatedAiRuntimeRoute
   '/_authenticated/campaigns': typeof AuthenticatedCampaignsRouteWithChildren
   '/_authenticated/cart': typeof AuthenticatedCartRoute
+  '/_authenticated/checkout': typeof AuthenticatedCheckoutRoute
   '/_authenticated/coupons': typeof AuthenticatedCouponsRoute
   '/_authenticated/customers': typeof AuthenticatedCustomersRouteWithChildren
   '/_authenticated/dispenses': typeof AuthenticatedDispensesRouteWithChildren
   '/_authenticated/doctors': typeof AuthenticatedDoctorsRouteWithChildren
   '/_authenticated/loyalty': typeof AuthenticatedLoyaltyRouteWithChildren
   '/_authenticated/medical-directory': typeof AuthenticatedMedicalDirectoryRoute
+  '/_authenticated/orders': typeof AuthenticatedOrdersRouteWithChildren
   '/_authenticated/patients': typeof AuthenticatedPatientsRouteWithChildren
   '/_authenticated/prescriptions': typeof AuthenticatedPrescriptionsRouteWithChildren
   '/_authenticated/purchase-orders': typeof AuthenticatedPurchaseOrdersRouteWithChildren
@@ -475,6 +510,7 @@ export interface FileRoutesById {
   '/_authenticated/warehouses': typeof AuthenticatedWarehousesRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/product/$handle': typeof ProductHandleRoute
+  '/product/$productId': typeof ProductProductIdRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/campaigns/$id': typeof AuthenticatedCampaignsIdRoute
@@ -485,6 +521,7 @@ export interface FileRoutesById {
   '/_authenticated/insurance/claims': typeof AuthenticatedInsuranceClaimsRoute
   '/_authenticated/insurance/coverage': typeof AuthenticatedInsuranceCoverageRoute
   '/_authenticated/loyalty/$accountId': typeof AuthenticatedLoyaltyAccountIdRoute
+  '/_authenticated/orders/$orderId': typeof AuthenticatedOrdersOrderIdRoute
   '/_authenticated/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/_authenticated/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/_authenticated/promotions/$id': typeof AuthenticatedPromotionsIdRoute
@@ -513,12 +550,14 @@ export interface FileRouteTypes {
     | '/ai-runtime'
     | '/campaigns'
     | '/cart'
+    | '/checkout'
     | '/coupons'
     | '/customers'
     | '/dispenses'
     | '/doctors'
     | '/loyalty'
     | '/medical-directory'
+    | '/orders'
     | '/patients'
     | '/prescriptions'
     | '/purchase-orders'
@@ -529,6 +568,7 @@ export interface FileRouteTypes {
     | '/warehouses'
     | '/planet/$planetId'
     | '/product/$handle'
+    | '/product/$productId'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/campaigns/$id'
@@ -539,6 +579,7 @@ export interface FileRouteTypes {
     | '/insurance/claims'
     | '/insurance/coverage'
     | '/loyalty/$accountId'
+    | '/orders/$orderId'
     | '/patients/$patientId'
     | '/prescriptions/$prescriptionId'
     | '/promotions/$id'
@@ -565,12 +606,14 @@ export interface FileRouteTypes {
     | '/ai-runtime'
     | '/campaigns'
     | '/cart'
+    | '/checkout'
     | '/coupons'
     | '/customers'
     | '/dispenses'
     | '/doctors'
     | '/loyalty'
     | '/medical-directory'
+    | '/orders'
     | '/patients'
     | '/prescriptions'
     | '/purchase-orders'
@@ -581,6 +624,7 @@ export interface FileRouteTypes {
     | '/warehouses'
     | '/planet/$planetId'
     | '/product/$handle'
+    | '/product/$productId'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/campaigns/$id'
@@ -591,6 +635,7 @@ export interface FileRouteTypes {
     | '/insurance/claims'
     | '/insurance/coverage'
     | '/loyalty/$accountId'
+    | '/orders/$orderId'
     | '/patients/$patientId'
     | '/prescriptions/$prescriptionId'
     | '/promotions/$id'
@@ -618,12 +663,14 @@ export interface FileRouteTypes {
     | '/_authenticated/ai-runtime'
     | '/_authenticated/campaigns'
     | '/_authenticated/cart'
+    | '/_authenticated/checkout'
     | '/_authenticated/coupons'
     | '/_authenticated/customers'
     | '/_authenticated/dispenses'
     | '/_authenticated/doctors'
     | '/_authenticated/loyalty'
     | '/_authenticated/medical-directory'
+    | '/_authenticated/orders'
     | '/_authenticated/patients'
     | '/_authenticated/prescriptions'
     | '/_authenticated/purchase-orders'
@@ -634,6 +681,7 @@ export interface FileRouteTypes {
     | '/_authenticated/warehouses'
     | '/planet/$planetId'
     | '/product/$handle'
+    | '/product/$productId'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/campaigns/$id'
@@ -644,6 +692,7 @@ export interface FileRouteTypes {
     | '/_authenticated/insurance/claims'
     | '/_authenticated/insurance/coverage'
     | '/_authenticated/loyalty/$accountId'
+    | '/_authenticated/orders/$orderId'
     | '/_authenticated/patients/$patientId'
     | '/_authenticated/prescriptions/$prescriptionId'
     | '/_authenticated/promotions/$id'
@@ -671,6 +720,7 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   PlanetPlanetIdRoute: typeof PlanetPlanetIdRoute
   ProductHandleRoute: typeof ProductHandleRoute
+  ProductProductIdRoute: typeof ProductProductIdRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicCspReportRoute: typeof ApiPublicCspReportRoute
@@ -771,6 +821,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCartRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/checkout': {
+      id: '/_authenticated/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof AuthenticatedCheckoutRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/coupons': {
       id: '/_authenticated/coupons'
       path: '/coupons'
@@ -811,6 +868,13 @@ declare module '@tanstack/react-router' {
       path: '/medical-directory'
       fullPath: '/medical-directory'
       preLoaderRoute: typeof AuthenticatedMedicalDirectoryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/orders': {
+      id: '/_authenticated/orders'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof AuthenticatedOrdersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/patients': {
@@ -881,6 +945,13 @@ declare module '@tanstack/react-router' {
       path: '/product/$handle'
       fullPath: '/product/$handle'
       preLoaderRoute: typeof ProductHandleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/product/$productId': {
+      id: '/product/$productId'
+      path: '/product/$productId'
+      fullPath: '/product/$productId'
+      preLoaderRoute: typeof ProductProductIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.lovable/oauth/consent': {
@@ -973,6 +1044,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/loyalty/$accountId'
       preLoaderRoute: typeof AuthenticatedLoyaltyAccountIdRouteImport
       parentRoute: typeof AuthenticatedLoyaltyRoute
+    }
+    '/_authenticated/orders/$orderId': {
+      id: '/_authenticated/orders/$orderId'
+      path: '/$orderId'
+      fullPath: '/orders/$orderId'
+      preLoaderRoute: typeof AuthenticatedOrdersOrderIdRouteImport
+      parentRoute: typeof AuthenticatedOrdersRoute
     }
     '/_authenticated/patients/$patientId': {
       id: '/_authenticated/patients/$patientId'
@@ -1106,6 +1184,17 @@ const AuthenticatedLoyaltyRouteChildren: AuthenticatedLoyaltyRouteChildren = {
 const AuthenticatedLoyaltyRouteWithChildren =
   AuthenticatedLoyaltyRoute._addFileChildren(AuthenticatedLoyaltyRouteChildren)
 
+interface AuthenticatedOrdersRouteChildren {
+  AuthenticatedOrdersOrderIdRoute: typeof AuthenticatedOrdersOrderIdRoute
+}
+
+const AuthenticatedOrdersRouteChildren: AuthenticatedOrdersRouteChildren = {
+  AuthenticatedOrdersOrderIdRoute: AuthenticatedOrdersOrderIdRoute,
+}
+
+const AuthenticatedOrdersRouteWithChildren =
+  AuthenticatedOrdersRoute._addFileChildren(AuthenticatedOrdersRouteChildren)
+
 interface AuthenticatedPatientsRouteChildren {
   AuthenticatedPatientsPatientIdRoute: typeof AuthenticatedPatientsPatientIdRoute
 }
@@ -1152,12 +1241,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAiRuntimeRoute: typeof AuthenticatedAiRuntimeRoute
   AuthenticatedCampaignsRoute: typeof AuthenticatedCampaignsRouteWithChildren
   AuthenticatedCartRoute: typeof AuthenticatedCartRoute
+  AuthenticatedCheckoutRoute: typeof AuthenticatedCheckoutRoute
   AuthenticatedCouponsRoute: typeof AuthenticatedCouponsRoute
   AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRouteWithChildren
   AuthenticatedDispensesRoute: typeof AuthenticatedDispensesRouteWithChildren
   AuthenticatedDoctorsRoute: typeof AuthenticatedDoctorsRouteWithChildren
   AuthenticatedLoyaltyRoute: typeof AuthenticatedLoyaltyRouteWithChildren
   AuthenticatedMedicalDirectoryRoute: typeof AuthenticatedMedicalDirectoryRoute
+  AuthenticatedOrdersRoute: typeof AuthenticatedOrdersRouteWithChildren
   AuthenticatedPatientsRoute: typeof AuthenticatedPatientsRouteWithChildren
   AuthenticatedPrescriptionsRoute: typeof AuthenticatedPrescriptionsRouteWithChildren
   AuthenticatedPurchaseOrdersRoute: typeof AuthenticatedPurchaseOrdersRouteWithChildren
@@ -1181,12 +1272,14 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAiRuntimeRoute: AuthenticatedAiRuntimeRoute,
   AuthenticatedCampaignsRoute: AuthenticatedCampaignsRouteWithChildren,
   AuthenticatedCartRoute: AuthenticatedCartRoute,
+  AuthenticatedCheckoutRoute: AuthenticatedCheckoutRoute,
   AuthenticatedCouponsRoute: AuthenticatedCouponsRoute,
   AuthenticatedCustomersRoute: AuthenticatedCustomersRouteWithChildren,
   AuthenticatedDispensesRoute: AuthenticatedDispensesRouteWithChildren,
   AuthenticatedDoctorsRoute: AuthenticatedDoctorsRouteWithChildren,
   AuthenticatedLoyaltyRoute: AuthenticatedLoyaltyRouteWithChildren,
   AuthenticatedMedicalDirectoryRoute: AuthenticatedMedicalDirectoryRoute,
+  AuthenticatedOrdersRoute: AuthenticatedOrdersRouteWithChildren,
   AuthenticatedPatientsRoute: AuthenticatedPatientsRouteWithChildren,
   AuthenticatedPrescriptionsRoute: AuthenticatedPrescriptionsRouteWithChildren,
   AuthenticatedPurchaseOrdersRoute:
@@ -1225,6 +1318,7 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   PlanetPlanetIdRoute: PlanetPlanetIdRoute,
   ProductHandleRoute: ProductHandleRoute,
+  ProductProductIdRoute: ProductProductIdRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicCspReportRoute: ApiPublicCspReportRoute,
