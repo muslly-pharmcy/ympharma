@@ -21,13 +21,15 @@ export type DirectoryDoctor = {
   phone_e164: string | null
 }
 
+type Json = string | number | boolean | null | Json[] | { [k: string]: Json }
+
 export type DirectorySupplier = {
   id: string
   name: string
   legal_name: string | null
   code: string | null
-  contact: unknown
-  metadata: unknown
+  contact: Json
+  metadata: Json
   status: string
 }
 
