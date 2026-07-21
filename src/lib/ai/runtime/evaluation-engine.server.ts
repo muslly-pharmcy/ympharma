@@ -13,8 +13,7 @@ export interface EvalRecord {
 
 export async function recordEvaluation(rec: EvalRecord): Promise<void> {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (supabaseAdmin as any).from('air_evaluations').insert({
+  await supabaseAdmin.from('air_evaluations').insert({
     organization_id: rec.organizationId,
     run_id: rec.runId,
     quality: rec.quality ?? null,
