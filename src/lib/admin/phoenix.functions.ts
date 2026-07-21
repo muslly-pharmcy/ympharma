@@ -51,8 +51,9 @@ export const phoenixProbeConnectivity = createServerFn({ method: 'GET' })
 
 // ---------- Phase 2: Schema forensics ----------
 const REQUIRED: Array<{ name: string; columns: string[] }> = [
-  { name: 'catalog_products', columns: ['id', 'code', 'name', 'selling_price'] },
-  { name: 'catalog_categories', columns: ['id', 'name'] },
+  { name: 'catalog_products', columns: ['id', 'store_code', 'name_ar', 'sbdma_official_price'] },
+  { name: 'store_products', columns: ['id', 'name', 'price', 'stock_balance'] },
+  { name: 'catalog_categories', columns: ['id'] },
   { name: 'inv_stock_batches', columns: ['id', 'product_id', 'qty_on_hand', 'expiry_date'] },
   { name: 'inv_stock_movements', columns: ['product_id', 'batch_id', 'movement_type'] },
   { name: 'orders', columns: ['id', 'user_id', 'customer_name', 'customer_phone', 'status'] },
@@ -125,14 +126,14 @@ export const phoenixProbeSchema = createServerFn({ method: 'GET' })
 
 // ---------- Phase 3: Index audit ----------
 const CRITICAL_INDEXES: Array<{ table: string; cols: string; name: string }> = [
-  { table: 'catalog_products', cols: 'code', name: 'idx_catalog_products_code' },
-  { table: 'catalog_products', cols: 'name', name: 'idx_catalog_products_name' },
+  { table: 'catalog_products', cols: 'store_code', name: 'catalog_products_store_code_uniq' },
+  { table: 'catalog_products', cols: 'name_ar', name: 'idx_catalog_products_name_ar' },
   {
     table: 'inv_stock_batches',
     cols: 'product_id, expiry_date',
     name: 'idx_inv_stock_batches_product_expiry',
   },
-  { table: 'orders', cols: 'user_id, created_at', name: 'idx_orders_user_created' },
+  { table: 'orders', cols: 'user_id, created_at DESC', name: 'idx_orders_user_created' },
   { table: 'cart_items', cols: 'user_id, product_id', name: 'idx_cart_items_user_product' },
 ]
 
@@ -292,6 +293,8 @@ export const phoenixProbeAi = createServerFn({ method: 'GET' })
     if (!agent.is_active)
       return { agentExists: true, agentActive: false, dispatchOk: false, output: '', error: 'inactive' }
     try {
+      // Auto-heal: make sure the current admin has an org membership before dispatch.
+      await supabaseAdmin.rpc('ensure_user_organization', { p_user_id: context.userId })
       const { dispatch } = await import('@/lib/ai/runtime/kernel.server')
       const { getActor } = await import('@/lib/session.server')
       const actor = await getActor()
@@ -363,8 +366,8 @@ export const phoenixProbeGoldenPath = createServerFn({ method: 'GET' })
     await assertAdmin(context.userId)
     const { supabase: userClient, userId } = context
     const catalog = await userClient
-      .from('catalog_products')
-      .select('id, name, selling_price')
+      .from('store_products')
+      .select('id, name, price')
       .limit(1)
     const ordersView = await userClient
       .from('orders')

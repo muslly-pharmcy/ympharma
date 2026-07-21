@@ -13971,6 +13971,10 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      ensure_user_organization: {
+        Args: { p_user_id?: string }
+        Returns: string
+      }
       exec_dashboard: { Args: never; Returns: Json }
       executive_alerts: { Args: never; Returns: Json }
       fail_agent_event: {
@@ -14363,6 +14367,7 @@ export type Database = {
         Args: { _patient_id: string }
         Returns: boolean
       }
+      pg_get_indexdef_by_name: { Args: { p_name: string }; Returns: string }
       pharmacy_chronic_legacy_ids: { Args: never; Returns: Json }
       pharmacy_homepage_sections: { Args: never; Returns: Json }
       pharmacy_related_products: { Args: { _legacy_id: number }; Returns: Json }
