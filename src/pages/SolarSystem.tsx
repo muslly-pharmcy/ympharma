@@ -9,6 +9,7 @@ import LoadingSpinner from '@/shared/components/LoadingSpinner'
 import { CosmicSearch } from '@/components/ai/CosmicSearch'
 import CategoriesGrid from '@/shared/components/home/CategoriesGrid'
 import TestimonialsSection from '@/shared/components/home/TestimonialsSection'
+import { ToolsIntroSection } from '@/shared/components/home/ToolsIntroSection'
 import almoslyLogo from '@/assets/almosly-logo.png.asset.json'
 
 
@@ -210,6 +211,9 @@ export default function SolarSystem() {
             ))}
           </div>
         </div>
+
+        {/* Site tools intro */}
+        <ToolsIntroSection />
 
         {/* Customer testimonials */}
         <TestimonialsSection />
