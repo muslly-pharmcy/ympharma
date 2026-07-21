@@ -72,9 +72,11 @@ function DiagnosticsPage() {
     setRlsRows([])
     const results: Row[] = []
     for (const t of RLS_TABLES) {
+      const anonAny = anonSupabase as unknown as { from: (n: string) => any }
+      const authAny = supabase as unknown as { from: (n: string) => any }
       const [anonRes, authRes] = await Promise.all([
-        anonSupabase.from(t.name).select('*', { head: true, count: 'exact' }).limit(1),
-        supabase.from(t.name).select('*', { head: true, count: 'exact' }).limit(1),
+        anonAny.from(t.name).select('*', { head: true, count: 'exact' }).limit(1),
+        authAny.from(t.name).select('*', { head: true, count: 'exact' }).limit(1),
       ])
       results.push({
         name: t.name,
