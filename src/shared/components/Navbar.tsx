@@ -1,10 +1,14 @@
 import { Link, useNavigate } from '@tanstack/react-router'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/context/AuthContext'
 import { useTheme } from '@/context/ThemeContext'
 import { useAI } from '@/context/AIContext'
 import { supabase } from '@/integrations/supabase/client'
-import { Sun, Moon, Bell, MessageSquare, LogOut, Shield, LogIn } from 'lucide-react'
+import { listCart } from '@/lib/cart.functions'
+import {
+  Sun, Moon, Bell, MessageSquare, LogOut, Shield, LogIn,
+  Stethoscope, Database, Search, ShoppingCart,
+} from 'lucide-react'
 import { useState } from 'react'
 
 export default function Navbar() {
