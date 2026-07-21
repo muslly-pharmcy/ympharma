@@ -15,6 +15,8 @@ import { ThemeProvider } from '@/context/ThemeContext'
 import { AIProvider } from '@/context/AIContext'
 import { supabase } from '@/integrations/supabase/client'
 import { BottomNav } from '@/shared/components/BottomNav'
+import { OfflineBanner } from '@/shared/components/OfflineBanner'
+import { GlobalErrorListeners } from '@/shared/components/GlobalErrorListeners'
 import { ModuleErrorBoundary } from '@/components/errors/ErrorBoundary'
 import { ErrorScreen } from '@/components/errors/ErrorScreen'
 import { RouteSkeleton } from '@/components/skeletons/Skeleton'
@@ -92,6 +94,8 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthStateSync />
+      <GlobalErrorListeners />
+      <OfflineBanner />
       <ThemeProvider>
         <AuthProvider>
           <AIProvider>
