@@ -293,6 +293,8 @@ export const phoenixProbeAi = createServerFn({ method: 'GET' })
     if (!agent.is_active)
       return { agentExists: true, agentActive: false, dispatchOk: false, output: '', error: 'inactive' }
     try {
+      // Auto-heal: make sure the current admin has an org membership before dispatch.
+      await supabaseAdmin.rpc('ensure_user_organization', { p_user_id: context.userId })
       const { dispatch } = await import('@/lib/ai/runtime/kernel.server')
       const { getActor } = await import('@/lib/session.server')
       const actor = await getActor()
