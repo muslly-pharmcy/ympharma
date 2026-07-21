@@ -20,6 +20,7 @@ import { Route as ShopRouteImport } from './routes/shop'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AuthenticatedAdminInventoryRouteImport } from './routes/_authenticated/admin-inventory'
+import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin-orders'
 import { Route as AuthenticatedAiRuntimeRouteImport } from './routes/_authenticated/ai-runtime'
 import { Route as AuthenticatedCampaignsRouteImport } from './routes/_authenticated/campaigns'
 import { Route as AuthenticatedCartRouteImport } from './routes/_authenticated/cart'
@@ -125,6 +126,12 @@ const AuthenticatedAdminInventoryRoute =
   AuthenticatedAdminInventoryRouteImport.update({
     id: '/admin-inventory',
     path: '/admin-inventory',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminOrdersRoute =
+  AuthenticatedAdminOrdersRouteImport.update({
+    id: '/admin-orders',
+    path: '/admin-orders',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAiRuntimeRoute = AuthenticatedAiRuntimeRouteImport.update({
@@ -408,6 +415,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin-inventory': typeof AuthenticatedAdminInventoryRoute
+  '/admin-orders': typeof AuthenticatedAdminOrdersRoute
   '/ai-runtime': typeof AuthenticatedAiRuntimeRoute
   '/campaigns': typeof AuthenticatedCampaignsRouteWithChildren
   '/cart': typeof AuthenticatedCartRoute
@@ -469,6 +477,7 @@ export interface FileRoutesByTo {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin-inventory': typeof AuthenticatedAdminInventoryRoute
+  '/admin-orders': typeof AuthenticatedAdminOrdersRoute
   '/ai-runtime': typeof AuthenticatedAiRuntimeRoute
   '/campaigns': typeof AuthenticatedCampaignsRouteWithChildren
   '/cart': typeof AuthenticatedCartRoute
@@ -532,6 +541,7 @@ export interface FileRoutesById {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/admin-inventory': typeof AuthenticatedAdminInventoryRoute
+  '/_authenticated/admin-orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/ai-runtime': typeof AuthenticatedAiRuntimeRoute
   '/_authenticated/campaigns': typeof AuthenticatedCampaignsRouteWithChildren
   '/_authenticated/cart': typeof AuthenticatedCartRoute
@@ -595,6 +605,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin-inventory'
+    | '/admin-orders'
     | '/ai-runtime'
     | '/campaigns'
     | '/cart'
@@ -656,6 +667,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin-inventory'
+    | '/admin-orders'
     | '/ai-runtime'
     | '/campaigns'
     | '/cart'
@@ -718,6 +730,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/admin-inventory'
+    | '/_authenticated/admin-orders'
     | '/_authenticated/ai-runtime'
     | '/_authenticated/campaigns'
     | '/_authenticated/cart'
@@ -867,6 +880,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-inventory'
       fullPath: '/admin-inventory'
       preLoaderRoute: typeof AuthenticatedAdminInventoryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin-orders': {
+      id: '/_authenticated/admin-orders'
+      path: '/admin-orders'
+      fullPath: '/admin-orders'
+      preLoaderRoute: typeof AuthenticatedAdminOrdersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/ai-runtime': {
@@ -1347,6 +1367,7 @@ const AuthenticatedStoreRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminInventoryRoute: typeof AuthenticatedAdminInventoryRoute
+  AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
   AuthenticatedAiRuntimeRoute: typeof AuthenticatedAiRuntimeRoute
   AuthenticatedCampaignsRoute: typeof AuthenticatedCampaignsRouteWithChildren
   AuthenticatedCartRoute: typeof AuthenticatedCartRoute
@@ -1382,6 +1403,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminInventoryRoute: AuthenticatedAdminInventoryRoute,
+  AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
   AuthenticatedAiRuntimeRoute: AuthenticatedAiRuntimeRoute,
   AuthenticatedCampaignsRoute: AuthenticatedCampaignsRouteWithChildren,
   AuthenticatedCartRoute: AuthenticatedCartRoute,
