@@ -5426,6 +5426,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "hc_appointments_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors_public_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "hc_appointments_location_id_fkey"
             columns: ["location_id"]
             isOneToOne: false
@@ -5482,6 +5489,13 @@ export type Database = {
             columns: ["doctor_id"]
             isOneToOne: false
             referencedRelation: "hc_doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hc_availability_blocks_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors_public_safe"
             referencedColumns: ["id"]
           },
           {
@@ -5763,6 +5777,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "hc_doctor_availability_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors_public_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "hc_doctor_availability_location_id_fkey"
             columns: ["location_id"]
             isOneToOne: false
@@ -5867,6 +5888,13 @@ export type Database = {
             referencedRelation: "hc_doctors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "hc_doctor_join_submissions_duplicate_of_fkey"
+            columns: ["duplicate_of"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors_public_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       hc_doctor_licenses: {
@@ -5917,6 +5945,13 @@ export type Database = {
             referencedRelation: "hc_doctors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "hc_doctor_licenses_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors_public_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       hc_doctor_locations: {
@@ -5947,6 +5982,13 @@ export type Database = {
             columns: ["doctor_id"]
             isOneToOne: false
             referencedRelation: "hc_doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hc_doctor_locations_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors_public_safe"
             referencedColumns: ["id"]
           },
           {
@@ -6034,6 +6076,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "hc_doctor_practices_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors_public_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "hc_doctor_practices_location_id_fkey"
             columns: ["location_id"]
             isOneToOne: false
@@ -6084,6 +6133,13 @@ export type Database = {
             referencedRelation: "hc_doctors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "hc_doctor_qualifications_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors_public_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       hc_doctor_specialties: {
@@ -6114,6 +6170,13 @@ export type Database = {
             columns: ["doctor_id"]
             isOneToOne: false
             referencedRelation: "hc_doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hc_doctor_specialties_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors_public_safe"
             referencedColumns: ["id"]
           },
           {
@@ -6634,6 +6697,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "hc_prescriptions_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors_public_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "hc_prescriptions_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
@@ -6746,10 +6816,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "hc_verification_requests_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors_public_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "hc_verification_requests_duplicate_of_fkey"
             columns: ["duplicate_of"]
             isOneToOne: false
             referencedRelation: "hc_doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hc_verification_requests_duplicate_of_fkey"
+            columns: ["duplicate_of"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors_public_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -10194,6 +10278,13 @@ export type Database = {
             referencedRelation: "hc_doctors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "patient_medications_prescribed_by_doctor_id_fkey"
+            columns: ["prescribed_by_doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors_public_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       payment_methods: {
@@ -12445,6 +12536,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "telemedicine_sessions_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "hc_doctors_public_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "telemedicine_sessions_patient_id_fkey"
             columns: ["patient_id"]
             isOneToOne: false
@@ -13273,6 +13371,134 @@ export type Database = {
           source_id: string | null
         }
         Relationships: []
+      }
+      hc_doctors_public_safe: {
+        Row: {
+          academic_title: string | null
+          accepted_insurance: string[] | null
+          awards: Json | null
+          bio_ar: string | null
+          bio_en: string | null
+          certificates: Json | null
+          consultation_fee_max: number | null
+          consultation_fee_min: number | null
+          created_at: string | null
+          currency: string | null
+          emergency_available: boolean | null
+          full_name_ar: string | null
+          full_name_en: string | null
+          gallery: Json | null
+          gender: string | null
+          id: string | null
+          intro_video_url: string | null
+          is_public: boolean | null
+          languages: string[] | null
+          last_verified_at: string | null
+          medical_title: string | null
+          organization_id: string | null
+          photo_url: string | null
+          profile_completeness: number | null
+          seo_title_ar: string | null
+          services: Json | null
+          slug: string | null
+          sub_specialties: string[] | null
+          telemedicine_ready: boolean | null
+          title: string | null
+          trust_score: number | null
+          updated_at: string | null
+          verification_status:
+            | Database["public"]["Enums"]["hc_verification_status"]
+            | null
+          verified_at: string | null
+          years_experience: number | null
+        }
+        Insert: {
+          academic_title?: string | null
+          accepted_insurance?: string[] | null
+          awards?: Json | null
+          bio_ar?: string | null
+          bio_en?: string | null
+          certificates?: Json | null
+          consultation_fee_max?: number | null
+          consultation_fee_min?: number | null
+          created_at?: string | null
+          currency?: string | null
+          emergency_available?: boolean | null
+          full_name_ar?: string | null
+          full_name_en?: string | null
+          gallery?: Json | null
+          gender?: string | null
+          id?: string | null
+          intro_video_url?: string | null
+          is_public?: boolean | null
+          languages?: string[] | null
+          last_verified_at?: string | null
+          medical_title?: string | null
+          organization_id?: string | null
+          photo_url?: string | null
+          profile_completeness?: number | null
+          seo_title_ar?: string | null
+          services?: Json | null
+          slug?: string | null
+          sub_specialties?: string[] | null
+          telemedicine_ready?: boolean | null
+          title?: string | null
+          trust_score?: number | null
+          updated_at?: string | null
+          verification_status?:
+            | Database["public"]["Enums"]["hc_verification_status"]
+            | null
+          verified_at?: string | null
+          years_experience?: number | null
+        }
+        Update: {
+          academic_title?: string | null
+          accepted_insurance?: string[] | null
+          awards?: Json | null
+          bio_ar?: string | null
+          bio_en?: string | null
+          certificates?: Json | null
+          consultation_fee_max?: number | null
+          consultation_fee_min?: number | null
+          created_at?: string | null
+          currency?: string | null
+          emergency_available?: boolean | null
+          full_name_ar?: string | null
+          full_name_en?: string | null
+          gallery?: Json | null
+          gender?: string | null
+          id?: string | null
+          intro_video_url?: string | null
+          is_public?: boolean | null
+          languages?: string[] | null
+          last_verified_at?: string | null
+          medical_title?: string | null
+          organization_id?: string | null
+          photo_url?: string | null
+          profile_completeness?: number | null
+          seo_title_ar?: string | null
+          services?: Json | null
+          slug?: string | null
+          sub_specialties?: string[] | null
+          telemedicine_ready?: boolean | null
+          title?: string | null
+          trust_score?: number | null
+          updated_at?: string | null
+          verification_status?:
+            | Database["public"]["Enums"]["hc_verification_status"]
+            | null
+          verified_at?: string | null
+          years_experience?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hc_doctors_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pending_admin_notifications: {
         Row: {
