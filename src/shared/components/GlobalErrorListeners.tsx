@@ -1,7 +1,12 @@
 import { useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from '@tanstack/react-router'
+import { toast } from 'sonner'
 import { classifyError } from '@/lib/errors/classify'
 import { newCorrelationId } from '@/lib/errors/correlation'
-import { reportError } from '@/lib/errors/logger'
+import { registerErrorHook, reportError } from '@/lib/errors/logger'
+import { sendReportToSupabase } from '@/lib/errors/supabase-sink'
+import { installErrorHealer } from '@/lib/errors/healer'
 
 /**
  * Global window error + unhandledrejection listeners.
