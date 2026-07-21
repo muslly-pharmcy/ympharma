@@ -64,11 +64,11 @@ export const listModulePatients = createServerFn({ method: 'GET' })
     const sb = context.supabase as any
     const { data, error } = await sb
       .from('hc_patients')
-      .select(sel('id, full_name, gender, date_of_birth, blood_type, allergies, chronic_conditions'))
+      .select(sel('id, full_name, gender, date_of_birth, blood_type'))
+      .eq('is_active', true)
       .limit(100)
     if (error) return { items: [], warning: error.message }
-    type Row = { id: string; full_name: string | null; gender: string | null; date_of_birth: string | null; blood_type: string | null; allergies: unknown; chronic_conditions: unknown }
-    const asStrs = (v: unknown): string[] => Array.isArray(v) ? v.filter((x) => typeof x === 'string') as string[] : []
+    type Row = { id: string; full_name: string | null; gender: string | null; date_of_birth: string | null; blood_type: string | null }
     const items: ModulePatient[] = ((data ?? []) as Row[]).map((r) => ({
       id: r.id,
       name: r.full_name ?? '',
@@ -76,8 +76,8 @@ export const listModulePatients = createServerFn({ method: 'GET' })
       gender: (r.gender === 'male' || r.gender === 'female') ? r.gender : 'other',
       dateOfBirth: r.date_of_birth,
       bloodType: r.blood_type,
-      allergies: asStrs(r.allergies),
-      chronicDiseases: asStrs(r.chronic_conditions),
+      allergies: [],
+      chronicDiseases: [],
     }))
     return { items, warning: null }
   })
@@ -102,22 +102,24 @@ export const listModuleDoctors = createServerFn({ method: 'GET' })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = context.supabase as any
     let q = sb.from('hc_doctors')
-      .select(sel('id, full_name, primary_specialty, phone, rating_avg, rating_count, is_verified, avatar_url, primary_address'))
-      .eq('is_active', true).eq('is_verified', true).limit(60)
-    if (data.specialty !== 'all') q = q.eq('primary_specialty', data.specialty)
+      .select(sel('id, full_name_ar, medical_title, phone_e164, verification_status, photo_url'))
+      .eq('is_public', true)
+      .eq('verification_status', 'verified')
+      .limit(60)
+    if (data.specialty !== 'all') q = q.eq('medical_title', data.specialty)
     const { data: rows, error } = await q
     if (error) return { items: [], warning: error.message }
-    type Row = { id: string; full_name: string | null; primary_specialty: string | null; phone: string | null; rating_avg: number | null; rating_count: number | null; is_verified: boolean | null; avatar_url: string | null; primary_address: string | null }
+    type Row = { id: string; full_name_ar: string | null; medical_title: string | null; phone_e164: string | null; verification_status: string | null; photo_url: string | null }
     const items: ModuleDoctor[] = ((rows ?? []) as Row[]).map((r) => ({
       id: r.id,
-      nameAr: r.full_name ?? '',
-      specialty: r.primary_specialty ?? '',
-      phone: r.phone ?? '',
-      rating: Number(r.rating_avg ?? 0),
-      reviewCount: Number(r.rating_count ?? 0),
-      isVerified: !!r.is_verified,
-      avatar: r.avatar_url,
-      clinicAddress: r.primary_address,
+      nameAr: r.full_name_ar ?? '',
+      specialty: r.medical_title ?? '',
+      phone: r.phone_e164 ?? '',
+      rating: 0,
+      reviewCount: 0,
+      isVerified: r.verification_status === 'verified',
+      avatar: r.photo_url,
+      clinicAddress: null,
     }))
     return { items, warning: null }
   })
