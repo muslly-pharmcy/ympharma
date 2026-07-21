@@ -25,6 +25,7 @@ import { Route as ShopRouteImport } from './routes/shop'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as AuthenticatedAdminDiagnosticsRouteImport } from './routes/_authenticated/admin-diagnostics'
 import { Route as AuthenticatedAdminErrorHealerRouteImport } from './routes/_authenticated/admin-error-healer'
 import { Route as AuthenticatedAdminExcelImportRouteImport } from './routes/_authenticated/admin-excel-import'
 import { Route as AuthenticatedAdminImageQueueRouteImport } from './routes/_authenticated/admin-image-queue'
@@ -162,6 +163,12 @@ const Char91DotwellKnownChar93OauthProtectedResourceRoute =
     id: '/.well-known/oauth-protected-resource',
     path: '/.well-known/oauth-protected-resource',
     getParentRoute: () => rootRouteImport,
+  } as any)
+const AuthenticatedAdminDiagnosticsRoute =
+  AuthenticatedAdminDiagnosticsRouteImport.update({
+    id: '/admin-diagnostics',
+    path: '/admin-diagnostics',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdminErrorHealerRoute =
   AuthenticatedAdminErrorHealerRouteImport.update({
@@ -490,6 +497,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin-diagnostics': typeof AuthenticatedAdminDiagnosticsRoute
   '/admin-error-healer': typeof AuthenticatedAdminErrorHealerRoute
   '/admin-excel-import': typeof AuthenticatedAdminExcelImportRoute
   '/admin-image-queue': typeof AuthenticatedAdminImageQueueRoute
@@ -563,6 +571,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin-diagnostics': typeof AuthenticatedAdminDiagnosticsRoute
   '/admin-error-healer': typeof AuthenticatedAdminErrorHealerRoute
   '/admin-excel-import': typeof AuthenticatedAdminExcelImportRoute
   '/admin-image-queue': typeof AuthenticatedAdminImageQueueRoute
@@ -638,6 +647,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/_authenticated/admin-diagnostics': typeof AuthenticatedAdminDiagnosticsRoute
   '/_authenticated/admin-error-healer': typeof AuthenticatedAdminErrorHealerRoute
   '/_authenticated/admin-excel-import': typeof AuthenticatedAdminExcelImportRoute
   '/_authenticated/admin-image-queue': typeof AuthenticatedAdminImageQueueRoute
@@ -713,6 +723,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin-diagnostics'
     | '/admin-error-healer'
     | '/admin-excel-import'
     | '/admin-image-queue'
@@ -786,6 +797,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin-diagnostics'
     | '/admin-error-healer'
     | '/admin-excel-import'
     | '/admin-image-queue'
@@ -860,6 +872,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/_authenticated/admin-diagnostics'
     | '/_authenticated/admin-error-healer'
     | '/_authenticated/admin-excel-import'
     | '/_authenticated/admin-image-queue'
@@ -1060,6 +1073,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/.well-known/oauth-protected-resource'
       preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/admin-diagnostics': {
+      id: '/_authenticated/admin-diagnostics'
+      path: '/admin-diagnostics'
+      fullPath: '/admin-diagnostics'
+      preLoaderRoute: typeof AuthenticatedAdminDiagnosticsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin-error-healer': {
       id: '/_authenticated/admin-error-healer'
@@ -1587,6 +1607,7 @@ const AuthenticatedStoreRouteWithChildren =
   AuthenticatedStoreRoute._addFileChildren(AuthenticatedStoreRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminDiagnosticsRoute: typeof AuthenticatedAdminDiagnosticsRoute
   AuthenticatedAdminErrorHealerRoute: typeof AuthenticatedAdminErrorHealerRoute
   AuthenticatedAdminExcelImportRoute: typeof AuthenticatedAdminExcelImportRoute
   AuthenticatedAdminImageQueueRoute: typeof AuthenticatedAdminImageQueueRoute
@@ -1626,6 +1647,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminDiagnosticsRoute: AuthenticatedAdminDiagnosticsRoute,
   AuthenticatedAdminErrorHealerRoute: AuthenticatedAdminErrorHealerRoute,
   AuthenticatedAdminExcelImportRoute: AuthenticatedAdminExcelImportRoute,
   AuthenticatedAdminImageQueueRoute: AuthenticatedAdminImageQueueRoute,
