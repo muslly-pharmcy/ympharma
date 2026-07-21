@@ -1,5 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
+import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
 import {
   createPurchaseOrderInput,
   purchaseOrderIdInput,
@@ -12,30 +13,32 @@ import {
 type RpcFn = (name: string, args: unknown) => Promise<{ data: unknown; error: { message: string } | null }>
 
 // -------------------- reads --------------------
+// Wave R1.2 — Public Function Review.
+// Verdict: Authenticated by design. Purchase orders are internal operational
+// documents; only /_authenticated/purchase-orders.tsx calls these readers.
 
-export const listPurchaseOrders = createServerFn({ method: 'GET' }).handler(async () => {
-  const { getPublicSupabase } = await import('./supabase-public.server')
-  const supabase = getPublicSupabase()
-  const { data, error } = await supabase
-    .from('purchase_orders')
-    .select('id, code, status, supplier_id, warehouse_id, total_amount, currency, created_at, received_at')
-    .order('created_at', { ascending: false })
-    .limit(100)
-  if (error) {
-    console.error('[listPurchaseOrders]', error)
-    return []
-  }
-  return data ?? []
-})
+export const listPurchaseOrders = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from('purchase_orders')
+      .select('id, code, status, supplier_id, warehouse_id, total_amount, currency, created_at, received_at')
+      .order('created_at', { ascending: false })
+      .limit(100)
+    if (error) {
+      console.error('[listPurchaseOrders]', error)
+      return []
+    }
+    return data ?? []
+  })
 
 export const getPurchaseOrder = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => z.object({ id: z.string().uuid() }).parse(raw))
-  .handler(async ({ data }) => {
-    const { getPublicSupabase } = await import('./supabase-public.server')
-    const supabase = getPublicSupabase()
+  .handler(async ({ data, context }) => {
     const [{ data: po, error: poErr }, { data: lines }] = await Promise.all([
-      supabase.from('purchase_orders').select('*').eq('id', data.id).maybeSingle(),
-      supabase.from('purchase_order_lines').select('*').eq('po_id', data.id).order('line_no'),
+      context.supabase.from('purchase_orders').select('*').eq('id', data.id).maybeSingle(),
+      context.supabase.from('purchase_order_lines').select('*').eq('po_id', data.id).order('line_no'),
     ])
     if (poErr) throw new Error(poErr.message)
     if (!po) return null

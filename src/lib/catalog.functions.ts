@@ -14,6 +14,11 @@ function escOr(v: string): string {
 
 const sel = (s: string): string => s
 
+// Wave R1.2 — Public Function Review.
+// Verdict: Public by design (storefront browse). Hardened so the server
+// always enforces the public gate (is_public AND status='approved'); the
+// `publicOnly` input flag is accepted for compat but cannot be turned off
+// from the client. Internal catalog surfaces must use authenticated fns.
 export const listProducts = createServerFn({ method: 'GET' })
   .inputValidator((raw: unknown) => listProductsInputSchema.parse(raw ?? {}))
   .handler(async ({ data }): Promise<ListProductsResult> => {
@@ -26,14 +31,11 @@ export const listProducts = createServerFn({ method: 'GET' })
     let q = supabase
       .from('catalog_products')
       .select(sel('*'), { count: 'exact' })
+      .eq('is_public', true)
+      .eq('status', 'approved')
       .order('updated_at', { ascending: false })
       .range(from, to)
 
-    // Public policy: is_public AND status='approved'. Enforce here too so we
-    // don't accidentally rely only on RLS.
-    if (data.publicOnly) {
-      q = q.eq('is_public', true).eq('status', 'approved')
-    }
     if (data.categoryId) q = q.eq('category_id', data.categoryId)
     if (data.search) {
       const term = `%${escOr(data.search)}%`
@@ -55,6 +57,9 @@ export const listProducts = createServerFn({ method: 'GET' })
     }
   })
 
+// Public by design (product detail page). Server enforces the same
+// is_public AND status='approved' gate so unpublished drafts stay hidden
+// even if a UUID leaks.
 export const getProduct = createServerFn({ method: 'GET' })
   .inputValidator((raw: unknown) =>
     z.object({ id: z.string().uuid() }).parse(raw),
@@ -67,6 +72,8 @@ export const getProduct = createServerFn({ method: 'GET' })
       .from('catalog_products')
       .select(sel('*'))
       .eq('id', data.id)
+      .eq('is_public', true)
+      .eq('status', 'approved')
       .maybeSingle()
 
     if (error || !product) return null
