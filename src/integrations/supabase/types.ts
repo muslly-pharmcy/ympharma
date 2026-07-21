@@ -2848,6 +2848,7 @@ export type Database = {
       catalog_products: {
         Row: {
           active_ingredients: Json
+          agent_name: string | null
           barcode: string | null
           brand: string | null
           category_id: string | null
@@ -2860,12 +2861,14 @@ export type Database = {
           id: string
           is_public: boolean
           manufacturer: string | null
+          manufacturer_country: string | null
           metadata: Json
           name_ar: string
           name_en: string | null
           organization_id: string | null
           owner_org_id: string | null
           requires_prescription: boolean
+          sbdma_official_price: number | null
           status: Database["public"]["Enums"]["catalog_status"]
           strength: string | null
           updated_at: string
@@ -2874,6 +2877,7 @@ export type Database = {
         }
         Insert: {
           active_ingredients?: Json
+          agent_name?: string | null
           barcode?: string | null
           brand?: string | null
           category_id?: string | null
@@ -2886,12 +2890,14 @@ export type Database = {
           id?: string
           is_public?: boolean
           manufacturer?: string | null
+          manufacturer_country?: string | null
           metadata?: Json
           name_ar: string
           name_en?: string | null
           organization_id?: string | null
           owner_org_id?: string | null
           requires_prescription?: boolean
+          sbdma_official_price?: number | null
           status?: Database["public"]["Enums"]["catalog_status"]
           strength?: string | null
           updated_at?: string
@@ -2900,6 +2906,7 @@ export type Database = {
         }
         Update: {
           active_ingredients?: Json
+          agent_name?: string | null
           barcode?: string | null
           brand?: string | null
           category_id?: string | null
@@ -2912,12 +2919,14 @@ export type Database = {
           id?: string
           is_public?: boolean
           manufacturer?: string | null
+          manufacturer_country?: string | null
           metadata?: Json
           name_ar?: string
           name_en?: string | null
           organization_id?: string | null
           owner_org_id?: string | null
           requires_prescription?: boolean
+          sbdma_official_price?: number | null
           status?: Database["public"]["Enums"]["catalog_status"]
           strength?: string | null
           updated_at?: string
