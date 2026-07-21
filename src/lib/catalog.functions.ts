@@ -51,11 +51,80 @@ export const listProducts = createServerFn({ method: 'GET' })
       console.error('[listProducts]', error)
       return { items: [], total: 0, page: data.page, pageSize: data.pageSize }
     }
+    const items = (rows ?? []) as unknown as Array<CatalogProduct & { primary_image_url?: string }>
+
+    // Bulk-fetch primary image (or first media) per product and sign URLs.
+    if (items.length > 0) {
+      try {
+        const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+        const ids = items.map((p) => p.id)
+        const { data: media } = await supabaseAdmin
+          .from('catalog_product_media')
+          .select('product_id, storage_bucket, storage_path, kind, sort_order, status')
+          .in('product_id', ids)
+          .eq('status', 'approved')
+          .order('sort_order', { ascending: true })
+        const byProduct = new Map<string, { bucket: string; path: string }>()
+        for (const m of (media ?? []) as Array<{
+          product_id: string
+          storage_bucket: string | null
+          storage_path: string
+          kind: string
+        }>) {
+          if (!byProduct.has(m.product_id)) {
+            byProduct.set(m.product_id, {
+              bucket: m.storage_bucket || 'product-images',
+              path: m.storage_path,
+            })
+          }
+        }
+        await Promise.all(
+          Array.from(byProduct.entries()).map(async ([pid, ref]) => {
+            const { data: signed } = await supabaseAdmin.storage
+              .from(ref.bucket)
+              .createSignedUrl(ref.path, 60 * 60 * 6)
+            if (signed?.signedUrl) {
+              const p = items.find((x) => x.id === pid)
+              if (p) p.primary_image_url = signed.signedUrl
+            }
+          }),
+        )
+      } catch (e) {
+        console.warn('[listProducts] image signing skipped:', (e as Error).message)
+      }
+    }
+
     return {
-      items: (rows ?? []) as unknown as CatalogProduct[],
+      items: items as unknown as CatalogProduct[],
       total: count ?? 0,
       page: data.page,
       pageSize: data.pageSize,
+    }
+  })
+
+// ---------- AI: Product summary via Kernel ----------
+// Authenticated. Uses the org-scoped Kernel dispatch with the
+// `catalog_advisor` agent + `store_query` tool. Never bypasses Safety/Budget.
+export const getProductAiSummary = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) =>
+    z.object({ productId: z.string().uuid() }).parse(raw),
+  )
+  .handler(async ({ data, context }) => {
+    const { dispatch } = await import('./ai/runtime/kernel.server')
+    const { buildActor } = await import('./session.server')
+    const actor = await buildActor(context.supabase, context.userId)
+    const res = await dispatch(actor, {
+      agentKey: 'catalog_advisor',
+      input: `اشرح لي هذا المنتج (المعرف: ${data.productId}) باستخدام أداة store_query.`,
+      toolInputs: { store_query: { productId: data.productId } },
+      tier: 'fast',
+    })
+    return {
+      output: res.output,
+      model: res.model,
+      toolsUsed: res.toolsUsed,
+      latencyMs: res.latencyMs,
     }
   })
 
