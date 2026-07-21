@@ -110,10 +110,10 @@ export const getProductAiSummary = createServerFn({ method: 'POST' })
   .inputValidator((raw: unknown) =>
     z.object({ productId: z.string().uuid() }).parse(raw),
   )
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data }) => {
     const { dispatch } = await import('./ai/runtime/kernel.server')
-    const { buildActor } = await import('./session.server')
-    const actor = await buildActor(context.supabase, context.userId)
+    const { getActor } = await import('./session.server')
+    const actor = await getActor()
     const res = await dispatch(actor, {
       agentKey: 'catalog_advisor',
       input: `اشرح لي هذا المنتج (المعرف: ${data.productId}) باستخدام أداة store_query.`,
