@@ -148,6 +148,11 @@ export default function Navbar() {
                   </span>
                 )}
               </Link>
+              {isAdmin && (
+                <Link to="/admin-orders" className="p-2.5 rounded-xl hover:bg-gray-100 transition-colors" title="إدارة الطلبات">
+                  <ClipboardList className="w-5 h-5 text-gold" />
+                </Link>
+              )}
             </>
           )}
 
