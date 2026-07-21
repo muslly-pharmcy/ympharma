@@ -1,8 +1,14 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useServerFn } from '@tanstack/react-start'
+import { useState } from 'react'
+import { toast } from 'sonner'
 import { getProduct } from '@/lib/catalog.functions'
 import { getStockSummary } from '@/lib/inventory.functions'
-import { ArrowRight, Package } from 'lucide-react'
+import { listProductImageUrls } from '@/lib/storefront.functions'
+import { registerProductImage, deleteProductImage } from '@/lib/catalog-media.functions'
+import { supabase } from '@/integrations/supabase/client'
+import { ArrowRight, Package, Upload, Trash2, Loader2 } from 'lucide-react'
 import type { CatalogBarcode } from '@/domain/catalog/schemas'
 
 export const Route = createFileRoute('/_authenticated/catalog/$productId')({
@@ -48,7 +54,7 @@ function ProductDetail() {
       </div>
     )
   }
-  const { product, barcodes, media } = data
+  const { product, barcodes } = data
   const barcodeRows = barcodes as unknown as CatalogBarcode[]
 
   return (
@@ -129,15 +135,133 @@ function ProductDetail() {
         )}
       </section>
 
-      <section className="glass-panel rounded-2xl p-6">
-        <h2 className="mb-3 text-lg font-semibold">الوسائط</h2>
-        <p className="text-sm text-muted-foreground">
-          {media.length === 0
-            ? 'لم يتم رفع صور بعد.'
-            : `${media.length} ملف مرتبط بهذا المنتج.`}
-        </p>
-      </section>
+      <MediaSection productId={params.productId} />
     </div>
+  )
+}
+
+function MediaSection({ productId }: { productId: string }) {
+  const qc = useQueryClient()
+  const [uploading, setUploading] = useState(false)
+  const { data: images = [] } = useQuery({
+    queryKey: ['storefront', 'product', productId, 'images'],
+    queryFn: () => listProductImageUrls({ data: { productId } }),
+  })
+  const registerFn = useServerFn(registerProductImage)
+  const deleteFn = useServerFn(deleteProductImage)
+  const register = useMutation({
+    mutationFn: (v: { storagePath: string; kind: 'primary' | 'gallery' }) =>
+      registerFn({ data: { productId, ...v } }),
+    onSuccess: () => {
+      toast.success('تم رفع الصورة')
+      void qc.invalidateQueries({ queryKey: ['storefront', 'product', productId, 'images'] })
+      void qc.invalidateQueries({ queryKey: ['catalog', 'product', productId] })
+    },
+    onError: (e: Error) => toast.error(e.message),
+  })
+  const remove = useMutation({
+    mutationFn: (mediaId: string) => deleteFn({ data: { mediaId } }),
+    onSuccess: () => {
+      toast.success('تم الحذف')
+      void qc.invalidateQueries({ queryKey: ['storefront', 'product', productId, 'images'] })
+    },
+    onError: (e: Error) => toast.error(e.message),
+  })
+
+  async function onUpload(file: File) {
+    setUploading(true)
+    try {
+      const ext = file.name.split('.').pop() || 'jpg'
+      const path = `${productId}/${crypto.randomUUID()}.${ext}`
+      const up = await supabase.storage
+        .from('product-images')
+        .upload(path, file, { upsert: false, contentType: file.type })
+      if (up.error) throw new Error(up.error.message)
+      const kind = images.length === 0 ? 'primary' : 'gallery'
+      await register.mutateAsync({ storagePath: path, kind })
+    } catch (e) {
+      toast.error((e as Error).message)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <section className="glass-panel rounded-2xl p-6">
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="text-lg font-semibold">صور المنتج</h2>
+        <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:opacity-90">
+          {uploading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Upload className="h-4 w-4" />
+          )}
+          {uploading ? 'جارٍ الرفع…' : 'رفع صورة'}
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0]
+              if (f) void onUpload(f)
+              e.target.value = ''
+            }}
+          />
+        </label>
+      </div>
+      {images.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          لم يتم رفع صور بعد. الصورة الأولى تصبح تلقائياً الصورة الرئيسية.
+        </p>
+      ) : (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {images.map((img, i) => (
+            <div key={i} className="group relative rounded-xl border border-gray-200 bg-gray-50">
+              <img src={img.url} alt="" className="aspect-square w-full rounded-xl object-contain" />
+              <span className="absolute right-2 top-2 rounded-full bg-white/90 px-2 py-0.5 text-[10px] text-gray-700">
+                {img.kind}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+      {/* Media list for delete (uses ordered admin list) */}
+      <AdminMediaDeleteList productId={productId} onDelete={(id) => remove.mutate(id)} />
+    </section>
+  )
+}
+
+function AdminMediaDeleteList({
+  productId,
+  onDelete,
+}: {
+  productId: string
+  onDelete: (mediaId: string) => void
+}) {
+  const { data } = useQuery({
+    queryKey: ['catalog', 'product', productId],
+    queryFn: () => getProduct({ data: { id: productId } }),
+  })
+  const rows =
+    (data?.media as unknown as Array<{ id: string; storage_path: string; kind: string }>) ?? []
+  if (rows.length === 0) return null
+  return (
+    <ul className="mt-4 divide-y divide-gray-100 text-sm">
+      {rows.map((m) => (
+        <li key={m.id} className="flex items-center justify-between py-2">
+          <span className="truncate text-gray-700">
+            <span className="font-mono text-xs text-gray-500">{m.kind}</span> · {m.storage_path}
+          </span>
+          <button
+            onClick={() => onDelete(m.id)}
+            className="rounded-lg p-1.5 text-red-600 hover:bg-red-50"
+            aria-label="حذف"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </li>
+      ))}
+    </ul>
   )
 }
 
