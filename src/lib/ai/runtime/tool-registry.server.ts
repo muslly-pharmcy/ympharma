@@ -17,6 +17,7 @@ export interface ToolMetadata {
 
 const META: Record<string, ToolMetadata> = {
   search_products:       { key: 'search_products',       capability: 'read',    permissions: [],                     costCents: 0, latencyMsP95: 250, timeoutMs: 5000, retryPolicy: { attempts: 2, backoffMs: 300 }, owner: 'catalog',   version: 1 },
+  store_query:           { key: 'store_query',           capability: 'read',    permissions: [],                     costCents: 0, latencyMsP95: 300, timeoutMs: 8000, retryPolicy: { attempts: 2, backoffMs: 300 }, owner: 'catalog',   version: 1 },
   get_product_stock:     { key: 'get_product_stock',     capability: 'read',    permissions: [],                     costCents: 0, latencyMsP95: 220, timeoutMs: 5000, retryPolicy: { attempts: 2, backoffMs: 300 }, owner: 'inventory', version: 1 },
   list_low_stock:        { key: 'list_low_stock',        capability: 'read',    permissions: [],                     costCents: 0, latencyMsP95: 400, timeoutMs: 8000, retryPolicy: { attempts: 1, backoffMs: 0   }, owner: 'inventory', version: 1 },
   list_expiring_soon:    { key: 'list_expiring_soon',    capability: 'read',    permissions: [],                     costCents: 0, latencyMsP95: 300, timeoutMs: 5000, retryPolicy: { attempts: 1, backoffMs: 0   }, owner: 'inventory', version: 1 },
