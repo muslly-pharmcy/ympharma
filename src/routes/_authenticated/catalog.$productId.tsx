@@ -1,8 +1,14 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useServerFn } from '@tanstack/react-start'
+import { useState } from 'react'
+import { toast } from 'sonner'
 import { getProduct } from '@/lib/catalog.functions'
 import { getStockSummary } from '@/lib/inventory.functions'
-import { ArrowRight, Package } from 'lucide-react'
+import { listProductImageUrls } from '@/lib/storefront.functions'
+import { registerProductImage, deleteProductImage } from '@/lib/catalog-media.functions'
+import { supabase } from '@/integrations/supabase/client'
+import { ArrowRight, Package, Upload, Trash2, Loader2 } from 'lucide-react'
 import type { CatalogBarcode } from '@/domain/catalog/schemas'
 
 export const Route = createFileRoute('/_authenticated/catalog/$productId')({
