@@ -44,7 +44,7 @@ function CartPage() {
       {items.length === 0 ? (
         <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center">
           <p className="text-gray-600 mb-4">السلة فارغة حالياً.</p>
-          <Link to="/catalog" className="inline-block px-4 py-2 rounded-xl bg-primary text-white text-sm font-medium">
+          <Link to="/catalog" search={{ q: '', page: 1 }} className="inline-block px-4 py-2 rounded-xl bg-primary text-white text-sm font-medium">
             تصفح الكتالوج
           </Link>
         </div>
