@@ -21,7 +21,9 @@ import { RouteSkeleton } from '@/components/skeletons/Skeleton'
 import { classifyError } from '@/lib/errors/classify'
 import { newCorrelationId } from '@/lib/errors/correlation'
 import { reportError } from '@/lib/errors/logger'
+import almoslyLogo from '@/assets/almosly-logo.png.asset.json'
 import appCss from '@/index.css?url'
+
 
 export const Route = createRootRoute({
   head: () => ({
@@ -124,20 +126,40 @@ function AuthStateSync() {
 
 function RootNotFound() {
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-background p-6 text-center">
-      <h1 className="text-3xl font-bold">الصفحة غير موجودة</h1>
-      <p className="text-muted-foreground">
-        الرابط الذي طلبته غير متاح أو تم نقله.
-      </p>
-      <Link
-        to="/"
-        className="rounded-md bg-primary px-4 py-2 text-primary-foreground"
-      >
-        العودة للرئيسية
-      </Link>
+    <div className="relative flex min-h-dvh flex-col items-center justify-center gap-6 overflow-hidden bg-gradient-to-br from-[#D9EEEB] via-white to-[#E8F5F3] p-6 text-center">
+      <div className="pointer-events-none absolute -top-24 -left-16 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -right-16 h-72 w-72 rounded-full bg-gold/10 blur-3xl" />
+
+      <img
+        src={almoslyLogo.url}
+        alt="صيدلية المصلي"
+        className="relative h-32 w-32 object-contain md:h-40 md:w-40"
+      />
+      <div className="relative space-y-2">
+        <p className="text-6xl font-black text-primary md:text-7xl">404</p>
+        <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">الصفحة غير موجودة</h1>
+        <p className="mx-auto max-w-md text-sm text-gray-600 md:text-base">
+          الرابط الذي طلبته غير متاح أو تم نقله. يمكنك العودة إلى الصفحة الرئيسية لصيدلية المصلي.
+        </p>
+      </div>
+      <div className="relative flex flex-wrap items-center justify-center gap-3">
+        <Link
+          to="/"
+          className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-primary/20 transition hover:bg-primary/90"
+        >
+          العودة للرئيسية
+        </Link>
+        <Link
+          to="/contact"
+          className="rounded-xl border border-primary/30 bg-white/70 px-6 py-2.5 text-sm font-semibold text-primary backdrop-blur transition hover:bg-primary/5"
+        >
+          تواصل معنا
+        </Link>
+      </div>
     </div>
   )
 }
+
 
 function RootError({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter()

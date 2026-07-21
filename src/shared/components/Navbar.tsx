@@ -55,19 +55,20 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="fixed top-0 right-0 left-0 z-50 h-16 glass-panel border-b border-gray-200/50">
-      <div className="h-full px-4 md:px-6 flex items-center justify-between max-w-[1920px] mx-auto">
-        <Link to="/" className="flex items-center gap-3">
+    <nav className="fixed top-0 right-0 left-0 z-50 h-16 glass-panel border-b border-primary/10">
+      <div className="h-full px-3 md:px-6 flex items-center justify-between gap-2 max-w-[1920px] mx-auto">
+        <Link to="/" className="flex min-w-0 items-center gap-2 md:gap-3 shrink">
           <img
             src={almoslyLogo.url}
             alt="صيدلية المصلي — Almosly Pharmacy"
-            className="h-11 w-auto object-contain"
+            className="h-10 w-10 md:h-12 md:w-12 shrink-0 object-contain"
           />
-          <div className="hidden md:block leading-tight">
-            <h1 className="text-base font-bold text-gray-900">صيدلية المصلي</h1>
-            <p className="text-[11px] text-gray-500">Almosly Pharmacy · عدن</p>
+          <div className="hidden md:block min-w-0 leading-tight">
+            <h1 className="truncate text-base font-bold text-gray-900">صيدلية المصلي</h1>
+            <p className="truncate text-[11px] text-gray-500">Almosly Pharmacy · عدن</p>
           </div>
         </Link>
+
 
 
 
@@ -181,8 +182,9 @@ export default function Navbar() {
                   onClick={() => setShowProfile(!showProfile)}
                   className="flex items-center gap-2 p-1.5 pr-3 rounded-xl hover:bg-gray-100 transition-colors"
                 >
-                  <img src={avatar} alt={displayName} className="w-8 h-8 rounded-lg object-cover" />
-                  <span className="hidden md:block text-sm font-medium text-gray-700">{displayName}</span>
+                  <img src={avatar} alt={displayName} className="w-9 h-9 shrink-0 rounded-full object-cover ring-2 ring-primary/20 bg-white" />
+                  <span className="hidden md:block truncate max-w-[140px] text-sm font-medium text-gray-700">{displayName}</span>
+
                 </button>
 
                 {showProfile && (

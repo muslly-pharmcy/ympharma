@@ -7,6 +7,8 @@ import { getActivePlanets } from '@/data/planets'
 import { Sparkles, ScanLine, Pill, MessageCircle, Box } from 'lucide-react'
 import LoadingSpinner from '@/shared/components/LoadingSpinner'
 import { CosmicSearch } from '@/components/ai/CosmicSearch'
+import almoslyLogo from '@/assets/almosly-logo.png.asset.json'
+
 
 const SolarSystem3D = lazy(() => import('@/shared/3d/SolarSystem3D'))
 
@@ -48,22 +50,61 @@ export default function SolarSystem() {
       ))}
 
       <div className="relative z-10 max-w-[1600px] mx-auto px-4 md:px-8 py-8">
-        {/* Header */}
-        <motion.div 
-          className="text-center mb-8"
+        {/* Hero — pharmacy identity */}
+        <motion.section
+          className="relative mb-10 overflow-hidden rounded-3xl border border-primary/15 bg-gradient-to-br from-[#D9EEEB] via-white to-[#E8F5F3] px-6 py-10 md:px-12 md:py-14 shadow-sm"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-            <span className="text-gradient">MUSLLY AI OS</span>
-          </h1>
-          <p className="text-gray-500 text-lg">منصة التشغيل الصحية الوطنية — صيدلية المصلي</p>
-          <div className="mt-3 inline-flex items-center gap-2 px-4 py-1.5 bg-primary/5 rounded-full">
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-sm text-primary font-medium">النظام يعمل بكامل طاقته</span>
+          <div className="pointer-events-none absolute -top-16 -left-16 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 -right-10 h-64 w-64 rounded-full bg-gold/10 blur-3xl" />
+
+          <div className="relative grid items-center gap-8 md:grid-cols-[auto_minmax(0,1fr)]">
+            <img
+              src={almoslyLogo.url}
+              alt="صيدلية المصلي — Almosly Pharmacy"
+              className="mx-auto h-32 w-32 shrink-0 object-contain md:h-44 md:w-44"
+            />
+            <div className="text-center md:text-right">
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-primary" />
+                رعاية دوائية موثوقة · عدن
+              </div>
+              <h1 className="mt-3 text-3xl font-black leading-tight text-gray-900 md:text-5xl">
+                صيدلية <span className="text-primary">المصلي</span>
+              </h1>
+              <p className="mt-1 text-lg font-semibold tracking-wide text-primary/80">Almosly Pharmacy</p>
+              <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-gray-700 md:mx-0 md:text-base">
+                صيدلية ذكية تجمع بين خبرة الصيادلة ودقّة الذكاء الصناعي — صرف الوصفات،
+                استشارات فورية، وتوصيل الأدوية إلى باب منزلك.
+              </p>
+              <div className="mt-6 flex flex-wrap justify-center gap-3 md:justify-start">
+                <Link
+                  to="/shop"
+                  search={{ page: 1 }}
+                  className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-primary/20 transition hover:bg-primary/90"
+                >
+                  تسوّق الأدوية
+                </Link>
+
+                <Link
+                  to="/ai-chat"
+                  className="rounded-xl border border-primary/30 bg-white/70 px-5 py-2.5 text-sm font-semibold text-primary backdrop-blur transition hover:bg-primary/5"
+                >
+                  استشارة ذكية
+                </Link>
+                <Link
+                  to="/about"
+                  className="rounded-xl px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:text-primary"
+                >
+                  من نحن ←
+                </Link>
+              </div>
+            </div>
           </div>
-        </motion.div>
+        </motion.section>
+
 
         {/* Cosmic AI Search — read-only bridge over catalog_products */}
         <motion.div

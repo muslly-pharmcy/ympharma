@@ -9,14 +9,15 @@ export function Footer() {
       <div className="max-w-[1920px] mx-auto px-4 md:px-8 py-10 grid gap-8 md:grid-cols-4">
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <img src={PHARMACY.logo} alt={PHARMACY.nameAr} className="w-11 h-11 rounded-xl bg-primary/5 p-1.5" />
-            <div>
-              <div className="font-bold text-gray-900">{PHARMACY.nameAr}</div>
-              <div className="text-xs text-gray-500">{PHARMACY.nameEn}</div>
+            <img src={PHARMACY.logo} alt={PHARMACY.nameAr} className="h-14 w-14 shrink-0 object-contain" />
+            <div className="min-w-0">
+              <div className="truncate font-bold text-gray-900">{PHARMACY.nameAr}</div>
+              <div className="truncate text-xs text-gray-500">{PHARMACY.nameEn}</div>
             </div>
           </div>
           <p className="text-sm text-gray-600 leading-relaxed">{PHARMACY.description}</p>
         </div>
+
 
         <div>
           <h3 className="font-semibold text-gray-900 mb-3">روابط سريعة</h3>
