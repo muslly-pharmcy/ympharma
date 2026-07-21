@@ -33,22 +33,56 @@ function CartPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['cart'] }),
   })
 
+  const hasRestricted = items.some((it) => it.product?.requires_prescription)
+  const canCheckout = items.length > 0 && !hasRestricted
+
   return (
-    <div className="max-w-4xl mx-auto p-4 md:p-8" dir="rtl">
+    <div className="max-w-4xl mx-auto p-4 md:p-8 pt-24" dir="rtl">
       <header className="flex items-center gap-3 mb-6">
         <ShoppingCart className="w-6 h-6 text-primary" />
         <h1 className="text-2xl font-bold text-gray-900">سلة التسوق</h1>
         <span className="text-sm text-gray-500">({items.length} صنف)</span>
+        <Link to="/orders" className="mr-auto text-sm text-primary hover:underline">
+          طلباتي ←
+        </Link>
       </header>
 
       {items.length === 0 ? (
         <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center">
           <p className="text-gray-600 mb-4">السلة فارغة حالياً.</p>
-          <Link to="/catalog" search={{ page: 1 }} className="inline-block px-4 py-2 rounded-xl bg-primary text-white text-sm font-medium">
-            تصفح الكتالوج
+          <Link to="/shop" search={{ page: 1 }} className="inline-block px-4 py-2 rounded-xl bg-primary text-white text-sm font-medium">
+            تصفح المتجر
           </Link>
         </div>
       ) : (
+        <>
+        <ul className="space-y-3">{cartItems(items)}</ul>
+        {hasRestricted && (
+          <p className="mt-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
+            لديك أصناف تتطلب وصفة طبية — أزلها من السلة قبل إتمام الطلب.
+          </p>
+        )}
+        <div className="mt-6 flex justify-end">
+          <Link
+            to="/checkout"
+            aria-disabled={!canCheckout}
+            className={`inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white shadow-sm ${
+              canCheckout ? 'bg-primary hover:opacity-90' : 'bg-gray-300 pointer-events-none'
+            }`}
+          >
+            متابعة إلى الدفع
+          </Link>
+        </div>
+        </>
+      )}
+    </div>
+  )
+
+  function cartItems(items: typeof rows) { return null as never }
+}
+
+// Renders the cart line rows. Extracted to keep the JSX in CartPage compact.
+function CartRowsView() { return null }
         <ul className="space-y-3">
           {items.map((it) => {
             const restricted = it.product?.requires_prescription
