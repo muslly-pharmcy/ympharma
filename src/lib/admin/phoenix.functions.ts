@@ -366,8 +366,8 @@ export const phoenixProbeGoldenPath = createServerFn({ method: 'GET' })
     await assertAdmin(context.userId)
     const { supabase: userClient, userId } = context
     const catalog = await userClient
-      .from('catalog_products')
-      .select('id, name, selling_price')
+      .from('store_products')
+      .select('id, name, price')
       .limit(1)
     const ordersView = await userClient
       .from('orders')
