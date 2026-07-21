@@ -13588,6 +13588,17 @@ export type Database = {
         Args: { _ip: string; _max?: number; _window_seconds?: number }
         Returns: boolean
       }
+      checkout_cart_fefo: {
+        Args: {
+          p_customer_address: string
+          p_customer_name: string
+          p_customer_phone: string
+          p_notes?: string
+          p_payment_method_code: string
+          p_shipping_zone_id: string
+        }
+        Returns: Json
+      }
       chronic_overdue: {
         Args: { _grace?: number }
         Returns: {
