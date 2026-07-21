@@ -8,7 +8,7 @@ import { listCart } from '@/lib/cart.functions'
 import { ShopifyCartDrawer } from '@/components/shopify/CartDrawer'
 import {
   Sun, Moon, Bell, MessageSquare, LogOut, Shield, LogIn,
-  Stethoscope, Database, Search, ShoppingCart, Store,
+  Stethoscope, Database, Search, ShoppingCart, Store, Sparkles,
 } from 'lucide-react'
 import { useState } from 'react'
 
