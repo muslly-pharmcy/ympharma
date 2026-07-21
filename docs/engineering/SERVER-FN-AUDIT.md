@@ -1,22 +1,16 @@
 # Server Function Auth Audit
 
-Generated: 2026-07-21T00:46:46.600Z
+Generated: 2026-07-21T00:46:57.484Z
 
 - Total server functions scanned: **154**
-- Protected by `requireSupabaseAuth`: **142/154**
+- Protected by `requireSupabaseAuth`: **148/154**
 - With `inputValidator`: **132/154**
-- Unauthenticated (public): **12**
+- Unauthenticated (public): **6**
 
 > Any function without `requireSupabaseAuth` is a public endpoint on the deployed site. Confirm each is intentionally public (health checks, public reads via `TO anon` RLS, marketing forms with signature/rate-limit guards) or add the middleware.
 
 ## ⚠ Unauthenticated server functions
 
-- src/lib/analytics.functions.ts :: getExecutiveKpis (GET)
-- src/lib/analytics.functions.ts :: getDispensesSeries (GET)
-- src/lib/analytics.functions.ts :: getCustomersGrowth (GET)
-- src/lib/analytics.functions.ts :: getCampaignsSummary (GET)
-- src/lib/analytics.functions.ts :: getInventoryHealth (GET)
-- src/lib/analytics.functions.ts :: getAiUsage (GET)
 - src/lib/catalog.functions.ts :: listProducts (GET)
 - src/lib/catalog.functions.ts :: getProduct (GET)
 - src/lib/catalog.functions.ts :: listCategories (GET)
@@ -32,12 +26,12 @@ Generated: 2026-07-21T00:46:46.600Z
 | `src/lib/ai.functions.ts` | `listAvailableToolsFn` | GET | ✅ | actor | — |
 | `src/lib/ai.functions.ts` | `invokeAgent` | POST | ✅ | actor | ✅ |
 | `src/lib/ai.functions.ts` | `listRuns` | GET | ✅ | actor | ✅ |
-| `src/lib/analytics.functions.ts` | `getExecutiveKpis` | GET | ❌ | none | — |
-| `src/lib/analytics.functions.ts` | `getDispensesSeries` | GET | ❌ | none | ✅ |
-| `src/lib/analytics.functions.ts` | `getCustomersGrowth` | GET | ❌ | none | ✅ |
-| `src/lib/analytics.functions.ts` | `getCampaignsSummary` | GET | ❌ | none | — |
-| `src/lib/analytics.functions.ts` | `getInventoryHealth` | GET | ❌ | none | — |
-| `src/lib/analytics.functions.ts` | `getAiUsage` | GET | ❌ | none | — |
+| `src/lib/analytics.functions.ts` | `getExecutiveKpis` | GET | ✅ | actor | — |
+| `src/lib/analytics.functions.ts` | `getDispensesSeries` | GET | ✅ | actor | ✅ |
+| `src/lib/analytics.functions.ts` | `getCustomersGrowth` | GET | ✅ | actor | ✅ |
+| `src/lib/analytics.functions.ts` | `getCampaignsSummary` | GET | ✅ | actor | — |
+| `src/lib/analytics.functions.ts` | `getInventoryHealth` | GET | ✅ | actor | — |
+| `src/lib/analytics.functions.ts` | `getAiUsage` | GET | ✅ | actor | — |
 | `src/lib/campaigns.functions.ts` | `listCampaigns` | GET | ✅ | actor | ✅ |
 | `src/lib/campaigns.functions.ts` | `getCampaign` | GET | ✅ | actor | ✅ |
 | `src/lib/campaigns.functions.ts` | `listSegments` | GET | ✅ | actor | — |
