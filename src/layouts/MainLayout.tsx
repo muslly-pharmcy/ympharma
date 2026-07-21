@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import Navbar from '@/shared/components/Navbar'
 import { Footer } from '@/shared/components/Footer'
+import { FloatingContactButtons } from '@/shared/components/FloatingContactButtons'
 import { useShopifyCartSync } from '@/hooks/useShopifyCartSync'
 
 interface MainLayoutProps {
@@ -15,6 +16,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
       <Navbar />
       <main className="pt-16 flex-1">{children}</main>
       <Footer />
+      <FloatingContactButtons />
     </div>
   )
 }
