@@ -82,7 +82,7 @@ export default function SolarSystem() {
               <div className="mt-6 flex flex-wrap justify-center gap-3 md:justify-start">
                 <Link
                   to="/shop"
-                  search={{}}
+                  search={{ page: 1 }}
                   className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-primary/20 transition hover:bg-primary/90"
                 >
                   تسوّق الأدوية
