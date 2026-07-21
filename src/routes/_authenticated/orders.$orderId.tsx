@@ -42,6 +42,10 @@ function OrderDetailPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['my-orders', orderId],
     queryFn: () => getMyOrder({ data: { id: orderId } }),
+    staleTime: 60_000,
+    gcTime: 24 * 60 * 60 * 1000,
+    refetchOnReconnect: true,
+    placeholderData: (prev) => prev,
   })
 
   const setReceiptFn = useServerFn(setOrderReceipt)

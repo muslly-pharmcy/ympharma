@@ -16,6 +16,7 @@ const PERSIST_KEYS = new Set([
   'storefront',
   'catalog',
   'my-orders',
+  'store', // /store list + /store/$code product detail
 ])
 
 export function AppQueryProvider({
