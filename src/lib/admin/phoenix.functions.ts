@@ -197,12 +197,17 @@ export const phoenixProbeRls = createServerFn({ method: 'GET' })
 
     // Write test: attempt to insert an order impersonating a different user_id — MUST fail
     const bogusUser = '00000000-0000-0000-0000-000000000001'
-    const writeTest = await userClient
-      .from('orders')
+    const writeTest = await (userClient.from('orders') as unknown as {
+      insert: (row: object) => {
+        select: (c: string) => { maybeSingle: () => Promise<{ error: { message: string } | null }> }
+      }
+    })
       .insert({
+        id: '00000000-0000-0000-0000-0000000000ff',
         user_id: bogusUser,
         customer_name: '__phoenix_probe__',
         customer_phone: '__probe__',
+        customer_address: '__probe__',
         status: 'pending',
       })
       .select('id')
