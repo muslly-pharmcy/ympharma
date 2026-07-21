@@ -9,7 +9,7 @@ export const PHARMACY = {
   taglineEn: 'Smart pharmaceutical care in Aden',
   description:
     'صيدلية المصلي — رعاية دوائية موثوقة في عدن مع مساعد ذكاء صناعي، صرف الوصفات، وتوصيل الأدوية.',
-  logo: '/favicon.svg',
+  logo: almoslyLogo.url,
   phone: '+967 777 000 000',
   whatsapp: '+967777000000',
   email: 'info@muslly.com',
