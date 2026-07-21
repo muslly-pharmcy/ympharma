@@ -35,6 +35,8 @@ export const catalogProductSchema = z.object({
   verified_at: z.string().nullable(),
   created_at: z.string(),
   updated_at: z.string(),
+  requires_prescription: z.boolean().default(false),
+  sbdma_official_price: z.number().nullable().optional(),
 })
 export type CatalogProduct = z.infer<typeof catalogProductSchema>
 

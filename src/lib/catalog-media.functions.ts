@@ -25,17 +25,18 @@ export const registerProductImage = createServerFn({ method: 'POST' })
       .maybeSingle()
     if (!product) throw new Error('المنتج غير موجود')
 
+    const insertRow = {
+      product_id: data.productId,
+      storage_bucket: 'product-images',
+      storage_path: data.storagePath,
+      kind: data.kind,
+      status: 'approved',
+      uploaded_by: context.userId,
+      metadata: data.altText ? { alt_text: data.altText } : {},
+    }
     const { data: inserted, error } = await context.supabase
       .from('catalog_product_media')
-      .insert({
-        product_id: data.productId,
-        storage_bucket: 'product-images',
-        storage_path: data.storagePath,
-        kind: data.kind,
-        status: 'approved',
-        alt_text: data.altText ?? null,
-        uploaded_by: context.userId,
-      })
+      .insert(insertRow as never)
       .select('id')
       .single()
     if (error) throw new Error(error.message)
