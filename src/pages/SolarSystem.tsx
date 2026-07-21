@@ -4,9 +4,11 @@ import { Link } from '@tanstack/react-router'
 import SunCore from '@/shared/components/SunCore'
 import PlanetCard from '@/shared/components/PlanetCard'
 import { getActivePlanets } from '@/data/planets'
-import { Sparkles, ScanLine, Pill, MessageCircle, Box } from 'lucide-react'
+import { Sparkles, ScanLine, Pill, MessageCircle, Box, Search } from 'lucide-react'
 import LoadingSpinner from '@/shared/components/LoadingSpinner'
 import { CosmicSearch } from '@/components/ai/CosmicSearch'
+import CategoriesGrid from '@/shared/components/home/CategoriesGrid'
+import TestimonialsSection from '@/shared/components/home/TestimonialsSection'
 import almoslyLogo from '@/assets/almosly-logo.png.asset.json'
 
 
@@ -141,6 +143,36 @@ export default function SolarSystem() {
         </motion.div>
 
 
+        {/* Quick site search → /search */}
+        <motion.form
+          action="/search"
+          method="get"
+          className="mb-6 flex items-center gap-2 rounded-2xl border border-primary/15 bg-white/80 p-2 shadow-sm backdrop-blur"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.22 }}
+        >
+          <Search className="mx-2 h-5 w-5 text-primary" />
+          <input
+            type="text"
+            name="q"
+            placeholder="ابحث عن دواء، منتج، أو خدمة..."
+            className="flex-1 bg-transparent px-2 py-2 text-sm outline-none"
+          />
+          <button
+            type="submit"
+            className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white"
+          >
+            بحث
+          </button>
+        </motion.form>
+
+        {/* Categories */}
+        <CategoriesGrid />
+
+
+
+
         {/* 3D Solar System */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -178,6 +210,10 @@ export default function SolarSystem() {
             ))}
           </div>
         </div>
+
+        {/* Customer testimonials */}
+        <TestimonialsSection />
+
 
         {/* Footer */}
         <motion.div 

@@ -9311,6 +9311,39 @@ export type Database = {
           },
         ]
       }
+      medical_requests: {
+        Row: {
+          created_at: string
+          full_name: string
+          id: string
+          note: string | null
+          phone: string
+          request_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          full_name: string
+          id?: string
+          note?: string | null
+          phone: string
+          request_type: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          id?: string
+          note?: string | null
+          phone?: string
+          request_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       medical_vault_files: {
         Row: {
           created_at: string
