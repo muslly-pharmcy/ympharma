@@ -5,9 +5,10 @@ import { useTheme } from '@/context/ThemeContext'
 import { useAI } from '@/context/AIContext'
 import { supabase } from '@/integrations/supabase/client'
 import { listCart } from '@/lib/cart.functions'
+import { ShopifyCartDrawer } from '@/components/shopify/CartDrawer'
 import {
   Sun, Moon, Bell, MessageSquare, LogOut, Shield, LogIn,
-  Stethoscope, Database, Search, ShoppingCart,
+  Stethoscope, Database, Search, ShoppingCart, Store,
 } from 'lucide-react'
 import { useState } from 'react'
 
