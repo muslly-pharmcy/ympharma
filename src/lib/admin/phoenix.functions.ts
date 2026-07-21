@@ -373,7 +373,7 @@ export const phoenixProbeGoldenPath = createServerFn({ method: 'GET' })
     return {
       catalogSearch: {
         ok: !catalog.error,
-        sampleName: catalog.data?.[0]?.name ?? null,
+        sampleName: (catalog.data?.[0] as { name?: string } | undefined)?.name ?? null,
         error: catalog.error?.message ?? null,
       },
       ordersHistory: {
