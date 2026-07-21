@@ -9457,9 +9457,16 @@ export type Database = {
           id: string
           items: Json
           notes: string | null
+          payment_method_code: string | null
+          payment_receipt_path: string | null
+          payment_status: string
+          shipping_fee: number
+          shipping_zone_id: string | null
           status: string
           subtotal: number | null
           total: number
+          updated_at: string
+          user_id: string | null
         }
         Insert: {
           branch_id?: string | null
@@ -9473,9 +9480,16 @@ export type Database = {
           id: string
           items?: Json
           notes?: string | null
+          payment_method_code?: string | null
+          payment_receipt_path?: string | null
+          payment_status?: string
+          shipping_fee?: number
+          shipping_zone_id?: string | null
           status?: string
           subtotal?: number | null
           total?: number
+          updated_at?: string
+          user_id?: string | null
         }
         Update: {
           branch_id?: string | null
@@ -9489,9 +9503,16 @@ export type Database = {
           id?: string
           items?: Json
           notes?: string | null
+          payment_method_code?: string | null
+          payment_receipt_path?: string | null
+          payment_status?: string
+          shipping_fee?: number
+          shipping_zone_id?: string | null
           status?: string
           subtotal?: number | null
           total?: number
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -9499,6 +9520,20 @@ export type Database = {
             columns: ["branch_id"]
             isOneToOne: false
             referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_payment_method_code_fkey"
+            columns: ["payment_method_code"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "orders_shipping_zone_id_fkey"
+            columns: ["shipping_zone_id"]
+            isOneToOne: false
+            referencedRelation: "shipping_zones"
             referencedColumns: ["id"]
           },
         ]
@@ -9960,6 +9995,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      payment_methods: {
+        Row: {
+          code: string
+          created_at: string
+          description_ar: string | null
+          id: string
+          instructions_ar: string | null
+          is_active: boolean
+          metadata: Json
+          name_ar: string
+          name_en: string | null
+          requires_receipt: boolean
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description_ar?: string | null
+          id?: string
+          instructions_ar?: string | null
+          is_active?: boolean
+          metadata?: Json
+          name_ar: string
+          name_en?: string | null
+          requires_receipt?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description_ar?: string | null
+          id?: string
+          instructions_ar?: string | null
+          is_active?: boolean
+          metadata?: Json
+          name_ar?: string
+          name_en?: string | null
+          requires_receipt?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       payment_transactions: {
         Row: {
@@ -11420,6 +11500,51 @@ export type Database = {
             referencedColumns: ["key"]
           },
         ]
+      }
+      shipping_zones: {
+        Row: {
+          code: string
+          created_at: string
+          currency: string
+          estimated_days: string | null
+          fee: number
+          id: string
+          is_active: boolean
+          name_ar: string
+          name_en: string | null
+          regions: string[]
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          currency?: string
+          estimated_days?: string | null
+          fee?: number
+          id?: string
+          is_active?: boolean
+          name_ar: string
+          name_en?: string | null
+          regions?: string[]
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          currency?: string
+          estimated_days?: string | null
+          fee?: number
+          id?: string
+          is_active?: boolean
+          name_ar?: string
+          name_en?: string | null
+          regions?: string[]
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       social_post_attempts: {
         Row: {
