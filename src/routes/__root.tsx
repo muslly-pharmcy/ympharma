@@ -31,27 +31,33 @@ export const Route = createRootRoute({
       { name: 'theme-color', content: '#005D4F' },
       { name: 'apple-mobile-web-app-capable', content: 'yes' },
       { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
-      { title: 'MUSLLY AI OS — Intelligent Pharmacy Operating System' },
+      { title: 'صيدلية المصلي — Al-Musalli Pharmacy | رعاية دوائية ذكية في عدن' },
       {
         name: 'description',
         content:
-          'MUSLLY AI OS is an AI-native pharmacy operating system for medication management, doctors, inventory, delivery, and analytics.',
+          'صيدلية المصلي في عدن — صرف الوصفات، توصيل الأدوية، دليل طبي، ومساعد ذكاء صناعي على مدار الساعة.',
       },
-      { property: 'og:title', content: 'MUSLLY AI OS' },
+      { property: 'og:title', content: 'صيدلية المصلي — Al-Musalli Pharmacy' },
       {
         property: 'og:description',
         content:
-          'AI-native operating system for pharmacies, doctors, and healthcare networks.',
+          'رعاية دوائية موثوقة في عدن مع مساعد ذكاء صناعي، صرف الوصفات، وتوصيل الأدوية.',
       },
+      { property: 'og:site_name', content: 'صيدلية المصلي' },
       { property: 'og:type', content: 'website' },
       { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:title', content: 'صيدلية المصلي — Al-Musalli Pharmacy' },
+      { name: 'twitter:description', content: 'رعاية دوائية ذكية في عدن.' },
+
     ],
     links: [
       { rel: 'stylesheet', href: appCss },
       { rel: 'manifest', href: '/manifest.webmanifest' },
+      { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
       { rel: 'apple-touch-icon', href: '/favicon.svg' },
     ],
   }),
+
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: RootNotFound,

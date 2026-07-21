@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import Navbar from '@/shared/components/Navbar'
+import { Footer } from '@/shared/components/Footer'
 import { useShopifyCartSync } from '@/hooks/useShopifyCartSync'
 
 interface MainLayoutProps {
@@ -10,9 +11,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
   useShopifyCartSync()
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <main className="pt-16 min-h-screen">{children}</main>
+      <main className="pt-16 flex-1">{children}</main>
+      <Footer />
     </div>
   )
 }

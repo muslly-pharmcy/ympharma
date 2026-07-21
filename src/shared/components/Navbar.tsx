@@ -55,14 +55,17 @@ export default function Navbar() {
     <nav className="fixed top-0 right-0 left-0 z-50 h-16 glass-panel border-b border-gray-200/50">
       <div className="h-full px-4 md:px-6 flex items-center justify-between max-w-[1920px] mx-auto">
         <Link to="/" className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
-            <span className="text-white text-xl font-bold">م</span>
-          </div>
-          <div className="hidden md:block">
-            <h1 className="text-lg font-bold text-gray-900 leading-tight">MUSLLY AI OS</h1>
-            <p className="text-xs text-gray-500">منصة التشغيل الصحية الوطنية</p>
+          <img
+            src="/favicon.svg"
+            alt="صيدلية المصلي"
+            className="w-10 h-10 rounded-xl bg-primary/5 p-1.5"
+          />
+          <div className="hidden md:block leading-tight">
+            <h1 className="text-base font-bold text-gray-900">صيدلية المصلي</h1>
+            <p className="text-[11px] text-gray-500">Al-Musalli Pharmacy · عدن</p>
           </div>
         </Link>
+
 
         <div className="hidden md:flex items-center gap-1 lg:gap-2">
           <Link
