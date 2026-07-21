@@ -32,6 +32,13 @@ export default function Navbar() {
   })
   const cartCount = cartItems?.reduce((n, it) => n + (it.quantity ?? 0), 0) ?? 0
 
+  const { data: isAdmin } = useQuery({
+    queryKey: ['is-admin'],
+    queryFn: () => isCurrentUserAdmin(),
+    enabled: isAuthenticated,
+    staleTime: 5 * 60_000,
+  })
+
   const displayName = (user?.user_metadata as { name?: string } | undefined)?.name ?? user?.email ?? ''
   const avatar =
     (user?.user_metadata as { avatar_url?: string } | undefined)?.avatar_url ??
