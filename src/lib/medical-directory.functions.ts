@@ -26,8 +26,8 @@ export type DirectorySupplier = {
   name: string
   legal_name: string | null
   code: string | null
-  contact: Record<string, unknown>
-  metadata: Record<string, unknown>
+  contact: unknown
+  metadata: unknown
   status: string
 }
 
