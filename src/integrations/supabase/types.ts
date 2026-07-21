@@ -2579,6 +2579,13 @@ export type Database = {
             referencedRelation: "catalog_products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "cart_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products"
+            referencedColumns: ["id"]
+          },
         ]
       }
       catalog_ai_signals: {
@@ -2636,6 +2643,13 @@ export type Database = {
             referencedRelation: "catalog_products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "catalog_ai_signals_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products"
+            referencedColumns: ["id"]
+          },
         ]
       }
       catalog_barcodes: {
@@ -2672,6 +2686,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "catalog_barcodes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products"
             referencedColumns: ["id"]
           },
         ]
@@ -2836,6 +2857,13 @@ export type Database = {
             referencedRelation: "catalog_products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "catalog_import_rows_matched_product_id_fkey"
+            columns: ["matched_product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products"
+            referencedColumns: ["id"]
+          },
         ]
       }
       catalog_product_aliases: {
@@ -2878,6 +2906,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "catalog_product_aliases_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products"
             referencedColumns: ["id"]
           },
         ]
@@ -2951,6 +2986,13 @@ export type Database = {
             referencedRelation: "catalog_products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "catalog_product_media_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products"
+            referencedColumns: ["id"]
+          },
         ]
       }
       catalog_products: {
@@ -2967,6 +3009,7 @@ export type Database = {
           dosage_form: string | null
           generic_name: string | null
           id: string
+          image_url: string | null
           is_public: boolean
           manufacturer: string | null
           manufacturer_country: string | null
@@ -2975,10 +3018,13 @@ export type Database = {
           name_en: string | null
           organization_id: string | null
           owner_org_id: string | null
+          pack_unit: string | null
           requires_prescription: boolean
           sbdma_official_price: number | null
           status: Database["public"]["Enums"]["catalog_status"]
+          store_code: string | null
           strength: string | null
+          supplier_name_text: string | null
           updated_at: string
           verified_at: string | null
           verified_by: string | null
@@ -2996,6 +3042,7 @@ export type Database = {
           dosage_form?: string | null
           generic_name?: string | null
           id?: string
+          image_url?: string | null
           is_public?: boolean
           manufacturer?: string | null
           manufacturer_country?: string | null
@@ -3004,10 +3051,13 @@ export type Database = {
           name_en?: string | null
           organization_id?: string | null
           owner_org_id?: string | null
+          pack_unit?: string | null
           requires_prescription?: boolean
           sbdma_official_price?: number | null
           status?: Database["public"]["Enums"]["catalog_status"]
+          store_code?: string | null
           strength?: string | null
+          supplier_name_text?: string | null
           updated_at?: string
           verified_at?: string | null
           verified_by?: string | null
@@ -3025,6 +3075,7 @@ export type Database = {
           dosage_form?: string | null
           generic_name?: string | null
           id?: string
+          image_url?: string | null
           is_public?: boolean
           manufacturer?: string | null
           manufacturer_country?: string | null
@@ -3033,10 +3084,13 @@ export type Database = {
           name_en?: string | null
           organization_id?: string | null
           owner_org_id?: string | null
+          pack_unit?: string | null
           requires_prescription?: boolean
           sbdma_official_price?: number | null
           status?: Database["public"]["Enums"]["catalog_status"]
+          store_code?: string | null
           strength?: string | null
+          supplier_name_text?: string | null
           updated_at?: string
           verified_at?: string | null
           verified_by?: string | null
@@ -6443,6 +6497,13 @@ export type Database = {
             referencedRelation: "catalog_products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "hc_prescription_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products"
+            referencedColumns: ["id"]
+          },
         ]
       }
       hc_prescription_notes: {
@@ -7207,6 +7268,13 @@ export type Database = {
             referencedRelation: "catalog_products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "insv2_claim_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products"
+            referencedColumns: ["id"]
+          },
         ]
       }
       insv2_claim_status_history: {
@@ -7822,6 +7890,13 @@ export type Database = {
             referencedRelation: "catalog_products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "inv_reservations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products"
+            referencedColumns: ["id"]
+          },
         ]
       }
       inv_stock_batches: {
@@ -7899,6 +7974,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_stock_batches_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products"
             referencedColumns: ["id"]
           },
           {
@@ -7989,6 +8071,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "inv_stock_movements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "inv_stock_movements_warehouse_id_fkey"
             columns: ["warehouse_id"]
             isOneToOne: false
@@ -8050,6 +8139,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_transfer_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products"
             referencedColumns: ["id"]
           },
           {
@@ -8713,10 +8809,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "invoice_line_items_matched_product_id_fkey"
+            columns: ["matched_product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "invoice_line_items_user_confirmed_product_id_fkey"
             columns: ["user_confirmed_product_id"]
             isOneToOne: false
             referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_line_items_user_confirmed_product_id_fkey"
+            columns: ["user_confirmed_product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products"
             referencedColumns: ["id"]
           },
         ]
@@ -10300,6 +10410,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "pn_pharmacy_stock_catalog_product_id_fkey"
+            columns: ["catalog_product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "pn_pharmacy_stock_pharmacy_id_fkey"
             columns: ["pharmacy_id"]
             isOneToOne: false
@@ -10360,6 +10477,13 @@ export type Database = {
             columns: ["catalog_product_id"]
             isOneToOne: false
             referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pn_transfer_requests_catalog_product_id_fkey"
+            columns: ["catalog_product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products"
             referencedColumns: ["id"]
           },
           {
@@ -11146,6 +11270,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_order_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products"
             referencedColumns: ["id"]
           },
         ]
@@ -11954,6 +12085,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sup_supplier_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products"
             referencedColumns: ["id"]
           },
           {
@@ -13093,6 +13231,99 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      store_products: {
+        Row: {
+          barcode: string | null
+          brand: string | null
+          category_id: string | null
+          dosage_form: string | null
+          generic_name: string | null
+          id: string | null
+          image_url: string | null
+          is_public: boolean | null
+          manufacturer: string | null
+          manufacturer_country: string | null
+          name: string | null
+          name_ar: string | null
+          name_en: string | null
+          organization_id: string | null
+          pack_unit: string | null
+          price: number | null
+          requires_prescription: boolean | null
+          status: Database["public"]["Enums"]["catalog_status"] | null
+          stock_balance: number | null
+          store_code: string | null
+          strength: string | null
+          supplier_name_text: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          barcode?: string | null
+          brand?: string | null
+          category_id?: string | null
+          dosage_form?: string | null
+          generic_name?: string | null
+          id?: string | null
+          image_url?: string | null
+          is_public?: boolean | null
+          manufacturer?: string | null
+          manufacturer_country?: string | null
+          name?: never
+          name_ar?: string | null
+          name_en?: string | null
+          organization_id?: string | null
+          pack_unit?: string | null
+          price?: number | null
+          requires_prescription?: boolean | null
+          status?: Database["public"]["Enums"]["catalog_status"] | null
+          stock_balance?: never
+          store_code?: string | null
+          strength?: string | null
+          supplier_name_text?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          barcode?: string | null
+          brand?: string | null
+          category_id?: string | null
+          dosage_form?: string | null
+          generic_name?: string | null
+          id?: string | null
+          image_url?: string | null
+          is_public?: boolean | null
+          manufacturer?: string | null
+          manufacturer_country?: string | null
+          name?: never
+          name_ar?: string | null
+          name_en?: string | null
+          organization_id?: string | null
+          pack_unit?: string | null
+          price?: number | null
+          requires_prescription?: boolean | null
+          status?: Database["public"]["Enums"]["catalog_status"] | null
+          stock_balance?: never
+          store_code?: string | null
+          strength?: string | null
+          supplier_name_text?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "catalog_products_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       unprocessed_agent_events: {
         Row: {
