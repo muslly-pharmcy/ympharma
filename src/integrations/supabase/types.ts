@@ -6856,6 +6856,63 @@ export type Database = {
         }
         Relationships: []
       }
+      image_generation_queue: {
+        Row: {
+          attempts: number
+          created_at: string
+          id: string
+          image_url: string | null
+          last_error: string | null
+          processed_at: string | null
+          product_id: string
+          requested_at: string
+          status: string
+          storage_path: string | null
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          last_error?: string | null
+          processed_at?: string | null
+          product_id: string
+          requested_at?: string
+          status?: string
+          storage_path?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          last_error?: string | null
+          processed_at?: string | null
+          product_id?: string
+          requested_at?: string
+          status?: string
+          storage_path?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "image_generation_queue_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "image_generation_queue_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "store_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       img_proxy_logs: {
         Row: {
           created_at: string
