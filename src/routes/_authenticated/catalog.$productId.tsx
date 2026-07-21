@@ -54,7 +54,7 @@ function ProductDetail() {
       </div>
     )
   }
-  const { product, barcodes, media } = data
+  const { product, barcodes } = data
   const barcodeRows = barcodes as unknown as CatalogBarcode[]
 
   return (
