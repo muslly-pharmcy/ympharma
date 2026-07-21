@@ -17,8 +17,11 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MissionControlRouteImport } from './routes/mission-control'
+import { Route as RequestRouteImport } from './routes/request'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as ShopRouteImport } from './routes/shop'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AuthenticatedAdminInventoryRouteImport } from './routes/_authenticated/admin-inventory'
@@ -112,14 +115,29 @@ const MissionControlRoute = MissionControlRouteImport.update({
   path: '/mission-control',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RequestRoute = RequestRouteImport.update({
+  id: '/request',
+  path: '/request',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ShopRoute = ShopRouteImport.update({
   id: '/shop',
   path: '/shop',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Char91DotmcpChar93ListToolsRoute =
@@ -424,8 +442,11 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/mcp': typeof McpRoute
   '/mission-control': typeof MissionControlRoute
+  '/request': typeof RequestRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin-inventory': typeof AuthenticatedAdminInventoryRoute
@@ -488,8 +509,11 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/mcp': typeof McpRoute
   '/mission-control': typeof MissionControlRoute
+  '/request': typeof RequestRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin-inventory': typeof AuthenticatedAdminInventoryRoute
@@ -554,8 +578,11 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/mcp': typeof McpRoute
   '/mission-control': typeof MissionControlRoute
+  '/request': typeof RequestRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/admin-inventory': typeof AuthenticatedAdminInventoryRoute
@@ -620,8 +647,11 @@ export interface FileRouteTypes {
     | '/contact'
     | '/mcp'
     | '/mission-control'
+    | '/request'
     | '/reset-password'
+    | '/search'
     | '/shop'
+    | '/sitemap.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin-inventory'
@@ -684,8 +714,11 @@ export interface FileRouteTypes {
     | '/contact'
     | '/mcp'
     | '/mission-control'
+    | '/request'
     | '/reset-password'
+    | '/search'
     | '/shop'
+    | '/sitemap.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin-inventory'
@@ -749,8 +782,11 @@ export interface FileRouteTypes {
     | '/contact'
     | '/mcp'
     | '/mission-control'
+    | '/request'
     | '/reset-password'
+    | '/search'
     | '/shop'
+    | '/sitemap.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/admin-inventory'
@@ -815,8 +851,11 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   McpRoute: typeof McpRoute
   MissionControlRoute: typeof MissionControlRoute
+  RequestRoute: typeof RequestRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  SearchRoute: typeof SearchRoute
   ShopRoute: typeof ShopRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   PlanetPlanetIdRoute: typeof PlanetPlanetIdRoute
@@ -887,6 +926,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionControlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/request': {
+      id: '/request'
+      path: '/request'
+      fullPath: '/request'
+      preLoaderRoute: typeof RequestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
@@ -894,11 +940,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/shop': {
       id: '/shop'
       path: '/shop'
       fullPath: '/shop'
       preLoaderRoute: typeof ShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.mcp/list-tools': {
@@ -1491,8 +1551,11 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   McpRoute: McpRoute,
   MissionControlRoute: MissionControlRoute,
+  RequestRoute: RequestRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  SearchRoute: SearchRoute,
   ShopRoute: ShopRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
