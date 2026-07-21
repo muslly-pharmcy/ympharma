@@ -55,19 +55,20 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="fixed top-0 right-0 left-0 z-50 h-16 glass-panel border-b border-gray-200/50">
-      <div className="h-full px-4 md:px-6 flex items-center justify-between max-w-[1920px] mx-auto">
-        <Link to="/" className="flex items-center gap-3">
+    <nav className="fixed top-0 right-0 left-0 z-50 h-16 glass-panel border-b border-primary/10">
+      <div className="h-full px-3 md:px-6 flex items-center justify-between gap-2 max-w-[1920px] mx-auto">
+        <Link to="/" className="flex min-w-0 items-center gap-2 md:gap-3 shrink">
           <img
             src={almoslyLogo.url}
             alt="صيدلية المصلي — Almosly Pharmacy"
-            className="h-11 w-auto object-contain"
+            className="h-10 w-10 md:h-12 md:w-12 shrink-0 object-contain"
           />
-          <div className="hidden md:block leading-tight">
-            <h1 className="text-base font-bold text-gray-900">صيدلية المصلي</h1>
-            <p className="text-[11px] text-gray-500">Almosly Pharmacy · عدن</p>
+          <div className="hidden md:block min-w-0 leading-tight">
+            <h1 className="truncate text-base font-bold text-gray-900">صيدلية المصلي</h1>
+            <p className="truncate text-[11px] text-gray-500">Almosly Pharmacy · عدن</p>
           </div>
         </Link>
+
 
 
 
