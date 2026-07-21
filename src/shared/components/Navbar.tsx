@@ -108,6 +108,14 @@ export default function Navbar() {
                 <MessageSquare className="w-5 h-5 text-primary" />
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-gold text-white text-[10px] rounded-full flex items-center justify-center font-bold">AI</span>
               </Link>
+              <Link to="/cart" className="p-2.5 rounded-xl hover:bg-gray-100 transition-colors relative" title="السلة">
+                <ShoppingCart className="w-5 h-5 text-gray-700" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-primary text-white text-[10px] rounded-full flex items-center justify-center font-bold">
+                    {cartCount > 99 ? '99+' : cartCount}
+                  </span>
+                )}
+              </Link>
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
                 className="p-2.5 rounded-xl hover:bg-gray-100 transition-colors relative"
