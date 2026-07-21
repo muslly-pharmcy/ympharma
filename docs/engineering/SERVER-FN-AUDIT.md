@@ -1,11 +1,11 @@
 # Server Function Auth Audit
 
-Generated: 2026-07-21T00:46:57.484Z
+Generated: 2026-07-21T00:55:24.411Z
 
 - Total server functions scanned: **154**
-- Protected by `requireSupabaseAuth`: **148/154**
+- Authenticated (`requireSupabaseAuth` **or** `getActor()`): **150/154**
 - With `inputValidator`: **132/154**
-- Unauthenticated (public): **6**
+- Unauthenticated (public endpoints): **4**
 
 > Any function without `requireSupabaseAuth` is a public endpoint on the deployed site. Confirm each is intentionally public (health checks, public reads via `TO anon` RLS, marketing forms with signature/rate-limit guards) or add the middleware.
 
@@ -15,8 +15,6 @@ Generated: 2026-07-21T00:46:57.484Z
 - src/lib/catalog.functions.ts :: getProduct (GET)
 - src/lib/catalog.functions.ts :: listCategories (GET)
 - src/lib/cosmic-search.functions.ts :: cosmicSearch (POST)
-- src/lib/purchasing.functions.ts :: listPurchaseOrders (GET)
-- src/lib/suppliers.functions.ts :: listSuppliers (GET)
 
 ## Full inventory
 
@@ -161,8 +159,8 @@ Generated: 2026-07-21T00:46:57.484Z
 | `src/lib/promotions.mutations.functions.ts` | `createCoupon` | POST | ✅ | actor | ✅ |
 | `src/lib/promotions.mutations.functions.ts` | `archiveCoupon` | POST | ✅ | actor | ✅ |
 | `src/lib/promotions.mutations.functions.ts` | `redeemCoupon` | POST | ✅ | actor | ✅ |
-| `src/lib/purchasing.functions.ts` | `listPurchaseOrders` | GET | ❌ | none | — |
-| `src/lib/purchasing.functions.ts` | `getPurchaseOrder` | GET | ✅ | actor | ✅ |
+| `src/lib/purchasing.functions.ts` | `listPurchaseOrders` | GET | ✅ | middleware | — |
+| `src/lib/purchasing.functions.ts` | `getPurchaseOrder` | GET | ✅ | middleware | ✅ |
 | `src/lib/purchasing.functions.ts` | `createPurchaseOrder` | POST | ✅ | actor | ✅ |
 | `src/lib/purchasing.functions.ts` | `updatePurchaseOrder` | POST | ✅ | actor | ✅ |
 | `src/lib/purchasing.functions.ts` | `submitPurchaseOrder` | POST | ✅ | actor | ✅ |
@@ -173,6 +171,6 @@ Generated: 2026-07-21T00:46:57.484Z
 | `src/lib/sbdma-import.functions.ts` | `commitSbdmaImport` | POST | ✅ | middleware | ✅ |
 | `src/lib/sbdma-import.functions.ts` | `listSbdmaImportJobs` | GET | ✅ | middleware | — |
 | `src/lib/sbdma-import.functions.ts` | `getSbdmaImportJob` | GET | ✅ | middleware | ✅ |
-| `src/lib/suppliers.functions.ts` | `listSuppliers` | GET | ❌ | none | — |
+| `src/lib/suppliers.functions.ts` | `listSuppliers` | GET | ✅ | middleware | — |
 | `src/lib/suppliers.mutations.functions.ts` | `createSupplier` | POST | ✅ | actor | ✅ |
 | `src/lib/suppliers.mutations.functions.ts` | `updateSupplier` | POST | ✅ | actor | ✅ |
