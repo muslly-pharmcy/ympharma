@@ -26,6 +26,10 @@ function StoreProductPage() {
   const { data: item, isLoading, error } = useQuery({
     queryKey: ['store', 'product', code],
     queryFn: () => fetchOne({ data: { code } }),
+    staleTime: 60_000,
+    gcTime: 24 * 60 * 60 * 1000,
+    refetchOnReconnect: true,
+    placeholderData: (prev) => prev,
   })
 
   const add = useMutation({
