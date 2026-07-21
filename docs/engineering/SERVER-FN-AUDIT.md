@@ -8,6 +8,8 @@ Generated: 2026-07-21T00:55:24.411Z
 - Unauthenticated (public endpoints): **4**
 
 > Any function without `requireSupabaseAuth` is a public endpoint on the deployed site. Confirm each is intentionally public (health checks, public reads via `TO anon` RLS, marketing forms with signature/rate-limit guards) or add the middleware.
+>
+> **Wave R1.2 completed 2026-07-21:** the 4 remaining unauthenticated functions are all *Public by design* with server-enforced gates. See [`WAVE-R1.2-PUBLIC-FUNCTION-REVIEW.md`](./WAVE-R1.2-PUBLIC-FUNCTION-REVIEW.md) for per-function verdict and evidence. No grey-area endpoints remain.
 
 ## ⚠ Unauthenticated server functions
 
