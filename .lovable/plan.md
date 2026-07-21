@@ -1,55 +1,44 @@
-# Track A + D — Reality-Adjusted Plan
 
-Chief, I have to push back on the two snippets you pasted before we commit them. Then here is what I will actually build.
+# Reality Check + Wave R1.3 Plan
 
-## What I am rejecting (and why)
+## 1. لماذا لن أنفّذ مقتطف "Unified Broadcast Engine" كما هو
 
-**1. The pasted `Header.tsx` is broken.**
-- Every JSX tag body is empty (`<motion.header>` / `<div>` open with no children). Copy-pasting it would render nothing and break the build.
-- We already have a working `src/shared/components/Navbar.tsx` wired to `AuthContext`, `ThemeContext`, `AIContext`, sign-out flow, and a `/mission-control` link. Replacing it with a stub loses real functionality.
-- The "teal snake" logo file was never actually uploaded in this session (no image asset in the codebase, no upload in this turn). I will not fabricate a logo path.
+المقتطف الأخير يحمل توقيع "AI مساعد" لا يعرف مشروعنا. الأخطاء الجوهرية:
 
-**2. The pasted `security-scanner.ts` is theater, not an audit.**
-- It hard-codes 5 function names into an array and `console.log`s that each was "verified". It never opens a file, never parses AST, never checks middleware. It would give a green report even if every function was unprotected.
-- A real audit belongs at build time (ripgrep over `src/lib/*.functions.ts`), not as a runtime function shipped to users.
+- `import { createServerFn } from '@tanstack/start'` — مشروعنا يستخدم `@tanstack/react-start`.
+- `requireSupabaseAuth()` **middleware** لا يُستدعى كدالة داخل الـ handler؛ يجب تسلسله عبر `.middleware([requireSupabaseAuth])`.
+- استيراد وهمي: `@/lib/auth/guards.server` غير موجود، و `brainKernel.generate(...)` غير موجود — الموجود فعلياً هو `dispatch(actor, ...)` في `src/lib/ai/runtime/kernel.server.ts` ويتطلب `Actor` مع `organizationId` و `correlationId`.
+- `Buffer.from(...)` في Worker runtime — يعمل مع `nodejs_compat` لكن الأنقى استعمال `btoa` أو `TextEncoder`.
+- Facebook/Meta و WhatsApp عبر Twilio: **لا توكنات محفوظة حالياً** — لا `TWILIO_ACCOUNT_SID` ولا `FB_PAGE_ACCESS_TOKEN` في الأسرار. أي كود إرسال الآن سيرمي `Missing …` في الإنتاج.
+- `To: 'whatsapp:+967XXXXXXXXX'` رقم Placeholder — سنكسر تسليم الرسائل.
+- كود الـ Header يحتوي HTML entity artifacts (كتلة JSX منقوصة) ولن يُترجم أصلاً.
 
-## What I will build instead
+**الاستنتاج:** نعتمد توصيتك الحقيقية في نفس الرسالة — إغلاق R1.3 و R1.4 أولاً، وتأجيل Tracks B/C حتى وصول مفاتيح Meta/Twilio.
 
-### Track A — Enhance the existing Navbar (no rewrite)
+## 2. Wave R1.3 — Authorization & Tenant Audit (النطاق المعتمَد)
 
-Edit `src/shared/components/Navbar.tsx` only. Keep every current feature. Add a middle nav cluster (visible on `md:` and up, collapsed on mobile) with real routes we already ship:
+**الهدف:** الإجابة عن سؤال "المستخدم مصادق، لكن هل مخوّل لهذه البيانات؟" لكل واحدة من الـ 150 دالة المحمية.
 
-| Label | Route | Icon |
-|---|---|---|
-| الدليل الطبي | `/medical-directory` | `Stethoscope` |
-| هيئة الأدوية | `/sbdma-import` (admin gated by route) | `Database` |
-| الكتالوج | `/catalog` | `Search` |
-| السلة | `/cart` *(new tiny route, see below)* | `ShoppingCart` |
+### التسليمات
+1. **`scripts/audit-authorization.mjs`** — تحليل ثابت لكل `*.functions.ts` يستخرج لكل دالة:
+   - وجود `.middleware([requireSupabaseAuth])`.
+   - هل تستخدم `context.supabase` (RLS-scoped) أم `supabaseAdmin` (bypass RLS)؟
+   - هل يوجد `organization_id` filter صريح في الاستعلام؟
+   - هل تعتمد فقط على RLS، أم على فحص دور (`context.claims`, `has_role`) أيضاً؟
+2. **`docs/engineering/WAVE-R1.3-AUTHZ-AUDIT.md`** — جدول قرار لكل دالة بالحالات:
+   - ✅ RLS-only (السياسة تكفي — موثّق أي جدول/سياسة).
+   - ✅ RLS + role check (least-privilege موثّق).
+   - ⚠️ Admin bypass legitimate (مبرَّر — trigger/migration/DLQ).
+   - ❌ Tenant leak risk (تصحيح مطلوب).
+3. **إصلاحات موضعية فقط** للفئة ❌ (سنطرحها في PR منفصل بعد المراجعة، لا في هذه الموجة).
 
-Cart badge count reads from `cart_items` via a small `useQuery` that calls existing `listCart` in `src/lib/cart.functions.ts` (already authenticated). No count shown when signed out.
+### حدود صارمة (Non-Goals لهذه الموجة)
+- لا تعديل مخطط قاعدة البيانات.
+- لا تغيير على منطق أعمال أو UI.
+- لا يُعاد كتابة أي دالة إلا لسدّ تسرّب مؤكَّد (وسيُذكر منفصلاً في التقرير).
 
-**Logo:** until you upload the teal-snake artwork, keep the current gradient "م" mark. As soon as you drop the image into chat I will replace it in a one-line follow-up and swap the wordmark colors to match the logo's teal. No placeholder image will be invented.
+## 3. الخطوة التالية بعد R1.3
+- **R1.4 — Contract Audit** (Zod, error taxonomy, correlation IDs, idempotency, pagination) عبر نفس منهجية السكربت الثابت.
+- Tracks B/C يبقيان معلَّقَين حتى يضع Chief التوكنات (`TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_NUMBER`, `FB_PAGE_ACCESS_TOKEN`, `FB_PAGE_ID`) عبر Lovable Secrets — عندها سنفتحهما بتصميم Webhook-first كما اقترحت.
 
-### Track D — Real self-audit (build-time, not runtime)
-
-Add `scripts/audit-server-fns.mjs` + `docs/engineering/SERVER-FN-AUDIT.md`:
-
-- Script walks `src/lib/**/*.functions.ts`, parses each `createServerFn(...)` chain, and reports for every exported server fn:
-  - Has `.middleware([requireSupabaseAuth])`? yes/no
-  - Has `.inputValidator(...)`? yes/no
-  - Method (GET/POST)
-- Writes a Markdown table to `docs/engineering/SERVER-FN-AUDIT.md` with a summary line (`X/Y protected`) and lists any unauthenticated fns explicitly, so unprotected endpoints cannot hide behind a hard-coded whitelist.
-- Runnable with `node scripts/audit-server-fns.mjs`; no runtime shipping, no fake dashboard.
-
-Deliverable in this turn: the script, one generated report, and the doc.
-
-## Out of scope this turn
-
-- Tracks B (WhatsApp) and C (FB/IG autopilot) — I will not scaffold code paths for them until the keys land. Half-built social wiring would need to be reworked once we know which provider (Meta Cloud API vs UltraMsg) you actually pick.
-- No `/settings` change, no `_authenticated` route changes, no DB migration.
-
-## Confirm before I switch to build
-
-Two quick decisions:
-1. **Cart route** — OK to add a minimal `src/routes/_authenticated/cart.tsx` that lists `cart_items` (view only, remove-item button), so the navbar cart badge links somewhere real? Or skip the page and have the badge open a dropdown instead?
-2. **Logo** — do you want to (a) ship the navbar update now with current "م" mark and swap the logo later, or (b) wait until you upload the teal-snake PNG so we do it in one shipment?
+**الطلب:** اعتمد Wave R1.3 بهذا النطاق لأبدأ التنفيذ مباشرة.
