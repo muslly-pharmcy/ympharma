@@ -199,13 +199,11 @@ function OrderDetailPage() {
           <ol className="space-y-2">
             {history.map((h) => (
               <li
-                key={(h as { id: string }).id}
+                key={h.id}
                 className="flex justify-between text-xs text-gray-600"
               >
-                <span>{statusMap[(h as { status: string }).status] ?? (h as { status: string }).status}</span>
-                <span>
-                  {new Date((h as { changed_at: string }).changed_at).toLocaleString('ar-EG')}
-                </span>
+                <span>{statusMap[h.status] ?? h.status}</span>
+                <span>{new Date(h.created_at).toLocaleString('ar-EG')}</span>
               </li>
             ))}
           </ol>
