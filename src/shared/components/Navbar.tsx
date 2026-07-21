@@ -110,7 +110,7 @@ export default function Navbar() {
             {isDark ? <Sun className="w-5 h-5 text-gold" /> : <Moon className="w-5 h-5 text-gray-600" />}
           </button>
 
-          {isAuthenticated ? (
+          {isAuthenticated && (
             <>
               <Link to="/ai-chat" className="p-2.5 rounded-xl hover:bg-gray-100 transition-colors relative" title="المحادثة الذكية">
                 <MessageSquare className="w-5 h-5 text-primary" />
@@ -124,9 +124,15 @@ export default function Navbar() {
                   </span>
                 )}
               </Link>
-              <div className="relative" title="سلة المتجر">
-                <ShopifyCartDrawer />
-              </div>
+            </>
+          )}
+
+          <div className="relative" title="سلة المتجر">
+            <ShopifyCartDrawer />
+          </div>
+
+          {isAuthenticated ? (
+            <>
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
                 className="p-2.5 rounded-xl hover:bg-gray-100 transition-colors relative"
