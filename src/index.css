@@ -6,7 +6,7 @@
   --color-secondary: #0F766E;
   --color-gold: #C9A227;
   --color-gold-600: #a8871e;
-  --color-background: #F4F7F6;
+  --color-background: #D9EEEB;
   --color-surface: #FFFFFF;
   --color-surface-dark: #1A1A2E;
 }
@@ -17,7 +17,7 @@
   --color-primary: #005D4F;
   --color-secondary: #0F766E;
   --color-gold: #C9A227;
-  --color-background: #F4F7F6;
+  --color-background: #D9EEEB;
   --color-surface: #FFFFFF;
   --color-surface-dark: #1A1A2E;
 }
@@ -27,7 +27,8 @@
 }
 
 body {
-  background-color: #F4F7F6;
+  background-color: #D9EEEB;
+
   color: #111827;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

@@ -7,11 +7,13 @@ import { supabase } from '@/integrations/supabase/client'
 import { listCart } from '@/lib/cart.functions'
 import { isCurrentUserAdmin } from '@/lib/admin-orders.functions'
 import { ShopifyCartDrawer } from '@/components/shopify/CartDrawer'
+import almoslyLogo from '@/assets/almosly-logo.png.asset.json'
 import {
   Sun, Moon, Bell, MessageSquare, LogOut, Shield, LogIn,
   Stethoscope, Database, Search, ShoppingCart, Store, Sparkles, ClipboardList,
 } from 'lucide-react'
 import { useState } from 'react'
+
 
 export default function Navbar() {
   const { user, isAuthenticated } = useAuth()
@@ -42,7 +44,8 @@ export default function Navbar() {
   const displayName = (user?.user_metadata as { name?: string } | undefined)?.name ?? user?.email ?? ''
   const avatar =
     (user?.user_metadata as { avatar_url?: string } | undefined)?.avatar_url ??
-    `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id ?? 'guest'}`
+    `https://api.dicebear.com/7.x/personas/svg?seed=${user?.id ?? 'guest'}&backgroundColor=D9EEEB&clothingColor=0F766E&hair=short01&facialHair=none&body=squared`
+
 
   async function handleSignOut() {
     await queryClient.cancelQueries()
@@ -56,15 +59,16 @@ export default function Navbar() {
       <div className="h-full px-4 md:px-6 flex items-center justify-between max-w-[1920px] mx-auto">
         <Link to="/" className="flex items-center gap-3">
           <img
-            src="/favicon.svg"
-            alt="صيدلية المصلي"
-            className="w-10 h-10 rounded-xl bg-primary/5 p-1.5"
+            src={almoslyLogo.url}
+            alt="صيدلية المصلي — Almosly Pharmacy"
+            className="h-11 w-auto object-contain"
           />
           <div className="hidden md:block leading-tight">
             <h1 className="text-base font-bold text-gray-900">صيدلية المصلي</h1>
-            <p className="text-[11px] text-gray-500">Al-Musalli Pharmacy · عدن</p>
+            <p className="text-[11px] text-gray-500">Almosly Pharmacy · عدن</p>
           </div>
         </Link>
+
 
 
         <div className="hidden md:flex items-center gap-1 lg:gap-2">

@@ -1,7 +1,10 @@
+import almoslyLogo from '@/assets/almosly-logo.png.asset.json'
+
 // Central pharmacy branding — single source of truth for name, logo, and contact info.
 export const PHARMACY = {
   nameAr: 'صيدلية المصلي',
-  nameEn: 'Al-Musalli Pharmacy',
+  nameEn: 'Almosly Pharmacy',
+
   tagline: 'رعاية دوائية ذكية في عدن',
   taglineEn: 'Smart pharmaceutical care in Aden',
   description:
