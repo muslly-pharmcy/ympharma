@@ -28,6 +28,7 @@ import { Route as AuthenticatedCouponsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated/customers'
 import { Route as AuthenticatedDispensesRouteImport } from './routes/_authenticated/dispenses'
 import { Route as AuthenticatedDoctorsRouteImport } from './routes/_authenticated/doctors'
+import { Route as AuthenticatedInventoryChatRouteImport } from './routes/_authenticated/inventory-chat'
 import { Route as AuthenticatedLoyaltyRouteImport } from './routes/_authenticated/loyalty'
 import { Route as AuthenticatedMedicalDirectoryRouteImport } from './routes/_authenticated/medical-directory'
 import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated/orders'
@@ -37,6 +38,7 @@ import { Route as AuthenticatedPurchaseOrdersRouteImport } from './routes/_authe
 import { Route as AuthenticatedRewardsRouteImport } from './routes/_authenticated/rewards'
 import { Route as AuthenticatedSbdmaImportRouteImport } from './routes/_authenticated/sbdma-import'
 import { Route as AuthenticatedSegmentsRouteImport } from './routes/_authenticated/segments'
+import { Route as AuthenticatedStoreRouteImport } from './routes/_authenticated/store'
 import { Route as AuthenticatedSuppliersRouteImport } from './routes/_authenticated/suppliers'
 import { Route as AuthenticatedVisionLabRouteImport } from './routes/_authenticated/vision-lab'
 import { Route as AuthenticatedWarehousesRouteImport } from './routes/_authenticated/warehouses'
@@ -62,6 +64,7 @@ import { Route as AuthenticatedPrescriptionsPrescriptionIdRouteImport } from './
 import { Route as AuthenticatedPromotionsIndexRouteImport } from './routes/_authenticated/promotions.index'
 import { Route as AuthenticatedPromotionsIdRouteImport } from './routes/_authenticated/promotions.$id'
 import { Route as AuthenticatedPurchaseOrdersIdRouteImport } from './routes/_authenticated/purchase-orders.$id'
+import { Route as AuthenticatedStoreCodeRouteImport } from './routes/_authenticated/store.$code'
 import { Route as ApiPublicCspReportRouteImport } from './routes/api/public/csp-report'
 import { Route as AuthenticatedInsuranceClaimsClaimIdRouteImport } from './routes/_authenticated/insurance.claims_.$claimId'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -164,6 +167,12 @@ const AuthenticatedDoctorsRoute = AuthenticatedDoctorsRouteImport.update({
   path: '/doctors',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedInventoryChatRoute =
+  AuthenticatedInventoryChatRouteImport.update({
+    id: '/inventory-chat',
+    path: '/inventory-chat',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedLoyaltyRoute = AuthenticatedLoyaltyRouteImport.update({
   id: '/loyalty',
   path: '/loyalty',
@@ -211,6 +220,11 @@ const AuthenticatedSbdmaImportRoute =
 const AuthenticatedSegmentsRoute = AuthenticatedSegmentsRouteImport.update({
   id: '/segments',
   path: '/segments',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedStoreRoute = AuthenticatedStoreRouteImport.update({
+  id: '/store',
+  path: '/store',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSuppliersRoute = AuthenticatedSuppliersRouteImport.update({
@@ -356,6 +370,11 @@ const AuthenticatedPurchaseOrdersIdRoute =
     path: '/$id',
     getParentRoute: () => AuthenticatedPurchaseOrdersRoute,
   } as any)
+const AuthenticatedStoreCodeRoute = AuthenticatedStoreCodeRouteImport.update({
+  id: '/$code',
+  path: '/$code',
+  getParentRoute: () => AuthenticatedStoreRoute,
+} as any)
 const ApiPublicCspReportRoute = ApiPublicCspReportRouteImport.update({
   id: '/api/public/csp-report',
   path: '/api/public/csp-report',
@@ -397,6 +416,7 @@ export interface FileRoutesByFullPath {
   '/customers': typeof AuthenticatedCustomersRouteWithChildren
   '/dispenses': typeof AuthenticatedDispensesRouteWithChildren
   '/doctors': typeof AuthenticatedDoctorsRouteWithChildren
+  '/inventory-chat': typeof AuthenticatedInventoryChatRoute
   '/loyalty': typeof AuthenticatedLoyaltyRouteWithChildren
   '/medical-directory': typeof AuthenticatedMedicalDirectoryRoute
   '/orders': typeof AuthenticatedOrdersRouteWithChildren
@@ -406,6 +426,7 @@ export interface FileRoutesByFullPath {
   '/rewards': typeof AuthenticatedRewardsRoute
   '/sbdma-import': typeof AuthenticatedSbdmaImportRoute
   '/segments': typeof AuthenticatedSegmentsRoute
+  '/store': typeof AuthenticatedStoreRouteWithChildren
   '/suppliers': typeof AuthenticatedSuppliersRoute
   '/vision-lab': typeof AuthenticatedVisionLabRoute
   '/warehouses': typeof AuthenticatedWarehousesRoute
@@ -427,6 +448,7 @@ export interface FileRoutesByFullPath {
   '/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/promotions/$id': typeof AuthenticatedPromotionsIdRoute
   '/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
+  '/store/$code': typeof AuthenticatedStoreCodeRoute
   '/api/public/csp-report': typeof ApiPublicCspReportRoute
   '/analytics/': typeof AuthenticatedAnalyticsIndexRoute
   '/catalog/': typeof AuthenticatedCatalogIndexRoute
@@ -455,6 +477,7 @@ export interface FileRoutesByTo {
   '/customers': typeof AuthenticatedCustomersRouteWithChildren
   '/dispenses': typeof AuthenticatedDispensesRouteWithChildren
   '/doctors': typeof AuthenticatedDoctorsRouteWithChildren
+  '/inventory-chat': typeof AuthenticatedInventoryChatRoute
   '/loyalty': typeof AuthenticatedLoyaltyRouteWithChildren
   '/medical-directory': typeof AuthenticatedMedicalDirectoryRoute
   '/orders': typeof AuthenticatedOrdersRouteWithChildren
@@ -464,6 +487,7 @@ export interface FileRoutesByTo {
   '/rewards': typeof AuthenticatedRewardsRoute
   '/sbdma-import': typeof AuthenticatedSbdmaImportRoute
   '/segments': typeof AuthenticatedSegmentsRoute
+  '/store': typeof AuthenticatedStoreRouteWithChildren
   '/suppliers': typeof AuthenticatedSuppliersRoute
   '/vision-lab': typeof AuthenticatedVisionLabRoute
   '/warehouses': typeof AuthenticatedWarehousesRoute
@@ -485,6 +509,7 @@ export interface FileRoutesByTo {
   '/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/promotions/$id': typeof AuthenticatedPromotionsIdRoute
   '/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
+  '/store/$code': typeof AuthenticatedStoreCodeRoute
   '/api/public/csp-report': typeof ApiPublicCspReportRoute
   '/analytics': typeof AuthenticatedAnalyticsIndexRoute
   '/catalog': typeof AuthenticatedCatalogIndexRoute
@@ -515,6 +540,7 @@ export interface FileRoutesById {
   '/_authenticated/customers': typeof AuthenticatedCustomersRouteWithChildren
   '/_authenticated/dispenses': typeof AuthenticatedDispensesRouteWithChildren
   '/_authenticated/doctors': typeof AuthenticatedDoctorsRouteWithChildren
+  '/_authenticated/inventory-chat': typeof AuthenticatedInventoryChatRoute
   '/_authenticated/loyalty': typeof AuthenticatedLoyaltyRouteWithChildren
   '/_authenticated/medical-directory': typeof AuthenticatedMedicalDirectoryRoute
   '/_authenticated/orders': typeof AuthenticatedOrdersRouteWithChildren
@@ -524,6 +550,7 @@ export interface FileRoutesById {
   '/_authenticated/rewards': typeof AuthenticatedRewardsRoute
   '/_authenticated/sbdma-import': typeof AuthenticatedSbdmaImportRoute
   '/_authenticated/segments': typeof AuthenticatedSegmentsRoute
+  '/_authenticated/store': typeof AuthenticatedStoreRouteWithChildren
   '/_authenticated/suppliers': typeof AuthenticatedSuppliersRoute
   '/_authenticated/vision-lab': typeof AuthenticatedVisionLabRoute
   '/_authenticated/warehouses': typeof AuthenticatedWarehousesRoute
@@ -545,6 +572,7 @@ export interface FileRoutesById {
   '/_authenticated/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/_authenticated/promotions/$id': typeof AuthenticatedPromotionsIdRoute
   '/_authenticated/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
+  '/_authenticated/store/$code': typeof AuthenticatedStoreCodeRoute
   '/api/public/csp-report': typeof ApiPublicCspReportRoute
   '/_authenticated/analytics/': typeof AuthenticatedAnalyticsIndexRoute
   '/_authenticated/catalog/': typeof AuthenticatedCatalogIndexRoute
@@ -575,6 +603,7 @@ export interface FileRouteTypes {
     | '/customers'
     | '/dispenses'
     | '/doctors'
+    | '/inventory-chat'
     | '/loyalty'
     | '/medical-directory'
     | '/orders'
@@ -584,6 +613,7 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/sbdma-import'
     | '/segments'
+    | '/store'
     | '/suppliers'
     | '/vision-lab'
     | '/warehouses'
@@ -605,6 +635,7 @@ export interface FileRouteTypes {
     | '/prescriptions/$prescriptionId'
     | '/promotions/$id'
     | '/purchase-orders/$id'
+    | '/store/$code'
     | '/api/public/csp-report'
     | '/analytics/'
     | '/catalog/'
@@ -633,6 +664,7 @@ export interface FileRouteTypes {
     | '/customers'
     | '/dispenses'
     | '/doctors'
+    | '/inventory-chat'
     | '/loyalty'
     | '/medical-directory'
     | '/orders'
@@ -642,6 +674,7 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/sbdma-import'
     | '/segments'
+    | '/store'
     | '/suppliers'
     | '/vision-lab'
     | '/warehouses'
@@ -663,6 +696,7 @@ export interface FileRouteTypes {
     | '/prescriptions/$prescriptionId'
     | '/promotions/$id'
     | '/purchase-orders/$id'
+    | '/store/$code'
     | '/api/public/csp-report'
     | '/analytics'
     | '/catalog'
@@ -692,6 +726,7 @@ export interface FileRouteTypes {
     | '/_authenticated/customers'
     | '/_authenticated/dispenses'
     | '/_authenticated/doctors'
+    | '/_authenticated/inventory-chat'
     | '/_authenticated/loyalty'
     | '/_authenticated/medical-directory'
     | '/_authenticated/orders'
@@ -701,6 +736,7 @@ export interface FileRouteTypes {
     | '/_authenticated/rewards'
     | '/_authenticated/sbdma-import'
     | '/_authenticated/segments'
+    | '/_authenticated/store'
     | '/_authenticated/suppliers'
     | '/_authenticated/vision-lab'
     | '/_authenticated/warehouses'
@@ -722,6 +758,7 @@ export interface FileRouteTypes {
     | '/_authenticated/prescriptions/$prescriptionId'
     | '/_authenticated/promotions/$id'
     | '/_authenticated/purchase-orders/$id'
+    | '/_authenticated/store/$code'
     | '/api/public/csp-report'
     | '/_authenticated/analytics/'
     | '/_authenticated/catalog/'
@@ -888,6 +925,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDoctorsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/inventory-chat': {
+      id: '/_authenticated/inventory-chat'
+      path: '/inventory-chat'
+      fullPath: '/inventory-chat'
+      preLoaderRoute: typeof AuthenticatedInventoryChatRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/loyalty': {
       id: '/_authenticated/loyalty'
       path: '/loyalty'
@@ -949,6 +993,13 @@ declare module '@tanstack/react-router' {
       path: '/segments'
       fullPath: '/segments'
       preLoaderRoute: typeof AuthenticatedSegmentsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/store': {
+      id: '/_authenticated/store'
+      path: '/store'
+      fullPath: '/store'
+      preLoaderRoute: typeof AuthenticatedStoreRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/suppliers': {
@@ -1126,6 +1177,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPurchaseOrdersIdRouteImport
       parentRoute: typeof AuthenticatedPurchaseOrdersRoute
     }
+    '/_authenticated/store/$code': {
+      id: '/_authenticated/store/$code'
+      path: '/$code'
+      fullPath: '/store/$code'
+      preLoaderRoute: typeof AuthenticatedStoreCodeRouteImport
+      parentRoute: typeof AuthenticatedStoreRoute
+    }
     '/api/public/csp-report': {
       id: '/api/public/csp-report'
       path: '/api/public/csp-report'
@@ -1276,6 +1334,17 @@ const AuthenticatedPurchaseOrdersRouteWithChildren =
     AuthenticatedPurchaseOrdersRouteChildren,
   )
 
+interface AuthenticatedStoreRouteChildren {
+  AuthenticatedStoreCodeRoute: typeof AuthenticatedStoreCodeRoute
+}
+
+const AuthenticatedStoreRouteChildren: AuthenticatedStoreRouteChildren = {
+  AuthenticatedStoreCodeRoute: AuthenticatedStoreCodeRoute,
+}
+
+const AuthenticatedStoreRouteWithChildren =
+  AuthenticatedStoreRoute._addFileChildren(AuthenticatedStoreRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminInventoryRoute: typeof AuthenticatedAdminInventoryRoute
   AuthenticatedAiRuntimeRoute: typeof AuthenticatedAiRuntimeRoute
@@ -1286,6 +1355,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRouteWithChildren
   AuthenticatedDispensesRoute: typeof AuthenticatedDispensesRouteWithChildren
   AuthenticatedDoctorsRoute: typeof AuthenticatedDoctorsRouteWithChildren
+  AuthenticatedInventoryChatRoute: typeof AuthenticatedInventoryChatRoute
   AuthenticatedLoyaltyRoute: typeof AuthenticatedLoyaltyRouteWithChildren
   AuthenticatedMedicalDirectoryRoute: typeof AuthenticatedMedicalDirectoryRoute
   AuthenticatedOrdersRoute: typeof AuthenticatedOrdersRouteWithChildren
@@ -1295,6 +1365,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRewardsRoute: typeof AuthenticatedRewardsRoute
   AuthenticatedSbdmaImportRoute: typeof AuthenticatedSbdmaImportRoute
   AuthenticatedSegmentsRoute: typeof AuthenticatedSegmentsRoute
+  AuthenticatedStoreRoute: typeof AuthenticatedStoreRouteWithChildren
   AuthenticatedSuppliersRoute: typeof AuthenticatedSuppliersRoute
   AuthenticatedVisionLabRoute: typeof AuthenticatedVisionLabRoute
   AuthenticatedWarehousesRoute: typeof AuthenticatedWarehousesRoute
@@ -1319,6 +1390,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCustomersRoute: AuthenticatedCustomersRouteWithChildren,
   AuthenticatedDispensesRoute: AuthenticatedDispensesRouteWithChildren,
   AuthenticatedDoctorsRoute: AuthenticatedDoctorsRouteWithChildren,
+  AuthenticatedInventoryChatRoute: AuthenticatedInventoryChatRoute,
   AuthenticatedLoyaltyRoute: AuthenticatedLoyaltyRouteWithChildren,
   AuthenticatedMedicalDirectoryRoute: AuthenticatedMedicalDirectoryRoute,
   AuthenticatedOrdersRoute: AuthenticatedOrdersRouteWithChildren,
@@ -1329,6 +1401,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRewardsRoute: AuthenticatedRewardsRoute,
   AuthenticatedSbdmaImportRoute: AuthenticatedSbdmaImportRoute,
   AuthenticatedSegmentsRoute: AuthenticatedSegmentsRoute,
+  AuthenticatedStoreRoute: AuthenticatedStoreRouteWithChildren,
   AuthenticatedSuppliersRoute: AuthenticatedSuppliersRoute,
   AuthenticatedVisionLabRoute: AuthenticatedVisionLabRoute,
   AuthenticatedWarehousesRoute: AuthenticatedWarehousesRoute,
