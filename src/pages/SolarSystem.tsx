@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion'
 import { Suspense, lazy } from 'react'
+import { Link } from '@tanstack/react-router'
 import SunCore from '@/shared/components/SunCore'
 import PlanetCard from '@/shared/components/PlanetCard'
 import { getActivePlanets } from '@/data/planets'
-import { Sparkles, TrendingUp, Users, Package, Box } from 'lucide-react'
+import { Sparkles, ScanLine, Pill, MessageCircle, Box } from 'lucide-react'
 import LoadingSpinner from '@/shared/components/LoadingSpinner'
 import { CosmicSearch } from '@/components/ai/CosmicSearch'
 
@@ -12,12 +13,13 @@ const SolarSystem3D = lazy(() => import('@/shared/3d/SolarSystem3D'))
 export default function SolarSystem() {
   const planets = getActivePlanets()
 
-  const stats = [
-    { label: 'الطلبات اليوم', value: '156', change: '+12%', icon: TrendingUp, color: 'text-green-600', bg: 'bg-green-50' },
-    { label: 'العملاء النشطين', value: '2,847', change: '+5%', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'المنتجات', value: '4,521', change: '+23', icon: Package, color: 'text-purple-600', bg: 'bg-purple-50' },
-    { label: 'وكلاء الذكاء', value: '8', change: 'نشط', icon: Sparkles, color: 'text-gold', bg: 'bg-gold/10' },
+  const aiTools = [
+    { label: 'مسح الوصفة', desc: 'صوّر وصفتك', icon: ScanLine, color: 'text-blue-600', bg: 'bg-blue-50', to: '/vision-lab' },
+    { label: 'استشارة ذكية', desc: 'اسأل الصيدلي AI', icon: MessageCircle, color: 'text-green-600', bg: 'bg-green-50', to: '/ai-chat' },
+    { label: 'ابحث عن دواء', desc: 'كتالوج المنتجات', icon: Pill, color: 'text-purple-600', bg: 'bg-purple-50', to: '/shop' },
+    { label: 'تحليل ذكي', desc: 'وصفتك بلمسة', icon: Sparkles, color: 'text-gold', bg: 'bg-gold/10', to: '/ai-chat' },
   ]
+
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -75,24 +77,28 @@ export default function SolarSystem() {
 
 
 
-        {/* Quick Stats */}
+        {/* AI Tools for Customers */}
         <motion.div 
           className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          {stats.map((stat, i) => (
-            <div key={i} className="glass-panel rounded-2xl p-4 text-center">
-              <div className={`w-10 h-10 ${stat.bg} rounded-xl flex items-center justify-center mx-auto mb-2`}>
-                <stat.icon className={`w-5 h-5 ${stat.color}`} />
+          {aiTools.map((tool, i) => (
+            <Link
+              key={i}
+              to={tool.to}
+              className="glass-panel rounded-2xl p-4 text-center hover:scale-[1.03] transition-transform cursor-pointer"
+            >
+              <div className={`w-11 h-11 ${tool.bg} rounded-xl flex items-center justify-center mx-auto mb-2`}>
+                <tool.icon className={`w-5 h-5 ${tool.color}`} />
               </div>
-              <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-              <p className="text-xs text-gray-500">{stat.label}</p>
-              <span className={`text-xs font-medium ${stat.color}`}>{stat.change}</span>
-            </div>
+              <p className="text-sm font-bold text-gray-900">{tool.label}</p>
+              <p className="text-xs text-gray-500 mt-1">{tool.desc}</p>
+            </Link>
           ))}
         </motion.div>
+
 
         {/* 3D Solar System */}
         <motion.div
