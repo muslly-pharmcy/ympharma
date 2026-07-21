@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useDeferredValue, useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { listProducts, listCategories } from '@/lib/catalog.functions'
+import type { CatalogProduct } from '@/domain/catalog/schemas'
+
 import { Pill, Search } from 'lucide-react'
 import { z } from 'zod'
 
