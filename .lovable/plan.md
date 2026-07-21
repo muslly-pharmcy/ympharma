@@ -1,65 +1,120 @@
+## نظرة عامة
 
-## الهدف
+تنفيذ 4 محاور بالتوازي بناءً على إجاباتك:
 
-بدلاً من بناء نظام موازٍ (`store_products` + `/store/*`)، سنُثري البنية القائمة: **`catalog_products` + `/catalog` + `search_products`**. البيانات ستأتي عبر `/sbdma-import` الموجود. سنُظهر كل منتج ببطاقة تحوي **الصورة + السعر + المورد** مع زر "🤖 شرح بالذكاء" يستدعي أداة AI جديدة (`store_query`) تُلخّص كل ما يعرفه النظام عن الصنف. **تاريخ الانتهاء لن يُعرض في الواجهة** (يبقى في DB للاستخدامات الطبية الأخرى).
+1. **تحديث بيانات التواصل** (فوري)
+2. **استيراد كامل المخزون** (4654 صنف مع تجميع المكرر)
+3. **توليد صور Gemini لكل صنف** (مهمة خلفية طويلة)
+4. **كشف "ما هو في الداتابيس ولا يظهر"** (تقرير تدقيقي)
 
-## نطاق التغيير
+---
 
-### 1. قاعدة البيانات (migration واحد صغير)
-- التحقق من وجود `price_amount` / `image_url` في `catalog_products` (موجودان فعلياً: `price` وحقول media منفصلة عبر `catalog_product_media`).
-- إضافة عمود `retail_price numeric(15,3)` إن لم يوجد بديل مناسب — **نفحص أولاً**.
-- **لا يوجد جدول جديد**. RLS الحالية على `catalog_products` تكفي (3 سياسات موجودة).
-- **الاستيراد يستمر عبر `catalog_import_jobs` الموجود** — سنضيف mapping لعمود `القيمة/price` في `sbdma-import.functions.ts::analyzeSbdmaImport`.
+## 1) بيانات التواصل + فيسبوك
 
-### 2. Server Functions (توسيع لا استبدال)
-- **`src/lib/catalog.functions.ts`**: توسيع `listCatalogProducts` لإرجاع `price` + `primary_image_url` (join مع `catalog_product_media` حيث `is_primary=true`) + `supplier_name`. الاستعلامات تمر عبر `context.supabase` مع `requireSupabaseAuth` (كما هي الآن).
-- **`src/lib/catalog.functions.ts`**: إضافة `getProductAiSummary({ productId })` — تجمع بيانات المنتج + الرصيد الإجمالي من `inv_stock_batches` + بيانات SBDMA + المورد، تمرّرها إلى Kernel عبر أداة `store_query` وتُعيد نصاً عربياً.
+تحديث `src/shared/branding.ts`:
+- `phone`: `+967 782 878 280`
+- `whatsapp`: `+967782878280`
+- إضافة `facebookUrl` و `facebookBusinessId: '1170639849472726'` و `metaAssetId`
+- تحديث Navbar/Footer/Contact لعرض أيقونة فيسبوك تربط للصفحة العامة (وليس business.facebook.com الذي يتطلب تسجيل دخول للأدمن — الرابط اللي أرسلته هو لوحة إدارة، سأستنتج منه أن الصفحة العامة موجودة وأضع placeholder مع تنبيه لك لإرسال الرابط العام `facebook.com/...` إن أردت عرضه للزوار).
+- Meta tags: إضافة `og:see_also` و `article:publisher` بالإشارة إلى الصفحة.
 
-### 3. AI Tool جديدة: `store_query`
-- تسجيل في `src/lib/ai/tools.server.ts` + metadata في `src/lib/ai/runtime/tool-registry.server.ts` (capability: `read`, owner: `catalog`, timeout: 8s).
-- المدخلات: `productId` (uuid).
-- المخرجات: JSON منظم `{ name, price, stock_qty, supplier, category, generic_name, description }` — يُغذّي Kernel prompt.
-- تمر عبر `Safety Layer` + `Budget Engine` + `Capability Registry` (كأي أداة أخرى — لا استثناءات).
+**ملاحظة عن "صلاحية النشر على ميتا"**: الرابط اللي أرسلته هو Business Manager URL يفتح عندك أنت فقط. النشر التلقائي على Facebook/Instagram من الموقع يتطلب:
+- Facebook App + Long-Lived Page Access Token (يجب أن تنشئه في Meta for Developers)
+- تخزينه كـ secret في Cloud
 
-### 4. الواجهات (تعديل ملفات موجودة فقط)
-- **`src/routes/_authenticated/catalog.index.tsx`**: تحويل الجدول إلى شبكة بطاقات (grid). كل بطاقة: صورة (fallback: أيقونة `Pill` من lucide) + اسم + سعر بالريال اليمني + المورد + زر "التفاصيل".
-- **`src/routes/_authenticated/catalog.$productId.tsx`**: 
-  - إخفاء أي حقول انتهاء صلاحية من العرض (مع إبقائها في الـ query كي لا نكسر تكامل البيانات).
-  - إضافة قسم "🤖 شرح ذكي" بزر يستدعي `getProductAiSummary` ويعرض النتيجة في Card. حالة تحميل + `ErrorBoundary` الموجود.
-- **البحث**: `useDeferredValue` للـ debounce (كما طلب البرومبت).
+سأبني الـ endpoint (`/api/publish-facebook`) جاهزاً، لكن التفعيل الفعلي ينتظر توليد الـ Access Token منك.
 
-### 5. Storage (استعمال الموجود)
-- Bucket `product-images` **موجود بالفعل** (تم إنشاؤه في Supabase Storefront v1).
-- سياسات: قراءة عامة + كتابة authenticated (موجودة).
-- رفع الصور للمنتج يمر عبر `catalog-media.functions.ts` الموجود — **لن نُنشئ حل رفع جديد**.
+---
 
-## ما لن نفعله (صراحةً)
+## 2) استيراد 4654 صنف مع تجميع المكرر
 
-- ❌ لا `store_products` جديد.
-- ❌ لا `/store/*` routes جديدة.
-- ❌ لا `scripts/seed-store.ts` — نستخدم `/sbdma-import` الموجود مع محرك القرار MATCHED/NEW/AMBIGUOUS.
-- ❌ لا `(supabase as any)` — نستخدم `context.supabase` المُنمَّط من `requireSupabaseAuth`.
-- ❌ لا `admin/inventory` منفصل — التحرير موجود في `/warehouses`.
+**خطوات التنفيذ (script + migration):**
 
-## التسلسل
+1. **إعداد البنية التحتية (migration واحدة):**
+   - إنشاء `wh_warehouses` رئيسي: `"صيدلية المصلي — المخزن الرئيسي"` تحت المنظمة الحالية
+   - إضافة عمود `store_code_key` (unique index جزئي) للاستيراد idempotent
 
-1. Migration تحقق/إضافة `retail_price` إن لزم.
-2. توسيع `catalog.functions.ts` (list + AI summary).
-3. تسجيل `store_query` في Tool Registry + tools.server.
-4. تحديث `catalog.index.tsx` (بطاقات + بحث).
-5. تحديث `catalog.$productId.tsx` (زر شرح AI + إخفاء الانتهاء).
-6. تحديث `sbdma-import.functions.ts` لتضمين `price`.
-7. `bunx tsgo` نظيف قبل التسليم.
+2. **قراءة الإكسل عبر pandas** (`code--exec`):
+   - تطبيع أسماء الأصناف (إزالة أسماء الموردين من نهاية الاسم)
+   - **التجميع حسب `الكود`**: كل صنف = صف واحد في `catalog_products`
+   - جمع الأرصدة من موردين متعددين
+   - إسناد أقدم `تاريخ انتهاء` كتنبيه FEFO
+
+3. **إسناد الفئة**: تصنيف تلقائي بالكلمات المفتاحية (فوار → digestive، أقراص/كبسول عام → pain-fever، شراب أطفال → mother-baby، إلخ). الأصناف غير المصنفة تدخل فئة جديدة `"عام / General"`.
+
+4. **حساب السعر**: `القيمة ÷ الرصيد = تكلفة الوحدة` → `selling_price = round(cost × 1.25, 2)` (هامش 25% افتراضي — قابل للتعديل من `/admin-inventory`).
+
+5. **إدخال البيانات (batching عبر supabase--insert):**
+   - `catalog_products`: ~2500 صنف فريد متوقع (بعد التجميع)
+   - `inv_stock_batches`: صف لكل (product × supplier × expiry)
+   - كل الأصناف `status='published'` و `is_public=true` ليظهروا في `/shop`
+
+---
+
+## 3) توليد الصور عبر Gemini (مهمة خلفية)
+
+**⚠️ تنبيه أخير**: 4654 صورة × ~2 ثانية × credits = عملية تستغرق **~3-4 ساعات** وتستهلك **رصيد كبير** من AI credits. أنت وافقت — سأمضي، لكن سأبنيها كـ **queue** قابلة للإيقاف.
+
+**التصميم:**
+
+1. **جدول `image_generation_queue`** (migration):
+   - `product_id`, `status` (pending/processing/done/failed), `image_url`, `attempts`, `error`
+
+2. **Server function** `/api/generate-product-image` (POST): يأخذ `product_id`، يستدعي Gemini `google/gemini-2.5-flash-image` عبر AI Gateway مع prompt:
+   > *"Professional pharmaceutical product photo of [name_ar]. Clean white background, studio lighting, medical packaging, high detail, e-commerce style."*
+   - يحمّل الصورة الناتجة إلى Supabase Storage bucket `product-images`
+   - يحدّث `catalog_products.image_url`
+
+3. **Worker cron** كل 5 دقائق: يعالج 20 صنف من الطابور (لتجنب rate limits).
+
+4. **لوحة تحكم** `/admin-image-queue`: تعرض التقدم (X من 4654 مكتمل)، أزرار Pause/Resume/Retry-failed.
+
+**Fallback**: أي صنف يفشل توليده 3 مرات → يستخدم أيقونة الفئة الافتراضية.
+
+---
+
+## 4) تدقيق: "ما في الداتابيس ولا يظهر"
+
+سأنشئ `docs/data-visibility-audit.md` بعد فحص شامل. المرشحون الرئيسيون (من فهرس 200+ جدول):
+
+| المجال | الجداول | الوضع الحالي |
+|---|---|---|
+| المواعيد الطبية | `hc_appointments`, `hc_doctors`, `hc_specialties` | البيانات موجودة، لا توجد صفحة عامة للحجز |
+| التأمين الصحي | `insv2_plans`, `insv2_claims`, `ins_companies` | نظام كامل بدون واجهة |
+| Loyalty | `crm_loyalty_accounts`, `crm_reward_catalog` | برنامج ولاء بدون صفحة `/rewards` |
+| الوصفات المرفوعة | `prescription_extractions` | يعمل في `/vision-lab` لكن الأدمن لا يرى قائمة موحدة |
+| CRM Campaigns | `crm_campaigns`, `campaign_deliveries` | إرسال يعمل بدون dashboard |
+| Marketplace الصيدليات | `pn_pharmacies` (5 صيدليات) | لا توجد صفحة `/pharmacies` تعرضها |
+| الأطباء | `hc_doctors` | لا توجد صفحة `/doctors` عامة |
+
+سأضع خطة عرض على مرحلتين للأولوية: **(أ) صفحات القراءة العامة** (`/doctors`, `/pharmacies`, `/rewards`), ثم **(ب) لوحات الإدارة** المفقودة.
+
+---
 
 ## تفاصيل تقنية
 
-- **حساب المخزون الإجمالي**: `SUM(quantity_on_hand)` من `inv_stock_batches WHERE product_id = ?` — يُحسب على الخادم داخل `getProductAiSummary`.
-- **Kernel dispatch**: `dispatch(actor, { agentKey: 'catalog_advisor', input: prompt, toolInputs: { store_query: { productId } } })`. نستخدم agent `catalog_advisor` — نتحقق من وجوده في `air_agents`، إن لم يوجد نُضيف صف واحد في نفس الـ migration.
-- **Fallback الصورة**: `<Pill className="w-full h-full text-primary/40" />` بدل صورة placeholder خارجية.
-- **العملة**: `Intl.NumberFormat('ar-YE', { style: 'currency', currency: 'YER' })`.
+**الأدوات:** `supabase--migration`, `code--exec` (pandas + psql COPY)، `supabase--insert` للـ batches، AI Gateway (`google/gemini-2.5-flash-image`), Supabase Storage.
 
-## المخاطر
+**Idempotency:** الاستيراد يعتمد على `catalog_products.store_code` كمفتاح فريد — يمكن إعادة تشغيله بأمان.
 
-- **حجم Kernel prompt**: بيانات المنتج قد تكون كبيرة → نقتصر على 8 حقول.
-- **agent `catalog_advisor` غير موجود**: نُضيفه في migration مع `allowed_tools=['store_query']` و prompt approved.
-- **تكلفة الاستدعاء**: الزر يُستدعى يدوياً فقط (لا auto-load) — يحمي budget.
+**الترتيب المتوازي:**
+```text
+[Migration: warehouse + queue table]  ──┐
+[Contact update: branding.ts]        ──┼── build مباشر
+[Import script: 4654 items]          ──┘
+        │
+        └──► [Enqueue 4654 image jobs] ──► [Cron worker running]
+```
+
+---
+
+## المخرجات النهائية
+
+- `/shop` يعرض 4654+ صنف بالسعر والتوفر ✓
+- `/admin-inventory` جدول قابل للتعديل ✓
+- بيانات التواصل الجديدة في كل الموقع ✓
+- Facebook link ظاهر + endpoint نشر جاهز (ينتظر Access Token) ⏳
+- طابور صور يعمل بالخلفية + لوحة `/admin-image-queue` ✓
+- تقرير `docs/data-visibility-audit.md` + خطة مرحلتين ✓
+
+هل أبدأ التنفيذ؟

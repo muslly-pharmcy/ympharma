@@ -14,6 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
+      _import_batches_stage: {
+        Row: {
+          cost: number | null
+          expiry: string | null
+          id: string | null
+          org: string | null
+          product_id: string | null
+          qty: number | null
+          sell: number | null
+          wh: string | null
+        }
+        Insert: {
+          cost?: number | null
+          expiry?: string | null
+          id?: string | null
+          org?: string | null
+          product_id?: string | null
+          qty?: number | null
+          sell?: number | null
+          wh?: string | null
+        }
+        Update: {
+          cost?: number | null
+          expiry?: string | null
+          id?: string | null
+          org?: string | null
+          product_id?: string | null
+          qty?: number | null
+          sell?: number | null
+          wh?: string | null
+        }
+        Relationships: []
+      }
+      _import_products_stage: {
+        Row: {
+          category_id: string | null
+          id: string | null
+          is_public: boolean | null
+          name_ar: string | null
+          org: string | null
+          owner_org: string | null
+          pack_unit: string | null
+          sell_price: number | null
+          status: string | null
+          store_code: string | null
+        }
+        Insert: {
+          category_id?: string | null
+          id?: string | null
+          is_public?: boolean | null
+          name_ar?: string | null
+          org?: string | null
+          owner_org?: string | null
+          pack_unit?: string | null
+          sell_price?: number | null
+          status?: string | null
+          store_code?: string | null
+        }
+        Update: {
+          category_id?: string | null
+          id?: string | null
+          is_public?: boolean | null
+          name_ar?: string | null
+          org?: string | null
+          owner_org?: string | null
+          pack_unit?: string | null
+          sell_price?: number | null
+          status?: string | null
+          store_code?: string | null
+        }
+        Relationships: []
+      }
       activity_logs: {
         Row: {
           action: string
@@ -6855,6 +6927,63 @@ export type Database = {
           subject_user_id?: string | null
         }
         Relationships: []
+      }
+      image_generation_queue: {
+        Row: {
+          attempts: number
+          created_at: string
+          id: string
+          image_url: string | null
+          last_error: string | null
+          processed_at: string | null
+          product_id: string
+          requested_at: string
+          status: string
+          storage_path: string | null
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          last_error?: string | null
+          processed_at?: string | null
+          product_id: string
+          requested_at?: string
+          status?: string
+          storage_path?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          last_error?: string | null
+          processed_at?: string | null
+          product_id?: string
+          requested_at?: string
+          status?: string
+          storage_path?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "image_generation_queue_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "image_generation_queue_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "store_products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       img_proxy_logs: {
         Row: {
