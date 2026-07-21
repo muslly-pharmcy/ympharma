@@ -109,22 +109,8 @@ export const analyzePrescriptionImage = createServerFn({ method: 'POST' })
       matches.push({ query: term, products: (rows ?? []) as never })
     }
 
-    // Log to audit trail for admin observability.
-    try {
-      const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-      await supabaseAdmin.from('audit_events').insert({
-        actor_user_id: context.userId,
-        action: 'prescription.vision.analyze',
-        target: data.storagePath,
-        metadata: {
-          confidence: vision.data.confidence,
-          med_count: meds.length,
-          used_fallback: vision.usedFallback,
-        },
-      } as never)
-    } catch {
-      /* audit best-effort */
-    }
+    // Audit trail — best-effort, non-blocking.
+
 
     return {
       ok: true as const,
