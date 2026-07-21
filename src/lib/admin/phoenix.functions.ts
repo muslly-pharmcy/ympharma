@@ -51,8 +51,9 @@ export const phoenixProbeConnectivity = createServerFn({ method: 'GET' })
 
 // ---------- Phase 2: Schema forensics ----------
 const REQUIRED: Array<{ name: string; columns: string[] }> = [
-  { name: 'catalog_products', columns: ['id', 'code', 'name', 'selling_price'] },
-  { name: 'catalog_categories', columns: ['id', 'name'] },
+  { name: 'catalog_products', columns: ['id', 'store_code', 'name_ar', 'sbdma_official_price'] },
+  { name: 'store_products', columns: ['id', 'name', 'price', 'stock_balance'] },
+  { name: 'catalog_categories', columns: ['id'] },
   { name: 'inv_stock_batches', columns: ['id', 'product_id', 'qty_on_hand', 'expiry_date'] },
   { name: 'inv_stock_movements', columns: ['product_id', 'batch_id', 'movement_type'] },
   { name: 'orders', columns: ['id', 'user_id', 'customer_name', 'customer_phone', 'status'] },
