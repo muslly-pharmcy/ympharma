@@ -80,7 +80,20 @@ async function loadAgent(agentKey: string): Promise<AgentRow> {
   const { data, error } = await sb.from('air_agents').select('*').eq('key', agentKey).maybeSingle()
   if (error) throw new Error(error.message)
   if (!data || !data.is_active) throw new Error(`agent not found or inactive: ${agentKey}`)
-  return data as AgentRow
+  return data as unknown as AgentRow
+}
+
+function emergencyResponse(reason: string, t0: number): KernelDispatchResult {
+  return {
+    runId: `emergency-${crypto.randomUUID()}`,
+    output:
+      '⚠️ نظام الذكاء الاصطناعي في وضع الطوارئ حالياً وتعذّر الوصول لطبقة الحوكمة. حاول مجدداً بعد قليل — تم تسجيل الحادثة.',
+    toolsUsed: [],
+    totalTokens: null,
+    latencyMs: Date.now() - t0,
+    model: 'emergency-fallback',
+    decision: { allowed: false, policyKey: `emergency:${reason.slice(0, 60)}` },
+  }
 }
 
 export async function dispatch(actor: Actor, req: KernelDispatchInput): Promise<KernelDispatchResult> {
@@ -95,8 +108,21 @@ export async function dispatch(actor: Actor, req: KernelDispatchInput): Promise<
     context: { tier: req.tier ?? 'balanced' },
   }
 
-  // 1. Load agent + capabilities
-  const agent = await loadAgent(req.agentKey)
+  // 1. Load agent + capabilities (Survival Mode: infrastructure failure → safe fallback,
+  //    but preserve throw semantics for business errors like "agent not found").
+  let agent: AgentRow
+  try {
+    agent = await loadAgent(req.agentKey)
+  } catch (err) {
+    const msg = (err as Error).message
+    const isInfraFailure =
+      /fetch failed|ECONNREFUSED|ETIMEDOUT|network|Failed to fetch|503|504/i.test(msg)
+    if (isInfraFailure) {
+      console.warn(`[Kernel] Survival mode engaged — DB unreachable: ${msg}`)
+      return emergencyResponse('db_unreachable', t0)
+    }
+    throw err
+  }
   const caps = await loadCapabilities(actor.organizationId, agent.key)
   requireCapability(caps, 'can_execute')
 
