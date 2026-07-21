@@ -69,7 +69,7 @@ async function auditKernelCall(actor: Actor, call: KernelCall, allowed: boolean,
     to_agent: call.toAgent,
     purpose: call.purpose,
     allowed,
-    decision: extras.decision ?? {},
+    decision: (extras.decision ?? {}) as never,
     policy_key: extras.policyKey ?? null,
     denied_reason: extras.deniedReason ?? null,
   })

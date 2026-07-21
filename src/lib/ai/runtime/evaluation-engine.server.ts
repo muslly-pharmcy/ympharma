@@ -21,6 +21,6 @@ export async function recordEvaluation(rec: EvalRecord): Promise<void> {
     cost_cents: rec.costCents ?? null,
     success: rec.success ?? true,
     retries: rec.retries ?? 0,
-    feedback: rec.feedback ?? {},
+    feedback: (rec.feedback ?? {}) as never,
   })
 }
