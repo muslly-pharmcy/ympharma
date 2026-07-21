@@ -126,14 +126,14 @@ export const phoenixProbeSchema = createServerFn({ method: 'GET' })
 
 // ---------- Phase 3: Index audit ----------
 const CRITICAL_INDEXES: Array<{ table: string; cols: string; name: string }> = [
-  { table: 'catalog_products', cols: 'code', name: 'idx_catalog_products_code' },
-  { table: 'catalog_products', cols: 'name', name: 'idx_catalog_products_name' },
+  { table: 'catalog_products', cols: 'store_code', name: 'catalog_products_store_code_uniq' },
+  { table: 'catalog_products', cols: 'name_ar', name: 'idx_catalog_products_name_ar' },
   {
     table: 'inv_stock_batches',
     cols: 'product_id, expiry_date',
     name: 'idx_inv_stock_batches_product_expiry',
   },
-  { table: 'orders', cols: 'user_id, created_at', name: 'idx_orders_user_created' },
+  { table: 'orders', cols: 'user_id, created_at DESC', name: 'idx_orders_user_created' },
   { table: 'cart_items', cols: 'user_id, product_id', name: 'idx_cart_items_user_product' },
 ]
 
