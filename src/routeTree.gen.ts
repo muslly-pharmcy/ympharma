@@ -17,6 +17,7 @@ import { Route as MissionControlRouteImport } from './routes/mission-control'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAiRuntimeRouteImport } from './routes/_authenticated/ai-runtime'
 import { Route as AuthenticatedCampaignsRouteImport } from './routes/_authenticated/campaigns'
+import { Route as AuthenticatedCartRouteImport } from './routes/_authenticated/cart'
 import { Route as AuthenticatedCouponsRouteImport } from './routes/_authenticated/coupons'
 import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated/customers'
 import { Route as AuthenticatedDispensesRouteImport } from './routes/_authenticated/dispenses'
@@ -88,6 +89,11 @@ const AuthenticatedAiRuntimeRoute = AuthenticatedAiRuntimeRouteImport.update({
 const AuthenticatedCampaignsRoute = AuthenticatedCampaignsRouteImport.update({
   id: '/campaigns',
   path: '/campaigns',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCartRoute = AuthenticatedCartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCouponsRoute = AuthenticatedCouponsRouteImport.update({
@@ -285,6 +291,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/ai-runtime': typeof AuthenticatedAiRuntimeRoute
   '/campaigns': typeof AuthenticatedCampaignsRouteWithChildren
+  '/cart': typeof AuthenticatedCartRoute
   '/coupons': typeof AuthenticatedCouponsRoute
   '/customers': typeof AuthenticatedCustomersRouteWithChildren
   '/dispenses': typeof AuthenticatedDispensesRouteWithChildren
@@ -327,6 +334,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/ai-runtime': typeof AuthenticatedAiRuntimeRoute
   '/campaigns': typeof AuthenticatedCampaignsRouteWithChildren
+  '/cart': typeof AuthenticatedCartRoute
   '/coupons': typeof AuthenticatedCouponsRoute
   '/customers': typeof AuthenticatedCustomersRouteWithChildren
   '/dispenses': typeof AuthenticatedDispensesRouteWithChildren
@@ -371,6 +379,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/ai-runtime': typeof AuthenticatedAiRuntimeRoute
   '/_authenticated/campaigns': typeof AuthenticatedCampaignsRouteWithChildren
+  '/_authenticated/cart': typeof AuthenticatedCartRoute
   '/_authenticated/coupons': typeof AuthenticatedCouponsRoute
   '/_authenticated/customers': typeof AuthenticatedCustomersRouteWithChildren
   '/_authenticated/dispenses': typeof AuthenticatedDispensesRouteWithChildren
@@ -415,6 +424,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/ai-runtime'
     | '/campaigns'
+    | '/cart'
     | '/coupons'
     | '/customers'
     | '/dispenses'
@@ -457,6 +467,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/ai-runtime'
     | '/campaigns'
+    | '/cart'
     | '/coupons'
     | '/customers'
     | '/dispenses'
@@ -500,6 +511,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authenticated/ai-runtime'
     | '/_authenticated/campaigns'
+    | '/_authenticated/cart'
     | '/_authenticated/coupons'
     | '/_authenticated/customers'
     | '/_authenticated/dispenses'
@@ -602,6 +614,13 @@ declare module '@tanstack/react-router' {
       path: '/campaigns'
       fullPath: '/campaigns'
       preLoaderRoute: typeof AuthenticatedCampaignsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/cart': {
+      id: '/_authenticated/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof AuthenticatedCartRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/coupons': {
@@ -949,6 +968,7 @@ const AuthenticatedPurchaseOrdersRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAiRuntimeRoute: typeof AuthenticatedAiRuntimeRoute
   AuthenticatedCampaignsRoute: typeof AuthenticatedCampaignsRouteWithChildren
+  AuthenticatedCartRoute: typeof AuthenticatedCartRoute
   AuthenticatedCouponsRoute: typeof AuthenticatedCouponsRoute
   AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRouteWithChildren
   AuthenticatedDispensesRoute: typeof AuthenticatedDispensesRouteWithChildren
@@ -977,6 +997,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAiRuntimeRoute: AuthenticatedAiRuntimeRoute,
   AuthenticatedCampaignsRoute: AuthenticatedCampaignsRouteWithChildren,
+  AuthenticatedCartRoute: AuthenticatedCartRoute,
   AuthenticatedCouponsRoute: AuthenticatedCouponsRoute,
   AuthenticatedCustomersRoute: AuthenticatedCustomersRouteWithChildren,
   AuthenticatedDispensesRoute: AuthenticatedDispensesRouteWithChildren,
