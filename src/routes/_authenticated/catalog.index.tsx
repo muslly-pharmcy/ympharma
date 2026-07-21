@@ -1,9 +1,16 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useDeferredValue, useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { listProducts, listCategories } from '@/lib/catalog.functions'
-import { Package, Search } from 'lucide-react'
+import { Pill, Search } from 'lucide-react'
 import { z } from 'zod'
+
+const YER = new Intl.NumberFormat('ar-YE', {
+  style: 'currency',
+  currency: 'YER',
+  maximumFractionDigits: 0,
+})
+
 
 const searchSchema = z.object({
   q: z.string().optional(),
