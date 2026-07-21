@@ -1,92 +1,86 @@
+## ⚠️ Reality Check أولاً (قبل أي كود)
 
-# Wave R1.3.2 — RLS Policy Migration for Bucket B (CRM Cluster First)
+الـ blueprints اللي وصلت من "Model" مبنية على **جداول وهمية لا وجود لها** في مشروعك، وستنفجر لحظة أول migration. لازم نصححها قبل التنفيذ:
 
-## Context
+| البلوبرنت طلب | الواقع في مشروعك |
+|---|---|
+| `user_profiles` + `user_role` enum | يوجد `profiles` + `user_roles` (RBAC منفصل) + `organization_members` — لا نعيد اختراعها |
+| `medical_facilities`, `doctor_profiles`, `supplier_storefronts` | يوجد بالفعل: `hc_doctors`, `hc_locations`, `hc_doctor_practices`, `pn_pharmacies`, `sup_suppliers`, `sup_supplier_products` |
+| `patient_medicine_vault` جديد | يوجد `medical_vault_files` + `patient_medications` + `patient_health_events` |
+| `catalog_products.sku_code / stock_balance / expiry_date / supplier_name` | العمودي الحقيقي: `catalog_products` مع `name_ar/brand/barcode/requires_prescription/status`، والمخزون في `inv_stock_batches` (FEFO) مع `expiry_date` + `qty_on_hand` — الأعمدة اللي طلبها Model غير موجودة |
+| `createClient()` من `@/lib/supabase/server`، `requireSupabaseAuth()` بلا middleware، `@tanstack/start` | الواقع: `@tanstack/react-start`، `createServerFn(...).middleware([requireSupabaseAuth])` مع `context.supabase/userId`، عميل الأدمن يُحمَّل داخل الـ handler فقط |
+| `import { google } from '@ai-sdk/google'` | مشروعك يستخدم Lovable AI Gateway عبر `createLovableAiGatewayProvider` — لا مفاتيح Google مباشرة |
+| Twilio / Meta فوراً | خارج نطاق البنية الحالية، ويحتاج secrets وأرقام مفوّتة — قرار منفصل |
+| "Framer Motion / next.js style JSX" مع أكواد ناقصة (`<motion.div ...` مقطوعة) | مشروعك TanStack Start + Tailwind v4، والأكواد المرسلة غير قابلة للصق (Syntax مبتور) |
 
-Wave R1.3.1 classified 91 admin-bypass server functions. Result:
+**الخلاصة:** لا يمكن اعتماد أي من الأكواد الأربعة كما هي. لكن الأفكار **الجوهرية** ممتازة ومنفذة على البنية الحقيقية.
 
-```
-Legitimate System Operations    2  (A — keep)
-Replace with RLS               35  (B — this wave targets these)
-Service Layer Required         54  (C — deferred to R1.3.4)
-Needs Redesign                  0
-```
+---
 
-Approved roadmap: **R1.3.2 → R1.3.5 → R1.4 → R1.5 → R1.6**, executed cluster-by-cluster with a migration + regression tests + verification report per step. Behaviour must not change; RLS becomes a defence-in-depth layer *underneath* the existing `requirePermission` / `actor.organizationId` guards.
+## الخطة المقترحة — 4 شحنات مستقلة (كل واحدة قابلة للإيقاف)
 
-## Scope of this wave
+### Shipment S1 — Omni Search v2 (ربط الكرنل بالبيانات الفعلية) ✅ صغير
+- توسيع `src/lib/cosmic-search.functions.ts` ليجمع نتائج **متوازية** من:
+  - `catalog_products` (موجود)
+  - `hc_doctors` + `hc_specialties` (دليل الأطباء)
+  - `pn_pharmacies` (الصيدليات)
+- توحيدها في `contextText` واحد يمرَّر لـ `dispatch()` في `kernel.server.ts` كأداة (tool) جديدة `search_directory` في `tool-registry`.
+- بدون جداول جديدة. بدون `pgvector` (البحث النصي `ilike` كافٍ للمرحلة الأولى — pgvector يأتي لاحقاً كـ Wave منفصل).
 
-**Only Bucket B, CRM cluster.** Concretely, the 9 handlers below plus the RLS policies for the tables they touch:
+### Shipment S2 — Prescription Vision (OCR الروشتات) 🟡 متوسط
+- **جدول موجود**: `prescription_extractions` + `prescription_image_blobs` + `prescription_files` — نستخدمها، لا ننشئ `patient_medicine_vault`.
+- Server fn جديدة `analyzePrescriptionImage` في `src/lib/prescriptions.mutations.functions.ts`:
+  - Middleware: `requireSupabaseAuth`
+  - Input: `{ storagePath, mimeType }` (الرفع إلى bucket موجود عبر signed URL)
+  - يستدعي Gemini vision عبر Lovable Gateway (`google/gemini-3-flash-preview` — يدعم الصور)
+  - يحفظ الاستخراج في `prescription_extractions` (مع مطابقة أدوية عبر `name_ar`/`brand`)
+  - يعيد `{ matches: CatalogProduct[], raw: string, confidence }`
+- UI: زر "تحليل روشتة" في `/prescriptions` route الموجود يفتح Dialog يعرض النتائج ويسمح بإضافة الأدوية المطابقة للسلة (OTC فقط، والباقي يتحول لطلب صيدلي بشري كما هو مصمم).
+- بدون "Auto-Pharmacist offline" في هذه الشحنة — يحتاج نقاش أمني منفصل.
 
-- `campaigns.functions.ts` → `listCampaigns`, `getCampaign`, `listSegments`, `getSegment` (tables: `crm_campaigns`, `crm_campaign_events`, `crm_segments`)
-- `customers.functions.ts` → `listCustomers`, `getCustomer` (tables: `crm_customers`, `crm_customer_contacts`)
-- `customers.mutations.functions.ts` → `updateCustomer`, `addCustomerAddress`, `addCustomerContact`, `addCustomerTag`, `removeCustomerTag` (tables: `crm_customers`, `crm_customer_addresses`, `crm_customer_contacts`, `crm_customer_tags`)
-- `loyalty.functions.ts` reads on `crm_loyalty_accounts`, `crm_loyalty_transactions`, `crm_reward_catalog`, `crm_reward_redemptions`, `crm_loyalty_rules`, `crm_loyalty_tiers` — RLS SELECT policies land in this wave; the handler cutover ships in R1.3.3 alongside customers/campaigns.
+### Shipment S3 — Supplier Invoice OCR + Bulk Import 🟡 متوسط
+- **جداول موجودة**: `catalog_import_jobs` + `catalog_import_rows` (من Batch 2 السابق!) + `purchase_orders` + `inv_stock_batches`.
+- إضافة **مسار جديد**: صورة فاتورة → Gemini vision → صفوف `catalog_import_rows` (status=NEW/MATCHED/AMBIGUOUS) → مراجعة يدوية → commit → إنشاء `purchase_order` + `inv_stock_batches`.
+- Server fns:
+  - `analyzeInvoiceImage({ storagePath })` — يستخرج الصفوف
+  - `commitInvoiceAsPurchaseOrder({ jobId, warehouseId, supplierId })` — يستخدم `createPurchaseOrder` الموجود
+- UI: تبويب جديد في `/sbdma-import` الموجود بدلاً من صفحة منفصلة.
 
-**Out of scope** (queued): medical / supply / platform clusters, all Bucket C service-layer extractions, R1.4+ audits, WhatsApp / Meta integrations (still gated on secrets).
+### Shipment S4 — Store Media Bulk (صور الأدوية بالكود) 🟢 صغير
+- **موجود**: `catalog_product_media` + `product-images` bucket + `catalog-media.functions.ts`.
+- إضافة server fn `linkMediaByBarcode({ storagePath, barcode })` يبحث في `catalog_products.barcode` ويربط تلقائياً.
+- Admin utility في `/catalog` يعرض المنتجات بلا صور ويسمح بالرفع الجماعي (ملف بأسماء `<barcode>.jpg`).
 
-## Plan
+---
 
-### Step 1 — Verify current tenant column and existing policies
+## ما هو **خارج** الخطة (نعتذر بأدب عن هذه)
 
-Before writing SQL, query `pg_policies` and `information_schema.columns` for each target table to confirm:
+1. **Twilio WhatsApp / Meta social autopilot الفوري** — يحتاج قرار: أي رقم؟ أي حساب Meta؟ نضيفه كـ Wave مستقل بعد S1–S4.
+2. **إعادة تسمية الجداول** لتطابق أسماء Model الوهمية — سيكسر 200+ سطر من الكود المنتج.
+3. **`Framer Motion` مع "gravity/nebula/laser scanner" cinematic** — يمكن إضافة polish بصري لاحقاً في Wave UI مستقل، لكن الأولوية للمنطق أولاً.
+4. **`pgvector` semantic search** — يبقى محجوزاً لـ AI SUN CORE v2؛ الآن نستخدم `ilike` (كافٍ لـ 1000 صنف).
+5. **"Self-Healing Sentinel" كما صُوّر** — لدينا بالفعل `dlq-recovery`, `ai_events`, `ErrorBoundary`. لا نضاعف الأنظمة.
 
-- The tenant column name is `organization_id` (not `org_id` / `tenant_id`).
-- Whether a `current_org()` helper already exists (used elsewhere in the schema).
-- Which policies exist today so the migration doesn't collide with them.
+---
 
-No file edits in this step; findings feed the migration.
+## Technical Details
 
-### Step 2 — Migration: RLS policies for CRM Bucket B tables
+**Stack constraints المحترمة:**
+- TanStack Start v1 + `createServerFn().middleware([requireSupabaseAuth]).inputValidator(z).handler(...)`
+- كل استخدام لـ `supabaseAdmin` = `await import('@/integrations/supabase/client.server')` داخل الـ handler
+- AI عبر `createLovableAiGatewayProvider(process.env.LOVABLE_API_KEY!)` — لا مفاتيح Google مباشرة
+- Vision عبر `google/gemini-3-flash-preview` مع `content: [{type:'text'}, {type:'image_url', image_url:{url}}]`
+- الرفع عبر signed URLs لـ bucket `product-images` (موجود) + bucket جديد `prescription-images` (خاص) + `supplier-invoices` (خاص)
+- كل جدول جديد يحصل على GRANT + RLS + policies scoped بـ `organization_id` أو `auth.uid()`
 
-One migration that, per table:
+**ترتيب التنفيذ المقترح:** S4 → S1 → S3 → S2 (من الأسهل للأصعب، وكل واحدة تنشحن مستقلة).
 
-1. Ensures RLS is enabled.
-2. Creates a `SELECT`, `INSERT`, `UPDATE`, `DELETE` policy scoped to `organization_id = <current-org-of-auth.uid()>` and gated by the same role the current handler checks via `requirePermission` (using `public.has_role(auth.uid(), …)` where applicable, or a `SECURITY DEFINER` helper that reads the caller's `actor` org).
-3. Confirms `GRANT SELECT, INSERT, UPDATE, DELETE ON <table> TO authenticated` is present (add if missing).
+---
 
-Tables covered: `crm_campaigns`, `crm_campaign_events`, `crm_segments`, `crm_customers`, `crm_customer_contacts`, `crm_customer_addresses`, `crm_customer_tags`, `crm_loyalty_accounts`, `crm_loyalty_transactions`, `crm_loyalty_rules`, `crm_loyalty_tiers`, `crm_reward_catalog`, `crm_reward_redemptions`.
+## سؤال قبل ما نبدأ
 
-No handler changes in this migration — policies land first so we can verify they match current behaviour before flipping any code.
-
-### Step 3 — Verification queries
-
-After the migration, run read-only checks:
-
-- `SELECT tablename, policyname, cmd, qual FROM pg_policies WHERE tablename LIKE 'crm\_%'` — confirm every target table has the expected 4 policies.
-- Simulated `SET LOCAL role authenticated; SET LOCAL request.jwt.claims …` probes against one row from a real org — confirm same-org rows return, other-org rows do not.
-
-### Step 4 — Verification report
-
-Append to `docs/engineering/WAVE-C7-REGRESSION-LOG.md` (existing regression log):
-
-- Migration ID + tables touched.
-- Policy diff (before/after).
-- Probe results.
-- Explicit statement: "No handler code changed in R1.3.2; cutover to `context.supabase` deferred to R1.3.3."
-
-### Step 5 — Follow-up ticket (not executed here)
-
-Open R1.3.3 tracking item covering the actual handler migration to `context.supabase` + `requireSupabaseAuth` for the 9 CRM Bucket B functions, plus a regression suite that hits each function under two orgs to prove RLS blocks cross-tenant reads/writes.
-
-## Technical notes
-
-- Role check inside RLS uses `public.has_role(auth.uid(), 'pharmacist'::app_role)` etc. — the existing helper. Do not invent a new one.
-- Organization scoping: today handlers read `actor.organizationId` from `getActor()`. RLS needs an equivalent. Preferred path: a `SECURITY DEFINER STABLE` helper `public.current_actor_org()` that reads `organization_members` for `auth.uid()` and returns the active org. If it already exists in the schema, reuse it; otherwise create it inside the same migration (with `search_path = public` and `REVOKE EXECUTE FROM PUBLIC; GRANT EXECUTE TO authenticated`).
-- Migration uses `DROP POLICY IF EXISTS` before `CREATE POLICY` so it is idempotent.
-- `SECURITY DEFINER` helpers created here fall under the R1.3-established hardening: explicit `search_path`, no `EXECUTE` to `anon`.
-
-## Non-goals
-
-- No handler rewrites (that is R1.3.3).
-- No changes to Bucket C mutation functions or `session.server.ts` / `idempotency.server.ts`.
-- No medical/supply/platform tables.
-- No new tests written in this wave beyond the SQL probes — behaviour is unchanged.
-
-## Acceptance
-
-- Migration applied cleanly, idempotent on re-run.
-- `pg_policies` shows the expected 4 policies per CRM Bucket B table.
-- Same-org / cross-org probes behave as documented.
-- Regression log entry added.
-- R1.3.3 backlog item recorded.
+هل تريد:
+- **(أ)** تنفيذ الأربعة بالترتيب المقترح (S4 أولاً، الأسهل والأكثر إفادة فوراً)؟
+- **(ب)** البدء بـ S2 (Prescription OCR) لأنه الأكثر تميزاً؟
+- **(ج)** البدء بـ S3 (Invoice OCR) لتوفير ساعات الإدخال اليدوي؟
+- **(د)** تعديل الخطة (أضف/احذف شحنة)؟
