@@ -22,6 +22,14 @@ export default function Navbar() {
 
   const activeAgentsCount = agents.filter((a) => a.status === 'active').length
 
+  const { data: cartItems } = useQuery({
+    queryKey: ['cart', 'items'],
+    queryFn: () => listCart(),
+    enabled: isAuthenticated,
+    staleTime: 30_000,
+  })
+  const cartCount = cartItems?.reduce((n, it) => n + (it.quantity ?? 0), 0) ?? 0
+
   const displayName = (user?.user_metadata as { name?: string } | undefined)?.name ?? user?.email ?? ''
   const avatar =
     (user?.user_metadata as { avatar_url?: string } | undefined)?.avatar_url ??
