@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { getProduct } from '@/lib/catalog.functions'
+import { getProduct, getProductAiSummary } from '@/lib/catalog.functions'
 import { getStockSummary } from '@/lib/inventory.functions'
 import { listProductImageUrls } from '@/lib/storefront.functions'
 import { registerProductImage, deleteProductImage } from '@/lib/catalog-media.functions'
@@ -41,6 +41,13 @@ function ProductDetail() {
   const { data: stock } = useQuery({
     queryKey: ['inventory', 'stock-summary', params.productId],
     queryFn: () => getStockSummary({ data: { productId: params.productId } }),
+  })
+  const aiSummary = useServerFn(getProductAiSummary)
+  const [aiText, setAiText] = useState<string | null>(null)
+  const aiMutation = useMutation({
+    mutationFn: () => aiSummary({ data: { productId: params.productId } }),
+    onSuccess: (r) => setAiText(r.output ?? 'لا يوجد ملخص متاح.'),
+    onError: (e: Error) => toast.error(`تعذر توليد الملخص: ${e.message}`),
   })
 
   if (isLoading) return <div className="p-8 text-center">جاري التحميل...</div>
@@ -108,6 +115,22 @@ function ProductDetail() {
         <Stat label="المخزون" value={(stock?.totalOnHand ?? 0).toLocaleString('ar-EG')} />
         <Stat label="المحجوز" value={(stock?.totalReserved ?? 0).toLocaleString('ar-EG')} />
         <Stat label="الدُفعات" value={String(stock?.batches ?? 0)} />
+      </section>
+
+      <section className="glass-panel rounded-2xl p-4">
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="font-semibold">شرح بالذكاء الاصطناعي</h2>
+          <button
+            onClick={() => aiMutation.mutate()}
+            disabled={aiMutation.isPending}
+            className="rounded-lg bg-primary px-4 py-2 text-sm text-white disabled:opacity-60"
+          >
+            {aiMutation.isPending ? 'جاري التوليد...' : 'اشرح بالذكاء الاصطناعي'}
+          </button>
+        </div>
+        {aiText && (
+          <p className="whitespace-pre-wrap text-sm leading-7 text-gray-700">{aiText}</p>
+        )}
       </section>
 
       {product.description_ar && (

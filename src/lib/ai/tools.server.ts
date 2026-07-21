@@ -36,14 +36,61 @@ const TOOLS: Record<string, ToolDefinition> = {
       const q = String(input.query ?? '').trim()
       if (!q) return { ok: false, error: 'query is required' }
       const sb = await admin()
+      const term = `%${q.replace(/[,()*"']/g, ' ')}%`
       const { data, error } = await sb
         .from('catalog_products')
-        .select('id, name, sku, status')
+        .select('id, name_ar, name_en, brand, sbdma_official_price, status')
         .eq('organization_id', actor.organizationId)
-        .ilike('name', `%${q}%`)
+        .or(`name_ar.ilike.${term},name_en.ilike.${term},brand.ilike.${term},generic_name.ilike.${term}`)
         .limit(15)
       if (error) return { ok: false, error: error.message }
       return { ok: true, data }
+    },
+  },
+  store_query: {
+    key: 'store_query',
+    description:
+      'Return a compact structured summary of one catalog product (name, price, total on-hand stock, supplier, category, generic name, description, requires_prescription). Input: { productId: string }',
+    execute: async ({ actor }, input) => {
+      const pid = String(input.productId ?? '').trim()
+      if (!pid) return { ok: false, error: 'productId is required' }
+      const sb = await admin()
+      const { data: p, error } = await sb
+        .from('catalog_products')
+        .select(
+          'id, name_ar, name_en, brand, manufacturer, generic_name, dosage_form, strength, active_ingredients, description_ar, sbdma_official_price, requires_prescription, agent_name, manufacturer_country, category_id',
+        )
+        .eq('id', pid)
+        .maybeSingle()
+      if (error) return { ok: false, error: error.message }
+      if (!p) return { ok: false, error: 'product_not_found' }
+      const { data: batches } = await sb
+        .from('inv_stock_batches')
+        .select('qty_on_hand')
+        .eq('organization_id', actor.organizationId)
+        .eq('product_id', pid)
+      const stock_total = ((batches ?? []) as Array<{ qty_on_hand: number }>).reduce(
+        (s, r) => s + Number(r.qty_on_hand ?? 0),
+        0,
+      )
+      return {
+        ok: true,
+        data: {
+          name: p.name_ar ?? p.name_en,
+          name_en: p.name_en,
+          generic_name: p.generic_name,
+          brand: p.brand,
+          manufacturer: p.manufacturer ?? p.agent_name,
+          manufacturer_country: p.manufacturer_country,
+          dosage_form: p.dosage_form,
+          strength: p.strength,
+          active_ingredients: p.active_ingredients,
+          description: p.description_ar,
+          price_yer: p.sbdma_official_price,
+          requires_prescription: p.requires_prescription,
+          stock_total,
+        },
+      }
     },
   },
   get_product_stock: {
