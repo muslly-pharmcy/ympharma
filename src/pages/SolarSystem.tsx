@@ -143,6 +143,11 @@ export default function SolarSystem() {
         </motion.div>
 
 
+        {/* Categories */}
+        <CategoriesGrid />
+
+
+
         {/* 3D Solar System */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -180,6 +185,10 @@ export default function SolarSystem() {
             ))}
           </div>
         </div>
+
+        {/* Customer testimonials */}
+        <TestimonialsSection />
+
 
         {/* Footer */}
         <motion.div 
