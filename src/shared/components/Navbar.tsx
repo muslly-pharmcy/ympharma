@@ -1,10 +1,14 @@
 import { Link, useNavigate } from '@tanstack/react-router'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/context/AuthContext'
 import { useTheme } from '@/context/ThemeContext'
 import { useAI } from '@/context/AIContext'
 import { supabase } from '@/integrations/supabase/client'
-import { Sun, Moon, Bell, MessageSquare, LogOut, Shield, LogIn } from 'lucide-react'
+import { listCart } from '@/lib/cart.functions'
+import {
+  Sun, Moon, Bell, MessageSquare, LogOut, Shield, LogIn,
+  Stethoscope, Database, Search, ShoppingCart,
+} from 'lucide-react'
 import { useState } from 'react'
 
 export default function Navbar() {
@@ -17,6 +21,14 @@ export default function Navbar() {
   const [showProfile, setShowProfile] = useState(false)
 
   const activeAgentsCount = agents.filter((a) => a.status === 'active').length
+
+  const { data: cartItems } = useQuery({
+    queryKey: ['cart', 'items'],
+    queryFn: () => listCart(),
+    enabled: isAuthenticated,
+    staleTime: 30_000,
+  })
+  const cartCount = cartItems?.reduce((n, it) => n + (it.quantity ?? 0), 0) ?? 0
 
   const displayName = (user?.user_metadata as { name?: string } | undefined)?.name ?? user?.email ?? ''
   const avatar =
@@ -43,8 +55,30 @@ export default function Navbar() {
           </div>
         </Link>
 
-        <div className="hidden lg:flex items-center gap-6">
-          <div className="flex items-center gap-2 px-4 py-2 bg-primary/5 rounded-xl">
+        <div className="hidden md:flex items-center gap-1 lg:gap-2">
+          <Link
+            to="/medical-directory"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors"
+          >
+            <Stethoscope className="w-4 h-4" />
+            <span>الدليل الطبي</span>
+          </Link>
+          <Link
+            to="/catalog"
+            search={{ page: 1 }}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors"
+          >
+            <Search className="w-4 h-4" />
+            <span>الكتالوج</span>
+          </Link>
+          <Link
+            to="/sbdma-import"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors"
+          >
+            <Database className="w-4 h-4" />
+            <span>هيئة الأدوية</span>
+          </Link>
+          <div className="hidden lg:flex items-center gap-2 px-3 py-2 bg-primary/5 rounded-xl ml-2">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
             <span className="text-sm text-gray-600">
               <span className="font-bold text-primary">{activeAgentsCount}</span> وكيل نشط
@@ -52,7 +86,7 @@ export default function Navbar() {
           </div>
           <Link
             to="/mission-control"
-            className="flex items-center gap-2 px-4 py-2 bg-gold/10 rounded-xl hover:bg-gold/20 transition-colors"
+            className="hidden lg:flex items-center gap-2 px-3 py-2 bg-gold/10 rounded-xl hover:bg-gold/20 transition-colors"
           >
             <Shield className="w-4 h-4 text-gold" />
             <span className="text-sm font-medium text-gold">مركز القيادة</span>
@@ -73,6 +107,14 @@ export default function Navbar() {
               <Link to="/ai-chat" className="p-2.5 rounded-xl hover:bg-gray-100 transition-colors relative" title="المحادثة الذكية">
                 <MessageSquare className="w-5 h-5 text-primary" />
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-gold text-white text-[10px] rounded-full flex items-center justify-center font-bold">AI</span>
+              </Link>
+              <Link to="/cart" className="p-2.5 rounded-xl hover:bg-gray-100 transition-colors relative" title="السلة">
+                <ShoppingCart className="w-5 h-5 text-gray-700" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-primary text-white text-[10px] rounded-full flex items-center justify-center font-bold">
+                    {cartCount > 99 ? '99+' : cartCount}
+                  </span>
+                )}
               </Link>
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
