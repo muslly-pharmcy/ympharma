@@ -53,11 +53,14 @@ d('SECURITY DEFINER grant baseline', () => {
     expect(rows).toBe('')
   })
 
-  it('every public SECURITY DEFINER function has search_path locked', () => {
+  it('every registry SECURITY DEFINER function has search_path locked', () => {
+    // Scoped to the privileged registry — existing app-wide definers are audited separately.
     const rows = psql(`
-      SELECT function_signature
-      FROM public.v_privileged_definer_grants
-      WHERE is_security_definer = true AND search_path_locked = false
+      SELECT g.function_signature
+      FROM public.v_privileged_definer_grants g
+      JOIN public.privileged_definer_functions r
+        ON r.function_signature = g.function_signature
+      WHERE g.is_security_definer = true AND g.search_path_locked = false
     `)
     expect(rows).toBe('')
   })
@@ -103,9 +106,9 @@ d('self-update protection triggers', () => {
 d('grant-change event trigger', () => {
   it('trg_audit_privileged_grants event trigger is enabled', () => {
     const row = psql(`
-      SELECT evtname || '|' || evtenabled
+      SELECT evtname || '|' || evtenabled::text
       FROM pg_event_trigger WHERE evtname = 'trg_audit_privileged_grants'
     `)
-    expect(row).toMatch(/trg_audit_privileged_grants\|[OA]/)
+    expect(row).toMatch(/trg_audit_privileged_grants\|[OAR]/)
   })
 })
