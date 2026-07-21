@@ -24,6 +24,8 @@ import { Route as ShopRouteImport } from './routes/shop'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as AuthenticatedAdminExcelImportRouteImport } from './routes/_authenticated/admin-excel-import'
+import { Route as AuthenticatedAdminImageQueueRouteImport } from './routes/_authenticated/admin-image-queue'
 import { Route as AuthenticatedAdminInventoryRouteImport } from './routes/_authenticated/admin-inventory'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin-orders'
 import { Route as AuthenticatedAiRuntimeRouteImport } from './routes/_authenticated/ai-runtime'
@@ -48,6 +50,7 @@ import { Route as AuthenticatedStoreRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedSuppliersRouteImport } from './routes/_authenticated/suppliers'
 import { Route as AuthenticatedVisionLabRouteImport } from './routes/_authenticated/vision-lab'
 import { Route as AuthenticatedWarehousesRouteImport } from './routes/_authenticated/warehouses'
+import { Route as ApiChatWidgetRouteImport } from './routes/api/chat-widget'
 import { Route as PlanetPlanetIdRouteImport } from './routes/planet.$planetId'
 import { Route as ProductHandleRouteImport } from './routes/product.$handle'
 import { Route as ProductProductIdRouteImport } from './routes/product.$productId'
@@ -73,6 +76,7 @@ import { Route as AuthenticatedPurchaseOrdersIdRouteImport } from './routes/_aut
 import { Route as AuthenticatedStoreCodeRouteImport } from './routes/_authenticated/store.$code'
 import { Route as ApiPublicCspReportRouteImport } from './routes/api/public/csp-report'
 import { Route as AuthenticatedInsuranceClaimsClaimIdRouteImport } from './routes/_authenticated/insurance.claims_.$claimId'
+import { Route as ApiPublicHooksGenerateSocialPostsRouteImport } from './routes/api/public/hooks/generate-social-posts'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 
@@ -151,6 +155,18 @@ const Char91DotwellKnownChar93OauthProtectedResourceRoute =
     id: '/.well-known/oauth-protected-resource',
     path: '/.well-known/oauth-protected-resource',
     getParentRoute: () => rootRouteImport,
+  } as any)
+const AuthenticatedAdminExcelImportRoute =
+  AuthenticatedAdminExcelImportRouteImport.update({
+    id: '/admin-excel-import',
+    path: '/admin-excel-import',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminImageQueueRoute =
+  AuthenticatedAdminImageQueueRouteImport.update({
+    id: '/admin-image-queue',
+    path: '/admin-image-queue',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdminInventoryRoute =
   AuthenticatedAdminInventoryRouteImport.update({
@@ -278,6 +294,11 @@ const AuthenticatedWarehousesRoute = AuthenticatedWarehousesRouteImport.update({
   id: '/warehouses',
   path: '/warehouses',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ApiChatWidgetRoute = ApiChatWidgetRouteImport.update({
+  id: '/api/chat-widget',
+  path: '/api/chat-widget',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PlanetPlanetIdRoute = PlanetPlanetIdRouteImport.update({
   id: '/planet/$planetId',
@@ -423,6 +444,12 @@ const AuthenticatedInsuranceClaimsClaimIdRoute =
     path: '/insurance/claims/$claimId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicHooksGenerateSocialPostsRoute =
+  ApiPublicHooksGenerateSocialPostsRouteImport.update({
+    id: '/api/public/hooks/generate-social-posts',
+    path: '/api/public/hooks/generate-social-posts',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   id: '/lovable/email/auth/preview',
   path: '/lovable/email/auth/preview',
@@ -449,6 +476,8 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin-excel-import': typeof AuthenticatedAdminExcelImportRoute
+  '/admin-image-queue': typeof AuthenticatedAdminImageQueueRoute
   '/admin-inventory': typeof AuthenticatedAdminInventoryRoute
   '/admin-orders': typeof AuthenticatedAdminOrdersRoute
   '/ai-runtime': typeof AuthenticatedAiRuntimeRoute
@@ -473,6 +502,7 @@ export interface FileRoutesByFullPath {
   '/suppliers': typeof AuthenticatedSuppliersRoute
   '/vision-lab': typeof AuthenticatedVisionLabRoute
   '/warehouses': typeof AuthenticatedWarehousesRoute
+  '/api/chat-widget': typeof ApiChatWidgetRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/product/$handle': typeof ProductHandleRoute
   '/product/$productId': typeof ProductProductIdRoute
@@ -498,6 +528,7 @@ export interface FileRoutesByFullPath {
   '/insurance/': typeof AuthenticatedInsuranceIndexRoute
   '/promotions/': typeof AuthenticatedPromotionsIndexRoute
   '/insurance/claims/$claimId': typeof AuthenticatedInsuranceClaimsClaimIdRoute
+  '/api/public/hooks/generate-social-posts': typeof ApiPublicHooksGenerateSocialPostsRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
@@ -516,6 +547,8 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin-excel-import': typeof AuthenticatedAdminExcelImportRoute
+  '/admin-image-queue': typeof AuthenticatedAdminImageQueueRoute
   '/admin-inventory': typeof AuthenticatedAdminInventoryRoute
   '/admin-orders': typeof AuthenticatedAdminOrdersRoute
   '/ai-runtime': typeof AuthenticatedAiRuntimeRoute
@@ -540,6 +573,7 @@ export interface FileRoutesByTo {
   '/suppliers': typeof AuthenticatedSuppliersRoute
   '/vision-lab': typeof AuthenticatedVisionLabRoute
   '/warehouses': typeof AuthenticatedWarehousesRoute
+  '/api/chat-widget': typeof ApiChatWidgetRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/product/$handle': typeof ProductHandleRoute
   '/product/$productId': typeof ProductProductIdRoute
@@ -565,6 +599,7 @@ export interface FileRoutesByTo {
   '/insurance': typeof AuthenticatedInsuranceIndexRoute
   '/promotions': typeof AuthenticatedPromotionsIndexRoute
   '/insurance/claims/$claimId': typeof AuthenticatedInsuranceClaimsClaimIdRoute
+  '/api/public/hooks/generate-social-posts': typeof ApiPublicHooksGenerateSocialPostsRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
@@ -585,6 +620,8 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/_authenticated/admin-excel-import': typeof AuthenticatedAdminExcelImportRoute
+  '/_authenticated/admin-image-queue': typeof AuthenticatedAdminImageQueueRoute
   '/_authenticated/admin-inventory': typeof AuthenticatedAdminInventoryRoute
   '/_authenticated/admin-orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/ai-runtime': typeof AuthenticatedAiRuntimeRoute
@@ -609,6 +646,7 @@ export interface FileRoutesById {
   '/_authenticated/suppliers': typeof AuthenticatedSuppliersRoute
   '/_authenticated/vision-lab': typeof AuthenticatedVisionLabRoute
   '/_authenticated/warehouses': typeof AuthenticatedWarehousesRoute
+  '/api/chat-widget': typeof ApiChatWidgetRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/product/$handle': typeof ProductHandleRoute
   '/product/$productId': typeof ProductProductIdRoute
@@ -634,6 +672,7 @@ export interface FileRoutesById {
   '/_authenticated/insurance/': typeof AuthenticatedInsuranceIndexRoute
   '/_authenticated/promotions/': typeof AuthenticatedPromotionsIndexRoute
   '/_authenticated/insurance/claims_/$claimId': typeof AuthenticatedInsuranceClaimsClaimIdRoute
+  '/api/public/hooks/generate-social-posts': typeof ApiPublicHooksGenerateSocialPostsRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
@@ -654,6 +693,8 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin-excel-import'
+    | '/admin-image-queue'
     | '/admin-inventory'
     | '/admin-orders'
     | '/ai-runtime'
@@ -678,6 +719,7 @@ export interface FileRouteTypes {
     | '/suppliers'
     | '/vision-lab'
     | '/warehouses'
+    | '/api/chat-widget'
     | '/planet/$planetId'
     | '/product/$handle'
     | '/product/$productId'
@@ -703,6 +745,7 @@ export interface FileRouteTypes {
     | '/insurance/'
     | '/promotions/'
     | '/insurance/claims/$claimId'
+    | '/api/public/hooks/generate-social-posts'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -721,6 +764,8 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin-excel-import'
+    | '/admin-image-queue'
     | '/admin-inventory'
     | '/admin-orders'
     | '/ai-runtime'
@@ -745,6 +790,7 @@ export interface FileRouteTypes {
     | '/suppliers'
     | '/vision-lab'
     | '/warehouses'
+    | '/api/chat-widget'
     | '/planet/$planetId'
     | '/product/$handle'
     | '/product/$productId'
@@ -770,6 +816,7 @@ export interface FileRouteTypes {
     | '/insurance'
     | '/promotions'
     | '/insurance/claims/$claimId'
+    | '/api/public/hooks/generate-social-posts'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
   id:
@@ -789,6 +836,8 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/_authenticated/admin-excel-import'
+    | '/_authenticated/admin-image-queue'
     | '/_authenticated/admin-inventory'
     | '/_authenticated/admin-orders'
     | '/_authenticated/ai-runtime'
@@ -813,6 +862,7 @@ export interface FileRouteTypes {
     | '/_authenticated/suppliers'
     | '/_authenticated/vision-lab'
     | '/_authenticated/warehouses'
+    | '/api/chat-widget'
     | '/planet/$planetId'
     | '/product/$handle'
     | '/product/$productId'
@@ -838,6 +888,7 @@ export interface FileRouteTypes {
     | '/_authenticated/insurance/'
     | '/_authenticated/promotions/'
     | '/_authenticated/insurance/claims_/$claimId'
+    | '/api/public/hooks/generate-social-posts'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
   fileRoutesById: FileRoutesById
@@ -858,12 +909,14 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  ApiChatWidgetRoute: typeof ApiChatWidgetRoute
   PlanetPlanetIdRoute: typeof PlanetPlanetIdRoute
   ProductHandleRoute: typeof ProductHandleRoute
   ProductProductIdRoute: typeof ProductProductIdRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicCspReportRoute: typeof ApiPublicCspReportRoute
+  ApiPublicHooksGenerateSocialPostsRoute: typeof ApiPublicHooksGenerateSocialPostsRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
 }
@@ -974,6 +1027,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/.well-known/oauth-protected-resource'
       preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/admin-excel-import': {
+      id: '/_authenticated/admin-excel-import'
+      path: '/admin-excel-import'
+      fullPath: '/admin-excel-import'
+      preLoaderRoute: typeof AuthenticatedAdminExcelImportRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin-image-queue': {
+      id: '/_authenticated/admin-image-queue'
+      path: '/admin-image-queue'
+      fullPath: '/admin-image-queue'
+      preLoaderRoute: typeof AuthenticatedAdminImageQueueRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin-inventory': {
       id: '/_authenticated/admin-inventory'
@@ -1142,6 +1209,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/warehouses'
       preLoaderRoute: typeof AuthenticatedWarehousesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/chat-widget': {
+      id: '/api/chat-widget'
+      path: '/api/chat-widget'
+      fullPath: '/api/chat-widget'
+      preLoaderRoute: typeof ApiChatWidgetRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/planet/$planetId': {
       id: '/planet/$planetId'
@@ -1318,6 +1392,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInsuranceClaimsClaimIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/hooks/generate-social-posts': {
+      id: '/api/public/hooks/generate-social-posts'
+      path: '/api/public/hooks/generate-social-posts'
+      fullPath: '/api/public/hooks/generate-social-posts'
+      preLoaderRoute: typeof ApiPublicHooksGenerateSocialPostsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/auth/preview': {
       id: '/lovable/email/auth/preview'
       path: '/lovable/email/auth/preview'
@@ -1466,6 +1547,8 @@ const AuthenticatedStoreRouteWithChildren =
   AuthenticatedStoreRoute._addFileChildren(AuthenticatedStoreRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminExcelImportRoute: typeof AuthenticatedAdminExcelImportRoute
+  AuthenticatedAdminImageQueueRoute: typeof AuthenticatedAdminImageQueueRoute
   AuthenticatedAdminInventoryRoute: typeof AuthenticatedAdminInventoryRoute
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
   AuthenticatedAiRuntimeRoute: typeof AuthenticatedAiRuntimeRoute
@@ -1502,6 +1585,8 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminExcelImportRoute: AuthenticatedAdminExcelImportRoute,
+  AuthenticatedAdminImageQueueRoute: AuthenticatedAdminImageQueueRoute,
   AuthenticatedAdminInventoryRoute: AuthenticatedAdminInventoryRoute,
   AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
   AuthenticatedAiRuntimeRoute: AuthenticatedAiRuntimeRoute,
@@ -1559,12 +1644,15 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  ApiChatWidgetRoute: ApiChatWidgetRoute,
   PlanetPlanetIdRoute: PlanetPlanetIdRoute,
   ProductHandleRoute: ProductHandleRoute,
   ProductProductIdRoute: ProductProductIdRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicCspReportRoute: ApiPublicCspReportRoute,
+  ApiPublicHooksGenerateSocialPostsRoute:
+    ApiPublicHooksGenerateSocialPostsRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
 }
