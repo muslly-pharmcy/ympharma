@@ -2,7 +2,12 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { FileUp, Loader2, CheckCircle2, XCircle, Download } from 'lucide-react'
-import * as XLSX from 'xlsx'
+type XLSXModule = typeof import('xlsx')
+let _xlsx: XLSXModule | null = null
+const loadXLSX = async (): Promise<XLSXModule> => {
+  if (!_xlsx) _xlsx = await import('xlsx')
+  return _xlsx
+}
 import { bulkImportExcel, type ExcelProductRow } from '@/lib/excel-import.functions'
 
 export const Route = createFileRoute('/_authenticated/admin-excel-import')({
