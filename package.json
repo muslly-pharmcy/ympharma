@@ -19,10 +19,6 @@
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^2.0.50",
-    "@e965/xlsx": "^0.20.3",
-    "@fontsource-variable/montserrat": "^5.2.8",
-    "@fontsource/cairo": "^5.2.7",
-    "@fontsource/tajawal": "^5.2.7",
     "@hookform/resolvers": "^5.2.2",
     "@lovable.dev/email-js": "^0.0.4",
     "@lovable.dev/mcp-js": "^0.24.0",
