@@ -115,7 +115,7 @@ export const Route = createFileRoute('/api/public/hooks/dlq-reprocessor')({
             event_name: row.event_name,
             entity_type: row.entity_type,
             entity_id: row.entity_id,
-            payload: row.payload,
+            payload: row.payload as never,
             source: `${prefix}${row.source}`,
             occurred_at: new Date().toISOString(),
             correlation_id: row.correlation_id,
