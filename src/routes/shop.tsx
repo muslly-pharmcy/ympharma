@@ -9,7 +9,7 @@ import type { CatalogProduct } from '@/domain/catalog/schemas'
 const searchSchema = z.object({
   q: z.string().optional(),
   cat: z.string().uuid().optional(),
-  page: z.coerce.number().int().min(1).default(1),
+  page: z.coerce.number().int().min(1).optional(),
 })
 
 export const Route = createFileRoute('/shop')({
