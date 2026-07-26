@@ -24,7 +24,7 @@ import { RouteSkeleton } from '@/components/skeletons/Skeleton'
 import { classifyError } from '@/lib/errors/classify'
 import { newCorrelationId } from '@/lib/errors/correlation'
 import { reportError } from '@/lib/errors/logger'
-import almoslyLogo from '@/assets/almosly-logo.png.asset.json'
+import almoslyLogo from '@/assets/almosly-logo-optimized.webp'
 import appCss from '@/index.css?url'
 
 
@@ -145,7 +145,7 @@ function RootNotFound() {
       <div className="pointer-events-none absolute -bottom-24 -right-16 h-72 w-72 rounded-full bg-gold/10 blur-3xl" />
 
       <img
-        src={almoslyLogo.url}
+        src={almoslyLogo}
         alt="صيدلية المصلي"
         className="relative h-32 w-32 object-contain md:h-40 md:w-40"
       />
