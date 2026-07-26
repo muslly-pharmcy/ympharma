@@ -20,7 +20,10 @@ Update cadence: after every major engineering phase.
 
 ### Autonomous cycle 2026-07-26 (post-Baseline v1)
 - **Security:** closed 2 active scanner findings — `crm_loyalty_any_member_write` (rewrote 10 CRM `ALL` policies to require `crm.loyalty.manage` / `crm.promotions.manage` / `crm.customers.manage` via `has_org_permission`) and `inv_expiry_alerts_ack_wrong_permission` (raised UPDATE from `inventory.read` to `inventory.manage`). 0 active findings remaining.
-- **Testing:** all 5 pre-existing failing tests fixed — permission-check missing `beforeEach` import, logger-redaction preserving null/undefined, sanitizer preserving digits in names, magic-number test typo, and SUN-GUARDIAN Arabic intent classification now catches "أعطِ دواءً …بدون وصفة" via a keyword-set semantic rule. Suite: **196/196 (100%)**.
+- **Testing:** all 5 pre-existing failing tests fixed. Suite: **196/196 (100%)**.
+- **Event Bus:** implemented missing `event-consumer` and `dlq-reprocessor` HTTP consumers, formalized DLQ replay contract in ADR-0001, generated cron SQL (`docs/engineering/sql/schedule-dlq-reprocessor.sql`) requiring elevated deploy privileges.
+- **DB perf:** dropped 2 unused duplicate indexes (`idx_error_logs_occurred_at`, `idx_uptime_checks_checked_at`) — retained indexes serve identical queries with 100× higher scan counts, reducing write amplification on the two hottest log tables (44.5 s + high-volume inserts).
+- **Deps:** removed 4 verified-unused packages (`@fontsource/cairo`, `@fontsource/tajawal`, `@fontsource-variable/montserrat`, `@e965/xlsx`); 0 high/critical vulnerabilities in remaining tree.
 - **Typecheck:** clean (`tsgo --noEmit`).
 
 
