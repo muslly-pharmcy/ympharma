@@ -186,9 +186,11 @@ export default function SolarSystem() {
             <Box className="w-5 h-5 text-primary" />
             <h2 className="text-xl font-bold text-gray-900">النظام الكوني ثلاثي الأبعاد</h2>
           </div>
-          <Suspense fallback={<LoadingSpinner text="جاري تحميل النظام الكوني..." />}>
-            <SolarSystem3D />
-          </Suspense>
+          <LazyInView fallback={<LoadingSpinner text="جاري تحميل النظام الكوني..." />} minHeight={500}>
+            <Suspense fallback={<LoadingSpinner text="جاري تحميل النظام الكوني..." />}>
+              <SolarSystem3D />
+            </Suspense>
+          </LazyInView>
         </motion.div>
 
         {/* Planets Grid */}
