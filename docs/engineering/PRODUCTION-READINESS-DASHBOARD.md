@@ -91,4 +91,4 @@ Deliverable: per-surface issue list with severity + fix, tracked in `docs/engine
 5. **Infrastructure** — HTML `Cache-Control: s-maxage=60, stale-while-revalidate=300` on marketing routes to close the Home TTFB gap.
 6. **Product JSON-LD** — `Product` schema on `/product/*` for rich results.
 7. **CX batch 2** — Order timeline stepper, checkout sticky summary, password reveal toggle.
-8. **AI Systems** — Schedule DLQ reprocessor cron; per-agent error-budget alerting.
+8. **AI Systems** — Apply `schedule-dlq-reprocessor.sql` (needs cron-schema GRANT); add per-agent error-budget alerting.
