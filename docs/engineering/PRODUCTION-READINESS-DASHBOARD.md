@@ -47,10 +47,10 @@ Update cadence: after every major engineering phase.
 - **Blocking:** Empty/error/loading states inconsistent across customer surfaces; motion system not yet unified.
 - **Next:** Phase 4 audit (see below) — Home, Shop, PDP, Search, Cart, Checkout, Orders, Auth.
 
-### AI Systems — 90 / 95
-- **Blocking:** DLQ recovery worker not scheduled in prod.
-- **Recent:** SUN CORE, Event Bus, pgvector memory, Clinical Copilot on Gemini 1.5 Flash live.
-- **Next:** Schedule DLQ reprocessor; add per-agent error budget alerting.
+### AI Systems — 92 / 95
+- **Blocking:** `event-consumer` route existed only as a cron target for weeks — now implemented (`src/routes/api/public/hooks/event-consumer.ts`). DLQ reprocessor code shipped; pg_cron install requires elevated privileges (SQL at `docs/engineering/sql/schedule-dlq-reprocessor.sql`).
+- **Recent:** ADR-0001 (Event Bus + DLQ Replay contract) accepted. SUN CORE, Event Bus, pgvector memory, Clinical Copilot on Gemini 1.5 Flash live.
+- **Next:** Owner applies DLQ cron SQL; add per-agent error-budget alerting on `fail_agent_event` volume.
 
 ### Connector Health — 78 / 95
 - **Blocking:** Sentry DSN not set in prod env (init is a no-op); WhatsApp webhook shipped but not yet verified end-to-end with Meta.
