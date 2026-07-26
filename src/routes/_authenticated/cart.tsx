@@ -79,17 +79,29 @@ function CartPage() {
         </Link>
       </header>
 
-      {items.length === 0 ? (
-        <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center">
-          <p className="mb-4 text-gray-600">السلة فارغة حالياً.</p>
-          <Link
-            to="/shop"
-            search={{ page: 1 }}
-            className="inline-block rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white"
-          >
-            تصفح المتجر
-          </Link>
-        </div>
+      {isError ? (
+        <ErrorState
+          onRetry={() => void refetch()}
+          isRetrying={isRefetching}
+          description="تعذّر تحميل سلة التسوق. تحقّق من الاتصال ثم أعد المحاولة."
+        />
+      ) : isLoading ? (
+        <ListSkeleton rows={3} />
+      ) : items.length === 0 ? (
+        <EmptyState
+          icon={<ShoppingCart className="h-8 w-8 text-gray-400 sm:h-10 sm:w-10" />}
+          title="السلة فارغة حالياً"
+          description="ابدأ بتصفّح المتجر لإضافة منتجاتك المفضّلة."
+          action={
+            <Link
+              to="/shop"
+              search={{ page: 1 }}
+              className="inline-block rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+            >
+              تصفّح المتجر
+            </Link>
+          }
+        />
       ) : (
         <>
           <ul className="space-y-3">
