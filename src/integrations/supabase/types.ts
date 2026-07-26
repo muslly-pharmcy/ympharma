@@ -13268,6 +13268,45 @@ export type Database = {
           },
         ]
       }
+      whatsapp_events: {
+        Row: {
+          correlation_id: string | null
+          created_at: string
+          direction: string
+          event_type: string
+          from_number: string | null
+          id: string
+          message_id: string
+          payload: Json
+          phone_number_id: string | null
+          processed_at: string
+        }
+        Insert: {
+          correlation_id?: string | null
+          created_at?: string
+          direction: string
+          event_type: string
+          from_number?: string | null
+          id?: string
+          message_id: string
+          payload: Json
+          phone_number_id?: string | null
+          processed_at?: string
+        }
+        Update: {
+          correlation_id?: string | null
+          created_at?: string
+          direction?: string
+          event_type?: string
+          from_number?: string | null
+          id?: string
+          message_id?: string
+          payload?: Json
+          phone_number_id?: string | null
+          processed_at?: string
+        }
+        Relationships: []
+      }
       whatsapp_messages: {
         Row: {
           agent_run_id: string | null

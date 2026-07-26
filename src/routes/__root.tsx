@@ -92,6 +92,13 @@ function RootComponent() {
         defaultOptions: { queries: { staleTime: 30_000, retry: 1 } },
       }),
   )
+  useEffect(() => {
+    // Fire-and-forget: both are no-ops when their env vars are missing.
+    void import('@/lib/observability/sentry').then((m) => m.initSentry()).catch(() => {})
+    void import('@/lib/analytics').then((m) => m.initAnalytics()).catch(() => {})
+  }, [])
+
+
   return (
     <AppQueryProvider client={queryClient}>
       <AuthStateSync />

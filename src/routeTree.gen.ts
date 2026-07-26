@@ -82,6 +82,7 @@ import { Route as AuthenticatedStoreCodeRouteImport } from './routes/_authentica
 import { Route as ApiPublicCspReportRouteImport } from './routes/api/public/csp-report'
 import { Route as AuthenticatedInsuranceClaimsClaimIdRouteImport } from './routes/_authenticated/insurance.claims_.$claimId'
 import { Route as ApiPublicHooksGenerateSocialPostsRouteImport } from './routes/api/public/hooks/generate-social-posts'
+import { Route as ApiPublicHooksWhatsappRouteImport } from './routes/api/public/hooks/whatsapp'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 
@@ -484,6 +485,11 @@ const ApiPublicHooksGenerateSocialPostsRoute =
     path: '/api/public/hooks/generate-social-posts',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksWhatsappRoute = ApiPublicHooksWhatsappRouteImport.update({
+  id: '/api/public/hooks/whatsapp',
+  path: '/api/public/hooks/whatsapp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   id: '/lovable/email/auth/preview',
   path: '/lovable/email/auth/preview',
@@ -568,6 +574,7 @@ export interface FileRoutesByFullPath {
   '/promotions/': typeof AuthenticatedPromotionsIndexRoute
   '/insurance/claims/$claimId': typeof AuthenticatedInsuranceClaimsClaimIdRoute
   '/api/public/hooks/generate-social-posts': typeof ApiPublicHooksGenerateSocialPostsRoute
+  '/api/public/hooks/whatsapp': typeof ApiPublicHooksWhatsappRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
@@ -644,6 +651,7 @@ export interface FileRoutesByTo {
   '/promotions': typeof AuthenticatedPromotionsIndexRoute
   '/insurance/claims/$claimId': typeof AuthenticatedInsuranceClaimsClaimIdRoute
   '/api/public/hooks/generate-social-posts': typeof ApiPublicHooksGenerateSocialPostsRoute
+  '/api/public/hooks/whatsapp': typeof ApiPublicHooksWhatsappRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
@@ -722,6 +730,7 @@ export interface FileRoutesById {
   '/_authenticated/promotions/': typeof AuthenticatedPromotionsIndexRoute
   '/_authenticated/insurance/claims_/$claimId': typeof AuthenticatedInsuranceClaimsClaimIdRoute
   '/api/public/hooks/generate-social-posts': typeof ApiPublicHooksGenerateSocialPostsRoute
+  '/api/public/hooks/whatsapp': typeof ApiPublicHooksWhatsappRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
@@ -800,6 +809,7 @@ export interface FileRouteTypes {
     | '/promotions/'
     | '/insurance/claims/$claimId'
     | '/api/public/hooks/generate-social-posts'
+    | '/api/public/hooks/whatsapp'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -876,6 +886,7 @@ export interface FileRouteTypes {
     | '/promotions'
     | '/insurance/claims/$claimId'
     | '/api/public/hooks/generate-social-posts'
+    | '/api/public/hooks/whatsapp'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
   id:
@@ -953,6 +964,7 @@ export interface FileRouteTypes {
     | '/_authenticated/promotions/'
     | '/_authenticated/insurance/claims_/$claimId'
     | '/api/public/hooks/generate-social-posts'
+    | '/api/public/hooks/whatsapp'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
   fileRoutesById: FileRoutesById
@@ -982,6 +994,7 @@ export interface RootRouteChildren {
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicCspReportRoute: typeof ApiPublicCspReportRoute
   ApiPublicHooksGenerateSocialPostsRoute: typeof ApiPublicHooksGenerateSocialPostsRoute
+  ApiPublicHooksWhatsappRoute: typeof ApiPublicHooksWhatsappRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
 }
@@ -1499,6 +1512,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksGenerateSocialPostsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/whatsapp': {
+      id: '/api/public/hooks/whatsapp'
+      path: '/api/public/hooks/whatsapp'
+      fullPath: '/api/public/hooks/whatsapp'
+      preLoaderRoute: typeof ApiPublicHooksWhatsappRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/auth/preview': {
       id: '/lovable/email/auth/preview'
       path: '/lovable/email/auth/preview'
@@ -1762,6 +1782,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicCspReportRoute: ApiPublicCspReportRoute,
   ApiPublicHooksGenerateSocialPostsRoute:
     ApiPublicHooksGenerateSocialPostsRoute,
+  ApiPublicHooksWhatsappRoute: ApiPublicHooksWhatsappRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
 }
