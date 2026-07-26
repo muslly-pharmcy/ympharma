@@ -13689,7 +13689,7 @@ export type Database = {
           stock_balance?: never
           store_code?: string | null
           strength?: string | null
-          supplier_name_text?: string | null
+          supplier_name_text?: never
           updated_at?: string | null
         }
         Update: {
@@ -13714,7 +13714,7 @@ export type Database = {
           stock_balance?: never
           store_code?: string | null
           strength?: string | null
-          supplier_name_text?: string | null
+          supplier_name_text?: never
           updated_at?: string | null
         }
         Relationships: [
