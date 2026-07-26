@@ -4,6 +4,7 @@
 // - Never throws — logging must not crash the app.
 
 import type { ClassifiedError } from './classify'
+import { apiErrorFromUnknown, isApiError } from './api-error'
 
 export interface ErrorReport {
   correlationId: string
