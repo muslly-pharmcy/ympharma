@@ -83,6 +83,7 @@ function AdminExcelImport() {
     setResult(null)
     setFileName(file.name)
     try {
+      const XLSX = await loadXLSX()
       const buf = await file.arrayBuffer()
       const wb = XLSX.read(buf, { type: 'array' })
       const sheet = wb.Sheets[wb.SheetNames[0]]
@@ -101,7 +102,8 @@ function AdminExcelImport() {
     }
   }
 
-  const downloadTemplate = () => {
+  const downloadTemplate = async () => {
+    const XLSX = await loadXLSX()
     const ws = XLSX.utils.json_to_sheet([
       {
         store_code: 'DEMO-001',
