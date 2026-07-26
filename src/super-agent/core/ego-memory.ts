@@ -99,9 +99,36 @@ export class EgoMemory {
 
   assertConstitution(intent: string): { allowed: boolean; reason?: string } {
     const lowerIntent = intent.toLowerCase();
+    // First: literal full-phrase match (English + exact Arabic prohibitions).
     for (const prohibition of this.constitution.absoluteProhibitions) {
       if (lowerIntent.includes(prohibition.toLowerCase())) {
         return { allowed: false, reason: `انتهاك للدستور: ${prohibition}` };
+      }
+    }
+    // Second: semantic keyword-set match — Arabic phrasing rarely mirrors the
+    // constitution string verbatim, so guard against high-signal intents that
+    // combine a prohibited action with its prohibited context.
+    const semanticRules: Array<{ keywords: string[]; prohibition: string }> = [
+      {
+        // "give / dispense / prescribe medicine ... without prescription"
+        keywords: ['دواء', 'دواءً', 'أدوية', 'وصفة'],
+        prohibition: 'إعطاء توصيات دوائية بدون وصفة طبية',
+      },
+      {
+        // English variant
+        keywords: ['prescription', 'without'],
+        prohibition: 'إعطاء توصيات دوائية بدون وصفة طبية',
+      },
+      {
+        // Bulk delete without confirmation
+        keywords: ['حذف', 'جماعي'],
+        prohibition: 'تنفيذ عمليات حذف جماعية بدون تأكيد بشري',
+      },
+    ];
+    for (const rule of semanticRules) {
+      const hits = rule.keywords.filter((k) => lowerIntent.includes(k.toLowerCase())).length;
+      if (hits >= 2 && lowerIntent.includes('بدون')) {
+        return { allowed: false, reason: `انتهاك للدستور: ${rule.prohibition}` };
       }
     }
     return { allowed: true };
