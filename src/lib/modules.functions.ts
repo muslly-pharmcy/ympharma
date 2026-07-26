@@ -101,20 +101,23 @@ export const listModuleDoctors = createServerFn({ method: 'GET' })
   .handler(async ({ data, context }): Promise<{ items: ModuleDoctor[]; warning: string | null }> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = context.supabase as any
+    // NOTE: `phone_e164` is intentionally excluded — column-level grants on
+    // hc_doctors REVOKE SELECT on phone/qr_token from anon+authenticated. Public
+    // directory hides the phone; contact goes through the request flow.
     let q = sb.from('hc_doctors')
-      .select(sel('id, full_name_ar, medical_title, phone_e164, verification_status, photo_url'))
+      .select(sel('id, full_name_ar, medical_title, verification_status, photo_url'))
       .eq('is_public', true)
       .eq('verification_status', 'verified')
       .limit(60)
     if (data.specialty !== 'all') q = q.eq('medical_title', data.specialty)
     const { data: rows, error } = await q
     if (error) return { items: [], warning: error.message }
-    type Row = { id: string; full_name_ar: string | null; medical_title: string | null; phone_e164: string | null; verification_status: string | null; photo_url: string | null }
+    type Row = { id: string; full_name_ar: string | null; medical_title: string | null; verification_status: string | null; photo_url: string | null }
     const items: ModuleDoctor[] = ((rows ?? []) as Row[]).map((r) => ({
       id: r.id,
       nameAr: r.full_name_ar ?? '',
       specialty: r.medical_title ?? '',
-      phone: r.phone_e164 ?? '',
+      phone: '',
       rating: 0,
       reviewCount: 0,
       isVerified: r.verification_status === 'verified',

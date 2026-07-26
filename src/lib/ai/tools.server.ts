@@ -159,7 +159,7 @@ const TOOLS: Record<string, ToolDefinition> = {
       const cutoff = new Date(Date.now() + days * 86400 * 1000).toISOString().slice(0, 10)
       const { data, error } = await sb
         .from('inv_stock_batches')
-        .select('id, product_id, batch_number, expiry_date, qty_on_hand')
+        .select('id, product_id, batch_no, expiry_date, qty_on_hand')
         .eq('organization_id', actor.organizationId)
         .not('expiry_date', 'is', null)
         .lte('expiry_date', cutoff)
