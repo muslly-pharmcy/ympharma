@@ -9,7 +9,7 @@ import type { CatalogProduct } from '@/domain/catalog/schemas'
 const searchSchema = z.object({
   q: z.string().optional(),
   cat: z.string().uuid().optional(),
-  page: z.coerce.number().int().min(1).default(1),
+  page: z.coerce.number().int().min(1).optional(),
 })
 
 export const Route = createFileRoute('/shop')({
@@ -129,9 +129,9 @@ function ShopPage() {
               ))}
             </div>
             <Pagination
-              page={search.page}
+              page={search.page ?? 1}
               pages={pages}
-              onChange={(page) => setSearch({ page })}
+              onChange={(page) => setSearch({ page: page === 1 ? undefined : page })}
             />
           </>
         )}

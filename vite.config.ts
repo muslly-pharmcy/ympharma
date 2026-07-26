@@ -27,6 +27,11 @@ export default defineConfig({
   },
   vite: {
     plugins: [mcpPlugin()],
+    build: {
+      // Hidden source maps: emitted to disk for Sentry/Lighthouse without
+      // referencing them from shipped JS (no `//# sourceMappingURL`).
+      sourcemap: 'hidden',
+    },
     resolve: {
       // React Email's bundled htmlparser2 still imports the legacy
       // `entities/lib/decode.js` subpath. v6+ exposes the same modules under

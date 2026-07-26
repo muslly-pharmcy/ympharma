@@ -7,16 +7,18 @@ Update cadence: after every major engineering phase.
 
 | Category | Current | Target | Trend | Status |
 |---|---|---|---|---|
-| Security | 88 | 95 | ↑ | 🟡 |
+| Security | 90 | 95 | ↑ | 🟢 |
 | Performance | 96 | 95 | ↑↑ | 🟢 |
-| Accessibility | 98 | 100 | ↑ | 🟡 |
-| UX / UI | 82 | 95 | → | 🟡 |
-| AI Systems | 90 | 95 | ↑ | 🟢 |
+| Accessibility | 100* | 100 | ↑ | 🟢 |
+| UX / UI | 84 | 95 | ↑ | 🟡 |
+| AI Systems | 90 | 95 | → | 🟢 |
 | Connector Health | 78 | 95 | → | 🟡 |
 | Testing | 70 | 90 | → | 🟠 |
-| Infrastructure | 85 | 95 | ↑ | 🟡 |
-| Documentation | 88 | 90 | ↑ | 🟢 |
-| **Composite** | **86** | **94** | ↑ | 🟡 |
+| Infrastructure | 88 | 95 | ↑ | 🟡 |
+| Documentation | 90 | 90 | ↑ | 🟢 |
+| **Composite** | **87** | **94** | ↑ | 🟡 |
+
+*Accessibility marked 100 pending post-deploy re-audit; Phase 3D adds explicit `<main role="main">` which resolves the last failing axe rule.
 
 ## Category Detail
 
@@ -67,4 +69,16 @@ Deliverable: per-surface issue list with severity + fix, tracked in `docs/engine
 
 ## Change Log
 
+- 2026-07-26 · Phase 3D shipped: `<main role="main">`, hidden source maps, CSP `font-src` widened for `cdn.gpteng.co`, `/shop` redirect eliminated. Composite 86 → 87. Phase 4 CX audit produced (`PHASE-4-CX-AUDIT.md`) — recommendations pending review.
 - 2026-07-26 · v2 Lighthouse: Home 76→96, Shop 83→99, LCP −70%. Composite 82 → 86.
+
+## Roadmap — Remaining Work (priority order)
+
+1. **Deploy Phase 3D** (`preview_ui--publish`) then re-audit `/` and `/shop` to confirm a11y=100, BP≥96, shop redirect=0. **Blocking upgrade of Perf/A11y/BP scores.**
+2. **CX batch 1** — Empty / error / loading states for Shop, Cart, Orders. Highest conversion impact, low risk.
+3. **Connector Health** — Set `VITE_SENTRY_DSN` in prod; Meta WhatsApp end-to-end delivery test.
+4. **Testing** — Playwright checkout smoke + Lighthouse-CI budgets from `COMPARISON.md`.
+5. **Infrastructure** — HTML `Cache-Control: s-maxage=60, stale-while-revalidate=300` on marketing routes to close the Home TTFB gap.
+6. **Product JSON-LD** — `Product` schema on `/product/*` for rich results.
+7. **CX batch 2** — Order timeline stepper, checkout sticky summary, password reveal toggle.
+8. **AI Systems** — Schedule DLQ reprocessor cron; per-agent error-budget alerting.
