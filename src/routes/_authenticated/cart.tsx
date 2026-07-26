@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
 import { ShoppingCart, Trash2, Plus, Minus, Lock } from 'lucide-react'
 import { listCart, removeFromCart, setCartQuantity } from '@/lib/cart.functions'
+import { EmptyState, ErrorState, ListSkeleton } from '@/shared/components/StateViews'
 
 export const Route = createFileRoute('/_authenticated/cart')({
   head: () => ({
@@ -17,7 +18,13 @@ export const Route = createFileRoute('/_authenticated/cart')({
 })
 
 function CartPage() {
-  const { data: items = [] } = useQuery({
+  const {
+    data: items = [],
+    isLoading,
+    isError,
+    refetch,
+    isRefetching,
+  } = useQuery({
     queryKey: ['cart', 'items'],
     queryFn: () => listCart(),
     // Keep data in memory long enough to survive brief offline periods.
@@ -30,7 +37,18 @@ function CartPage() {
 
   const remove = useMutation({
     mutationFn: (itemId: string) => removeFn({ data: { itemId } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['cart'] }),
+    onMutate: async (itemId: string) => {
+      await qc.cancelQueries({ queryKey: ['cart', 'items'] })
+      const prev = qc.getQueryData<typeof items>(['cart', 'items'])
+      qc.setQueryData<typeof items>(['cart', 'items'], (old) =>
+        (old ?? []).filter((it) => it.id !== itemId),
+      )
+      return { prev }
+    },
+    onError: (_e, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(['cart', 'items'], ctx.prev)
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ['cart'] }),
   })
   const setQty = useMutation({
     mutationFn: (v: { itemId: string; quantity: number }) => setQtyFn({ data: v }),
@@ -61,17 +79,29 @@ function CartPage() {
         </Link>
       </header>
 
-      {items.length === 0 ? (
-        <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center">
-          <p className="mb-4 text-gray-600">السلة فارغة حالياً.</p>
-          <Link
-            to="/shop"
-            search={{ page: 1 }}
-            className="inline-block rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white"
-          >
-            تصفح المتجر
-          </Link>
-        </div>
+      {isError ? (
+        <ErrorState
+          onRetry={() => void refetch()}
+          isRetrying={isRefetching}
+          description="تعذّر تحميل سلة التسوق. تحقّق من الاتصال ثم أعد المحاولة."
+        />
+      ) : isLoading ? (
+        <ListSkeleton rows={3} />
+      ) : items.length === 0 ? (
+        <EmptyState
+          icon={<ShoppingCart className="h-8 w-8 text-gray-400 sm:h-10 sm:w-10" />}
+          title="السلة فارغة حالياً"
+          description="ابدأ بتصفّح المتجر لإضافة منتجاتك المفضّلة."
+          action={
+            <Link
+              to="/shop"
+              search={{ page: 1 }}
+              className="inline-block rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+            >
+              تصفّح المتجر
+            </Link>
+          }
+        />
       ) : (
         <>
           <ul className="space-y-3">

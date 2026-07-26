@@ -2,6 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { ShoppingBag, ArrowLeft } from 'lucide-react'
 import { listMyOrders } from '@/lib/storefront.functions'
+import { EmptyState, ErrorState, ListSkeleton } from '@/shared/components/StateViews'
 
 export const Route = createFileRoute('/_authenticated/orders')({
   head: () => ({
@@ -23,7 +24,7 @@ const statusLabels: Record<string, { label: string; color: string }> = {
 }
 
 function MyOrdersPage() {
-  const { data: orders = [], isLoading } = useQuery({
+  const { data: orders = [], isLoading, isError, refetch, isRefetching } = useQuery({
     queryKey: ['my-orders'],
     queryFn: () => listMyOrders(),
   })
@@ -35,19 +36,29 @@ function MyOrdersPage() {
         <h1 className="text-2xl font-bold text-gray-900">طلباتي</h1>
       </header>
 
-      {isLoading ? (
-        <div className="p-8 text-center text-gray-500">جاري التحميل…</div>
+      {isError ? (
+        <ErrorState
+          onRetry={() => void refetch()}
+          isRetrying={isRefetching}
+          description="تعذّر جلب قائمة الطلبات. تحقّق من الاتصال ثم أعد المحاولة."
+        />
+      ) : isLoading ? (
+        <ListSkeleton rows={4} />
       ) : orders.length === 0 ? (
-        <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center">
-          <p className="mb-4 text-gray-600">لا توجد طلبات بعد.</p>
-          <Link
-            to="/shop"
-            search={{ page: 1 }}
-            className="inline-block rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-white"
-          >
-            ابدأ التسوق
-          </Link>
-        </div>
+        <EmptyState
+          icon={<ShoppingBag className="h-8 w-8 text-gray-400 sm:h-10 sm:w-10" />}
+          title="لا توجد طلبات بعد"
+          description="عند إتمام أوّل طلب سيظهر هنا مع حالته وتفاصيله."
+          action={
+            <Link
+              to="/shop"
+              search={{ page: 1 }}
+              className="inline-block rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+            >
+              ابدأ التسوّق
+            </Link>
+          }
+        />
       ) : (
         <ul className="space-y-3">
           {orders.map((o) => {

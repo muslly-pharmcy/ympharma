@@ -69,8 +69,10 @@ Deliverable: per-surface issue list with severity + fix, tracked in `docs/engine
 
 ## Change Log
 
+- 2026-07-26 · **Production Baseline v1** frozen. Post-3D re-audit (muslly.com): Home LCP 1.74 s / FCP 1.51 s / CLS ~0 / TBT 255 ms / TTFB 1.00 s; Shop LCP 1.48 s / FCP 1.28 s / CLS ~0 / TBT 11 ms / TTFB 1.05 s. No failed requests, no hydration warnings, CSP + HSTS + XFO headers verified. Console noise limited to CSP report-only notice and generated Supabase-env guard (both non-fatal, tracked as external limits). CX Batch 1 shipped: shared `StateViews` (loading skeletons, empty, error+retry) wired into `/shop`, `/_authenticated/cart`, `/_authenticated/orders`; optimistic remove on cart. No changes to checkout, pricing, inventory, auth, or branding.
 - 2026-07-26 · Phase 3D shipped: `<main role="main">`, hidden source maps, CSP `font-src` widened for `cdn.gpteng.co`, `/shop` redirect eliminated. Composite 86 → 87. Phase 4 CX audit produced (`PHASE-4-CX-AUDIT.md`) — recommendations pending review.
 - 2026-07-26 · v2 Lighthouse: Home 76→96, Shop 83→99, LCP −70%. Composite 82 → 86.
+
 
 ## Roadmap — Remaining Work (priority order)
 

@@ -1,10 +1,15 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Package, Search, ShoppingCart, Lock } from 'lucide-react'
+import { Package, Search, ShoppingCart, Lock, PackageSearch } from 'lucide-react'
 import { z } from 'zod'
 import { listProducts, listCategories } from '@/lib/catalog.functions'
 import type { CatalogProduct } from '@/domain/catalog/schemas'
+import {
+  EmptyState as SharedEmptyState,
+  ErrorState,
+  ProductGridSkeleton,
+} from '@/shared/components/StateViews'
 
 const searchSchema = z.object({
   q: z.string().optional(),
@@ -36,7 +41,7 @@ function ShopPage() {
   const navigate = useNavigate()
   const [q, setQ] = useState(search.q ?? '')
 
-  const { data, isFetching } = useQuery({
+  const { data, isFetching, isError, refetch, isRefetching } = useQuery({
     queryKey: ['storefront', 'products', search],
     queryFn: () =>
       listProducts({
@@ -113,14 +118,38 @@ function ShopPage() {
           </button>
         </form>
 
-        {isFetching && products.length === 0 ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="aspect-[3/4] animate-pulse rounded-2xl bg-gray-100" />
-            ))}
-          </div>
+        {isError ? (
+          <ErrorState
+            onRetry={() => void refetch()}
+            isRetrying={isRefetching}
+            description="تعذّر جلب قائمة المنتجات. تحقّق من الاتصال ثم أعد المحاولة."
+          />
+        ) : isFetching && products.length === 0 ? (
+          <ProductGridSkeleton count={8} />
         ) : products.length === 0 ? (
-          <EmptyState />
+          <SharedEmptyState
+            icon={<PackageSearch className="h-8 w-8 text-gray-400 sm:h-10 sm:w-10" />}
+            title={search.q || search.cat ? 'لا توجد نتائج مطابقة' : 'لا توجد منتجات حالياً'}
+            description={
+              search.q || search.cat
+                ? 'جرّب تعديل كلمة البحث أو اختيار فئة أخرى.'
+                : 'سيتم إضافة المنتجات قريباً.'
+            }
+            action={
+              (search.q || search.cat) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQ('')
+                    void navigate({ to: '/shop', search: {} })
+                  }}
+                  className="rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+                >
+                  مسح الفلاتر
+                </button>
+              )
+            }
+          />
         ) : (
           <>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -178,19 +207,6 @@ function ProductCard({ product }: { product: CatalogProduct }) {
   )
 }
 
-function EmptyState() {
-  return (
-    <div className="rounded-3xl border border-gray-100 bg-white py-24 text-center shadow-sm">
-      <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gray-100">
-        <Package className="h-10 w-10 text-gray-400" />
-      </div>
-      <h2 className="mb-2 text-xl font-bold text-gray-900">لا توجد منتجات مطابقة</h2>
-      <p className="mx-auto max-w-md text-gray-500">
-        جرّب تعديل البحث أو تصفح الفئات المختلفة.
-      </p>
-    </div>
-  )
-}
 
 function Pagination({
   page,
