@@ -212,6 +212,7 @@ export type Database = {
           payload: Json
           pharmacist_notes: string | null
           status: string
+          submitted_by: string | null
           updated_at: string
           user_phone: string | null
         }
@@ -236,6 +237,7 @@ export type Database = {
           payload?: Json
           pharmacist_notes?: string | null
           status?: string
+          submitted_by?: string | null
           updated_at?: string
           user_phone?: string | null
         }
@@ -260,6 +262,7 @@ export type Database = {
           payload?: Json
           pharmacist_notes?: string | null
           status?: string
+          submitted_by?: string | null
           updated_at?: string
           user_phone?: string | null
         }
@@ -13652,30 +13655,57 @@ export type Database = {
       }
       product_classifications_public: {
         Row: {
+          active_ingredient: string | null
+          complementary_legacy_ids: number[] | null
           conditions: string[] | null
+          created_at: string | null
+          generic_name: string | null
           id: string | null
+          is_chronic: boolean | null
           pharmacological_class: string | null
+          product_legacy_id: number | null
           related_legacy_ids: number[] | null
           requires_prescription: boolean | null
           status: Database["public"]["Enums"]["classification_status"] | null
+          therapeutic_category:
+            | Database["public"]["Enums"]["therapeutic_category"]
+            | null
           updated_at: string | null
         }
         Insert: {
+          active_ingredient?: string | null
+          complementary_legacy_ids?: number[] | null
           conditions?: string[] | null
+          created_at?: string | null
+          generic_name?: string | null
           id?: string | null
+          is_chronic?: boolean | null
           pharmacological_class?: string | null
+          product_legacy_id?: number | null
           related_legacy_ids?: number[] | null
           requires_prescription?: boolean | null
           status?: Database["public"]["Enums"]["classification_status"] | null
+          therapeutic_category?:
+            | Database["public"]["Enums"]["therapeutic_category"]
+            | null
           updated_at?: string | null
         }
         Update: {
+          active_ingredient?: string | null
+          complementary_legacy_ids?: number[] | null
           conditions?: string[] | null
+          created_at?: string | null
+          generic_name?: string | null
           id?: string | null
+          is_chronic?: boolean | null
           pharmacological_class?: string | null
+          product_legacy_id?: number | null
           related_legacy_ids?: number[] | null
           requires_prescription?: boolean | null
           status?: Database["public"]["Enums"]["classification_status"] | null
+          therapeutic_category?:
+            | Database["public"]["Enums"]["therapeutic_category"]
+            | null
           updated_at?: string | null
         }
         Relationships: []
