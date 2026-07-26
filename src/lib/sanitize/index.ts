@@ -138,4 +138,4 @@ export function sanitize(input: string, options: SanitizeOptions = {}): string {
   return result;
 }
 
-export { LENGTH_LIMITS };
+
