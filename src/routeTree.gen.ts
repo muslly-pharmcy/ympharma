@@ -81,6 +81,8 @@ import { Route as AuthenticatedPurchaseOrdersIdRouteImport } from './routes/_aut
 import { Route as AuthenticatedStoreCodeRouteImport } from './routes/_authenticated/store.$code'
 import { Route as ApiPublicCspReportRouteImport } from './routes/api/public/csp-report'
 import { Route as AuthenticatedInsuranceClaimsClaimIdRouteImport } from './routes/_authenticated/insurance.claims_.$claimId'
+import { Route as ApiPublicHooksDlqReprocessorRouteImport } from './routes/api/public/hooks/dlq-reprocessor'
+import { Route as ApiPublicHooksEventConsumerRouteImport } from './routes/api/public/hooks/event-consumer'
 import { Route as ApiPublicHooksGenerateSocialPostsRouteImport } from './routes/api/public/hooks/generate-social-posts'
 import { Route as ApiPublicHooksWhatsappRouteImport } from './routes/api/public/hooks/whatsapp'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -479,6 +481,18 @@ const AuthenticatedInsuranceClaimsClaimIdRoute =
     path: '/insurance/claims/$claimId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicHooksDlqReprocessorRoute =
+  ApiPublicHooksDlqReprocessorRouteImport.update({
+    id: '/api/public/hooks/dlq-reprocessor',
+    path: '/api/public/hooks/dlq-reprocessor',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksEventConsumerRoute =
+  ApiPublicHooksEventConsumerRouteImport.update({
+    id: '/api/public/hooks/event-consumer',
+    path: '/api/public/hooks/event-consumer',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksGenerateSocialPostsRoute =
   ApiPublicHooksGenerateSocialPostsRouteImport.update({
     id: '/api/public/hooks/generate-social-posts',
@@ -573,6 +587,8 @@ export interface FileRoutesByFullPath {
   '/insurance/': typeof AuthenticatedInsuranceIndexRoute
   '/promotions/': typeof AuthenticatedPromotionsIndexRoute
   '/insurance/claims/$claimId': typeof AuthenticatedInsuranceClaimsClaimIdRoute
+  '/api/public/hooks/dlq-reprocessor': typeof ApiPublicHooksDlqReprocessorRoute
+  '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/generate-social-posts': typeof ApiPublicHooksGenerateSocialPostsRoute
   '/api/public/hooks/whatsapp': typeof ApiPublicHooksWhatsappRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -650,6 +666,8 @@ export interface FileRoutesByTo {
   '/insurance': typeof AuthenticatedInsuranceIndexRoute
   '/promotions': typeof AuthenticatedPromotionsIndexRoute
   '/insurance/claims/$claimId': typeof AuthenticatedInsuranceClaimsClaimIdRoute
+  '/api/public/hooks/dlq-reprocessor': typeof ApiPublicHooksDlqReprocessorRoute
+  '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/generate-social-posts': typeof ApiPublicHooksGenerateSocialPostsRoute
   '/api/public/hooks/whatsapp': typeof ApiPublicHooksWhatsappRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -729,6 +747,8 @@ export interface FileRoutesById {
   '/_authenticated/insurance/': typeof AuthenticatedInsuranceIndexRoute
   '/_authenticated/promotions/': typeof AuthenticatedPromotionsIndexRoute
   '/_authenticated/insurance/claims_/$claimId': typeof AuthenticatedInsuranceClaimsClaimIdRoute
+  '/api/public/hooks/dlq-reprocessor': typeof ApiPublicHooksDlqReprocessorRoute
+  '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/generate-social-posts': typeof ApiPublicHooksGenerateSocialPostsRoute
   '/api/public/hooks/whatsapp': typeof ApiPublicHooksWhatsappRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -808,6 +828,8 @@ export interface FileRouteTypes {
     | '/insurance/'
     | '/promotions/'
     | '/insurance/claims/$claimId'
+    | '/api/public/hooks/dlq-reprocessor'
+    | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/generate-social-posts'
     | '/api/public/hooks/whatsapp'
     | '/lovable/email/auth/preview'
@@ -885,6 +907,8 @@ export interface FileRouteTypes {
     | '/insurance'
     | '/promotions'
     | '/insurance/claims/$claimId'
+    | '/api/public/hooks/dlq-reprocessor'
+    | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/generate-social-posts'
     | '/api/public/hooks/whatsapp'
     | '/lovable/email/auth/preview'
@@ -963,6 +987,8 @@ export interface FileRouteTypes {
     | '/_authenticated/insurance/'
     | '/_authenticated/promotions/'
     | '/_authenticated/insurance/claims_/$claimId'
+    | '/api/public/hooks/dlq-reprocessor'
+    | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/generate-social-posts'
     | '/api/public/hooks/whatsapp'
     | '/lovable/email/auth/preview'
@@ -993,6 +1019,8 @@ export interface RootRouteChildren {
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicCspReportRoute: typeof ApiPublicCspReportRoute
+  ApiPublicHooksDlqReprocessorRoute: typeof ApiPublicHooksDlqReprocessorRoute
+  ApiPublicHooksEventConsumerRoute: typeof ApiPublicHooksEventConsumerRoute
   ApiPublicHooksGenerateSocialPostsRoute: typeof ApiPublicHooksGenerateSocialPostsRoute
   ApiPublicHooksWhatsappRoute: typeof ApiPublicHooksWhatsappRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -1505,6 +1533,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInsuranceClaimsClaimIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/hooks/dlq-reprocessor': {
+      id: '/api/public/hooks/dlq-reprocessor'
+      path: '/api/public/hooks/dlq-reprocessor'
+      fullPath: '/api/public/hooks/dlq-reprocessor'
+      preLoaderRoute: typeof ApiPublicHooksDlqReprocessorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/event-consumer': {
+      id: '/api/public/hooks/event-consumer'
+      path: '/api/public/hooks/event-consumer'
+      fullPath: '/api/public/hooks/event-consumer'
+      preLoaderRoute: typeof ApiPublicHooksEventConsumerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/generate-social-posts': {
       id: '/api/public/hooks/generate-social-posts'
       path: '/api/public/hooks/generate-social-posts'
@@ -1780,6 +1822,8 @@ const rootRouteChildren: RootRouteChildren = {
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicCspReportRoute: ApiPublicCspReportRoute,
+  ApiPublicHooksDlqReprocessorRoute: ApiPublicHooksDlqReprocessorRoute,
+  ApiPublicHooksEventConsumerRoute: ApiPublicHooksEventConsumerRoute,
   ApiPublicHooksGenerateSocialPostsRoute:
     ApiPublicHooksGenerateSocialPostsRoute,
   ApiPublicHooksWhatsappRoute: ApiPublicHooksWhatsappRoute,
