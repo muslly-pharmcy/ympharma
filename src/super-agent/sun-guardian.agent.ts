@@ -22,8 +22,8 @@ interface AgentContext {
 interface AgentResponse {
   response: string;
   confidence: number;
-  actions: string[];
-  proactiveTasks?: any[];
+  actions: unknown[];
+  proactiveTasks?: unknown;
 }
 
 // --- Singleton initialization ---
