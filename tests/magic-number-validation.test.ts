@@ -55,7 +55,7 @@ describe('quickValidate', () => {
   });
 
   it('rejects executable files', () => {
-    for (const ext of Array.from(EXUTABLE_BLOCKLIST).slice(0, 5)) {
+    for (const ext of Array.from(EXECUTABLE_BLOCKLIST).slice(0, 5)) {
       const result = quickValidate(`file.${ext}`, 'application/octet-stream', 1024);
       expect(result.valid).toBe(false);
       expect(result.error).toContain('Executable');
