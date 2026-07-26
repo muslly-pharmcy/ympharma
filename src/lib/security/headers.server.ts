@@ -14,6 +14,9 @@ const THIRD_PARTY_HOSTS = {
   // Google Fonts (if used by any future page). Kept explicit to avoid `https:` wildcard.
   googleFonts:   'https://fonts.googleapis.com',
   googleFontsStatic: 'https://fonts.gstatic.com',
+  // Lovable component-tagger widget fonts (published deployments include the
+  // Lovable badge which loads its variable icon font from cdn.gpteng.co).
+  lovableCdn: 'https://cdn.gpteng.co',
 } as const
 
 function buildCsp(supabaseUrl: string | undefined, reportPath: string): string {
@@ -32,7 +35,7 @@ function buildCsp(supabaseUrl: string | undefined, reportPath: string): string {
     'form-action':      ["'self'"],
 
     'img-src':          ["'self'", 'data:', 'blob:', ...(supaOrigin ? [supaOrigin] : [])],
-    'font-src':         ["'self'", 'data:', THIRD_PARTY_HOSTS.googleFontsStatic],
+    'font-src':         ["'self'", 'data:', THIRD_PARTY_HOSTS.googleFontsStatic, THIRD_PARTY_HOSTS.lovableCdn],
     'style-src':        ["'self'", "'unsafe-inline'", THIRD_PARTY_HOSTS.googleFonts],
     'script-src':       ["'self'", "'unsafe-inline'"], // Nonce migration deferred.
     'connect-src': [
