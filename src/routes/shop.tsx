@@ -129,9 +129,9 @@ function ShopPage() {
               ))}
             </div>
             <Pagination
-              page={search.page}
+              page={search.page ?? 1}
               pages={pages}
-              onChange={(page) => setSearch({ page })}
+              onChange={(page) => setSearch({ page: page === 1 ? undefined : page })}
             />
           </>
         )}

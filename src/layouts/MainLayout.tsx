@@ -14,7 +14,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <main className="pt-16 flex-1">{children}</main>
+      <main id="main-content" role="main" className="pt-16 flex-1">{children}</main>
       <Footer />
       <FloatingContactButtons />
     </div>
