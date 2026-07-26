@@ -43,7 +43,7 @@ export function success<T>(data: T, meta?: SuccessResponse<T>['meta']): SuccessR
  * Create error response (client-safe)
  */
 export function error(apiError: ApiError): ErrorResponse {
-  return apiError.toJSON() as ErrorResponse;
+  return apiError.toJSON() as unknown as ErrorResponse;
 }
 
 /**
