@@ -38,6 +38,7 @@ export class ApiError extends Error {
   readonly correlationId: string;
   readonly timestamp: string;
   readonly context?: ApiErrorContext;
+  declare cause?: unknown;
 
   constructor(
     code: ErrorCode,
