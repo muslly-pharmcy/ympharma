@@ -534,6 +534,36 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_memory: {
+        Row: {
+          agent_id: string
+          created_at: string
+          decision: string
+          id: string
+          learned_lesson: string
+          outcome: string
+          situation: string
+        }
+        Insert: {
+          agent_id?: string
+          created_at?: string
+          decision: string
+          id?: string
+          learned_lesson: string
+          outcome: string
+          situation: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          decision?: string
+          id?: string
+          learned_lesson?: string
+          outcome?: string
+          situation?: string
+        }
+        Relationships: []
+      }
       agent_performance_insights: {
         Row: {
           avg_engagement: number | null
@@ -1885,6 +1915,51 @@ export type Database = {
           ip?: string | null
           organization_id?: string
           payload?: Json
+          resource_id?: string | null
+          resource_type?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          actor_id: string
+          correlation_id: string
+          created_at: string
+          id: string
+          ip_address: unknown
+          new_value: Json | null
+          old_value: Json | null
+          organization_id: string | null
+          resource_id: string | null
+          resource_type: string
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          correlation_id: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown
+          new_value?: Json | null
+          old_value?: Json | null
+          organization_id?: string | null
+          resource_id?: string | null
+          resource_type: string
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          correlation_id?: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown
+          new_value?: Json | null
+          old_value?: Json | null
+          organization_id?: string | null
           resource_id?: string | null
           resource_type?: string
           user_agent?: string | null

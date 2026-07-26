@@ -3,6 +3,7 @@
 import type { Actor } from '../../session.server'
 import type { KernelCall, KernelDecision } from './types'
 import { evaluatePolicy } from './policy-engine.server'
+import { redactPII, containsPII } from '../../ai/safety/pii-filter.server'
 
 const MAX_INPUT = 8000
 const SUSPECT = [/ignore previous instructions/i, /system prompt/i, /reveal the secret/i]

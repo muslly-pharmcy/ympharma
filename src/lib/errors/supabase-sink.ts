@@ -5,6 +5,7 @@
 
 import { supabase } from '@/integrations/supabase/client'
 import type { ErrorReport } from './logger'
+import { apiErrorFromUnknown, isApiError } from './api-error'
 
 const APP_VERSION =
   (typeof import.meta !== 'undefined' && import.meta.env?.VITE_APP_VERSION) ||
