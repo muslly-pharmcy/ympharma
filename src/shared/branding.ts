@@ -1,4 +1,4 @@
-import almoslyLogo from '@/assets/almosly-logo.png.asset.json'
+import almoslyLogo from '@/assets/almosly-logo-optimized.webp'
 
 // Central pharmacy branding — single source of truth for name, logo, and contact info.
 export const PHARMACY = {
