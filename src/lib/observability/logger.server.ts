@@ -52,7 +52,8 @@ export function redactSensitive<T>(data: T): T {
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(data)) {
     if (isSensitiveField(key)) {
-      result[key] = '[REDACTED]';
+      // Preserve null/undefined so callers can distinguish "unset" from "hidden".
+      result[key] = value === null || value === undefined ? value : '[REDACTED]';
     } else if (typeof value === 'object' && value !== null) {
       result[key] = redactSensitive(value);
     } else {

@@ -2,7 +2,7 @@
  * Permission Check & Audit Log Tests
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import {
   requirePermission,
   secureQuery,

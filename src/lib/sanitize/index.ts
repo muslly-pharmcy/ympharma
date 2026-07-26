@@ -61,8 +61,8 @@ export function name(input: string): string {
   let result = normalizeUnicode(input);
   result = removeControlChars(result);
   result = normalizeWhitespace(result);
-  // Allow letters, spaces, hyphens, apostrophes
-  result = result.replace(/[^\p{L}\s\-'']/gu, '');
+  // Allow letters, numbers, spaces, hyphens, apostrophes
+  result = result.replace(/[^\p{L}\p{N}\s\-'']/gu, '');
   result = truncate(result, LENGTH_LIMITS.name);
   return result;
 }
