@@ -67,19 +67,27 @@ export async function runSunGuardian(
   // 5. Execute via kernel (or fallback)
   let result: AgentResponse;
   try {
-    // Try to import and use the existing kernel
-    const { executeSuperAgent } = await import('@/lib/ai/runtime/kernel.server');
-    const kernelResult = await executeSuperAgent(actor, intent, context, {
+    // Try to import and use the existing kernel (executeSuperAgent may not exist yet)
+    const kernelMod = (await import('@/lib/ai/runtime/kernel.server')) as unknown as {
+      executeSuperAgent?: (
+        actor: unknown,
+        intent: string,
+        context: unknown,
+        opts: { systemPrompt: string; tools: string[]; guardrails: readonly string[] },
+      ) => Promise<{ response?: string; confidence?: number; actions?: unknown[] }>;
+    };
+    if (!kernelMod.executeSuperAgent) throw new Error('executeSuperAgent not available');
+    const kernelResult = await kernelMod.executeSuperAgent(actor, intent, context, {
       systemPrompt,
       tools: ['search_workspace', 'create_task', 'update_task', 'send_notification', 'auto_remediate'],
       guardrails: SUN_GUARDIAN_CONSTITUTION.absoluteProhibitions,
     });
     result = {
-      response: kernelResult.response || kernelResult,
-      confidence: kernelResult.confidence || 0.9,
-      actions: kernelResult.actions || [],
+      response: (kernelResult.response as string) || String(kernelResult),
+      confidence: kernelResult.confidence ?? 0.9,
+      actions: (kernelResult.actions as unknown[]) ?? [],
     };
-  } catch (e) {
+  } catch {
     // Fallback: direct response without kernel
     result = await fallbackExecute(intent, context, systemPrompt);
   }
