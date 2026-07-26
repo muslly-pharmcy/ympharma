@@ -69,10 +69,11 @@ export function logInternalError(
   });
 
   // Add request context
+  const internalBlock = (logEntry._internal ?? {}) as Record<string, unknown>;
   const fullLog = {
     ...logEntry,
     _internal: {
-      ...logEntry._internal,
+      ...internalBlock,
       requestPath: context.requestPath,
       requestMethod: context.requestMethod,
       environment: process.env.NODE_ENV || 'unknown',
