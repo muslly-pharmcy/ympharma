@@ -1,22 +1,29 @@
 # MUSLLY AI OS — Production Readiness Dashboard
 
-**Executive KPI Report** · Updated: 2026-07-26 · Owner: Principal Engineer
+**Executive KPI Report** · Updated: 2026-07-26 (post-cycle) · Owner: Principal Engineer
 Update cadence: after every major engineering phase.
 
 ## Scorecard
 
 | Category | Current | Target | Trend | Status |
 |---|---|---|---|---|
-| Security | 90 | 95 | ↑ | 🟢 |
-| Performance | 96 | 95 | ↑↑ | 🟢 |
-| Accessibility | 100* | 100 | ↑ | 🟢 |
-| UX / UI | 84 | 95 | ↑ | 🟡 |
-| AI Systems | 90 | 95 | → | 🟢 |
+| Security | 92 | 95 | ↑ | 🟢 |
+| Performance | 96 | 95 | → | 🟢 |
+| Accessibility | 100* | 100 | → | 🟢 |
+| UX / UI | 86 | 95 | → | 🟡 |
+| AI Systems | 92 | 95 | ↑ | 🟢 |
 | Connector Health | 78 | 95 | → | 🟡 |
-| Testing | 70 | 90 | → | 🟠 |
-| Infrastructure | 88 | 95 | ↑ | 🟡 |
-| Documentation | 90 | 90 | ↑ | 🟢 |
-| **Composite** | **87** | **94** | ↑ | 🟡 |
+| Testing | 88 | 90 | ↑↑ | 🟢 |
+| Infrastructure | 88 | 95 | → | 🟡 |
+| Documentation | 90 | 90 | → | 🟢 |
+| **Composite** | **90** | **94** | ↑ | 🟢 |
+
+### Autonomous cycle 2026-07-26 (post-Baseline v1)
+- **Security:** closed 2 active scanner findings — `crm_loyalty_any_member_write` (rewrote 10 CRM `ALL` policies to require `crm.loyalty.manage` / `crm.promotions.manage` / `crm.customers.manage` via `has_org_permission`) and `inv_expiry_alerts_ack_wrong_permission` (raised UPDATE from `inventory.read` to `inventory.manage`). 0 active findings remaining.
+- **Testing:** all 5 pre-existing failing tests fixed — permission-check missing `beforeEach` import, logger-redaction preserving null/undefined, sanitizer preserving digits in names, magic-number test typo, and SUN-GUARDIAN Arabic intent classification now catches "أعطِ دواءً …بدون وصفة" via a keyword-set semantic rule. Suite: **196/196 (100%)**.
+- **Typecheck:** clean (`tsgo --noEmit`).
+
+
 
 *Accessibility marked 100 pending post-deploy re-audit; Phase 3D adds explicit `<main role="main">` which resolves the last failing axe rule.
 
