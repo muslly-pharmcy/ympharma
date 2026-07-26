@@ -42,13 +42,13 @@ export function sanitizeFormInput<T extends Record<string, string>>(
   formData: T,
   configs: FormFieldConfig[]
 ): T {
-  const result = { ...formData };
+  const result = { ...formData } as Record<string, string>;
   for (const config of configs) {
     if (result[config.field] !== undefined) {
-      result[config.field] = sanitizeFormField(result[config.field], config) as T[Extract<keyof T, string>];
+      result[config.field] = sanitizeFormField(result[config.field], config);
     }
   }
-  return result;
+  return result as T;
 }
 
 /**
