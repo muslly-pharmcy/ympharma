@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { listCart } from '@/lib/cart.functions'
 import { isCurrentUserAdmin } from '@/lib/admin-orders.functions'
 import { ShopifyCartDrawer } from '@/components/shopify/CartDrawer'
-import almoslyLogo from '@/assets/almosly-logo.png.asset.json'
+import almoslyLogo from '@/assets/almosly-logo-optimized.webp'
 import {
   Sun, Moon, Bell, MessageSquare, LogOut, Shield, LogIn,
   Stethoscope, Database, Search, ShoppingCart, Store, Sparkles, ClipboardList,
@@ -59,7 +59,7 @@ export default function Navbar() {
       <div className="h-full px-3 md:px-6 flex items-center justify-between gap-2 max-w-[1920px] mx-auto">
         <Link to="/" className="flex min-w-0 items-center gap-2 md:gap-3 shrink">
           <img
-            src={almoslyLogo.url}
+            src={almoslyLogo}
             alt="صيدلية المصلي — Almosly Pharmacy"
             className="h-10 w-10 md:h-12 md:w-12 shrink-0 object-contain"
           />

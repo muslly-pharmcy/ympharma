@@ -1,4 +1,4 @@
-import almoslyLogo from '@/assets/almosly-logo.png.asset.json'
+import almoslyLogo from '@/assets/almosly-logo-optimized.webp'
 
 // Central pharmacy branding — single source of truth for name, logo, and contact info.
 export const PHARMACY = {
@@ -9,7 +9,7 @@ export const PHARMACY = {
   taglineEn: 'Smart pharmaceutical care in Aden',
   description:
     'صيدلية المصلي — رعاية دوائية موثوقة في عدن مع مساعد ذكاء صناعي، صرف الوصفات، وتوصيل الأدوية.',
-  logo: almoslyLogo.url,
+  logo: almoslyLogo,
   phone: '+967 782 878 280',
   whatsapp: '+967782878280',
   whatsappUrl: 'https://wa.me/967782878280',

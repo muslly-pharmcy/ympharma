@@ -11,7 +11,7 @@ import { CosmicSearch } from '@/components/ai/CosmicSearch'
 import CategoriesGrid from '@/shared/components/home/CategoriesGrid'
 import TestimonialsSection from '@/shared/components/home/TestimonialsSection'
 import { ToolsIntroSection } from '@/shared/components/home/ToolsIntroSection'
-import almoslyLogo from '@/assets/almosly-logo.png.asset.json'
+import almoslyLogo from '@/assets/almosly-logo-optimized.webp'
 
 
 const SolarSystem3D = lazy(() => import('@/shared/3d/SolarSystem3D'))
@@ -66,7 +66,7 @@ export default function SolarSystem() {
 
           <div className="relative grid items-center gap-8 md:grid-cols-[auto_minmax(0,1fr)]">
             <img
-              src={almoslyLogo.url}
+              src={almoslyLogo}
               alt="صيدلية المصلي — Almosly Pharmacy"
               className="mx-auto h-32 w-32 shrink-0 object-contain md:h-44 md:w-44"
             />

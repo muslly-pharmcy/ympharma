@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { WifiOff, ShoppingCart, Receipt, Home, RefreshCw } from 'lucide-react'
-import almoslyLogo from '@/assets/almosly-logo.png.asset.json'
+import almoslyLogo from '@/assets/almosly-logo-optimized.webp'
 
 export const Route = createFileRoute('/offline')({
   head: () => ({
@@ -24,7 +24,7 @@ function OfflinePage() {
       <div className="relative w-full max-w-lg space-y-6">
         <div className="flex flex-col items-center gap-3">
           <img
-            src={almoslyLogo.url}
+            src={almoslyLogo}
             alt="صيدلية المصلي"
             className="h-24 w-24 object-contain md:h-28 md:w-28"
           />
