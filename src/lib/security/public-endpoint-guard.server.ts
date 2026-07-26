@@ -14,6 +14,9 @@
 //   Handlers do not need to think about which failure mode fired.
 
 import { newCorrelationId } from '@/lib/errors/correlation'
+import { requirePermission } from '../audit/secure-admin'
+import type { Permission } from '../audit/secure-admin'
+import { redactSensitive } from '../observability/logger.server'
 
 export interface PublicGuardOptions {
   /** Route identifier used to scope the rate-limit bucket. Required. */
