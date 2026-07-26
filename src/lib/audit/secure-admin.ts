@@ -82,7 +82,7 @@ export function requirePermission(actor: Actor, permission: Permission): void {
       'FORBIDDEN',
       403,
       `Permission denied: ${permission}`,
-      { correlationId, requiredPermission: permission }
+      { details: { correlationId, requiredPermission: permission } }
     );
   }
 }
