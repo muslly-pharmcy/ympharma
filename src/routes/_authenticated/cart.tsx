@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
 import { ShoppingCart, Trash2, Plus, Minus, Lock } from 'lucide-react'
 import { listCart, removeFromCart, setCartQuantity } from '@/lib/cart.functions'
+import { EmptyState, ErrorState, ListSkeleton } from '@/shared/components/StateViews'
 
 export const Route = createFileRoute('/_authenticated/cart')({
   head: () => ({
@@ -17,7 +18,13 @@ export const Route = createFileRoute('/_authenticated/cart')({
 })
 
 function CartPage() {
-  const { data: items = [] } = useQuery({
+  const {
+    data: items = [],
+    isLoading,
+    isError,
+    refetch,
+    isRefetching,
+  } = useQuery({
     queryKey: ['cart', 'items'],
     queryFn: () => listCart(),
     // Keep data in memory long enough to survive brief offline periods.
@@ -30,7 +37,18 @@ function CartPage() {
 
   const remove = useMutation({
     mutationFn: (itemId: string) => removeFn({ data: { itemId } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['cart'] }),
+    onMutate: async (itemId: string) => {
+      await qc.cancelQueries({ queryKey: ['cart', 'items'] })
+      const prev = qc.getQueryData<typeof items>(['cart', 'items'])
+      qc.setQueryData<typeof items>(['cart', 'items'], (old) =>
+        (old ?? []).filter((it) => it.id !== itemId),
+      )
+      return { prev }
+    },
+    onError: (_e, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(['cart', 'items'], ctx.prev)
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ['cart'] }),
   })
   const setQty = useMutation({
     mutationFn: (v: { itemId: string; quantity: number }) => setQtyFn({ data: v }),
