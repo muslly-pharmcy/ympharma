@@ -12,6 +12,12 @@ function missing(vars: readonly string[]): string[] {
 }
 
 export function validateCloudEnv(): void {
+  // Guard: this module may be reached in a client chunk during dev HMR.
+  // The browser has no process.env, so skip the check there.
+  if (typeof window !== 'undefined' || typeof process === 'undefined') {
+    return
+  }
+
   const serverMissing = missing(SERVER_VARS)
   const clientMissing = missing(CLIENT_VARS)
 
