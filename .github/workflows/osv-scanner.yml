@@ -1,12 +1,27 @@
 name: OSV-Scanner
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - main
+    paths:
+      - "package.json"
+      - "package-lock.json"
+      - "yarn.lock"
+      - "pnpm-lock.yaml"
+      - "bun.lock"
+      - "bun.lockb"
   push:
     branches:
       - main
+    paths:
+      - "package.json"
+      - "package-lock.json"
+      - "yarn.lock"
+      - "pnpm-lock.yaml"
+      - "bun.lock"
+      - "bun.lockb"
   schedule:
     - cron: "0 0 * * 1"
 
@@ -40,7 +55,16 @@ jobs:
             --format sarif
             --output results.sarif
 
-      - name: Upload SARIF results
+      - name: Upload SARIF artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: osv-results-sarif
+          path: results.sarif
+          if-no-files-found: ignore
+
+      - name: Upload SARIF to GitHub Security tab
+        if: success() && hashFiles('results.sarif') != ''
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results.sarif
