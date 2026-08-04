@@ -20,12 +20,80 @@ import { toast } from 'sonner'
 
 export const Route = createFileRoute('/product/$productId')({
   parseParams: (p) => ({ productId: z.string().uuid().parse(p.productId) }),
-  head: () => ({
-    meta: [
-      { title: 'تفاصيل المنتج — صيدلية المصلي' },
-      { name: 'description', content: 'تفاصيل المنتج، السعر، والسياسات.' },
-    ],
-  }),
+  loader: async ({ params }) => {
+    const res = await getProduct({ data: { id: params.productId } })
+    return { product: res?.product ?? null }
+  },
+  head: ({ params, loaderData }) => {
+    const product = loaderData?.product
+    const url = `https://muslly.com/product/${params.productId}`
+    if (!product) {
+      return {
+        meta: [
+          { title: 'تفاصيل المنتج — صيدلية المصلي' },
+          { name: 'description', content: 'تفاصيل المنتج، السعر، والسياسات.' },
+        ],
+        links: [{ rel: 'canonical', href: url }],
+      }
+    }
+    const name = product.name_ar || product.name_en || 'منتج'
+    const price =
+      typeof product.sbdma_official_price === 'number'
+        ? product.sbdma_official_price
+        : null
+    const description =
+      [name, product.brand, product.strength, product.dosage_form]
+        .filter(Boolean)
+        .join(' · ') +
+      (price !== null ? ` — السعر ${price} ر.ي` : '') +
+      ' | صيدلية المصلي'
+    const image =
+      typeof product.image_url === 'string' && product.image_url.startsWith('https://')
+        ? product.image_url
+        : null
+    const title = `${name} — صيدلية المصلي`
+    return {
+      meta: [
+        { title },
+        { name: 'description', content: description.slice(0, 158) },
+        { property: 'og:title', content: title },
+        { property: 'og:description', content: description.slice(0, 158) },
+        { property: 'og:type', content: 'product' },
+        { property: 'og:url', content: url },
+        ...(image ? [{ property: 'og:image', content: image }] : []),
+        { name: 'twitter:card', content: image ? 'summary_large_image' : 'summary' },
+        { name: 'twitter:title', content: title },
+        { name: 'twitter:description', content: description.slice(0, 158) },
+        ...(image ? [{ name: 'twitter:image', content: image }] : []),
+      ],
+      links: [{ rel: 'canonical', href: url }],
+      scripts: [
+        {
+          type: 'application/ld+json',
+          children: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Product',
+            name,
+            description: description.slice(0, 300),
+            ...(product.brand ? { brand: { '@type': 'Brand', name: product.brand } } : {}),
+            ...(image ? { image: [image] } : {}),
+            ...(price !== null
+              ? {
+                  offers: {
+                    '@type': 'Offer',
+                    price,
+                    priceCurrency: 'YER',
+                    url,
+                    availability: 'https://schema.org/InStock',
+                  },
+                }
+              : {}),
+          }),
+        },
+      ],
+    }
+  },
+
   component: ProductDetailPage,
   errorComponent: ({ error }) => (
     <div className="p-8 text-center text-red-600">تعذر تحميل المنتج: {error.message}</div>
