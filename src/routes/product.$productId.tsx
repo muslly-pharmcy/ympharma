@@ -47,10 +47,10 @@ export const Route = createFileRoute('/product/$productId')({
         .join(' · ') +
       (price !== null ? ` — السعر ${price} ر.ي` : '') +
       ' | صيدلية المصلي'
+    const rawImage = (product as { image_url?: string | null }).image_url
     const image =
-      typeof product.image_url === 'string' && product.image_url.startsWith('https://')
-        ? product.image_url
-        : null
+      typeof rawImage === 'string' && rawImage.startsWith('https://') ? rawImage : null
+
     const title = `${name} — صيدلية المصلي`
     return {
       meta: [
