@@ -62,7 +62,7 @@ export const listProducts = createServerFn({ method: 'GET' })
 
     let q = supabase
       .from('catalog_products')
-      .select(sel('*'), { count: 'exact' })
+      .select(PUBLIC_PRODUCT_COLUMNS, { count: 'exact' })
       .eq('is_public', true)
       .eq('status', 'approved')
       .order('updated_at', { ascending: false })
