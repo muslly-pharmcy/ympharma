@@ -21,7 +21,7 @@ import { toast } from 'sonner'
 export const Route = createFileRoute('/product/$productId')({
   parseParams: (p) => ({ productId: z.string().uuid().parse(p.productId) }),
   loader: async ({ params }) => {
-    const res = await getProduct({ data: { id: params.productId } })
+    const res = await getProduct({ data: { id: params.productId } }).catch((e) => { console.error("[product loader]", e); return null })
     return { product: res?.product ?? null }
   },
   head: ({ params, loaderData }) => {
