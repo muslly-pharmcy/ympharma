@@ -171,7 +171,7 @@ export const getProduct = createServerFn({ method: 'GET' })
 
     const { data: product, error } = await supabase
       .from('catalog_products')
-      .select(sel('*'))
+      .select(PUBLIC_PRODUCT_COLUMNS)
       .eq('id', data.id)
       .eq('is_public', true)
       .eq('status', 'approved')
