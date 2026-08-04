@@ -14,7 +14,37 @@ function escOr(v: string): string {
   return v.replace(/[,()*"']/g, ' ').trim()
 }
 
-const sel = (s: string): string => s
+// `catalog_products` has column-level SELECT grants for `anon`, so `select('*')`
+// fails with "permission denied for table catalog_products". Public reads must
+// project only the anon-readable columns.
+const PUBLIC_PRODUCT_COLUMNS = [
+  'id',
+  'category_id',
+  'name_ar',
+  'name_en',
+  'generic_name',
+  'brand',
+  'manufacturer',
+  'manufacturer_country',
+  'barcode',
+  'active_ingredients',
+  'dosage_form',
+  'strength',
+  'description_ar',
+  'description_en',
+  'status',
+  'is_public',
+  'requires_prescription',
+  'sbdma_official_price',
+  'store_code',
+  'pack_unit',
+  'image_url',
+  'created_at',
+  'updated_at',
+].join(',')
+
+const sel = (s: string): string => (s === '*' ? '*' : s)
+
 
 // Wave R1.2 — Public Function Review.
 // Verdict: Public by design (storefront browse). Hardened so the server
