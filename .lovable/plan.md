@@ -1,31 +1,25 @@
-## Problem
-Lovable Cloud is already enabled and healthy, but the app throws `Missing Supabase environment variable(s): SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY. Connect Supabase in Lovable Cloud` on startup after an external GitHub commit (Jules, cbf8f5d) was synced. The `.env` file in the repo still contains the correct `VITE_SUPABASE_*` and `SUPABASE_*` values, so the issue is that the running dev server has not picked up the environment configuration.
+# استعادة الدخول لحسابك
 
-## Plan
+## الوضع الحالي
 
-### 1. Restart the dev server to reload environment
-The Vite dev server caches environment at startup. A GitHub sync can rewrite `.env` while the old process is still running, leaving `import.meta.env` empty for the client bundle.
-- Kill the running `vite`/`bun run dev` process.
-- Wait for the supervisor to respawn it.
-- Verify `http://localhost:8080` responds.
+كلمة المرور مخزّنة مشفّرة (hash) في نظام الحسابات، ولا يمكن لأي أحد — بما فيهم أنا — قراءتها. الحل الوحيد هو تعيين كلمة مرور جديدة.
 
-### 2. Validate env injection after restart
-- Open the preview and confirm the missing-env error is gone.
-- Check browser console for any remaining Supabase initialization errors.
-- If the error persists, inspect whether Vite is loading `.env` by checking `import.meta.env` in a temporary diagnostic route or console log.
+اسم المستخدم = البريد الإلكتروني. الحسابات الموجودة في المشروع:
 
-### 3. Rebind Supabase secrets if env still missing
-If the values in `.env` are not being injected into the server runtime, run `supabase--rebind_secrets` to refresh the sandbox binding for `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, and `SUPABASE_SERVICE_ROLE_KEY`, then restart again.
+| البريد | الصلاحية |
+| --- | --- |
+| dr-mohmed@muslly.com | owner + admin (الحساب الرئيسي) |
+| alimohmed.321@gmail.com | admin |
 
-### 4. Add a startup guard for Cloud connectivity
-To make future failures easier to diagnose, add a small env-validation step in `src/start.ts` (or a dedicated `src/lib/env-check.server.ts`) that:
-- Verifies `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` are present at build/dev time.
-- Logs a clear, actionable message if they are missing.
-- Does not leak the service role key or any secret values.
+## الخطة
 
-## Expected outcome
-The app initializes the Supabase client successfully, the preview loads, and the user sees a clearer error if env vars are ever missing again.
+1. تختار الحساب المطلوب (الافتراضي: `dr-mohmed@muslly.com`).
+2. أفتح لك نموذجًا آمنًا تُدخل فيه كلمة المرور الجديدة التي تريدها (لا تُكتب في المحادثة ولا في الكود).
+3. أُنفّذ تحديث كلمة المرور لهذا الحساب عبر واجهة الإدارة في الخادم، مع تأكيد البريد إن لم يكن مؤكّدًا.
+4. أتحقق من نجاح التغيير، ثم تسجّل الدخول من صفحة `/auth`.
 
-## Notes
-- No schema changes or migrations are needed; the backend is healthy.
-- The publishable/anon key is already in `.env` and is safe to expose to the client; the service role key is server-only and must remain in runtime secrets only.
+## تفاصيل تقنية
+
+- كلمة المرور الجديدة تُخزَّن كـ secret مؤقت ويُستخدم مرة واحدة عبر `supabaseAdmin.auth.admin.updateUserById` داخل سكربت خادمي، ثم يُحذف الـ secret.
+- لا تغييرات على قاعدة البيانات أو على الكود الخاص بالتطبيق.
+- بديل بدون أي تدخل مني: صفحة `/auth` → "نسيت كلمة المرور؟" ويصلك رابط استعادة على البريد.
