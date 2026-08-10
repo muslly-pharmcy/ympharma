@@ -23,6 +23,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as StoreRouteImport } from './routes/store'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AuthenticatedAdminDiagnosticsRouteImport } from './routes/_authenticated/admin-diagnostics'
@@ -155,6 +156,11 @@ const ShopRoute = ShopRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoreRoute = StoreRouteImport.update({
+  id: '/store',
+  path: '/store',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Char91DotmcpChar93ListToolsRoute =
@@ -529,6 +535,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/store': typeof AuthenticatedStoreRouteWithChildren
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin-diagnostics': typeof AuthenticatedAdminDiagnosticsRoute
@@ -555,7 +562,6 @@ export interface FileRoutesByFullPath {
   '/rewards': typeof AuthenticatedRewardsRoute
   '/sbdma-import': typeof AuthenticatedSbdmaImportRoute
   '/segments': typeof AuthenticatedSegmentsRoute
-  '/store': typeof AuthenticatedStoreRouteWithChildren
   '/suppliers': typeof AuthenticatedSuppliersRoute
   '/vision-lab': typeof AuthenticatedVisionLabRoute
   '/warehouses': typeof AuthenticatedWarehousesRoute
@@ -608,6 +614,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/store': typeof AuthenticatedStoreRouteWithChildren
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin-diagnostics': typeof AuthenticatedAdminDiagnosticsRoute
@@ -634,7 +641,6 @@ export interface FileRoutesByTo {
   '/rewards': typeof AuthenticatedRewardsRoute
   '/sbdma-import': typeof AuthenticatedSbdmaImportRoute
   '/segments': typeof AuthenticatedSegmentsRoute
-  '/store': typeof AuthenticatedStoreRouteWithChildren
   '/suppliers': typeof AuthenticatedSuppliersRoute
   '/vision-lab': typeof AuthenticatedVisionLabRoute
   '/warehouses': typeof AuthenticatedWarehousesRoute
@@ -689,6 +695,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/store': typeof StoreRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/admin-diagnostics': typeof AuthenticatedAdminDiagnosticsRoute
@@ -770,6 +777,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/shop'
     | '/sitemap.xml'
+    | '/store'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin-diagnostics'
@@ -796,7 +804,6 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/sbdma-import'
     | '/segments'
-    | '/store'
     | '/suppliers'
     | '/vision-lab'
     | '/warehouses'
@@ -849,6 +856,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/shop'
     | '/sitemap.xml'
+    | '/store'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin-diagnostics'
@@ -875,7 +883,6 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/sbdma-import'
     | '/segments'
-    | '/store'
     | '/suppliers'
     | '/vision-lab'
     | '/warehouses'
@@ -929,6 +936,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/shop'
     | '/sitemap.xml'
+    | '/store'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/admin-diagnostics'
@@ -1010,6 +1018,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   ShopRoute: typeof ShopRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  StoreRoute: typeof StoreRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiChatWidgetRoute: typeof ApiChatWidgetRoute
@@ -1125,6 +1134,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/store': {
+      id: '/store'
+      path: '/store'
+      fullPath: '/store'
+      preLoaderRoute: typeof StoreRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.mcp/list-tools': {
@@ -1812,6 +1828,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   ShopRoute: ShopRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  StoreRoute: StoreRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
