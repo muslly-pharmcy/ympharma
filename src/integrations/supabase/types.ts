@@ -1514,6 +1514,63 @@ export type Database = {
         }
         Relationships: []
       }
+      air_hitl_approvals: {
+        Row: {
+          action_key: string
+          agent_key: string
+          correlation_id: string | null
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          id: string
+          organization_id: string
+          payload: Json
+          reason: string | null
+          requested_by: string | null
+          risk_level: string
+          run_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          action_key: string
+          agent_key: string
+          correlation_id?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          organization_id: string
+          payload?: Json
+          reason?: string | null
+          requested_by?: string | null
+          risk_level?: string
+          run_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          action_key?: string
+          agent_key?: string
+          correlation_id?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          organization_id?: string
+          payload?: Json
+          reason?: string | null
+          requested_by?: string | null
+          risk_level?: string
+          run_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       air_kernel_calls: {
         Row: {
           allowed: boolean
@@ -1567,6 +1624,8 @@ export type Database = {
           key: string | null
           layer: string
           organization_id: string
+          scope_id: string | null
+          scope_type: string
         }
         Insert: {
           agent_key: string
@@ -1578,6 +1637,8 @@ export type Database = {
           key?: string | null
           layer: string
           organization_id: string
+          scope_id?: string | null
+          scope_type?: string
         }
         Update: {
           agent_key?: string
@@ -1589,6 +1650,8 @@ export type Database = {
           key?: string | null
           layer?: string
           organization_id?: string
+          scope_id?: string | null
+          scope_type?: string
         }
         Relationships: []
       }
