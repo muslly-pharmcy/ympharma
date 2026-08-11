@@ -21,7 +21,6 @@ import { Route as OfflineRouteImport } from './routes/offline'
 import { Route as RequestRouteImport } from './routes/request'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SearchRouteImport } from './routes/search'
-import { Route as SeedanceStudioRouteImport } from './routes/seedance-studio'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
@@ -49,6 +48,7 @@ import { Route as AuthenticatedPrescriptionsRouteImport } from './routes/_authen
 import { Route as AuthenticatedPurchaseOrdersRouteImport } from './routes/_authenticated/purchase-orders'
 import { Route as AuthenticatedRewardsRouteImport } from './routes/_authenticated/rewards'
 import { Route as AuthenticatedSbdmaImportRouteImport } from './routes/_authenticated/sbdma-import'
+import { Route as AuthenticatedSeedanceStudioRouteImport } from './routes/_authenticated/seedance-studio'
 import { Route as AuthenticatedSegmentsRouteImport } from './routes/_authenticated/segments'
 import { Route as AuthenticatedStoreRouteImport } from './routes/_authenticated/store'
 import { Route as AuthenticatedSuppliersRouteImport } from './routes/_authenticated/suppliers'
@@ -146,11 +146,6 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SeedanceStudioRoute = SeedanceStudioRouteImport.update({
-  id: '/seedance-studio',
-  path: '/seedance-studio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShopRoute = ShopRouteImport.update({
@@ -299,6 +294,12 @@ const AuthenticatedSbdmaImportRoute =
   AuthenticatedSbdmaImportRouteImport.update({
     id: '/sbdma-import',
     path: '/sbdma-import',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSeedanceStudioRoute =
+  AuthenticatedSeedanceStudioRouteImport.update({
+    id: '/seedance-studio',
+    path: '/seedance-studio',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedSegmentsRoute = AuthenticatedSegmentsRouteImport.update({
@@ -533,7 +534,6 @@ export interface FileRoutesByFullPath {
   '/request': typeof RequestRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
-  '/seedance-studio': typeof SeedanceStudioRoute
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -561,6 +561,7 @@ export interface FileRoutesByFullPath {
   '/purchase-orders': typeof AuthenticatedPurchaseOrdersRouteWithChildren
   '/rewards': typeof AuthenticatedRewardsRoute
   '/sbdma-import': typeof AuthenticatedSbdmaImportRoute
+  '/seedance-studio': typeof AuthenticatedSeedanceStudioRoute
   '/segments': typeof AuthenticatedSegmentsRoute
   '/store': typeof AuthenticatedStoreRouteWithChildren
   '/suppliers': typeof AuthenticatedSuppliersRoute
@@ -613,7 +614,6 @@ export interface FileRoutesByTo {
   '/request': typeof RequestRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
-  '/seedance-studio': typeof SeedanceStudioRoute
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -641,6 +641,7 @@ export interface FileRoutesByTo {
   '/purchase-orders': typeof AuthenticatedPurchaseOrdersRouteWithChildren
   '/rewards': typeof AuthenticatedRewardsRoute
   '/sbdma-import': typeof AuthenticatedSbdmaImportRoute
+  '/seedance-studio': typeof AuthenticatedSeedanceStudioRoute
   '/segments': typeof AuthenticatedSegmentsRoute
   '/store': typeof AuthenticatedStoreRouteWithChildren
   '/suppliers': typeof AuthenticatedSuppliersRoute
@@ -695,7 +696,6 @@ export interface FileRoutesById {
   '/request': typeof RequestRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
-  '/seedance-studio': typeof SeedanceStudioRoute
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -723,6 +723,7 @@ export interface FileRoutesById {
   '/_authenticated/purchase-orders': typeof AuthenticatedPurchaseOrdersRouteWithChildren
   '/_authenticated/rewards': typeof AuthenticatedRewardsRoute
   '/_authenticated/sbdma-import': typeof AuthenticatedSbdmaImportRoute
+  '/_authenticated/seedance-studio': typeof AuthenticatedSeedanceStudioRoute
   '/_authenticated/segments': typeof AuthenticatedSegmentsRoute
   '/_authenticated/store': typeof AuthenticatedStoreRouteWithChildren
   '/_authenticated/suppliers': typeof AuthenticatedSuppliersRoute
@@ -777,7 +778,6 @@ export interface FileRouteTypes {
     | '/request'
     | '/reset-password'
     | '/search'
-    | '/seedance-studio'
     | '/shop'
     | '/sitemap.xml'
     | '/.mcp/list-tools'
@@ -805,6 +805,7 @@ export interface FileRouteTypes {
     | '/purchase-orders'
     | '/rewards'
     | '/sbdma-import'
+    | '/seedance-studio'
     | '/segments'
     | '/store'
     | '/suppliers'
@@ -857,7 +858,6 @@ export interface FileRouteTypes {
     | '/request'
     | '/reset-password'
     | '/search'
-    | '/seedance-studio'
     | '/shop'
     | '/sitemap.xml'
     | '/.mcp/list-tools'
@@ -885,6 +885,7 @@ export interface FileRouteTypes {
     | '/purchase-orders'
     | '/rewards'
     | '/sbdma-import'
+    | '/seedance-studio'
     | '/segments'
     | '/store'
     | '/suppliers'
@@ -938,7 +939,6 @@ export interface FileRouteTypes {
     | '/request'
     | '/reset-password'
     | '/search'
-    | '/seedance-studio'
     | '/shop'
     | '/sitemap.xml'
     | '/.mcp/list-tools'
@@ -966,6 +966,7 @@ export interface FileRouteTypes {
     | '/_authenticated/purchase-orders'
     | '/_authenticated/rewards'
     | '/_authenticated/sbdma-import'
+    | '/_authenticated/seedance-studio'
     | '/_authenticated/segments'
     | '/_authenticated/store'
     | '/_authenticated/suppliers'
@@ -1020,7 +1021,6 @@ export interface RootRouteChildren {
   RequestRoute: typeof RequestRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SearchRoute: typeof SearchRoute
-  SeedanceStudioRoute: typeof SeedanceStudioRoute
   ShopRoute: typeof ShopRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
@@ -1124,13 +1124,6 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/seedance-studio': {
-      id: '/seedance-studio'
-      path: '/seedance-studio'
-      fullPath: '/seedance-studio'
-      preLoaderRoute: typeof SeedanceStudioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/shop': {
@@ -1320,6 +1313,13 @@ declare module '@tanstack/react-router' {
       path: '/sbdma-import'
       fullPath: '/sbdma-import'
       preLoaderRoute: typeof AuthenticatedSbdmaImportRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/seedance-studio': {
+      id: '/_authenticated/seedance-studio'
+      path: '/seedance-studio'
+      fullPath: '/seedance-studio'
+      preLoaderRoute: typeof AuthenticatedSeedanceStudioRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/segments': {
@@ -1752,6 +1752,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPurchaseOrdersRoute: typeof AuthenticatedPurchaseOrdersRouteWithChildren
   AuthenticatedRewardsRoute: typeof AuthenticatedRewardsRoute
   AuthenticatedSbdmaImportRoute: typeof AuthenticatedSbdmaImportRoute
+  AuthenticatedSeedanceStudioRoute: typeof AuthenticatedSeedanceStudioRoute
   AuthenticatedSegmentsRoute: typeof AuthenticatedSegmentsRoute
   AuthenticatedStoreRoute: typeof AuthenticatedStoreRouteWithChildren
   AuthenticatedSuppliersRoute: typeof AuthenticatedSuppliersRoute
@@ -1795,6 +1796,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedPurchaseOrdersRouteWithChildren,
   AuthenticatedRewardsRoute: AuthenticatedRewardsRoute,
   AuthenticatedSbdmaImportRoute: AuthenticatedSbdmaImportRoute,
+  AuthenticatedSeedanceStudioRoute: AuthenticatedSeedanceStudioRoute,
   AuthenticatedSegmentsRoute: AuthenticatedSegmentsRoute,
   AuthenticatedStoreRoute: AuthenticatedStoreRouteWithChildren,
   AuthenticatedSuppliersRoute: AuthenticatedSuppliersRoute,
@@ -1830,7 +1832,6 @@ const rootRouteChildren: RootRouteChildren = {
   RequestRoute: RequestRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SearchRoute: SearchRoute,
-  SeedanceStudioRoute: SeedanceStudioRoute,
   ShopRoute: ShopRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
