@@ -297,7 +297,6 @@ export async function dispatch(actor: Actor, req: KernelDispatchInput): Promise<
       ...(volition ? [{ role: 'system' as const, content: renderVolitionDirective(volition) }] : []),
       ...(contextBlock ? [{ role: 'system' as const, content: `Runtime context:\n\n${contextBlock}` }] : []),
       { role: 'user' as const, content: safety.redactedInput ?? req.input },
-
     ]
 
     const result = await generateText({
@@ -307,7 +306,10 @@ export async function dispatch(actor: Actor, req: KernelDispatchInput): Promise<
       maxOutputTokens: agent.max_tokens,
     })
 
-    const output = result.text
+    let output = result.text
+    if (needsApproval) {
+      output = `${output}\n\n---\n⏸️ **بانتظار موافقة بشرية** — هذا الإجراء مصنّف (${riskLevel}) ولن يُنفَّذ تلقائياً. تم إنشاء طلب اعتماد في قائمة الموافقات.`
+    }
     const usage = result.usage as { inputTokens?: number; outputTokens?: number; totalTokens?: number } | undefined
     const latency = Date.now() - t0
     const totalTokens = usage?.totalTokens ?? null
@@ -331,7 +333,9 @@ export async function dispatch(actor: Actor, req: KernelDispatchInput): Promise<
         success: true,
       }),
       settleBudgets(actor.organizationId, agent.key, totalTokens ?? 0, costCents),
-      auditKernelCall(actor, call, true, { decision: { model: routed.model, tools: toolsUsed, tier: req.tier ?? 'balanced' } }),
+      auditKernelCall(actor, call, true, {
+        decision: { model: routed.model, tools: toolsUsed, tier, intent: intent.intent, risk: riskLevel },
+      }),
       caps.can_learn
         ? remember({
             organizationId: actor.organizationId,
@@ -339,6 +343,16 @@ export async function dispatch(actor: Actor, req: KernelDispatchInput): Promise<
             layer: 'short',
             content: `Q: ${req.input.slice(0, 200)} | A: ${output.slice(0, 200)}`,
             importance: 0.6,
+          })
+        : Promise.resolve(),
+      clientRecord
+        ? rememberForClient({
+            organizationId: actor.organizationId,
+            clientId: clientRecord.clientId,
+            agentKey: agent.key,
+            content: `[${intent.intent}] ${req.input.slice(0, 160)} → ${output.slice(0, 200)}`,
+            importance: intent.clinicalRisk ? 0.85 : 0.6,
+            layer: 'long',
           })
         : Promise.resolve(),
     ])
@@ -351,7 +365,19 @@ export async function dispatch(actor: Actor, req: KernelDispatchInput): Promise<
       latencyMs: latency,
       model: routed.model,
       decision: { allowed: true },
+      intent,
+      volition,
+      clinical: {
+        ran: grounding.ran,
+        providerId: grounding.providerId,
+        confidence: grounding.confidence,
+        warnings: grounding.warnings.length,
+        highestSeverity: grounding.highestSeverity,
+      },
+      approvalId,
+      requiresApproval: needsApproval,
     }
+
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     await Promise.all([
