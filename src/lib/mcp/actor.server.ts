@@ -11,19 +11,26 @@ export async function actorFromToken(ctx: ToolContext): Promise<Actor> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = supabaseAdmin as any;
 
-  const { data, error } = await sb
-    .from("organization_members")
-    .select("organization_id, role")
-    .eq("user_id", userId)
-    .limit(1)
-    .maybeSingle();
+  const [{ data: membership, error }, { data: roleRows }] = await Promise.all([
+    sb
+      .from("organization_members")
+      .select("organization_id, role")
+      .eq("user_id", userId)
+      .limit(1)
+      .maybeSingle(),
+    sb.from("user_roles").select("role").eq("user_id", userId),
+  ]);
   if (error) throw new Error(error.message);
-  if (!data) throw new Error("User has no organization membership");
+  if (!membership) throw new Error("User has no organization membership");
 
   return {
     userId,
-    organizationId: data.organization_id as string,
-    role: data.role as Actor["role"],
+    organizationId: membership.organization_id as string,
+    branchId: null,
+    roles: ((roleRows ?? []) as Array<{ role: string }>).map((r) => r.role),
+    orgRole: (membership.role as string) ?? "employee",
     correlationId: crypto.randomUUID(),
-  } as Actor;
+    ip: null,
+    userAgent: "mcp",
+  };
 }

@@ -1,4 +1,4 @@
-import { defineTool, ToolError } from "@lovable.dev/mcp-js";
+import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
 
 export default defineTool({
@@ -19,29 +19,38 @@ export default defineTool({
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ drugs, patient_id }, ctx) => {
-    if (!ctx.isAuthenticated()) throw new ToolError("Not authenticated");
-    const { actorFromToken } = await import("../actor.server");
-    const { loadClientRecord } = await import("@/lib/ai/runtime/ego-memory.server");
-    const { groundClinically } = await import("@/lib/ai/runtime/clinical-rag.server");
+    if (!ctx.isAuthenticated()) {
+      return { content: [{ type: "text" as const, text: "Not authenticated" }], isError: true };
+    }
+    try {
+      const { actorFromToken } = await import("../actor.server");
+      const { loadClientRecord } = await import("@/lib/ai/runtime/ego-memory.server");
+      const { groundClinically } = await import("@/lib/ai/runtime/clinical-rag.server");
 
-    const actor = await actorFromToken(ctx);
-    const record = patient_id ? await loadClientRecord(actor.organizationId, patient_id) : null;
-    const grounding = await groundClinically({ record, drugNames: drugs });
+      const actor = await actorFromToken(ctx);
+      const record = patient_id ? await loadClientRecord(actor.organizationId, patient_id) : null;
+      const grounding = await groundClinically({ record, drugNames: drugs });
 
-    const text = grounding.warnings.length
-      ? grounding.warnings
-          .map((w) => `[${w.severity}] ${w.title}: ${w.detail}`)
-          .join("\n")
-      : "No warnings returned by the clinical engine. Advisory only — confirm with a pharmacist.";
+      const text = grounding.warnings.length
+        ? grounding.warnings
+            .map((w) => `[${w.severity}/${w.category}] ${w.message} (${w.source})`)
+            .join("\n")
+        : "No warnings returned by the clinical engine. Advisory only — confirm with a pharmacist.";
 
-    return {
-      content: [{ type: "text", text }],
-      structuredContent: {
-        provider: grounding.providerId,
-        confidence: grounding.confidence,
-        highest_severity: grounding.highestSeverity,
-        warnings: grounding.warnings,
-      },
-    };
+      return {
+        content: [{ type: "text" as const, text }],
+        structuredContent: {
+          provider: grounding.providerId,
+          confidence: grounding.confidence,
+          highest_severity: grounding.highestSeverity,
+          warnings: grounding.warnings,
+        },
+      };
+    } catch (err) {
+      return {
+        content: [{ type: "text" as const, text: (err as Error).message }],
+        isError: true,
+      };
+    }
   },
 });

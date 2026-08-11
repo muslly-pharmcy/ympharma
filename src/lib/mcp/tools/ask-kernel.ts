@@ -1,4 +1,4 @@
-import { defineTool, ToolError } from "@lovable.dev/mcp-js";
+import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
 
 export default defineTool({
@@ -21,29 +21,38 @@ export default defineTool({
   },
   annotations: { readOnlyHint: true, openWorldHint: false },
   handler: async ({ question, agent_key, client_id }, ctx) => {
-    if (!ctx.isAuthenticated()) throw new ToolError("Not authenticated");
-    const { actorFromToken } = await import("../actor.server");
-    const { dispatch } = await import("@/lib/ai/runtime/kernel.server");
+    if (!ctx.isAuthenticated()) {
+      return { content: [{ type: "text" as const, text: "Not authenticated" }], isError: true };
+    }
+    try {
+      const { actorFromToken } = await import("../actor.server");
+      const { dispatch } = await import("@/lib/ai/runtime/kernel.server");
 
-    const actor = await actorFromToken(ctx);
-    const res = await dispatch(actor, {
-      agentKey: agent_key ?? "pharmacist",
-      input: question,
-      clientId: client_id,
-      fromAgent: "mcp",
-    });
+      const actor = await actorFromToken(ctx);
+      const res = await dispatch(actor, {
+        agentKey: agent_key ?? "pharmacist",
+        input: question,
+        clientId: client_id,
+        fromAgent: "mcp",
+      });
 
-    return {
-      content: [{ type: "text", text: res.output }],
-      structuredContent: {
-        run_id: res.runId,
-        model: res.model,
-        intent: res.intent?.intent ?? null,
-        clinical: res.clinical ?? null,
-        requires_approval: res.requiresApproval ?? false,
-        approval_id: res.approvalId ?? null,
-        latency_ms: res.latencyMs,
-      },
-    };
+      return {
+        content: [{ type: "text" as const, text: res.output }],
+        structuredContent: {
+          run_id: res.runId,
+          model: res.model,
+          intent: res.intent?.intent ?? null,
+          clinical: res.clinical ?? null,
+          requires_approval: res.requiresApproval ?? false,
+          approval_id: res.approvalId ?? null,
+          latency_ms: res.latencyMs,
+        },
+      };
+    } catch (err) {
+      return {
+        content: [{ type: "text" as const, text: (err as Error).message }],
+        isError: true,
+      };
+    }
   },
 });
