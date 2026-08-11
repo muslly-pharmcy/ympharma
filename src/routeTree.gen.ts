@@ -21,6 +21,7 @@ import { Route as OfflineRouteImport } from './routes/offline'
 import { Route as RequestRouteImport } from './routes/request'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as SeedanceStudioRouteImport } from './routes/seedance-studio'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
@@ -145,6 +146,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SeedanceStudioRoute = SeedanceStudioRouteImport.update({
+  id: '/seedance-studio',
+  path: '/seedance-studio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShopRoute = ShopRouteImport.update({
@@ -527,6 +533,7 @@ export interface FileRoutesByFullPath {
   '/request': typeof RequestRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
+  '/seedance-studio': typeof SeedanceStudioRoute
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -606,6 +613,7 @@ export interface FileRoutesByTo {
   '/request': typeof RequestRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
+  '/seedance-studio': typeof SeedanceStudioRoute
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -687,6 +695,7 @@ export interface FileRoutesById {
   '/request': typeof RequestRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
+  '/seedance-studio': typeof SeedanceStudioRoute
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -768,6 +777,7 @@ export interface FileRouteTypes {
     | '/request'
     | '/reset-password'
     | '/search'
+    | '/seedance-studio'
     | '/shop'
     | '/sitemap.xml'
     | '/.mcp/list-tools'
@@ -847,6 +857,7 @@ export interface FileRouteTypes {
     | '/request'
     | '/reset-password'
     | '/search'
+    | '/seedance-studio'
     | '/shop'
     | '/sitemap.xml'
     | '/.mcp/list-tools'
@@ -927,6 +938,7 @@ export interface FileRouteTypes {
     | '/request'
     | '/reset-password'
     | '/search'
+    | '/seedance-studio'
     | '/shop'
     | '/sitemap.xml'
     | '/.mcp/list-tools'
@@ -1008,6 +1020,7 @@ export interface RootRouteChildren {
   RequestRoute: typeof RequestRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SearchRoute: typeof SearchRoute
+  SeedanceStudioRoute: typeof SeedanceStudioRoute
   ShopRoute: typeof ShopRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
@@ -1111,6 +1124,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seedance-studio': {
+      id: '/seedance-studio'
+      path: '/seedance-studio'
+      fullPath: '/seedance-studio'
+      preLoaderRoute: typeof SeedanceStudioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/shop': {
@@ -1810,6 +1830,7 @@ const rootRouteChildren: RootRouteChildren = {
   RequestRoute: RequestRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SearchRoute: SearchRoute,
+  SeedanceStudioRoute: SeedanceStudioRoute,
   ShopRoute: ShopRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
