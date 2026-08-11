@@ -8,7 +8,6 @@ export interface SeedanceShot {
   shotType: string
   cameraMovement: string
   lighting: string
-  aspectRatio: string
   durationSeconds: number
 }
 
@@ -19,13 +18,51 @@ export interface DramaScriptInput {
   characters: SeedanceCharacter[]
   sceneDescription: string
   shots: SeedanceShot[]
+  aspectRatio: string
+  renderStyle: string
+  lockContinuity: boolean
+  frameRate?: string
 }
 
 export interface SeedancePromptOutput {
   stage: string
   frameLockHash: string
+  /** The full studio document (headers + specs + generation command). */
   formattedSeedancePrompt: string
+  /** Just the text passed to the video model. */
+  videoPrompt: string
 }
+
+export const SHOT_TYPES = [
+  'Low Angle Cinematic',
+  'Wide Establishing',
+  'Medium Close-Up',
+  'Extreme Close-Up',
+  'Over The Shoulder',
+  'Dutch Angle',
+  'Top Down',
+] as const
+
+export const CAMERA_MOVES = [
+  'Push In',
+  'Pull Out',
+  'Slow Pan',
+  'Tracking Shot',
+  'Handheld Follow',
+  'Crane Up',
+  'Static Lock',
+] as const
+
+export const LIGHTING_SETUPS = [
+  'Cinematic Rim Light',
+  'Soft Key Light',
+  'High Contrast Noir',
+  'Golden Hour',
+  'Cold Fluorescent Office',
+  'Practical Neon',
+] as const
+
+export const DURATIONS = [4, 6, 8] as const
 
 function frameLock(seed: string): string {
   let h1 = 0x811c9dc5
@@ -38,36 +75,92 @@ function frameLock(seed: string): string {
   return `FL-${h1.toString(16).padStart(8, '0')}${h2.toString(16).padStart(8, '0')}`.toUpperCase()
 }
 
+function buildVideoPrompt(input: DramaScriptInput): string {
+  const shot = input.shots[0]
+  const cast = input.characters
+    .filter((c) => c.name.trim())
+    .map((c) => `${c.name} (${c.role || 'Hero'}) — ${c.visualStyle || 'Cinematic Style'}`)
+    .join('; ')
+
+  const parts = [
+    `Cinematic short drama scene (${input.genre}): ${input.sceneDescription}.`,
+    input.logline ? `Story beat: ${input.logline}.` : '',
+    cast ? `Characters: ${cast}.` : '',
+    shot
+      ? `Camera: ${shot.shotType}, ${shot.cameraMovement}, lighting ${shot.lighting}.`
+      : '',
+    `${input.renderStyle}.`,
+    input.lockContinuity
+      ? 'Maintain strict facial identity and clothing consistency across frames.'
+      : '',
+    'High tension, crisp focus, cinematic color grading, Seedance AI optimized.',
+  ]
+
+  return parts.filter(Boolean).join(' ')
+}
+
 export const SeedanceEngine = {
+  buildVideoPrompt,
+
   generateCinematicPrompt(input: DramaScriptInput): SeedancePromptOutput {
-    const shot = input.shots[0]
-    const cast = input.characters.length
-      ? input.characters
-          .map((c) => `${c.name} (${c.role}) — ${c.visualStyle}`)
-          .join('; ')
-      : 'Single unnamed protagonist, photoreal cinematic styling'
+    const characters = input.characters.filter((c) => c.name.trim())
+    const frameRate = input.frameRate ?? '60fps'
+    const videoPrompt = buildVideoPrompt(input)
 
-    const lines = [
-      `[SCENE] ${input.title}`,
-      `[GENRE] ${input.genre}`,
-      `[LOGLINE] ${input.logline}`,
-      `[CAST] ${cast}`,
-      `[ACTION] ${input.sceneDescription}`,
-      shot &&
-        `[CAMERA] ${shot.shotType}, ${shot.cameraMovement}, ${shot.lighting}`,
-      shot && `[FORMAT] ${shot.aspectRatio}, ${shot.durationSeconds}s, 24fps`,
-      `[RENDER] Ultra-detailed cinematic film still motion, shallow depth of field, volumetric light, filmic color grade, natural micro-expressions, consistent character identity across frames`,
-      `[NEGATIVE] distorted faces, extra limbs, text overlays, watermark, jitter, morphing identity`,
-    ].filter(Boolean) as string[]
+    const characterLines = characters.length
+      ? characters.map(
+          (c) => `- ${c.name} (${c.role || 'Hero'}): ${c.visualStyle || 'Cinematic Style'}`,
+        )
+      : ['- Single unnamed protagonist: photoreal cinematic styling']
 
-    const formattedSeedancePrompt = lines.join('\n')
+    const shotLines = input.shots.map(
+      (s, i) =>
+        `[Shot ${i + 1}] - Type: ${s.shotType} | Cam: ${s.cameraMovement} | Light: ${s.lighting} | Duration: ${s.durationSeconds}s`,
+    )
+
+    const doc = [
+      '[SEEDANCE DRAMA STUDIO V2.0 - CINEMATIC ENGINE]',
+      '',
+      '[MODE: FINAL VERSION LOCK]',
+      '',
+      '=== PRE-PRODUCTION & SCENE SPECS ===',
+      '',
+      `TITLE: ${input.title}`,
+      '',
+      `GENRE: ${input.genre}`,
+      '',
+      `LOGLINE: ${input.logline}`,
+      '',
+      '=== CHARACTER CONTINUITY MATRIX ===',
+      '',
+      ...characterLines,
+      '',
+      '=== SCENE DIRECTING & CAMERA WORK ===',
+      '',
+      ...shotLines,
+      '',
+      '=== VISUAL & LIGHTING INSTRUCTIONS ===',
+      '',
+      `- Aspect Ratio: ${input.aspectRatio}`,
+      '',
+      `- Render Style: ${input.renderStyle}`,
+      '',
+      input.lockContinuity
+        ? '- Continuity Enforcement: Maintain strict facial identity and clothing consistency across frames.'
+        : '- Continuity Enforcement: Disabled.',
+      '',
+      '=== SEEDANCE GENERATION PROMPT ===',
+      '',
+      `/generate_video --prompt "${videoPrompt}" --aspect_ratio ${input.aspectRatio} --framerate ${frameRate} --lock_continuity ${input.lockContinuity}`,
+    ].join('\n')
 
     return {
       stage: 'FRAME_LOCKED_V2',
       frameLockHash: frameLock(
-        `${input.title}|${input.genre}|${input.sceneDescription}|${cast}|${shot?.shotType ?? ''}`,
+        `${input.title}|${input.genre}|${input.sceneDescription}|${characterLines.join('|')}|${shotLines.join('|')}|${input.aspectRatio}`,
       ),
-      formattedSeedancePrompt,
+      formattedSeedancePrompt: doc,
+      videoPrompt,
     }
   },
 }
