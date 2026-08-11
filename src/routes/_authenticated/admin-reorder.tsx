@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -9,10 +9,6 @@ import {
   listReorderSuggestions,
   refreshReorder,
 } from '@/lib/reorder.functions'
-import { useOrganization } from '@/hooks/useOrganization'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export const Route = createFileRoute('/_authenticated/admin-reorder')({
   component: ReorderPage,
@@ -34,17 +30,46 @@ export const Route = createFileRoute('/_authenticated/admin-reorder')({
       { name: 'robots', content: 'noindex, nofollow' },
     ],
   }),
+  errorComponent: ({ error, reset }) => {
+    const router = useRouter()
+    return (
+      <div dir="rtl" className="mx-auto max-w-3xl p-6">
+        <h1 className="text-xl font-bold text-red-700">تعذّر تحميل اقتراحات إعادة الطلب</h1>
+        <pre className="mt-3 whitespace-pre-wrap rounded bg-red-50 p-3 text-sm">
+          {String(error?.message ?? error)}
+        </pre>
+        <button
+          className="mt-4 rounded bg-teal-600 px-4 py-2 text-white"
+          onClick={() => {
+            reset()
+            void router.invalidate()
+          }}
+        >
+          إعادة المحاولة
+        </button>
+      </div>
+    )
+  },
+  notFoundComponent: () => <div className="p-6">الصفحة غير موجودة</div>,
 })
 
 function coverTone(days: number | null): string {
-  if (days === null) return 'bg-muted text-muted-foreground'
-  if (days <= 7) return 'bg-destructive/15 text-destructive'
-  if (days <= 21) return 'bg-amber-500/15 text-amber-700 dark:text-amber-400'
-  return 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
+  if (days === null) return 'bg-slate-100 text-slate-600'
+  if (days <= 7) return 'bg-red-100 text-red-700'
+  if (days <= 21) return 'bg-amber-100 text-amber-800'
+  return 'bg-emerald-100 text-emerald-700'
+}
+
+function StatCard({ label, value, tone }: { label: string; value: string; tone?: string }) {
+  return (
+    <div className="rounded-xl border border-teal-100 bg-white p-4 shadow-sm">
+      <p className="text-xs text-slate-500">{label}</p>
+      <p className={`mt-1 text-2xl font-bold ${tone ?? 'text-slate-900'}`}>{value}</p>
+    </div>
+  )
 }
 
 function ReorderPage() {
-  const { organizationId } = useOrganization()
   const queryClient = useQueryClient()
   const [leadTimeDays, setLeadTimeDays] = useState(14)
 
@@ -53,13 +78,12 @@ function ReorderPage() {
   const decide = useServerFn(decideReorderSuggestion)
 
   const { data, isLoading } = useQuery({
-    queryKey: ['reorder-suggestions', organizationId],
-    queryFn: () => list({ data: { organizationId: organizationId!, status: 'open' } }),
-    enabled: Boolean(organizationId),
+    queryKey: ['reorder-suggestions'],
+    queryFn: () => list({ data: { status: 'open' as const } }),
   })
 
   const refreshMutation = useMutation({
-    mutationFn: () => refresh({ data: { organizationId: organizationId!, leadTimeDays } }),
+    mutationFn: () => refresh({ data: { leadTimeDays } }),
     onSuccess: (result) => {
       toast.success(`تم تحديث ${result.persisted} اقتراح إعادة طلب`)
       void queryClient.invalidateQueries({ queryKey: ['reorder-suggestions'] })
@@ -68,154 +92,129 @@ function ReorderPage() {
   })
 
   const decideMutation = useMutation({
-    mutationFn: (vars: { id: string; status: 'dismissed' | 'ordered' }) =>
-      decide({ data: vars }),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['reorder-suggestions'] })
-    },
+    mutationFn: (vars: { id: string; status: 'dismissed' | 'ordered' }) => decide({ data: vars }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['reorder-suggestions'] }),
     onError: (error: Error) => toast.error(error.message),
   })
 
   const rows = data ?? []
-  const critical = useMemo(
-    () => rows.filter((r) => (r.days_of_cover ?? 999) <= 7).length,
-    [rows],
-  )
+  const critical = useMemo(() => rows.filter((r) => (r.days_of_cover ?? 999) <= 7).length, [rows])
+  const totalQty = useMemo(() => rows.reduce((sum, r) => sum + r.suggested_qty, 0), [rows])
 
   return (
-    <div dir="rtl" className="container mx-auto space-y-6 px-4 py-8">
-      <header className="flex flex-wrap items-center justify-between gap-4">
+    <div dir="rtl" className="mx-auto max-w-7xl space-y-6 px-4 py-8">
+      <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">اقتراحات إعادة الطلب التنبؤية</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-2xl font-bold text-slate-900">اقتراحات إعادة الطلب التنبؤية</h1>
+          <p className="mt-1 text-sm text-slate-600">
             تُحسب من الاستهلاك الفعلي خلال آخر ٩٠ يوماً مع مخزون أمان يراعي تذبذب الطلب.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <label className="text-sm text-muted-foreground" htmlFor="lead-time">
-            مدة التوريد (يوم)
-          </label>
-          <input
-            id="lead-time"
-            type="number"
-            min={1}
-            max={180}
-            value={leadTimeDays}
-            onChange={(e) => setLeadTimeDays(Number(e.target.value) || 14)}
-            className="h-9 w-20 rounded-md border border-input bg-background px-2 text-sm"
-          />
-          <Button
+        <div className="flex items-end gap-2">
+          <div>
+            <label htmlFor="lead-time" className="block text-xs text-slate-500">
+              مدة التوريد (يوم)
+            </label>
+            <input
+              id="lead-time"
+              type="number"
+              min={1}
+              max={180}
+              value={leadTimeDays}
+              onChange={(e) => setLeadTimeDays(Number(e.target.value) || 14)}
+              className="mt-1 h-10 w-24 rounded-lg border border-slate-300 px-2 text-sm"
+            />
+          </div>
+          <button
             onClick={() => refreshMutation.mutate()}
-            disabled={!organizationId || refreshMutation.isPending}
+            disabled={refreshMutation.isPending}
+            className="flex h-10 items-center gap-2 rounded-lg bg-teal-600 px-4 text-sm font-medium text-white disabled:opacity-60"
           >
             {refreshMutation.isPending ? (
-              <Loader2 className="ms-2 h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <RefreshCw className="ms-2 h-4 w-4" />
+              <RefreshCw className="h-4 w-4" />
             )}
             إعادة الحساب
-          </Button>
+          </button>
         </div>
       </header>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">أصناف تحتاج طلباً</CardTitle>
-          </CardHeader>
-          <CardContent className="text-2xl font-bold">{rows.length}</CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">حرِج (≤ ٧ أيام)</CardTitle>
-          </CardHeader>
-          <CardContent className="text-2xl font-bold text-destructive">{critical}</CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">إجمالي الكميات المقترحة</CardTitle>
-          </CardHeader>
-          <CardContent className="text-2xl font-bold">
-            {rows.reduce((sum, r) => sum + r.suggested_qty, 0).toLocaleString('ar')}
-          </CardContent>
-        </Card>
+        <StatCard label="أصناف تحتاج طلباً" value={String(rows.length)} />
+        <StatCard label="حرِج (≤ ٧ أيام)" value={String(critical)} tone="text-red-600" />
+        <StatCard label="إجمالي الكميات المقترحة" value={totalQty.toLocaleString('ar')} />
       </div>
 
-      <Card>
-        <CardContent className="p-0">
-          {isLoading ? (
-            <div className="flex items-center justify-center gap-2 p-10 text-muted-foreground">
-              <Loader2 className="h-5 w-5 animate-spin" /> جارٍ التحميل…
-            </div>
-          ) : rows.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 p-10 text-center text-muted-foreground">
-              <PackagePlus className="h-8 w-8" />
-              <p>لا توجد اقتراحات حالياً — كل الأصناف ضمن مستوى الأمان.</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-muted/50 text-right text-xs text-muted-foreground">
-                  <tr>
-                    <th className="p-3">الصنف</th>
-                    <th className="p-3">المخزن</th>
-                    <th className="p-3">المتوفر</th>
-                    <th className="p-3">الاستهلاك/يوم</th>
-                    <th className="p-3">تغطية</th>
-                    <th className="p-3">نقطة الطلب</th>
-                    <th className="p-3">الكمية المقترحة</th>
-                    <th className="p-3">إجراء</th>
+      <div className="overflow-hidden rounded-xl border border-teal-100 bg-white shadow-sm">
+        {isLoading ? (
+          <div className="flex items-center justify-center gap-2 p-10 text-slate-500">
+            <Loader2 className="h-5 w-5 animate-spin" /> جارٍ التحميل…
+          </div>
+        ) : rows.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 p-10 text-center text-slate-500">
+            <PackagePlus className="h-8 w-8" />
+            <p>لا توجد اقتراحات حالياً — كل الأصناف ضمن مستوى الأمان.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-right text-sm">
+              <thead className="bg-teal-50 text-xs text-slate-600">
+                <tr>
+                  <th className="p-3">الصنف</th>
+                  <th className="p-3">المخزن</th>
+                  <th className="p-3">المتوفر</th>
+                  <th className="p-3">الاستهلاك/يوم</th>
+                  <th className="p-3">التغطية</th>
+                  <th className="p-3">نقطة الطلب</th>
+                  <th className="p-3">الكمية المقترحة</th>
+                  <th className="p-3">إجراء</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row) => (
+                  <tr key={row.id} className="border-t border-slate-100">
+                    <td className="p-3 font-medium text-slate-900">
+                      {row.product_name ?? row.product_id}
+                    </td>
+                    <td className="p-3 text-slate-500">{row.warehouse_name ?? '—'}</td>
+                    <td className="p-3">{row.on_hand.toLocaleString('ar')}</td>
+                    <td className="p-3">{row.daily_burn_rate.toFixed(2)}</td>
+                    <td className="p-3">
+                      <span
+                        className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${coverTone(row.days_of_cover)}`}
+                      >
+                        <TrendingDown className="h-3 w-3" />
+                        {row.days_of_cover === null ? '—' : `${Math.round(row.days_of_cover)} يوم`}
+                      </span>
+                    </td>
+                    <td className="p-3 text-slate-500">{row.reorder_point}</td>
+                    <td className="p-3 font-bold text-teal-700">{row.suggested_qty}</td>
+                    <td className="p-3">
+                      <div className="flex gap-2">
+                        <button
+                          disabled={decideMutation.isPending}
+                          onClick={() => decideMutation.mutate({ id: row.id, status: 'ordered' })}
+                          className="rounded-md bg-teal-600 px-3 py-1 text-xs text-white disabled:opacity-60"
+                        >
+                          تم الطلب
+                        </button>
+                        <button
+                          disabled={decideMutation.isPending}
+                          onClick={() => decideMutation.mutate({ id: row.id, status: 'dismissed' })}
+                          className="rounded-md border border-slate-300 px-3 py-1 text-xs text-slate-600 disabled:opacity-60"
+                        >
+                          تجاهل
+                        </button>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {rows.map((row) => (
-                    <tr key={row.id} className="border-t border-border/60">
-                      <td className="p-3 font-medium">{row.product_name ?? row.product_id}</td>
-                      <td className="p-3 text-muted-foreground">{row.warehouse_name ?? '—'}</td>
-                      <td className="p-3">{row.on_hand.toLocaleString('ar')}</td>
-                      <td className="p-3">{row.daily_burn_rate.toFixed(2)}</td>
-                      <td className="p-3">
-                        <Badge variant="outline" className={coverTone(row.days_of_cover)}>
-                          <TrendingDown className="ms-1 h-3 w-3" />
-                          {row.days_of_cover === null
-                            ? '—'
-                            : `${Math.round(row.days_of_cover)} يوم`}
-                        </Badge>
-                      </td>
-                      <td className="p-3 text-muted-foreground">{row.reorder_point}</td>
-                      <td className="p-3 font-bold text-primary">{row.suggested_qty}</td>
-                      <td className="p-3">
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            disabled={decideMutation.isPending}
-                            onClick={() =>
-                              decideMutation.mutate({ id: row.id, status: 'ordered' })
-                            }
-                          >
-                            تم الطلب
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            disabled={decideMutation.isPending}
-                            onClick={() =>
-                              decideMutation.mutate({ id: row.id, status: 'dismissed' })
-                            }
-                          >
-                            تجاهل
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
