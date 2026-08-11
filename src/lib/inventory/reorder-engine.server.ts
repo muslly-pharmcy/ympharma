@@ -32,14 +32,15 @@ const DEFAULTS = { windowDays: 90, leadTimeDays: 14, coverDays: 45, serviceFacto
 interface MovementRow {
   warehouse_id: string | null
   product_id: string | null
-  quantity: number | string | null
-  created_at: string
+  qty_delta: number | string | null
+  occurred_at: string
 }
 
 interface BatchRow {
   warehouse_id: string | null
   product_id: string | null
-  qty_available: number | string | null
+  qty_on_hand: number | string | null
+  qty_reserved: number | string | null
   supplier_id: string | null
 }
 
@@ -66,10 +67,10 @@ export async function computeReorderSuggestions(params: ReorderParams): Promise<
 
   const { data: movements } = await supabaseAdmin
     .from('inv_stock_movements')
-    .select('warehouse_id, product_id, quantity, created_at')
+    .select('warehouse_id, product_id, qty_delta, occurred_at')
     .eq('organization_id', cfg.organizationId)
     .eq('movement_type', 'STOCK_SOLD')
-    .gte('created_at', since)
+    .gte('occurred_at', since)
     .limit(50_000)
 
   // daily consumption series per (warehouse, product)
@@ -77,17 +78,17 @@ export async function computeReorderSuggestions(params: ReorderParams): Promise<
   for (const row of (movements ?? []) as MovementRow[]) {
     if (!row.warehouse_id || !row.product_id) continue
     const k = key(row.warehouse_id, row.product_id)
-    const day = row.created_at.slice(0, 10)
+    const day = row.occurred_at.slice(0, 10)
     const series = daily.get(k) ?? new Map<string, number>()
-    series.set(day, (series.get(day) ?? 0) + Math.abs(num(row.quantity)))
+    series.set(day, (series.get(day) ?? 0) + Math.abs(num(row.qty_delta)))
     daily.set(k, series)
   }
 
   const { data: batches } = await supabaseAdmin
     .from('inv_stock_batches')
-    .select('warehouse_id, product_id, qty_available, supplier_id')
+    .select('warehouse_id, product_id, qty_on_hand, qty_reserved, supplier_id')
     .eq('organization_id', cfg.organizationId)
-    .gt('qty_available', 0)
+    .gt('qty_on_hand', 0)
     .limit(50_000)
 
   const onHand = new Map<string, { qty: number; supplierId: string | null; warehouseId: string; productId: string }>()
@@ -96,7 +97,8 @@ export async function computeReorderSuggestions(params: ReorderParams): Promise<
     const k = key(row.warehouse_id, row.product_id)
     const prev = onHand.get(k)
     onHand.set(k, {
-      qty: (prev?.qty ?? 0) + num(row.qty_available),
+      // available = on hand minus what is already reserved for open orders
+      qty: (prev?.qty ?? 0) + Math.max(0, num(row.qty_on_hand) - num(row.qty_reserved)),
       supplierId: prev?.supplierId ?? row.supplier_id ?? null,
       warehouseId: row.warehouse_id,
       productId: row.product_id,
