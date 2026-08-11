@@ -162,8 +162,15 @@ export async function dispatch(actor: Actor, req: KernelDispatchInput): Promise<
   // 4. Prompt registry (approved-only) — fallback: air_prompts row via direct read if legacy prompt has no status column.
   const prompt = await loadApprovedPrompt(agent.prompt_key)
 
-  // 5. Model router — respects agent.model as a pin, otherwise tier-based.
-  const routed = routeModel({ tier: req.tier ?? 'balanced', prefer: agent.model ?? undefined })
+  // 5. Intent Router (v3.0) → tier, then Model Router → concrete model.
+  const intent = classifyIntent(safety.redactedInput ?? req.input, { hasImage: req.hasImage })
+  const tier = req.tier ?? intent.tier
+  call.context = { ...call.context, tier, intent: intent.intent }
+  const routed = routeModel({
+    tier,
+    needsVision: tier === 'vision',
+    prefer: tier === 'vision' ? undefined : agent.model ?? undefined,
+  })
 
   // 6. Tool context (only allowed + capability-checked + policied)
   const toolsUsed: string[] = []
@@ -187,9 +194,45 @@ export async function dispatch(actor: Actor, req: KernelDispatchInput): Promise<
     }
   }
 
-  // 7. Memory context
+  // 7. Memory context — agent memory + Ego Memory client record.
   const memBlock = caps.can_learn ? await buildContextBlock(actor.organizationId, agent.key) : ''
-  const contextBlock = [memBlock, toolChunks.join('\n\n')].filter(Boolean).join('\n\n')
+  let clientRecord: ClientRecord | null = null
+  if (req.clientId) {
+    try {
+      clientRecord = await loadClientRecord(actor.organizationId, req.clientId)
+    } catch (err) {
+      console.warn('[Kernel] ego-memory unavailable:', (err as Error).message)
+    }
+  }
+  const egoBlock = clientRecord ? renderClientRecordBlock(clientRecord) : ''
+
+  // 7b. Clinical RAG grounding — evidence before generation, never after.
+  const grounding = intent.clinicalRisk
+    ? await groundClinically({
+        record: clientRecord,
+        drugNames: extractDrugMentions(safety.redactedInput ?? req.input, clientRecord),
+      })
+    : { ran: false, providerId: null, warnings: [], highestSeverity: null, confidence: 'unverified' as const, block: '' }
+
+  const contextBlock = [memBlock, egoBlock, grounding.block, toolChunks.join('\n\n')]
+    .filter(Boolean)
+    .join('\n\n')
+
+  // 7c. Volition loop — Thought → Plan → Critique before Execution (deep/vision only).
+  const volition: VolitionTrace | null =
+    tier === 'deep' || tier === 'vision'
+      ? await runVolition({
+          apiKey,
+          input: safety.redactedInput ?? req.input,
+          clinicalRisk: intent.clinicalRisk,
+          grounding,
+          contextBlock,
+        })
+      : null
+
+  // 7d. Human-in-the-loop gate — high-risk actions never execute autonomously.
+  const riskLevel: HitlRisk = volition?.riskLevel ?? (intent.clinicalRisk ? 'moderate' : 'low')
+  const needsApproval = hitlRequiresApproval({ actionKey: req.actionKey, riskLevel })
 
   // 8. Insert run
   const sb = await admin()
@@ -202,17 +245,59 @@ export async function dispatch(actor: Actor, req: KernelDispatchInput): Promise<
     status: 'pending',
     tools_used: toolsUsed,
     correlation_id: actor.correlationId,
+    metadata: {
+      tier,
+      intent: intent.intent,
+      intent_reason: intent.reason,
+      clinical: {
+        ran: grounding.ran,
+        provider: grounding.providerId,
+        confidence: grounding.confidence,
+        warnings: grounding.warnings.length,
+        highest_severity: grounding.highestSeverity,
+      },
+      volition: volition
+        ? {
+            thought: volition.thought,
+            plan: volition.plan,
+            critique: volition.critique,
+            risk_level: volition.riskLevel,
+            requires_human_verification: volition.requiresHumanVerification,
+            advisory_only: volition.advisoryOnly,
+            model: volition.model,
+            latency_ms: volition.latencyMs,
+          }
+        : null,
+      requires_approval: needsApproval,
+    } as never,
   }).select('id').single()
   if (runErr) throw new Error(runErr.message)
   const runId = runIns.id as string
+
+  let approvalId: string | null = null
+  if (needsApproval) {
+    approvalId = await requestApproval({
+      organizationId: actor.organizationId,
+      runId,
+      agentKey: agent.key,
+      actionKey: req.actionKey ?? `agent:${agent.key}`,
+      riskLevel,
+      reason: volition?.critique ?? intent.reason,
+      payload: { intent: intent.intent, tier, tools: toolsUsed },
+      requestedBy: actor.userId,
+      correlationId: actor.correlationId,
+    })
+  }
 
   try {
     const gateway = createLovableAiGatewayProvider(apiKey)
     const model = gateway(routed.model)
     const messages = [
       { role: 'system' as const, content: prompt.system_prompt },
+      ...(volition ? [{ role: 'system' as const, content: renderVolitionDirective(volition) }] : []),
       ...(contextBlock ? [{ role: 'system' as const, content: `Runtime context:\n\n${contextBlock}` }] : []),
       { role: 'user' as const, content: safety.redactedInput ?? req.input },
+
     ]
 
     const result = await generateText({
