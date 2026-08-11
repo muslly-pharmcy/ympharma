@@ -2,6 +2,9 @@ import { auth, defineMcp } from "@lovable.dev/mcp-js";
 import whoamiTool from "./tools/whoami";
 import searchCatalogTool from "./tools/search-catalog";
 import checkStockTool from "./tools/check-stock";
+import askKernelTool from "./tools/ask-kernel";
+import clinicalCheckTool from "./tools/clinical-check";
+
 
 // OAuth issuer MUST be the direct supabase.co host (RFC 8414 issuer match).
 // Read the project ref from a Vite-inlined literal — not process.env — so the
