@@ -1,4 +1,6 @@
+import { retryAsync } from '@/lib/net/retry'
 import {
+
   SHOPIFY_STOREFRONT_URL,
   SHOPIFY_STOREFRONT_TOKEN,
 } from './config'
@@ -101,38 +103,46 @@ export async function storefrontApiRequest(
   query: string,
   variables: Record<string, unknown> = {},
 ) {
-  const response = await fetch(SHOPIFY_STOREFRONT_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Shopify-Storefront-Access-Token': SHOPIFY_STOREFRONT_TOKEN,
-    },
-    body: JSON.stringify({ query, variables }),
+  // Transient failures (network drop, 429, 5xx) retry with exponential backoff.
+  return retryAsync(async () => {
+    const response = await fetch(SHOPIFY_STOREFRONT_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Storefront-Access-Token': SHOPIFY_STOREFRONT_TOKEN,
+      },
+      body: JSON.stringify({ query, variables }),
+    })
+
+    if (response.status === 402) {
+      throw new Error(
+        'Shopify: Payment required. The store needs an active Shopify billing plan.',
+      )
+    }
+
+    if (!response.ok) {
+      const err = new Error(`Shopify HTTP error! status: ${response.status}`) as Error & {
+        status?: number
+      }
+      err.status = response.status
+      throw err
+    }
+
+    const data = (await response.json()) as {
+      errors?: Array<{ message: string }>
+      data?: unknown
+    }
+
+    if (data.errors) {
+      throw new Error(
+        `Error calling Shopify: ${data.errors.map((e) => e.message).join(', ')}`,
+      )
+    }
+
+    return data
   })
-
-  if (response.status === 402) {
-    throw new Error(
-      'Shopify: Payment required. The store needs an active Shopify billing plan.',
-    )
-  }
-
-  if (!response.ok) {
-    throw new Error(`Shopify HTTP error! status: ${response.status}`)
-  }
-
-  const data = (await response.json()) as {
-    errors?: Array<{ message: string }>
-    data?: unknown
-  }
-
-  if (data.errors) {
-    throw new Error(
-      `Error calling Shopify: ${data.errors.map((e) => e.message).join(', ')}`,
-    )
-  }
-
-  return data
 }
+
 
 export async function fetchShopifyProducts(
   first = 50,

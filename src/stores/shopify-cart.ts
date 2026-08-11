@@ -7,6 +7,9 @@ import {
   updateShopifyCartLine,
   removeLineFromShopifyCart,
 } from '@/lib/shopify/cart-api'
+import { enqueueCartOp } from '@/lib/offline/cart-queue'
+
+const isOffline = () => typeof navigator !== 'undefined' && navigator.onLine === false
 
 export interface CartItem {
   lineId: string | null
@@ -44,6 +47,26 @@ export const useShopifyCartStore = create<CartStore>()(
       addItem: async (item) => {
         const { items, cartId, clearCart } = get()
         const existingItem = items.find((i) => i.variantId === item.variantId)
+
+        // Offline: apply locally and replay against Shopify once back online.
+        if (isOffline()) {
+          enqueueCartOp({
+            kind: 'add',
+            variantId: item.variantId,
+            quantity: item.quantity,
+            payload: item,
+          })
+          set({
+            items: existingItem
+              ? items.map((i) =>
+                  i.variantId === item.variantId
+                    ? { ...i, quantity: i.quantity + item.quantity }
+                    : i,
+                )
+              : [...items, { ...item, lineId: null }],
+          })
+          return
+        }
 
         set({ isLoading: true })
         try {
@@ -114,7 +137,14 @@ export const useShopifyCartStore = create<CartStore>()(
 
         const { items, cartId, clearCart } = get()
         const item = items.find((i) => i.variantId === variantId)
-        if (!item?.lineId || !cartId) return
+        if (!item) return
+
+        if (isOffline()) {
+          enqueueCartOp({ kind: 'update', variantId, quantity })
+          set({ items: items.map((i) => (i.variantId === variantId ? { ...i, quantity } : i)) })
+          return
+        }
+        if (!item.lineId || !cartId) return
 
         set({ isLoading: true })
         try {
@@ -143,7 +173,15 @@ export const useShopifyCartStore = create<CartStore>()(
       removeItem: async (variantId) => {
         const { items, cartId, clearCart } = get()
         const item = items.find((i) => i.variantId === variantId)
-        if (!item?.lineId || !cartId) return
+        if (!item) return
+
+        if (isOffline()) {
+          enqueueCartOp({ kind: 'remove', variantId })
+          const remaining = items.filter((i) => i.variantId !== variantId)
+          set({ items: remaining })
+          return
+        }
+        if (!item.lineId || !cartId) return
 
         set({ isLoading: true })
         try {

@@ -8108,6 +8108,112 @@ export type Database = {
           },
         ]
       }
+      inv_reorder_suggestions: {
+        Row: {
+          computed_at: string
+          created_at: string
+          daily_burn_rate: number
+          days_of_cover: number | null
+          id: string
+          lead_time_days: number
+          on_hand: number
+          organization_id: string
+          product_id: string
+          purchase_order_id: string | null
+          reorder_point: number
+          safety_stock: number
+          status: string
+          suggested_qty: number
+          supplier_id: string | null
+          updated_at: string
+          warehouse_id: string
+          window_days: number
+        }
+        Insert: {
+          computed_at?: string
+          created_at?: string
+          daily_burn_rate?: number
+          days_of_cover?: number | null
+          id?: string
+          lead_time_days?: number
+          on_hand?: number
+          organization_id: string
+          product_id: string
+          purchase_order_id?: string | null
+          reorder_point?: number
+          safety_stock?: number
+          status?: string
+          suggested_qty?: number
+          supplier_id?: string | null
+          updated_at?: string
+          warehouse_id: string
+          window_days?: number
+        }
+        Update: {
+          computed_at?: string
+          created_at?: string
+          daily_burn_rate?: number
+          days_of_cover?: number | null
+          id?: string
+          lead_time_days?: number
+          on_hand?: number
+          organization_id?: string
+          product_id?: string
+          purchase_order_id?: string | null
+          reorder_point?: number
+          safety_stock?: number
+          status?: string
+          suggested_qty?: number
+          supplier_id?: string | null
+          updated_at?: string
+          warehouse_id?: string
+          window_days?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_reorder_suggestions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_reorder_suggestions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_reorder_suggestions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_reorder_suggestions_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_reorder_suggestions_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "sup_suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_reorder_suggestions_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "wh_warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inv_reservations: {
         Row: {
           actor_user_id: string | null
