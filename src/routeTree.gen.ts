@@ -31,6 +31,7 @@ import { Route as AuthenticatedAdminExcelImportRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminImageQueueRouteImport } from './routes/_authenticated/admin-image-queue'
 import { Route as AuthenticatedAdminInventoryRouteImport } from './routes/_authenticated/admin-inventory'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin-orders'
+import { Route as AuthenticatedAdminReorderRouteImport } from './routes/_authenticated/admin-reorder'
 import { Route as AuthenticatedAiRuntimeRouteImport } from './routes/_authenticated/ai-runtime'
 import { Route as AuthenticatedCampaignsRouteImport } from './routes/_authenticated/campaigns'
 import { Route as AuthenticatedCartRouteImport } from './routes/_authenticated/cart'
@@ -204,6 +205,12 @@ const AuthenticatedAdminOrdersRoute =
   AuthenticatedAdminOrdersRouteImport.update({
     id: '/admin-orders',
     path: '/admin-orders',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminReorderRoute =
+  AuthenticatedAdminReorderRouteImport.update({
+    id: '/admin-reorder',
+    path: '/admin-reorder',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAiRuntimeRoute = AuthenticatedAiRuntimeRouteImport.update({
@@ -544,6 +551,7 @@ export interface FileRoutesByFullPath {
   '/admin-image-queue': typeof AuthenticatedAdminImageQueueRoute
   '/admin-inventory': typeof AuthenticatedAdminInventoryRoute
   '/admin-orders': typeof AuthenticatedAdminOrdersRoute
+  '/admin-reorder': typeof AuthenticatedAdminReorderRoute
   '/ai-runtime': typeof AuthenticatedAiRuntimeRoute
   '/campaigns': typeof AuthenticatedCampaignsRouteWithChildren
   '/cart': typeof AuthenticatedCartRoute
@@ -624,6 +632,7 @@ export interface FileRoutesByTo {
   '/admin-image-queue': typeof AuthenticatedAdminImageQueueRoute
   '/admin-inventory': typeof AuthenticatedAdminInventoryRoute
   '/admin-orders': typeof AuthenticatedAdminOrdersRoute
+  '/admin-reorder': typeof AuthenticatedAdminReorderRoute
   '/ai-runtime': typeof AuthenticatedAiRuntimeRoute
   '/campaigns': typeof AuthenticatedCampaignsRouteWithChildren
   '/cart': typeof AuthenticatedCartRoute
@@ -706,6 +715,7 @@ export interface FileRoutesById {
   '/_authenticated/admin-image-queue': typeof AuthenticatedAdminImageQueueRoute
   '/_authenticated/admin-inventory': typeof AuthenticatedAdminInventoryRoute
   '/_authenticated/admin-orders': typeof AuthenticatedAdminOrdersRoute
+  '/_authenticated/admin-reorder': typeof AuthenticatedAdminReorderRoute
   '/_authenticated/ai-runtime': typeof AuthenticatedAiRuntimeRoute
   '/_authenticated/campaigns': typeof AuthenticatedCampaignsRouteWithChildren
   '/_authenticated/cart': typeof AuthenticatedCartRoute
@@ -788,6 +798,7 @@ export interface FileRouteTypes {
     | '/admin-image-queue'
     | '/admin-inventory'
     | '/admin-orders'
+    | '/admin-reorder'
     | '/ai-runtime'
     | '/campaigns'
     | '/cart'
@@ -868,6 +879,7 @@ export interface FileRouteTypes {
     | '/admin-image-queue'
     | '/admin-inventory'
     | '/admin-orders'
+    | '/admin-reorder'
     | '/ai-runtime'
     | '/campaigns'
     | '/cart'
@@ -949,6 +961,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin-image-queue'
     | '/_authenticated/admin-inventory'
     | '/_authenticated/admin-orders'
+    | '/_authenticated/admin-reorder'
     | '/_authenticated/ai-runtime'
     | '/_authenticated/campaigns'
     | '/_authenticated/cart'
@@ -1194,6 +1207,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-orders'
       fullPath: '/admin-orders'
       preLoaderRoute: typeof AuthenticatedAdminOrdersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin-reorder': {
+      id: '/_authenticated/admin-reorder'
+      path: '/admin-reorder'
+      fullPath: '/admin-reorder'
+      preLoaderRoute: typeof AuthenticatedAdminReorderRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/ai-runtime': {
@@ -1735,6 +1755,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminImageQueueRoute: typeof AuthenticatedAdminImageQueueRoute
   AuthenticatedAdminInventoryRoute: typeof AuthenticatedAdminInventoryRoute
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
+  AuthenticatedAdminReorderRoute: typeof AuthenticatedAdminReorderRoute
   AuthenticatedAiRuntimeRoute: typeof AuthenticatedAiRuntimeRoute
   AuthenticatedCampaignsRoute: typeof AuthenticatedCampaignsRouteWithChildren
   AuthenticatedCartRoute: typeof AuthenticatedCartRoute
@@ -1778,6 +1799,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminImageQueueRoute: AuthenticatedAdminImageQueueRoute,
   AuthenticatedAdminInventoryRoute: AuthenticatedAdminInventoryRoute,
   AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
+  AuthenticatedAdminReorderRoute: AuthenticatedAdminReorderRoute,
   AuthenticatedAiRuntimeRoute: AuthenticatedAiRuntimeRoute,
   AuthenticatedCampaignsRoute: AuthenticatedCampaignsRouteWithChildren,
   AuthenticatedCartRoute: AuthenticatedCartRoute,
