@@ -1,8 +1,5 @@
 // Server-only helpers behind `src/lib/reorder.functions.ts`.
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { refreshReorderSuggestions } from '@/lib/inventory/reorder-engine.server'
-
-type Client = SupabaseClient<any, 'public', any>
 
 export interface SuggestionRow {
   id: string
@@ -21,20 +18,6 @@ export interface SuggestionRow {
   warehouse_name: string | null
 }
 
-/** Purchasing writers only — verified through the caller's own RLS session. */
-export async function assertPurchasingWrite(
-  supabase: Client,
-  userId: string,
-  organizationId: string,
-): Promise<void> {
-  const { data, error } = await supabase.rpc('has_org_permission', {
-    _user_id: userId,
-    _org_id: organizationId,
-    _permission: 'purchasing.write',
-  })
-  if (error || data !== true) throw new Error('Forbidden: purchasing.write required')
-}
-
 export async function runRefresh(params: {
   organizationId: string
   windowDays?: number
@@ -44,11 +27,13 @@ export async function runRefresh(params: {
   return refreshReorderSuggestions(params)
 }
 
-export async function fetchSuggestions(
-  supabase: Client,
-  params: { organizationId: string; status?: string; limit?: number },
-): Promise<SuggestionRow[]> {
-  const { data, error } = await supabase
+export async function fetchSuggestions(params: {
+  organizationId: string
+  status?: string
+  limit?: number
+}): Promise<SuggestionRow[]> {
+  const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+  const { data, error } = await supabaseAdmin
     .from('inv_reorder_suggestions')
     .select(
       'id, product_id, warehouse_id, supplier_id, on_hand, daily_burn_rate, lead_time_days, reorder_point, suggested_qty, days_of_cover, status, computed_at, catalog_products(name_ar, name_en), wh_warehouses(name)',
@@ -58,9 +43,9 @@ export async function fetchSuggestions(
     .order('days_of_cover', { ascending: true, nullsFirst: true })
     .limit(params.limit ?? 100)
 
-  if (error) throw error
+  if (error) throw new Error(error.message)
 
-  return (data ?? []).map((row: any) => ({
+  return (data ?? []).map((row: Record<string, any>) => ({
     id: row.id,
     product_id: row.product_id,
     warehouse_id: row.warehouse_id,
@@ -78,11 +63,17 @@ export async function fetchSuggestions(
   }))
 }
 
-export async function updateSuggestionStatus(supabase: Client, id: string, status: string) {
-  const { error } = await supabase
+export async function updateSuggestionStatus(
+  organizationId: string,
+  id: string,
+  status: string,
+) {
+  const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+  const { error } = await supabaseAdmin
     .from('inv_reorder_suggestions')
     .update({ status, updated_at: new Date().toISOString() })
     .eq('id', id)
-  if (error) throw error
+    .eq('organization_id', organizationId)
+  if (error) throw new Error(error.message)
   return { ok: true as const }
 }
