@@ -1,9 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
-import { Bot, Send, X, Loader2 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Bot, Send, X, Loader2, Mic, MicOff } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
 import { PHARMACY } from '@/shared/branding'
+import { useSpeechRecognition } from '@/hooks/useSpeechRecognition'
 
 type Msg = { role: 'user' | 'assistant'; content: string }
+
 
 // Lightweight floating AI chat popup for site visitors. Uses the same
 // Lovable AI Gateway path as /ai-chat but stays inline (no navigation).
