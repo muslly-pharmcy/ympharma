@@ -42,6 +42,12 @@ export interface KernelDispatchInput {
   toolInputs?: Record<string, Record<string, unknown>>
   fromAgent?: string | null
   tier?: ModelTier
+  /** v3.0 — patient/customer whose Ego Memory record should be loaded. */
+  clientId?: string | null
+  /** v3.0 — set when the request carries an image/scan (multimodal route). */
+  hasImage?: boolean
+  /** v3.0 — action the caller intends to execute; gated actions go to HITL. */
+  actionKey?: string | null
 }
 
 export interface KernelDispatchResult {
@@ -52,7 +58,14 @@ export interface KernelDispatchResult {
   latencyMs: number
   model: string
   decision: { allowed: boolean; policyKey?: string }
+  /** v3.0 observability */
+  intent?: IntentDecision
+  volition?: VolitionTrace | null
+  clinical?: { ran: boolean; providerId: string | null; confidence: string; warnings: number; highestSeverity: string | null }
+  approvalId?: string | null
+  requiresApproval?: boolean
 }
+
 
 async function admin() {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
