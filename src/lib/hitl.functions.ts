@@ -10,7 +10,9 @@ export const listHitlApprovals = createServerFn({ method: 'POST' })
     const { getActor } = await import('./session.server')
     const { listApprovals } = await import('./ai/runtime/hitl.server')
     const actor = await getActor()
-    return listApprovals(actor.organizationId, data.status)
+    const rows = await listApprovals(actor.organizationId, data.status)
+    return { items: rows.map((r) => JSON.parse(JSON.stringify(r)) as Record<string, string | number | boolean | null>) }
+
   })
 
 export const decideHitlApproval = createServerFn({ method: 'POST' })
