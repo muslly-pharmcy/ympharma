@@ -23,7 +23,11 @@ const CATALOG: RoutingCandidate[] = [
   { model: 'openai/gpt-5.4-nano',            tier: 'fast',     costPerMTokenCents: 20,  avgLatencyMs: 900,  supportsVision: true  },
   { model: 'openai/gpt-5.4-mini',            tier: 'balanced', costPerMTokenCents: 60,  avgLatencyMs: 1600, supportsVision: true  },
   { model: 'openai/gpt-5.5',                 tier: 'deep',     costPerMTokenCents: 250, avgLatencyMs: 4200, supportsVision: true  },
+  // Vision tier — multimodal perception (prescriptions, lab results, scans).
+  { model: 'google/gemini-3.5-flash',        tier: 'vision',   costPerMTokenCents: 25,  avgLatencyMs: 1600, supportsVision: true  },
+  { model: 'google/gemini-2.5-pro',          tier: 'vision',   costPerMTokenCents: 120, avgLatencyMs: 3400, supportsVision: true  },
 ]
+
 
 export interface RouteRequest {
   tier: ModelTier
