@@ -24,6 +24,12 @@ import { checkBudgets, settleBudgets } from './budget-engine.server'
 import { recordEvaluation } from './evaluation-engine.server'
 import { buildContextBlock, remember } from './memory-manager.server'
 import type { KernelCall } from './types'
+import { classifyIntent, type IntentDecision } from './intent-router'
+import { loadClientRecord, renderClientRecordBlock, rememberForClient, type ClientRecord } from './ego-memory.server'
+import { extractDrugMentions, groundClinically } from './clinical-rag.server'
+import { runVolition, renderVolitionDirective, type VolitionTrace } from './volition.server'
+import { requestApproval, requiresApproval as hitlRequiresApproval, type HitlRisk } from './hitl.server'
+
 
 interface AgentRow {
   key: string
