@@ -20,10 +20,15 @@ export function ChatWidget({ onClose }: { onClose: () => void }) {
   const [input, setInput] = useState('')
   const [busy, setBusy] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const voice = useSpeechRecognition({
+    lang: 'ar-SA',
+    onResult: (text) => setInput((prev) => (prev ? `${prev} ${text}` : text)),
+  })
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
   }, [messages, busy])
+
 
   const send = async () => {
     const text = input.trim()
