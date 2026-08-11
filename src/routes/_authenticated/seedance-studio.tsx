@@ -1,18 +1,18 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { SeedanceStudio } from '@/components/ai/SeedanceStudio'
 
-export const Route = createFileRoute('/seedance-studio')({
+export const Route = createFileRoute('/_authenticated/seedance-studio')({
   head: () => ({
     meta: [
       { title: 'استوديو سيدانس السينمائي — MUSLLY' },
       {
         name: 'description',
-        content: 'محرك توليد أوامر سينمائية متقدمة لمنصة Seedance AI: مشاهد، شخصيات، وحركة كاميرا.',
+        content: 'محرك توليد أوامر سينمائية متقدمة ومقاطع فيديو بالذكاء الاصطناعي.',
       },
       { property: 'og:title', content: 'استوديو سيدانس السينمائي — MUSLLY' },
       {
         property: 'og:description',
-        content: 'أنشئ أوامر Seedance AI السينمائية من عنوان المشهد ووصفه وتفاصيل الشخصية.',
+        content: 'أنشئ أوامر Seedance السينمائية ووَلِّد المقطع مباشرة داخل الاستوديو.',
       },
       { property: 'og:type', content: 'website' },
       { name: 'twitter:card', content: 'summary_large_image' },

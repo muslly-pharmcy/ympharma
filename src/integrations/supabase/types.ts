@@ -11972,6 +11972,48 @@ export type Database = {
           },
         ]
       }
+      seedance_generations: {
+        Row: {
+          aspect_ratio: string
+          created_at: string
+          error_message: string | null
+          id: string
+          job_id: string
+          prompt: string
+          seconds: number
+          status: string
+          storage_path: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          aspect_ratio?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          job_id: string
+          prompt: string
+          seconds?: number
+          status?: string
+          storage_path?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          aspect_ratio?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          job_id?: string
+          prompt?: string
+          seconds?: number
+          status?: string
+          storage_path?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       shipping_zones: {
         Row: {
           code: string
