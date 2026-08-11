@@ -3,16 +3,23 @@
 
 import type { DrugKnowledgeProvider } from '@/domain/clinical/types'
 import { nullProvider } from './null-provider'
+import { localDbProvider } from './local-db-provider.server'
 
-const registry = new Map<string, DrugKnowledgeProvider>([[nullProvider.id, nullProvider]])
+const registry = new Map<string, DrugKnowledgeProvider>([
+  [nullProvider.id, nullProvider],
+  [localDbProvider.id, localDbProvider],
+])
+
+/** Default when CLINICAL_PROVIDER is unset: the curated local knowledge base. */
+const defaultProvider: DrugKnowledgeProvider = localDbProvider
 
 export function registerProvider(p: DrugKnowledgeProvider) {
   registry.set(p.id, p)
 }
 
 export function getProvider(id?: string | null): DrugKnowledgeProvider {
-  if (!id) return nullProvider
-  return registry.get(id) ?? nullProvider
+  if (!id) return defaultProvider
+  return registry.get(id) ?? defaultProvider
 }
 
 export function listProviders(): Array<{ id: string; displayName: string }> {
