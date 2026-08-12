@@ -34,6 +34,8 @@ export default defineConfig({
         registerType: "autoUpdate",
         injectRegister: null,
         filename: "sw.js",
+        // Client assets are emitted to dist/client; the SW must live beside them.
+        outDir: "dist/client",
         devOptions: { enabled: false },
         manifest: false,
         workbox: {
