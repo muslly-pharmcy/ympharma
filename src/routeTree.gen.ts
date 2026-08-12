@@ -63,6 +63,7 @@ import { Route as PlanetPlanetIdRouteImport } from './routes/planet.$planetId'
 import { Route as ProductHandleRouteImport } from './routes/product.$handle'
 import { Route as ProductProductIdRouteImport } from './routes/product.$productId'
 import { Route as ToolsIndexRouteImport } from './routes/tools.index'
+import { Route as ToolsBmiRouteImport } from './routes/tools.bmi'
 import { Route as ToolsInteractionsRouteImport } from './routes/tools.interactions'
 import { Route as ToolsPediatricDoseRouteImport } from './routes/tools.pediatric-dose'
 import { Route as ToolsScheduleRouteImport } from './routes/tools.schedule'
@@ -391,6 +392,11 @@ const ToolsIndexRoute = ToolsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ToolsRoute,
 } as any)
+const ToolsBmiRoute = ToolsBmiRouteImport.update({
+  id: '/bmi',
+  path: '/bmi',
+  getParentRoute: () => ToolsRoute,
+} as any)
 const ToolsInteractionsRoute = ToolsInteractionsRouteImport.update({
   id: '/interactions',
   path: '/interactions',
@@ -692,6 +698,7 @@ export interface FileRoutesByFullPath {
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/product/$handle': typeof ProductHandleRoute
   '/product/$productId': typeof ProductProductIdRoute
+  '/tools/bmi': typeof ToolsBmiRoute
   '/tools/interactions': typeof ToolsInteractionsRoute
   '/tools/pediatric-dose': typeof ToolsPediatricDoseRoute
   '/tools/schedule': typeof ToolsScheduleRoute
@@ -789,6 +796,7 @@ export interface FileRoutesByTo {
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/product/$handle': typeof ProductHandleRoute
   '/product/$productId': typeof ProductProductIdRoute
+  '/tools/bmi': typeof ToolsBmiRoute
   '/tools/interactions': typeof ToolsInteractionsRoute
   '/tools/pediatric-dose': typeof ToolsPediatricDoseRoute
   '/tools/schedule': typeof ToolsScheduleRoute
@@ -889,6 +897,7 @@ export interface FileRoutesById {
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/product/$handle': typeof ProductHandleRoute
   '/product/$productId': typeof ProductProductIdRoute
+  '/tools/bmi': typeof ToolsBmiRoute
   '/tools/interactions': typeof ToolsInteractionsRoute
   '/tools/pediatric-dose': typeof ToolsPediatricDoseRoute
   '/tools/schedule': typeof ToolsScheduleRoute
@@ -989,6 +998,7 @@ export interface FileRouteTypes {
     | '/planet/$planetId'
     | '/product/$handle'
     | '/product/$productId'
+    | '/tools/bmi'
     | '/tools/interactions'
     | '/tools/pediatric-dose'
     | '/tools/schedule'
@@ -1086,6 +1096,7 @@ export interface FileRouteTypes {
     | '/planet/$planetId'
     | '/product/$handle'
     | '/product/$productId'
+    | '/tools/bmi'
     | '/tools/interactions'
     | '/tools/pediatric-dose'
     | '/tools/schedule'
@@ -1185,6 +1196,7 @@ export interface FileRouteTypes {
     | '/planet/$planetId'
     | '/product/$handle'
     | '/product/$productId'
+    | '/tools/bmi'
     | '/tools/interactions'
     | '/tools/pediatric-dose'
     | '/tools/schedule'
@@ -1649,6 +1661,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/tools/'
       preLoaderRoute: typeof ToolsIndexRouteImport
+      parentRoute: typeof ToolsRoute
+    }
+    '/tools/bmi': {
+      id: '/tools/bmi'
+      path: '/bmi'
+      fullPath: '/tools/bmi'
+      preLoaderRoute: typeof ToolsBmiRouteImport
       parentRoute: typeof ToolsRoute
     }
     '/tools/interactions': {
@@ -2190,6 +2209,7 @@ const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface ToolsRouteChildren {
+  ToolsBmiRoute: typeof ToolsBmiRoute
   ToolsInteractionsRoute: typeof ToolsInteractionsRoute
   ToolsPediatricDoseRoute: typeof ToolsPediatricDoseRoute
   ToolsScheduleRoute: typeof ToolsScheduleRoute
@@ -2198,6 +2218,7 @@ interface ToolsRouteChildren {
 }
 
 const ToolsRouteChildren: ToolsRouteChildren = {
+  ToolsBmiRoute: ToolsBmiRoute,
   ToolsInteractionsRoute: ToolsInteractionsRoute,
   ToolsPediatricDoseRoute: ToolsPediatricDoseRoute,
   ToolsScheduleRoute: ToolsScheduleRoute,
