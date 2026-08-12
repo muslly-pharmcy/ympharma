@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { Phone, Mail, MapPin, MessageCircle, Clock } from 'lucide-react'
 import { PHARMACY } from '@/shared/branding'
+import { GlassLogo } from '@/shared/components/GlassLogo'
 
 export function Footer() {
   const year = new Date().getFullYear()
@@ -9,7 +10,7 @@ export function Footer() {
       <div className="max-w-[1920px] mx-auto px-4 md:px-8 py-10 grid gap-8 md:grid-cols-4">
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <img src={PHARMACY.logo} alt={PHARMACY.nameAr} className="h-14 w-14 shrink-0 object-contain" />
+            <GlassLogo src={PHARMACY.logo} alt={PHARMACY.nameAr} className="h-14 w-14" />
             <div className="min-w-0">
               <div className="truncate font-bold text-gray-900">{PHARMACY.nameAr}</div>
               <div className="truncate text-xs text-gray-500">{PHARMACY.nameEn}</div>
