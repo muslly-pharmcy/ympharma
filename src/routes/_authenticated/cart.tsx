@@ -193,18 +193,38 @@ function CartPage() {
                 {subtotal.toLocaleString('ar-EG')} ر.ي
               </span>
             </div>
-            <Link
-              to="/checkout"
-              aria-disabled={!canCheckout}
-              className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white shadow-sm sm:w-auto ${
-                canCheckout
-                  ? 'bg-primary hover:opacity-90'
-                  : 'pointer-events-none bg-gray-300'
-              }`}
-            >
-              متابعة إلى الدفع
-            </Link>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <Link
+                to="/checkout"
+                aria-disabled={!canCheckout}
+                className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white shadow-sm sm:w-auto ${
+                  canCheckout
+                    ? 'bg-primary hover:opacity-90'
+                    : 'pointer-events-none bg-gray-300'
+                }`}
+              >
+                متابعة إلى الدفع
+              </Link>
+              <button
+                type="button"
+                disabled={!canCheckout}
+                onClick={() =>
+                  openWhatsAppOrder({
+                    lines: items.map((it) => ({
+                      name: it.product?.name_ar ?? 'صنف',
+                      quantity: it.quantity,
+                      unitPrice: Number(it.product?.sbdma_official_price ?? 0),
+                    })),
+                  })
+                }
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-6 py-3 text-sm font-semibold text-emerald-800 disabled:opacity-50 sm:w-auto"
+              >
+                <MessageCircle className="h-4 w-4" />
+                اطلب عبر واتساب
+              </button>
+            </div>
           </div>
+
         </>
       )}
     </div>
