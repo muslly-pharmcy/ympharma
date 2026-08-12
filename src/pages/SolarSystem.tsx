@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import { Suspense, lazy } from 'react'
 import { Link } from '@tanstack/react-router'
 import SunCore from '@/shared/components/SunCore'
