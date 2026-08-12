@@ -117,7 +117,14 @@ export default function Storefront() {
               >
                 الأدوات الصحية
               </Link>
+              <button
+                onClick={() => setRxOpen(true)}
+                className="press-scale rounded-2xl border border-primary/30 bg-primary/5 px-5 py-2.5 text-sm font-bold text-primary"
+              >
+                رفع الوصفة الطبية
+              </button>
             </div>
+
           </motion.div>
 
           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
