@@ -17,6 +17,7 @@ import { addToCart } from '@/lib/cart.functions'
 import { supabase } from '@/integrations/supabase/client'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { ProductAiGuide } from '@/components/store/ProductAiGuide'
 
 export const Route = createFileRoute('/product/$productId')({
   parseParams: (p) => ({ productId: z.string().uuid().parse(p.productId) }),
@@ -293,6 +294,8 @@ function ProductDetailPage() {
                 </p>
               </div>
             )}
+
+            <ProductAiGuide productId={productId} />
 
             <div className="grid grid-cols-1 gap-2 pt-2 sm:grid-cols-3">
               <Policy icon={Truck} title="توصيل موثوق" desc="عدن خلال 24 ساعة" />
