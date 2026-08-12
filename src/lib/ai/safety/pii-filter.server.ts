@@ -3,6 +3,8 @@
  * Detects and redacts 10 types of PII before sending to AI providers
  */
 
+import { redactText, textContainsPII } from '@/lib/observability/pii-patterns';
+
 // PII detection patterns
 const PII_PATTERNS: Record<string, RegExp> = {
   email: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
@@ -95,7 +97,11 @@ function luhnCheck(digits: string): boolean {
 }
 
 /**
- * Redact PII from text
+ * Redact PII from text.
+ *
+ * Two passes: the structural patterns above, then the shared high-confidence
+ * text patterns (patient names, MRNs, Rx codes, bearer tokens) used by the
+ * server logger, so AI prompts and logs never drift apart.
  */
 export function redactPII(text: string, replacement = '[REDACTED]'): string {
   const detections = detectPII(text);
@@ -107,7 +113,7 @@ export function redactPII(text: string, replacement = '[REDACTED]'): string {
     result = before + replacement + after;
   }
 
-  return result;
+  return redactText(result);
 }
 
 /**
@@ -115,12 +121,14 @@ export function redactPII(text: string, replacement = '[REDACTED]'): string {
  */
 export const sanitizeForAI = redactPII;
 
+
 /**
  * Check if text contains any PII
  */
 export function containsPII(text: string): boolean {
-  return detectPII(text).length > 0;
+  return detectPII(text).length > 0 || textContainsPII(text);
 }
+
 
 /**
  * Get PII summary for analytics

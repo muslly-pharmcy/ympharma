@@ -61,6 +61,7 @@ import { Route as ProductHandleRouteImport } from './routes/product.$handle'
 import { Route as ProductProductIdRouteImport } from './routes/product.$productId'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as AuthenticatedAdminKernelEvolutionRouteImport } from './routes/_authenticated/admin.kernel-evolution'
 import { Route as AuthenticatedAdminPhoenixReportRouteImport } from './routes/_authenticated/admin.phoenix-report'
 import { Route as AuthenticatedAdminTitanosReportRouteImport } from './routes/_authenticated/admin.titanos-report'
 import { Route as AuthenticatedAnalyticsIndexRouteImport } from './routes/_authenticated/analytics.index'
@@ -74,12 +75,14 @@ import { Route as AuthenticatedInsuranceIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedInsuranceClaimsRouteImport } from './routes/_authenticated/insurance.claims'
 import { Route as AuthenticatedInsuranceCoverageRouteImport } from './routes/_authenticated/insurance.coverage'
 import { Route as AuthenticatedLoyaltyAccountIdRouteImport } from './routes/_authenticated/loyalty.$accountId'
+import { Route as AuthenticatedMarketingSocialAssistantRouteImport } from './routes/_authenticated/marketing.social-assistant'
 import { Route as AuthenticatedOrdersOrderIdRouteImport } from './routes/_authenticated/orders.$orderId'
 import { Route as AuthenticatedPatientsPatientIdRouteImport } from './routes/_authenticated/patients.$patientId'
 import { Route as AuthenticatedPrescriptionsPrescriptionIdRouteImport } from './routes/_authenticated/prescriptions.$prescriptionId'
 import { Route as AuthenticatedPromotionsIndexRouteImport } from './routes/_authenticated/promotions.index'
 import { Route as AuthenticatedPromotionsIdRouteImport } from './routes/_authenticated/promotions.$id'
 import { Route as AuthenticatedPurchaseOrdersIdRouteImport } from './routes/_authenticated/purchase-orders.$id'
+import { Route as AuthenticatedPurchasingScanInvoiceRouteImport } from './routes/_authenticated/purchasing.scan-invoice'
 import { Route as AuthenticatedStoreCodeRouteImport } from './routes/_authenticated/store.$code'
 import { Route as ApiPublicCspReportRouteImport } from './routes/api/public/csp-report'
 import { Route as AuthenticatedInsuranceClaimsClaimIdRouteImport } from './routes/_authenticated/insurance.claims_.$claimId'
@@ -365,6 +368,12 @@ const Char91DotmcpChar93InvokeToolToolRoute =
     path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedAdminKernelEvolutionRoute =
+  AuthenticatedAdminKernelEvolutionRouteImport.update({
+    id: '/admin/kernel-evolution',
+    path: '/admin/kernel-evolution',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminPhoenixReportRoute =
   AuthenticatedAdminPhoenixReportRouteImport.update({
     id: '/admin/phoenix-report',
@@ -443,6 +452,12 @@ const AuthenticatedLoyaltyAccountIdRoute =
     path: '/$accountId',
     getParentRoute: () => AuthenticatedLoyaltyRoute,
   } as any)
+const AuthenticatedMarketingSocialAssistantRoute =
+  AuthenticatedMarketingSocialAssistantRouteImport.update({
+    id: '/marketing/social-assistant',
+    path: '/marketing/social-assistant',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOrdersOrderIdRoute =
   AuthenticatedOrdersOrderIdRouteImport.update({
     id: '/$orderId',
@@ -478,6 +493,12 @@ const AuthenticatedPurchaseOrdersIdRoute =
     id: '/$id',
     path: '/$id',
     getParentRoute: () => AuthenticatedPurchaseOrdersRoute,
+  } as any)
+const AuthenticatedPurchasingScanInvoiceRoute =
+  AuthenticatedPurchasingScanInvoiceRouteImport.update({
+    id: '/purchasing/scan-invoice',
+    path: '/purchasing/scan-invoice',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedStoreCodeRoute = AuthenticatedStoreCodeRouteImport.update({
   id: '/$code',
@@ -581,6 +602,7 @@ export interface FileRoutesByFullPath {
   '/product/$productId': typeof ProductProductIdRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/admin/kernel-evolution': typeof AuthenticatedAdminKernelEvolutionRoute
   '/admin/phoenix-report': typeof AuthenticatedAdminPhoenixReportRoute
   '/admin/titanos-report': typeof AuthenticatedAdminTitanosReportRoute
   '/campaigns/$id': typeof AuthenticatedCampaignsIdRoute
@@ -591,11 +613,13 @@ export interface FileRoutesByFullPath {
   '/insurance/claims': typeof AuthenticatedInsuranceClaimsRoute
   '/insurance/coverage': typeof AuthenticatedInsuranceCoverageRoute
   '/loyalty/$accountId': typeof AuthenticatedLoyaltyAccountIdRoute
+  '/marketing/social-assistant': typeof AuthenticatedMarketingSocialAssistantRoute
   '/orders/$orderId': typeof AuthenticatedOrdersOrderIdRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/promotions/$id': typeof AuthenticatedPromotionsIdRoute
   '/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
+  '/purchasing/scan-invoice': typeof AuthenticatedPurchasingScanInvoiceRoute
   '/store/$code': typeof AuthenticatedStoreCodeRoute
   '/api/public/csp-report': typeof ApiPublicCspReportRoute
   '/analytics/': typeof AuthenticatedAnalyticsIndexRoute
@@ -662,6 +686,7 @@ export interface FileRoutesByTo {
   '/product/$productId': typeof ProductProductIdRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/admin/kernel-evolution': typeof AuthenticatedAdminKernelEvolutionRoute
   '/admin/phoenix-report': typeof AuthenticatedAdminPhoenixReportRoute
   '/admin/titanos-report': typeof AuthenticatedAdminTitanosReportRoute
   '/campaigns/$id': typeof AuthenticatedCampaignsIdRoute
@@ -672,11 +697,13 @@ export interface FileRoutesByTo {
   '/insurance/claims': typeof AuthenticatedInsuranceClaimsRoute
   '/insurance/coverage': typeof AuthenticatedInsuranceCoverageRoute
   '/loyalty/$accountId': typeof AuthenticatedLoyaltyAccountIdRoute
+  '/marketing/social-assistant': typeof AuthenticatedMarketingSocialAssistantRoute
   '/orders/$orderId': typeof AuthenticatedOrdersOrderIdRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/promotions/$id': typeof AuthenticatedPromotionsIdRoute
   '/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
+  '/purchasing/scan-invoice': typeof AuthenticatedPurchasingScanInvoiceRoute
   '/store/$code': typeof AuthenticatedStoreCodeRoute
   '/api/public/csp-report': typeof ApiPublicCspReportRoute
   '/analytics': typeof AuthenticatedAnalyticsIndexRoute
@@ -745,6 +772,7 @@ export interface FileRoutesById {
   '/product/$productId': typeof ProductProductIdRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/_authenticated/admin/kernel-evolution': typeof AuthenticatedAdminKernelEvolutionRoute
   '/_authenticated/admin/phoenix-report': typeof AuthenticatedAdminPhoenixReportRoute
   '/_authenticated/admin/titanos-report': typeof AuthenticatedAdminTitanosReportRoute
   '/_authenticated/campaigns/$id': typeof AuthenticatedCampaignsIdRoute
@@ -755,11 +783,13 @@ export interface FileRoutesById {
   '/_authenticated/insurance/claims': typeof AuthenticatedInsuranceClaimsRoute
   '/_authenticated/insurance/coverage': typeof AuthenticatedInsuranceCoverageRoute
   '/_authenticated/loyalty/$accountId': typeof AuthenticatedLoyaltyAccountIdRoute
+  '/_authenticated/marketing/social-assistant': typeof AuthenticatedMarketingSocialAssistantRoute
   '/_authenticated/orders/$orderId': typeof AuthenticatedOrdersOrderIdRoute
   '/_authenticated/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/_authenticated/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/_authenticated/promotions/$id': typeof AuthenticatedPromotionsIdRoute
   '/_authenticated/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
+  '/_authenticated/purchasing/scan-invoice': typeof AuthenticatedPurchasingScanInvoiceRoute
   '/_authenticated/store/$code': typeof AuthenticatedStoreCodeRoute
   '/api/public/csp-report': typeof ApiPublicCspReportRoute
   '/_authenticated/analytics/': typeof AuthenticatedAnalyticsIndexRoute
@@ -828,6 +858,7 @@ export interface FileRouteTypes {
     | '/product/$productId'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/admin/kernel-evolution'
     | '/admin/phoenix-report'
     | '/admin/titanos-report'
     | '/campaigns/$id'
@@ -838,11 +869,13 @@ export interface FileRouteTypes {
     | '/insurance/claims'
     | '/insurance/coverage'
     | '/loyalty/$accountId'
+    | '/marketing/social-assistant'
     | '/orders/$orderId'
     | '/patients/$patientId'
     | '/prescriptions/$prescriptionId'
     | '/promotions/$id'
     | '/purchase-orders/$id'
+    | '/purchasing/scan-invoice'
     | '/store/$code'
     | '/api/public/csp-report'
     | '/analytics/'
@@ -909,6 +942,7 @@ export interface FileRouteTypes {
     | '/product/$productId'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/admin/kernel-evolution'
     | '/admin/phoenix-report'
     | '/admin/titanos-report'
     | '/campaigns/$id'
@@ -919,11 +953,13 @@ export interface FileRouteTypes {
     | '/insurance/claims'
     | '/insurance/coverage'
     | '/loyalty/$accountId'
+    | '/marketing/social-assistant'
     | '/orders/$orderId'
     | '/patients/$patientId'
     | '/prescriptions/$prescriptionId'
     | '/promotions/$id'
     | '/purchase-orders/$id'
+    | '/purchasing/scan-invoice'
     | '/store/$code'
     | '/api/public/csp-report'
     | '/analytics'
@@ -991,6 +1027,7 @@ export interface FileRouteTypes {
     | '/product/$productId'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/_authenticated/admin/kernel-evolution'
     | '/_authenticated/admin/phoenix-report'
     | '/_authenticated/admin/titanos-report'
     | '/_authenticated/campaigns/$id'
@@ -1001,11 +1038,13 @@ export interface FileRouteTypes {
     | '/_authenticated/insurance/claims'
     | '/_authenticated/insurance/coverage'
     | '/_authenticated/loyalty/$accountId'
+    | '/_authenticated/marketing/social-assistant'
     | '/_authenticated/orders/$orderId'
     | '/_authenticated/patients/$patientId'
     | '/_authenticated/prescriptions/$prescriptionId'
     | '/_authenticated/promotions/$id'
     | '/_authenticated/purchase-orders/$id'
+    | '/_authenticated/purchasing/scan-invoice'
     | '/_authenticated/store/$code'
     | '/api/public/csp-report'
     | '/_authenticated/analytics/'
@@ -1419,6 +1458,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/kernel-evolution': {
+      id: '/_authenticated/admin/kernel-evolution'
+      path: '/admin/kernel-evolution'
+      fullPath: '/admin/kernel-evolution'
+      preLoaderRoute: typeof AuthenticatedAdminKernelEvolutionRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/phoenix-report': {
       id: '/_authenticated/admin/phoenix-report'
       path: '/admin/phoenix-report'
@@ -1510,6 +1556,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLoyaltyAccountIdRouteImport
       parentRoute: typeof AuthenticatedLoyaltyRoute
     }
+    '/_authenticated/marketing/social-assistant': {
+      id: '/_authenticated/marketing/social-assistant'
+      path: '/marketing/social-assistant'
+      fullPath: '/marketing/social-assistant'
+      preLoaderRoute: typeof AuthenticatedMarketingSocialAssistantRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/orders/$orderId': {
       id: '/_authenticated/orders/$orderId'
       path: '/$orderId'
@@ -1551,6 +1604,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/purchase-orders/$id'
       preLoaderRoute: typeof AuthenticatedPurchaseOrdersIdRouteImport
       parentRoute: typeof AuthenticatedPurchaseOrdersRoute
+    }
+    '/_authenticated/purchasing/scan-invoice': {
+      id: '/_authenticated/purchasing/scan-invoice'
+      path: '/purchasing/scan-invoice'
+      fullPath: '/purchasing/scan-invoice'
+      preLoaderRoute: typeof AuthenticatedPurchasingScanInvoiceRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/store/$code': {
       id: '/_authenticated/store/$code'
@@ -1779,12 +1839,15 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSuppliersRoute: typeof AuthenticatedSuppliersRoute
   AuthenticatedVisionLabRoute: typeof AuthenticatedVisionLabRoute
   AuthenticatedWarehousesRoute: typeof AuthenticatedWarehousesRoute
+  AuthenticatedAdminKernelEvolutionRoute: typeof AuthenticatedAdminKernelEvolutionRoute
   AuthenticatedAdminPhoenixReportRoute: typeof AuthenticatedAdminPhoenixReportRoute
   AuthenticatedAdminTitanosReportRoute: typeof AuthenticatedAdminTitanosReportRoute
   AuthenticatedCatalogProductIdRoute: typeof AuthenticatedCatalogProductIdRoute
   AuthenticatedInsuranceClaimsRoute: typeof AuthenticatedInsuranceClaimsRoute
   AuthenticatedInsuranceCoverageRoute: typeof AuthenticatedInsuranceCoverageRoute
+  AuthenticatedMarketingSocialAssistantRoute: typeof AuthenticatedMarketingSocialAssistantRoute
   AuthenticatedPromotionsIdRoute: typeof AuthenticatedPromotionsIdRoute
+  AuthenticatedPurchasingScanInvoiceRoute: typeof AuthenticatedPurchasingScanInvoiceRoute
   AuthenticatedAnalyticsIndexRoute: typeof AuthenticatedAnalyticsIndexRoute
   AuthenticatedCatalogIndexRoute: typeof AuthenticatedCatalogIndexRoute
   AuthenticatedInsuranceIndexRoute: typeof AuthenticatedInsuranceIndexRoute
@@ -1824,12 +1887,18 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSuppliersRoute: AuthenticatedSuppliersRoute,
   AuthenticatedVisionLabRoute: AuthenticatedVisionLabRoute,
   AuthenticatedWarehousesRoute: AuthenticatedWarehousesRoute,
+  AuthenticatedAdminKernelEvolutionRoute:
+    AuthenticatedAdminKernelEvolutionRoute,
   AuthenticatedAdminPhoenixReportRoute: AuthenticatedAdminPhoenixReportRoute,
   AuthenticatedAdminTitanosReportRoute: AuthenticatedAdminTitanosReportRoute,
   AuthenticatedCatalogProductIdRoute: AuthenticatedCatalogProductIdRoute,
   AuthenticatedInsuranceClaimsRoute: AuthenticatedInsuranceClaimsRoute,
   AuthenticatedInsuranceCoverageRoute: AuthenticatedInsuranceCoverageRoute,
+  AuthenticatedMarketingSocialAssistantRoute:
+    AuthenticatedMarketingSocialAssistantRoute,
   AuthenticatedPromotionsIdRoute: AuthenticatedPromotionsIdRoute,
+  AuthenticatedPurchasingScanInvoiceRoute:
+    AuthenticatedPurchasingScanInvoiceRoute,
   AuthenticatedAnalyticsIndexRoute: AuthenticatedAnalyticsIndexRoute,
   AuthenticatedCatalogIndexRoute: AuthenticatedCatalogIndexRoute,
   AuthenticatedInsuranceIndexRoute: AuthenticatedInsuranceIndexRoute,

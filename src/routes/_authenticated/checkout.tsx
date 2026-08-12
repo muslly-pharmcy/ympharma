@@ -14,9 +14,15 @@ import { toast } from 'sonner'
 import { listCart } from '@/lib/cart.functions'
 import {
   listPaymentMethods,
+  listProductImageUrls,
   listShippingZones,
   placeOrder,
 } from '@/lib/storefront.functions'
+import {
+  openWhatsAppOrder,
+  type WhatsAppOrderLine,
+} from '@/lib/whatsapp/order-message'
+
 
 export const Route = createFileRoute('/_authenticated/checkout')({
   head: () => ({
@@ -54,6 +60,52 @@ function CheckoutPage() {
   const [address, setAddress] = useState('')
   const [notes, setNotes] = useState('')
 
+  const [waFallbackUrl, setWaFallbackUrl] = useState<string | null>(null)
+
+  const imagesFn = useServerFn(listProductImageUrls)
+
+  async function dispatchToWhatsApp(orderRef: string): Promise<void> {
+    const currentZone = zones.find((z) => z.id === zoneId)
+    const currentMethod = methods.find((m) => m.code === methodCode)
+
+    const lines: WhatsAppOrderLine[] = await Promise.all(
+      cart.map(async (row) => {
+        let imageUrl: string | null = null
+        try {
+          const media = await imagesFn({ data: { productId: row.product_id } })
+          imageUrl = media[0]?.url ?? null
+        } catch {
+          imageUrl = null
+        }
+        return {
+          name: row.product?.name_ar ?? 'صنف',
+          quantity: row.quantity,
+          unitPrice: Number(
+            (row.product as unknown as { sbdma_official_price?: number | null } | null)
+              ?.sbdma_official_price ?? 0,
+          ),
+          imageUrl,
+        }
+      }),
+    )
+
+    const { url, opened } = openWhatsAppOrder({
+      orderRef,
+      customerName,
+      phone,
+      address,
+      zoneName: currentZone?.name_ar ?? null,
+      paymentMethod: currentMethod?.name_ar ?? null,
+      notes: notes || null,
+      shippingFee: currentZone?.fee ?? 0,
+      lines,
+    })
+    if (!opened) {
+      setWaFallbackUrl(url)
+      toast.info('اضغط على رابط واتساب لإرسال الطلب')
+    }
+  }
+
   const placeFn = useServerFn(placeOrder)
   const placeMut = useMutation({
     mutationFn: () =>
@@ -67,8 +119,13 @@ function CheckoutPage() {
           notes: notes || null,
         },
       }),
-    onSuccess: (res) => {
-      toast.success('تم إنشاء الطلب')
+    onSuccess: async (res) => {
+      toast.success('تم إنشاء الطلب — جارٍ فتح واتساب')
+      try {
+        await dispatchToWhatsApp(res.id.slice(0, 8).toUpperCase())
+      } catch {
+        toast.error('تعذّر فتح واتساب — يمكنك متابعة الطلب من صفحة الطلبات')
+      }
       void qc.invalidateQueries({ queryKey: ['cart'] })
       void qc.invalidateQueries({ queryKey: ['my-orders'] })
       void navigate({
@@ -78,6 +135,7 @@ function CheckoutPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   })
+
 
   const subtotal = useMemo(
     () =>
@@ -282,8 +340,19 @@ function CheckoutPage() {
               className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50"
             >
               {placeMut.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-              تأكيد الطلب
+              تأكيد الطلب وإرساله عبر واتساب
             </button>
+            {waFallbackUrl && (
+              <a
+                href={waFallbackUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 block rounded-xl border border-emerald-300 bg-emerald-50 py-2 text-center text-sm font-semibold text-emerald-800"
+              >
+                فتح واتساب لإرسال الطلب
+              </a>
+            )}
+
             <p className="mt-2 text-center text-[11px] text-gray-500">
               بالضغط أنت توافق على شروط الشراء وسياسة الإرجاع.
             </p>
