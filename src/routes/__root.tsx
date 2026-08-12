@@ -18,6 +18,10 @@ import { supabase } from '@/integrations/supabase/client'
 import { BottomNav } from '@/shared/components/BottomNav'
 import { OfflineBanner } from '@/shared/components/OfflineBanner'
 import { GlobalErrorListeners } from '@/shared/components/GlobalErrorListeners'
+import { ReadingProgress } from '@/shared/components/engage/ReadingProgress'
+import { ScrollDepthPrompt } from '@/shared/components/engage/ScrollDepthPrompt'
+import { ExitIntentModal } from '@/shared/components/engage/ExitIntentModal'
+
 import { ModuleErrorBoundary } from '@/components/errors/ErrorBoundary'
 import { ErrorScreen } from '@/components/errors/ErrorScreen'
 import { RouteSkeleton } from '@/components/skeletons/Skeleton'
@@ -115,6 +119,7 @@ function RootComponent() {
       <AuthStateSync />
       <GlobalErrorListeners />
       <OfflineBanner />
+      <ReadingProgress />
       <ThemeProvider>
         <AuthProvider>
           <AIProvider>
@@ -126,7 +131,10 @@ function RootComponent() {
               </ModuleErrorBoundary>
             </MainLayout>
             <BottomNav />
+            <ScrollDepthPrompt />
+            <ExitIntentModal />
           </AIProvider>
+
         </AuthProvider>
       </ThemeProvider>
     </AppQueryProvider>

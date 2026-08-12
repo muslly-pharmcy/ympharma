@@ -23,6 +23,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ToolsRouteImport } from './routes/tools'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AuthenticatedAdminDiagnosticsRouteImport } from './routes/_authenticated/admin-diagnostics'
@@ -59,6 +60,11 @@ import { Route as ApiChatWidgetRouteImport } from './routes/api/chat-widget'
 import { Route as PlanetPlanetIdRouteImport } from './routes/planet.$planetId'
 import { Route as ProductHandleRouteImport } from './routes/product.$handle'
 import { Route as ProductProductIdRouteImport } from './routes/product.$productId'
+import { Route as ToolsIndexRouteImport } from './routes/tools.index'
+import { Route as ToolsInteractionsRouteImport } from './routes/tools.interactions'
+import { Route as ToolsPediatricDoseRouteImport } from './routes/tools.pediatric-dose'
+import { Route as ToolsScheduleRouteImport } from './routes/tools.schedule'
+import { Route as ToolsSymptomsRouteImport } from './routes/tools.symptoms'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as AuthenticatedAdminKernelEvolutionRouteImport } from './routes/_authenticated/admin.kernel-evolution'
@@ -160,6 +166,11 @@ const ShopRoute = ShopRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsRoute = ToolsRouteImport.update({
+  id: '/tools',
+  path: '/tools',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Char91DotmcpChar93ListToolsRoute =
@@ -356,6 +367,31 @@ const ProductProductIdRoute = ProductProductIdRouteImport.update({
   id: '/product/$productId',
   path: '/product/$productId',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsIndexRoute = ToolsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ToolsRoute,
+} as any)
+const ToolsInteractionsRoute = ToolsInteractionsRouteImport.update({
+  id: '/interactions',
+  path: '/interactions',
+  getParentRoute: () => ToolsRoute,
+} as any)
+const ToolsPediatricDoseRoute = ToolsPediatricDoseRouteImport.update({
+  id: '/pediatric-dose',
+  path: '/pediatric-dose',
+  getParentRoute: () => ToolsRoute,
+} as any)
+const ToolsScheduleRoute = ToolsScheduleRouteImport.update({
+  id: '/schedule',
+  path: '/schedule',
+  getParentRoute: () => ToolsRoute,
+} as any)
+const ToolsSymptomsRoute = ToolsSymptomsRouteImport.update({
+  id: '/symptoms',
+  path: '/symptoms',
+  getParentRoute: () => ToolsRoute,
 } as any)
 const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   id: '/.lovable/oauth/consent',
@@ -564,6 +600,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/tools': typeof ToolsRouteWithChildren
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin-diagnostics': typeof AuthenticatedAdminDiagnosticsRoute
@@ -600,6 +637,11 @@ export interface FileRoutesByFullPath {
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/product/$handle': typeof ProductHandleRoute
   '/product/$productId': typeof ProductProductIdRoute
+  '/tools/interactions': typeof ToolsInteractionsRoute
+  '/tools/pediatric-dose': typeof ToolsPediatricDoseRoute
+  '/tools/schedule': typeof ToolsScheduleRoute
+  '/tools/symptoms': typeof ToolsSymptomsRoute
+  '/tools/': typeof ToolsIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/kernel-evolution': typeof AuthenticatedAdminKernelEvolutionRoute
@@ -684,6 +726,11 @@ export interface FileRoutesByTo {
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/product/$handle': typeof ProductHandleRoute
   '/product/$productId': typeof ProductProductIdRoute
+  '/tools/interactions': typeof ToolsInteractionsRoute
+  '/tools/pediatric-dose': typeof ToolsPediatricDoseRoute
+  '/tools/schedule': typeof ToolsScheduleRoute
+  '/tools/symptoms': typeof ToolsSymptomsRoute
+  '/tools': typeof ToolsIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/kernel-evolution': typeof AuthenticatedAdminKernelEvolutionRoute
@@ -734,6 +781,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/tools': typeof ToolsRouteWithChildren
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/admin-diagnostics': typeof AuthenticatedAdminDiagnosticsRoute
@@ -770,6 +818,11 @@ export interface FileRoutesById {
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/product/$handle': typeof ProductHandleRoute
   '/product/$productId': typeof ProductProductIdRoute
+  '/tools/interactions': typeof ToolsInteractionsRoute
+  '/tools/pediatric-dose': typeof ToolsPediatricDoseRoute
+  '/tools/schedule': typeof ToolsScheduleRoute
+  '/tools/symptoms': typeof ToolsSymptomsRoute
+  '/tools/': typeof ToolsIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/admin/kernel-evolution': typeof AuthenticatedAdminKernelEvolutionRoute
@@ -820,6 +873,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/shop'
     | '/sitemap.xml'
+    | '/tools'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin-diagnostics'
@@ -856,6 +910,11 @@ export interface FileRouteTypes {
     | '/planet/$planetId'
     | '/product/$handle'
     | '/product/$productId'
+    | '/tools/interactions'
+    | '/tools/pediatric-dose'
+    | '/tools/schedule'
+    | '/tools/symptoms'
+    | '/tools/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/kernel-evolution'
@@ -940,6 +999,11 @@ export interface FileRouteTypes {
     | '/planet/$planetId'
     | '/product/$handle'
     | '/product/$productId'
+    | '/tools/interactions'
+    | '/tools/pediatric-dose'
+    | '/tools/schedule'
+    | '/tools/symptoms'
+    | '/tools'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/kernel-evolution'
@@ -989,6 +1053,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/shop'
     | '/sitemap.xml'
+    | '/tools'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/admin-diagnostics'
@@ -1025,6 +1090,11 @@ export interface FileRouteTypes {
     | '/planet/$planetId'
     | '/product/$handle'
     | '/product/$productId'
+    | '/tools/interactions'
+    | '/tools/pediatric-dose'
+    | '/tools/schedule'
+    | '/tools/symptoms'
+    | '/tools/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/admin/kernel-evolution'
@@ -1075,6 +1145,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   ShopRoute: typeof ShopRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ToolsRoute: typeof ToolsRouteWithChildren
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiChatWidgetRoute: typeof ApiChatWidgetRoute
@@ -1190,6 +1261,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools': {
+      id: '/tools'
+      path: '/tools'
+      fullPath: '/tools'
+      preLoaderRoute: typeof ToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.mcp/list-tools': {
@@ -1443,6 +1521,41 @@ declare module '@tanstack/react-router' {
       fullPath: '/product/$productId'
       preLoaderRoute: typeof ProductProductIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/tools/': {
+      id: '/tools/'
+      path: '/'
+      fullPath: '/tools/'
+      preLoaderRoute: typeof ToolsIndexRouteImport
+      parentRoute: typeof ToolsRoute
+    }
+    '/tools/interactions': {
+      id: '/tools/interactions'
+      path: '/interactions'
+      fullPath: '/tools/interactions'
+      preLoaderRoute: typeof ToolsInteractionsRouteImport
+      parentRoute: typeof ToolsRoute
+    }
+    '/tools/pediatric-dose': {
+      id: '/tools/pediatric-dose'
+      path: '/pediatric-dose'
+      fullPath: '/tools/pediatric-dose'
+      preLoaderRoute: typeof ToolsPediatricDoseRouteImport
+      parentRoute: typeof ToolsRoute
+    }
+    '/tools/schedule': {
+      id: '/tools/schedule'
+      path: '/schedule'
+      fullPath: '/tools/schedule'
+      preLoaderRoute: typeof ToolsScheduleRouteImport
+      parentRoute: typeof ToolsRoute
+    }
+    '/tools/symptoms': {
+      id: '/tools/symptoms'
+      path: '/symptoms'
+      fullPath: '/tools/symptoms'
+      preLoaderRoute: typeof ToolsSymptomsRouteImport
+      parentRoute: typeof ToolsRoute
     }
     '/.lovable/oauth/consent': {
       id: '/.lovable/oauth/consent'
@@ -1910,6 +2023,24 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface ToolsRouteChildren {
+  ToolsInteractionsRoute: typeof ToolsInteractionsRoute
+  ToolsPediatricDoseRoute: typeof ToolsPediatricDoseRoute
+  ToolsScheduleRoute: typeof ToolsScheduleRoute
+  ToolsSymptomsRoute: typeof ToolsSymptomsRoute
+  ToolsIndexRoute: typeof ToolsIndexRoute
+}
+
+const ToolsRouteChildren: ToolsRouteChildren = {
+  ToolsInteractionsRoute: ToolsInteractionsRoute,
+  ToolsPediatricDoseRoute: ToolsPediatricDoseRoute,
+  ToolsScheduleRoute: ToolsScheduleRoute,
+  ToolsSymptomsRoute: ToolsSymptomsRoute,
+  ToolsIndexRoute: ToolsIndexRoute,
+}
+
+const ToolsRouteWithChildren = ToolsRoute._addFileChildren(ToolsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -1925,6 +2056,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   ShopRoute: ShopRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ToolsRoute: ToolsRouteWithChildren,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
