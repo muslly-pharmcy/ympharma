@@ -1,13 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
-import { Suspense } from 'react'
-import { ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts'
+import { Suspense, lazy } from 'react'
 import {
   getExecutiveKpis, getDispensesSeries, getCustomersGrowth,
   getCampaignsSummary, getInventoryHealth, getAiUsage,
   type ExecutiveKpis, type SeriesPoint, type CampaignPerf, type InventoryHealth, type AiUsage,
 } from '@/lib/analytics.functions'
 import { ClientOnly } from '@/shared/components/ClientOnly'
+const AreaTrendChart = lazy(() => import('@/components/charts/AreaTrendChart'))
 import { Activity, Users, Pill, Package, Sparkles, Megaphone, AlertTriangle, Download } from 'lucide-react'
 
 const kpisQuery = queryOptions({ queryKey: ['analytics', 'kpis'], queryFn: () => getExecutiveKpis() })
@@ -90,9 +90,12 @@ function KpiGrid({ kpis }: { kpis: ExecutiveKpis }) {
     { label: 'نقاط ولاء (30ي)', value: kpis.loyalty_points_earned_30d, icon: Sparkles, tone: 'amber' },
   ] as const
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-      {items.map((k) => (
-        <div key={k.label} className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-4">
+    <div className="bento-grid">
+      {items.map((k, i) => (
+        <div
+          key={k.label}
+          className={`rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/25 ${i === 0 ? 'bento-wide' : ''}`}
+        >
           <div className="flex items-center justify-between">
             <span className="text-xs text-slate-400">{k.label}</span>
             <k.icon className="h-4 w-4 text-slate-500" aria-hidden />
@@ -106,7 +109,7 @@ function KpiGrid({ kpis }: { kpis: ExecutiveKpis }) {
 
 function Card({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-4">
+    <section className="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl">
       <header className="mb-3 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-slate-200">{title}</h2>
         {action}
@@ -120,23 +123,9 @@ function ChartSkeleton() { return <div className="h-56 animate-pulse rounded-xl 
 
 function LineChartLazy({ data, color }: { data: SeriesPoint[]; color: string }) {
   return (
-    <div className="h-56 w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ left: 0, right: 8, top: 8, bottom: 0 }}>
-          <defs>
-            <linearGradient id={`g-${color}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity={0.35} />
-              <stop offset="100%" stopColor={color} stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-          <XAxis dataKey="date" tick={{ fill: '#94a3b8', fontSize: 11 }} tickFormatter={(v: string) => v.slice(5)} />
-          <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} width={30} allowDecimals={false} />
-          <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#e2e8f0' }} />
-          <Area type="monotone" dataKey="value" stroke={color} fill={`url(#g-${color})`} strokeWidth={2} />
-        </AreaChart>
-      </ResponsiveContainer>
-    </div>
+    <Suspense fallback={<ChartSkeleton />}>
+      <AreaTrendChart data={data} color={color} />
+    </Suspense>
   )
 }
 

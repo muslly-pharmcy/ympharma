@@ -9,6 +9,8 @@ import { fileURLToPath } from "node:url";
 import { loadEnv } from "vite";
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/tanstack/vite";
+import { VitePWA } from "vite-plugin-pwa";
+
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -26,7 +28,61 @@ export default defineConfig({
     ssr: false,
   },
   vite: {
-    plugins: [mcpPlugin()],
+    plugins: [
+      mcpPlugin(),
+      VitePWA({
+        registerType: "autoUpdate",
+        injectRegister: null,
+        filename: "sw.js",
+        // Client assets are emitted to dist/client; the SW must live beside them.
+        outDir: "dist/client",
+        devOptions: { enabled: false },
+        manifest: false,
+        workbox: {
+          globPatterns: ["**/*.{js,css,woff2,png,svg,webp,ico}"],
+          navigateFallback: "/offline",
+          navigateFallbackDenylist: [/^\/~oauth/, /^\/api\//, /^\/\.mcp/, /^\/\.well-known/],
+          cleanupOutdatedCaches: true,
+          clientsClaim: true,
+          skipWaiting: true,
+          runtimeCaching: [
+            {
+              // HTML navigations: always try the network first, fall back to cache.
+              urlPattern: ({ request }: { request: Request }) => request.mode === "navigate",
+              handler: "NetworkFirst",
+              options: {
+                cacheName: "html-navigations",
+                networkTimeoutSeconds: 4,
+                expiration: { maxEntries: 40, maxAgeSeconds: 60 * 60 * 24 },
+              },
+            },
+            {
+              // Static assets: instant from cache, refreshed in the background.
+              urlPattern: ({ request, sameOrigin }: { request: Request; sameOrigin: boolean }) =>
+                sameOrigin &&
+                ["style", "script", "worker", "image", "font"].includes(request.destination),
+              handler: "StaleWhileRevalidate",
+              options: {
+                cacheName: "static-assets",
+                expiration: { maxEntries: 300, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              },
+            },
+            {
+              // API reads: network-first so data is fresh, cached copy when offline.
+              urlPattern: ({ url, sameOrigin }: { url: URL; sameOrigin: boolean }) =>
+                sameOrigin && url.pathname.startsWith("/api/") && !url.pathname.startsWith("/api/public/"),
+              handler: "NetworkFirst",
+              options: {
+                cacheName: "api-cache",
+                networkTimeoutSeconds: 6,
+                expiration: { maxEntries: 60, maxAgeSeconds: 60 * 30 },
+              },
+            },
+          ],
+        },
+      }),
+    ],
+
     build: {
       // Hidden source maps: emitted to disk for Sentry/Lighthouse without
       // referencing them from shipped JS (no `//# sourceMappingURL`).

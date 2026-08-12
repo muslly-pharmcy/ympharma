@@ -12,9 +12,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
   useShopifyCartSync()
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col safe-area-x safe-area-top">
       <Navbar />
       <main id="main-content" role="main" className="pt-16 flex-1">{children}</main>
+
       <Footer />
       <FloatingContactButtons />
     </div>
