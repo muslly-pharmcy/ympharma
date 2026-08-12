@@ -128,3 +128,49 @@ export async function retryPendingCrmSync(limit = 50): Promise<{ retried: number
 
   return { retried: data.length, synced, failed }
 }
+
+/**
+ * Backfill new customer registrations that were not synced yet.
+ * Runs on the hourly cron so registrations created by DB triggers are covered.
+ */
+export async function syncNewRegistrations(sinceHours = 48, limit = 50): Promise<{ synced: number }> {
+  const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+  const since = new Date(Date.now() - sinceHours * 3600_000).toISOString()
+
+  const { data: customers } = await supabaseAdmin
+    .from('crm_customers')
+    .select('id, full_name, phone, created_at')
+    .gte('created_at', since)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  if (!customers?.length) return { synced: 0 }
+
+  const { data: logged } = await supabaseAdmin
+    .from('crm_sync_log')
+    .select('payload')
+    .eq('source', 'registration')
+    .gte('created_at', since)
+    .limit(500)
+  const seen = new Set(
+    (logged ?? [])
+      .map((r) => ((r.payload ?? {}) as Record<string, unknown>).customerId)
+      .filter((v): v is string => typeof v === 'string'),
+  )
+
+  let synced = 0
+  for (const c of customers) {
+    if (seen.has(c.id as string)) continue
+    const res = await syncCrmEvent({
+      source: 'registration',
+      category: 'عميل جديد',
+      fullName: (c.full_name as string) ?? '—',
+      phone: (c.phone as string) ?? '—',
+      details: 'تسجيل عميل جديد',
+      at: c.created_at as string,
+      // carried in payload for dedupe
+      ...({ customerId: c.id } as Record<string, unknown>),
+    } as never)
+    if (res.synced) synced++
+  }
+  return { synced }
+}

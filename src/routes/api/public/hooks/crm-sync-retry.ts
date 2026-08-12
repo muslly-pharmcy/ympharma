@@ -18,10 +18,13 @@ export const Route = createFileRoute('/api/public/hooks/crm-sync-retry')({
         if (!process.env['CRON_SECRET']) return new Response('cron secret not configured', { status: 500 })
         if (!authorized(request)) return new Response('unauthorized', { status: 401 })
 
-        const { retryPendingCrmSync } = await import('@/lib/integrations/google-sheets/sync.server')
+        const { retryPendingCrmSync, syncNewRegistrations } = await import(
+          '@/lib/integrations/google-sheets/sync.server'
+        )
         try {
+          const registrations = await syncNewRegistrations()
           const result = await retryPendingCrmSync(100)
-          return Response.json({ ok: true, ...result })
+          return Response.json({ ok: true, ...result, registrations: registrations.synced })
         } catch (e) {
           console.error('[crm-sync-retry]', e)
           return new Response(JSON.stringify({ ok: false, error: (e as Error).message }), { status: 500 })
