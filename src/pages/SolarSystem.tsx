@@ -45,7 +45,7 @@ export default function SolarSystem() {
         {/* AI Tools for Customers — Bento grid */}
         <Stagger className="bento-grid mb-10">
           {aiTools.map((tool, i) => (
-            <RevealItem key={i} className={i === 0 ? 'bento-wide md:col-span-2' : ''}>
+            <RevealItem key={i} className={i === 0 || i === 3 ? 'col-span-2 md:col-span-1' : ''}>
               <Link
                 to={tool.to}
                 className="glass-card press-scale flex h-full flex-col items-center justify-center gap-2 p-5 text-center"
