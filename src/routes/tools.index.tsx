@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { Baby, Network, Stethoscope, CalendarClock, ArrowLeft } from 'lucide-react'
+import { Baby, Network, Stethoscope, CalendarClock, ArrowLeft, Scale } from 'lucide-react'
 import { Reveal, Stagger, RevealItem } from '@/shared/components/motion/Reveal'
+
 
 export const Route = createFileRoute('/tools/')({
   head: () => {
