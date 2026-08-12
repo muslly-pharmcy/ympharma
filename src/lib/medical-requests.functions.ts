@@ -52,6 +52,20 @@ export const submitMedicalRequest = createServerFn({ method: 'POST' })
       console.warn('[submitMedicalRequest] email enqueue skipped', err)
     }
 
+    // CRM bridge → Google Sheets (best effort).
+    try {
+      const { syncCrmEvent } = await import('@/lib/integrations/google-sheets/sync.server')
+      void syncCrmEvent({
+        source: 'inquiry',
+        category: data.request_type === 'medication' ? 'طلب دواء' : data.request_type === 'consultation' ? 'استشارة' : data.request_type === 'delivery' ? 'توصيل' : 'أخرى',
+        fullName: data.full_name,
+        phone: data.phone,
+        details: data.note && data.note.length > 0 ? data.note : 'بدون ملاحظات',
+      })
+    } catch {
+      /* non-blocking */
+    }
+
     return { id: row?.id as string, ok: true as const }
   })
 
