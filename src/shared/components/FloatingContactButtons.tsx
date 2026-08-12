@@ -48,8 +48,22 @@ export function FloatingContactButtons() {
           <Bot className="h-6 w-6" />
           <span className="dock-tip">المساعد الذكي</span>
         </motion.button>
+
+        <motion.button
+          onClick={() => setRxOpen(true)}
+          aria-label="رفع الوصفة الطبية"
+          whileHover={hover}
+          whileTap={tap}
+          transition={spring}
+          className="dock-item group flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-primary shadow-lg ring-1 ring-primary/20"
+        >
+          <FileImage className="h-6 w-6" />
+          <span className="dock-tip">رفع الوصفة</span>
+        </motion.button>
       </div>
-      {open && <ChatWidget onClose={() => setOpen(false)} />}
+      {open && <AiHealthBot onClose={() => setOpen(false)} />}
+      <PrescriptionUploadModal open={rxOpen} onClose={() => setRxOpen(false)} />
     </>
+
   )
 }
