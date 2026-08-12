@@ -18,6 +18,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { ProductAiGuide } from '@/components/store/ProductAiGuide'
+import { PharmacologyPanel } from '@/components/store/PharmacologyPanel'
 
 export const Route = createFileRoute('/product/$productId')({
   parseParams: (p) => ({ productId: z.string().uuid().parse(p.productId) }),
@@ -294,6 +295,12 @@ function ProductDetailPage() {
                 </p>
               </div>
             )}
+
+            <PharmacologyPanel
+              product={product}
+              displayName={product.name_ar ?? product.name_en ?? 'المنتج'}
+              available={price !== null}
+            />
 
             <ProductAiGuide productId={productId} />
 

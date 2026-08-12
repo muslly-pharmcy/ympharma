@@ -59,13 +59,14 @@ export function CategoryGrid({ categories, activeCategoryId, onSelect }: Categor
   return (
     <section dir="rtl" className="px-4 pb-2 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-3 flex items-center gap-2">
+        <div className="mb-2 flex items-center gap-2">
           <Layers className="h-4 w-4 text-primary" />
-          <h2 className="text-lg font-black text-foreground">تصفّح الأقسام</h2>
+          <h2 className="text-base font-black text-foreground sm:text-lg">تصفّح الأقسام</h2>
         </div>
 
-        <div className="-mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <CategoryCard
+        {/* single-line horizontal rail — compact pills, no wrapping */}
+        <div className="-mx-1 flex snap-x snap-mandatory flex-nowrap gap-2 overflow-x-auto overscroll-x-contain px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <CategoryPill
             Icon={Sparkles}
             glow="from-teal-400/40 via-emerald-400/25 to-cyan-400/30"
             tint="text-teal-600"
@@ -76,7 +77,7 @@ export function CategoryGrid({ categories, activeCategoryId, onSelect }: Categor
           {categories.map((c, i) => {
             const t = themeFor(c.label, i)
             return (
-              <CategoryCard
+              <CategoryPill
                 key={c.id}
                 Icon={t.Icon}
                 glow={t.glow}
@@ -93,7 +94,7 @@ export function CategoryGrid({ categories, activeCategoryId, onSelect }: Categor
   )
 }
 
-function CategoryCard({
+function CategoryPill({
   Icon,
   glow,
   tint,
@@ -112,26 +113,23 @@ function CategoryCard({
     <motion.button
       type="button"
       onClick={onClick}
-      whileHover={{ scale: 1.05, y: -4 }}
       whileTap={{ scale: 0.95 }}
       transition={{ type: 'spring', stiffness: 380, damping: 22 }}
       aria-pressed={active}
-      className={`relative isolate flex w-32 shrink-0 snap-start flex-col items-center gap-2 overflow-hidden rounded-3xl border p-4 shadow-2xl backdrop-blur-xl transition sm:w-36 ${
+      className={`relative isolate flex h-10 shrink-0 snap-start items-center gap-2 overflow-hidden whitespace-nowrap rounded-full border px-3 text-xs font-bold shadow-sm backdrop-blur-xl transition ${
         active
-          ? 'border-primary/50 bg-white/90 dark:bg-slate-900/90'
-          : 'border-white/30 bg-white/80 dark:bg-slate-900/80'
+          ? 'border-primary/50 bg-primary/10 text-primary'
+          : 'border-white/40 bg-white/80 text-foreground dark:border-white/10 dark:bg-slate-900/70'
       }`}
     >
       <span
-        className={`pointer-events-none absolute -top-8 left-1/2 -z-10 h-24 w-24 -translate-x-1/2 rounded-full bg-gradient-to-br ${glow} blur-2xl`}
+        className={`pointer-events-none absolute -top-6 right-2 -z-10 h-14 w-14 rounded-full bg-gradient-to-br ${glow} blur-2xl`}
       />
-      <span className="grid h-12 w-12 place-items-center rounded-2xl border border-white/50 bg-white/70 shadow-[0_12px_24px_-12px_rgba(15,60,55,0.6)] backdrop-blur-md dark:border-white/10 dark:bg-slate-800/70">
-        <Icon className={`h-6 w-6 ${tint}`} strokeWidth={1.8} />
-      </span>
-      <span className="line-clamp-2 text-center text-xs font-bold text-foreground">{label}</span>
-      {active && <span className="h-1 w-8 rounded-full bg-primary" />}
+      <Icon className={`h-4 w-4 shrink-0 ${active ? 'text-primary' : tint}`} strokeWidth={1.9} />
+      <span className="max-w-[9rem] truncate">{label}</span>
     </motion.button>
   )
 }
+
 
 export default CategoryGrid

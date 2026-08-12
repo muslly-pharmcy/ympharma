@@ -1,20 +1,44 @@
 /**
- * High-resolution studio-grade pharma imagery mapping.
+ * High-resolution studio-grade pharma & beauty imagery mapping.
  *
  * Products live in the database (thousands of rows), so instead of a static
  * per-product array we resolve every product deterministically to a real
  * photograph based on its own image columns, its name, or its dosage form /
  * category keywords. No product ever falls back to a grey vector icon.
+ *
+ * All generated URLs request WebP (`fm=webp&auto=format`) and expose a
+ * responsive `srcset` so weak connections (Aden metro) download the smallest
+ * useful variant.
  */
 
 const U = (id: string, w = 800) =>
-  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=80`
+  `https://images.unsplash.com/photo-${id}?auto=format&fm=webp&fit=crop&w=${w}&q=68`
+
+/** Responsive widths served to the browser, smallest first. */
+export const IMAGE_WIDTHS = [240, 400, 640, 800] as const
+
+/**
+ * Build a `srcset` for an Unsplash-style URL that already carries a `w=`
+ * query param. Non-matching (e.g. database-hosted) URLs return an empty
+ * string so the caller can omit the attribute.
+ */
+export function buildSrcSet(url: string): string {
+  if (!/[?&]w=\d+/.test(url)) return ''
+  return IMAGE_WIDTHS.map((w) => `${url.replace(/([?&]w=)\d+/, `$1${w}`)} ${w}w`).join(', ')
+}
+
+/** Low-bandwidth default: pick the ~400px variant when available. */
+export function lowBandwidthSrc(url: string): string {
+  return /[?&]w=\d+/.test(url) ? url.replace(/([?&]w=)\d+/, '$1400') : url
+}
 
 export type ProductImageBucket =
   | 'vials'
   | 'tablets'
   | 'syrups'
   | 'skincare'
+  | 'haircare'
+  | 'makeup'
   | 'vitamins'
   | 'baby'
   | 'devices'
@@ -43,12 +67,28 @@ export const IMAGE_POOLS: Record<ProductImageBucket, string[]> = {
     U('1584017911766-d451b3d0e843'),
     U('1608248543803-ba4f8c70ae0b'),
   ],
-  // Luxury minimalist cosmeceutical containers
+  // Luxury minimalist cosmeceutical containers — creams, serums, sunscreen
   skincare: [
     U('1556228720-195a672e8a03'),
     U('1571781926291-c477ebfd024b'),
     U('1620916566398-39f1143ab7be'),
     U('1596462502278-27bfdc403348'),
+    U('1612817288484-6f916006741a'),
+    U('1608248543803-ba4f8c70ae0b'),
+  ],
+  // Shampoo, conditioner, hair oils & treatments
+  haircare: [
+    U('1522338242992-e1a54906a8da'),
+    U('1526947425960-945c6e72858f'),
+    U('1608248597279-f99d160bfcbc'),
+    U('1585232004423-244e0e6904e3'),
+  ],
+  // Makeup, lipstick, fragrance, nail care
+  makeup: [
+    U('1596462502278-27bfdc403348'),
+    U('1512496015851-a90fb38ba796'),
+    U('1522335789203-aabd1fc54bc9'),
+    U('1571781926291-c477ebfd024b'),
   ],
   // Supplement bottles, capsules, vitamins
   vitamins: [
@@ -87,6 +127,9 @@ const NAME_OVERRIDES: Array<{ match: string[]; bucket: ProductImageBucket }> = [
   { match: ['بانادول', 'panadol', 'paracetamol', 'باراسيتامول'], bucket: 'tablets' },
   { match: ['أموكسيل', 'amoxil', 'amoxicillin', 'أموكسيسيلين'], bucket: 'tablets' },
   { match: ['فيتامين', 'vitamin', 'omega', 'أوميغا', 'zinc', 'زنك'], bucket: 'vitamins' },
+  { match: ['vichy', 'فيشي', 'la roche', 'لاروش', 'bioderma', 'بيوديرما', 'cerave', 'سيرافي', 'eucerin', 'يوسيرين'], bucket: 'skincare' },
+  { match: ['pantene', 'بانتين', 'head & shoulders', 'هيد اند شولدرز', 'kerastase', 'كيراستاز'], bucket: 'haircare' },
+  { match: ['maybelline', 'مايبيلين', 'loreal', 'لوريال', 'nivea', 'نيفيا'], bucket: 'makeup' },
 ]
 
 const BUCKET_KEYWORDS: Array<{ bucket: ProductImageBucket; words: string[] }> = [
@@ -95,6 +138,20 @@ const BUCKET_KEYWORDS: Array<{ bucket: ProductImageBucket; words: string[] }> = 
     words: [
       'vial', 'ampoule', 'injection', 'injectable', 'iv', 'im',
       'حقن', 'حقنة', 'أمبول', 'امبول', 'فيال', 'وريدي', 'عضلي',
+    ],
+  },
+  {
+    bucket: 'haircare',
+    words: [
+      'shampoo', 'conditioner', 'hair', 'scalp', 'keratin', 'anti-dandruff',
+      'شامبو', 'بلسم', 'شعر', 'فروة', 'قشرة', 'كيراتين', 'زيت الشعر', 'تساقط',
+    ],
+  },
+  {
+    bucket: 'makeup',
+    words: [
+      'makeup', 'lipstick', 'mascara', 'foundation', 'perfume', 'fragrance', 'nail', 'eyeliner',
+      'مكياج', 'أحمر شفاه', 'احمر شفاه', 'ماسكارا', 'كحل', 'عطر', 'عطور', 'أظافر', 'اظافر', 'مناكير',
     ],
   },
   {
@@ -108,7 +165,9 @@ const BUCKET_KEYWORDS: Array<{ bucket: ProductImageBucket; words: string[] }> = 
     bucket: 'skincare',
     words: [
       'cream', 'ointment', 'gel', 'lotion', 'serum', 'sunscreen', 'derma', 'cosmetic',
+      'cleanser', 'moisturizer', 'toner', 'micellar', 'spf', 'peeling',
       'كريم', 'مرهم', 'جل', 'لوشن', 'سيروم', 'واقي', 'بشرة', 'تجميل', 'عناية',
+      'غسول', 'مرطب', 'تونر', 'ميسيلار', 'تفتيح', 'تقشير', 'حب الشباب',
     ],
   },
   {
@@ -121,8 +180,8 @@ const BUCKET_KEYWORDS: Array<{ bucket: ProductImageBucket; words: string[] }> = 
   {
     bucket: 'baby',
     words: [
-      'baby', 'infant', 'pediatric', 'diaper', 'formula', 'maternity',
-      'أطفال', 'طفل', 'رضع', 'حفاض', 'حليب', 'الأم', 'حوامل', 'حامل',
+      'baby', 'infant', 'pediatric', 'diaper', 'formula', 'maternity', 'wipes',
+      'أطفال', 'طفل', 'رضع', 'حفاض', 'حفاضات', 'حليب', 'الأم', 'حوامل', 'حامل', 'مناديل',
     ],
   },
   {
@@ -201,6 +260,10 @@ export function bucketGradient(bucket: ProductImageBucket): string {
       return 'from-amber-500/25 via-orange-400/20 to-rose-400/20'
     case 'skincare':
       return 'from-fuchsia-500/20 via-pink-400/20 to-rose-400/25'
+    case 'haircare':
+      return 'from-violet-500/20 via-purple-400/20 to-indigo-400/25'
+    case 'makeup':
+      return 'from-rose-500/25 via-pink-400/20 to-fuchsia-400/25'
     case 'vitamins':
       return 'from-orange-400/25 via-amber-400/20 to-yellow-400/25'
     case 'baby':
