@@ -34,7 +34,7 @@ export async function recordModuleRun(sample: TelemetrySample): Promise<void> {
       budget_used: sample.budgetUsed ?? 0,
       runs: 1,
       failures: sample.ok ? 0 : 1,
-      meta: sample.meta ?? {},
+      meta: (sample.meta ?? {}) as never,
     })
   } catch (e) {
     console.warn('[telemetry] skipped', (e as Error).message)
