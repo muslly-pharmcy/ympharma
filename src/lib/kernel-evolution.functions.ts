@@ -37,29 +37,41 @@ export const getKernelEvolution = createServerFn({ method: 'GET' })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<KernelEvolutionReport> => {
     const day = since(24)
-    const count = async (
-      table: string,
-      apply: (q: ReturnType<typeof buildBase>) => ReturnType<typeof buildBase>,
+    const db = context.supabase as unknown as {
+      from: (table: string) => {
+        select: (
+          cols: string,
+          opts: { count: 'exact'; head: true },
+        ) => {
+          gte: (c: string, v: string) => Promise<{ count: number | null }> & {
+            eq: (c: string, v: string) => Promise<{ count: number | null }>
+          }
+          eq: (c: string, v: string) => Promise<{ count: number | null }>
+        }
+      }
+    }
+    const base = (table: string) => db.from(table).select('id', { count: 'exact', head: true })
+    const safeCount = async (
+      run: () => Promise<{ count: number | null }>,
     ): Promise<number> => {
       try {
-        const { count: n } = await apply(buildBase(table))
-        return n ?? 0
+        return (await run()).count ?? 0
       } catch {
         return 0
       }
     }
-    function buildBase(table: string) {
-      return context.supabase.from(table).select('id', { count: 'exact', head: true })
-    }
 
     const [errors24h, agentRuns24h, agentFailures24h, openReorder, dlqDepth] =
       await Promise.all([
-        count('error_logs', (q) => q.gte('created_at', day)),
-        count('agent_runs', (q) => q.gte('created_at', day)),
-        count('agent_runs', (q) => q.gte('created_at', day).eq('status', 'failed')),
-        count('inv_reorder_suggestions', (q) => q.eq('status', 'open')),
-        count('agent_events_dlq', (q) => q.gte('created_at', since(24 * 7))),
+        safeCount(() => base('error_logs').gte('created_at', day)),
+        safeCount(() => base('agent_runs').gte('created_at', day)),
+        safeCount(() =>
+          base('agent_runs').gte('created_at', day).eq('status', 'failed'),
+        ),
+        safeCount(() => base('inv_reorder_suggestions').eq('status', 'open')),
+        safeCount(() => base('agent_events_dlq').gte('created_at', since(24 * 7))),
       ])
+
 
     const telemetry: KernelTelemetry = {
       errors24h,
