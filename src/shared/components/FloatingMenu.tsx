@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { MessageCircle, Bot, FileImage, Plus, X, Phone } from 'lucide-react'
+import { MessageCircle, Bot, FileImage, Plus, X, Phone, ScanLine, Siren } from 'lucide-react'
 import { PHARMACY } from '@/shared/branding'
 import { AiHealthBot } from '@/components/store/AiHealthBot'
 import { PrescriptionUploadModal } from '@/components/store/PrescriptionUploadModal'
+import { AiPrescriptionScanner } from '@/components/store/AiPrescriptionScanner'
+import { EmergencyOrderModal } from '@/components/store/EmergencyOrderModal'
+
 
 /**
  * Single consolidated speed-dial, anchored bottom-right, sitting above the
