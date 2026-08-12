@@ -5572,6 +5572,57 @@ export type Database = {
           },
         ]
       }
+      family_health_profiles: {
+        Row: {
+          allergies: string[]
+          birth_date: string | null
+          blood_type: string | null
+          chronic_conditions: string[]
+          created_at: string
+          current_medicines: string[]
+          display_name: string
+          id: string
+          is_default: boolean
+          notes: string | null
+          relation: string
+          updated_at: string
+          user_id: string
+          weight_kg: number | null
+        }
+        Insert: {
+          allergies?: string[]
+          birth_date?: string | null
+          blood_type?: string | null
+          chronic_conditions?: string[]
+          created_at?: string
+          current_medicines?: string[]
+          display_name: string
+          id?: string
+          is_default?: boolean
+          notes?: string | null
+          relation?: string
+          updated_at?: string
+          user_id: string
+          weight_kg?: number | null
+        }
+        Update: {
+          allergies?: string[]
+          birth_date?: string | null
+          blood_type?: string | null
+          chronic_conditions?: string[]
+          created_at?: string
+          current_medicines?: string[]
+          display_name?: string
+          id?: string
+          is_default?: boolean
+          notes?: string | null
+          relation?: string
+          updated_at?: string
+          user_id?: string
+          weight_kg?: number | null
+        }
+        Relationships: []
+      }
       hc_appointments: {
         Row: {
           cancel_reason: string | null
@@ -12568,6 +12619,54 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_watch_requests: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+          notified_at: string | null
+          phone: string
+          product_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          notified_at?: string | null
+          phone: string
+          product_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          notified_at?: string | null
+          phone?: string
+          product_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_watch_requests_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_watch_requests_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products"
             referencedColumns: ["id"]
           },
         ]
