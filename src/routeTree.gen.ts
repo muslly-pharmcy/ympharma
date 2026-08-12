@@ -94,6 +94,8 @@ import { Route as AuthenticatedStoreCodeRouteImport } from './routes/_authentica
 import { Route as ApiPublicCspReportRouteImport } from './routes/api/public/csp-report'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as AuthenticatedInsuranceClaimsClaimIdRouteImport } from './routes/_authenticated/insurance.claims_.$claimId'
+import { Route as ApiPublicHooksCrmSyncRetryRouteImport } from './routes/api/public/hooks/crm-sync-retry'
+import { Route as ApiPublicHooksDailyReportRouteImport } from './routes/api/public/hooks/daily-report'
 import { Route as ApiPublicHooksDlqReprocessorRouteImport } from './routes/api/public/hooks/dlq-reprocessor'
 import { Route as ApiPublicHooksEventConsumerRouteImport } from './routes/api/public/hooks/event-consumer'
 import { Route as ApiPublicHooksGenerateSocialPostsRouteImport } from './routes/api/public/hooks/generate-social-posts'
@@ -566,6 +568,18 @@ const AuthenticatedInsuranceClaimsClaimIdRoute =
     path: '/insurance/claims/$claimId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicHooksCrmSyncRetryRoute =
+  ApiPublicHooksCrmSyncRetryRouteImport.update({
+    id: '/api/public/hooks/crm-sync-retry',
+    path: '/api/public/hooks/crm-sync-retry',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksDailyReportRoute =
+  ApiPublicHooksDailyReportRouteImport.update({
+    id: '/api/public/hooks/daily-report',
+    path: '/api/public/hooks/daily-report',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksDlqReprocessorRoute =
   ApiPublicHooksDlqReprocessorRouteImport.update({
     id: '/api/public/hooks/dlq-reprocessor',
@@ -697,6 +711,8 @@ export interface FileRoutesByFullPath {
   '/insurance/': typeof AuthenticatedInsuranceIndexRoute
   '/promotions/': typeof AuthenticatedPromotionsIndexRoute
   '/insurance/claims/$claimId': typeof AuthenticatedInsuranceClaimsClaimIdRoute
+  '/api/public/hooks/crm-sync-retry': typeof ApiPublicHooksCrmSyncRetryRoute
+  '/api/public/hooks/daily-report': typeof ApiPublicHooksDailyReportRoute
   '/api/public/hooks/dlq-reprocessor': typeof ApiPublicHooksDlqReprocessorRoute
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/generate-social-posts': typeof ApiPublicHooksGenerateSocialPostsRoute
@@ -790,6 +806,8 @@ export interface FileRoutesByTo {
   '/insurance': typeof AuthenticatedInsuranceIndexRoute
   '/promotions': typeof AuthenticatedPromotionsIndexRoute
   '/insurance/claims/$claimId': typeof AuthenticatedInsuranceClaimsClaimIdRoute
+  '/api/public/hooks/crm-sync-retry': typeof ApiPublicHooksCrmSyncRetryRoute
+  '/api/public/hooks/daily-report': typeof ApiPublicHooksDailyReportRoute
   '/api/public/hooks/dlq-reprocessor': typeof ApiPublicHooksDlqReprocessorRoute
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/generate-social-posts': typeof ApiPublicHooksGenerateSocialPostsRoute
@@ -886,6 +904,8 @@ export interface FileRoutesById {
   '/_authenticated/insurance/': typeof AuthenticatedInsuranceIndexRoute
   '/_authenticated/promotions/': typeof AuthenticatedPromotionsIndexRoute
   '/_authenticated/insurance/claims_/$claimId': typeof AuthenticatedInsuranceClaimsClaimIdRoute
+  '/api/public/hooks/crm-sync-retry': typeof ApiPublicHooksCrmSyncRetryRoute
+  '/api/public/hooks/daily-report': typeof ApiPublicHooksDailyReportRoute
   '/api/public/hooks/dlq-reprocessor': typeof ApiPublicHooksDlqReprocessorRoute
   '/api/public/hooks/event-consumer': typeof ApiPublicHooksEventConsumerRoute
   '/api/public/hooks/generate-social-posts': typeof ApiPublicHooksGenerateSocialPostsRoute
@@ -982,6 +1002,8 @@ export interface FileRouteTypes {
     | '/insurance/'
     | '/promotions/'
     | '/insurance/claims/$claimId'
+    | '/api/public/hooks/crm-sync-retry'
+    | '/api/public/hooks/daily-report'
     | '/api/public/hooks/dlq-reprocessor'
     | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/generate-social-posts'
@@ -1075,6 +1097,8 @@ export interface FileRouteTypes {
     | '/insurance'
     | '/promotions'
     | '/insurance/claims/$claimId'
+    | '/api/public/hooks/crm-sync-retry'
+    | '/api/public/hooks/daily-report'
     | '/api/public/hooks/dlq-reprocessor'
     | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/generate-social-posts'
@@ -1170,6 +1194,8 @@ export interface FileRouteTypes {
     | '/_authenticated/insurance/'
     | '/_authenticated/promotions/'
     | '/_authenticated/insurance/claims_/$claimId'
+    | '/api/public/hooks/crm-sync-retry'
+    | '/api/public/hooks/daily-report'
     | '/api/public/hooks/dlq-reprocessor'
     | '/api/public/hooks/event-consumer'
     | '/api/public/hooks/generate-social-posts'
@@ -1207,6 +1233,8 @@ export interface RootRouteChildren {
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicCspReportRoute: typeof ApiPublicCspReportRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicHooksCrmSyncRetryRoute: typeof ApiPublicHooksCrmSyncRetryRoute
+  ApiPublicHooksDailyReportRoute: typeof ApiPublicHooksDailyReportRoute
   ApiPublicHooksDlqReprocessorRoute: typeof ApiPublicHooksDlqReprocessorRoute
   ApiPublicHooksEventConsumerRoute: typeof ApiPublicHooksEventConsumerRoute
   ApiPublicHooksGenerateSocialPostsRoute: typeof ApiPublicHooksGenerateSocialPostsRoute
@@ -1814,6 +1842,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInsuranceClaimsClaimIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/hooks/crm-sync-retry': {
+      id: '/api/public/hooks/crm-sync-retry'
+      path: '/api/public/hooks/crm-sync-retry'
+      fullPath: '/api/public/hooks/crm-sync-retry'
+      preLoaderRoute: typeof ApiPublicHooksCrmSyncRetryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/daily-report': {
+      id: '/api/public/hooks/daily-report'
+      path: '/api/public/hooks/daily-report'
+      fullPath: '/api/public/hooks/daily-report'
+      preLoaderRoute: typeof ApiPublicHooksDailyReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/dlq-reprocessor': {
       id: '/api/public/hooks/dlq-reprocessor'
       path: '/api/public/hooks/dlq-reprocessor'
@@ -2151,6 +2193,8 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicCspReportRoute: ApiPublicCspReportRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicHooksCrmSyncRetryRoute: ApiPublicHooksCrmSyncRetryRoute,
+  ApiPublicHooksDailyReportRoute: ApiPublicHooksDailyReportRoute,
   ApiPublicHooksDlqReprocessorRoute: ApiPublicHooksDlqReprocessorRoute,
   ApiPublicHooksEventConsumerRoute: ApiPublicHooksEventConsumerRoute,
   ApiPublicHooksGenerateSocialPostsRoute:
