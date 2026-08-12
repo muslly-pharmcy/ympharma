@@ -104,7 +104,7 @@ export const getProductAiGuide = createServerFn({ method: 'POST' })
 
       await supabaseAdmin
         .from('catalog_products')
-        .update({ metadata: { ...metadata, ai_guide: guide } })
+        .update({ metadata: { ...metadata, ai_guide: guide } as unknown as never })
         .eq('id', product.id)
 
       return guide
