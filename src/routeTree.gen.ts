@@ -61,6 +61,7 @@ import { Route as PlanetPlanetIdRouteImport } from './routes/planet.$planetId'
 import { Route as ProductHandleRouteImport } from './routes/product.$handle'
 import { Route as ProductProductIdRouteImport } from './routes/product.$productId'
 import { Route as ToolsIndexRouteImport } from './routes/tools.index'
+import { Route as ToolsPediatricDoseRouteImport } from './routes/tools.pediatric-dose'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as AuthenticatedAdminKernelEvolutionRouteImport } from './routes/_authenticated/admin.kernel-evolution'
@@ -369,6 +370,11 @@ const ToolsIndexRoute = ToolsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ToolsRoute,
 } as any)
+const ToolsPediatricDoseRoute = ToolsPediatricDoseRouteImport.update({
+  id: '/pediatric-dose',
+  path: '/pediatric-dose',
+  getParentRoute: () => ToolsRoute,
+} as any)
 const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   id: '/.lovable/oauth/consent',
   path: '/.lovable/oauth/consent',
@@ -613,6 +619,7 @@ export interface FileRoutesByFullPath {
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/product/$handle': typeof ProductHandleRoute
   '/product/$productId': typeof ProductProductIdRoute
+  '/tools/pediatric-dose': typeof ToolsPediatricDoseRoute
   '/tools/': typeof ToolsIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -698,6 +705,7 @@ export interface FileRoutesByTo {
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/product/$handle': typeof ProductHandleRoute
   '/product/$productId': typeof ProductProductIdRoute
+  '/tools/pediatric-dose': typeof ToolsPediatricDoseRoute
   '/tools': typeof ToolsIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -786,6 +794,7 @@ export interface FileRoutesById {
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/product/$handle': typeof ProductHandleRoute
   '/product/$productId': typeof ProductProductIdRoute
+  '/tools/pediatric-dose': typeof ToolsPediatricDoseRoute
   '/tools/': typeof ToolsIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -874,6 +883,7 @@ export interface FileRouteTypes {
     | '/planet/$planetId'
     | '/product/$handle'
     | '/product/$productId'
+    | '/tools/pediatric-dose'
     | '/tools/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -959,6 +969,7 @@ export interface FileRouteTypes {
     | '/planet/$planetId'
     | '/product/$handle'
     | '/product/$productId'
+    | '/tools/pediatric-dose'
     | '/tools'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -1046,6 +1057,7 @@ export interface FileRouteTypes {
     | '/planet/$planetId'
     | '/product/$handle'
     | '/product/$productId'
+    | '/tools/pediatric-dose'
     | '/tools/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -1479,6 +1491,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/tools/'
       preLoaderRoute: typeof ToolsIndexRouteImport
+      parentRoute: typeof ToolsRoute
+    }
+    '/tools/pediatric-dose': {
+      id: '/tools/pediatric-dose'
+      path: '/pediatric-dose'
+      fullPath: '/tools/pediatric-dose'
+      preLoaderRoute: typeof ToolsPediatricDoseRouteImport
       parentRoute: typeof ToolsRoute
     }
     '/.lovable/oauth/consent': {
@@ -1948,10 +1967,12 @@ const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface ToolsRouteChildren {
+  ToolsPediatricDoseRoute: typeof ToolsPediatricDoseRoute
   ToolsIndexRoute: typeof ToolsIndexRoute
 }
 
 const ToolsRouteChildren: ToolsRouteChildren = {
+  ToolsPediatricDoseRoute: ToolsPediatricDoseRoute,
   ToolsIndexRoute: ToolsIndexRoute,
 }
 
