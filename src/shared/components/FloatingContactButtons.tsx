@@ -9,6 +9,8 @@ import { PrescriptionUploadModal } from '@/components/store/PrescriptionUploadMo
 // Glassmorphic floating dock: WhatsApp direct + inline AI chat popup.
 export function FloatingContactButtons() {
   const [open, setOpen] = useState(false)
+  const [rxOpen, setRxOpen] = useState(false)
+
   const reduce = useReducedMotion()
   const hover = reduce ? undefined : { scale: 1.06, y: -3 }
   const tap = reduce ? undefined : { scale: 0.94 }
