@@ -70,6 +70,8 @@ export default function Storefront() {
   return (
     <div dir="rtl" className="min-h-screen">
       <OnboardingDocModal />
+      <PrescriptionUploadModal open={rxOpen} onClose={() => setRxOpen(false)} />
+
 
       {/* Hero */}
       <section className="relative overflow-hidden px-4 pb-10 pt-10 sm:px-6 lg:px-8">
