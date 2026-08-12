@@ -7,7 +7,9 @@ export interface DailyReport {
   crm: { newCustomers: number; syncSynced: number; syncPending: number; syncFailed: number }
   sales: { orders: number; revenue: number; pendingPurchaseOrders: number; safetyStockAlerts: number }
   content: { generated: number; published: number; pending: number }
+  storefront: { prescriptions: number; refills: number; bundleOrders: number; assistantMessages: number }
   health: { errors: number; degradedModules: string[] }
+
 }
 
 const REPORT_EMAIL = process.env['EXEC_REPORT_EMAIL'] ?? 'dr-mohmed@muslly.com'
