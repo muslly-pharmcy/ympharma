@@ -111,6 +111,21 @@ export async function buildDailyReport(): Promise<DailyReport> {
     }
   }, { generated: 0, published: 0, pending: 0 })
 
+  const storefront = await safe(async () => {
+    const [rx, refills, bundles, events] = await Promise.all([
+      supabaseAdmin.from('store_prescription_uploads').select('id', { count: 'exact', head: true }).gte('created_at', fromIso),
+      supabaseAdmin.from('store_refill_subscriptions').select('id', { count: 'exact', head: true }).gte('created_at', fromIso),
+      supabaseAdmin.from('store_bundle_orders').select('id', { count: 'exact', head: true }).gte('created_at', fromIso),
+      supabaseAdmin.from('ai_widget_events').select('id', { count: 'exact', head: true }).eq('kind', 'assistant_message').gte('created_at', fromIso),
+    ])
+    return {
+      prescriptions: rx.count ?? 0,
+      refills: refills.count ?? 0,
+      bundleOrders: bundles.count ?? 0,
+      assistantMessages: events.count ?? 0,
+    }
+  }, { prescriptions: 0, refills: 0, bundleOrders: 0, assistantMessages: 0 })
+
   const health = await safe(async () => {
     const { count } = await supabaseAdmin.from('error_logs').select('id', { count: 'exact', head: true }).gte('created_at', fromIso)
     const modules = await planetaryStatus(24)
@@ -120,7 +135,8 @@ export async function buildDailyReport(): Promise<DailyReport> {
     }
   }, { errors: 0, degradedModules: [] as string[] })
 
-  return { dateLabel: label, visitors, crm, sales, content, health }
+  return { dateLabel: label, visitors, crm, sales, content, storefront, health }
+
 }
 
 const CARD = 'background:#ffffff;border:1px solid #e2eeec;border-radius:16px;padding:16px;margin:0 0 12px'
