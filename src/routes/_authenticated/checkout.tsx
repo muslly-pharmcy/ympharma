@@ -14,9 +14,15 @@ import { toast } from 'sonner'
 import { listCart } from '@/lib/cart.functions'
 import {
   listPaymentMethods,
+  listProductImageUrls,
   listShippingZones,
   placeOrder,
 } from '@/lib/storefront.functions'
+import {
+  openWhatsAppOrder,
+  type WhatsAppOrderLine,
+} from '@/lib/whatsapp/order-message'
+
 
 export const Route = createFileRoute('/_authenticated/checkout')({
   head: () => ({
