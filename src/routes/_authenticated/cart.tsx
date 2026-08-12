@@ -2,9 +2,11 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
-import { ShoppingCart, Trash2, Plus, Minus, Lock } from 'lucide-react'
+import { ShoppingCart, Trash2, Plus, Minus, Lock, MessageCircle } from 'lucide-react'
 import { listCart, removeFromCart, setCartQuantity } from '@/lib/cart.functions'
+import { openWhatsAppOrder } from '@/lib/whatsapp/order-message'
 import { EmptyState, ErrorState, ListSkeleton } from '@/shared/components/StateViews'
+
 
 export const Route = createFileRoute('/_authenticated/cart')({
   head: () => ({
