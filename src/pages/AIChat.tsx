@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAI } from '@/context/AIContext'
-import { Send, Bot, User, Loader2, Sparkles, Trash2 } from 'lucide-react'
+import { useSpeechRecognition } from '@/hooks/useSpeechRecognition'
+import { Send, Bot, User, Loader2, Sparkles, Trash2, Mic, MicOff } from 'lucide-react'
+
 
 interface Message {
   id: string
