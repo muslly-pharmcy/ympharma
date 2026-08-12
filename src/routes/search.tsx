@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Search, Package, Pill } from 'lucide-react'
+import { ProductImage } from '@/components/store/ProductImage'
 import { z } from 'zod'
 import { listProducts } from '@/lib/catalog.functions'
 
@@ -136,13 +137,21 @@ function SearchPage() {
                 key={p.id}
                 to="/product/$productId"
                 params={{ productId: p.id }}
-                className="rounded-2xl border border-primary/10 bg-white p-4 transition hover:border-primary/30 hover:shadow-sm"
+                className="group flex gap-3 rounded-2xl border border-primary/10 bg-white p-3 transition hover:border-primary/30 hover:shadow-sm"
               >
+                <ProductImage
+                  product={p}
+                  alt={p.name_ar ?? 'منتج'}
+                  rounded="rounded-xl"
+                  className="h-20 w-20 shrink-0"
+                />
+                <div className="min-w-0">
                 <p className="font-semibold text-gray-900">{p.name_ar}</p>
                 {p.name_en && <p className="text-xs text-gray-500">{p.name_en}</p>}
                 {p.brand && (
                   <p className="mt-1 text-xs text-primary/80">{p.brand}</p>
                 )}
+                </div>
               </Link>
             ))}
           </div>
