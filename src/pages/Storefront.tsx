@@ -156,6 +156,10 @@ export default function Storefront() {
         </div>
       </section>
 
+      <HealthBundles />
+
+
+
       {/* Categories */}
       {categories.length > 0 && (
         <section className="px-4 sm:px-6 lg:px-8">
