@@ -72,6 +72,7 @@ import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as AuthenticatedAdminKernelEvolutionRouteImport } from './routes/_authenticated/admin.kernel-evolution'
 import { Route as AuthenticatedAdminPhoenixReportRouteImport } from './routes/_authenticated/admin.phoenix-report'
+import { Route as AuthenticatedAdminPrescriptionsRouteImport } from './routes/_authenticated/admin.prescriptions'
 import { Route as AuthenticatedAdminSunCoreRouteImport } from './routes/_authenticated/admin.sun-core'
 import { Route as AuthenticatedAdminTitanosReportRouteImport } from './routes/_authenticated/admin.titanos-report'
 import { Route as AuthenticatedAnalyticsIndexRouteImport } from './routes/_authenticated/analytics.index'
@@ -440,6 +441,12 @@ const AuthenticatedAdminPhoenixReportRoute =
     path: '/admin/phoenix-report',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminPrescriptionsRoute =
+  AuthenticatedAdminPrescriptionsRouteImport.update({
+    id: '/admin/prescriptions',
+    path: '/admin/prescriptions',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminSunCoreRoute =
   AuthenticatedAdminSunCoreRouteImport.update({
     id: '/admin/sun-core',
@@ -708,6 +715,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/kernel-evolution': typeof AuthenticatedAdminKernelEvolutionRoute
   '/admin/phoenix-report': typeof AuthenticatedAdminPhoenixReportRoute
+  '/admin/prescriptions': typeof AuthenticatedAdminPrescriptionsRoute
   '/admin/sun-core': typeof AuthenticatedAdminSunCoreRoute
   '/admin/titanos-report': typeof AuthenticatedAdminTitanosReportRoute
   '/campaigns/$id': typeof AuthenticatedCampaignsIdRoute
@@ -806,6 +814,7 @@ export interface FileRoutesByTo {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/kernel-evolution': typeof AuthenticatedAdminKernelEvolutionRoute
   '/admin/phoenix-report': typeof AuthenticatedAdminPhoenixReportRoute
+  '/admin/prescriptions': typeof AuthenticatedAdminPrescriptionsRoute
   '/admin/sun-core': typeof AuthenticatedAdminSunCoreRoute
   '/admin/titanos-report': typeof AuthenticatedAdminTitanosReportRoute
   '/campaigns/$id': typeof AuthenticatedCampaignsIdRoute
@@ -907,6 +916,7 @@ export interface FileRoutesById {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/admin/kernel-evolution': typeof AuthenticatedAdminKernelEvolutionRoute
   '/_authenticated/admin/phoenix-report': typeof AuthenticatedAdminPhoenixReportRoute
+  '/_authenticated/admin/prescriptions': typeof AuthenticatedAdminPrescriptionsRoute
   '/_authenticated/admin/sun-core': typeof AuthenticatedAdminSunCoreRoute
   '/_authenticated/admin/titanos-report': typeof AuthenticatedAdminTitanosReportRoute
   '/_authenticated/campaigns/$id': typeof AuthenticatedCampaignsIdRoute
@@ -1008,6 +1018,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/admin/kernel-evolution'
     | '/admin/phoenix-report'
+    | '/admin/prescriptions'
     | '/admin/sun-core'
     | '/admin/titanos-report'
     | '/campaigns/$id'
@@ -1106,6 +1117,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/admin/kernel-evolution'
     | '/admin/phoenix-report'
+    | '/admin/prescriptions'
     | '/admin/sun-core'
     | '/admin/titanos-report'
     | '/campaigns/$id'
@@ -1206,6 +1218,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/admin/kernel-evolution'
     | '/_authenticated/admin/phoenix-report'
+    | '/_authenticated/admin/prescriptions'
     | '/_authenticated/admin/sun-core'
     | '/_authenticated/admin/titanos-report'
     | '/_authenticated/campaigns/$id'
@@ -1726,6 +1739,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPhoenixReportRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/prescriptions': {
+      id: '/_authenticated/admin/prescriptions'
+      path: '/admin/prescriptions'
+      fullPath: '/admin/prescriptions'
+      preLoaderRoute: typeof AuthenticatedAdminPrescriptionsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/sun-core': {
       id: '/_authenticated/admin/sun-core'
       path: '/admin/sun-core'
@@ -2137,6 +2157,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedWarehousesRoute: typeof AuthenticatedWarehousesRoute
   AuthenticatedAdminKernelEvolutionRoute: typeof AuthenticatedAdminKernelEvolutionRoute
   AuthenticatedAdminPhoenixReportRoute: typeof AuthenticatedAdminPhoenixReportRoute
+  AuthenticatedAdminPrescriptionsRoute: typeof AuthenticatedAdminPrescriptionsRoute
   AuthenticatedAdminSunCoreRoute: typeof AuthenticatedAdminSunCoreRoute
   AuthenticatedAdminTitanosReportRoute: typeof AuthenticatedAdminTitanosReportRoute
   AuthenticatedCatalogProductIdRoute: typeof AuthenticatedCatalogProductIdRoute
@@ -2187,6 +2208,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminKernelEvolutionRoute:
     AuthenticatedAdminKernelEvolutionRoute,
   AuthenticatedAdminPhoenixReportRoute: AuthenticatedAdminPhoenixReportRoute,
+  AuthenticatedAdminPrescriptionsRoute: AuthenticatedAdminPrescriptionsRoute,
   AuthenticatedAdminSunCoreRoute: AuthenticatedAdminSunCoreRoute,
   AuthenticatedAdminTitanosReportRoute: AuthenticatedAdminTitanosReportRoute,
   AuthenticatedCatalogProductIdRoute: AuthenticatedCatalogProductIdRoute,
