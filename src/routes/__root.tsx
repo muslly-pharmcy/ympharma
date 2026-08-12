@@ -97,7 +97,16 @@ function RootComponent() {
     void import('@/lib/observability/sentry').then((m) => m.initSentry()).catch(() => {})
     void import('@/lib/analytics').then((m) => m.initAnalytics()).catch(() => {})
     void import('@/lib/pwa/register').then((m) => m.registerServiceWorker()).catch(() => {})
+    // Native shell only (Capacitor); a no-op in the browser build.
+    void import('@/lib/native/capacitor')
+      .then((m) =>
+        m.registerPushNotifications((token) =>
+          console.info('[push] device token registered', token.slice(0, 8) + '…'),
+        ),
+      )
+      .catch(() => {})
   }, [])
+
 
 
 
