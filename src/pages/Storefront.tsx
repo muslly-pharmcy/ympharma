@@ -58,7 +58,7 @@ export default function Storefront() {
 
   return (
     <div dir="rtl" className="min-h-screen pb-24 md:pb-0">
-      <OnboardingDocModal />
+      <OnboardingModal />
       <PrescriptionUploadModal open={rxOpen} onClose={() => setRxOpen(false)} />
 
       <div ref={heroRef}>
