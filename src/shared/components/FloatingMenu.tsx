@@ -17,6 +17,8 @@ export function FloatingMenu() {
   const [open, setOpen] = useState(false)
   const [botOpen, setBotOpen] = useState(false)
   const [rxOpen, setRxOpen] = useState(false)
+  const [scanOpen, setScanOpen] = useState(false)
+  const [sosOpen, setSosOpen] = useState(false)
   const reduce = useReducedMotion()
 
   useEffect(() => {
@@ -49,6 +51,20 @@ export function FloatingMenu() {
       Icon: FileImage,
       className: 'bg-white text-primary ring-1 ring-primary/20 dark:bg-slate-900',
       onClick: () => setRxOpen(true),
+    },
+    {
+      key: 'scan',
+      label: 'قراءة الوصفة بالذكاء',
+      Icon: ScanLine,
+      className: 'bg-sky-600 text-white',
+      onClick: () => setScanOpen(true),
+    },
+    {
+      key: 'sos',
+      label: 'طلب طوارئ',
+      Icon: Siren,
+      className: 'bg-red-600 text-white',
+      onClick: () => setSosOpen(true),
     },
     {
       key: 'call',
@@ -130,6 +146,8 @@ export function FloatingMenu() {
 
       {botOpen && <AiHealthBot onClose={() => setBotOpen(false)} />}
       <PrescriptionUploadModal open={rxOpen} onClose={() => setRxOpen(false)} />
+      <AiPrescriptionScanner open={scanOpen} onClose={() => setScanOpen(false)} />
+      <EmergencyOrderModal open={sosOpen} onClose={() => setSosOpen(false)} />
     </>
   )
 }
