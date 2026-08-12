@@ -56,7 +56,16 @@ const TOOLS = [
     accent: 'from-amber-500/20 to-orange-400/10',
     iconClass: 'text-amber-600 bg-amber-50',
   },
+  {
+    to: '/tools/bmi' as const,
+    icon: Scale,
+    title: 'حاسبة كتلة الجسم والترطيب',
+    desc: 'اعرف مؤشر كتلة جسمك واحتياجك اليومي من الماء فوراً.',
+    accent: 'from-cyan-500/20 to-blue-400/10',
+    iconClass: 'text-cyan-600 bg-cyan-50',
+  },
 ]
+
 
 function ToolsHub() {
   return (
