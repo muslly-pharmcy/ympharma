@@ -57,6 +57,7 @@ import { Route as AuthenticatedSuppliersRouteImport } from './routes/_authentica
 import { Route as AuthenticatedVisionLabRouteImport } from './routes/_authenticated/vision-lab'
 import { Route as AuthenticatedWarehousesRouteImport } from './routes/_authenticated/warehouses'
 import { Route as ApiChatWidgetRouteImport } from './routes/api/chat-widget'
+import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as PlanetPlanetIdRouteImport } from './routes/planet.$planetId'
 import { Route as ProductHandleRouteImport } from './routes/product.$handle'
 import { Route as ProductProductIdRouteImport } from './routes/product.$productId'
@@ -91,6 +92,7 @@ import { Route as AuthenticatedPurchaseOrdersIdRouteImport } from './routes/_aut
 import { Route as AuthenticatedPurchasingScanInvoiceRouteImport } from './routes/_authenticated/purchasing.scan-invoice'
 import { Route as AuthenticatedStoreCodeRouteImport } from './routes/_authenticated/store.$code'
 import { Route as ApiPublicCspReportRouteImport } from './routes/api/public/csp-report'
+import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as AuthenticatedInsuranceClaimsClaimIdRouteImport } from './routes/_authenticated/insurance.claims_.$claimId'
 import { Route as ApiPublicHooksDlqReprocessorRouteImport } from './routes/api/public/hooks/dlq-reprocessor'
 import { Route as ApiPublicHooksEventConsumerRouteImport } from './routes/api/public/hooks/event-consumer'
@@ -98,6 +100,8 @@ import { Route as ApiPublicHooksGenerateSocialPostsRouteImport } from './routes/
 import { Route as ApiPublicHooksWhatsappRouteImport } from './routes/api/public/hooks/whatsapp'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
+import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -353,6 +357,11 @@ const ApiChatWidgetRoute = ApiChatWidgetRouteImport.update({
   path: '/api/chat-widget',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
+  id: '/email/unsubscribe',
+  path: '/email/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlanetPlanetIdRoute = PlanetPlanetIdRouteImport.update({
   id: '/planet/$planetId',
   path: '/planet/$planetId',
@@ -546,6 +555,11 @@ const ApiPublicCspReportRoute = ApiPublicCspReportRouteImport.update({
   path: '/api/public/csp-report',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
+  id: '/lovable/email/suppression',
+  path: '/lovable/email/suppression',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedInsuranceClaimsClaimIdRoute =
   AuthenticatedInsuranceClaimsClaimIdRouteImport.update({
     id: '/insurance/claims_/$claimId',
@@ -585,6 +599,18 @@ const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
   path: '/lovable/email/auth/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailTransactionalSendRoute =
+  LovableEmailTransactionalSendRouteImport.update({
+    id: '/lovable/email/transactional/send',
+    path: '/lovable/email/transactional/send',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -634,6 +660,7 @@ export interface FileRoutesByFullPath {
   '/vision-lab': typeof AuthenticatedVisionLabRoute
   '/warehouses': typeof AuthenticatedWarehousesRoute
   '/api/chat-widget': typeof ApiChatWidgetRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/product/$handle': typeof ProductHandleRoute
   '/product/$productId': typeof ProductProductIdRoute
@@ -664,6 +691,7 @@ export interface FileRoutesByFullPath {
   '/purchasing/scan-invoice': typeof AuthenticatedPurchasingScanInvoiceRoute
   '/store/$code': typeof AuthenticatedStoreCodeRoute
   '/api/public/csp-report': typeof ApiPublicCspReportRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/analytics/': typeof AuthenticatedAnalyticsIndexRoute
   '/catalog/': typeof AuthenticatedCatalogIndexRoute
   '/insurance/': typeof AuthenticatedInsuranceIndexRoute
@@ -675,6 +703,8 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/whatsapp': typeof ApiPublicHooksWhatsappRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -723,6 +753,7 @@ export interface FileRoutesByTo {
   '/vision-lab': typeof AuthenticatedVisionLabRoute
   '/warehouses': typeof AuthenticatedWarehousesRoute
   '/api/chat-widget': typeof ApiChatWidgetRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/product/$handle': typeof ProductHandleRoute
   '/product/$productId': typeof ProductProductIdRoute
@@ -753,6 +784,7 @@ export interface FileRoutesByTo {
   '/purchasing/scan-invoice': typeof AuthenticatedPurchasingScanInvoiceRoute
   '/store/$code': typeof AuthenticatedStoreCodeRoute
   '/api/public/csp-report': typeof ApiPublicCspReportRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/analytics': typeof AuthenticatedAnalyticsIndexRoute
   '/catalog': typeof AuthenticatedCatalogIndexRoute
   '/insurance': typeof AuthenticatedInsuranceIndexRoute
@@ -764,6 +796,8 @@ export interface FileRoutesByTo {
   '/api/public/hooks/whatsapp': typeof ApiPublicHooksWhatsappRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -815,6 +849,7 @@ export interface FileRoutesById {
   '/_authenticated/vision-lab': typeof AuthenticatedVisionLabRoute
   '/_authenticated/warehouses': typeof AuthenticatedWarehousesRoute
   '/api/chat-widget': typeof ApiChatWidgetRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/product/$handle': typeof ProductHandleRoute
   '/product/$productId': typeof ProductProductIdRoute
@@ -845,6 +880,7 @@ export interface FileRoutesById {
   '/_authenticated/purchasing/scan-invoice': typeof AuthenticatedPurchasingScanInvoiceRoute
   '/_authenticated/store/$code': typeof AuthenticatedStoreCodeRoute
   '/api/public/csp-report': typeof ApiPublicCspReportRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/analytics/': typeof AuthenticatedAnalyticsIndexRoute
   '/_authenticated/catalog/': typeof AuthenticatedCatalogIndexRoute
   '/_authenticated/insurance/': typeof AuthenticatedInsuranceIndexRoute
@@ -856,6 +892,8 @@ export interface FileRoutesById {
   '/api/public/hooks/whatsapp': typeof ApiPublicHooksWhatsappRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -907,6 +945,7 @@ export interface FileRouteTypes {
     | '/vision-lab'
     | '/warehouses'
     | '/api/chat-widget'
+    | '/email/unsubscribe'
     | '/planet/$planetId'
     | '/product/$handle'
     | '/product/$productId'
@@ -937,6 +976,7 @@ export interface FileRouteTypes {
     | '/purchasing/scan-invoice'
     | '/store/$code'
     | '/api/public/csp-report'
+    | '/lovable/email/suppression'
     | '/analytics/'
     | '/catalog/'
     | '/insurance/'
@@ -948,6 +988,8 @@ export interface FileRouteTypes {
     | '/api/public/hooks/whatsapp'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -996,6 +1038,7 @@ export interface FileRouteTypes {
     | '/vision-lab'
     | '/warehouses'
     | '/api/chat-widget'
+    | '/email/unsubscribe'
     | '/planet/$planetId'
     | '/product/$handle'
     | '/product/$productId'
@@ -1026,6 +1069,7 @@ export interface FileRouteTypes {
     | '/purchasing/scan-invoice'
     | '/store/$code'
     | '/api/public/csp-report'
+    | '/lovable/email/suppression'
     | '/analytics'
     | '/catalog'
     | '/insurance'
@@ -1037,6 +1081,8 @@ export interface FileRouteTypes {
     | '/api/public/hooks/whatsapp'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   id:
     | '__root__'
     | '/'
@@ -1087,6 +1133,7 @@ export interface FileRouteTypes {
     | '/_authenticated/vision-lab'
     | '/_authenticated/warehouses'
     | '/api/chat-widget'
+    | '/email/unsubscribe'
     | '/planet/$planetId'
     | '/product/$handle'
     | '/product/$productId'
@@ -1117,6 +1164,7 @@ export interface FileRouteTypes {
     | '/_authenticated/purchasing/scan-invoice'
     | '/_authenticated/store/$code'
     | '/api/public/csp-report'
+    | '/lovable/email/suppression'
     | '/_authenticated/analytics/'
     | '/_authenticated/catalog/'
     | '/_authenticated/insurance/'
@@ -1128,6 +1176,8 @@ export interface FileRouteTypes {
     | '/api/public/hooks/whatsapp'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1149,18 +1199,22 @@ export interface RootRouteChildren {
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiChatWidgetRoute: typeof ApiChatWidgetRoute
+  EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   PlanetPlanetIdRoute: typeof PlanetPlanetIdRoute
   ProductHandleRoute: typeof ProductHandleRoute
   ProductProductIdRoute: typeof ProductProductIdRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicCspReportRoute: typeof ApiPublicCspReportRoute
+  LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksDlqReprocessorRoute: typeof ApiPublicHooksDlqReprocessorRoute
   ApiPublicHooksEventConsumerRoute: typeof ApiPublicHooksEventConsumerRoute
   ApiPublicHooksGenerateSocialPostsRoute: typeof ApiPublicHooksGenerateSocialPostsRoute
   ApiPublicHooksWhatsappRoute: typeof ApiPublicHooksWhatsappRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
+  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
+  LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1501,6 +1555,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatWidgetRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/email/unsubscribe': {
+      id: '/email/unsubscribe'
+      path: '/email/unsubscribe'
+      fullPath: '/email/unsubscribe'
+      preLoaderRoute: typeof EmailUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/planet/$planetId': {
       id: '/planet/$planetId'
       path: '/planet/$planetId'
@@ -1739,6 +1800,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicCspReportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/suppression': {
+      id: '/lovable/email/suppression'
+      path: '/lovable/email/suppression'
+      fullPath: '/lovable/email/suppression'
+      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/insurance/claims_/$claimId': {
       id: '/_authenticated/insurance/claims_/$claimId'
       path: '/insurance/claims/$claimId'
@@ -1786,6 +1854,20 @@ declare module '@tanstack/react-router' {
       path: '/lovable/email/auth/webhook'
       fullPath: '/lovable/email/auth/webhook'
       preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/send': {
+      id: '/lovable/email/transactional/send'
+      path: '/lovable/email/transactional/send'
+      fullPath: '/lovable/email/transactional/send'
+      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -2061,12 +2143,14 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ApiChatWidgetRoute: ApiChatWidgetRoute,
+  EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   PlanetPlanetIdRoute: PlanetPlanetIdRoute,
   ProductHandleRoute: ProductHandleRoute,
   ProductProductIdRoute: ProductProductIdRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicCspReportRoute: ApiPublicCspReportRoute,
+  LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksDlqReprocessorRoute: ApiPublicHooksDlqReprocessorRoute,
   ApiPublicHooksEventConsumerRoute: ApiPublicHooksEventConsumerRoute,
   ApiPublicHooksGenerateSocialPostsRoute:
@@ -2074,6 +2158,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksWhatsappRoute: ApiPublicHooksWhatsappRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
+  LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
+  LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
