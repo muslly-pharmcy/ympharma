@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
 import { ShoppingCart, Trash2, Plus, Minus, Lock, MessageCircle } from 'lucide-react'
 import { listCart, removeFromCart, setCartQuantity } from '@/lib/cart.functions'
+import { CartSafetyPanel } from '@/components/store/CartSafetyPanel'
 import { openWhatsAppOrder } from '@/lib/whatsapp/order-message'
 import { EmptyState, ErrorState, ListSkeleton } from '@/shared/components/StateViews'
 
@@ -106,6 +107,9 @@ function CartPage() {
         />
       ) : (
         <>
+          <div className="mb-4">
+            <CartSafetyPanel />
+          </div>
           <ul className="space-y-3">
             {items.map((it) => {
               const restricted = it.product?.requires_prescription

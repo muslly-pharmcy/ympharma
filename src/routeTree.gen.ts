@@ -42,6 +42,7 @@ import { Route as AuthenticatedCouponsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated/customers'
 import { Route as AuthenticatedDispensesRouteImport } from './routes/_authenticated/dispenses'
 import { Route as AuthenticatedDoctorsRouteImport } from './routes/_authenticated/doctors'
+import { Route as AuthenticatedFamilyHealthRouteImport } from './routes/_authenticated/family-health'
 import { Route as AuthenticatedInventoryChatRouteImport } from './routes/_authenticated/inventory-chat'
 import { Route as AuthenticatedLoyaltyRouteImport } from './routes/_authenticated/loyalty'
 import { Route as AuthenticatedMedicalDirectoryRouteImport } from './routes/_authenticated/medical-directory'
@@ -282,6 +283,12 @@ const AuthenticatedDoctorsRoute = AuthenticatedDoctorsRouteImport.update({
   path: '/doctors',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedFamilyHealthRoute =
+  AuthenticatedFamilyHealthRouteImport.update({
+    id: '/family-health',
+    path: '/family-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedInventoryChatRoute =
   AuthenticatedInventoryChatRouteImport.update({
     id: '/inventory-chat',
@@ -685,6 +692,7 @@ export interface FileRoutesByFullPath {
   '/customers': typeof AuthenticatedCustomersRouteWithChildren
   '/dispenses': typeof AuthenticatedDispensesRouteWithChildren
   '/doctors': typeof AuthenticatedDoctorsRouteWithChildren
+  '/family-health': typeof AuthenticatedFamilyHealthRoute
   '/inventory-chat': typeof AuthenticatedInventoryChatRoute
   '/loyalty': typeof AuthenticatedLoyaltyRouteWithChildren
   '/medical-directory': typeof AuthenticatedMedicalDirectoryRoute
@@ -784,6 +792,7 @@ export interface FileRoutesByTo {
   '/customers': typeof AuthenticatedCustomersRouteWithChildren
   '/dispenses': typeof AuthenticatedDispensesRouteWithChildren
   '/doctors': typeof AuthenticatedDoctorsRouteWithChildren
+  '/family-health': typeof AuthenticatedFamilyHealthRoute
   '/inventory-chat': typeof AuthenticatedInventoryChatRoute
   '/loyalty': typeof AuthenticatedLoyaltyRouteWithChildren
   '/medical-directory': typeof AuthenticatedMedicalDirectoryRoute
@@ -886,6 +895,7 @@ export interface FileRoutesById {
   '/_authenticated/customers': typeof AuthenticatedCustomersRouteWithChildren
   '/_authenticated/dispenses': typeof AuthenticatedDispensesRouteWithChildren
   '/_authenticated/doctors': typeof AuthenticatedDoctorsRouteWithChildren
+  '/_authenticated/family-health': typeof AuthenticatedFamilyHealthRoute
   '/_authenticated/inventory-chat': typeof AuthenticatedInventoryChatRoute
   '/_authenticated/loyalty': typeof AuthenticatedLoyaltyRouteWithChildren
   '/_authenticated/medical-directory': typeof AuthenticatedMedicalDirectoryRoute
@@ -988,6 +998,7 @@ export interface FileRouteTypes {
     | '/customers'
     | '/dispenses'
     | '/doctors'
+    | '/family-health'
     | '/inventory-chat'
     | '/loyalty'
     | '/medical-directory'
@@ -1087,6 +1098,7 @@ export interface FileRouteTypes {
     | '/customers'
     | '/dispenses'
     | '/doctors'
+    | '/family-health'
     | '/inventory-chat'
     | '/loyalty'
     | '/medical-directory'
@@ -1188,6 +1200,7 @@ export interface FileRouteTypes {
     | '/_authenticated/customers'
     | '/_authenticated/dispenses'
     | '/_authenticated/doctors'
+    | '/_authenticated/family-health'
     | '/_authenticated/inventory-chat'
     | '/_authenticated/loyalty'
     | '/_authenticated/medical-directory'
@@ -1527,6 +1540,13 @@ declare module '@tanstack/react-router' {
       path: '/doctors'
       fullPath: '/doctors'
       preLoaderRoute: typeof AuthenticatedDoctorsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/family-health': {
+      id: '/_authenticated/family-health'
+      path: '/family-health'
+      fullPath: '/family-health'
+      preLoaderRoute: typeof AuthenticatedFamilyHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/inventory-chat': {
@@ -2140,6 +2160,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRouteWithChildren
   AuthenticatedDispensesRoute: typeof AuthenticatedDispensesRouteWithChildren
   AuthenticatedDoctorsRoute: typeof AuthenticatedDoctorsRouteWithChildren
+  AuthenticatedFamilyHealthRoute: typeof AuthenticatedFamilyHealthRoute
   AuthenticatedInventoryChatRoute: typeof AuthenticatedInventoryChatRoute
   AuthenticatedLoyaltyRoute: typeof AuthenticatedLoyaltyRouteWithChildren
   AuthenticatedMedicalDirectoryRoute: typeof AuthenticatedMedicalDirectoryRoute
@@ -2189,6 +2210,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCustomersRoute: AuthenticatedCustomersRouteWithChildren,
   AuthenticatedDispensesRoute: AuthenticatedDispensesRouteWithChildren,
   AuthenticatedDoctorsRoute: AuthenticatedDoctorsRouteWithChildren,
+  AuthenticatedFamilyHealthRoute: AuthenticatedFamilyHealthRoute,
   AuthenticatedInventoryChatRoute: AuthenticatedInventoryChatRoute,
   AuthenticatedLoyaltyRoute: AuthenticatedLoyaltyRouteWithChildren,
   AuthenticatedMedicalDirectoryRoute: AuthenticatedMedicalDirectoryRoute,
