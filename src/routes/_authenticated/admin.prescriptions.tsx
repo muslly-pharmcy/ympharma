@@ -69,10 +69,11 @@ function AdminPrescriptions() {
       </header>
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label="وصفات جديدة" value={t?.pending.prescriptions ?? 0} />
-        <Stat label="تذكيرات تعبئة" value={t?.pending.refills ?? 0} />
-        <Stat label="طلبات باقات" value={t?.pending.bundles ?? 0} />
-        <Stat label="تفاعلات المساعد (24س)" value={t?.events.assistant ?? 0} />
+        <Stat label="وصفات جديدة" value={t?.pendingPrescriptions ?? 0} />
+        <Stat label="تذكيرات تعبئة" value={t?.activeRefills ?? 0} />
+        <Stat label="طلبات باقات" value={t?.bundleOrders ?? 0} />
+        <Stat label="تفاعلات المساعد (24س)" value={t?.assistantMessages ?? 0} />
+
       </section>
 
       <Panel title="الوصفات المرفوعة">
