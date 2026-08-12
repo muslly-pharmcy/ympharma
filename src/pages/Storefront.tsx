@@ -6,7 +6,7 @@ import { motion } from 'framer-motion'
 import { Package, MessageCircle, Sparkles } from 'lucide-react'
 import { listProducts, listCategories } from '@/lib/catalog.functions'
 import { useDebounce } from '@/shared/hooks/useDebounce'
-import { OnboardingDocModal } from '@/components/store/OnboardingDocModal'
+import { OnboardingModal } from '@/components/store/OnboardingModal'
 import { HealthBundles } from '@/components/store/HealthBundles'
 import { PrescriptionUploadModal } from '@/components/store/PrescriptionUploadModal'
 import { HeroBanner } from '@/components/store/HeroBanner'
@@ -58,7 +58,7 @@ export default function Storefront() {
 
   return (
     <div dir="rtl" className="min-h-screen pb-24 md:pb-0">
-      <OnboardingDocModal />
+      <OnboardingModal />
       <PrescriptionUploadModal open={rxOpen} onClose={() => setRxOpen(false)} />
 
       <div ref={heroRef}>
