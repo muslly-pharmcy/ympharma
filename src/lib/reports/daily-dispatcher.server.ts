@@ -213,6 +213,8 @@ export function renderWhatsAppSummary(r: DailyReport): string {
     `🧑‍⚕️ عملاء جدد: ${r.crm.newCustomers} — مزامنة Sheets: ${r.crm.syncSynced}`,
     `📦 تنبيهات مخزون: ${r.sales.safetyStockAlerts} — فواتير قيد المعالجة: ${r.sales.pendingPurchaseOrders}`,
     `📝 منشورات صحية: ${r.content.generated}`,
+    `💊 وصفات: ${r.storefront.prescriptions} — تعبئة: ${r.storefront.refills} — باقات: ${r.storefront.bundleOrders}`,
+
     `⚙️ أخطاء: ${r.health.errors}`,
   ]
   return lines.join('\n')
