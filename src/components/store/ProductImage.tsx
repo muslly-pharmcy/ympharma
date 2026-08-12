@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react'
 import { Pill } from 'lucide-react'
 import {
   bucketGradient,
+  buildSrcSet,
+  lowBandwidthSrc,
   resolveBucket,
   resolveProductImage,
   type ImageResolvable,
@@ -13,12 +15,14 @@ interface ProductImageProps {
   className?: string
   rounded?: string
   priority?: boolean
+  /** Responsive sizes hint; defaults tuned for the 2-up mobile product grid. */
+  sizes?: string
 }
 
 /**
  * Smart storefront image: glassmorphic shimmer while loading, real studio
- * photography when available, and a rendered gradient packaging card instead
- * of a broken-image icon when the network fails.
+ * photography (WebP + responsive srcset for weak connections), and a rendered
+ * gradient packaging card instead of a broken-image icon when the network fails.
  */
 export function ProductImage({
   product,
@@ -26,8 +30,11 @@ export function ProductImage({
   className = '',
   rounded = 'rounded-3xl',
   priority = false,
+  sizes = '(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 240px',
 }: ProductImageProps) {
-  const src = useMemo(() => resolveProductImage(product), [product])
+  const resolved = useMemo(() => resolveProductImage(product), [product])
+  const src = useMemo(() => lowBandwidthSrc(resolved), [resolved])
+  const srcSet = useMemo(() => buildSrcSet(resolved), [resolved])
   const bucket = useMemo(() => resolveBucket(product), [product])
   const [loaded, setLoaded] = useState(false)
   const [failed, setFailed] = useState(false)
@@ -43,8 +50,12 @@ export function ProductImage({
       {!failed && (
         <img
           src={src}
+          {...(srcSet ? { srcSet, sizes } : {})}
           alt={alt}
+          width={400}
+          height={400}
           loading={priority ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : 'low'}
           decoding="async"
           onLoad={() => setLoaded(true)}
           onError={() => setFailed(true)}
