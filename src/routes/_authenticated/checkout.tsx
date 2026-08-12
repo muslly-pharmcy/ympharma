@@ -60,6 +60,52 @@ function CheckoutPage() {
   const [address, setAddress] = useState('')
   const [notes, setNotes] = useState('')
 
+  const [waFallbackUrl, setWaFallbackUrl] = useState<string | null>(null)
+
+  const imagesFn = useServerFn(listProductImageUrls)
+
+  async function dispatchToWhatsApp(orderRef: string): Promise<void> {
+    const currentZone = zones.find((z) => z.id === zoneId)
+    const currentMethod = methods.find((m) => m.code === methodCode)
+
+    const lines: WhatsAppOrderLine[] = await Promise.all(
+      cart.map(async (row) => {
+        let imageUrl: string | null = null
+        try {
+          const media = await imagesFn({ data: { productId: row.product_id } })
+          imageUrl = media[0]?.url ?? null
+        } catch {
+          imageUrl = null
+        }
+        return {
+          name: row.product?.name_ar ?? 'صنف',
+          quantity: row.quantity,
+          unitPrice: Number(
+            (row.product as unknown as { sbdma_official_price?: number | null } | null)
+              ?.sbdma_official_price ?? 0,
+          ),
+          imageUrl,
+        }
+      }),
+    )
+
+    const { url, opened } = openWhatsAppOrder({
+      orderRef,
+      customerName,
+      phone,
+      address,
+      zoneName: currentZone?.name_ar ?? null,
+      paymentMethod: currentMethod?.name_ar ?? null,
+      notes: notes || null,
+      shippingFee: currentZone?.fee ?? 0,
+      lines,
+    })
+    if (!opened) {
+      setWaFallbackUrl(url)
+      toast.info('اضغط على رابط واتساب لإرسال الطلب')
+    }
+  }
+
   const placeFn = useServerFn(placeOrder)
   const placeMut = useMutation({
     mutationFn: () =>
@@ -73,8 +119,13 @@ function CheckoutPage() {
           notes: notes || null,
         },
       }),
-    onSuccess: (res) => {
-      toast.success('تم إنشاء الطلب')
+    onSuccess: async (res) => {
+      toast.success('تم إنشاء الطلب — جارٍ فتح واتساب')
+      try {
+        await dispatchToWhatsApp(res.id.slice(0, 8).toUpperCase())
+      } catch {
+        toast.error('تعذّر فتح واتساب — يمكنك متابعة الطلب من صفحة الطلبات')
+      }
       void qc.invalidateQueries({ queryKey: ['cart'] })
       void qc.invalidateQueries({ queryKey: ['my-orders'] })
       void navigate({
@@ -84,6 +135,7 @@ function CheckoutPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   })
+
 
   const subtotal = useMemo(
     () =>
