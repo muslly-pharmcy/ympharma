@@ -4789,6 +4789,54 @@ export type Database = {
           },
         ]
       }
+      crm_sync_log: {
+        Row: {
+          attempts: number
+          category: string
+          created_at: string
+          details: string | null
+          error: string | null
+          full_name: string | null
+          id: string
+          payload: Json
+          phone: string | null
+          source: string
+          status: string
+          synced_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          category: string
+          created_at?: string
+          details?: string | null
+          error?: string | null
+          full_name?: string | null
+          id?: string
+          payload?: Json
+          phone?: string | null
+          source: string
+          status?: string
+          synced_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          category?: string
+          created_at?: string
+          details?: string | null
+          error?: string | null
+          full_name?: string | null
+          id?: string
+          payload?: Json
+          phone?: string | null
+          source?: string
+          status?: string
+          synced_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       crm_unsubscribes: {
         Row: {
           channel: Database["public"]["Enums"]["crm_campaign_channel"]
@@ -9332,6 +9380,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      kernel_module_telemetry: {
+        Row: {
+          budget_used: number
+          created_at: string
+          error_rate: number
+          failures: number
+          id: string
+          latency_ms: number | null
+          meta: Json
+          module_key: string
+          observed_at: string
+          runs: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          budget_used?: number
+          created_at?: string
+          error_rate?: number
+          failures?: number
+          id?: string
+          latency_ms?: number | null
+          meta?: Json
+          module_key: string
+          observed_at?: string
+          runs?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          budget_used?: number
+          created_at?: string
+          error_rate?: number
+          failures?: number
+          id?: string
+          latency_ms?: number | null
+          meta?: Json
+          module_key?: string
+          observed_at?: string
+          runs?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       loyalty_accounts: {
         Row: {
