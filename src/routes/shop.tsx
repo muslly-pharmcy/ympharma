@@ -1,3 +1,4 @@
+import { ProductImage } from '@/components/store/ProductImage'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -180,9 +181,12 @@ function ProductCard({ product }: { product: CatalogProduct }) {
       params={{ productId: product.id }}
       className="group flex flex-col rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-primary/40 hover:shadow-md"
     >
-      <div className="mb-3 flex aspect-square items-center justify-center rounded-xl bg-gray-50">
-        <Package className="h-14 w-14 text-gray-300" />
-      </div>
+      <ProductImage
+        product={product}
+        alt={product.name_ar ?? 'منتج'}
+        rounded="rounded-xl"
+        className="mb-3 aspect-square w-full"
+      />
       <h3 className="line-clamp-2 text-sm font-semibold text-gray-900">
         {product.name_ar}
       </h3>
