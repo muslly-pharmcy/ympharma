@@ -126,8 +126,9 @@ export const sanitizeForAI = redactPII;
  * Check if text contains any PII
  */
 export function containsPII(text: string): boolean {
-  return detectPII(text).length > 0;
+  return detectPII(text).length > 0 || textContainsPII(text);
 }
+
 
 /**
  * Get PII summary for analytics
