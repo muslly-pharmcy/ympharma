@@ -26,7 +26,9 @@ const TRUST = [
 
 export default function Storefront() {
   const [rawSearch, setRawSearch] = useState('')
+  const [rxOpen, setRxOpen] = useState(false)
   const [categoryId, setCategoryId] = useState<string | undefined>(undefined)
+
   const search = useDebounce(rawSearch, 300)
 
   const productsFn = useServerFn(listProducts)
