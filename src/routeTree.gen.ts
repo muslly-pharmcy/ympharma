@@ -81,6 +81,7 @@ import { Route as AuthenticatedPrescriptionsPrescriptionIdRouteImport } from './
 import { Route as AuthenticatedPromotionsIndexRouteImport } from './routes/_authenticated/promotions.index'
 import { Route as AuthenticatedPromotionsIdRouteImport } from './routes/_authenticated/promotions.$id'
 import { Route as AuthenticatedPurchaseOrdersIdRouteImport } from './routes/_authenticated/purchase-orders.$id'
+import { Route as AuthenticatedPurchasingScanInvoiceRouteImport } from './routes/_authenticated/purchasing.scan-invoice'
 import { Route as AuthenticatedStoreCodeRouteImport } from './routes/_authenticated/store.$code'
 import { Route as ApiPublicCspReportRouteImport } from './routes/api/public/csp-report'
 import { Route as AuthenticatedInsuranceClaimsClaimIdRouteImport } from './routes/_authenticated/insurance.claims_.$claimId'
@@ -486,6 +487,12 @@ const AuthenticatedPurchaseOrdersIdRoute =
     path: '/$id',
     getParentRoute: () => AuthenticatedPurchaseOrdersRoute,
   } as any)
+const AuthenticatedPurchasingScanInvoiceRoute =
+  AuthenticatedPurchasingScanInvoiceRouteImport.update({
+    id: '/purchasing/scan-invoice',
+    path: '/purchasing/scan-invoice',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedStoreCodeRoute = AuthenticatedStoreCodeRouteImport.update({
   id: '/$code',
   path: '/$code',
@@ -604,6 +611,7 @@ export interface FileRoutesByFullPath {
   '/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/promotions/$id': typeof AuthenticatedPromotionsIdRoute
   '/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
+  '/purchasing/scan-invoice': typeof AuthenticatedPurchasingScanInvoiceRoute
   '/store/$code': typeof AuthenticatedStoreCodeRoute
   '/api/public/csp-report': typeof ApiPublicCspReportRoute
   '/analytics/': typeof AuthenticatedAnalyticsIndexRoute
@@ -686,6 +694,7 @@ export interface FileRoutesByTo {
   '/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/promotions/$id': typeof AuthenticatedPromotionsIdRoute
   '/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
+  '/purchasing/scan-invoice': typeof AuthenticatedPurchasingScanInvoiceRoute
   '/store/$code': typeof AuthenticatedStoreCodeRoute
   '/api/public/csp-report': typeof ApiPublicCspReportRoute
   '/analytics': typeof AuthenticatedAnalyticsIndexRoute
@@ -770,6 +779,7 @@ export interface FileRoutesById {
   '/_authenticated/prescriptions/$prescriptionId': typeof AuthenticatedPrescriptionsPrescriptionIdRoute
   '/_authenticated/promotions/$id': typeof AuthenticatedPromotionsIdRoute
   '/_authenticated/purchase-orders/$id': typeof AuthenticatedPurchaseOrdersIdRoute
+  '/_authenticated/purchasing/scan-invoice': typeof AuthenticatedPurchasingScanInvoiceRoute
   '/_authenticated/store/$code': typeof AuthenticatedStoreCodeRoute
   '/api/public/csp-report': typeof ApiPublicCspReportRoute
   '/_authenticated/analytics/': typeof AuthenticatedAnalyticsIndexRoute
@@ -854,6 +864,7 @@ export interface FileRouteTypes {
     | '/prescriptions/$prescriptionId'
     | '/promotions/$id'
     | '/purchase-orders/$id'
+    | '/purchasing/scan-invoice'
     | '/store/$code'
     | '/api/public/csp-report'
     | '/analytics/'
@@ -936,6 +947,7 @@ export interface FileRouteTypes {
     | '/prescriptions/$prescriptionId'
     | '/promotions/$id'
     | '/purchase-orders/$id'
+    | '/purchasing/scan-invoice'
     | '/store/$code'
     | '/api/public/csp-report'
     | '/analytics'
@@ -1019,6 +1031,7 @@ export interface FileRouteTypes {
     | '/_authenticated/prescriptions/$prescriptionId'
     | '/_authenticated/promotions/$id'
     | '/_authenticated/purchase-orders/$id'
+    | '/_authenticated/purchasing/scan-invoice'
     | '/_authenticated/store/$code'
     | '/api/public/csp-report'
     | '/_authenticated/analytics/'
@@ -1572,6 +1585,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPurchaseOrdersIdRouteImport
       parentRoute: typeof AuthenticatedPurchaseOrdersRoute
     }
+    '/_authenticated/purchasing/scan-invoice': {
+      id: '/_authenticated/purchasing/scan-invoice'
+      path: '/purchasing/scan-invoice'
+      fullPath: '/purchasing/scan-invoice'
+      preLoaderRoute: typeof AuthenticatedPurchasingScanInvoiceRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/store/$code': {
       id: '/_authenticated/store/$code'
       path: '/$code'
@@ -1806,6 +1826,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInsuranceCoverageRoute: typeof AuthenticatedInsuranceCoverageRoute
   AuthenticatedMarketingSocialAssistantRoute: typeof AuthenticatedMarketingSocialAssistantRoute
   AuthenticatedPromotionsIdRoute: typeof AuthenticatedPromotionsIdRoute
+  AuthenticatedPurchasingScanInvoiceRoute: typeof AuthenticatedPurchasingScanInvoiceRoute
   AuthenticatedAnalyticsIndexRoute: typeof AuthenticatedAnalyticsIndexRoute
   AuthenticatedCatalogIndexRoute: typeof AuthenticatedCatalogIndexRoute
   AuthenticatedInsuranceIndexRoute: typeof AuthenticatedInsuranceIndexRoute
@@ -1853,6 +1874,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMarketingSocialAssistantRoute:
     AuthenticatedMarketingSocialAssistantRoute,
   AuthenticatedPromotionsIdRoute: AuthenticatedPromotionsIdRoute,
+  AuthenticatedPurchasingScanInvoiceRoute:
+    AuthenticatedPurchasingScanInvoiceRoute,
   AuthenticatedAnalyticsIndexRoute: AuthenticatedAnalyticsIndexRoute,
   AuthenticatedCatalogIndexRoute: AuthenticatedCatalogIndexRoute,
   AuthenticatedInsuranceIndexRoute: AuthenticatedInsuranceIndexRoute,
