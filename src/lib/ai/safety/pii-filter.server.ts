@@ -3,6 +3,8 @@
  * Detects and redacts 10 types of PII before sending to AI providers
  */
 
+import { redactText, textContainsPII } from '@/lib/observability/pii-patterns';
+
 // PII detection patterns
 const PII_PATTERNS: Record<string, RegExp> = {
   email: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
