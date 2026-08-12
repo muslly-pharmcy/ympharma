@@ -1,7 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
-import { Image as ImageIcon, Loader2 } from 'lucide-react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useServerFn } from '@tanstack/react-start'
+import { Image as ImageIcon, Loader2, Sparkles } from 'lucide-react'
+import { toast } from 'sonner'
 import { getImageQueueStats } from '@/lib/excel-import.functions'
+import { generateProductImages } from '@/lib/ai/product-imagery.functions'
 
 export const Route = createFileRoute('/_authenticated/admin-image-queue')({
   head: () => ({
@@ -15,6 +18,17 @@ export const Route = createFileRoute('/_authenticated/admin-image-queue')({
 })
 
 function AdminImageQueue() {
+  const qc = useQueryClient()
+  const genFn = useServerFn(generateProductImages)
+  const gen = useMutation({
+    mutationFn: () => genFn({ data: { limit: 3 } }),
+    onSuccess: (r) => {
+      toast.success(`تم توليد ${r.generated} صورة (تم تخطي ${r.skipped})`)
+      void qc.invalidateQueries({ queryKey: ['admin', 'image-queue'] })
+    },
+    onError: (e: Error) => toast.error(e.message),
+  })
+
   const q = useQuery({
     queryKey: ['admin', 'image-queue'],
     queryFn: () => getImageQueueStats(),
@@ -32,6 +46,15 @@ function AdminImageQueue() {
           </p>
         </div>
       </header>
+
+      <button
+        onClick={() => gen.mutate()}
+        disabled={gen.isPending}
+        className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-3 text-sm font-bold text-white shadow-sm hover:opacity-90 disabled:opacity-50"
+      >
+        {gen.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+        توليد صور احترافية (3 منتجات)
+      </button>
 
       {q.isLoading ? (
         <div className="flex items-center gap-2 text-gray-500">
