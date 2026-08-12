@@ -90,9 +90,12 @@ function KpiGrid({ kpis }: { kpis: ExecutiveKpis }) {
     { label: 'نقاط ولاء (30ي)', value: kpis.loyalty_points_earned_30d, icon: Sparkles, tone: 'amber' },
   ] as const
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-      {items.map((k) => (
-        <div key={k.label} className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-4">
+    <div className="bento-grid">
+      {items.map((k, i) => (
+        <div
+          key={k.label}
+          className={`rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/25 ${i === 0 ? 'bento-wide' : ''}`}
+        >
           <div className="flex items-center justify-between">
             <span className="text-xs text-slate-400">{k.label}</span>
             <k.icon className="h-4 w-4 text-slate-500" aria-hidden />
@@ -106,7 +109,7 @@ function KpiGrid({ kpis }: { kpis: ExecutiveKpis }) {
 
 function Card({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-4">
+    <section className="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl">
       <header className="mb-3 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-slate-200">{title}</h2>
         {action}
