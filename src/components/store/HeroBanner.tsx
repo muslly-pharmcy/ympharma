@@ -49,7 +49,7 @@ export function HeroBanner({
               style={{ animationDelay: '-6s' }}
             />
             <div
-              className="mesh-drift absolute bottom--10 left-1/3 h-64 w-64 rounded-full bg-teal-300/25 blur-3xl"
+              className="mesh-drift absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-teal-300/25 blur-3xl"
               style={{ animationDelay: '-11s' }}
             />
           </div>
