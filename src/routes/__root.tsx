@@ -115,6 +115,7 @@ function RootComponent() {
       <AuthStateSync />
       <GlobalErrorListeners />
       <OfflineBanner />
+      <ReadingProgress />
       <ThemeProvider>
         <AuthProvider>
           <AIProvider>
@@ -126,7 +127,10 @@ function RootComponent() {
               </ModuleErrorBoundary>
             </MainLayout>
             <BottomNav />
+            <ScrollDepthPrompt />
+            <ExitIntentModal />
           </AIProvider>
+
         </AuthProvider>
       </ThemeProvider>
     </AppQueryProvider>
