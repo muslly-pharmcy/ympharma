@@ -63,6 +63,7 @@ import { Route as ProductProductIdRouteImport } from './routes/product.$productI
 import { Route as ToolsIndexRouteImport } from './routes/tools.index'
 import { Route as ToolsInteractionsRouteImport } from './routes/tools.interactions'
 import { Route as ToolsPediatricDoseRouteImport } from './routes/tools.pediatric-dose'
+import { Route as ToolsSymptomsRouteImport } from './routes/tools.symptoms'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as AuthenticatedAdminKernelEvolutionRouteImport } from './routes/_authenticated/admin.kernel-evolution'
@@ -381,6 +382,11 @@ const ToolsPediatricDoseRoute = ToolsPediatricDoseRouteImport.update({
   path: '/pediatric-dose',
   getParentRoute: () => ToolsRoute,
 } as any)
+const ToolsSymptomsRoute = ToolsSymptomsRouteImport.update({
+  id: '/symptoms',
+  path: '/symptoms',
+  getParentRoute: () => ToolsRoute,
+} as any)
 const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   id: '/.lovable/oauth/consent',
   path: '/.lovable/oauth/consent',
@@ -627,6 +633,7 @@ export interface FileRoutesByFullPath {
   '/product/$productId': typeof ProductProductIdRoute
   '/tools/interactions': typeof ToolsInteractionsRoute
   '/tools/pediatric-dose': typeof ToolsPediatricDoseRoute
+  '/tools/symptoms': typeof ToolsSymptomsRoute
   '/tools/': typeof ToolsIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -714,6 +721,7 @@ export interface FileRoutesByTo {
   '/product/$productId': typeof ProductProductIdRoute
   '/tools/interactions': typeof ToolsInteractionsRoute
   '/tools/pediatric-dose': typeof ToolsPediatricDoseRoute
+  '/tools/symptoms': typeof ToolsSymptomsRoute
   '/tools': typeof ToolsIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -804,6 +812,7 @@ export interface FileRoutesById {
   '/product/$productId': typeof ProductProductIdRoute
   '/tools/interactions': typeof ToolsInteractionsRoute
   '/tools/pediatric-dose': typeof ToolsPediatricDoseRoute
+  '/tools/symptoms': typeof ToolsSymptomsRoute
   '/tools/': typeof ToolsIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -894,6 +903,7 @@ export interface FileRouteTypes {
     | '/product/$productId'
     | '/tools/interactions'
     | '/tools/pediatric-dose'
+    | '/tools/symptoms'
     | '/tools/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -981,6 +991,7 @@ export interface FileRouteTypes {
     | '/product/$productId'
     | '/tools/interactions'
     | '/tools/pediatric-dose'
+    | '/tools/symptoms'
     | '/tools'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -1070,6 +1081,7 @@ export interface FileRouteTypes {
     | '/product/$productId'
     | '/tools/interactions'
     | '/tools/pediatric-dose'
+    | '/tools/symptoms'
     | '/tools/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -1517,6 +1529,13 @@ declare module '@tanstack/react-router' {
       path: '/pediatric-dose'
       fullPath: '/tools/pediatric-dose'
       preLoaderRoute: typeof ToolsPediatricDoseRouteImport
+      parentRoute: typeof ToolsRoute
+    }
+    '/tools/symptoms': {
+      id: '/tools/symptoms'
+      path: '/symptoms'
+      fullPath: '/tools/symptoms'
+      preLoaderRoute: typeof ToolsSymptomsRouteImport
       parentRoute: typeof ToolsRoute
     }
     '/.lovable/oauth/consent': {
@@ -1988,12 +2007,14 @@ const AuthenticatedRouteRouteWithChildren =
 interface ToolsRouteChildren {
   ToolsInteractionsRoute: typeof ToolsInteractionsRoute
   ToolsPediatricDoseRoute: typeof ToolsPediatricDoseRoute
+  ToolsSymptomsRoute: typeof ToolsSymptomsRoute
   ToolsIndexRoute: typeof ToolsIndexRoute
 }
 
 const ToolsRouteChildren: ToolsRouteChildren = {
   ToolsInteractionsRoute: ToolsInteractionsRoute,
   ToolsPediatricDoseRoute: ToolsPediatricDoseRoute,
+  ToolsSymptomsRoute: ToolsSymptomsRoute,
   ToolsIndexRoute: ToolsIndexRoute,
 }
 
