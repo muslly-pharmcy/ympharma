@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { MessageCircle, Bot } from 'lucide-react'
+import { MessageCircle, Bot, FileImage } from 'lucide-react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { PHARMACY } from '@/shared/branding'
-import { ChatWidget } from './ChatWidget'
+import { AiHealthBot } from '@/components/store/AiHealthBot'
+import { PrescriptionUploadModal } from '@/components/store/PrescriptionUploadModal'
+
 
 // Glassmorphic floating dock: WhatsApp direct + inline AI chat popup.
 export function FloatingContactButtons() {
