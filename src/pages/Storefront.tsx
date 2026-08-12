@@ -49,11 +49,16 @@ export default function Storefront() {
 
   const products = useMemo(
     () =>
-      (data?.items ?? []) as Array<
-        (typeof data extends never ? never : import('@/domain/catalog/schemas').CatalogProduct) & {
-          primary_image_url?: string
-        }
-      >,
+      (data?.items ?? []) as unknown as Array<{
+        id: string
+        name_ar?: string | null
+        name_en?: string | null
+        brand?: string | null
+        dosage_form?: string | null
+        sbdma_official_price?: number | null
+        image_url?: string | null
+        primary_image_url?: string | null
+      }>,
     [data],
   )
 
