@@ -89,14 +89,13 @@ export default defineConfig({
       sourcemap: 'hidden',
     },
     resolve: {
-      // React Email's bundled htmlparser2 still imports the legacy
-      // `entities/lib/decode.js` subpath. v6+ exposes the same modules under
-      // `dist/esm/`. Repoint the legacy paths so SSR bundling resolves them.
+      // React Email imports the legacy `entities/lib/*.js` subpaths. The pinned
+      // entities@4.5.0 ships those under `lib/esm/`, so point the aliases there
+      // (v6+ `dist/esm/` paths do not exist in this install).
       alias: {
-        "entities/lib/decode.js": path.resolve(__dirname, "node_modules/entities/dist/esm/decode.js"),
-        "entities/lib/encode.js": path.resolve(__dirname, "node_modules/entities/dist/esm/encode.js"),
+        "entities/lib/decode.js": path.resolve(__dirname, "node_modules/entities/lib/esm/decode.js"),
+        "entities/lib/encode.js": path.resolve(__dirname, "node_modules/entities/lib/esm/encode.js"),
       },
-
     },
   },
 });
