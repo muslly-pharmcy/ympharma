@@ -1,6 +1,5 @@
 import { Suspense, lazy } from 'react'
 import { Link } from '@tanstack/react-router'
-import SunCore from '@/shared/components/SunCore'
 import PlanetCard from '@/shared/components/PlanetCard'
 import { getActivePlanets } from '@/data/planets'
 import { Sparkles, ScanLine, Pill, MessageCircle, Box, Search } from 'lucide-react'
