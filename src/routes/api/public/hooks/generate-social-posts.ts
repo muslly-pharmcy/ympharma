@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { timingSafeEqual } from 'node:crypto'
 
-// Daily job: generate 5 medical/health tip posts using Lovable AI Gateway
+// Daily job: generate 3 medical/health tip posts using Lovable AI Gateway
 // and queue them into `social_posts` (facebook). Public hook, protected by
 // a shared CRON_SECRET header (never the public anon key).
 export const Route = createFileRoute('/api/public/hooks/generate-social-posts')({
@@ -21,7 +21,7 @@ export const Route = createFileRoute('/api/public/hooks/generate-social-posts')(
         const key = process.env.LOVABLE_API_KEY
         if (!key) return new Response('missing LOVABLE_API_KEY', { status: 500 })
 
-        const prompt = `أنت مسؤول المحتوى الطبي لصيدلية المصلي في عدن. أنشئ 5 منشورات قصيرة (كل منشور 2-3 جمل) لصفحة فيسبوك تحوي نصيحة صحية أو دوائية عملية للجمهور اليمني، بأسلوب ودّي ومهني. أرجع JSON فقط بالشكل التالي:
+        const prompt = `أنت مسؤول المحتوى الطبي لصيدلية المصلي في عدن. أنشئ 3 منشورات قصيرة (كل منشور 2-3 جمل) لصفحة فيسبوك تحوي نصيحة صحية أو دوائية عملية للجمهور اليمني، بأسلوب ودّي ومهني. أرجع JSON فقط بالشكل التالي:
 {"posts":[{"caption":"...","hashtags":["#صحة","#صيدلية_المصلي"],"cta":"..."}]}`
 
         let posts: Array<{ caption: string; hashtags: string[]; cta?: string }> = []
@@ -49,7 +49,7 @@ export const Route = createFileRoute('/api/public/hooks/generate-social-posts')(
           const data = (await r.json()) as { choices?: Array<{ message?: { content?: string } }> }
           const text = data.choices?.[0]?.message?.content ?? '{"posts":[]}'
           const parsed = JSON.parse(text) as { posts?: typeof posts }
-          posts = Array.isArray(parsed.posts) ? parsed.posts.slice(0, 5) : []
+          posts = Array.isArray(parsed.posts) ? parsed.posts.slice(0, 3) : []
         } catch (e) {
           console.error('[social-posts] parse failed', e)
           return new Response(JSON.stringify({ ok: false, error: (e as Error).message }), { status: 500 })

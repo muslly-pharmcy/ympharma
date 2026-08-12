@@ -164,6 +164,20 @@ export const placeOrder = createServerFn({ method: 'POST' })
       requires_receipt: boolean
       payment_method_code: string
     }
+    // CRM bridge → Google Sheets (best effort, never blocks the order).
+    try {
+      const { syncCrmEvent } = await import('@/lib/integrations/google-sheets/sync.server')
+      void syncCrmEvent({
+        source: 'order',
+        category: 'طلب',
+        fullName: data.customerName,
+        phone: data.phone,
+        details: `طلب #${r.order_id} — الإجمالي ${Number(r.total)} — الدفع ${r.payment_method_code}`,
+      })
+    } catch {
+      /* non-blocking */
+    }
+
     return {
       id: r.order_id,
       total: Number(r.total),
