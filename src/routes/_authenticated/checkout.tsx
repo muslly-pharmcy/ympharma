@@ -340,8 +340,19 @@ function CheckoutPage() {
               className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50"
             >
               {placeMut.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-              تأكيد الطلب
+              تأكيد الطلب وإرساله عبر واتساب
             </button>
+            {waFallbackUrl && (
+              <a
+                href={waFallbackUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 block rounded-xl border border-emerald-300 bg-emerald-50 py-2 text-center text-sm font-semibold text-emerald-800"
+              >
+                فتح واتساب لإرسال الطلب
+              </a>
+            )}
+
             <p className="mt-2 text-center text-[11px] text-gray-500">
               بالضغط أنت توافق على شروط الشراء وسياسة الإرجاع.
             </p>
