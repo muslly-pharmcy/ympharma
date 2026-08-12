@@ -16,7 +16,12 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:all": "vitest run && playwright test"
+    "test:all": "vitest run && playwright test",
+    "cap:sync": "vite build && cap sync",
+    "cap:add:ios": "cap add ios",
+    "cap:add:android": "cap add android",
+    "cap:open:ios": "cap open ios",
+    "cap:open:android": "cap open android"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^2.0.50",
