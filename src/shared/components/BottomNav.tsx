@@ -17,7 +17,7 @@ export function BottomNav() {
   if (path.startsWith('/auth') || path.startsWith('/reset-password')) return null
   return (
     <nav
-      className="md:hidden fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-slate-950/85 backdrop-blur-xl"
+      className="md:hidden fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-slate-950/85 backdrop-blur-xl safe-area-bottom"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       aria-label="التنقل الرئيسي"
     >
