@@ -156,7 +156,17 @@ export default function AIChat() {
             يعمل بواسطة MUSLLY AI SUN Core
           </div>
         </div>
-        <div className="flex gap-2 p-2 bg-card border rounded-xl shadow-lg">
+        {voice.listening && (
+          <div className="mb-2 flex items-center gap-2 text-xs text-primary">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-70" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+            </span>
+            أستمع إليك… {voice.transcript}
+          </div>
+        )}
+        {voice.error && <p className="mb-2 text-xs text-red-600">{voice.error}</p>}
+        <div className="glass-card flex gap-2 p-2 !rounded-xl">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -166,23 +176,41 @@ export default function AIChat() {
                 handleSend()
               }
             }}
-            placeholder="اكتب رسالتك هنا..."
-            className="flex-1 bg-transparent border-none focus:ring-0 resize-none py-2 px-3 text-sm min-h-[44px] max-h-32 custom-scrollbar"
+            placeholder="اكتب رسالتك أو تحدث بالميكروفون..."
+            className="flex-1 min-w-0 bg-transparent border-none focus:ring-0 resize-none py-2 px-3 text-sm min-h-[44px] max-h-32 custom-scrollbar"
             rows={1}
           />
-          <button
+          {voice.supported && (
+            <motion.button
+              type="button"
+              whileTap={{ scale: 0.9 }}
+              onClick={voice.toggle}
+              aria-label={voice.listening ? 'إيقاف الإدخال الصوتي' : 'إدخال صوتي'}
+              aria-pressed={voice.listening}
+              className={`shrink-0 rounded-lg p-3 transition-all ${
+                voice.listening
+                  ? 'bg-red-500 text-white shadow-lg shadow-red-500/30'
+                  : 'bg-primary/10 text-primary hover:bg-primary/20'
+              }`}
+            >
+              {voice.listening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+            </motion.button>
+          )}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
             onClick={handleSend}
             disabled={!input.trim() || isProcessing}
-            className="p-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 disabled:opacity-50 transition-all shadow-md flex items-center justify-center"
+            className="shrink-0 p-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 disabled:opacity-50 transition-all shadow-md flex items-center justify-center"
           >
             {isProcessing ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <Send className="w-5 h-5" />
             )}
-          </button>
+          </motion.button>
         </div>
       </div>
+
     </div>
   )
 }
