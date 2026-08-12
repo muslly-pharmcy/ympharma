@@ -59,7 +59,7 @@ export function HeroBanner({
           </p>
 
           <h1 className="mt-4 text-3xl font-black leading-tight text-foreground sm:text-5xl">
-            صيدلية المصلي — <span className="text-gradient gradient-primary">دواؤك يصلك بثقة</span>
+            صيدلية المصلي — <span className="bg-gradient-to-l from-primary via-teal-600 to-cyan-600 bg-clip-text text-transparent">دواؤك يصلك بثقة</span>
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
             آلاف الأدوية ومستحضرات العناية بأسعار معتمدة، مع إرشاد دوائي دقيق وتوصيل سريع —

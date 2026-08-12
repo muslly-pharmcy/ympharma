@@ -12,7 +12,6 @@ import { PrescriptionUploadModal } from '@/components/store/PrescriptionUploadMo
 import { HeroBanner } from '@/components/store/HeroBanner'
 import { CategoryGrid } from '@/components/store/CategoryGrid'
 import { ProductCard, type StoreProduct } from '@/components/store/ProductCard'
-import { MobileQuickNav } from '@/components/store/MobileQuickNav'
 import { Skeleton } from '@/components/skeletons/Skeleton'
 
 const gridVariants = {
@@ -56,12 +55,6 @@ export default function Storefront() {
       })),
     [categories],
   )
-
-  const scrollToSearch = () => {
-    heroRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    const input = heroRef.current?.querySelector('input')
-    if (input instanceof HTMLInputElement) setTimeout(() => input.focus(), 350)
-  }
 
   return (
     <div dir="rtl" className="min-h-screen pb-24 md:pb-0">
@@ -154,8 +147,6 @@ export default function Storefront() {
           </Link>
         </motion.div>
       </section>
-
-      <MobileQuickNav onUploadRx={() => setRxOpen(true)} onSearch={scrollToSearch} />
     </div>
   )
 }
