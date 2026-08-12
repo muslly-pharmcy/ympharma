@@ -26,7 +26,7 @@ export const IMAGE_POOLS: Record<ProductImageBucket, string[]> = {
   vials: [
     U('1584362917165-526a968579e8'),
     U('1607619056574-7b8d3ee536b2'),
-    U('1615486364073-2f4d09fa1c2b'),
+    U('1612817288484-6f916006741a'),
     U('1631549916768-4119b2e5f926'),
   ],
   // Blister packs, tablets, capsules, antibiotics
@@ -41,18 +41,18 @@ export const IMAGE_POOLS: Record<ProductImageBucket, string[]> = {
     U('1550572017-edd951b55104'),
     U('1603398938378-e54eab446dde'),
     U('1584017911766-d451b3d0e843'),
-    U('1616091238212-4d5c1a1e4f3f'),
+    U('1608248543803-ba4f8c70ae0b'),
   ],
   // Luxury minimalist cosmeceutical containers
   skincare: [
     U('1556228720-195a672e8a03'),
-    U('1570194065650-d99fb4bedf0a'),
+    U('1571781926291-c477ebfd024b'),
     U('1620916566398-39f1143ab7be'),
     U('1596462502278-27bfdc403348'),
   ],
   // Supplement bottles, capsules, vitamins
   vitamins: [
-    U('1607619662634-2d5c3a4dfe10'),
+    U('1585232004423-244e0e6904e3'),
     U('1584308666744-24d5c474f2ae'),
     U('1512069772995-ec65ed45afd6'),
     U('1550572017-4fcdbb59cc32'),
