@@ -7,7 +7,9 @@ export interface DailyReport {
   crm: { newCustomers: number; syncSynced: number; syncPending: number; syncFailed: number }
   sales: { orders: number; revenue: number; pendingPurchaseOrders: number; safetyStockAlerts: number }
   content: { generated: number; published: number; pending: number }
+  storefront: { prescriptions: number; refills: number; bundleOrders: number; assistantMessages: number }
   health: { errors: number; degradedModules: string[] }
+
 }
 
 const REPORT_EMAIL = process.env['EXEC_REPORT_EMAIL'] ?? 'dr-mohmed@muslly.com'
@@ -109,6 +111,21 @@ export async function buildDailyReport(): Promise<DailyReport> {
     }
   }, { generated: 0, published: 0, pending: 0 })
 
+  const storefront = await safe(async () => {
+    const [rx, refills, bundles, events] = await Promise.all([
+      supabaseAdmin.from('store_prescription_uploads').select('id', { count: 'exact', head: true }).gte('created_at', fromIso),
+      supabaseAdmin.from('store_refill_subscriptions').select('id', { count: 'exact', head: true }).gte('created_at', fromIso),
+      supabaseAdmin.from('store_bundle_orders').select('id', { count: 'exact', head: true }).gte('created_at', fromIso),
+      supabaseAdmin.from('ai_widget_events').select('id', { count: 'exact', head: true }).eq('kind', 'assistant_message').gte('created_at', fromIso),
+    ])
+    return {
+      prescriptions: rx.count ?? 0,
+      refills: refills.count ?? 0,
+      bundleOrders: bundles.count ?? 0,
+      assistantMessages: events.count ?? 0,
+    }
+  }, { prescriptions: 0, refills: 0, bundleOrders: 0, assistantMessages: 0 })
+
   const health = await safe(async () => {
     const { count } = await supabaseAdmin.from('error_logs').select('id', { count: 'exact', head: true }).gte('created_at', fromIso)
     const modules = await planetaryStatus(24)
@@ -118,7 +135,8 @@ export async function buildDailyReport(): Promise<DailyReport> {
     }
   }, { errors: 0, degradedModules: [] as string[] })
 
-  return { dateLabel: label, visitors, crm, sales, content, health }
+  return { dateLabel: label, visitors, crm, sales, content, storefront, health }
+
 }
 
 const CARD = 'background:#ffffff;border:1px solid #e2eeec;border-radius:16px;padding:16px;margin:0 0 12px'
@@ -169,6 +187,16 @@ export function renderReportHtml(r: DailyReport): string {
     <h2 style="font-size:15px;color:#0f3b36;margin:16px 0 6px">المحتوى الصحي</h2>
     <div style="${CARD}"><p style="margin:0;color:#0f3b36;font-size:14px">تم توليد ${r.content.generated} منشوراً — نُشر ${r.content.published}، بانتظار النشر ${r.content.pending}.</p></div>
 
+    <h2 style="font-size:15px;color:#0f3b36;margin:16px 0 6px">طلبات المتجر</h2>
+    <table width="100%" cellspacing="0" cellpadding="0"><tr>
+      ${metric('وصفات مرفوعة', String(r.storefront.prescriptions))}
+      ${metric('تذكيرات تعبئة', String(r.storefront.refills))}
+    </tr><tr>
+      ${metric('طلبات باقات', String(r.storefront.bundleOrders))}
+      ${metric('رسائل المساعد الذكي', String(r.storefront.assistantMessages))}
+    </tr></table>
+
+
     <h2 style="font-size:15px;color:#0f3b36;margin:16px 0 6px">صحة النظام</h2>
     <div style="${CARD}"><p style="margin:0;color:#0f3b36;font-size:14px">أخطاء الرصد خلال 24 ساعة: <b>${r.health.errors}</b><br/>حالة الوحدات: ${escapeHtml(degraded)}</p></div>
 
@@ -185,6 +213,8 @@ export function renderWhatsAppSummary(r: DailyReport): string {
     `🧑‍⚕️ عملاء جدد: ${r.crm.newCustomers} — مزامنة Sheets: ${r.crm.syncSynced}`,
     `📦 تنبيهات مخزون: ${r.sales.safetyStockAlerts} — فواتير قيد المعالجة: ${r.sales.pendingPurchaseOrders}`,
     `📝 منشورات صحية: ${r.content.generated}`,
+    `💊 وصفات: ${r.storefront.prescriptions} — تعبئة: ${r.storefront.refills} — باقات: ${r.storefront.bundleOrders}`,
+
     `⚙️ أخطاء: ${r.health.errors}`,
   ]
   return lines.join('\n')

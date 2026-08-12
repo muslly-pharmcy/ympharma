@@ -63,6 +63,7 @@ import { Route as PlanetPlanetIdRouteImport } from './routes/planet.$planetId'
 import { Route as ProductHandleRouteImport } from './routes/product.$handle'
 import { Route as ProductProductIdRouteImport } from './routes/product.$productId'
 import { Route as ToolsIndexRouteImport } from './routes/tools.index'
+import { Route as ToolsBmiRouteImport } from './routes/tools.bmi'
 import { Route as ToolsInteractionsRouteImport } from './routes/tools.interactions'
 import { Route as ToolsPediatricDoseRouteImport } from './routes/tools.pediatric-dose'
 import { Route as ToolsScheduleRouteImport } from './routes/tools.schedule'
@@ -71,6 +72,7 @@ import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as AuthenticatedAdminKernelEvolutionRouteImport } from './routes/_authenticated/admin.kernel-evolution'
 import { Route as AuthenticatedAdminPhoenixReportRouteImport } from './routes/_authenticated/admin.phoenix-report'
+import { Route as AuthenticatedAdminPrescriptionsRouteImport } from './routes/_authenticated/admin.prescriptions'
 import { Route as AuthenticatedAdminSunCoreRouteImport } from './routes/_authenticated/admin.sun-core'
 import { Route as AuthenticatedAdminTitanosReportRouteImport } from './routes/_authenticated/admin.titanos-report'
 import { Route as AuthenticatedAnalyticsIndexRouteImport } from './routes/_authenticated/analytics.index'
@@ -391,6 +393,11 @@ const ToolsIndexRoute = ToolsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ToolsRoute,
 } as any)
+const ToolsBmiRoute = ToolsBmiRouteImport.update({
+  id: '/bmi',
+  path: '/bmi',
+  getParentRoute: () => ToolsRoute,
+} as any)
 const ToolsInteractionsRoute = ToolsInteractionsRouteImport.update({
   id: '/interactions',
   path: '/interactions',
@@ -432,6 +439,12 @@ const AuthenticatedAdminPhoenixReportRoute =
   AuthenticatedAdminPhoenixReportRouteImport.update({
     id: '/admin/phoenix-report',
     path: '/admin/phoenix-report',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminPrescriptionsRoute =
+  AuthenticatedAdminPrescriptionsRouteImport.update({
+    id: '/admin/prescriptions',
+    path: '/admin/prescriptions',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdminSunCoreRoute =
@@ -692,6 +705,7 @@ export interface FileRoutesByFullPath {
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/product/$handle': typeof ProductHandleRoute
   '/product/$productId': typeof ProductProductIdRoute
+  '/tools/bmi': typeof ToolsBmiRoute
   '/tools/interactions': typeof ToolsInteractionsRoute
   '/tools/pediatric-dose': typeof ToolsPediatricDoseRoute
   '/tools/schedule': typeof ToolsScheduleRoute
@@ -701,6 +715,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/kernel-evolution': typeof AuthenticatedAdminKernelEvolutionRoute
   '/admin/phoenix-report': typeof AuthenticatedAdminPhoenixReportRoute
+  '/admin/prescriptions': typeof AuthenticatedAdminPrescriptionsRoute
   '/admin/sun-core': typeof AuthenticatedAdminSunCoreRoute
   '/admin/titanos-report': typeof AuthenticatedAdminTitanosReportRoute
   '/campaigns/$id': typeof AuthenticatedCampaignsIdRoute
@@ -789,6 +804,7 @@ export interface FileRoutesByTo {
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/product/$handle': typeof ProductHandleRoute
   '/product/$productId': typeof ProductProductIdRoute
+  '/tools/bmi': typeof ToolsBmiRoute
   '/tools/interactions': typeof ToolsInteractionsRoute
   '/tools/pediatric-dose': typeof ToolsPediatricDoseRoute
   '/tools/schedule': typeof ToolsScheduleRoute
@@ -798,6 +814,7 @@ export interface FileRoutesByTo {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/kernel-evolution': typeof AuthenticatedAdminKernelEvolutionRoute
   '/admin/phoenix-report': typeof AuthenticatedAdminPhoenixReportRoute
+  '/admin/prescriptions': typeof AuthenticatedAdminPrescriptionsRoute
   '/admin/sun-core': typeof AuthenticatedAdminSunCoreRoute
   '/admin/titanos-report': typeof AuthenticatedAdminTitanosReportRoute
   '/campaigns/$id': typeof AuthenticatedCampaignsIdRoute
@@ -889,6 +906,7 @@ export interface FileRoutesById {
   '/planet/$planetId': typeof PlanetPlanetIdRoute
   '/product/$handle': typeof ProductHandleRoute
   '/product/$productId': typeof ProductProductIdRoute
+  '/tools/bmi': typeof ToolsBmiRoute
   '/tools/interactions': typeof ToolsInteractionsRoute
   '/tools/pediatric-dose': typeof ToolsPediatricDoseRoute
   '/tools/schedule': typeof ToolsScheduleRoute
@@ -898,6 +916,7 @@ export interface FileRoutesById {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/admin/kernel-evolution': typeof AuthenticatedAdminKernelEvolutionRoute
   '/_authenticated/admin/phoenix-report': typeof AuthenticatedAdminPhoenixReportRoute
+  '/_authenticated/admin/prescriptions': typeof AuthenticatedAdminPrescriptionsRoute
   '/_authenticated/admin/sun-core': typeof AuthenticatedAdminSunCoreRoute
   '/_authenticated/admin/titanos-report': typeof AuthenticatedAdminTitanosReportRoute
   '/_authenticated/campaigns/$id': typeof AuthenticatedCampaignsIdRoute
@@ -989,6 +1008,7 @@ export interface FileRouteTypes {
     | '/planet/$planetId'
     | '/product/$handle'
     | '/product/$productId'
+    | '/tools/bmi'
     | '/tools/interactions'
     | '/tools/pediatric-dose'
     | '/tools/schedule'
@@ -998,6 +1018,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/admin/kernel-evolution'
     | '/admin/phoenix-report'
+    | '/admin/prescriptions'
     | '/admin/sun-core'
     | '/admin/titanos-report'
     | '/campaigns/$id'
@@ -1086,6 +1107,7 @@ export interface FileRouteTypes {
     | '/planet/$planetId'
     | '/product/$handle'
     | '/product/$productId'
+    | '/tools/bmi'
     | '/tools/interactions'
     | '/tools/pediatric-dose'
     | '/tools/schedule'
@@ -1095,6 +1117,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/admin/kernel-evolution'
     | '/admin/phoenix-report'
+    | '/admin/prescriptions'
     | '/admin/sun-core'
     | '/admin/titanos-report'
     | '/campaigns/$id'
@@ -1185,6 +1208,7 @@ export interface FileRouteTypes {
     | '/planet/$planetId'
     | '/product/$handle'
     | '/product/$productId'
+    | '/tools/bmi'
     | '/tools/interactions'
     | '/tools/pediatric-dose'
     | '/tools/schedule'
@@ -1194,6 +1218,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/admin/kernel-evolution'
     | '/_authenticated/admin/phoenix-report'
+    | '/_authenticated/admin/prescriptions'
     | '/_authenticated/admin/sun-core'
     | '/_authenticated/admin/titanos-report'
     | '/_authenticated/campaigns/$id'
@@ -1651,6 +1676,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsIndexRouteImport
       parentRoute: typeof ToolsRoute
     }
+    '/tools/bmi': {
+      id: '/tools/bmi'
+      path: '/bmi'
+      fullPath: '/tools/bmi'
+      preLoaderRoute: typeof ToolsBmiRouteImport
+      parentRoute: typeof ToolsRoute
+    }
     '/tools/interactions': {
       id: '/tools/interactions'
       path: '/interactions'
@@ -1705,6 +1737,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/phoenix-report'
       fullPath: '/admin/phoenix-report'
       preLoaderRoute: typeof AuthenticatedAdminPhoenixReportRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/prescriptions': {
+      id: '/_authenticated/admin/prescriptions'
+      path: '/admin/prescriptions'
+      fullPath: '/admin/prescriptions'
+      preLoaderRoute: typeof AuthenticatedAdminPrescriptionsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/sun-core': {
@@ -2118,6 +2157,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedWarehousesRoute: typeof AuthenticatedWarehousesRoute
   AuthenticatedAdminKernelEvolutionRoute: typeof AuthenticatedAdminKernelEvolutionRoute
   AuthenticatedAdminPhoenixReportRoute: typeof AuthenticatedAdminPhoenixReportRoute
+  AuthenticatedAdminPrescriptionsRoute: typeof AuthenticatedAdminPrescriptionsRoute
   AuthenticatedAdminSunCoreRoute: typeof AuthenticatedAdminSunCoreRoute
   AuthenticatedAdminTitanosReportRoute: typeof AuthenticatedAdminTitanosReportRoute
   AuthenticatedCatalogProductIdRoute: typeof AuthenticatedCatalogProductIdRoute
@@ -2168,6 +2208,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminKernelEvolutionRoute:
     AuthenticatedAdminKernelEvolutionRoute,
   AuthenticatedAdminPhoenixReportRoute: AuthenticatedAdminPhoenixReportRoute,
+  AuthenticatedAdminPrescriptionsRoute: AuthenticatedAdminPrescriptionsRoute,
   AuthenticatedAdminSunCoreRoute: AuthenticatedAdminSunCoreRoute,
   AuthenticatedAdminTitanosReportRoute: AuthenticatedAdminTitanosReportRoute,
   AuthenticatedCatalogProductIdRoute: AuthenticatedCatalogProductIdRoute,
@@ -2190,6 +2231,7 @@ const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface ToolsRouteChildren {
+  ToolsBmiRoute: typeof ToolsBmiRoute
   ToolsInteractionsRoute: typeof ToolsInteractionsRoute
   ToolsPediatricDoseRoute: typeof ToolsPediatricDoseRoute
   ToolsScheduleRoute: typeof ToolsScheduleRoute
@@ -2198,6 +2240,7 @@ interface ToolsRouteChildren {
 }
 
 const ToolsRouteChildren: ToolsRouteChildren = {
+  ToolsBmiRoute: ToolsBmiRoute,
   ToolsInteractionsRoute: ToolsInteractionsRoute,
   ToolsPediatricDoseRoute: ToolsPediatricDoseRoute,
   ToolsScheduleRoute: ToolsScheduleRoute,

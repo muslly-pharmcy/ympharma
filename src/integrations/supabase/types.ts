@@ -1308,6 +1308,30 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_widget_events: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          meta: Json
+          session_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          meta?: Json
+          session_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          meta?: Json
+          session_id?: string | null
+        }
+        Relationships: []
+      }
       ai_world_health: {
         Row: {
           checked_at: string
@@ -12547,6 +12571,211 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      store_bundle_orders: {
+        Row: {
+          bundle_id: string | null
+          bundle_title: string | null
+          created_at: string
+          full_name: string
+          id: string
+          notes: string | null
+          phone: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          bundle_id?: string | null
+          bundle_title?: string | null
+          created_at?: string
+          full_name: string
+          id?: string
+          notes?: string | null
+          phone: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          bundle_id?: string | null
+          bundle_title?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          notes?: string | null
+          phone?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_bundle_orders_bundle_id_fkey"
+            columns: ["bundle_id"]
+            isOneToOne: false
+            referencedRelation: "store_health_bundles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      store_health_bundle_items: {
+        Row: {
+          bundle_id: string
+          created_at: string
+          id: string
+          label_ar: string
+          product_id: string | null
+          quantity: number
+          updated_at: string
+        }
+        Insert: {
+          bundle_id: string
+          created_at?: string
+          id?: string
+          label_ar: string
+          product_id?: string | null
+          quantity?: number
+          updated_at?: string
+        }
+        Update: {
+          bundle_id?: string
+          created_at?: string
+          id?: string
+          label_ar?: string
+          product_id?: string | null
+          quantity?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_health_bundle_items_bundle_id_fkey"
+            columns: ["bundle_id"]
+            isOneToOne: false
+            referencedRelation: "store_health_bundles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      store_health_bundles: {
+        Row: {
+          bundle_price: number | null
+          created_at: string
+          description_ar: string | null
+          discount_label: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          slug: string
+          sort_order: number
+          title_ar: string
+          updated_at: string
+        }
+        Insert: {
+          bundle_price?: number | null
+          created_at?: string
+          description_ar?: string | null
+          discount_label?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          slug: string
+          sort_order?: number
+          title_ar: string
+          updated_at?: string
+        }
+        Update: {
+          bundle_price?: number | null
+          created_at?: string
+          description_ar?: string | null
+          discount_label?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          slug?: string
+          sort_order?: number
+          title_ar?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      store_prescription_uploads: {
+        Row: {
+          created_at: string
+          file_name: string | null
+          file_path: string | null
+          full_name: string
+          handled_by: string | null
+          id: string
+          notes: string | null
+          phone: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          file_name?: string | null
+          file_path?: string | null
+          full_name: string
+          handled_by?: string | null
+          id?: string
+          notes?: string | null
+          phone: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string | null
+          file_path?: string | null
+          full_name?: string
+          handled_by?: string | null
+          id?: string
+          notes?: string | null
+          phone?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      store_refill_subscriptions: {
+        Row: {
+          condition_tag: string | null
+          created_at: string
+          full_name: string
+          id: string
+          interval_days: number
+          next_reminder_at: string
+          phone: string
+          product_id: string | null
+          product_name: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          condition_tag?: string | null
+          created_at?: string
+          full_name: string
+          id?: string
+          interval_days?: number
+          next_reminder_at?: string
+          phone: string
+          product_id?: string | null
+          product_name?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          condition_tag?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          interval_days?: number
+          next_reminder_at?: string
+          phone?: string
+          product_id?: string | null
+          product_name?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       sun_decisions: {
         Row: {

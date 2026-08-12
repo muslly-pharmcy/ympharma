@@ -16,7 +16,10 @@ import {
 import { listProducts, listCategories } from '@/lib/catalog.functions'
 import { useDebounce } from '@/shared/hooks/useDebounce'
 import { OnboardingDocModal } from '@/components/store/OnboardingDocModal'
+import { HealthBundles } from '@/components/store/HealthBundles'
+import { PrescriptionUploadModal } from '@/components/store/PrescriptionUploadModal'
 import { Skeleton } from '@/components/skeletons/Skeleton'
+
 
 const TRUST = [
   { icon: ShieldCheck, title: 'أدوية أصلية', body: 'مصادر معتمدة وتخزين وفق المعايير الدوائية.' },
@@ -26,7 +29,9 @@ const TRUST = [
 
 export default function Storefront() {
   const [rawSearch, setRawSearch] = useState('')
+  const [rxOpen, setRxOpen] = useState(false)
   const [categoryId, setCategoryId] = useState<string | undefined>(undefined)
+
   const search = useDebounce(rawSearch, 300)
 
   const productsFn = useServerFn(listProducts)
@@ -65,6 +70,8 @@ export default function Storefront() {
   return (
     <div dir="rtl" className="min-h-screen">
       <OnboardingDocModal />
+      <PrescriptionUploadModal open={rxOpen} onClose={() => setRxOpen(false)} />
+
 
       {/* Hero */}
       <section className="relative overflow-hidden px-4 pb-10 pt-10 sm:px-6 lg:px-8">
@@ -117,7 +124,14 @@ export default function Storefront() {
               >
                 الأدوات الصحية
               </Link>
+              <button
+                onClick={() => setRxOpen(true)}
+                className="press-scale rounded-2xl border border-primary/30 bg-primary/5 px-5 py-2.5 text-sm font-bold text-primary"
+              >
+                رفع الوصفة الطبية
+              </button>
             </div>
+
           </motion.div>
 
           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -141,6 +155,10 @@ export default function Storefront() {
           </div>
         </div>
       </section>
+
+      <HealthBundles />
+
+
 
       {/* Categories */}
       {categories.length > 0 && (
