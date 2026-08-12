@@ -16,7 +16,10 @@ import {
 import { listProducts, listCategories } from '@/lib/catalog.functions'
 import { useDebounce } from '@/shared/hooks/useDebounce'
 import { OnboardingDocModal } from '@/components/store/OnboardingDocModal'
+import { HealthBundles } from '@/components/store/HealthBundles'
+import { PrescriptionUploadModal } from '@/components/store/PrescriptionUploadModal'
 import { Skeleton } from '@/components/skeletons/Skeleton'
+
 
 const TRUST = [
   { icon: ShieldCheck, title: 'أدوية أصلية', body: 'مصادر معتمدة وتخزين وفق المعايير الدوائية.' },
