@@ -187,6 +187,16 @@ export function renderReportHtml(r: DailyReport): string {
     <h2 style="font-size:15px;color:#0f3b36;margin:16px 0 6px">المحتوى الصحي</h2>
     <div style="${CARD}"><p style="margin:0;color:#0f3b36;font-size:14px">تم توليد ${r.content.generated} منشوراً — نُشر ${r.content.published}، بانتظار النشر ${r.content.pending}.</p></div>
 
+    <h2 style="font-size:15px;color:#0f3b36;margin:16px 0 6px">طلبات المتجر</h2>
+    <table width="100%" cellspacing="0" cellpadding="0"><tr>
+      ${metric('وصفات مرفوعة', String(r.storefront.prescriptions))}
+      ${metric('تذكيرات تعبئة', String(r.storefront.refills))}
+    </tr><tr>
+      ${metric('طلبات باقات', String(r.storefront.bundleOrders))}
+      ${metric('رسائل المساعد الذكي', String(r.storefront.assistantMessages))}
+    </tr></table>
+
+
     <h2 style="font-size:15px;color:#0f3b36;margin:16px 0 6px">صحة النظام</h2>
     <div style="${CARD}"><p style="margin:0;color:#0f3b36;font-size:14px">أخطاء الرصد خلال 24 ساعة: <b>${r.health.errors}</b><br/>حالة الوحدات: ${escapeHtml(degraded)}</p></div>
 
