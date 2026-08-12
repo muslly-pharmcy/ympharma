@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 
@@ -34,6 +34,16 @@ function Molecules({ count }: { count: number }) {
   const dummy = useMemo(() => new THREE.Object3D(), [])
   const target = useRef({ x: 0, y: 0 })
 
+  // canvas is pointer-events:none, so track the pointer on window instead
+  useEffect(() => {
+    const onMove = (e: PointerEvent) => {
+      target.current.x = (e.clientX / window.innerWidth - 0.5) * 0.56
+      target.current.y = (e.clientY / window.innerHeight - 0.5) * 0.36
+    }
+    window.addEventListener('pointermove', onMove, { passive: true })
+    return () => window.removeEventListener('pointermove', onMove)
+  }, [])
+
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime
     const mesh = pointsRef.current
@@ -53,8 +63,6 @@ function Molecules({ count }: { count: number }) {
       mesh.instanceMatrix.needsUpdate = true
     }
 
-    target.current.x = state.pointer.x * 0.28
-    target.current.y = state.pointer.y * 0.18
     const g = groupRef.current
     if (g) {
       const k = Math.min(1, delta * 2.2)
