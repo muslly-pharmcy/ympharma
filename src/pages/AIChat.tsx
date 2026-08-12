@@ -32,7 +32,12 @@ export default function AIChat() {
     },
   ])
   const [input, setInput] = useState('')
+  const voice = useSpeechRecognition({
+    lang: 'ar-SA',
+    onResult: (text) => setInput((prev) => (prev ? `${prev} ${text}` : text)),
+  })
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
