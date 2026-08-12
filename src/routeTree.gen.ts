@@ -61,6 +61,7 @@ import { Route as ProductHandleRouteImport } from './routes/product.$handle'
 import { Route as ProductProductIdRouteImport } from './routes/product.$productId'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as AuthenticatedAdminKernelEvolutionRouteImport } from './routes/_authenticated/admin.kernel-evolution'
 import { Route as AuthenticatedAdminPhoenixReportRouteImport } from './routes/_authenticated/admin.phoenix-report'
 import { Route as AuthenticatedAdminTitanosReportRouteImport } from './routes/_authenticated/admin.titanos-report'
 import { Route as AuthenticatedAnalyticsIndexRouteImport } from './routes/_authenticated/analytics.index'
@@ -367,6 +368,12 @@ const Char91DotmcpChar93InvokeToolToolRoute =
     path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedAdminKernelEvolutionRoute =
+  AuthenticatedAdminKernelEvolutionRouteImport.update({
+    id: '/admin/kernel-evolution',
+    path: '/admin/kernel-evolution',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminPhoenixReportRoute =
   AuthenticatedAdminPhoenixReportRouteImport.update({
     id: '/admin/phoenix-report',
@@ -595,6 +602,7 @@ export interface FileRoutesByFullPath {
   '/product/$productId': typeof ProductProductIdRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/admin/kernel-evolution': typeof AuthenticatedAdminKernelEvolutionRoute
   '/admin/phoenix-report': typeof AuthenticatedAdminPhoenixReportRoute
   '/admin/titanos-report': typeof AuthenticatedAdminTitanosReportRoute
   '/campaigns/$id': typeof AuthenticatedCampaignsIdRoute
@@ -678,6 +686,7 @@ export interface FileRoutesByTo {
   '/product/$productId': typeof ProductProductIdRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/admin/kernel-evolution': typeof AuthenticatedAdminKernelEvolutionRoute
   '/admin/phoenix-report': typeof AuthenticatedAdminPhoenixReportRoute
   '/admin/titanos-report': typeof AuthenticatedAdminTitanosReportRoute
   '/campaigns/$id': typeof AuthenticatedCampaignsIdRoute
@@ -763,6 +772,7 @@ export interface FileRoutesById {
   '/product/$productId': typeof ProductProductIdRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/_authenticated/admin/kernel-evolution': typeof AuthenticatedAdminKernelEvolutionRoute
   '/_authenticated/admin/phoenix-report': typeof AuthenticatedAdminPhoenixReportRoute
   '/_authenticated/admin/titanos-report': typeof AuthenticatedAdminTitanosReportRoute
   '/_authenticated/campaigns/$id': typeof AuthenticatedCampaignsIdRoute
@@ -848,6 +858,7 @@ export interface FileRouteTypes {
     | '/product/$productId'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/admin/kernel-evolution'
     | '/admin/phoenix-report'
     | '/admin/titanos-report'
     | '/campaigns/$id'
@@ -931,6 +942,7 @@ export interface FileRouteTypes {
     | '/product/$productId'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/admin/kernel-evolution'
     | '/admin/phoenix-report'
     | '/admin/titanos-report'
     | '/campaigns/$id'
@@ -1015,6 +1027,7 @@ export interface FileRouteTypes {
     | '/product/$productId'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/_authenticated/admin/kernel-evolution'
     | '/_authenticated/admin/phoenix-report'
     | '/_authenticated/admin/titanos-report'
     | '/_authenticated/campaigns/$id'
@@ -1445,6 +1458,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/kernel-evolution': {
+      id: '/_authenticated/admin/kernel-evolution'
+      path: '/admin/kernel-evolution'
+      fullPath: '/admin/kernel-evolution'
+      preLoaderRoute: typeof AuthenticatedAdminKernelEvolutionRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/phoenix-report': {
       id: '/_authenticated/admin/phoenix-report'
       path: '/admin/phoenix-report'
@@ -1819,6 +1839,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSuppliersRoute: typeof AuthenticatedSuppliersRoute
   AuthenticatedVisionLabRoute: typeof AuthenticatedVisionLabRoute
   AuthenticatedWarehousesRoute: typeof AuthenticatedWarehousesRoute
+  AuthenticatedAdminKernelEvolutionRoute: typeof AuthenticatedAdminKernelEvolutionRoute
   AuthenticatedAdminPhoenixReportRoute: typeof AuthenticatedAdminPhoenixReportRoute
   AuthenticatedAdminTitanosReportRoute: typeof AuthenticatedAdminTitanosReportRoute
   AuthenticatedCatalogProductIdRoute: typeof AuthenticatedCatalogProductIdRoute
@@ -1866,6 +1887,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSuppliersRoute: AuthenticatedSuppliersRoute,
   AuthenticatedVisionLabRoute: AuthenticatedVisionLabRoute,
   AuthenticatedWarehousesRoute: AuthenticatedWarehousesRoute,
+  AuthenticatedAdminKernelEvolutionRoute:
+    AuthenticatedAdminKernelEvolutionRoute,
   AuthenticatedAdminPhoenixReportRoute: AuthenticatedAdminPhoenixReportRoute,
   AuthenticatedAdminTitanosReportRoute: AuthenticatedAdminTitanosReportRoute,
   AuthenticatedCatalogProductIdRoute: AuthenticatedCatalogProductIdRoute,
