@@ -83,10 +83,10 @@ export async function buildDailyReport(): Promise<DailyReport> {
   const sales = await safe(async () => {
     const { data: orders } = await supabaseAdmin
       .from('orders')
-      .select('total_amount, created_at')
+      .select('total, created_at')
       .gte('created_at', fromIso)
       .limit(5000)
-    const revenue = (orders ?? []).reduce((s, o) => s + Number(o.total_amount ?? 0), 0)
+    const revenue = (orders ?? []).reduce((s, o) => s + Number(o.total ?? 0), 0)
     const [po, alerts] = await Promise.all([
       supabaseAdmin.from('invoice_uploads').select('id', { count: 'exact', head: true }).in('status', ['uploaded', 'extracting', 'extracted']),
       supabaseAdmin.from('inv_reorder_suggestions').select('id', { count: 'exact', head: true }).gte('created_at', fromIso),
