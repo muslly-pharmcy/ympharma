@@ -95,7 +95,11 @@ function luhnCheck(digits: string): boolean {
 }
 
 /**
- * Redact PII from text
+ * Redact PII from text.
+ *
+ * Two passes: the structural patterns above, then the shared high-confidence
+ * text patterns (patient names, MRNs, Rx codes, bearer tokens) used by the
+ * server logger, so AI prompts and logs never drift apart.
  */
 export function redactPII(text: string, replacement = '[REDACTED]'): string {
   const detections = detectPII(text);
@@ -107,13 +111,14 @@ export function redactPII(text: string, replacement = '[REDACTED]'): string {
     result = before + replacement + after;
   }
 
-  return result;
+  return redactText(result);
 }
 
 /**
  * Alias for sanitizeForAI
  */
 export const sanitizeForAI = redactPII;
+
 
 /**
  * Check if text contains any PII
