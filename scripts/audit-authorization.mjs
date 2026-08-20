@@ -58,7 +58,7 @@ function classify(file) {
     const usesAdmin = /\bsupabaseAdmin\b|client\.server/.test(body)
     const usesAnonPublishable = /supabase-public\.server|createPublishableClient|SUPABASE_PUBLISHABLE_KEY/.test(body)
 
-    let dataMode = 'unknown'
+    let dataMode
     if (usesContextSb && !usesAdmin) dataMode = 'rls'
     else if (usesAdmin && !usesContextSb) dataMode = 'admin-bypass'
     else if (usesAdmin && usesContextSb) dataMode = 'mixed'

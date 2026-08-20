@@ -23,7 +23,7 @@ export const listPharmacyProducts = createServerFn({ method: 'GET' })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => z.object({ search: z.string().trim().max(80).default('') }).parse(raw ?? {}))
   .handler(async ({ data, context }): Promise<{ items: ModuleProduct[]; warning: string | null }> => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const sb = context.supabase as any
     let q = sb.from('products').select(sel('id, name, name_ar, price, stock, min_stock, barcode, is_active')).eq('is_active', true).limit(50)
     if (data.search) {
@@ -60,7 +60,7 @@ export interface ModulePatient {
 export const listModulePatients = createServerFn({ method: 'GET' })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<{ items: ModulePatient[]; warning: string | null }> => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const sb = context.supabase as any
     const { data, error } = await sb
       .from('hc_patients')
@@ -99,7 +99,7 @@ export const listModuleDoctors = createServerFn({ method: 'GET' })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => z.object({ specialty: z.string().trim().max(80).default('all') }).parse(raw ?? {}))
   .handler(async ({ data, context }): Promise<{ items: ModuleDoctor[]; warning: string | null }> => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const sb = context.supabase as any
     // NOTE: `phone_e164` is intentionally excluded — column-level grants on
     // hc_doctors REVOKE SELECT on phone/qr_token from anon+authenticated. Public
@@ -141,7 +141,7 @@ export const listModuleDeliveries = createServerFn({ method: 'GET' })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => z.object({ status: z.enum(['all', 'assigned', 'in_transit', 'delivered']).default('all') }).parse(raw ?? {}))
   .handler(async ({ data, context }): Promise<{ items: ModuleDelivery[]; warning: string | null }> => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const sb = context.supabase as any
     // No `deliveries` table in current schema — synthesize from `orders`.
     let q = sb.from('orders').select(sel('id, status, notes, created_at')).order('created_at', { ascending: false }).limit(50)
@@ -173,7 +173,7 @@ export interface ModuleTransaction {
 export const listModuleTransactions = createServerFn({ method: 'GET' })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<{ items: ModuleTransaction[]; warning: string | null }> => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const sb = context.supabase as any
     const { data, error } = await sb
       .from('billing_ledger')

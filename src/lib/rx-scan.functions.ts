@@ -66,7 +66,7 @@ export const scanPrescriptionImage = createServerFn({ method: 'POST' })
         ? 'حلّل تقرير المختبر في الصورة: استخرج كل مؤشر مع قيمته وحالته (طبيعي/مرتفع/منخفض) ولخّصها للمريض.'
         : 'اقرأ الوصفة الطبية في الصورة: استخرج أسماء الأدوية وتراكيزها وطريقة الاستخدام والمدة، ثم لخّصها للمريض.'
 
-    let scan: PrescriptionScan | null = null
+    let scan: PrescriptionScan | null
     try {
       const result = await callVision({
         systemPrompt,

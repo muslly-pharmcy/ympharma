@@ -29,7 +29,7 @@ async function resolveRule(
   rule: SegmentRule,
   orgId: string,
   now: Date,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   sb: any,
 ): Promise<Set<string>> {
   const iso = (d: Date) => d.toISOString()
@@ -124,7 +124,7 @@ async function resolveRule(
 
 export async function evaluateSegment(opts: EvalOptions): Promise<string[]> {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const sb: any = supabaseAdmin as any
   const now = opts.now ?? new Date()
 

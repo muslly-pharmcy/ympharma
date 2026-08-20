@@ -7,7 +7,7 @@ import type {
   InsuranceClaimStatusHistory, InsuranceAuthorization,
 } from '@/domain/insurance/schemas'
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 type AnyDB = { from: (t: string) => any; rpc: (n: string, a?: unknown) => any }
 
 async function db(): Promise<AnyDB> {

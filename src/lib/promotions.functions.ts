@@ -8,7 +8,7 @@ import type {
 export const listPromotions = createServerFn({ method: 'GET' })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const sb: any = context.supabase
     const { data, error } = await sb.from('crm_promotions').select('*')
       .order('priority', { ascending: true })
@@ -25,7 +25,7 @@ export const getPromotion = createServerFn({ method: 'GET' })
     return { id: d.id }
   })
   .handler(async ({ data, context }) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const sb: any = context.supabase
     const [{ data: p }, { data: targets }, { data: eligibility }, { data: redemptions }] = await Promise.all([
       sb.from('crm_promotions').select('*').eq('id', data.id).maybeSingle(),
@@ -46,7 +46,7 @@ export const getPromotion = createServerFn({ method: 'GET' })
 export const listCoupons = createServerFn({ method: 'GET' })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const sb: any = context.supabase
     const [{ data: coupons }, { data: codes }] = await Promise.all([
       sb.from('crm_coupons').select('*').order('created_at', { ascending: false }),
@@ -63,7 +63,7 @@ export const previewPromotion = createServerFn({ method: 'POST' })
   .inputValidator((raw: unknown): PreviewPromotionInput => previewPromotionInput.parse(raw))
   .handler(async ({ data, context }) => {
     const { evaluatePromotions } = await import('./promotions/engine.server')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const sb: any = context.supabase
     let promoQuery = sb.from('crm_promotions').select('*').eq('status', 'active')
     if (data.promotion_id) promoQuery = promoQuery.eq('id', data.promotion_id)

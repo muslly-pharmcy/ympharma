@@ -1,20 +1,35 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import { FileUp, Loader2, CheckCircle2, XCircle, Download } from 'lucide-react'
-type XLSXModule = typeof import('xlsx')
-let _xlsx: XLSXModule | null = null
-const loadXLSX = async (): Promise<XLSXModule> => {
-  if (!_xlsx) _xlsx = await import('xlsx')
-  return _xlsx
-}
+import { CheckCircle2, Download, FileUp, Loader2, XCircle } from 'lucide-react'
 import { bulkImportExcel, type ExcelProductRow } from '@/lib/excel-import.functions'
+
+type SpreadsheetCell = string | number | boolean | Date | null
+type ReadExcelFileModule = typeof import('read-excel-file/browser')
+let readExcelFile: ReadExcelFileModule['default'] | null = null
+
+const TEMPLATE_COLUMNS = [
+  'store_code',
+  'name_ar',
+  'name_en',
+  'brand',
+  'manufacturer',
+  'barcode',
+  'strength',
+  'dosage_form',
+  'price',
+  'qty',
+  'category_slug',
+] as const
 
 export const Route = createFileRoute('/_authenticated/admin-excel-import')({
   head: () => ({
     meta: [
-      { title: 'استيراد Excel — لوحة التحكم' },
-      { name: 'description', content: 'رفع ملف Excel لتحديث الأصناف والأسعار والمخزون.' },
+      { title: 'استيراد Excel - لوحة التحكم' },
+      {
+        name: 'description',
+        content: 'رفع ملف Excel أو CSV لتحديث الأصناف والأسعار والمخزون.',
+      },
     ],
   }),
   component: AdminExcelImport,
@@ -26,24 +41,77 @@ export const Route = createFileRoute('/_authenticated/admin-excel-import')({
 
 type Result = Awaited<ReturnType<typeof bulkImportExcel>>
 
-// Try to map various common Arabic/English column names to our canonical fields.
+async function loadReadExcelFile(): Promise<ReadExcelFileModule['default']> {
+  if (!readExcelFile) {
+    const mod = await import('read-excel-file/browser')
+    readExcelFile = mod.default
+  }
+  return readExcelFile
+}
+
+function rowsToRecords(rows: SpreadsheetCell[][]): Record<string, unknown>[] {
+  const [headerRow, ...bodyRows] = rows
+  if (!headerRow) return []
+  const headers = headerRow.map((cell) => String(cell ?? '').trim())
+  return bodyRows.map((row) => {
+    const record: Record<string, unknown> = {}
+    headers.forEach((header, index) => {
+      if (header) record[header] = row[index] ?? ''
+    })
+    return record
+  })
+}
+
+function parseCsv(text: string): Record<string, unknown>[] {
+  const rows: string[][] = []
+  let row: string[] = []
+  let cell = ''
+  let quoted = false
+
+  for (let index = 0; index < text.length; index++) {
+    const char = text[index]
+    const next = text[index + 1]
+    if (char === '"' && quoted && next === '"') {
+      cell += '"'
+      index++
+    } else if (char === '"') {
+      quoted = !quoted
+    } else if (char === ',' && !quoted) {
+      row.push(cell)
+      cell = ''
+    } else if ((char === '\n' || char === '\r') && !quoted) {
+      if (char === '\r' && next === '\n') index++
+      row.push(cell)
+      if (row.some((value) => value.trim() !== '')) rows.push(row)
+      row = []
+      cell = ''
+    } else {
+      cell += char
+    }
+  }
+
+  row.push(cell)
+  if (row.some((value) => value.trim() !== '')) rows.push(row)
+  return rowsToRecords(rows)
+}
+
 function normalizeRow(raw: Record<string, unknown>): ExcelProductRow | null {
   const pick = (...keys: string[]): string | undefined => {
-    for (const k of keys) {
-      for (const rk of Object.keys(raw)) {
-        if (rk.trim().toLowerCase() === k.toLowerCase()) {
-          const v = raw[rk]
-          if (v === null || v === undefined || v === '') continue
-          return String(v).trim()
+    for (const key of keys) {
+      for (const rawKey of Object.keys(raw)) {
+        if (rawKey.trim().toLowerCase() === key.toLowerCase()) {
+          const value = raw[rawKey]
+          if (value === null || value === undefined || value === '') continue
+          return String(value).trim()
         }
       }
     }
     return undefined
   }
-  const num = (v: string | undefined) => {
-    if (!v) return null
-    const n = Number(v.replace(/[,،\s]/g, ''))
-    return Number.isFinite(n) ? n : null
+  const num = (value: string | undefined) => {
+    if (!value) return null
+    const parsed = Number(value.replace(/[,،\s]/g, ''))
+    return Number.isFinite(parsed) ? parsed : null
   }
 
   const name_ar = pick('name_ar', 'الاسم', 'اسم الصنف', 'الصنف', 'name', 'product', 'product_name')
@@ -66,6 +134,43 @@ function normalizeRow(raw: Record<string, unknown>): ExcelProductRow | null {
   }
 }
 
+async function parseSpreadsheet(file: File): Promise<Record<string, unknown>[]> {
+  if (file.name.toLowerCase().endsWith('.csv')) {
+    return parseCsv(await file.text())
+  }
+  const read = await loadReadExcelFile()
+  return rowsToRecords((await read(file)) as unknown as SpreadsheetCell[][])
+}
+
+function downloadCsvTemplate() {
+  const values = [
+    TEMPLATE_COLUMNS,
+    [
+      'DEMO-001',
+      'باراسيتامول 500 ملغ',
+      'Paracetamol 500mg',
+      'Panadol',
+      'GSK',
+      '6221234567890',
+      '500mg',
+      'قرص',
+      '250',
+      '100',
+      'pain-fever',
+    ],
+  ]
+  const csv = values
+    .map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(','))
+    .join('\r\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'product-import-template.csv'
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
 function AdminExcelImport() {
   const [rows, setRows] = useState<ExcelProductRow[]>([])
   const [fileName, setFileName] = useState<string | null>(null)
@@ -73,8 +178,7 @@ function AdminExcelImport() {
   const [result, setResult] = useState<Result | null>(null)
 
   const importMut = useMutation({
-    mutationFn: (payload: ExcelProductRow[]) =>
-      bulkImportExcel({ data: { rows: payload } }),
+    mutationFn: (payload: ExcelProductRow[]) => bulkImportExcel({ data: { rows: payload } }),
     onSuccess: setResult,
   })
 
@@ -83,53 +187,28 @@ function AdminExcelImport() {
     setResult(null)
     setFileName(file.name)
     try {
-      const XLSX = await loadXLSX()
-      const buf = await file.arrayBuffer()
-      const wb = XLSX.read(buf, { type: 'array' })
-      const sheet = wb.Sheets[wb.SheetNames[0]]
-      const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: '' })
       const mapped: ExcelProductRow[] = []
       let skipped = 0
-      for (const r of json) {
-        const n = normalizeRow(r)
-        if (n) mapped.push(n)
+      for (const rawRow of await parseSpreadsheet(file)) {
+        const row = normalizeRow(rawRow)
+        if (row) mapped.push(row)
         else skipped++
       }
       setRows(mapped)
-      if (mapped.length === 0) setParseError(`لم يتم التعرف على أي صف صالح (${skipped} صف مُتجاهل)`)
-    } catch (e) {
-      setParseError((e as Error).message)
+      if (mapped.length === 0) {
+        setParseError(`لم يتم التعرف على أي صف صالح (${skipped} صف متجاهل)`)
+      }
+    } catch (error) {
+      setParseError((error as Error).message)
     }
-  }
-
-  const downloadTemplate = async () => {
-    const XLSX = await loadXLSX()
-    const ws = XLSX.utils.json_to_sheet([
-      {
-        store_code: 'DEMO-001',
-        name_ar: 'باراسيتامول 500 ملغ',
-        name_en: 'Paracetamol 500mg',
-        brand: 'Panadol',
-        manufacturer: 'GSK',
-        barcode: '6221234567890',
-        strength: '500mg',
-        dosage_form: 'قرص',
-        price: 250,
-        qty: 100,
-        category_slug: 'pain-fever',
-      },
-    ])
-    const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, 'products')
-    XLSX.writeFile(wb, 'excel-template.xlsx')
   }
 
   return (
     <div dir="rtl" className="mx-auto max-w-5xl space-y-6 p-6 pt-24">
       <header className="space-y-2">
-        <h1 className="text-3xl font-bold text-gray-900">استيراد Excel للأصناف والمخزون</h1>
+        <h1 className="text-3xl font-bold text-gray-900">استيراد الأصناف والمخزون</h1>
         <p className="text-sm text-gray-600">
-          ارفع ملف Excel لتحديث/إضافة الأصناف مع الأسعار والكميات. الأعمدة المدعومة:
+          ارفع ملف Excel أو CSV لتحديث الأصناف مع الأسعار والكميات. الأعمدة المدعومة:
           <code className="mx-1 rounded bg-gray-100 px-1 text-xs">
             store_code, name_ar, name_en, brand, manufacturer, barcode, strength, dosage_form,
             price, qty, category_slug
@@ -140,24 +219,24 @@ function AdminExcelImport() {
       <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90">
           <FileUp className="h-4 w-4" />
-          اختر ملف .xlsx / .xls
+          اختر ملف .xlsx / .csv
           <input
             type="file"
             className="hidden"
-            accept=".xlsx,.xls,.csv"
-            onChange={(e) => {
-              const f = e.target.files?.[0]
-              if (f) void onFile(f)
+            accept=".xlsx,.csv"
+            onChange={(event) => {
+              const file = event.target.files?.[0]
+              if (file) void onFile(file)
             }}
           />
         </label>
         <button
-          onClick={downloadTemplate}
+          onClick={downloadCsvTemplate}
           className="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
         >
-          <Download className="h-4 w-4" /> حمّل قالب نموذجي
+          <Download className="h-4 w-4" /> حمل قالب CSV
         </button>
-        {fileName && <span className="text-sm text-gray-500">📄 {fileName}</span>}
+        {fileName && <span className="text-sm text-gray-500">ملف: {fileName}</span>}
       </div>
 
       {parseError && (
@@ -180,7 +259,7 @@ function AdminExcelImport() {
             >
               {importMut.isPending ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" /> جارٍ الاستيراد…
+                  <Loader2 className="h-4 w-4 animate-spin" /> جار الاستيراد...
                 </>
               ) : (
                 <>
@@ -202,20 +281,20 @@ function AdminExcelImport() {
                 </tr>
               </thead>
               <tbody>
-                {rows.slice(0, 20).map((r, i) => (
-                  <tr key={i} className="border-t border-gray-100">
-                    <td className="p-3 font-mono text-xs">{r.store_code}</td>
-                    <td className="p-3">{r.name_ar}</td>
-                    <td className="p-3">{r.brand ?? '—'}</td>
-                    <td className="p-3">{r.price ?? '—'}</td>
-                    <td className="p-3">{r.qty ?? '—'}</td>
+                {rows.slice(0, 20).map((row, index) => (
+                  <tr key={index} className="border-t border-gray-100">
+                    <td className="p-3 font-mono text-xs">{row.store_code}</td>
+                    <td className="p-3">{row.name_ar}</td>
+                    <td className="p-3">{row.brand ?? '-'}</td>
+                    <td className="p-3">{row.price ?? '-'}</td>
+                    <td className="p-3">{row.qty ?? '-'}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
             {rows.length > 20 && (
               <p className="p-3 text-center text-xs text-gray-500">
-                … {(rows.length - 20).toLocaleString('ar-EG')} صف إضافي
+                ... {(rows.length - 20).toLocaleString('ar-EG')} صف إضافي
               </p>
             )}
           </div>
@@ -231,20 +310,20 @@ function AdminExcelImport() {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Stat label="إجمالي" value={result.total} />
             <Stat label="مضاف جديد" value={result.inserted} />
-            <Stat label="محدّث" value={result.updated} />
+            <Stat label="محدث" value={result.updated} />
             <Stat label="فشل" value={result.skipped} />
           </div>
           {result.errors.length > 0 && (
             <details className="rounded-xl bg-white p-4">
               <summary className="cursor-pointer text-sm font-semibold text-red-700">
-                {result.errors.length} خطأ — عرض التفاصيل
+                {result.errors.length} خطأ - عرض التفاصيل
               </summary>
               <ul className="mt-2 space-y-1 text-xs text-gray-700">
-                {result.errors.map((e, i) => (
-                  <li key={i} className="flex items-start gap-2">
+                {result.errors.map((error, index) => (
+                  <li key={index} className="flex items-start gap-2">
                     <XCircle className="mt-0.5 h-3 w-3 shrink-0 text-red-500" />
                     <span>
-                      <b>{e.store_code}</b>: {e.error}
+                      <b>{error.store_code}</b>: {error.error}
                     </span>
                   </li>
                 ))}

@@ -68,7 +68,7 @@ export const Route = createFileRoute('/api/public/hooks/dlq-reprocessor')({
 
         const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
 
-        let rows: DlqRow[] = []
+        let rows: DlqRow[]
         if (body.dlqId) {
           const { data, error } = await supabaseAdmin
             .from('agent_events_dlq')

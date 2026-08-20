@@ -76,7 +76,7 @@ async function persistEvents(envelope: WhatsAppEnvelope, correlationId: string):
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
     // `message_id` is a UNIQUE constraint → idempotency for Meta re-deliveries.
     const { data, error } = await supabaseAdmin
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       .from('whatsapp_events' as any)
       .upsert(rows, { onConflict: 'message_id', ignoreDuplicates: true })
       .select('id')
@@ -130,7 +130,7 @@ export const Route = createFileRoute('/api/public/hooks/whatsapp')({
           console.warn('[whatsapp] bad signature', { correlationId })
           return new Response('invalid signature', { status: 401 })
         }
-        let envelope: WhatsAppEnvelope = {}
+        let envelope: WhatsAppEnvelope
         try { envelope = JSON.parse(raw) as WhatsAppEnvelope } catch {
           console.warn('[whatsapp] bad json', { correlationId })
           return new Response('ok', { status: 200 })
