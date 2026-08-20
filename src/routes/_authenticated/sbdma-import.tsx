@@ -76,7 +76,7 @@ function SbdmaImportPage() {
         if (!Array.isArray(parsed)) throw new Error('JSON must be an array')
         rows = parsed as SbdmaInputRow[]
       } catch (e) {
-        throw new Error(`JSON غير صالح: ${e instanceof Error ? e.message : String(e)}`)
+        throw Object.assign(new Error(`JSON غير صالح: ${e instanceof Error ? e.message : String(e)}`), { cause: e })
       }
       return analyzeSbdmaImport({ data: { source_name: source, rows } })
     },

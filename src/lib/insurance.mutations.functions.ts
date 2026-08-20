@@ -12,7 +12,7 @@ import {
 } from '@/domain/insurance/commands'
 import { canTransitionClaim, type ClaimStatus } from '@/domain/insurance/schemas'
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 type AnyDB = { from: (t: string) => any; rpc: (n: string, a?: unknown) => any }
 
 async function loadDeps() {

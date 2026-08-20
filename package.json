@@ -140,7 +140,8 @@
     "vitest": "^4.1.10"
   },
   "overrides": {
-    "htmlparser2": "^10.1.0"
+    "htmlparser2": "^10.1.0",
+    "esbuild": "0.28.1"
   },
   "resolutions": {
     "htmlparser2": "^10.1.0"

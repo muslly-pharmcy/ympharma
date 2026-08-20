@@ -18,7 +18,7 @@ export const listCustomers = createServerFn({ method: 'GET' })
     const actor = await getActor()
     requirePermission(actor, 'customer.read')
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     let q: any = (supabaseAdmin as any)
       .from('crm_customers')
       .select(sel('*'))
@@ -57,7 +57,7 @@ export const getCustomer = createServerFn({ method: 'GET' })
     const actor = await getActor()
     requirePermission(actor, 'customer.read')
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const sb: any = supabaseAdmin as any
     const { data: c, error } = await sb
       .from('crm_customers')
