@@ -4,11 +4,15 @@
  * with a clear message instead of a cryptic client-side throw.
  */
 
-const SERVER_VARS = ['SUPABASE_URL', 'SUPABASE_PUBLISHABLE_KEY'] as const
-const CLIENT_VARS = ['VITE_SUPABASE_URL', 'VITE_SUPABASE_PUBLISHABLE_KEY'] as const
+const REQUIRED_GROUPS = [
+  ['SUPABASE_URL', 'VITE_SUPABASE_URL'],
+  ['SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_ANON_KEY', 'VITE_SUPABASE_PUBLISHABLE_KEY', 'VITE_SUPABASE_ANON_KEY'],
+] as const
 
-function missing(vars: readonly string[]): string[] {
-  return vars.filter((v) => !process.env[v])
+function missingGroups(groups: typeof REQUIRED_GROUPS): string[] {
+  return groups
+    .filter((group) => !group.some((name) => process.env[name]))
+    .map((group) => group.join(' or '))
 }
 
 export function validateCloudEnv(): void {
@@ -18,18 +22,10 @@ export function validateCloudEnv(): void {
     return
   }
 
-  const serverMissing = missing(SERVER_VARS)
-  const clientMissing = missing(CLIENT_VARS)
+  const missing = missingGroups(REQUIRED_GROUPS)
 
-  if (serverMissing.length > 0 || clientMissing.length > 0) {
-    const parts: string[] = []
-    if (serverMissing.length > 0) {
-      parts.push(`server env missing: ${serverMissing.join(', ')}`)
-    }
-    if (clientMissing.length > 0) {
-      parts.push(`client env missing: ${clientMissing.join(', ')}`)
-    }
-    const message = `Lovable Cloud configuration incomplete — ${parts.join('; ')}. Ensure Lovable Cloud is enabled and environment variables are loaded.`
+  if (missing.length > 0) {
+    const message = `Lovable Cloud configuration incomplete — missing ${missing.join('; ')}. Ensure Lovable Cloud is enabled and environment variables are loaded.`
     console.error(`[env-check] ${message}`)
     // Do not throw during dev HMR reloads; the error is logged loudly and
     // the Supabase client will still throw its own message on first use.

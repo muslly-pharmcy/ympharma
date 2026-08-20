@@ -29,7 +29,7 @@ export default defineConfig({
   },
   vite: {
     plugins: [
-      mcpPlugin(),
+      ...(process.platform === "win32" ? [] : [mcpPlugin()]),
       VitePWA({
         registerType: "autoUpdate",
         injectRegister: null,

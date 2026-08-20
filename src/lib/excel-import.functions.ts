@@ -2,8 +2,8 @@ import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
 
-// Bulk upsert products from a client-parsed Excel sheet.
-// Admin-only. Client parses the .xlsx (with the `xlsx` package) and posts
+// Bulk upsert products from a client-parsed spreadsheet.
+// Admin-only. Client parses .xlsx/.csv files and posts
 // normalized rows here — we upsert into catalog_products (by store_code),
 // then seed one FEFO batch per new product so it appears in the shop.
 const RowSchema = z.object({
