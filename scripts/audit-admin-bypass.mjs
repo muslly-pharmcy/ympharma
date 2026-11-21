@@ -121,7 +121,7 @@ function classifyBucket(fn) {
   const systemWrites = writeTables.some((t) => SYSTEM_TABLES.has(t))
   const systemReads = tables.some((t) => SYSTEM_TABLES.has(t))
 
-  let bucket, rationale, followUp = ''
+  let bucket, rationale, followUp
 
   // Rule 1 — legitimate infra files.
   if (SYSTEM_FILES.has(base)) {

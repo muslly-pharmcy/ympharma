@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { runClinicalCheck } from '@/lib/clinical/engine.server'
 import { registerProvider, getProvider } from '@/lib/clinical/registry.server'
-import { nullProvider } from '@/lib/clinical/null-provider'
 import type { DrugKnowledgeProvider, ClinicalWarning } from '@/domain/clinical/types'
 
 describe('Clinical framework', () => {
@@ -14,9 +13,9 @@ describe('Clinical framework', () => {
     expect(r.warnings).toEqual([])
   })
 
-  it('registry returns null provider for unknown id', () => {
-    expect(getProvider('does-not-exist').id).toBe('null')
-    expect(getProvider(undefined).id).toBe(nullProvider.id)
+  it('registry falls back to the default provider for unknown or missing ids', () => {
+    expect(getProvider('does-not-exist').id).toBe('local-db')
+    expect(getProvider(undefined).id).toBe('local-db')
   })
 
   it('warnings sort by severity when a provider emits them', async () => {

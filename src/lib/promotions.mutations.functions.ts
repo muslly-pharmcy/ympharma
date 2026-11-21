@@ -28,7 +28,7 @@ export const createPromotion = createServerFn({ method: 'POST' })
     const correlation = newCorrelationId('promo-create')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'createPromotion', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const sb: any = supabaseAdmin as any
       const { data: row, error } = await sb.from('crm_promotions').insert({
         organization_id: actor.organizationId,
@@ -69,7 +69,7 @@ export const updatePromotion = createServerFn({ method: 'POST' })
     const { audit } = await import('./audit.server')
     const actor = await getActor()
     requirePermission(actor, 'campaign.write')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const sb: any = supabaseAdmin as any
     const { data: existing } = await sb.from('crm_promotions').select('id, organization_id, status').eq('id', data.id).maybeSingle()
     if (!existing || existing.organization_id !== actor.organizationId) throw new Error('Promotion not found')
@@ -123,7 +123,7 @@ export const transitionPromotion = createServerFn({ method: 'POST' })
     const actor = await getActor()
     requirePermission(actor, 'campaign.write')
     const correlation = newCorrelationId('promo-transition')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const sb: any = supabaseAdmin as any
     const { data: existing } = await sb.from('crm_promotions').select('id, organization_id, status').eq('id', data.id).maybeSingle()
     if (!existing || existing.organization_id !== actor.organizationId) throw new Error('Promotion not found')
@@ -155,7 +155,7 @@ export const createCoupon = createServerFn({ method: 'POST' })
     const correlation = newCorrelationId('coupon-create')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'createCoupon', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const sb: any = supabaseAdmin as any
       const { data: coup, error } = await sb.from('crm_coupons').insert({
         organization_id: actor.organizationId,
@@ -193,7 +193,7 @@ export const archiveCoupon = createServerFn({ method: 'POST' })
     const { audit } = await import('./audit.server')
     const actor = await getActor()
     requirePermission(actor, 'campaign.write')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const sb: any = supabaseAdmin as any
     const { data: existing } = await sb.from('crm_coupons').select('id, organization_id').eq('id', data.id).maybeSingle()
     if (!existing || existing.organization_id !== actor.organizationId) throw new Error('Coupon not found')

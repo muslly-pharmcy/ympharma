@@ -166,7 +166,7 @@ export async function guardPublicRequest(
   }
 
   // Structured admission log — never includes body or raw IP.
-  // eslint-disable-next-line no-console
+   
   console.info('[public-guard]', {
     route: opts.route,
     method: request.method,

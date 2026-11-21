@@ -70,7 +70,7 @@ function CheckoutPage() {
 
     const lines: WhatsAppOrderLine[] = await Promise.all(
       cart.map(async (row) => {
-        let imageUrl: string | null = null
+        let imageUrl: string | null
         try {
           const media = await imagesFn({ data: { productId: row.product_id } })
           imageUrl = media[0]?.url ?? null

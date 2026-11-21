@@ -56,7 +56,7 @@ export function reportError(input: {
 
   // Structured console output — searchable in devtools + server logs.
   try {
-    // eslint-disable-next-line no-console
+     
     console.error('[error]', report)
   } catch {
     /* noop */

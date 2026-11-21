@@ -21,7 +21,7 @@ async function emit(event: string, payload: Record<string, unknown>, correlation
 
 async function assertOwnedByOrg(table: string, id: string, orgId: string) {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const { data, error } = await (supabaseAdmin as any).from(table).select('organization_id').eq('id', id).single()
   if (error || !data) throw new Error(`${table}#${id} not found`)
   if (data.organization_id !== orgId) throw new Error('Cross-org access denied')
@@ -39,7 +39,7 @@ export const createCustomer = createServerFn({ method: 'POST' })
     const correlation = data.correlationId ?? newCorrelationId('customer')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'createCustomer', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const { data: row, error } = await (supabaseAdmin as any)
         .from('crm_customers')
         .insert({
@@ -81,7 +81,7 @@ export const updateCustomer = createServerFn({ method: 'POST' })
     }
     if (Object.keys(patch).length === 0) return { id: data.id, correlationId: correlation }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const { error } = await (supabaseAdmin as any).from('crm_customers').update(patch).eq('id', data.id)
     if (error) throw new Error(error.message)
 
@@ -106,7 +106,7 @@ export const archiveCustomer = createServerFn({ method: 'POST' })
     await assertOwnedByOrg('crm_customers', data.id, actor.organizationId)
     const correlation = newCorrelationId('customer')
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const { error } = await (supabaseAdmin as any).from('crm_customers').update({ status: 'archived' }).eq('id', data.id)
     if (error) throw new Error(error.message)
     await emit('CustomerArchived', { customer_id: data.id }, correlation)
@@ -128,7 +128,7 @@ export const mergeCustomers = createServerFn({ method: 'POST' })
     await assertOwnedByOrg('crm_customers', data.sourceId, actor.organizationId)
     const correlation = data.correlationId ?? newCorrelationId('customer-merge')
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const sb: any = supabaseAdmin as any
     // Re-parent addresses/contacts/tags to target, then mark source as merged.
     await sb.from('crm_customer_addresses').update({ customer_id: data.targetId }).eq('customer_id', data.sourceId)
@@ -163,7 +163,7 @@ export const addCustomerAddress = createServerFn({ method: 'POST' })
     requirePermission(actor, 'customer.write')
     await assertOwnedByOrg('crm_customers', data.customerId, actor.organizationId)
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const sb: any = supabaseAdmin as any
     if (data.is_default) {
       await sb.from('crm_customer_addresses').update({ is_default: false }).eq('customer_id', data.customerId)
@@ -196,7 +196,7 @@ export const addCustomerContact = createServerFn({ method: 'POST' })
     requirePermission(actor, 'customer.write')
     await assertOwnedByOrg('crm_customers', data.customerId, actor.organizationId)
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const sb: any = supabaseAdmin as any
     if (data.is_primary) {
       await sb.from('crm_customer_contacts').update({ is_primary: false }).eq('customer_id', data.customerId).eq('kind', data.kind)
@@ -225,7 +225,7 @@ export const addCustomerTag = createServerFn({ method: 'POST' })
     requirePermission(actor, 'customer.write')
     await assertOwnedByOrg('crm_customers', data.customerId, actor.organizationId)
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const { data: row, error } = await (supabaseAdmin as any).from('crm_customer_tags').insert({
       organization_id: actor.organizationId,
       customer_id: data.customerId,
@@ -250,7 +250,7 @@ export const removeCustomerTag = createServerFn({ method: 'POST' })
     const actor = await getActor()
     requirePermission(actor, 'customer.write')
     await assertOwnedByOrg('crm_customers', data.customerId, actor.organizationId)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const { error } = await (supabaseAdmin as any).from('crm_customer_tags').delete().eq('id', data.id).eq('customer_id', data.customerId)
     if (error) throw new Error(error.message)
     await audit(actor, { action: 'customer.tag.remove', resourceType: 'customer', resourceId: data.customerId, payload: { tag_id: data.id } })

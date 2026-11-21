@@ -18,13 +18,13 @@ export const Route = createFileRoute('/api/public/csp-report')({
         })
         if (guard instanceof Response) return guard
 
-        let parsed: unknown = null
+        let parsed: unknown
         try {
           parsed = guard.body ? JSON.parse(guard.body) : null
         } catch {
           parsed = { raw: guard.body }
         }
-        // eslint-disable-next-line no-console
+         
         console.warn('[csp-report]', {
           correlationId: guard.correlationId,
           ua: request.headers.get('user-agent'),

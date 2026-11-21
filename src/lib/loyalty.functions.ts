@@ -16,7 +16,7 @@ export const listLoyaltyAccounts = createServerFn({ method: 'GET' })
     const actor = await getActor()
     requirePermission(actor, 'loyalty.read')
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     let q: any = (supabaseAdmin as any)
       .from('crm_loyalty_accounts')
       .select(sel('*, customer:crm_customers!inner(full_name, code)'))
@@ -53,7 +53,7 @@ export const getLoyaltyAccount = createServerFn({ method: 'GET' })
     const actor = await getActor()
     requirePermission(actor, 'loyalty.read')
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const sb: any = supabaseAdmin as any
     const { data: acc } = await sb.from('crm_loyalty_accounts')
       .select(sel('*, customer:crm_customers!inner(id, code, full_name), tier:crm_loyalty_tiers(*)'))
@@ -83,7 +83,7 @@ export const listLoyaltyTransactions = createServerFn({ method: 'GET' })
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
     const actor = await getActor()
     requirePermission(actor, 'loyalty.read')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     let q: any = (supabaseAdmin as any).from('crm_loyalty_transactions').select(sel('*'))
       .eq('organization_id', actor.organizationId)
       .order('created_at', { ascending: false }).limit(data.limit ?? 100)
@@ -100,7 +100,7 @@ export const listRewards = createServerFn({ method: 'GET' })
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
     const actor = await getActor()
     requirePermission(actor, 'loyalty.read')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     let q: any = (supabaseAdmin as any).from('crm_reward_catalog').select(sel('*'))
       .eq('organization_id', actor.organizationId)
       .order('points_cost', { ascending: true }).limit(200)
@@ -114,7 +114,7 @@ export const listLoyaltyRules = createServerFn({ method: 'GET' }).handler(async 
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
   const actor = await getActor()
   requirePermission(actor, 'loyalty.read')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const { data } = await (supabaseAdmin as any).from('crm_loyalty_rules').select(sel('*'))
     .eq('organization_id', actor.organizationId).order('priority', { ascending: true })
   return (data ?? []) as LoyaltyRule[]
@@ -125,7 +125,7 @@ export const listLoyaltyTiers = createServerFn({ method: 'GET' }).handler(async 
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
   const actor = await getActor()
   requirePermission(actor, 'loyalty.read')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const { data } = await (supabaseAdmin as any).from('crm_loyalty_tiers').select(sel('*'))
     .eq('organization_id', actor.organizationId).order('min_lifetime_points', { ascending: true })
   return (data ?? []) as LoyaltyTier[]

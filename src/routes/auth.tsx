@@ -38,7 +38,7 @@ function safeRedirect(raw?: string): string {
   if (raw.length > 512) return DEFAULT_REDIRECT
   if (/[\s\u0000-\u001f\u007f]/.test(raw)) return DEFAULT_REDIRECT
 
-  let decoded = raw
+  let decoded: string
   try {
     // Decode once to catch %2f%2fevil.com and %5cevil.com style bypasses.
     decoded = decodeURIComponent(raw)

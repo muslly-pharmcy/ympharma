@@ -11,7 +11,7 @@ export const listCampaigns = createServerFn({ method: 'GET' })
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
     const actor = await getActor()
     requirePermission(actor, 'campaign.read')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     let q: any = (supabaseAdmin as any).from('crm_campaigns').select('*')
       .eq('organization_id', actor.organizationId).order('created_at', { ascending: false }).limit(200)
     if (data.status && data.status !== 'all') q = q.eq('status', data.status)
@@ -36,7 +36,7 @@ export const getCampaign = createServerFn({ method: 'GET' })
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
     const actor = await getActor()
     requirePermission(actor, 'campaign.read')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const sb: any = supabaseAdmin as any
     const { data: c } = await sb.from('crm_campaigns').select('*')
       .eq('id', data.id).eq('organization_id', actor.organizationId).maybeSingle()
@@ -63,7 +63,7 @@ export const listSegments = createServerFn({ method: 'GET' })
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
     const actor = await getActor()
     requirePermission(actor, 'segment.read')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const { data, error } = await (supabaseAdmin as any).from('crm_segments').select('*')
       .eq('organization_id', actor.organizationId).order('created_at', { ascending: false }).limit(200)
     if (error) { console.error('[listSegments]', error); return [] }
@@ -81,7 +81,7 @@ export const getSegment = createServerFn({ method: 'GET' })
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
     const actor = await getActor()
     requirePermission(actor, 'segment.read')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const sb: any = supabaseAdmin as any
     const { data: s } = await sb.from('crm_segments').select('*')
       .eq('id', data.id).eq('organization_id', actor.organizationId).maybeSingle()
@@ -117,7 +117,7 @@ export const previewSegment = createServerFn({ method: 'POST' })
       limit: data.limit,
     })
     if (ids.length === 0) return { count: 0, sample: [] }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const { data: cust } = await (supabaseAdmin as any).from('crm_customers')
       .select('id, full_name, code').in('id', ids.slice(0, 25))
     return { count: ids.length, sample: (cust ?? []) as Array<{ id: string; full_name: string; code: string }> }

@@ -29,6 +29,29 @@ import { reportError } from '@/lib/errors/logger'
 import almoslyLogo from '@/assets/almosly-logo-optimized.webp'
 import appCss from '@/index.css?url'
 
+const SITE_URL = 'https://muslly.com'
+const SITE_IMAGE = `${SITE_URL}/icon-512.png`
+const PHARMACY_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'Pharmacy',
+  '@id': `${SITE_URL}/#pharmacy`,
+  name: 'صيدلية المصلي',
+  alternateName: 'Al-Musalli Pharmacy',
+  url: SITE_URL,
+  logo: SITE_IMAGE,
+  image: SITE_IMAGE,
+  telephone: '+967782878280',
+  priceRange: 'YER',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'المنصورة، ريمي، أمام مستشفى صابر',
+    addressLocality: 'عدن',
+    addressCountry: 'YE',
+  },
+  sameAs: ['https://wa.me/967782878280'],
+  medicalSpecialty: 'Pharmacy',
+}
+
 
 export const Route = createRootRoute({
   head: () => ({
@@ -52,13 +75,19 @@ export const Route = createRootRoute({
       },
       { property: 'og:site_name', content: 'صيدلية المصلي' },
       { property: 'og:type', content: 'website' },
+      { property: 'og:url', content: SITE_URL },
+      { property: 'og:image', content: SITE_IMAGE },
+      { property: 'og:locale', content: 'ar_YE' },
       { name: 'twitter:card', content: 'summary_large_image' },
       { name: 'twitter:title', content: 'صيدلية المصلي — Al-Musalli Pharmacy' },
       { name: 'twitter:description', content: 'رعاية دوائية ذكية في عدن.' },
+      { name: 'twitter:image', content: SITE_IMAGE },
+      { name: 'robots', content: 'index, follow, max-image-preview:large' },
 
     ],
     links: [
       { rel: 'stylesheet', href: appCss },
+      { rel: 'canonical', href: SITE_URL },
       { rel: 'manifest', href: '/manifest.webmanifest' },
       { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
       { rel: 'icon', type: 'image/png', sizes: '192x192', href: '/icon-192.png' },
@@ -78,6 +107,10 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="ar" dir="rtl">
       <head>
         <HeadContent />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(PHARMACY_JSON_LD) }}
+        />
       </head>
       <body>
         {children}

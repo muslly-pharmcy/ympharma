@@ -8,7 +8,7 @@ export async function actorFromToken(ctx: ToolContext): Promise<Actor> {
   if (!userId) throw new Error("No user id on the verified token");
 
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const sb = supabaseAdmin as any;
 
   const [{ data: membership, error }, { data: roleRows }] = await Promise.all([

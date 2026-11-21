@@ -92,7 +92,7 @@ export const securityHeadersMiddleware = createMiddleware({ type: 'request' }).s
     'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
   }
   for (const [name, value] of Object.entries(headers)) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     setResponseHeader(name as any, value)
   }
   return next()

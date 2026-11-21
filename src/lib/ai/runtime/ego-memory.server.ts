@@ -18,7 +18,7 @@ export interface ClientRecord {
 
 async function admin() {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return supabaseAdmin as any
 }
 

@@ -391,7 +391,7 @@ export async function dispatch(actor: Actor, req: KernelDispatchInput): Promise<
       }),
       auditKernelCall(actor, call, false, { deniedReason: msg }),
     ])
-    throw new Error(msg)
+    throw Object.assign(new Error(msg), { cause: err })
   }
 }
 

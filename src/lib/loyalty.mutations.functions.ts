@@ -23,7 +23,7 @@ async function emit(event: string, payload: Record<string, unknown>, correlation
 // Ensures the customer has a loyalty account (creates it + seeds tiers on first use).
 async function ensureAccount(orgId: string, customerId: string): Promise<{ accountId: string; created: boolean }> {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const sb: any = supabaseAdmin as any
   const { data: existing } = await sb.from('crm_loyalty_accounts')
     .select('id').eq('organization_id', orgId).eq('customer_id', customerId).maybeSingle()
@@ -76,7 +76,7 @@ export const issuePoints = createServerFn({ method: 'POST' })
     const correlation = data.correlationId ?? newCorrelationId('loyalty-issue')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'issuePoints', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const sb: any = supabaseAdmin as any
       const { data: customer } = await sb.from('crm_customers')
         .select('id, organization_id').eq('id', data.customerId).maybeSingle()
@@ -153,7 +153,7 @@ export const reversePoints = createServerFn({ method: 'POST' })
     const correlation = data.correlationId ?? newCorrelationId('loyalty-reverse')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'reversePoints', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const sb: any = supabaseAdmin as any
       const { data: orig } = await sb.from('crm_loyalty_transactions')
         .select('id, organization_id, account_id, points, kind').eq('id', data.transactionId).maybeSingle()
@@ -226,7 +226,7 @@ export const createReward = createServerFn({ method: 'POST' })
     const { audit } = await import('./audit.server')
     const actor = await getActor()
     requirePermission(actor, 'loyalty.write')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const { data: row, error } = await (supabaseAdmin as any).from('crm_reward_catalog').insert({
       organization_id: actor.organizationId,
       code: data.code, name: data.name, description: data.description ?? null,
@@ -250,7 +250,7 @@ export const redeemReward = createServerFn({ method: 'POST' })
     const correlation = data.correlationId ?? newCorrelationId('reward-redeem')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'redeemReward', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const sb: any = supabaseAdmin as any
       const { data: reward } = await sb.from('crm_reward_catalog')
         .select('id, organization_id, points_cost, stock, is_active, expires_at')
@@ -292,7 +292,7 @@ export const upsertLoyaltyRule = createServerFn({ method: 'POST' })
     const { audit } = await import('./audit.server')
     const actor = await getActor()
     requirePermission(actor, 'loyalty.write')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const { data: row, error } = await (supabaseAdmin as any).from('crm_loyalty_rules').upsert({
       organization_id: actor.organizationId,
       key: data.key, name: data.name, kind: data.kind,

@@ -32,7 +32,7 @@ export const upsertSegment = createServerFn({ method: 'POST' })
     requirePermission(actor, 'segment.write')
     const correlation = newCorrelationId('segment')
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const sb: any = supabaseAdmin as any
     const patch = {
       organization_id: actor.organizationId,
@@ -72,7 +72,7 @@ export const recalcSegment = createServerFn({ method: 'POST' })
     requirePermission(actor, 'segment.write')
     const correlation = newCorrelationId('segment-recalc')
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const sb: any = supabaseAdmin as any
     const { data: seg } = await sb.from('crm_segments').select('id, organization_id, rules, combinator').eq('id', data.id).maybeSingle()
     if (!seg || seg.organization_id !== actor.organizationId) throw new Error('Segment not found')
@@ -105,7 +105,7 @@ export const createCampaign = createServerFn({ method: 'POST' })
     const correlation = data.correlationId ?? newCorrelationId('campaign')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'createCampaign', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const { data: row, error } = await (supabaseAdmin as any).from('crm_campaigns').insert({
         organization_id: actor.organizationId,
         name: data.name, description: data.description ?? null,
@@ -133,7 +133,7 @@ export const updateCampaign = createServerFn({ method: 'POST' })
     const { audit } = await import('./audit.server')
     const actor = await getActor()
     requirePermission(actor, 'campaign.write')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const sb: any = supabaseAdmin as any
     const { data: existing } = await sb.from('crm_campaigns').select('id, organization_id, status').eq('id', data.id).maybeSingle()
     if (!existing || existing.organization_id !== actor.organizationId) throw new Error('Campaign not found')
@@ -160,7 +160,7 @@ export const scheduleCampaign = createServerFn({ method: 'POST' })
     const actor = await getActor()
     requirePermission(actor, 'campaign.write')
     const correlation = data.correlationId ?? newCorrelationId('campaign-schedule')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const sb: any = supabaseAdmin as any
     const { data: existing } = await sb.from('crm_campaigns').select('id, organization_id, status').eq('id', data.id).maybeSingle()
     if (!existing || existing.organization_id !== actor.organizationId) throw new Error('Campaign not found')
@@ -181,7 +181,7 @@ export const transitionCampaign = createServerFn({ method: 'POST' })
     const actor = await getActor()
     requirePermission(actor, 'campaign.write')
     const correlation = data.correlationId ?? newCorrelationId('campaign-transition')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const sb: any = supabaseAdmin as any
     const { data: existing } = await sb.from('crm_campaigns').select('id, organization_id, status').eq('id', data.id).maybeSingle()
     if (!existing || existing.organization_id !== actor.organizationId) throw new Error('Campaign not found')
@@ -215,14 +215,14 @@ export const startCampaign = createServerFn({ method: 'POST' })
     const correlation = data.correlationId ?? newCorrelationId('campaign-start')
 
     return withIdempotency(data.idempotencyKey, actor.userId, 'startCampaign', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const sb: any = supabaseAdmin as any
       const { data: c } = await sb.from('crm_campaigns').select('*').eq('id', data.id).maybeSingle()
       if (!c || c.organization_id !== actor.organizationId) throw new Error('Campaign not found')
       if (!isLegalTransition(c.status, 'running')) throw new Error(`Illegal transition ${c.status} -> running`)
 
       // Resolve audience from segment (or empty rules = all active).
-      let customerIds: string[] = []
+      let customerIds: string[]
       if (c.segment_id) {
         const { data: seg } = await sb.from('crm_segments').select('rules, combinator').eq('id', c.segment_id).maybeSingle()
         customerIds = await evaluateSegment({
