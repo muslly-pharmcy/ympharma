@@ -39,43 +39,23 @@ export default defineConfig({
         devOptions: { enabled: false },
         manifest: false,
         workbox: {
-          globPatterns: ["**/*.{js,css,woff2,png,svg,webp,ico}"],
-          navigateFallback: "/offline",
-          navigateFallbackDenylist: [/^\/~oauth/, /^\/api\//, /^\/\.mcp/, /^\/\.well-known/],
+          // Public build artifacts only; never persist account HTML or API data.
+          globPatterns: ["**/*.{js,css,woff2,png,svg,webp,ico}", "offline.html"],
+          globIgnores: ["purge-legacy-private-caches.js"],
+          navigateFallback: null,
+          importScripts: ["/purge-legacy-private-caches.js"],
           cleanupOutdatedCaches: true,
           clientsClaim: true,
           skipWaiting: true,
           runtimeCaching: [
             {
-              // HTML navigations: always try the network first, fall back to cache.
-              urlPattern: ({ request }: { request: Request }) => request.mode === "navigate",
-              handler: "NetworkFirst",
+              urlPattern: ({ request, sameOrigin, url }: { request: Request; sameOrigin: boolean; url: URL }) =>
+                sameOrigin && request.mode === "navigate" &&
+                !/^\/(?:api(?:\/|$)|\.mcp(?:\/|$)|\.well-known(?:\/|$)|~oauth(?:\/|$))/.test(url.pathname),
+              handler: "NetworkOnly",
               options: {
-                cacheName: "html-navigations",
-                networkTimeoutSeconds: 4,
-                expiration: { maxEntries: 40, maxAgeSeconds: 60 * 60 * 24 },
-              },
-            },
-            {
-              // Static assets: instant from cache, refreshed in the background.
-              urlPattern: ({ request, sameOrigin }: { request: Request; sameOrigin: boolean }) =>
-                sameOrigin &&
-                ["style", "script", "worker", "image", "font"].includes(request.destination),
-              handler: "StaleWhileRevalidate",
-              options: {
-                cacheName: "static-assets",
-                expiration: { maxEntries: 300, maxAgeSeconds: 60 * 60 * 24 * 30 },
-              },
-            },
-            {
-              // API reads: network-first so data is fresh, cached copy when offline.
-              urlPattern: ({ url, sameOrigin }: { url: URL; sameOrigin: boolean }) =>
-                sameOrigin && url.pathname.startsWith("/api/") && !url.pathname.startsWith("/api/public/"),
-              handler: "NetworkFirst",
-              options: {
-                cacheName: "api-cache",
-                networkTimeoutSeconds: 6,
-                expiration: { maxEntries: 60, maxAgeSeconds: 60 * 30 },
+                fetchOptions: { cache: "no-store" },
+                precacheFallback: { fallbackURL: "/offline.html" },
               },
             },
           ],
