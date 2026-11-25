@@ -14,7 +14,7 @@ describe("offline privacy policy", () => {
   });
   it("deletes only the old named caches during worker activation", async () => {
     const script = readFileSync(new URL("../public/purge-legacy-private-caches.js", import.meta.url), "utf8");
-    const remove = vi.fn(async () => true);
+    const remove = vi.fn(async (_name: string) => true);
     let pending: Promise<unknown> | undefined;
     runInNewContext(script, {
       caches: { delete: remove },
